@@ -1,5 +1,8 @@
 package net.earthcomputer.clientcommands.command;
 
+import java.util.Collections;
+import java.util.List;
+
 import net.earthcomputer.clientcommands.CreativeInventoryListener;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -13,6 +16,7 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandCGive extends ClientCommandBase {
@@ -42,7 +46,7 @@ public class CommandCGive extends ClientCommandBase {
 		EntityPlayer player = (EntityPlayer) executingEntity;
 
 		Item item = getItemByText(sender, args[0]);
-		int meta = args.length >= 3 ? parseInt(args[3]) : 0;
+		int meta = args.length >= 3 ? parseInt(args[2]) : 0;
 
 		ItemStack stack = new ItemStack(item, 1, meta);
 
@@ -54,7 +58,7 @@ public class CommandCGive extends ClientCommandBase {
 			}
 		}
 
-		int count = args.length >= 2 ? parseInt(args[2], 1, stack.getMaxStackSize()) : 1;
+		int count = args.length >= 2 ? parseInt(args[1], 1, stack.getMaxStackSize()) : 1;
 		stack.setCount(count);
 
 		boolean added = player.inventory.addItemStackToInventory(stack);
@@ -73,8 +77,19 @@ public class CommandCGive extends ClientCommandBase {
 		} else if (!stack.isEmpty()) {
 			throw new CommandException("Failed to give you all the items");
 		} else {
+			stack.setCount(1);
 			sender.sendMessage(new TextComponentTranslation("commands.give.success", stack.getTextComponent(), count,
 					player.getName()));
+		}
+	}
+
+	@Override
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
+			BlockPos targetPos) {
+		if (args.length == 1) {
+			return getListOfStringsMatchingLastWord(args, Item.REGISTRY.getKeys());
+		} else {
+			return Collections.emptyList();
 		}
 	}
 
