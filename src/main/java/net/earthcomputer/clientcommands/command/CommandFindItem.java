@@ -2,11 +2,11 @@ package net.earthcomputer.clientcommands.command;
 
 import java.util.List;
 
-import net.earthcomputer.clientcommands.ClientCommandsMod;
 import net.earthcomputer.clientcommands.DelegatingContainer;
-import net.earthcomputer.clientcommands.GuiBlocker;
-import net.earthcomputer.clientcommands.LongTask;
 import net.earthcomputer.clientcommands.Ptr;
+import net.earthcomputer.clientcommands.task.GuiBlocker;
+import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -34,7 +34,7 @@ public class CommandFindItem extends ClientCommandBase {
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		ClientCommandsMod.INSTANCE.ensureNoTasks();
+		TaskManager.ensureNoTasks();
 
 		if (args.length < 1) {
 			throw new WrongUsageException(getUsage(sender));
@@ -54,6 +54,8 @@ public class CommandFindItem extends ClientCommandBase {
 		Minecraft mc = Minecraft.getMinecraft();
 		World world = mc.world;
 
+		// Check the player's inventory first, since the player having a matching item
+		// in their inventory would screw with the search process
 		for (int i = 0; i < mc.player.inventory.getSizeInventory(); i++) {
 			ItemStack stack = mc.player.inventory.getStackInSlot(i);
 			if (stack.getItem() == item && (damage == -1 || stack.getItemDamage() == damage)
@@ -69,6 +71,8 @@ public class CommandFindItem extends ClientCommandBase {
 			return;
 		}
 
+		// +0.5 because we're going to the center of blocks. Not a perfect heuristic,
+		// but better than nothing.
 		float radius = mc.playerController.getBlockReachDistance() + 0.5f;
 		double playerx = sender.getPositionVector().x;
 		double playery = sender.getPositionVector().y + sender.getCommandSenderEntity().getEyeHeight();
@@ -76,18 +80,20 @@ public class CommandFindItem extends ClientCommandBase {
 
 		Ptr<Boolean> foundItem = new Ptr<>(Boolean.FALSE);
 
+		// add queued search task for each inventory
 		for (int x = (int) (playerx - radius); x <= playerx + radius; x++) {
 			for (int z = (int) (playerz - radius); z <= playerz + radius; z++) {
 				for (int y = (int) (playery - radius); y <= playery + radius; y++) {
 					BlockPos pos = new BlockPos(x, y, z);
 					if (world.getTileEntity(pos) instanceof IInventory) {
-						ClientCommandsMod.INSTANCE
-								.addLongTask(new WaitForGuiTask(mc, item, damage, nbt, sender, pos, foundItem));
+						TaskManager.addLongTask(new WaitForGuiTask(mc, item, damage, nbt, sender, pos, foundItem));
 					}
 				}
 			}
 		}
-		ClientCommandsMod.INSTANCE.addLongTask(new LongTask() {
+
+		// add a queued "finished" notification task
+		TaskManager.addLongTask(new LongTask() {
 			@Override
 			public void start() {
 				if (!foundItem.get()) {
@@ -134,6 +140,8 @@ public class CommandFindItem extends ClientCommandBase {
 
 		@Override
 		public void start() {
+			// create a GUI blocker which listens for when the items are received on the
+			// client
 			GuiBlocker blocker = new GuiBlocker() {
 				@Override
 				public boolean processGui(GuiScreen gui) {
@@ -164,7 +172,10 @@ public class CommandFindItem extends ClientCommandBase {
 					}
 				}
 			};
-			ClientCommandsMod.INSTANCE.addGuiBlocker(blocker);
+			TaskManager.addGuiBlocker(blocker);
+
+			// try to right click the block to cause the server to send the container to the
+			// client
 			boolean success = false;
 			for (EnumHand hand : EnumHand.values()) {
 				EnumActionResult result = mc.playerController.processRightClickBlock(mc.player, mc.world, pos,

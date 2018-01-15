@@ -14,9 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import net.earthcomputer.clientcommands.ClientCommandsMod;
-import net.earthcomputer.clientcommands.LongTask;
 import net.earthcomputer.clientcommands.SimulatedWorld;
+import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
@@ -53,8 +53,9 @@ public class CommandSimGen extends ClientCommandBase {
 			throw new WrongUsageException(getUsage(sender));
 		}
 
-		ClientCommandsMod.INSTANCE.ensureNoTasks();
+		TaskManager.ensureNoTasks();
 
+		// Generator constructor argument
 		String generatorArg = args[0];
 		Matcher matcher = GENERATOR_ARG_PATTERN.matcher(generatorArg);
 		if (!matcher.matches()) {
@@ -72,6 +73,7 @@ public class CommandSimGen extends ClientCommandBase {
 			throw new CommandException("Class " + generatorName + " is not a world generator");
 		}
 
+		// Generator constructor argument arguments
 		String argsSection = matcher.group(2);
 		Object[] ctorArgs;
 		Class<?>[] ctorTypes;
@@ -82,8 +84,11 @@ public class CommandSimGen extends ClientCommandBase {
 			String[] parts = argsSection.split(",");
 			ctorArgs = new Object[parts.length];
 			ctorTypes = new Class[parts.length];
+
 			for (int i = 0; i < parts.length; i++) {
 				String part = parts[i].toLowerCase(Locale.ENGLISH);
+
+				// infer the type of the argument
 				if ("true".equals(part)) {
 					ctorArgs[i] = Boolean.TRUE;
 					ctorTypes[i] = boolean.class;
@@ -150,10 +155,12 @@ public class CommandSimGen extends ClientCommandBase {
 			}
 		}
 
+		// instantiate the world generator
 		WorldGenerator generatorInstance;
 		try {
 			generatorInstance = (WorldGenerator) generatorClass.getConstructor(ctorTypes).newInstance(ctorArgs);
 		} catch (Exception e) {
+			// generate a meaningful error message
 			List<Constructor<?>> ctors = new ArrayList<>();
 			if (!Modifier.isAbstract(generatorClass.getModifiers())) {
 				Collections.addAll(ctors, generatorClass.getConstructors());
@@ -174,10 +181,12 @@ public class CommandSimGen extends ClientCommandBase {
 		}
 
 		int tries = parseInt(args[1], 1, 1000000);
+		// used for displaying progress updates
 		int tenPercentInterval = tries / 10;
 
 		BlockPos position = args.length > 2 ? parseBlockPos(sender, args, 2, true) : sender.getPosition();
 
+		// run on a separate thread so as not to freeze the client
 		Thread thread = new Thread(() -> {
 			SimulatedWorld world = new SimulatedWorld(Minecraft.getMinecraft().world);
 			Random rand = new Random();
@@ -192,15 +201,18 @@ public class CommandSimGen extends ClientCommandBase {
 					return;
 				}
 
+				// display progress updates without spamming
 				if (tenPercentInterval >= 1000 && i % tenPercentInterval == 0) {
 					sender.sendMessage(new TextComponentString(
 							TextFormatting.GOLD + "Simulating: " + (i / tenPercentInterval * 10) + "%"));
 				}
 
+				// try to generate using the world generator
 				if (!generatorInstance.generate(world, rand, position)) {
 					failedAttempts++;
 					continue;
 				}
+				// collect data about what was generated, and revert the generation
 				Map<BlockPos, IBlockState> addedBlocks = world.getChangedBlocks();
 				positions.clear();
 				positions.addAll(addedBlocks.keySet());
@@ -218,11 +230,13 @@ public class CommandSimGen extends ClientCommandBase {
 				}
 			}
 
+			// display the results
 			sender.sendMessage(new TextComponentString("" + TextFormatting.YELLOW + TextFormatting.BOLD + "Simulated "
 					+ generatorName + " " + tries + " times"));
 			sender.sendMessage(new TextComponentString(TextFormatting.RED + "Failed attempts: " + failedAttempts));
 			sender.sendMessage(
 					new TextComponentString(TextFormatting.GREEN + "Successful attempts: " + (tries - failedAttempts)));
+
 			sender.sendMessage(new TextComponentString(TextFormatting.BOLD + "Added blocks:"));
 			if (addedBlocksCount.isEmpty()) {
 				sender.sendMessage(new TextComponentString(TextFormatting.RED + "None"));
@@ -234,6 +248,7 @@ public class CommandSimGen extends ClientCommandBase {
 							+ TextFormatting.GRAY + " average" + TextFormatting.RESET));
 				}
 			}
+
 			sender.sendMessage(new TextComponentString(TextFormatting.BOLD + "Removed blocks:"));
 			if (removedBlocksCount.isEmpty()) {
 				sender.sendMessage(new TextComponentString(TextFormatting.RED + "None"));
@@ -245,6 +260,7 @@ public class CommandSimGen extends ClientCommandBase {
 							+ TextFormatting.GRAY + " average" + TextFormatting.RESET));
 				}
 			}
+
 			sender.sendMessage(new TextComponentString(TextFormatting.BOLD + "Added entities:"));
 			if (addedEntities.isEmpty()) {
 				sender.sendMessage(new TextComponentString(TextFormatting.RED + "None"));
@@ -259,7 +275,9 @@ public class CommandSimGen extends ClientCommandBase {
 			}
 		});
 
-		ClientCommandsMod.INSTANCE.addLongTask(new LongTask() {
+		// add a long task so this command cannot be run again until the above thread
+		// has finished (or aborted)
+		TaskManager.addLongTask(new LongTask() {
 			@Override
 			protected void taskTick() {
 				if (!thread.isAlive()) {

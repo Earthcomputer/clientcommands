@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
-import net.earthcomputer.clientcommands.ClientCommandsMod;
-import net.earthcomputer.clientcommands.GuiBlocker;
+import net.earthcomputer.clientcommands.task.GuiBlocker;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiErrorScreen;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -14,6 +14,8 @@ import net.minecraft.server.MinecraftServer;
 
 public class CommandRelog extends ClientCommandBase {
 
+	// flag to stop disconnecting event listeners from being triggered by the
+	// /crelog command (mostly for convenience)
 	public static boolean isRelogging = false;
 
 	@Override
@@ -28,7 +30,10 @@ public class CommandRelog extends ClientCommandBase {
 		mc.world.sendQuittingDisconnectingPacket();
 		mc.loadWorld(null);
 		mc.displayGuiScreen(new GuiConnecting(new GuiErrorScreen("Auto-Relog", "Failed to connect"), mc, serverData));
-		ClientCommandsMod.INSTANCE.addGuiBlocker(new GuiBlocker() {
+		// At some point in the relogging process, mc.displayGuiScreen(null) is called,
+		// which happens to open the main menu screen. We don't want this, so an
+		// unfortunate hacky solution is to block it once.
+		TaskManager.addGuiBlocker(new GuiBlocker() {
 			@Override
 			public boolean processGui(GuiScreen gui) {
 				if (gui instanceof GuiMainMenu) {

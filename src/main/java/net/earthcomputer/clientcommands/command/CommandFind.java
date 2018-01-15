@@ -34,7 +34,10 @@ public class CommandFind extends ClientCommandBase {
 		World world = Minecraft.getMinecraft().world;
 		EntityPlayer player = Minecraft.getMinecraft().player;
 
+		// create a stream, and filter it with the arguments
 		Stream<Entity> entities = world.loadedEntityList.stream();
+
+		// type
 		ResourceLocation type = new ResourceLocation(args[0]);
 		Class<? extends Entity> entityClass;
 		if (PLAYER.equals(type)) {
@@ -47,6 +50,7 @@ public class CommandFind extends ClientCommandBase {
 		}
 		entities = entities.filter(entityClass::isInstance);
 
+		// remaining filter arguments
 		for (int i = 1; i < args.length; i += 2) {
 			String arg = args[i];
 			String value = args[i + 1];
@@ -67,7 +71,7 @@ public class CommandFind extends ClientCommandBase {
 					break;
 				case "furthest":
 					entities = entities.sorted(
-							Comparator.<Entity> comparingDouble(entity -> player.getDistanceSq(entity)).reversed());
+							Comparator.<Entity>comparingDouble(entity -> player.getDistanceSq(entity)).reversed());
 					break;
 				default:
 					throw new CommandException("Unknown arg value for order: " + value);
@@ -85,8 +89,10 @@ public class CommandFind extends ClientCommandBase {
 			}
 		}
 
+		// compile to list
 		List<Entity> entityList = entities.collect(Collectors.toList());
 
+		// output list
 		if (entityList.isEmpty()) {
 			sender.sendMessage(new TextComponentString(TextFormatting.RED + "No entities matched your query"));
 		} else {
@@ -106,7 +112,7 @@ public class CommandFind extends ClientCommandBase {
 	}
 
 	@Override
-	public String getUsage(ICommandSender arg0) {
+	public String getUsage(ICommandSender sender) {
 		return "/cfind <type> [(<arg> <value>)...]";
 	}
 

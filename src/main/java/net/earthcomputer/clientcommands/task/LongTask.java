@@ -1,7 +1,9 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.task;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import net.earthcomputer.clientcommands.ClientCommandsMod;
 
 public abstract class LongTask {
 

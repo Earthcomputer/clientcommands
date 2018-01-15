@@ -37,15 +37,18 @@ public class CommandCClear extends ClientCommandBase {
 		}
 
 		if (args.length >= 1 && item == null) {
+			// item was specified but was null, invalid
 			throw new CommandException("commands.clear.failure", player.getName());
 		}
 
+		// do the clearing
 		int count = player.inventory.clearMatchingItems(item, damage, maxCount, nbt);
 		CreativeInventoryListener listener = new CreativeInventoryListener();
 		player.inventoryContainer.addListener(listener);
 		player.inventoryContainer.detectAndSendChanges();
 		player.inventoryContainer.removeListener(listener);
 
+		// report the result
 		if (count == 0) {
 			throw new CommandException("commands.clear.failure", player.getName());
 		}

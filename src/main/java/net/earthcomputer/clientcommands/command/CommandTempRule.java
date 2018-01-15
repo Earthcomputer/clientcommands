@@ -16,6 +16,8 @@ public class CommandTempRule extends ClientCommandBase {
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+		// this code is very similar to CommandGameRule
+
 		GameRules tempRules = ClientCommandsMod.INSTANCE.getTempRules();
 		String rule = args.length > 0 ? args[0] : "";
 		String value = args.length > 1 ? buildString(args, 1) : "";

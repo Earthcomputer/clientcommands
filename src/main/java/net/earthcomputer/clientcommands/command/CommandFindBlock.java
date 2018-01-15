@@ -21,6 +21,7 @@ import net.minecraft.world.chunk.Chunk;
 
 public class CommandFindBlock extends ClientCommandBase {
 
+	// The maximum block search radius, in blocks
 	private static final int MAX_RADIUS = 16 * 8;
 
 	@Override
@@ -33,6 +34,8 @@ public class CommandFindBlock extends ClientCommandBase {
 		int radius = args.length < 2 ? MAX_RADIUS : parseInt(args[1], 0, MAX_RADIUS);
 		String radiusType = args.length < 3 ? "cartesian" : args[2];
 
+		// compile a list of block positions within the radius which might match the
+		// query
 		List<BlockPos> candidates;
 
 		switch (radiusType) {
@@ -52,6 +55,7 @@ public class CommandFindBlock extends ClientCommandBase {
 			return;
 		}
 
+		// find the closest matched block based on the radius type
 		BlockPos closestBlock;
 		switch (radiusType) {
 		case "cartesian":
@@ -59,16 +63,15 @@ public class CommandFindBlock extends ClientCommandBase {
 					.min(Comparator.comparingDouble(it -> it.distanceSq(sender.getPosition()))).orElse(null);
 			break;
 		case "square":
-			closestBlock = candidates
-					.stream().filter(
-							it -> Math.max(
-									Math.max(Math.abs(sender.getPosition().getX() - it.getX()),
-											Math.abs(sender.getPosition().getZ() - it.getZ())),
-									Math.abs(sender.getPosition().getY() - it.getY())) <= radius)
+			closestBlock = candidates.stream()
+					.filter(it -> Math.max(
+							Math.max(Math.abs(sender.getPosition().getX() - it.getX()),
+									Math.abs(sender.getPosition().getZ() - it.getZ())),
+							Math.abs(sender.getPosition().getY() - it.getY())) <= radius)
 					.min(Comparator.comparingInt(it -> Math.max(
 							Math.max(Math.abs(sender.getPosition().getX() - it.getX()),
 									Math.abs(sender.getPosition().getZ() - it.getZ())),
-									Math.abs(sender.getPosition().getY() - it.getY()))))
+							Math.abs(sender.getPosition().getY() - it.getY()))))
 					.orElse(null);
 			break;
 		case "taxicab":
@@ -85,6 +88,7 @@ public class CommandFindBlock extends ClientCommandBase {
 			throw new AssertionError();
 		}
 
+		// output the block
 		if (closestBlock == null) {
 			sender.sendMessage(new TextComponentString(TextFormatting.RED + "No such block found"));
 		} else {
@@ -121,6 +125,8 @@ public class CommandFindBlock extends ClientCommandBase {
 
 		List<BlockPos> blockCandidates = new ArrayList<>();
 
+		// search in each chunk with an increasing radius, until we increase the radius
+		// past an already found block
 		int chunkRadius = (radius >> 4) + 1;
 		for (int r = 0; r < chunkRadius; r++) {
 			for (int chunkX = chunkPos.x - r; chunkX <= chunkPos.x + r; chunkX++) {
@@ -128,11 +134,12 @@ public class CommandFindBlock extends ClientCommandBase {
 						+ r; chunkZ += chunkX == chunkPos.x - r || chunkX == chunkPos.x + r ? 1 : r + r) {
 					Chunk chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
 					if (searchChunkForBlockCandidates(chunk, senderPos.getY(), block, blockCandidates)) {
+						// update new, potentially shortened, radius
 						int dx = chunkPos.x - chunkX;
-						int dy = chunkPos.z - chunkZ;
+						int dz = chunkPos.z - chunkZ;
 						int newChunkRadius;
 						if ("cartesian".equals(radiusType)) {
-							newChunkRadius = MathHelper.ceil(MathHelper.sqrt(dx * dx + dy * dy) + MathHelper.SQRT_2);
+							newChunkRadius = MathHelper.ceil(MathHelper.sqrt(dx * dx + dz * dz) + MathHelper.SQRT_2);
 						} else {
 							newChunkRadius = Math.max(Math.abs(chunkPos.x - chunkX), Math.abs(chunkPos.z - chunkZ)) + 1;
 						}
@@ -154,6 +161,8 @@ public class CommandFindBlock extends ClientCommandBase {
 
 		List<BlockPos> blockCandidates = new ArrayList<>();
 
+		// search in each chunk with an increasing radius, until we increase the radius
+		// past an already found block
 		int chunkRadius = (radius >> 4) + 1;
 		for (int r = 0; r < chunkRadius; r++) {
 			for (int chunkX = chunkPos.x - r; chunkX <= chunkPos.x + r; chunkX++) {
@@ -161,6 +170,7 @@ public class CommandFindBlock extends ClientCommandBase {
 				for (int i = 0; i < 2; i++) {
 					Chunk chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
 					if (searchChunkForBlockCandidates(chunk, senderPos.getY(), block, blockCandidates)) {
+						// update new, potentially shortened, radius
 						int newChunkRadius = Math.abs(chunkPos.x - chunkX) + Math.abs(chunkPos.z - chunkZ) + 1;
 						if (newChunkRadius < chunkRadius) {
 							chunkRadius = newChunkRadius;
@@ -180,8 +190,10 @@ public class CommandFindBlock extends ClientCommandBase {
 		boolean found = false;
 		int maxY = chunk.getTopFilledSegment() + 15;
 
+		// search every column for the block
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
+				// search the column nearest to the sender first, and stop if we find the block
 				int maxDy = Math.max(senderY, maxY - senderY);
 				for (int dy = 0; dy <= maxDy; dy = dy > 0 ? -dy : -dy + 1) {
 					if (senderY + dy < 0 || senderY + dy >= 256) {

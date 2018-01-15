@@ -27,14 +27,17 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
+/**
+ * Mostly a simplified copy of the enchantment table GUI code, but also does the
+ * enchanting prediction
+ */
 public class GuiBetterEnchantment extends GuiContainer {
 
+	// Normal GUI fields
 	private static final ResourceLocation ENCHANTMENT_TABLE_GUI_TEXTURE = new ResourceLocation(
 			"textures/gui/container/enchanting_table.png");
 	private final InventoryPlayer playerInventory;
@@ -42,29 +45,34 @@ public class GuiBetterEnchantment extends GuiContainer {
 	private final IWorldNameable nameable;
 	private BlockPos position;
 
+	// The default values of the enchantment table container
 	private static final int[] NULL_CLUE = { -1, -1, -1 };
 	private static final int[] NULL_LEVELS = { 0, 0, 0 };
 
+	// Working values of the brute-force xp seed search
 	private static Set<Integer> possibleEnchantmentSeeds = new HashSet<>(1 << 20);
 	private static boolean hasReceivedXpSeed = false;
 	private static int lastReportedXpSeed;
 
-	public static void reset() {
-		possibleEnchantmentSeeds.clear();
-		hasReceivedXpSeed = false;
-	}
+	static {
+		EventManager.addDisconnectListener(e -> {
+			// reset working values
+			possibleEnchantmentSeeds.clear();
+			hasReceivedXpSeed = false;
+		});
 
-	@SubscribeEvent
-	public static void onGuiOpened(GuiOpenEvent e) {
-		if (!ClientCommandsMod.INSTANCE.getTempRules().getBoolean("enchantingPrediction")) {
-			return;
-		}
-		if (e.getGui() instanceof GuiEnchantment) {
-			Minecraft mc = Minecraft.getMinecraft();
-			IWorldNameable nameable = ReflectionHelper.getPrivateValue(GuiEnchantment.class,
-					(GuiEnchantment) e.getGui(), "nameable", "field_175380_I");
-			e.setGui(new GuiBetterEnchantment(mc.player.inventory, mc.world, nameable));
-		}
+		EventManager.addGuiOpenListener(e -> {
+			// replace default GUI with this GUI if necessary
+			if (!ClientCommandsMod.INSTANCE.getTempRules().getBoolean("enchantingPrediction")) {
+				return;
+			}
+			if (e.getGui() instanceof GuiEnchantment) {
+				Minecraft mc = Minecraft.getMinecraft();
+				IWorldNameable nameable = ReflectionHelper.getPrivateValue(GuiEnchantment.class,
+						(GuiEnchantment) e.getGui(), "nameable", "field_175380_I");
+				e.setGui(new GuiBetterEnchantment(mc.player.inventory, mc.world, nameable));
+			}
+		});
 	}
 
 	public GuiBetterEnchantment(InventoryPlayer inventory, World worldIn, IWorldNameable nameable) {
@@ -82,16 +90,19 @@ public class GuiBetterEnchantment extends GuiContainer {
 	@Override
 	public void updateScreen() {
 		super.updateScreen();
-
 	}
 
+	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		fontRenderer.drawString(nameable.getDisplayName().getUnformattedText() + " (Better GUI)", 12, 5, 0x404040);
 		fontRenderer.drawString(playerInventory.getDisplayName().getUnformattedText(), 8, ySize - 96 + 2, 0x404040);
 	}
 
+	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
+
+		// check for if an enchant button has been pressed
 		int leftX = (width - xSize) / 2;
 		int topY = (height - ySize) / 2;
 
@@ -106,7 +117,9 @@ public class GuiBetterEnchantment extends GuiContainer {
 		}
 	}
 
+	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+		// extra info in top left
 		if (possibleEnchantmentSeeds.size() == 1) {
 			fontRenderer.drawString(String.format("Enchantment seed: %08X", possibleEnchantmentSeeds.iterator().next()),
 					0, 0, 0xffffff);
@@ -115,35 +128,39 @@ public class GuiBetterEnchantment extends GuiContainer {
 					0, 0xffffff);
 		}
 
+		// background
 		mc.getTextureManager().bindTexture(ENCHANTMENT_TABLE_GUI_TEXTURE);
 		int leftX = (width - xSize) / 2;
 		int topY = (height - ySize) / 2;
 		drawTexturedModalRect(leftX, topY, 0, 0, xSize, ySize);
-		int lapis = container.getLapisAmount();
 
+		// draw slots
+		int lapis = container.getLapisAmount();
 		for (int slot = 0; slot < 3; slot++) {
 			int slotsLeft = leftX + 60;
 			int textLeft = slotsLeft + 20;
-			zLevel = 0.0F;
+			zLevel = 0;
 			mc.getTextureManager().bindTexture(ENCHANTMENT_TABLE_GUI_TEXTURE);
 			int levels = container.enchantLevels[slot];
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			GlStateManager.color(1, 1, 1, 1);
 
 			if (levels == 0) {
 				drawTexturedModalRect(slotsLeft, topY + 14 + 19 * slot, 0, 185, 108, 19);
 			} else {
-				String strLevels = "" + levels;
+				String strLevels = String.valueOf(levels);
 				int wrapWidth = 86 - fontRenderer.getStringWidth(strLevels);
-				Enchantment enchantment = Enchantment.getEnchantmentByID(container.enchantClue[slot]);
-				String clue = I18n.format("container.enchant.clue",
-						enchantment == null ? "" : enchantment.getTranslatedName(container.worldClue[slot]));
+				Enchantment clueEnch = Enchantment.getEnchantmentByID(container.enchantClue[slot]);
+				String clueLvl = I18n.format("container.enchant.clue",
+						clueEnch == null ? "" : clueEnch.getTranslatedName(container.worldClue[slot]));
+
 				int levelsColor = 0x685e4a;
 
 				if ((lapis < slot + 1 || mc.player.experienceLevel < levels)
 						&& !mc.player.capabilities.isCreativeMode) {
+					// the player cannot enchant with this slot, gray it out
 					drawTexturedModalRect(slotsLeft, topY + 14 + 19 * slot, 0, 185, 108, 19);
 					drawTexturedModalRect(slotsLeft + 1, topY + 15 + 19 * slot, 16 * slot, 239, 16, 16);
-					fontRenderer.drawSplitString(clue, textLeft, topY + 16 + 19 * slot, wrapWidth,
+					fontRenderer.drawSplitString(clueLvl, textLeft, topY + 16 + 19 * slot, wrapWidth,
 							(levelsColor & 0xfefefe) >> 1);
 					levelsColor = 0x407f10;
 				} else {
@@ -151,43 +168,50 @@ public class GuiBetterEnchantment extends GuiContainer {
 					int relativeMouseY = mouseY - (topY + 14 + 19 * slot);
 
 					if (relativeMouseX >= 0 && relativeMouseY >= 0 && relativeMouseX < 108 && relativeMouseY < 19) {
+						// the slot is being hovered over, highlight it
 						drawTexturedModalRect(slotsLeft, topY + 14 + 19 * slot, 0, 204, 108, 19);
 						levelsColor = 0xffff80;
 					} else {
+						// draw the slot normally
 						drawTexturedModalRect(slotsLeft, topY + 14 + 19 * slot, 0, 166, 108, 19);
 					}
 
 					drawTexturedModalRect(slotsLeft + 1, topY + 15 + 19 * slot, 16 * slot, 223, 16, 16);
-					fontRenderer.drawSplitString(clue, textLeft, topY + 16 + 19 * slot, wrapWidth, levelsColor);
+					fontRenderer.drawSplitString(clueLvl, textLeft, topY + 16 + 19 * slot, wrapWidth, levelsColor);
 					levelsColor = 0x80ff20;
 				}
 
 				mc.fontRenderer.drawStringWithShadow(strLevels,
-						(float) (textLeft + 86 - mc.fontRenderer.getStringWidth(strLevels)),
-						(float) (topY + 16 + 19 * slot + 7), levelsColor);
+						textLeft + 86 - mc.fontRenderer.getStringWidth(strLevels), topY + 16 + 19 * slot + 7,
+						levelsColor);
 			}
 		}
 	}
 
+	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		partialTicks = this.mc.getTickLength();
+		partialTicks = mc.getTickLength();
 		drawDefaultBackground();
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		renderHoveredToolTip(mouseX, mouseY);
+
+		// draw the tooltip over the slot if necessary
 
 		boolean creativeMode = mc.player.capabilities.isCreativeMode;
 		int lapis = container.getLapisAmount();
 
 		for (int slot = 0; slot < 3; slot++) {
 			int levels = container.enchantLevels[slot];
-			Enchantment enchantment = Enchantment.getEnchantmentByID(container.enchantClue[slot]);
-			int enchantmentLevel = container.worldClue[slot];
+			Enchantment clueEnch = Enchantment.getEnchantmentByID(container.enchantClue[slot]);
+			int clueLvl = container.worldClue[slot];
 			int lapisRequired = slot + 1;
 
-			if (isPointInRegion(60, 14 + 19 * slot, 108, 17, mouseX, mouseY) && levels > 0 && enchantmentLevel >= 0
-					&& enchantment != null) {
+			if (isPointInRegion(60, 14 + 19 * slot, 108, 17, mouseX, mouseY) && levels > 0 && clueLvl >= 0
+					&& clueEnch != null) {
 				List<String> lines = new ArrayList<>();
+
 				if (possibleEnchantmentSeeds.size() == 1) {
+					// we have our enchantment seed, get the exact enchantments
 					List<EnchantmentData> enchantmentList = getEnchantmentList(new Random(),
 							possibleEnchantmentSeeds.iterator().next(), container.tableInventory.getStackInSlot(0),
 							slot, container.enchantLevels[slot]);
@@ -196,8 +220,9 @@ public class GuiBetterEnchantment extends GuiContainer {
 								+ ench.enchantment.getTranslatedName(ench.enchantmentLevel));
 					}
 				} else {
+					// only give the default clue
 					lines.add("" + TextFormatting.WHITE + TextFormatting.ITALIC
-							+ I18n.format("container.enchant.clue", enchantment.getTranslatedName(enchantmentLevel)));
+							+ I18n.format("container.enchant.clue", clueEnch.getTranslatedName(clueLvl)));
 				}
 
 				if (!creativeMode) {
@@ -238,6 +263,7 @@ public class GuiBetterEnchantment extends GuiContainer {
 	private void recalcXpSeed() {
 		Set<Integer> possibleSeeds = possibleEnchantmentSeeds;
 		if (!hasReceivedXpSeed || lastReportedXpSeed != container.xpSeed) {
+			// re-initialize everything
 			hasReceivedXpSeed = true;
 			lastReportedXpSeed = container.xpSeed;
 			possibleSeeds.clear();
@@ -251,9 +277,12 @@ public class GuiBetterEnchantment extends GuiContainer {
 
 		if (Arrays.equals(container.enchantLevels, NULL_LEVELS) && Arrays.equals(container.enchantClue, NULL_CLUE)
 				&& Arrays.equals(container.worldClue, NULL_CLUE)) {
+			// Prevent eliminating results with the wrong data
 			return;
 		}
 
+		// Slightly copied from ContainerEnchantment, in order to simulate the
+		// enchantments
 		ItemStack itemToEnchant = container.tableInventory.getStackInSlot(0);
 		if (itemToEnchant.isEmpty() || !itemToEnchant.isItemEnchantable()) {
 			return;
@@ -322,9 +351,13 @@ public class GuiBetterEnchantment extends GuiContainer {
 
 	}
 
+	/**
+	 * Gets the list of enchantments that would go on a certain item stack, given
+	 * the xp seed
+	 */
 	private List<EnchantmentData> getEnchantmentList(Random rand, int xpSeed, ItemStack stack, int enchantSlot,
 			int level) {
-		rand.setSeed((long) (xpSeed + enchantSlot));
+		rand.setSeed(xpSeed + enchantSlot);
 		List<EnchantmentData> list = EnchantmentHelper.buildEnchantmentList(rand, stack, level, false);
 
 		if (stack.getItem() == Items.BOOK && list.size() > 1) {
@@ -337,7 +370,6 @@ public class GuiBetterEnchantment extends GuiContainer {
 	private static class ContainerBetterEnchantment extends ContainerEnchantment {
 
 		public GuiBetterEnchantment gui;
-		private int n = 0;
 
 		public ContainerBetterEnchantment(InventoryPlayer playerInv, World worldIn) {
 			super(playerInv, worldIn);
@@ -346,10 +378,6 @@ public class GuiBetterEnchantment extends GuiContainer {
 		@Override
 		public void updateProgressBar(int id, int data) {
 			super.updateProgressBar(id, data);
-			if (id != n % 10) {
-				throw new AssertionError();
-			}
-			n++;
 			if (id == 9) {
 				gui.recalcXpSeed();
 			}

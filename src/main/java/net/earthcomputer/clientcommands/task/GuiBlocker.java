@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.task;
 
 import net.minecraft.client.gui.GuiScreen;
 

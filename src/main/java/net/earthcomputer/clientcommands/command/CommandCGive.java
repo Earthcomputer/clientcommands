@@ -48,6 +48,8 @@ public class CommandCGive extends ClientCommandBase {
 		Item item = getItemByText(sender, args[0]);
 		int meta = args.length >= 3 ? parseInt(args[2]) : 0;
 
+		// create the stack before the count, so we can reliably get the max. stack size
+		// for modded items
 		ItemStack stack = new ItemStack(item, 1, meta);
 
 		if (args.length >= 4) {
@@ -61,6 +63,7 @@ public class CommandCGive extends ClientCommandBase {
 		int count = args.length >= 2 ? parseInt(args[1], 1, stack.getMaxStackSize()) : 1;
 		stack.setCount(count);
 
+		// do the giving
 		boolean added = player.inventory.addItemStackToInventory(stack);
 		if (added) {
 			player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP,
@@ -72,6 +75,7 @@ public class CommandCGive extends ClientCommandBase {
 			player.inventoryContainer.removeListener(listener);
 		}
 
+		// report the result
 		if (!added) {
 			throw new CommandException("Your inventory is full");
 		} else if (!stack.isEmpty()) {

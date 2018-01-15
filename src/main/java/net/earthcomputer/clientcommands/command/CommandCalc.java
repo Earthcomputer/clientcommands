@@ -134,7 +134,8 @@ public class CommandCalc extends ClientCommandBase {
 			throw new WrongUsageException(getUsage(sender));
 		}
 
-		String expression = getChatComponentFromNthArg(sender, args, 0).getUnformattedText();
+		// Parse the expression
+		String expression = buildString(args, 0);
 		Expression expr;
 		try {
 			StreamTokenizer tokenizer = new StreamTokenizer(new StringReader(expression));
@@ -150,6 +151,7 @@ public class CommandCalc extends ClientCommandBase {
 			throw new AssertionError(e);
 		}
 
+		// Evaluate the expression
 		double ans;
 		try {
 			ans = expr.evaluate();
@@ -157,11 +159,14 @@ public class CommandCalc extends ClientCommandBase {
 			throw new CommandException("Math Error: " + e.getMessage());
 		}
 
+		// Output the formatted answer
 		if (ans > 0 && ans % 1 == 0 && Double.isFinite(ans)) {
+			// question = <b>answer</b> = itemstack_breakdown
 			sender.sendMessage(new TextComponentString(
 					String.format("%s = " + TextFormatting.BOLD + "%d" + TextFormatting.RESET + " = %d * 64 + %d",
 							expression, (long) ans, (long) ans / 64, (long) ans % 64)));
 		} else {
+			// question = <b>answer</b>
 			sender.sendMessage(new TextComponentString(
 					expression + " = " + TextFormatting.BOLD + toString(ans) + TextFormatting.RESET));
 		}
@@ -190,6 +195,9 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * An expression is a sum of products
+	 */
 	private static class Expression {
 		private List<Sign> signs;
 		private List<Product> products;
@@ -202,7 +210,11 @@ public class CommandCalc extends ClientCommandBase {
 		public static Expression parse(StreamTokenizer tokenizer) throws CommandException, IOException {
 			List<Sign> signs = new ArrayList<>();
 			List<Product> products = new ArrayList<>();
+
+			// first product
 			products.add(Product.parse(tokenizer));
+
+			// the remaining products
 			while (true) {
 				Sign sign;
 				switch (tokenizer.nextToken()) {
@@ -213,6 +225,7 @@ public class CommandCalc extends ClientCommandBase {
 					sign = Sign.MINUS;
 					break;
 				default:
+					// no more terms to parse
 					tokenizer.pushBack();
 					return new Expression(signs, products);
 				}
@@ -237,6 +250,9 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * A product multiplies together simpler terms
+	 */
 	private static class Product {
 		private List<MultSign> signs;
 		private List<Term> terms;
@@ -249,8 +265,11 @@ public class CommandCalc extends ClientCommandBase {
 		public static Product parse(StreamTokenizer tokenizer) throws CommandException, IOException {
 			List<Term> terms = new ArrayList<>();
 			List<MultSign> signs = new ArrayList<>();
+
+			// first simpler term
 			terms.add(Term.parse(tokenizer));
 
+			// the remaining simpler terms
 			while (true) {
 				switch (tokenizer.nextToken()) {
 				case '*':
@@ -261,14 +280,17 @@ public class CommandCalc extends ClientCommandBase {
 					break;
 				case '(':
 				case StreamTokenizer.TT_WORD:
+					// implicit multiplication
 					signs.add(MultSign.MULTIPLY);
 					tokenizer.pushBack();
 					break;
 				case '^':
+					// the previous simpler term is the base, parse the exponent
 					terms.set(terms.size() - 1,
 							new ExponentialTerm(terms.get(terms.size() - 1), Term.parse(tokenizer)));
 					continue;
 				default:
+					// no more simpler terms to parse
 					tokenizer.pushBack();
 					return new Product(signs, terms);
 				}
@@ -292,8 +314,12 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * A variable, constant, function, etc
+	 */
 	private static interface Term {
 		public static Term parse(StreamTokenizer tokenizer) throws CommandException, IOException {
+			// parse leading minus and plus signs
 			boolean negative = false;
 
 			do {
@@ -303,13 +329,17 @@ public class CommandCalc extends ClientCommandBase {
 			} while (tokenizer.ttype == '+' || tokenizer.ttype == '-');
 			tokenizer.pushBack();
 			if (negative) {
+				// if we need to negate, create a special term for that and re-parse without the
+				// signs
 				return new NegateTerm(parse(tokenizer));
 			}
 
 			switch (tokenizer.nextToken()) {
 			case StreamTokenizer.TT_NUMBER:
+				// if it's numerical, it's a number
 				return new NumberTerm(tokenizer.nval);
 			case StreamTokenizer.TT_WORD:
+				// if it's a word, it's either a constant or a function
 				Double constVal = CONSTANTS.get(tokenizer.sval.toLowerCase(Locale.ENGLISH));
 				if (constVal == null) {
 					tokenizer.pushBack();
@@ -318,6 +348,7 @@ public class CommandCalc extends ClientCommandBase {
 					return new NumberTerm(constVal);
 				}
 			case '(':
+				// if it's an open parenthesis, it's a parenthesized nested expression
 				tokenizer.pushBack();
 				return ParenthesesTerm.parse(tokenizer);
 			default:
@@ -328,6 +359,9 @@ public class CommandCalc extends ClientCommandBase {
 		double evaluate();
 	}
 
+	/**
+	 * Evaluates to a literal number
+	 */
 	private static class NumberTerm implements Term {
 		private double number;
 
@@ -341,6 +375,9 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * Evaluates the value of an expression, as a term
+	 */
 	private static class ParenthesesTerm implements Term {
 		private Expression expr;
 
@@ -365,6 +402,9 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * Evaluates its child, then negates the result
+	 */
 	private static class NegateTerm implements Term {
 		private Term child;
 
@@ -378,6 +418,9 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * Raises one value to the power of another
+	 */
 	private static class ExponentialTerm implements Term {
 		private Term base;
 		private Term exponent;
@@ -393,6 +436,9 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * Computes a function of other values
+	 */
 	private static class FunctionTerm implements Term {
 		private ToDoubleFunction<double[]> f;
 		private List<Expression> arguments;
@@ -403,18 +449,26 @@ public class CommandCalc extends ClientCommandBase {
 		}
 
 		public static FunctionTerm parse(StreamTokenizer tokenizer) throws CommandException, IOException {
+			// function name
 			if (tokenizer.nextToken() != StreamTokenizer.TT_WORD) {
 				throw syntaxError();
 			}
+
+			// resolve the name
 			ToDoubleFunction<double[]> f = FUNCTIONS.get(tokenizer.sval.toLowerCase(Locale.ENGLISH));
 			if (f == null) {
 				throw syntaxError();
 			}
+
+			// function arguments
 			if (tokenizer.nextToken() != '(') {
 				throw syntaxError();
 			}
 			List<Expression> args = new ArrayList<>();
+
+			// first argument
 			args.add(Expression.parse(tokenizer));
+			// remaining arguments
 			while (true) {
 				switch (tokenizer.nextToken()) {
 				case ',':
@@ -434,14 +488,23 @@ public class CommandCalc extends ClientCommandBase {
 		}
 	}
 
+	/**
+	 * An additive sign +/-
+	 */
 	private static enum Sign {
 		PLUS, MINUS
 	}
 
+	/**
+	 * A multiplicative sign, * or /
+	 */
 	private static enum MultSign {
 		MULTIPLY, DIVIDE
 	}
 
+	/**
+	 * A helper class for functions which only take 1 argument
+	 */
 	private static class SimpleFunction implements ToDoubleFunction<double[]> {
 
 		private String name;

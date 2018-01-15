@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
-import net.earthcomputer.clientcommands.ClientCommandsMod;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
@@ -10,7 +10,7 @@ public class CommandAbort extends ClientCommandBase {
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		if (ClientCommandsMod.INSTANCE.abortTasks()) {
+		if (TaskManager.abortTasks()) {
 			sender.sendMessage(new TextComponentString("Successfully aborted the current task"));
 		} else {
 			throw new CommandException("No task to abort");

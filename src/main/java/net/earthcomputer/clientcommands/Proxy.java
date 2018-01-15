@@ -7,5 +7,9 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
+/**
+ * When a field is labeled with this annotation, delegate methods are generated
+ * in the surrounding class
+ */
 public @interface Proxy {
 }
