@@ -9,6 +9,7 @@ import java.util.Queue;
 
 import net.earthcomputer.clientcommands.command.CommandAbort;
 import net.earthcomputer.clientcommands.command.CommandCClear;
+import net.earthcomputer.clientcommands.command.CommandCGive;
 import net.earthcomputer.clientcommands.command.CommandCHelp;
 import net.earthcomputer.clientcommands.command.CommandCalc;
 import net.earthcomputer.clientcommands.command.CommandFind;
@@ -75,6 +76,7 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandCalc());
 		ClientCommandHandler.instance.registerCommand(new CommandCHelp());
 		ClientCommandHandler.instance.registerCommand(new CommandCClear());
+		ClientCommandHandler.instance.registerCommand(new CommandCGive());
 		ClientCommandHandler.instance.registerCommand(new CommandAbort());
 		ClientCommandHandler.instance.registerCommand(new CommandNote());
 		ClientCommandHandler.instance.registerCommand(new CommandTempRule());
