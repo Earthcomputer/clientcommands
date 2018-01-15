@@ -1,0 +1,16 @@
+[
+{
+  "modid": "clientcommands",
+  "name": "Earthcomputer's Client Command Mod",
+  "description": "Commands for the client",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Earthcomputer"],
+  "credits": "Earthcomputer",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
