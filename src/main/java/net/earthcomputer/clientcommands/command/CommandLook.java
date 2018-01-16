@@ -118,7 +118,7 @@ public class CommandLook extends ClientCommandBase {
 		if (args.length == 1) {
 			return getListOfStringsMatchingLastWord(args, "block", "angles", "cardinal");
 		}
-		if ("cardinal".equals(args[1])) {
+		if ("cardinal".equals(args[0])) {
 			return getListOfStringsMatchingLastWord(args, "west", "east", "down", "up", "north", "south");
 		}
 		return Collections.emptyList();
