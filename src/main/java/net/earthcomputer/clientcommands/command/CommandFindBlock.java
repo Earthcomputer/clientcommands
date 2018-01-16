@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -31,8 +33,10 @@ public class CommandFindBlock extends ClientCommandBase {
 		}
 
 		Block block = getBlockByText(sender, args[0]);
-		int radius = args.length < 2 ? MAX_RADIUS : parseInt(args[1], 0, MAX_RADIUS);
-		String radiusType = args.length < 3 ? "cartesian" : args[2];
+		Predicate<IBlockState> blockMatcher = args.length < 2 ? state -> state.getBlock() == block
+				: convertArgToBlockStatePredicate(block, args[1]);
+		int radius = args.length < 3 ? MAX_RADIUS : parseInt(args[2], 0, MAX_RADIUS);
+		String radiusType = args.length < 4 ? "cartesian" : args[3];
 
 		// compile a list of block positions within the radius which might match the
 		// query
@@ -41,10 +45,10 @@ public class CommandFindBlock extends ClientCommandBase {
 		switch (radiusType) {
 		case "cartesian":
 		case "square":
-			candidates = findBlockCandidatesInSquareArea(sender, block, radius, radiusType);
+			candidates = findBlockCandidatesInSquareArea(sender, blockMatcher, radius, radiusType);
 			break;
 		case "taxicab":
-			candidates = findBlockCandidatesInTaxicabArea(sender, block, radius);
+			candidates = findBlockCandidatesInTaxicabArea(sender, blockMatcher, radius);
 			break;
 		default:
 			throw new CommandException("Unknown radius type " + radiusType);
@@ -117,8 +121,8 @@ public class CommandFindBlock extends ClientCommandBase {
 		}
 	}
 
-	private List<BlockPos> findBlockCandidatesInSquareArea(ICommandSender sender, Block block, int radius,
-			String radiusType) {
+	private List<BlockPos> findBlockCandidatesInSquareArea(ICommandSender sender, Predicate<IBlockState> blockMatcher,
+			int radius, String radiusType) {
 		World world = Minecraft.getMinecraft().world;
 		BlockPos senderPos = sender.getPosition();
 		ChunkPos chunkPos = new ChunkPos(senderPos);
@@ -133,7 +137,7 @@ public class CommandFindBlock extends ClientCommandBase {
 				for (int chunkZ = chunkPos.z - r; chunkZ <= chunkPos.z
 						+ r; chunkZ += chunkX == chunkPos.x - r || chunkX == chunkPos.x + r ? 1 : r + r) {
 					Chunk chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
-					if (searchChunkForBlockCandidates(chunk, senderPos.getY(), block, blockCandidates)) {
+					if (searchChunkForBlockCandidates(chunk, senderPos.getY(), blockMatcher, blockCandidates)) {
 						// update new, potentially shortened, radius
 						int dx = chunkPos.x - chunkX;
 						int dz = chunkPos.z - chunkZ;
@@ -154,7 +158,8 @@ public class CommandFindBlock extends ClientCommandBase {
 		return blockCandidates;
 	}
 
-	private List<BlockPos> findBlockCandidatesInTaxicabArea(ICommandSender sender, Block block, int radius) {
+	private List<BlockPos> findBlockCandidatesInTaxicabArea(ICommandSender sender, Predicate<IBlockState> blockMatcher,
+			int radius) {
 		World world = Minecraft.getMinecraft().world;
 		BlockPos senderPos = sender.getPosition();
 		ChunkPos chunkPos = new ChunkPos(senderPos);
@@ -169,7 +174,7 @@ public class CommandFindBlock extends ClientCommandBase {
 				int chunkZ = chunkPos.z - (r - Math.abs(chunkPos.x - chunkX));
 				for (int i = 0; i < 2; i++) {
 					Chunk chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
-					if (searchChunkForBlockCandidates(chunk, senderPos.getY(), block, blockCandidates)) {
+					if (searchChunkForBlockCandidates(chunk, senderPos.getY(), blockMatcher, blockCandidates)) {
 						// update new, potentially shortened, radius
 						int newChunkRadius = Math.abs(chunkPos.x - chunkX) + Math.abs(chunkPos.z - chunkZ) + 1;
 						if (newChunkRadius < chunkRadius) {
@@ -185,7 +190,7 @@ public class CommandFindBlock extends ClientCommandBase {
 		return blockCandidates;
 	}
 
-	private boolean searchChunkForBlockCandidates(Chunk chunk, int senderY, Block block,
+	private boolean searchChunkForBlockCandidates(Chunk chunk, int senderY, Predicate<IBlockState> blockMatcher,
 			List<BlockPos> blockCandidates) {
 		boolean found = false;
 		int maxY = chunk.getTopFilledSegment() + 15;
@@ -199,7 +204,7 @@ public class CommandFindBlock extends ClientCommandBase {
 					if (senderY + dy < 0 || senderY + dy >= 256) {
 						continue;
 					}
-					if (chunk.getBlockState(x, senderY + dy, z).getBlock() == block) {
+					if (blockMatcher.test(chunk.getBlockState(x, senderY + dy, z))) {
 						blockCandidates.add(new BlockPos((chunk.x << 4) + x, senderY + dy, (chunk.z << 4) + z));
 						found = true;
 						break;
@@ -218,7 +223,7 @@ public class CommandFindBlock extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/cfindblock <block> [radius] [radiustype]";
+		return "/cfindblock <block> [data|properties] [radius] [radiustype]";
 	}
 
 	@Override
@@ -226,7 +231,7 @@ public class CommandFindBlock extends ClientCommandBase {
 		if (args.length == 1) {
 			return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
 		}
-		if (args.length == 3) {
+		if (args.length == 4) {
 			return getListOfStringsMatchingLastWord(args, "cartesian", "taxicab", "square");
 		}
 		return Collections.emptyList();
