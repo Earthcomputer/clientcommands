@@ -86,6 +86,8 @@ public class ClientCommandsMod {
 			}
 		});
 
+		GuiBetterEnchantment.registerEvents();
+
 		MinecraftForge.EVENT_BUS.register(EventManager.INSTANCE);
 	}
 

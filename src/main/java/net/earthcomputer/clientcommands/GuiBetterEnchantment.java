@@ -54,7 +54,7 @@ public class GuiBetterEnchantment extends GuiContainer {
 	private static boolean hasReceivedXpSeed = false;
 	private static int lastReportedXpSeed;
 
-	static {
+	public static void registerEvents() {
 		EventManager.addDisconnectListener(e -> {
 			// reset working values
 			possibleEnchantmentSeeds.clear();
