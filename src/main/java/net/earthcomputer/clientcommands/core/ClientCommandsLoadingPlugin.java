@@ -8,7 +8,7 @@ public class ClientCommandsLoadingPlugin implements IFMLLoadingPlugin {
 
 	@Override
 	public String[] getASMTransformerClass() {
-		return new String[] { ProxyTransformer.class.getName() };
+		return new String[] { ProxyTransformer.class.getName(), NetHandlerTransformer.class.getName() };
 	}
 
 	@Override
