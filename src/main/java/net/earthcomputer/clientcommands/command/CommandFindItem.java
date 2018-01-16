@@ -7,12 +7,15 @@ import net.earthcomputer.clientcommands.Ptr;
 import net.earthcomputer.clientcommands.task.GuiBlocker;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockChest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -21,6 +24,8 @@ import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -85,7 +90,7 @@ public class CommandFindItem extends ClientCommandBase {
 			for (int z = (int) (playerz - radius); z <= playerz + radius; z++) {
 				for (int y = (int) (playery - radius); y <= playery + radius; y++) {
 					BlockPos pos = new BlockPos(x, y, z);
-					if (world.getTileEntity(pos) instanceof IInventory) {
+					if (shouldSearch(world, pos)) {
 						TaskManager.addLongTask(new WaitForGuiTask(mc, item, damage, nbt, sender, pos, foundItem));
 					}
 				}
@@ -116,6 +121,32 @@ public class CommandFindItem extends ClientCommandBase {
 	@Override
 	public String getUsage(ICommandSender sender) {
 		return "/cfinditem <item> [damage] [nbt]";
+	}
+
+	private static boolean shouldSearch(World world, BlockPos pos) {
+		Block block = world.getBlockState(pos).getBlock();
+		TileEntity te = world.getTileEntity(pos);
+
+		if (block == Blocks.ENDER_CHEST) {
+			return true;
+		}
+
+		if (block instanceof BlockChest) {
+			if (!(te instanceof TileEntityChest)) {
+				return false;
+			}
+			TileEntityChest chest = (TileEntityChest) te;
+			if (!chest.adjacentChestChecked) {
+				chest.checkForAdjacentChests();
+			}
+			return chest.adjacentChestXNeg == null && chest.adjacentChestZNeg == null;
+		}
+
+		if (te instanceof IInventory) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static class WaitForGuiTask extends LongTask {
