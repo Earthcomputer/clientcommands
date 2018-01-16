@@ -112,8 +112,8 @@ public class CommandFindBlock extends ClientCommandBase {
 				throw new AssertionError();
 			}
 			sender.sendMessage(
-					new TextComponentString(String.format("Closest match is at (%d, %d, %d), %.2f blocks away",
-							closestBlock.getX(), closestBlock.getY(), closestBlock.getZ(), distance)));
+					new TextComponentString("Closest match is at ").appendSibling(getCoordsTextComponent(closestBlock))
+							.appendSibling(new TextComponentString(String.format(", %.2f blocks away", distance))));
 		}
 	}
 

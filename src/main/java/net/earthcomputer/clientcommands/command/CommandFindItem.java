@@ -185,9 +185,8 @@ public class CommandFindItem extends ClientCommandBase {
 									if (stack.getItem() == item && (damage == -1 || stack.getItemDamage() == damage)
 											&& (nbt == null
 													|| NBTUtil.areNBTEquals(nbt, stack.getTagCompound(), true))) {
-										sender.sendMessage(new TextComponentString(
-												String.format("Matching item found at (%d, %d, %d)", pos.getX(),
-														pos.getY(), pos.getZ())));
+										sender.sendMessage(new TextComponentString("Matching item found at ")
+												.appendSibling(getCoordsTextComponent(pos)));
 										foundItem.set(Boolean.TRUE);
 										break;
 									}

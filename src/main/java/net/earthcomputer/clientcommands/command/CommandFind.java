@@ -99,9 +99,10 @@ public class CommandFind extends ClientCommandBase {
 			sender.sendMessage(
 					new TextComponentString(String.format("%d entities matched your query", entityList.size())));
 			for (Entity entity : entityList) {
-				sender.sendMessage(
-						new TextComponentString(String.format("Found entity at (%.2f, %.2f, %.2f), %.2f blocks away",
-								entity.posX, entity.posY, entity.posZ, player.getDistance(entity))));
+				sender.sendMessage(new TextComponentString(String.format("Found %s at ", entity.getName()))
+						.appendSibling(getCoordsTextComponent(new BlockPos(entity)))
+						.appendSibling(new TextComponentString(
+								String.format(", %.2f blocks away", player.getDistance(entity)))));
 			}
 		}
 	}
