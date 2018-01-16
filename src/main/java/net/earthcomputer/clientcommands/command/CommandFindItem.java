@@ -83,7 +83,7 @@ public class CommandFindItem extends ClientCommandBase {
 		double playery = sender.getPositionVector().y + sender.getCommandSenderEntity().getEyeHeight();
 		double playerz = sender.getPositionVector().z;
 
-		Ptr<Boolean> foundItem = new Ptr<>(Boolean.FALSE);
+		Ptr<Integer> itemsFound = new Ptr<>(0);
 
 		// add queued search task for each inventory
 		for (int x = (int) (playerx - radius); x <= playerx + radius; x++) {
@@ -91,18 +91,23 @@ public class CommandFindItem extends ClientCommandBase {
 				for (int y = (int) (playery - radius); y <= playery + radius; y++) {
 					BlockPos pos = new BlockPos(x, y, z);
 					if (shouldSearch(world, pos)) {
-						TaskManager.addLongTask(new WaitForGuiTask(mc, item, damage, nbt, sender, pos, foundItem));
+						TaskManager.addLongTask(new WaitForGuiTask(mc, item, damage, nbt, sender, pos, itemsFound));
 					}
 				}
 			}
 		}
 
+		final NBTTagCompound nbt_f = nbt;
 		// add a queued "finished" notification task
 		TaskManager.addLongTask(new LongTask() {
 			@Override
 			public void start() {
-				if (!foundItem.get()) {
+				int noItemsFound = itemsFound.get();
+				if (noItemsFound == 0) {
 					sender.sendMessage(new TextComponentString(TextFormatting.RED + "No matching items found"));
+				} else {
+					sender.sendMessage(new TextComponentString(String.format("Found %d %s", noItemsFound,
+							new ItemStack(item, 1, damage, nbt_f).getDisplayName())));
 				}
 				setFinished();
 			}
@@ -156,17 +161,17 @@ public class CommandFindItem extends ClientCommandBase {
 		private NBTTagCompound nbt;
 		private ICommandSender sender;
 		private BlockPos pos;
-		private Ptr<Boolean> foundItem;
+		private Ptr<Integer> itemsFound;
 
 		public WaitForGuiTask(Minecraft mc, Item item, int damage, NBTTagCompound nbt, ICommandSender sender,
-				BlockPos pos, Ptr<Boolean> foundItem) {
+				BlockPos pos, Ptr<Integer> itemsFound) {
 			this.mc = mc;
 			this.item = item;
 			this.damage = damage;
 			this.nbt = nbt;
 			this.sender = sender;
 			this.pos = pos;
-			this.foundItem = foundItem;
+			this.itemsFound = itemsFound;
 		}
 
 		@Override
@@ -187,8 +192,7 @@ public class CommandFindItem extends ClientCommandBase {
 													|| NBTUtil.areNBTEquals(nbt, stack.getTagCompound(), true))) {
 										sender.sendMessage(new TextComponentString("Matching item found at ")
 												.appendSibling(getCoordsTextComponent(pos)));
-										foundItem.set(Boolean.TRUE);
-										break;
+										itemsFound.set(itemsFound.get() + stack.getCount());
 									}
 								}
 								mc.player.closeScreen();
