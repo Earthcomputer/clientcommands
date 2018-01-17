@@ -17,7 +17,6 @@ import net.earthcomputer.clientcommands.command.CommandSimGen;
 import net.earthcomputer.clientcommands.command.CommandTempRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.GameRules;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -25,7 +24,6 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 
 @Mod(modid = ClientCommandsMod.MODID, version = ClientCommandsMod.VERSION, clientSideOnly = true)
@@ -35,8 +33,6 @@ public class ClientCommandsMod {
 
 	@Instance(MODID)
 	public static ClientCommandsMod INSTANCE;
-
-	private GameRules tempRules;
 
 	@NetworkCheckHandler
 	public boolean checkConnect(Map<String, String> mods, Side otherSide) {
@@ -51,11 +47,12 @@ public class ClientCommandsMod {
 	}
 
 	private void initTempRules() {
-		tempRules = new GameRules();
-		Map<String, ?> rules = ReflectionHelper.getPrivateValue(GameRules.class, tempRules, "rules", "field_82771_a");
-		rules.clear();
-		resetTempRules();
-		EventManager.addDisconnectListener(e -> resetTempRules());
+		TempRules.BLOCK_REACH_DISTANCE.addValueChangeListener(e -> {
+			Minecraft.getMinecraft().player.getAttributeMap().getAttributeInstance(EntityPlayer.REACH_DISTANCE)
+					.setBaseValue(e.getNewValue());
+		});
+
+		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 	}
 
 	private void registerCommands() {
@@ -75,28 +72,11 @@ public class ClientCommandsMod {
 	}
 
 	private void registerEventStuff() {
-		EventManager.addTickListener(e -> {
-			if (Minecraft.getMinecraft().inGameHasFocus) {
-				try {
-					double reachDistance = Double.parseDouble(tempRules.getString("blockReachDistance"));
-					Minecraft.getMinecraft().player.getAttributeMap().getAttributeInstance(EntityPlayer.REACH_DISTANCE)
-							.setBaseValue(reachDistance);
-				} catch (NumberFormatException e1) {
-				}
-			}
-		});
-
 		GuiBetterEnchantment.registerEvents();
+
+		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 
 		MinecraftForge.EVENT_BUS.register(EventManager.INSTANCE);
 	}
 
-	public void resetTempRules() {
-		tempRules.addGameRule("enchantingPrediction", "false", GameRules.ValueType.BOOLEAN_VALUE);
-		tempRules.addGameRule("blockReachDistance", "default", GameRules.ValueType.ANY_VALUE);
-	}
-
-	public GameRules getTempRules() {
-		return tempRules;
-	}
 }

@@ -63,7 +63,7 @@ public class GuiBetterEnchantment extends GuiContainer {
 
 		EventManager.addGuiOpenListener(e -> {
 			// replace default GUI with this GUI if necessary
-			if (!ClientCommandsMod.INSTANCE.getTempRules().getBoolean("enchantingPrediction")) {
+			if (!TempRules.ENCHANTING_PREDICTION.getValue()) {
 				return;
 			}
 			if (e.getGui() instanceof GuiEnchantment) {
