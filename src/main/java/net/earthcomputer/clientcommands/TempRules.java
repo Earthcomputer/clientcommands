@@ -22,7 +22,6 @@ public class TempRules {
 			Boolean.FALSE);
 	public static final Rule<Double> BLOCK_REACH_DISTANCE = registerRule("blockReachDistance", DataType.DOUBLE.min(0),
 			5.0);
-	public static final Rule<Integer> HOTBAR_SIZE = registerRule("hotbarSize", DataType.INTEGER.range(1, 18), 9);
 
 	public static boolean hasRule(String name) {
 		return rules.containsKey(name);
