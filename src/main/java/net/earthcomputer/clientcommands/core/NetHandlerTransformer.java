@@ -7,6 +7,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -70,9 +71,9 @@ public class NetHandlerTransformer implements IClassTransformer {
 		if ("net.minecraft.network.NetworkManager".equals(transformedName)) {
 			ClassReader reader = new ClassReader(basicClass);
 			ClassNode clazz = new ClassNode();
-			reader.accept(clazz, ClassReader.SKIP_FRAMES);
+			reader.accept(clazz, 0);
 			transformNetworkManager(clazz);
-			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+			ClassWriter writer = new ClassWriter(0);
 			clazz.accept(writer);
 			return writer.toByteArray();
 		}
@@ -80,9 +81,9 @@ public class NetHandlerTransformer implements IClassTransformer {
 		if ("net.minecraft.network.PacketThreadUtil$1".equals(transformedName)) {
 			ClassReader reader = new ClassReader(basicClass);
 			ClassNode clazz = new ClassNode();
-			reader.accept(clazz, ClassReader.SKIP_FRAMES);
+			reader.accept(clazz, 0);
 			transformPacketThreadUtil_1(clazz);
-			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+			ClassWriter writer = new ClassWriter(0);
 			clazz.accept(writer);
 			return writer.toByteArray();
 		}
@@ -135,6 +136,7 @@ public class NetHandlerTransformer implements IClassTransformer {
 		insns.add(new JumpInsnNode(Opcodes.IFNONNULL, l));
 		insns.add(new InsnNode(Opcodes.RETURN));
 		insns.add(l);
+		insns.add(new FrameNode(Opcodes.F_SAME, 0, new Object[0], 0, new Object[0]));
 		method.instructions.insertBefore(method.instructions.getFirst(), insns);
 
 		AbstractInsnNode returnInsn;
@@ -190,6 +192,7 @@ public class NetHandlerTransformer implements IClassTransformer {
 		insns.add(new JumpInsnNode(Opcodes.IFNONNULL, endLabel));
 		insns.add(new InsnNode(Opcodes.RETURN));
 		insns.add(endLabel);
+		insns.add(new FrameNode(Opcodes.F_SAME, 0, new Object[0], 0, new Object[0]));
 		method.instructions.insertBefore(method.instructions.getFirst(), insns);
 
 		AbstractInsnNode returnInsn;
@@ -219,6 +222,7 @@ public class NetHandlerTransformer implements IClassTransformer {
 		insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, EVENT_MANAGER_NAME, "fireInboundPacketPost",
 				EVENT_MANAGER_POST_METHODS_DESC, false));
 		insns.add(endLabel);
+		insns.add(new FrameNode(Opcodes.F_SAME, 0, new Object[0], 0, new Object[0]));
 		method.instructions.insertBefore(returnInsn, insns);
 	}
 
@@ -281,6 +285,7 @@ public class NetHandlerTransformer implements IClassTransformer {
 		insns.add(new JumpInsnNode(Opcodes.IFNONNULL, l));
 		insns.add(new InsnNode(Opcodes.RETURN));
 		insns.add(l);
+		insns.add(new FrameNode(Opcodes.F_SAME, 0, new Object[0], 0, new Object[0]));
 		method.instructions.insertBefore(method.instructions.getFirst(), insns);
 
 		AbstractInsnNode returnInsn;
