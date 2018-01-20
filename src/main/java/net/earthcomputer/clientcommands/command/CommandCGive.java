@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import net.earthcomputer.clientcommands.CreativeInventoryListener;
+import net.earthcomputer.clientcommands.EnchantmentCracker;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -73,6 +74,7 @@ public class CommandCGive extends ClientCommandBase {
 			player.inventoryContainer.addListener(listener);
 			player.inventoryContainer.detectAndSendChanges();
 			player.inventoryContainer.removeListener(listener);
+			EnchantmentCracker.resetCracker("cgive command");
 		}
 
 		// report the result

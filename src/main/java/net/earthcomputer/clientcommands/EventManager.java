@@ -10,11 +10,26 @@ import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.player.AnvilRepairEvent;
+import net.minecraftforge.event.entity.player.ArrowLooseEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class EventManager {
 
@@ -159,6 +174,195 @@ public class EventManager {
 	@SubscribeEvent
 	public void onGuiOpen(GuiOpenEvent e) {
 		guiOpenListeners.invoke(e);
+	}
+
+	// GUI OVERLAY
+
+	private static Listeners<DrawScreenEvent.Post> guiOverlayListeners = new Listeners<>();
+
+	public static void addGuiOverlayListener(Consumer<DrawScreenEvent.Post> listener) {
+		guiOverlayListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onGuiOverlay(DrawScreenEvent.Post e) {
+		guiOverlayListeners.invoke(e);
+	}
+
+	// ENTITY CONSTRUCTING
+
+	private static Listeners<EntityConstructing> entityConstructingListeners = new Listeners<>();
+
+	public static void addEntityConstructingListener(Consumer<EntityConstructing> listener) {
+		entityConstructingListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onEntityConstructing(EntityConstructing e) {
+		entityConstructingListeners.invoke(e);
+	}
+
+	// ENTITY JOIN WORLD
+
+	private static Listeners<EntityJoinWorldEvent> entitySpawnListeners = new Listeners<>();
+
+	public static void addEntitySpawnListener(Consumer<EntityJoinWorldEvent> listener) {
+		entitySpawnListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onEntitySpawn(EntityJoinWorldEvent e) {
+		if (Minecraft.getMinecraft().player != null && e.getWorld().isRemote) {
+			entitySpawnListeners.invoke(e);
+		}
+	}
+
+	// PLAYER TICK
+
+	private static Listeners<PlayerTickEvent> playerTickListeners = new Listeners<>();
+
+	public static void addPlayerTickListener(Consumer<PlayerTickEvent> listener) {
+		playerTickListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onPlayerTick(PlayerTickEvent e) {
+		if (e.side == Side.CLIENT && e.phase == TickEvent.Phase.END) {
+			playerTickListeners.invoke(e);
+		}
+	}
+
+	// LIVING ATTACK
+
+	private static Listeners<LivingAttackEvent> livingAttackListeners = new Listeners<>();
+
+	public static void addLivingAttackListener(Consumer<LivingAttackEvent> listener) {
+		livingAttackListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onLivingAttack(LivingAttackEvent e) {
+		livingAttackListeners.invoke(e);
+	}
+
+	// ANVIL REPAIR
+
+	private static Listeners<AnvilRepairEvent> anvilRepairListeners = new Listeners<>();
+
+	public static void addAnvilRepairListener(Consumer<AnvilRepairEvent> listener) {
+		anvilRepairListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onAnvilRepair(AnvilRepairEvent e) {
+		if (e.getEntityPlayer() == Minecraft.getMinecraft().player) {
+			anvilRepairListeners.invoke(e);
+		}
+	}
+
+	// ATTACK BLOCK
+
+	private static Listeners<LeftClickBlock> attackBlockListeners = new Listeners<>();
+
+	public static void addAttackBlockListener(Consumer<LeftClickBlock> listener) {
+		attackBlockListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onAttackBlock(LeftClickBlock e) {
+		if (e.getSide() == Side.CLIENT) {
+			attackBlockListeners.invoke(e);
+		}
+	}
+
+	// ATTACK ENTITY
+
+	private static Listeners<AttackEntityEvent> attackEntityListeners = new Listeners<>();
+
+	public static void addAttackEntityListener(Consumer<AttackEntityEvent> listener) {
+		attackEntityListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onAttackEntity(AttackEntityEvent e) {
+		if (e.getEntityPlayer() == Minecraft.getMinecraft().player) {
+			attackEntityListeners.invoke(e);
+		}
+	}
+
+	// USE BLOCK
+
+	private static Listeners<RightClickBlock> useBlockListeners = new Listeners<>();
+
+	public static void addUseBlockListener(Consumer<RightClickBlock> listener) {
+		useBlockListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onUseBlock(RightClickBlock e) {
+		if (e.getSide() == Side.CLIENT) {
+			useBlockListeners.invoke(e);
+		}
+	}
+
+	// USE ITEM
+
+	private static Listeners<RightClickItem> useItemListeners = new Listeners<>();
+
+	public static void addUseItemListener(Consumer<RightClickItem> listener) {
+		useItemListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onUseItem(RightClickItem e) {
+		if (e.getSide() == Side.CLIENT) {
+			useItemListeners.invoke(e);
+		}
+	}
+
+	// USE ENTITY
+
+	private static Listeners<EntityInteract> useEntityListeners = new Listeners<>();
+
+	public static void addUseEntityListener(Consumer<EntityInteract> listener) {
+		useEntityListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onUseEntity(EntityInteract e) {
+		if (e.getSide() == Side.CLIENT) {
+			useEntityListeners.invoke(e);
+		}
+	}
+
+	// FIRE BOW
+
+	private static Listeners<ArrowLooseEvent> fireBowListeners = new Listeners<>();
+
+	public static void addFireBowListener(Consumer<ArrowLooseEvent> listener) {
+		fireBowListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onFireBow(ArrowLooseEvent e) {
+		if (e.getEntityPlayer() == Minecraft.getMinecraft().player) {
+			fireBowListeners.invoke(e);
+		}
+	}
+
+	// BREAK ITEM
+
+	private static Listeners<PlayerDestroyItemEvent> breakItemListeners = new Listeners<>();
+
+	public static void addBreakItemListener(Consumer<PlayerDestroyItemEvent> listener) {
+		breakItemListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onBreakItem(PlayerDestroyItemEvent e) {
+		if (e.getEntityPlayer() == Minecraft.getMinecraft().player) {
+			breakItemListeners.invoke(e);
+		}
 	}
 
 	// IMPLEMENTATION

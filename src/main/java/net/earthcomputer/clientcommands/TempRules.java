@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +21,15 @@ public class TempRules {
 
 	public static final Rule<Boolean> ENCHANTING_PREDICTION = registerRule("enchantingPrediction", DataType.BOOLEAN,
 			Boolean.FALSE);
+	public static final Rule<EnchantmentCracker.EnumCrackState> ENCHANTING_CRACK_STATE = registerRule(
+			"enchantingCrackState", EnumDataType.of(EnchantmentCracker.EnumCrackState.class),
+			EnchantmentCracker.EnumCrackState.UNCRACKED);
 	public static final Rule<Double> BLOCK_REACH_DISTANCE = registerRule("blockReachDistance", DataType.DOUBLE.min(0),
 			5.0);
+
+	static {
+		ENCHANTING_CRACK_STATE.setReadOnly();
+	}
 
 	public static boolean hasRule(String name) {
 		return rules.containsKey(name);
@@ -29,6 +37,10 @@ public class TempRules {
 
 	public static Rule<?> getRule(String name) {
 		return rules.get(name);
+	}
+
+	public static Collection<Rule<?>> getRules() {
+		return rules.values();
 	}
 
 	public static List<String> getRuleNames() {
@@ -50,6 +62,7 @@ public class TempRules {
 		private DataType<T> dataType;
 		private T defaultValue;
 		private T value;
+		private boolean readOnly = false;
 		private List<Consumer<ValueChangeEvent<T>>> listeners = new ArrayList<>();
 
 		private Rule(String name, DataType<T> dataType, T defaultValue) {
@@ -88,6 +101,14 @@ public class TempRules {
 				listeners.forEach(l -> l.accept(event));
 				value = defaultValue;
 			}
+		}
+
+		public boolean isReadOnly() {
+			return readOnly;
+		}
+
+		public void setReadOnly() {
+			readOnly = true;
 		}
 
 		public void addValueChangeListener(Consumer<ValueChangeEvent<T>> listener) {
@@ -258,8 +279,11 @@ public class TempRules {
 		}
 
 		public static <T extends Enum<T> & IStringSerializable> EnumDataType<T> of(Class<T> clazz) {
-			Map<String, T> nameToValue = Arrays.stream(clazz.getEnumConstants()).collect(Collectors
-					.groupingBy(IStringSerializable::getName, Collectors.reducing(null, (a, b) -> a == null ? b : a)));
+			// https://stackoverflow.com/questions/33929304/weird-exception-invalid-receiver-type-class-java-lang-object-not-a-subtype-of
+			// we can't use the method reference IStringSerializable::getName because of
+			// this
+			Map<String, T> nameToValue = Arrays.stream(clazz.getEnumConstants()).collect(
+					Collectors.groupingBy(x -> x.getName(), Collectors.reducing(null, (a, b) -> a == null ? b : a)));
 			return new EnumDataType<>(nameToValue);
 		}
 

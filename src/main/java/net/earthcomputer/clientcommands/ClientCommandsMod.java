@@ -72,7 +72,7 @@ public class ClientCommandsMod {
 	}
 
 	private void registerEventStuff() {
-		GuiBetterEnchantment.registerEvents();
+		EnchantmentCracker.registerEvents();
 
 		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 

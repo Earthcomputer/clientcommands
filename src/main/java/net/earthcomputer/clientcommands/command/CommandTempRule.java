@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.minecraft.command.CommandException;
@@ -51,11 +52,17 @@ public class CommandTempRule extends ClientCommandBase {
 				if (args.length == 2) {
 					throw new WrongUsageException("/ctemprule set <rule> <value>");
 				}
+				if (rule.isReadOnly()) {
+					throw new CommandException("Cannot modify read-only TempRule " + ruleName);
+				}
 				String strVal = buildString(args, 2);
 				setRuleVal(rule, strVal);
 				sender.sendMessage(new TextComponentString("TempRule " + ruleName + " has been updated to " + strVal));
 				break;
 			case "reset":
+				if (rule.isReadOnly()) {
+					throw new CommandException("Cannot modify read-only TempRule " + ruleName);
+				}
 				rule.setToDefault();
 				sender.sendMessage(new TextComponentString(
 						"TempRule " + ruleName + " has been reset to " + ruleValToString(rule)));
@@ -88,10 +95,18 @@ public class CommandTempRule extends ClientCommandBase {
 		if (args.length == 1) {
 			return getListOfStringsMatchingLastWord(args, "get", "set", "reset", "list");
 		} else if (args.length == 2 && !"list".equals(args[0])) {
-			return getListOfStringsMatchingLastWord(args, TempRules.getRuleNames());
+			if ("get".equals(args[0])) {
+				return getListOfStringsMatchingLastWord(args, TempRules.getRuleNames());
+			} else {
+				return getListOfStringsMatchingLastWord(args,
+						TempRules.getRules().stream().filter(rule -> !rule.isReadOnly()).map(TempRules.Rule::getName)
+								.sorted().collect(Collectors.toList()));
+			}
 		} else if (args.length == 3 && "set".equals(args[0]) && TempRules.hasRule(args[1])) {
 			TempRules.Rule<?> rule = TempRules.getRule(args[1]);
-			return getListOfStringsMatchingLastWord(args, rule.getDataType().getTabCompletionOptions());
+			if (!rule.isReadOnly()) {
+				return getListOfStringsMatchingLastWord(args, rule.getDataType().getTabCompletionOptions());
+			}
 		}
 		return Collections.emptyList();
 	}
