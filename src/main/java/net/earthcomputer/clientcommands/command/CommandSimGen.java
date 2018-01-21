@@ -53,6 +53,8 @@ public class CommandSimGen extends ClientCommandBase {
 			throw new WrongUsageException(getUsage(sender));
 		}
 
+		sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "Warning: /csimgen is deprecated"));
+
 		TaskManager.ensureNoTasks();
 
 		// Generator constructor argument
