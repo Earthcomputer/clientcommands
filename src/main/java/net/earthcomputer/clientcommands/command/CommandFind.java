@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,6 +74,13 @@ public class CommandFind extends ClientCommandBase {
 					entities = entities.sorted(
 							Comparator.<Entity>comparingDouble(entity -> player.getDistanceSq(entity)).reversed());
 					break;
+				case "random":
+					int r = ThreadLocalRandom.current().nextInt();
+					Comparator<Entity> randomComparator = Comparator
+							.<Entity>comparingInt(entity -> entity.getUniqueID().hashCode() ^ r)
+							.thenComparing(Entity::getUniqueID);
+					entities = entities.sorted(randomComparator);
+					break;
 				default:
 					throw new CommandException("Unknown arg value for order: " + value);
 				}
@@ -135,7 +143,7 @@ public class CommandFind extends ClientCommandBase {
 		} else {
 			switch (args[args.length - 2]) {
 			case "order":
-				return getListOfStringsMatchingLastWord(args, "nearest", "furthest");
+				return getListOfStringsMatchingLastWord(args, "nearest", "furthest", "random");
 			case "name":
 				return getListOfStringsMatchingLastWord(args, Minecraft.getMinecraft().world.playerEntities.stream()
 						.map(Entity::getName).sorted().collect(Collectors.toList()));
