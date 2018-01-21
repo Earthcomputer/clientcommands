@@ -427,6 +427,16 @@ public class EnchantmentCracker {
 
 		lines.add("");
 
+		if (crackState == EnumCrackState.CRACKED_ENCH_SEED) {
+			lines.add("XP seed: " + String.format("%08X", possibleXPSeeds.iterator().next()));
+		} else if (crackState == EnumCrackState.CRACKING_ENCH_SEED) {
+			lines.add("Possible XP seeds: " + possibleXPSeeds.size());
+		} else if (crackState == EnumCrackState.CRACKING) {
+			lines.add("Possible player RNG seeds: " + possiblePlayerRandSeeds.size());
+		}
+
+		lines.add("");
+
 		if (crackState == EnumCrackState.CRACKED || crackState == EnumCrackState.CRACKED_ENCH_SEED) {
 			lines.add("Enchantments:");
 		} else {
