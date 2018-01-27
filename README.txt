@@ -78,6 +78,23 @@ Common problems with setup:
 /csimgen (deprecated) - simulated the generation of a world generator.
 /ctemprule - get and set variables which affect the workings of clientcommands. TempRules reset
              when you log out of a world.
+/cenchant - manipulate the XP seed so that you can get the specified enchantments in an
+            enchantment table. This only works if the enchantment seed is cracked (see below).
+            First you specify the type of item you want to enchant, and then zero or more
+            enchantment specifications. There are two types of enchantment specifications:
+               `with` - This enchantment should be included in the enchantments on the item.
+               `without` - This enchantment should not be included in the enchantments on
+                           the item.
+            In addition to the enchantment, you also specify the level of the enchantment
+            you would like. This level can either be an exact number, or a range in the
+            format min..max (e.g. `1..5`).
+            Once you run the command, the enchantment cracker may automatically throw items
+            onto the ground beneath you. Do not look anywhere else while this is happening,
+            as you may not be able to pick the items back up again. Once this is done,
+            follow the instructions the command gives you.
+            Examples:
+               `/cenchant diamond_sword with looting 3 without smite 1..5 without bane_of_arthropods 1..5`
+               `/cenchant fishing_rod with lure 3 with luck_of_the_sea 3`
 
 ===== ENCHANTING PREDICTION =====
 WARNING: enchanting prediction is very cheaty and could get you banned from a server if an
