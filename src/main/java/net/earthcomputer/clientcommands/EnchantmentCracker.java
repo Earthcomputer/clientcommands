@@ -7,10 +7,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCommandBlock;
@@ -18,6 +22,7 @@ import net.minecraft.block.BlockStructure;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiEnchantment;
 import net.minecraft.enchantment.Enchantment;
@@ -32,8 +37,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerEnchantment;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBow;
@@ -47,6 +54,7 @@ import net.minecraft.item.ItemTool;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.client.CPacketEnchantItem;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.server.SPacketAdvancementInfo;
 import net.minecraft.network.play.server.SPacketEntityStatus;
@@ -62,6 +70,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class EnchantmentCracker {
 
@@ -93,7 +102,20 @@ public class EnchantmentCracker {
 	 * player's RNG and hence affect its internal state. We have to detect on the
 	 * client side when one of these things is likely to be happening. This is only
 	 * possible to do for certain if the server is running vanilla because some mod
-	 * could use the player's RNG for some miscellanous task.
+	 * could use the player's RNG for some miscellaneous task.
+	 * 
+	 * Third, we can take advantage of the fact that generating XP seeds is not the
+	 * only thing that the player RNG does, to manipulate the RNG to produce an XP
+	 * seed which we want. The /cenchant command, which calls the
+	 * manipulateEnchantments method of this class, does this. We change the state
+	 * of the player RNG in a predictable way by throwing out items of the player's
+	 * inventory. Each time the player throws out an item, rand.nextFloat() gets
+	 * called 4 times to determine the velocity of the item which is thrown out. If
+	 * we throw out n items before we then do a dummy enchantment to generate our
+	 * new enchantment seed, then we can change n to change the enchantment seed. By
+	 * simulating which XP seed each n (up to a limit) will generate, and which
+	 * enchantments that XP seed will generate, we can filter out which enchantments
+	 * we want and determine n.
 	 */
 
 	private static final Logger LOGGER = LogManager.getLogger(ClientCommandsMod.MODID);
@@ -114,6 +136,7 @@ public class EnchantmentCracker {
 	 */
 
 	private static boolean wasWet = false;
+	private static int expectedThrows = 0;
 
 	private static void registerRNGCheckEvents() {
 		EventManager.addLivingAttackListener(e -> {
@@ -163,7 +186,11 @@ public class EnchantmentCracker {
 			if (isEnchantingPredictionEnabled()) {
 				if (e.getEntity() instanceof EntityItem && e.getEntity().getEntityBoundingBox()
 						.intersects(Minecraft.getMinecraft().player.getEntityBoundingBox())) {
-					resetCracker("drop item");
+					if (expectedThrows == 0) {
+						resetCracker("drop item");
+					} else {
+						expectedThrows--;
+					}
 				}
 			}
 		});
@@ -431,7 +458,7 @@ public class EnchantmentCracker {
 			lines.add("XP seed: " + String.format("%08X", possibleXPSeeds.iterator().next()));
 		} else if (crackState == EnumCrackState.CRACKING_ENCH_SEED) {
 			lines.add("Possible XP seeds: " + possibleXPSeeds.size());
-		} else if (crackState == EnumCrackState.CRACKING) {
+		} else if (crackState == EnumCrackState.CRACKING && !possiblePlayerRandSeeds.isEmpty()) {
 			lines.add("Possible player RNG seeds: " + possiblePlayerRandSeeds.size());
 		}
 
@@ -475,6 +502,7 @@ public class EnchantmentCracker {
 	private static int windowPropertyUpdatesUntilXPSeedUpdate = -1;
 	private static Set<Long> possiblePlayerRandSeeds = new HashSet<>(1 << 16);
 	private static Random playerRand = new Random();
+	private static boolean doneEnchantment = false;
 
 	private static void registerLogicEvents() {
 		TempRules.ENCHANTING_PREDICTION.addValueChangeListener(e -> {
@@ -541,6 +569,7 @@ public class EnchantmentCracker {
 				Packet<?> packet = e.getPacket();
 				if (packet instanceof CPacketEnchantItem) {
 					onEnchantedItem();
+					doneEnchantment = true;
 				}
 			}
 		});
@@ -647,7 +676,7 @@ public class EnchantmentCracker {
 			return;
 		}
 
-		long newSeedHigh = (long) enchantmentSeed << 16;
+		long newSeedHigh = ((long) enchantmentSeed << 16) & 0x0000_ffff_ffff_0000L;
 		if (possiblePlayerRandSeeds.isEmpty() && crackState != EnumCrackState.INVALID) {
 			// add initial 2^16 possibilities
 			for (int lowBits = 0; lowBits < 65536; lowBits++) {
@@ -693,6 +722,174 @@ public class EnchantmentCracker {
 		} else {
 			resetCracker();
 			onFirstXPSeed = false;
+		}
+	}
+
+	// ENCHANTMENT MANIPULATION
+	/*
+	 * This section is involved in actually manipulating the enchantments and the XP
+	 * seed
+	 */
+
+	private static EnchantManipulationStatus manipulateEnchantmentsSanityCheck(EntityPlayer player) {
+		if (TempRules.ENCHANTING_CRACK_STATE.getValue() != EnumCrackState.CRACKED) {
+			return EnchantManipulationStatus.NOT_CRACKED;
+		} else if (!player.onGround) {
+			return EnchantManipulationStatus.NOT_ON_GROUND;
+		} else if (player.inventoryContainer.getInventory().stream().allMatch(ItemStack::isEmpty)) {
+			return EnchantManipulationStatus.EMPTY_INVENTORY;
+		} else {
+			return EnchantManipulationStatus.OK;
+		}
+	}
+
+	public static EnchantManipulationStatus manipulateEnchantments(Item item,
+			Predicate<List<EnchantmentData>> enchantmentsPredicate) {
+		EntityPlayerSP player = Minecraft.getMinecraft().player;
+
+		EnchantManipulationStatus status = manipulateEnchantmentsSanityCheck(player);
+		if (status != EnchantManipulationStatus.OK) {
+			return status;
+		}
+
+		ItemStack stack = new ItemStack(item);
+		long seed = ReflectionHelper.<AtomicLong, Random>getPrivateValue(Random.class, playerRand, "seed").get();
+		// -2: not found; -1: no dummy enchantment needed; >= 0: number of times needed
+		// to throw out item before dummy enchantment
+		int timesNeeded = -2;
+		int bookshelvesNeeded = 0;
+		int slot = 0;
+		int[] enchantLevels = new int[3];
+		outerLoop: for (int i = -1; i < 1000; i++) {
+			int xpSeed = (int) ((i == -1 ? seed : ((seed * MULTIPLIER + ADDEND) & MASK)) >>> 16);
+			Random rand = new Random();
+			for (bookshelvesNeeded = 0; bookshelvesNeeded <= 15; bookshelvesNeeded++) {
+				rand.setSeed(xpSeed);
+				for (slot = 0; slot < 3; slot++) {
+					int level = EnchantmentHelper.calcItemStackEnchantability(rand, slot, bookshelvesNeeded, stack);
+					if (level < slot + 1) {
+						level = 0;
+					}
+					enchantLevels[slot] = level;
+				}
+				for (slot = 0; slot < 3; slot++) {
+					List<EnchantmentData> enchantments = getEnchantmentList(rand, xpSeed, stack, slot,
+							enchantLevels[slot]);
+					if (enchantmentsPredicate.test(enchantments)) {
+						timesNeeded = i;
+						break outerLoop;
+					}
+				}
+			}
+
+			if (i != -1) {
+				for (int j = 0; j < 4; j++) {
+					seed = (seed * MULTIPLIER + ADDEND) & MASK;
+				}
+			}
+		}
+		if (timesNeeded == -2) {
+			return EnchantManipulationStatus.IMPOSSIBLE;
+		}
+
+		if (timesNeeded != -1) {
+			if (timesNeeded != 0) {
+				player.setLocationAndAngles(player.posX, player.posY, player.posZ, player.rotationYaw, 90);
+				// sync rotation to server before we throw any items
+				player.connection.sendPacket(new CPacketPlayer.Rotation(player.rotationYaw, 90, player.onGround));
+			}
+			for (int i = 0; i < timesNeeded; i++) {
+				// throw the item
+				TaskManager.addLongTask(new LongTask() {
+					private boolean firstTick = true;
+
+					@Override
+					protected void taskTick() {
+						if (firstTick) {
+							EnchantManipulationStatus status = manipulateEnchantmentsSanityCheck(player);
+							if (status != EnchantManipulationStatus.OK) {
+								if (status != EnchantManipulationStatus.EMPTY_INVENTORY) {
+									player.sendMessage(
+											new TextComponentString(TextFormatting.RED + status.getMessage()));
+									TaskManager.abortTasks();
+									return;
+								}
+							}
+							Slot matchingSlot = player.inventoryContainer.inventorySlots.stream()
+									.filter(Slot::getHasStack).findAny().orElse(null);
+							if (matchingSlot == null) {
+								return;
+							}
+							expectedThrows++;
+							for (int i = 0; i < 4; i++) {
+								playerRand.nextInt();
+							}
+							Minecraft.getMinecraft().playerController.windowClick(player.inventoryContainer.windowId,
+									matchingSlot.slotNumber, 0, ClickType.THROW, player);
+							firstTick = false;
+						} else {
+							setFinished();
+						}
+					}
+				});
+			}
+			// dummy enchantment
+			TaskManager.addLongTask(new LongTask() {
+				@Override
+				public void start() {
+					player.sendMessage(new TextComponentString("Do a dummy enchantment"));
+					doneEnchantment = false;
+				}
+
+				@Override
+				protected void taskTick() {
+					if (doneEnchantment) {
+						setFinished();
+					}
+				}
+
+				@Override
+				protected int getTimeout() {
+					return Integer.MAX_VALUE;
+				}
+			});
+		}
+		final int bookshelvesNeeded_f = bookshelvesNeeded;
+		final int slot_f = slot;
+		TaskManager.addLongTask(new LongTask() {
+			@Override
+			public void start() {
+				player.sendMessage(new TextComponentString(TextFormatting.BOLD + "Your enchantment seed is ready"));
+				player.sendMessage(new TextComponentString("Bookshelves needed: " + bookshelvesNeeded_f));
+				player.sendMessage(new TextComponentString("In slot: " + (slot_f + 1)));
+				setFinished();
+			}
+
+			@Override
+			protected void taskTick() {
+			}
+		});
+
+		return EnchantManipulationStatus.OK;
+	}
+
+	public static enum EnchantManipulationStatus {
+		// @formatter:off
+		OK(null),
+		NOT_CRACKED("You need to be in crack state CRACKED"),
+		NOT_ON_GROUND("You are not on the ground"),
+		EMPTY_INVENTORY("You have an empty inventory"),
+		IMPOSSIBLE("It's impossible or would take too long to get those enchantments");
+		// @formatter:on
+
+		private String message;
+
+		private EnchantManipulationStatus(String message) {
+			this.message = message;
+		}
+
+		public String getMessage() {
+			return message;
 		}
 	}
 

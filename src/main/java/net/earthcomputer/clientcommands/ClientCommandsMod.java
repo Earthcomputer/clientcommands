@@ -4,6 +4,7 @@ import java.util.Map;
 
 import net.earthcomputer.clientcommands.command.CommandAbort;
 import net.earthcomputer.clientcommands.command.CommandCClear;
+import net.earthcomputer.clientcommands.command.CommandCEnchant;
 import net.earthcomputer.clientcommands.command.CommandCGive;
 import net.earthcomputer.clientcommands.command.CommandCHelp;
 import net.earthcomputer.clientcommands.command.CommandCalc;
@@ -69,6 +70,7 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandNote());
 		ClientCommandHandler.instance.registerCommand(new CommandTempRule());
 		ClientCommandHandler.instance.registerCommand(new CommandSimGen());
+		ClientCommandHandler.instance.registerCommand(new CommandCEnchant());
 	}
 
 	private void registerEventStuff() {

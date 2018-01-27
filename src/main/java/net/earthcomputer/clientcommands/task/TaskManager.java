@@ -80,7 +80,7 @@ public class TaskManager {
 					currentLongTask = null;
 				} else {
 					currentLongTask.tick();
-					if (currentLongTask.isFinished()) {
+					if (currentLongTask != null && currentLongTask.isFinished()) {
 						currentLongTask.cleanup();
 						currentLongTask = null;
 					} else {
