@@ -75,6 +75,7 @@ public class ClientCommandsMod {
 
 	private void registerEventStuff() {
 		EnchantmentCracker.registerEvents();
+		ToolDamageManager.registerEvents();
 
 		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 

@@ -16,9 +16,6 @@ import org.apache.logging.log4j.Logger;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockCommandBlock;
-import net.minecraft.block.BlockStructure;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -32,7 +29,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
@@ -43,32 +39,21 @@ import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBow;
-import net.minecraft.item.ItemFishingRod;
-import net.minecraft.item.ItemHoe;
-import net.minecraft.item.ItemShears;
-import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
-import net.minecraft.item.ItemTool;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.client.CPacketEnchantItem;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.server.SPacketAdvancementInfo;
 import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketWindowProperty;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.IShearable;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
@@ -172,13 +157,6 @@ public class EnchantmentCracker {
 					frostWalkerCheck(player,
 							EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FROST_WALKER, player));
 				}
-				if (player.isElytraFlying()) {
-					// an elytra could have unbreaking or break
-					ItemStack elytra = player.inventory.armorInventory.get(2);
-					if (!elytra.isEmpty() && elytra.getItem() == Items.ELYTRA) {
-						itemUseCheck(player.inventory.armorInventory.get(2), 1);
-					}
-				}
 				wasWet = player.isWet();
 			}
 		});
@@ -199,60 +177,15 @@ public class EnchantmentCracker {
 				resetCracker("anvil use");
 			}
 		});
-		EventManager.addUseBlockListener(e -> {
-			if (isEnchantingPredictionEnabled()) {
-				ItemStack stack = e.getItemStack();
-				if (stack.isEmpty()) {
-					return;
-				}
-				Item item = stack.getItem();
-
-				if (e.getWorld().getBlockState(e.getPos()).getBlock() == Blocks.TNT) {
-					if (item == Items.FLINT_AND_STEEL) {
-						itemUseCheck(stack, 1);
-					}
-				}
-				if (e.getEntityPlayer().canPlayerEdit(e.getPos().offset(e.getFace()), e.getFace(), stack)) {
-					if (item instanceof ItemHoe || item == Items.FLINT_AND_STEEL) {
-						// tilling the ground or setting it on fire
-						itemUseCheck(stack, 1);
-					} else if (item instanceof ItemSpade) {
-						// creating a grass path
-						if (e.getFace() != EnumFacing.DOWN
-								&& e.getWorld().getBlockState(e.getPos().up()).getMaterial() == Material.AIR
-								&& e.getWorld().getBlockState(e.getPos()).getBlock() == Blocks.GRASS) {
-							itemUseCheck(stack, 1);
-						}
-					}
-				}
-			}
-		});
-		EventManager.addAttackBlockListener(e -> {
-			if (isEnchantingPredictionEnabled()) {
-				// instant-mined blocks
-				if (!Minecraft.getMinecraft().playerController.isInCreativeMode()) {
-					IBlockState hitState = e.getWorld().getBlockState(e.getPos());
-					if (hitState.getMaterial() != Material.AIR && hitState
-							.getPlayerRelativeBlockHardness(e.getEntityPlayer(), e.getWorld(), e.getPos()) >= 1) {
-						onDestroyBlock(e.getWorld(), e.getPos(), e.getEntityPlayer());
-					}
-				}
-			}
-		});
 		EventManager.addUseItemListener(e -> {
 			if (isEnchantingPredictionEnabled()) {
 				ItemStack stack = e.getItemStack();
 				if (stack.isEmpty()) {
 					return;
 				}
-				Item item = stack.getItem();
 
 				if (e.getItemStack().getItemUseAction() == EnumAction.EAT) {
 					resetCracker("eating");
-				} else if (item == Items.CARROT_ON_A_STICK) {
-					itemUseCheck(stack, 7);
-				} else if (item instanceof ItemFishingRod) {
-					itemUseCheck(stack, 5); // assume 5 (the max in vanilla)
 				}
 			}
 		});
@@ -268,40 +201,6 @@ public class EnchantmentCracker {
 							resetCracker("bane of arthropods");
 						}
 					}
-					Item heldItem = heldStack.getItem();
-					if (heldItem instanceof ItemSword || heldItem instanceof ItemHoe) {
-						itemUseCheck(heldStack, 1);
-					} else if (heldItem instanceof ItemTool) {
-						itemUseCheck(heldStack, 2);
-					}
-				}
-			}
-		});
-		EventManager.addUseEntityListener(e -> {
-			if (isEnchantingPredictionEnabled()) {
-				ItemStack usedStack = e.getItemStack();
-				if (!usedStack.isEmpty()) {
-					if (usedStack.getItem() instanceof ItemShears) {
-						if (e.getTarget() instanceof IShearable) {
-							if (((IShearable) e.getTarget()).isShearable(usedStack, e.getWorld(),
-									new BlockPos(e.getTarget()))) {
-								// shearing sheep, snow golems
-								itemUseCheck(usedStack, 1);
-							}
-						}
-					}
-					if (usedStack.getItem() == Items.FLINT_AND_STEEL) {
-						if (e.getTarget() instanceof EntityCreeper) {
-							itemUseCheck(usedStack, 1);
-						}
-					}
-				}
-			}
-		});
-		EventManager.addFireBowListener(e -> {
-			if (isEnchantingPredictionEnabled()) {
-				if (e.hasAmmo() && ItemBow.getArrowVelocity(e.getCharge()) >= 0.1) {
-					itemUseCheck(e.getBow(), 1);
 				}
 			}
 		});
@@ -333,14 +232,15 @@ public class EnchantmentCracker {
 					if (message.startsWith("/") && message.substring(1).trim().startsWith("give")) {
 						resetCracker("give command");
 					}
-				} else if (packet instanceof CPacketPlayerDigging) {
-					CPacketPlayerDigging digPacket = (CPacketPlayerDigging) packet;
-					if (digPacket.getAction() == CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK) {
-						// the player has completed mining a block
-						Minecraft mc = Minecraft.getMinecraft();
-						onDestroyBlock(mc.world, digPacket.getPosition(), mc.player);
-					}
 				}
+			}
+		});
+		EventManager.addPostDamageItemListener(e -> {
+			ItemStack heldStack = e.getItemStack();
+			if (EnchantmentHelper.getEnchantments(heldStack).containsKey(Enchantments.UNBREAKING)) {
+				resetCracker("unbreaking item");
+			} else if (heldStack.getItemDamage() + e.getDamageAmount() > heldStack.getMaxDamage() + 1) {
+				resetCracker("broke item");
 			}
 		});
 	}
@@ -369,54 +269,6 @@ public class EnchantmentCracker {
 							return;
 						}
 					}
-				}
-			}
-		}
-	}
-
-	private static void itemUseCheck(ItemStack heldStack, int damageAmount) {
-		if (EnchantmentHelper.getEnchantments(heldStack).containsKey(Enchantments.UNBREAKING)) {
-			resetCracker("unbreaking item");
-		} else if (heldStack.getItemDamage() + damageAmount > heldStack.getMaxDamage() + 1) {
-			resetCracker("broke item");
-		}
-	}
-
-	private static void onDestroyBlock(World world, BlockPos pos, EntityPlayer player) {
-		IBlockState state = world.getBlockState(pos);
-		Block block = state.getBlock();
-		ItemStack stack = player.getHeldItemMainhand();
-		Minecraft mc = Minecraft.getMinecraft();
-
-		// perform necessary extra checks
-		if (mc.playerController.getCurrentGameType().hasLimitedInteractions()) {
-			if (mc.playerController.getCurrentGameType() == GameType.SPECTATOR) {
-				return;
-			}
-			if (!player.isAllowEdit()) {
-				if (stack.isEmpty()) {
-					return;
-				}
-				if (!stack.canDestroy(block)) {
-					return;
-				}
-			}
-		}
-		if (block instanceof BlockCommandBlock || block instanceof BlockStructure) {
-			return;
-		}
-		if (state.getMaterial() == Material.AIR) {
-			return;
-		}
-
-		// perform the item use check on the item if necessary
-		if (!stack.isEmpty()) {
-			Item item = stack.getItem();
-			if (item instanceof ItemShears) {
-				itemUseCheck(stack, 1);
-			} else if (item instanceof ItemSword || item instanceof ItemTool) {
-				if (world.getBlockState(pos).getBlockHardness(world, pos) != 0) {
-					itemUseCheck(stack, item instanceof ItemSword ? 1 : 2);
 				}
 			}
 		}

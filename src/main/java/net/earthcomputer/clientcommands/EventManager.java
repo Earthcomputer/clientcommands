@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import net.earthcomputer.clientcommands.ToolDamageManager.ToolDamagedEvent;
 import net.earthcomputer.clientcommands.command.CommandRelog;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.EnumPacketDirection;
@@ -15,10 +16,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
@@ -320,6 +321,21 @@ public class EventManager {
 		}
 	}
 
+	// STOP USE ITEM
+
+	private static Listeners<LivingEntityUseItemEvent.Stop> stopUseItemListeners = new Listeners<>();
+
+	public static void addStopUseItemListener(Consumer<LivingEntityUseItemEvent.Stop> listener) {
+		stopUseItemListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onStopUseItem(LivingEntityUseItemEvent.Stop e) {
+		if (e.getEntity() == Minecraft.getMinecraft().player) {
+			stopUseItemListeners.invoke(e);
+		}
+	}
+
 	// USE ENTITY
 
 	private static Listeners<EntityInteract> useEntityListeners = new Listeners<>();
@@ -350,19 +366,30 @@ public class EventManager {
 		}
 	}
 
-	// BREAK ITEM
+	// PRE DAMAGE ITEM
 
-	private static Listeners<PlayerDestroyItemEvent> breakItemListeners = new Listeners<>();
+	private static Listeners<ToolDamagedEvent.Pre> preDamageItemListeners = new Listeners<>();
 
-	public static void addBreakItemListener(Consumer<PlayerDestroyItemEvent> listener) {
-		breakItemListeners.add(listener);
+	public static void addPreDamageItemListener(Consumer<ToolDamagedEvent.Pre> listener) {
+		preDamageItemListeners.add(listener);
 	}
 
 	@SubscribeEvent
-	public void onBreakItem(PlayerDestroyItemEvent e) {
-		if (e.getEntityPlayer() == Minecraft.getMinecraft().player) {
-			breakItemListeners.invoke(e);
-		}
+	public void onPreDamageItem(ToolDamagedEvent.Pre e) {
+		preDamageItemListeners.invoke(e);
+	}
+
+	// POST DAMAGE ITEM
+
+	private static Listeners<ToolDamagedEvent.Post> postDamageItemListeners = new Listeners<>();
+
+	public static void addPostDamageItemListener(Consumer<ToolDamagedEvent.Post> listener) {
+		postDamageItemListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onPostDamageItem(ToolDamagedEvent.Post e) {
+		postDamageItemListeners.invoke(e);
 	}
 
 	// IMPLEMENTATION
