@@ -40,7 +40,6 @@ import net.minecraftforge.common.IShearable;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
 
 public class ToolDamageManager {
 
@@ -121,7 +120,7 @@ public class ToolDamageManager {
 				int damage = getDestroyBlockDamage(e.getWorld(), e.getPos(), e.getEntityPlayer());
 				if (damage != 0) {
 					if (postToolDamagedPre(e.getEntityPlayer(), e.getItemStack(), damage)) {
-						e.setResult(Event.Result.DENY);
+						e.setCanceled(true);
 						packetsToBlock.add(CPacketPlayerDigging.class);
 					} else if (hitState.getMaterial() != Material.AIR && hitState
 							.getPlayerRelativeBlockHardness(e.getEntityPlayer(), e.getWorld(), e.getPos()) >= 1) {
@@ -319,7 +318,7 @@ public class ToolDamageManager {
 				return 1;
 			} else if (item instanceof ItemSword || item instanceof ItemTool) {
 				if (world.getBlockState(pos).getBlockHardness(world, pos) != 0) {
-					return item instanceof ItemSword ? 1 : 2;
+					return item instanceof ItemSword ? 2 : 1;
 				}
 			}
 		}

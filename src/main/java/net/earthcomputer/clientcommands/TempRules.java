@@ -26,6 +26,8 @@ public class TempRules {
 			EnchantmentCracker.EnumCrackState.UNCRACKED);
 	public static final Rule<Double> BLOCK_REACH_DISTANCE = registerRule("blockReachDistance", DataType.DOUBLE.min(0),
 			5.0);
+	public static final Rule<Boolean> TOOL_BREAK_PROTECTION = registerRule("toolBreakProtection", DataType.BOOLEAN,
+			Boolean.FALSE);
 
 	static {
 		ENCHANTING_CRACK_STATE.setReadOnly();

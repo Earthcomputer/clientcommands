@@ -16,8 +16,6 @@ import net.earthcomputer.clientcommands.command.CommandNote;
 import net.earthcomputer.clientcommands.command.CommandRelog;
 import net.earthcomputer.clientcommands.command.CommandSimGen;
 import net.earthcomputer.clientcommands.command.CommandTempRule;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -48,10 +46,6 @@ public class ClientCommandsMod {
 	}
 
 	private void initTempRules() {
-		TempRules.BLOCK_REACH_DISTANCE.addValueChangeListener(e -> {
-			Minecraft.getMinecraft().player.getAttributeMap().getAttributeInstance(EntityPlayer.REACH_DISTANCE)
-					.setBaseValue(e.getNewValue());
-		});
 
 		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 	}
@@ -76,6 +70,7 @@ public class ClientCommandsMod {
 	private void registerEventStuff() {
 		EnchantmentCracker.registerEvents();
 		ToolDamageManager.registerEvents();
+		TempRulesImpl.registerEvents();
 
 		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 
