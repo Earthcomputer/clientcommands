@@ -95,6 +95,13 @@ Common problems with setup:
             Examples:
                `/cenchant diamond_sword with looting 3 without smite 1..5 without bane_of_arthropods 1..5`
                `/cenchant fishing_rod with lure 3 with luck_of_the_sea 3`
+/ctime - queries or changes the time client-side. All subcommands except `mock` and `unmock`
+         only query the time. Using `/ctime mock <daytime> [doDaylightCycle]` starts mocking
+         the time, and `/ctime unmock` stops mocking the time. Mocking the time means
+         making it appear to be a certain time on the client-side only, while the server-
+         side time (which is the time that matters for mob spawning etc.) is unaffected.
+         `/ctime mock` is intended for builders to inspect their builds at different times of
+         day.
 
 ===== ENCHANTING PREDICTION =====
 WARNING: enchanting prediction is very cheaty and could get you banned from a server if an
