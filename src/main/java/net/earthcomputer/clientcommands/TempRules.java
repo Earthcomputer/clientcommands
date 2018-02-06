@@ -28,9 +28,11 @@ public class TempRules {
 			5.0);
 	public static final Rule<Boolean> TOOL_BREAK_PROTECTION = registerRule("toolBreakProtection", DataType.BOOLEAN,
 			Boolean.FALSE);
+	public static final Rule<Boolean> MOCKING_TIME = registerRule("mockingTime", DataType.BOOLEAN, Boolean.FALSE);
 
 	static {
 		ENCHANTING_CRACK_STATE.setReadOnly();
+		MOCKING_TIME.setReadOnly();
 	}
 
 	public static boolean hasRule(String name) {

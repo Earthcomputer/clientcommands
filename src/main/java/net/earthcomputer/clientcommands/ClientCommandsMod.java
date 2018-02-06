@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.command.CommandCClear;
 import net.earthcomputer.clientcommands.command.CommandCEnchant;
 import net.earthcomputer.clientcommands.command.CommandCGive;
 import net.earthcomputer.clientcommands.command.CommandCHelp;
+import net.earthcomputer.clientcommands.command.CommandCTime;
 import net.earthcomputer.clientcommands.command.CommandCalc;
 import net.earthcomputer.clientcommands.command.CommandFind;
 import net.earthcomputer.clientcommands.command.CommandFindBlock;
@@ -65,6 +66,7 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandTempRule());
 		ClientCommandHandler.instance.registerCommand(new CommandSimGen());
 		ClientCommandHandler.instance.registerCommand(new CommandCEnchant());
+		ClientCommandHandler.instance.registerCommand(new CommandCTime());
 	}
 
 	private void registerEventStuff() {
