@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class DelegatingContainer extends Container {
 
@@ -14,7 +13,7 @@ public class DelegatingContainer extends Container {
 		this.windowId = delegate.windowId;
 		this.inventoryItemStacks = delegate.inventoryItemStacks;
 		this.inventorySlots = delegate.inventorySlots;
-		this.listeners = ReflectionHelper.getPrivateValue(Container.class, delegate, "listeners", "field_75149_d");
+		this.listeners = delegate.listeners;
 	}
 
 	@Override

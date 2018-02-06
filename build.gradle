@@ -22,7 +22,8 @@ compileJava {
 jar {
 	manifest {
 		attributes 'FMLCorePlugin': 'net.earthcomputer.clientcommands.core.ClientCommandsLoadingPlugin',
-				'FMLCorePluginContainsFMLMod': true
+				'FMLCorePluginContainsFMLMod': true,
+				'FMLAT': 'clientcommands_at.cfg'
 	}
 }
 
