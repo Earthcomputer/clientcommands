@@ -28,9 +28,13 @@ public class CommandCHelp extends ClientCommandBase {
 			String message = e.getMessage();
 			if (e.getMessage().startsWith("/")) {
 				message = message.substring(1).trim();
-				if (message.startsWith("help ")) {
-					String[] args = message.split(" ");
-					if (args.length > 1) {
+				String[] args = message.split(" ");
+				if ("help".equals(args[0])) {
+					if (args.length == 1) {
+						TextComponentTranslation chatMsg = new TextComponentTranslation("commands.chelp.helpHint");
+						chatMsg.getStyle().setColor(TextFormatting.GREEN);
+						Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(chatMsg);
+					} else {
 						if (ClientCommandHandler.instance.getCommands().containsKey(args[1])) {
 							TextComponentString hint = new TextComponentString("/chelp " + args[1]);
 							hint.getStyle().setUnderlined(Boolean.TRUE);
@@ -44,16 +48,6 @@ public class CommandCHelp extends ClientCommandBase {
 													new TextComponentTranslation("commands.chelp.redirect.right")));
 						}
 					}
-				}
-			}
-		});
-		EventManager.addChatReceivedListener(e -> {
-			if (e.getMessage() instanceof TextComponentTranslation) {
-				String key = ((TextComponentTranslation) e.getMessage()).getKey();
-				if ("commands.help.footer".equals(key)) {
-					TextComponentTranslation message = new TextComponentTranslation("commands.chelp.helpHint");
-					message.getStyle().setColor(TextFormatting.GREEN);
-					Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(message);
 				}
 			}
 		});
