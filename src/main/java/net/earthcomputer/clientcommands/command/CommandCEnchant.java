@@ -20,7 +20,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandCEnchant extends ClientCommandBase {
 
@@ -31,7 +31,7 @@ public class CommandCEnchant extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/cenchant <item> [(<with|without> <enchantment> <level>)...]";
+		return "commands.cenchant.usage";
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class CommandCEnchant extends ClientCommandBase {
 				en = Enchantment.getEnchantmentByLocation(args[i + 1]);
 			}
 			if (en == null) {
-				throw new CommandException("Unknown enchantment " + args[i + 1]);
+				throw new CommandException("commands.cenchant.unknownEnchantment", args[i + 1]);
 			}
 			Enchantment enchantment = en;
 
@@ -80,9 +80,9 @@ public class CommandCEnchant extends ClientCommandBase {
 
 		EnchantManipulationStatus status = EnchantmentCracker.manipulateEnchantments(item, enchantmentsPredicate);
 		if (status == EnchantManipulationStatus.OK) {
-			sender.sendMessage(new TextComponentString("Starting enchantment manipulation"));
+			sender.sendMessage(new TextComponentTranslation("commands.cenchant.success"));
 		} else {
-			throw new CommandException(status.getMessage());
+			throw new CommandException(status.getTranslation());
 		}
 
 	}

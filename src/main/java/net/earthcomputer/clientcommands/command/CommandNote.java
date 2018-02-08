@@ -18,7 +18,7 @@ public class CommandNote extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/cnote <message>";
+		return "commands.cnote.usage";
 	}
 
 }

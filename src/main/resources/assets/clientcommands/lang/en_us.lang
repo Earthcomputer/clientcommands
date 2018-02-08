@@ -1,0 +1,148 @@
+clientcommands.task.timedOut=LongTask timed out, aborting all tasks
+clientcommands.task.alreadyRunning=Looks like there is already a task running! Try /cabort.
+
+enchCrack.state=Crack State: %s
+enchCrack.state.uncracked=Uncracked
+enchCrack.state.crackingEnchSeed=Cracking XP Seed
+enchCrack.state.crackedEnchSeed=Cracked XP Seed
+enchCrack.state.cracking=Cracking
+enchCrack.state.cracked=Cracked
+enchCrack.state.invalid=Invalid
+
+enchCrack.enchantments=Enchantments:
+enchCrack.clues=Clues:
+enchCrack.slot=Slot %d:
+
+enchCrack.reset=Restarting enchantment cracking. Reason: %s
+enchCrack.reset.playerHurt=Player Hurt
+enchCrack.reset.sprint=Sprinted
+enchCrack.reset.enterWater=Entered Water
+enchCrack.reset.swim=Swum
+enchCrack.reset.potion=Potion Effect Active
+enchCrack.reset.mending=Mended Item
+enchCrack.reset.respiration=Respiration Helmet Used
+enchCrack.reset.dropItem=Dropped Item
+enchCrack.reset.anvil=Anvil Used
+enchCrack.reset.food=Eaten
+enchCrack.reset.baneOfArthropods=Hit Arthropod with Bane of Arthropods
+enchCrack.reset.advancement=Gained Advancement
+enchCrack.reset.shield=Blocked with Shield
+enchCrack.reset.give=Give Command Used
+enchCrack.reset.unbreaking=Unbreaking Item Used
+enchCrack.reset.itemBreak=Item Broken
+enchCrack.reset.frostWalker=Frost Walker Used
+
+enchCrack.xpSeed.one=XP Seed: %08X
+enchCrack.xpSeed.many=Possible XP seeds: %d
+enchCrack.playerRNGSeed.many=Possible player RNG seeds: %d
+
+enchCrack.insn.dummy=Do a dummy enchantment
+enchCrack.insn.ready=Your enchantment seed is ready
+enchCrack.insn.bookshelves=Bookshelves needed: %d
+enchCrack.insn.slot=In slot: %d
+
+enchCrack.manipStatus.notCracked=You need to be in crack state Cracked
+enchCrack.manipStatus.notOnGround=You are not on solid ground
+enchCrack.manipStatus.emptyInventory=Your inventory is empty
+enchCrack.manipStatus.impossible=It's impossible or would take too long to get those enchantments
+
+
+tempRules.string.invalid=%s is not accepted
+tempRules.enum.invalid=%s is an invalid enum
+tempRules.toolBreakProtection.protected=Protected your tool from breaking
+
+
+commands.client.blockpos=(%d, %d, %d)
+commands.client.notCreative=This action requires creative mode
+
+commands.cabort.success=Successfully aborted the current task
+commands.cabort.noTask=No task to abort
+commands.cabort.usage=/cabort
+
+commands.ccalc.mathError=Math error: %s
+commands.ccalc.syntaxError=Syntax error
+commands.ccalc.usage=/ccalc <expression>
+
+commands.cclear.usage=/cclear [item] [data] [maxCount] [dataTag]
+
+commands.cenchant.success=Starting enchantment manipulation
+commands.cenchant.unknownEnchantment=Unknown enchantment %s
+commands.cenchant.usage=/cenchant <item> [(<with|without> <enchantment> <level>)...]
+
+commands.cgive.noPlayer=This command must be executed by a player
+commands.cgive.fullInventory=Your inventory is full
+commands.cgive.notAll=Failed to give you all the items
+commands.cgive.usage=/cgive <item> [count] [meta] [nbt]
+
+commands.chelp.usage=/chelp [page|command name]
+
+commands.ctime.daytime=Daytime: %d ticks (%s)
+commands.ctime.day=Day: %d
+commands.ctime.gametime=Game time: %d ticks (%s)
+commands.ctime.infoHeader====== TIME INFO =====
+commands.ctime.moon=Moon phase: %d, %s
+commands.ctime.moon.0=Full Moon
+commands.ctime.moon.1=Waning Gibbous
+commands.ctime.moon.2=Last Quarter
+commands.ctime.moon.3=Waning Crescent
+commands.ctime.moon.4=New Moon
+commands.ctime.moon.5=Waxing Crescent
+commands.ctime.moon.6=First Quarter
+commands.ctime.moon.7=Waxing Gibbous
+commands.ctime.mobsBurn=Mobs can burn: %s
+commands.ctime.mobsSpawn=Mobs can spawn: %s
+commands.ctime.doDaylightCycle=Do daylight cycle: %s
+commands.ctime.mock.success=Mocking from time %d. Use /ctime unmock to return to normal
+commands.ctime.unmock.success=No longer mocking the time
+commands.ctime.mock.usage=/ctime mock <daytime> [doDaylightCycle]
+commands.ctime.usage=/ctime [daytime|day|gametime|info|mock|unmock] [...]
+
+commands.cfind.success=%d entities matched your query
+commands.cfind.found.left=Found %1$s at
+commands.cfind.found.right=, %2$.2f blocks away
+commands.cfind.unknownEntity=Unknwon entity type %s
+commands.cfind.unknownArg=Unknown argument %s
+commands.cfind.order.unknown=Unknown arg value for order: %s
+commands.cfind.noMatch=No entities matched your query
+commands.cfind.usage=/cfind <type> [(<arg> <value>)...]
+
+commands.cfindblock.success.left=Closest match is at 
+commands.cfindblock.success.right=, %1$.2f blocks away
+commands.cfindblock.unknownRadiusType=Unknown radius type %s
+commands.cfindblock.notFound=No such block found
+commands.cfindblock.usage=/cfindblock <block> [data|properties] [radius] [radiustype]
+
+commands.cfinditem.success=Found %d %s
+commands.cfinditem.match.left=Matching item found at 
+commands.cfinditem.match.right=
+commands.cfinditem.alreadyPresent=It's already in your inventory you dummy!
+commands.cfinditem.sneaking=Can't access containers while you're sneaking
+commands.cfinditem.noMatch=No matching items found
+commands.cfinditem.unableToOpen=Unable to open a container
+commands.cfinditem.usage=/cfinditem <item> [damage] [nbt]
+
+commands.clook.block.usage=/clook block <x> <y> <z>
+commands.clook.angles.usage=/clook angles <yaw> <pitch>
+commands.clook.cardinal.usage=/clook cardinal <west|east|down|up|north|south>
+commands.clook.usage=/clook <block|angles|cardinal> ...
+
+commands.cnote.usage=/cnote <message>
+
+commands.crelog.localWorld=This command only works on a remote server
+commands.crelog.errorScreen.line1=Auto-Relog
+commands.crelog.errorScreen.line2=Failed to connect
+commands.crelog.usage=/crelog
+
+commands.csimgen.deprecated=Warning: /csimgen is deprecated
+commands.csimgen.usage=/csimgen <generator> <times> [<x> <y> <z>]
+
+commands.ctemprule.unknownRule=No such TempRule as %s
+commands.ctemprule.readOnly=Cannot modify read-only TempRule %s
+commands.ctemprule.list.success=%d TempRules available
+commands.ctemprule.set.success=TempRule %s has been updated to %s
+commands.ctemprule.set.usage=/ctemprule set <rule> <value>
+commands.ctemprule.get.success=%s = %s
+commands.ctemprule.get.usage=/ctemprule get <rule>
+commands.ctemprule.reset.success=TempRule %s has been reset to %s
+commands.ctemprule.reset.usage=/ctemprule reset <rule>
+commands.ctemprule.usage=/ctemprule <get|set|reset|list> ...

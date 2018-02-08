@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.multiplayer.GuiConnecting;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
@@ -21,7 +22,7 @@ public class CommandRelog extends ClientCommandBase {
 	@Override
 	public void execute(MinecraftServer arg0, ICommandSender arg1, String[] arg2) throws CommandException {
 		if (Minecraft.getMinecraft().isIntegratedServerRunning()) {
-			throw new CommandException("This command only works on a remote server");
+			throw new CommandException("commands.crelog.localWorld");
 		}
 
 		isRelogging = true;
@@ -29,7 +30,8 @@ public class CommandRelog extends ClientCommandBase {
 		ServerData serverData = mc.getCurrentServerData();
 		mc.world.sendQuittingDisconnectingPacket();
 		mc.loadWorld(null);
-		mc.displayGuiScreen(new GuiConnecting(new GuiErrorScreen("Auto-Relog", "Failed to connect"), mc, serverData));
+		mc.displayGuiScreen(new GuiConnecting(new GuiErrorScreen(I18n.format("commands.crelog.errorScreen.line1"),
+				I18n.format("commands.crelog.errorScreen.line2")), mc, serverData));
 		// At some point in the relogging process, mc.displayGuiScreen(null) is called,
 		// which happens to open the main menu screen. We don't want this, so an
 		// unfortunate hacky solution is to block it once.
@@ -52,8 +54,8 @@ public class CommandRelog extends ClientCommandBase {
 	}
 
 	@Override
-	public String getUsage(ICommandSender arg0) {
-		return "/crelog";
+	public String getUsage(ICommandSender sender) {
+		return "commands.crelog.usage";
 	}
 
 }

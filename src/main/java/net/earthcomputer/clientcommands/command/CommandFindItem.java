@@ -12,6 +12,7 @@ import net.minecraft.block.BlockChest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -32,6 +33,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -65,14 +67,14 @@ public class CommandFindItem extends ClientCommandBase {
 			ItemStack stack = mc.player.inventory.getStackInSlot(i);
 			if (stack.getItem() == item && (damage == -1 || stack.getItemDamage() == damage)
 					&& (nbt == null || NBTUtil.areNBTEquals(nbt, stack.getTagCompound(), true))) {
-				sender.sendMessage(new TextComponentString("It's already in your inventory you dummy!"));
+				sender.sendMessage(new TextComponentTranslation("commands.cfinditem.alreadyPresent"));
 				return;
 			}
 		}
 
 		if (mc.player.isSneaking()) {
 			sender.sendMessage(
-					new TextComponentString(TextFormatting.RED + "Can't access inventories while you're sneaking"));
+					new TextComponentString(TextFormatting.RED + I18n.format("commands.cfinditem.sneaking")));
 			return;
 		}
 
@@ -104,10 +106,11 @@ public class CommandFindItem extends ClientCommandBase {
 			public void start() {
 				int noItemsFound = itemsFound.get();
 				if (noItemsFound == 0) {
-					sender.sendMessage(new TextComponentString(TextFormatting.RED + "No matching items found"));
+					sender.sendMessage(
+							new TextComponentString(TextFormatting.RED + I18n.format("commands.cfinditem.noMatch")));
 				} else {
-					sender.sendMessage(new TextComponentString(String.format("Found %d %s", noItemsFound,
-							new ItemStack(item, 1, damage, nbt_f).getDisplayName())));
+					sender.sendMessage(new TextComponentTranslation("commands.cfinditem.success", noItemsFound,
+							new ItemStack(item, 1, damage, nbt_f).getDisplayName()));
 				}
 				setFinished();
 			}
@@ -125,7 +128,7 @@ public class CommandFindItem extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/cfinditem <item> [damage] [nbt]";
+		return "commands.cfinditem.usage";
 	}
 
 	private static boolean shouldSearch(World world, BlockPos pos) {
@@ -190,8 +193,10 @@ public class CommandFindItem extends ClientCommandBase {
 									if (stack.getItem() == item && (damage == -1 || stack.getItemDamage() == damage)
 											&& (nbt == null
 													|| NBTUtil.areNBTEquals(nbt, stack.getTagCompound(), true))) {
-										sender.sendMessage(new TextComponentString("Matching item found at ")
-												.appendSibling(getCoordsTextComponent(pos)));
+										sender.sendMessage(new TextComponentTranslation("commands.cfinditem.match.left")
+												.appendSibling(getCoordsTextComponent(pos))
+												.appendSibling(new TextComponentTranslation(
+														"commands.cfinditem.match.right")));
 										itemsFound.set(itemsFound.get() + stack.getCount());
 									}
 								}
@@ -215,7 +220,8 @@ public class CommandFindItem extends ClientCommandBase {
 				EnumActionResult result = mc.playerController.processRightClickBlock(mc.player, mc.world, pos,
 						EnumFacing.DOWN, new Vec3d(pos), hand);
 				if (result == EnumActionResult.FAIL) {
-					sender.sendMessage(new TextComponentString(TextFormatting.RED + "Unable to open an inventory"));
+					sender.sendMessage(new TextComponentString(
+							TextFormatting.RED + I18n.format("commands.cfinditem.unableToOpen")));
 					break;
 				}
 				if (result == EnumActionResult.SUCCESS) {

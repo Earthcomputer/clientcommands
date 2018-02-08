@@ -65,8 +65,8 @@ public class CommandCClear extends ClientCommandBase {
 	}
 
 	@Override
-	public String getUsage(ICommandSender arg0) {
-		return "/cclear [item] [data] [maxCount] [dataTag]";
+	public String getUsage(ICommandSender sender) {
+		return "commands.cclear.usage";
 	}
 
 	@Override

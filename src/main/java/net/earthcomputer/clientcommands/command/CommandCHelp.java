@@ -37,7 +37,7 @@ public class CommandCHelp extends CommandHelp implements IClientCommand {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/chelp [page|command name]";
+		return "commands.chelp.usage";
 	}
 
 	@Override

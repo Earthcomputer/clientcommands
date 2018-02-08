@@ -10,6 +10,7 @@ import java.util.List;
 import net.earthcomputer.clientcommands.EventManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -23,9 +24,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 public class CommandCTime extends ClientCommandBase {
-
-	private static final String[] MOON_PHASE_NAMES = { "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent",
-			"New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous" };
 
 	static {
 		EventManager.addInboundPacketPreListener(e -> {
@@ -45,7 +43,7 @@ public class CommandCTime extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/ctime [daytime|day|gametime|info|mock|unmock] [...]";
+		return "commands.ctime.usage";
 	}
 
 	@Override
@@ -61,19 +59,19 @@ public class CommandCTime extends ClientCommandBase {
 		switch (args[0]) {
 		case "daytime": {
 			int daytime = (int) (world.getWorldTime() % 24000);
-			lines.add(String.format("Daytime: %d ticks (%s)", daytime,
+			lines.add(I18n.format("commands.ctime.daytime", daytime,
 					LocalTime.of(daytime / 1000, (daytime % 1000) * 60 / 1000)
 							.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
 			break;
 		}
 		case "day": {
 			int day = (int) ((world.getWorldTime() / 24000) % Integer.MAX_VALUE);
-			lines.add(String.format("Day: %d", day));
+			lines.add(I18n.format("commands.ctime.day", day));
 			break;
 		}
 		case "gametime": {
 			int gametime = (int) (world.getTotalWorldTime() % Integer.MAX_VALUE);
-			lines.add(String.format("Game time: %d ticks (%s)", gametime, StatBase.timeStatType.format(gametime)));
+			lines.add(I18n.format("commands.ctime.gametime", gametime, StatBase.timeStatType.format(gametime)));
 			break;
 		}
 		case "info": {
@@ -83,22 +81,22 @@ public class CommandCTime extends ClientCommandBase {
 			int moonPhase = day % 8;
 			int skylightSubtracted = world.calculateSkylightSubtracted(1);
 
-			lines.add("===== TIME INFO =====");
-			lines.add(String.format("Daytime: %d ticks (%s)", daytime,
+			lines.add(I18n.format("commands.ctime.infoHeader"));
+			lines.add(I18n.format("commands.ctime.daytime", daytime,
 					LocalTime.of((daytime / 1000 + 6) % 24, (daytime % 1000) * 60 / 1000)
 							.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
-			lines.add(String.format("Day: %d", day));
-			lines.add(String.format("Game time: %d ticks (%s)", gametime, StatBase.timeStatType.format(gametime)));
-			lines.add(String.format("Moon phase: %d, %s", moonPhase, MOON_PHASE_NAMES[moonPhase]));
-			lines.add(String.format("Mobs can burn: %s", formatBoolean(skylightSubtracted < 4)));
-			lines.add(String.format("Mobs can spawn: %s", formatBoolean(15 - skylightSubtracted <= 7)));
-			lines.add(String.format("Do Daylight Cycle: %s",
+			lines.add(I18n.format("commands.ctime.day", day));
+			lines.add(I18n.format("commands.ctime.gametime", gametime, StatBase.timeStatType.format(gametime)));
+			lines.add(I18n.format("commands.ctime.moon", moonPhase, I18n.format("commands.ctime.moon." + moonPhase)));
+			lines.add(I18n.format("commands.ctime.mobsBurn", formatBoolean(skylightSubtracted < 4)));
+			lines.add(I18n.format("commands.ctime.mobsSpawn", formatBoolean(15 - skylightSubtracted <= 7)));
+			lines.add(I18n.format("commands.ctime.doDaylightCycle",
 					formatBoolean(world.getGameRules().getBoolean("doDaylightCycle"))));
 			break;
 		}
 		case "mock": {
 			if (args.length < 2) {
-				throw new WrongUsageException("/ctime mock <daytime> [doDaylightCycle]");
+				throw new WrongUsageException("commands.ctime.mock.usage");
 			}
 			int daytime;
 			if ("day".equals(args[1])) {
@@ -112,7 +110,7 @@ public class CommandCTime extends ClientCommandBase {
 			} else {
 				daytime = parseInt(args[1], 0);
 			}
-			lines.add(String.format("Mocking from time %d. Use /ctime unmock to return to normal", daytime));
+			lines.add(I18n.format("commands.ctime.mock.success", daytime));
 			boolean doDaylightCycle = args.length < 3 ? true : Boolean.parseBoolean(args[2]);
 			if (!doDaylightCycle) {
 				daytime = -daytime;
@@ -126,7 +124,7 @@ public class CommandCTime extends ClientCommandBase {
 		}
 		case "unmock": {
 			TempRules.MOCKING_TIME.setValue(Boolean.FALSE);
-			lines.add("No longer mocking the time");
+			lines.add(I18n.format("commands.ctime.unmock.success"));
 			break;
 		}
 		default:

@@ -22,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiEnchantment;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -51,6 +52,7 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
@@ -127,7 +129,7 @@ public class EnchantmentCracker {
 		EventManager.addLivingAttackListener(e -> {
 			if (isEnchantingPredictionEnabled()) {
 				if (e.getEntity() == Minecraft.getMinecraft().player) {
-					resetCracker("player hurt");
+					resetCracker("playerHurt");
 				}
 			}
 		});
@@ -135,23 +137,23 @@ public class EnchantmentCracker {
 			if (isEnchantingPredictionEnabled()) {
 				EntityPlayer player = e.player;
 				if (player.isSprinting()) {
-					resetCracker("sprinting");
+					resetCracker("sprint");
 				}
 				if (player.isWet() && !wasWet) {
-					resetCracker("entered water");
+					resetCracker("enterWater");
 				}
 				if (player.isWet() && (!player.isSneaking() || !player.onGround)) {
-					resetCracker("swimming");
+					resetCracker("swim");
 				}
 				if (!player.getActivePotionEffects().isEmpty()) {
-					resetCracker("potion effect active");
+					resetCracker("potion");
 				}
 				if (!EnchantmentHelper.getEnchantedItem(Enchantments.MENDING, player).isEmpty() && !player.world
 						.getEntitiesWithinAABB(EntityXPOrb.class, player.getEntityBoundingBox()).isEmpty()) {
-					resetCracker("mending item");
+					resetCracker("mending");
 				}
 				if (player.isInsideOfMaterial(Material.WATER) && EnchantmentHelper.getRespirationModifier(player) > 0) {
-					resetCracker("using respiration");
+					resetCracker("respiration");
 				}
 				if (EnchantmentHelper.hasFrostWalkerEnchantment(player)) {
 					frostWalkerCheck(player,
@@ -165,7 +167,7 @@ public class EnchantmentCracker {
 				if (e.getEntity() instanceof EntityItem && e.getEntity().getEntityBoundingBox()
 						.intersects(Minecraft.getMinecraft().player.getEntityBoundingBox())) {
 					if (expectedThrows == 0) {
-						resetCracker("drop item");
+						resetCracker("dropItem");
 					} else {
 						expectedThrows--;
 					}
@@ -174,7 +176,7 @@ public class EnchantmentCracker {
 		});
 		EventManager.addAnvilRepairListener(e -> {
 			if (isEnchantingPredictionEnabled()) {
-				resetCracker("anvil use");
+				resetCracker("anvil");
 			}
 		});
 		EventManager.addUseItemListener(e -> {
@@ -185,7 +187,7 @@ public class EnchantmentCracker {
 				}
 
 				if (e.getItemStack().getItemUseAction() == EnumAction.EAT) {
-					resetCracker("eating");
+					resetCracker("eat");
 				}
 			}
 		});
@@ -198,7 +200,7 @@ public class EnchantmentCracker {
 						if (EnchantmentHelper.getEnchantments(heldStack).containsKey(Enchantments.BANE_OF_ARTHROPODS)) {
 							// The player's RNG is used to determine whether the slowness effect should be
 							// applied
-							resetCracker("bane of arthropods");
+							resetCracker("baneOfArthropods");
 						}
 					}
 				}
@@ -211,13 +213,13 @@ public class EnchantmentCracker {
 					SPacketAdvancementInfo advancementInfo = (SPacketAdvancementInfo) packet;
 					if (!advancementInfo.isFirstSync() && advancementInfo.getProgressUpdates().values().stream()
 							.anyMatch(AdvancementProgress::isDone)) {
-						resetCracker("gain advancement");
+						resetCracker("advancement");
 					}
 				} else if (packet instanceof SPacketEntityStatus) {
 					SPacketEntityStatus entityStatus = (SPacketEntityStatus) packet;
 					if (entityStatus.getOpCode() == 29) { // 29 = play shield block sound effect
 						if (entityStatus.getEntity(Minecraft.getMinecraft().world) == Minecraft.getMinecraft().player) {
-							resetCracker("blocking with shield");
+							resetCracker("shield");
 						}
 					}
 				}
@@ -230,7 +232,7 @@ public class EnchantmentCracker {
 					CPacketChatMessage chat = (CPacketChatMessage) packet;
 					String message = chat.getMessage();
 					if (message.startsWith("/") && message.substring(1).trim().startsWith("give")) {
-						resetCracker("give command");
+						resetCracker("give");
 					}
 				}
 			}
@@ -238,9 +240,9 @@ public class EnchantmentCracker {
 		EventManager.addPostDamageItemListener(e -> {
 			ItemStack heldStack = e.getItemStack();
 			if (EnchantmentHelper.getEnchantments(heldStack).containsKey(Enchantments.UNBREAKING)) {
-				resetCracker("unbreaking item");
+				resetCracker("unbreaking");
 			} else if (heldStack.getItemDamage() + e.getDamageAmount() > heldStack.getMaxDamage() + 1) {
-				resetCracker("broke item");
+				resetCracker("itemBreak");
 			}
 		});
 	}
@@ -265,7 +267,7 @@ public class EnchantmentCracker {
 						IBlockState stateAtWater = world.getBlockState(waterPos);
 
 						if (stateAtWater.getBlock() == Blocks.FROSTED_ICE) {
-							resetCracker("frost walking");
+							resetCracker("frostWalker");
 							return;
 						}
 					}
@@ -276,8 +278,8 @@ public class EnchantmentCracker {
 
 	public static void resetCracker(String reason) {
 		if (TempRules.ENCHANTING_CRACK_STATE.getValue() != EnumCrackState.UNCRACKED) {
-			Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(
-					new TextComponentString(TextFormatting.RED + "Restarting enchantment cracking. Reason: " + reason));
+			Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(
+					TextFormatting.RED + I18n.format("enchCrack.reset", I18n.format("enchCrack.reset." + reason))));
 		}
 		resetCracker();
 	}
@@ -302,28 +304,28 @@ public class EnchantmentCracker {
 
 		List<String> lines = new ArrayList<>();
 
-		lines.add("Crack state: " + crackState.getName());
+		lines.add(I18n.format("enchCrack.state", I18n.format("enchCrack.state." + crackState.getName())));
 
 		lines.add("");
 
 		if (crackState == EnumCrackState.CRACKED_ENCH_SEED) {
-			lines.add("XP seed: " + String.format("%08X", possibleXPSeeds.iterator().next()));
+			lines.add(I18n.format("enchCrack.xpSeed.one", possibleXPSeeds.iterator().next()));
 		} else if (crackState == EnumCrackState.CRACKING_ENCH_SEED) {
-			lines.add("Possible XP seeds: " + possibleXPSeeds.size());
+			lines.add(I18n.format("enchCrack.xpSeed.many", possibleXPSeeds.size()));
 		} else if (crackState == EnumCrackState.CRACKING && !possiblePlayerRandSeeds.isEmpty()) {
-			lines.add("Possible player RNG seeds: " + possiblePlayerRandSeeds.size());
+			lines.add(I18n.format("enchCrack.playerRNGSeed.many", possiblePlayerRandSeeds.size()));
 		}
 
 		lines.add("");
 
 		if (crackState == EnumCrackState.CRACKED || crackState == EnumCrackState.CRACKED_ENCH_SEED) {
-			lines.add("Enchantments:");
+			lines.add(I18n.format("enchCrack.enchantments"));
 		} else {
-			lines.add("Clues:");
+			lines.add(I18n.format("enchCrack.clues"));
 		}
 
 		for (int slot = 0; slot < 3; slot++) {
-			lines.add("Slot " + (slot + 1) + ":");
+			lines.add(I18n.format("enchCrack.slot", slot + 1));
 			List<EnchantmentData> enchs = getEnchantmentsInTable(slot);
 			if (enchs != null) {
 				for (EnchantmentData ench : enchs) {
@@ -661,8 +663,8 @@ public class EnchantmentCracker {
 							EnchantManipulationStatus status = manipulateEnchantmentsSanityCheck(player);
 							if (status != EnchantManipulationStatus.OK) {
 								if (status != EnchantManipulationStatus.EMPTY_INVENTORY) {
-									player.sendMessage(
-											new TextComponentString(TextFormatting.RED + status.getMessage()));
+									player.sendMessage(new TextComponentString(
+											TextFormatting.RED + I18n.format(status.getTranslation())));
 									TaskManager.abortTasks();
 									return;
 								}
@@ -689,7 +691,7 @@ public class EnchantmentCracker {
 			TaskManager.addLongTask(new LongTask() {
 				@Override
 				public void start() {
-					player.sendMessage(new TextComponentString("Do a dummy enchantment"));
+					player.sendMessage(new TextComponentTranslation("enchCrack.insn.dummy"));
 					doneEnchantment = false;
 				}
 
@@ -711,9 +713,9 @@ public class EnchantmentCracker {
 		TaskManager.addLongTask(new LongTask() {
 			@Override
 			public void start() {
-				player.sendMessage(new TextComponentString(TextFormatting.BOLD + "Your enchantment seed is ready"));
-				player.sendMessage(new TextComponentString("Bookshelves needed: " + bookshelvesNeeded_f));
-				player.sendMessage(new TextComponentString("In slot: " + (slot_f + 1)));
+				player.sendMessage(new TextComponentString(TextFormatting.BOLD + I18n.format("enchCrack.insn.ready")));
+				player.sendMessage(new TextComponentTranslation("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
+				player.sendMessage(new TextComponentTranslation("enchCrack.insn.slot", slot_f + 1));
 				setFinished();
 			}
 
@@ -727,21 +729,21 @@ public class EnchantmentCracker {
 
 	public static enum EnchantManipulationStatus {
 		// @formatter:off
-		OK(null),
-		NOT_CRACKED("You need to be in crack state CRACKED"),
-		NOT_ON_GROUND("You are not on the ground"),
-		EMPTY_INVENTORY("You have an empty inventory"),
-		IMPOSSIBLE("It's impossible or would take too long to get those enchantments");
+		OK("ok"),
+		NOT_CRACKED("notCracked"),
+		NOT_ON_GROUND("notOnGround"),
+		EMPTY_INVENTORY("emptyInventory"),
+		IMPOSSIBLE("impossible");
 		// @formatter:on
 
-		private String message;
+		private String translation;
 
-		private EnchantManipulationStatus(String message) {
-			this.message = message;
+		private EnchantManipulationStatus(String translation) {
+			this.translation = translation;
 		}
 
-		public String getMessage() {
-			return message;
+		public String getTranslation() {
+			return "enchCrack.manipStatus." + translation;
 		}
 	}
 
@@ -813,11 +815,18 @@ public class EnchantmentCracker {
 	}
 
 	public static enum EnumCrackState implements IStringSerializable {
-		UNCRACKED, CRACKING_ENCH_SEED, CRACKED_ENCH_SEED, CRACKING, CRACKED, INVALID;
+		UNCRACKED("uncracked"), CRACKING_ENCH_SEED("crackingEnchSeed"), CRACKED_ENCH_SEED("crackedEnchSeed"), CRACKING(
+				"cracking"), CRACKED("cracked"), INVALID("invalid");
+
+		private String name;
+
+		private EnumCrackState(String name) {
+			this.name = name;
+		}
 
 		@Override
 		public String getName() {
-			return name();
+			return name;
 		}
 	}
 

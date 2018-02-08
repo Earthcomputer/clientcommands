@@ -8,6 +8,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.client.IClientCommand;
@@ -26,13 +27,13 @@ public abstract class ClientCommandBase extends CommandBase implements IClientCo
 
 	protected static void ensureCreativeMode() throws CommandException {
 		if (!Minecraft.getMinecraft().playerController.isInCreativeMode()) {
-			throw new CommandException("This action requires creative mode");
+			throw new CommandException("commands.client.notCreative");
 		}
 	}
 
 	protected static ITextComponent getCoordsTextComponent(BlockPos pos) {
-		ITextComponent text = new TextComponentString(
-				String.format("(%d, %d, %d)", pos.getX(), pos.getY(), pos.getZ()));
+		ITextComponent text = new TextComponentTranslation("commands.client.blockpos", pos.getX(), pos.getY(),
+				pos.getZ());
 		text.getStyle().setUnderlined(true);
 		text.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
 				String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())));

@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import net.earthcomputer.clientcommands.ClientCommandsMod;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
@@ -24,7 +25,7 @@ public abstract class LongTask {
 		ticks++;
 		if (ticks > getTimeout()) {
 			Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(
-					new TextComponentString(TextFormatting.RED + "LongTask timed out, aborting all tasks"));
+					new TextComponentString(TextFormatting.RED + I18n.format("clientcommands.task.timedOut")));
 			TaskManager.abortTasks();
 		} else {
 			taskTick();

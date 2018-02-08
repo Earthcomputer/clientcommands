@@ -156,7 +156,7 @@ public class CommandCalc extends ClientCommandBase {
 		try {
 			ans = expr.evaluate();
 		} catch (ArithmeticException e) {
-			throw new CommandException("Math Error: " + e.getMessage());
+			throw new CommandException("commands.ccalc.mathError", e.getMessage());
 		}
 
 		// Output the formatted answer
@@ -179,11 +179,11 @@ public class CommandCalc extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/ccalc <expression>";
+		return "commands.ccalc.usage";
 	}
 
 	private static CommandException syntaxError() {
-		return new CommandException("Syntax Error");
+		return new CommandException("commands.ccalc.syntaxError");
 	}
 
 	private static String toString(double val) {

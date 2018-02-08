@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -19,6 +20,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -47,7 +49,7 @@ public class CommandFind extends ClientCommandBase {
 			entityClass = EntityList.getClass(type);
 		}
 		if (entityClass == null) {
-			throw new CommandException("Unknown entity type " + args[0]);
+			throw new CommandException("commands.cfind.unknownEntity", args[0]);
 		}
 		entities = entities.filter(entityClass::isInstance);
 
@@ -82,7 +84,7 @@ public class CommandFind extends ClientCommandBase {
 					entities = entities.sorted(randomComparator);
 					break;
 				default:
-					throw new CommandException("Unknown arg value for order: " + value);
+					throw new CommandException("commands.cfind.order.unknown", value);
 				}
 				break;
 			case "limit":
@@ -93,7 +95,7 @@ public class CommandFind extends ClientCommandBase {
 				entities = entities.filter(entity -> entity.getName().equalsIgnoreCase(value));
 				break;
 			default:
-				throw new CommandException("Unknown argument " + arg);
+				throw new CommandException("commands.cfind.unknownArg", arg);
 			}
 		}
 
@@ -102,15 +104,15 @@ public class CommandFind extends ClientCommandBase {
 
 		// output list
 		if (entityList.isEmpty()) {
-			sender.sendMessage(new TextComponentString(TextFormatting.RED + "No entities matched your query"));
+			sender.sendMessage(new TextComponentString(TextFormatting.RED + I18n.format("commands.cfind.noMatch")));
 		} else {
-			sender.sendMessage(
-					new TextComponentString(String.format("%d entities matched your query", entityList.size())));
+			sender.sendMessage(new TextComponentTranslation("commands.cfind.success", entityList.size()));
 			for (Entity entity : entityList) {
-				sender.sendMessage(new TextComponentString(String.format("Found %s at ", entity.getName()))
+				float distance = player.getDistance(entity);
+				sender.sendMessage(new TextComponentTranslation("commands.cfind.found.left", entity.getName(), distance)
 						.appendSibling(getCoordsTextComponent(new BlockPos(entity)))
-						.appendSibling(new TextComponentString(
-								String.format(", %.2f blocks away", player.getDistance(entity)))));
+						.appendSibling(new TextComponentTranslation("commands.cfind.found.right", entity.getName(),
+								distance)));
 			}
 		}
 	}
@@ -122,7 +124,7 @@ public class CommandFind extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/cfind <type> [(<arg> <value>)...]";
+		return "commands.cfind.usage";
 	}
 
 	@Override

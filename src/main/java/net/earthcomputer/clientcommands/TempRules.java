@@ -188,7 +188,7 @@ public class TempRules {
 		@Override
 		public String parse(String str) throws CommandException {
 			if (!filter.test(str)) {
-				throw new CommandException(str + " is not accepted");
+				throw new CommandException("tempRules.string.invalid", str);
 			}
 			return str;
 		}
@@ -295,7 +295,7 @@ public class TempRules {
 		public T parse(String str) throws CommandException {
 			T val = nameToValue.get(str);
 			if (val == null) {
-				throw new CommandException("Invalid enum");
+				throw new CommandException("tempRules.enum.invalid", str);
 			}
 			return val;
 		}

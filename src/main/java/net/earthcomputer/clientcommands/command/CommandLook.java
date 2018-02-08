@@ -38,7 +38,7 @@ public class CommandLook extends ClientCommandBase {
 
 	private void lookBlock(ICommandSender sender, String... args) throws CommandException {
 		if (args.length < 4) {
-			throw new WrongUsageException("/clook block <x> <y> <z>");
+			throw new WrongUsageException("commands.clook.block.usage");
 		}
 
 		BlockPos pos = parseBlockPos(sender, args, 1, true);
@@ -54,7 +54,7 @@ public class CommandLook extends ClientCommandBase {
 
 	private void lookAngles(ICommandSender sender, String... args) throws CommandException {
 		if (args.length < 3) {
-			throw new WrongUsageException("/clook angles <yaw> <pitch>");
+			throw new WrongUsageException("commands.clook.angles.usage");
 		}
 
 		float yaw = (float) parseCoordinate(sender.getCommandSenderEntity().rotationYaw, args[1], false).getResult();
@@ -65,12 +65,12 @@ public class CommandLook extends ClientCommandBase {
 
 	private void lookCardinal(ICommandSender sender, String... args) throws CommandException {
 		if (args.length < 2) {
-			throw new WrongUsageException("/clook cardinal <west|east|down|up|north|south>");
+			throw new WrongUsageException("commands.clook.cardinal.usage");
 		}
 
 		EnumFacing direction = EnumFacing.byName(args[1]);
 		if (direction == null) {
-			throw new WrongUsageException("/clook cardinal <west|east|down|up|north|south>");
+			throw new WrongUsageException("commands.clook.cardinal.usage");
 		}
 		switch (direction) {
 		case DOWN:
@@ -107,7 +107,7 @@ public class CommandLook extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/clook <block|angles|cardinal> ...";
+		return "commands.clook.usage";
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public class CommandCGive extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/cgive <item> [count] [meta] [nbt]";
+		return "commands.cgive.usage";
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class CommandCGive extends ClientCommandBase {
 
 		Entity executingEntity = sender.getCommandSenderEntity();
 		if (!(executingEntity instanceof EntityPlayer)) {
-			throw new CommandException("This command must be executed by a player");
+			throw new CommandException("commands.cgive.noPlayer");
 		}
 		EntityPlayer player = (EntityPlayer) executingEntity;
 
@@ -77,9 +77,9 @@ public class CommandCGive extends ClientCommandBase {
 
 		// report the result
 		if (!added) {
-			throw new CommandException("Your inventory is full");
+			throw new CommandException("commands.cgive.fullInventory");
 		} else if (!stack.isEmpty()) {
-			throw new CommandException("Failed to give you all the items");
+			throw new CommandException("commands.cgive.notAll");
 		} else {
 			stack.setCount(1);
 			sender.sendMessage(new TextComponentTranslation("commands.give.success", stack.getTextComponent(), count,

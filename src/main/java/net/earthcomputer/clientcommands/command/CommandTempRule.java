@@ -11,6 +11,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandTempRule extends ClientCommandBase {
 
@@ -24,7 +25,7 @@ public class CommandTempRule extends ClientCommandBase {
 
 		if ("list".equals(mode)) {
 			sender.sendMessage(
-					new TextComponentString(String.format("%d TempRules available", TempRules.getRuleNames().size())));
+					new TextComponentTranslation("commands.ctemprule.list.success", TempRules.getRuleNames().size()));
 			TempRules.getRuleNames().forEach(name -> sender.sendMessage(new TextComponentString("- " + name)));
 		} else {
 			if (!"get".equals(mode) && !"set".equals(mode) && !"reset".equals(mode)) {
@@ -32,40 +33,41 @@ public class CommandTempRule extends ClientCommandBase {
 			}
 			if (args.length == 1) {
 				if ("set".equals(mode)) {
-					throw new WrongUsageException("/ctemprule set <rule> <value>");
+					throw new WrongUsageException("commands.ctemprule.set.usage");
 				} else {
-					throw new WrongUsageException("/ctemprule " + mode + " <rule>");
+					throw new WrongUsageException("commands.ctemprule." + mode + ".usage");
 				}
 			}
 
 			String ruleName = args[1];
 			if (!TempRules.hasRule(ruleName)) {
-				throw new CommandException("No such TempRule");
+				throw new CommandException("commands.ctemprule.unknownRule", ruleName);
 			}
 			TempRules.Rule<?> rule = TempRules.getRule(ruleName);
 
 			switch (mode) {
 			case "get":
-				sender.sendMessage(new TextComponentString(ruleName + " = " + ruleValToString(rule)));
+				sender.sendMessage(new TextComponentTranslation("commands.ctemprule.get.success", ruleName,
+						ruleValToString(rule)));
 				break;
 			case "set":
 				if (args.length == 2) {
-					throw new WrongUsageException("/ctemprule set <rule> <value>");
+					throw new WrongUsageException("commands.ctemprule.set.usage");
 				}
 				if (rule.isReadOnly()) {
-					throw new CommandException("Cannot modify read-only TempRule " + ruleName);
+					throw new CommandException("commands.ctemprule.readOnly", ruleName);
 				}
 				String strVal = buildString(args, 2);
 				setRuleVal(rule, strVal);
-				sender.sendMessage(new TextComponentString("TempRule " + ruleName + " has been updated to " + strVal));
+				sender.sendMessage(new TextComponentTranslation("commands.ctemprule.set.success", ruleName, strVal));
 				break;
 			case "reset":
 				if (rule.isReadOnly()) {
-					throw new CommandException("Cannot modify read-only TempRule " + ruleName);
+					throw new CommandException("commands.ctemprule.readOnly", ruleName);
 				}
 				rule.setToDefault();
-				sender.sendMessage(new TextComponentString(
-						"TempRule " + ruleName + " has been reset to " + ruleValToString(rule)));
+				sender.sendMessage(new TextComponentTranslation("commands.ctemprule.reset.success", ruleName,
+						ruleValToString(rule)));
 				break;
 			}
 		}
@@ -86,7 +88,7 @@ public class CommandTempRule extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/ctemprule <get|set|reset|list> ...";
+		return "commands.ctemprule.usage";
 	}
 
 	@Override

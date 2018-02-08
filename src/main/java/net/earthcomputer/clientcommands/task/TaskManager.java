@@ -24,7 +24,7 @@ public class TaskManager {
 
 	public static void ensureNoTasks() throws CommandException {
 		if (currentLongTask != null || !longTaskQueue.isEmpty()) {
-			throw new CommandException("Looks like there is already a task running! Try /cabort.");
+			throw new CommandException("clientcommands.task.alreadyRunning");
 		}
 	}
 

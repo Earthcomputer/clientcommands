@@ -19,6 +19,7 @@ import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -44,7 +45,7 @@ public class CommandSimGen extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/csimgen <generator> <times> [<x> <y> <z>]";
+		return "commands.csimgen.usage";
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class CommandSimGen extends ClientCommandBase {
 			throw new WrongUsageException(getUsage(sender));
 		}
 
-		sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "Warning: /csimgen is deprecated"));
+		sender.sendMessage(new TextComponentString(TextFormatting.GOLD + I18n.format("commands.csimgen.deprecated")));
 
 		TaskManager.ensureNoTasks();
 

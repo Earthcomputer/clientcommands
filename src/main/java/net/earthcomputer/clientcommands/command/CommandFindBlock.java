@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -17,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -51,11 +53,12 @@ public class CommandFindBlock extends ClientCommandBase {
 			candidates = findBlockCandidatesInTaxicabArea(sender, blockMatcher, radius);
 			break;
 		default:
-			throw new CommandException("Unknown radius type " + radiusType);
+			throw new CommandException("commands.cfindblock.unknownRadiusType", radiusType);
 		}
 
 		if (candidates.isEmpty()) {
-			sender.sendMessage(new TextComponentString(TextFormatting.RED + "No such block found"));
+			sender.sendMessage(
+					new TextComponentString(TextFormatting.RED + I18n.format("commands.cfindblock.notFound")));
 			return;
 		}
 
@@ -94,7 +97,8 @@ public class CommandFindBlock extends ClientCommandBase {
 
 		// output the block
 		if (closestBlock == null) {
-			sender.sendMessage(new TextComponentString(TextFormatting.RED + "No such block found"));
+			sender.sendMessage(
+					new TextComponentString(TextFormatting.RED + I18n.format("commands.cfindblock.notFound")));
 		} else {
 			float distance;
 			switch (radiusType) {
@@ -115,9 +119,9 @@ public class CommandFindBlock extends ClientCommandBase {
 			default:
 				throw new AssertionError();
 			}
-			sender.sendMessage(
-					new TextComponentString("Closest match is at ").appendSibling(getCoordsTextComponent(closestBlock))
-							.appendSibling(new TextComponentString(String.format(", %.2f blocks away", distance))));
+			sender.sendMessage(new TextComponentTranslation("commands.cfindblock.success.left", distance)
+					.appendSibling(getCoordsTextComponent(closestBlock))
+					.appendSibling(new TextComponentTranslation("commands.cfindblock.success.right", distance)));
 		}
 	}
 
@@ -223,7 +227,7 @@ public class CommandFindBlock extends ClientCommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/cfindblock <block> [data|properties] [radius] [radiustype]";
+		return "commands.cfindblock.usage";
 	}
 
 	@Override
