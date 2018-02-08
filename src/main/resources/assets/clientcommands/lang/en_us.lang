@@ -74,6 +74,11 @@ commands.cgive.fullInventory=Your inventory is full
 commands.cgive.notAll=Failed to give you all the items
 commands.cgive.usage=/cgive <item> [count] [meta] [nbt]
 
+commands.chelp.helpHint=Also try /chelp to get help for client-side commands
+commands.chelp.redirect.left=Did you mean 
+commands.chelp.redirect.right=?
+commands.chelp.header=--- Showing client help page %d of %d (/chelp <page>) ---
+commands.chelp.unknownCommand=Unknown command. Try /chelp for a list of client-side commands
 commands.chelp.usage=/chelp [page|command name]
 
 commands.ctime.daytime=Daytime: %d ticks (%s)

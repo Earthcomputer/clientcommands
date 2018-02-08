@@ -10,6 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
+import net.minecraftforge.client.event.ClientChatEvent;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -188,6 +190,32 @@ public class EventManager {
 	@SubscribeEvent
 	public void onGuiOverlay(DrawScreenEvent.Post e) {
 		guiOverlayListeners.invoke(e);
+	}
+
+	// CHAT SENT
+
+	private static Listeners<ClientChatEvent> chatSentListeners = new Listeners<>();
+
+	public static void addChatSentListener(Consumer<ClientChatEvent> listener) {
+		chatSentListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onChatSent(ClientChatEvent e) {
+		chatSentListeners.invoke(e);
+	}
+
+	// CHAT RECEIVED
+
+	private static Listeners<ClientChatReceivedEvent> chatReceivedListeners = new Listeners<>();
+
+	public static void addChatReceivedListener(Consumer<ClientChatReceivedEvent> listener) {
+		chatReceivedListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onChatReceived(ClientChatReceivedEvent e) {
+		chatReceivedListeners.invoke(e);
 	}
 
 	// ENTITY CONSTRUCTING
