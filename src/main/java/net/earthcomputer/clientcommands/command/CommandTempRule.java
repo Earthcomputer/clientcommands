@@ -98,11 +98,14 @@ public class CommandTempRule extends ClientCommandBase {
 			return getListOfStringsMatchingLastWord(args, "get", "set", "reset", "list");
 		} else if (args.length == 2 && !"list".equals(args[0])) {
 			if ("get".equals(args[0])) {
-				return getListOfStringsMatchingLastWord(args, TempRules.getRuleNames());
+				return getListOfStringsMatchingLastWord(args,
+						TempRules.getRules().stream().filter(rule -> !rule.isHidden()).map(TempRules.Rule::getName)
+								.sorted().collect(Collectors.toList()));
 			} else {
 				return getListOfStringsMatchingLastWord(args,
-						TempRules.getRules().stream().filter(rule -> !rule.isReadOnly()).map(TempRules.Rule::getName)
-								.sorted().collect(Collectors.toList()));
+						TempRules.getRules().stream().filter(rule -> !rule.isReadOnly())
+								.filter(rule -> !rule.isHidden()).map(TempRules.Rule::getName).sorted()
+								.collect(Collectors.toList()));
 			}
 		} else if (args.length == 3 && "set".equals(args[0]) && TempRules.hasRule(args[1])) {
 			TempRules.Rule<?> rule = TempRules.getRule(args[1]);

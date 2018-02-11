@@ -20,20 +20,16 @@ public class TempRules {
 	private static Map<String, Rule<?>> rules = new HashMap<>();
 
 	public static final Rule<Boolean> ENCHANTING_PREDICTION = registerRule("enchantingPrediction", DataType.BOOLEAN,
-			Boolean.FALSE);
+			Boolean.FALSE).setHidden();
 	public static final Rule<EnchantmentCracker.EnumCrackState> ENCHANTING_CRACK_STATE = registerRule(
 			"enchantingCrackState", EnumDataType.of(EnchantmentCracker.EnumCrackState.class),
-			EnchantmentCracker.EnumCrackState.UNCRACKED);
+			EnchantmentCracker.EnumCrackState.UNCRACKED).setReadOnly().setHidden();
 	public static final Rule<Double> BLOCK_REACH_DISTANCE = registerRule("blockReachDistance", DataType.DOUBLE.min(0),
 			5.0);
 	public static final Rule<Boolean> TOOL_BREAK_PROTECTION = registerRule("toolBreakProtection", DataType.BOOLEAN,
 			Boolean.FALSE);
-	public static final Rule<Boolean> MOCKING_TIME = registerRule("mockingTime", DataType.BOOLEAN, Boolean.FALSE);
-
-	static {
-		ENCHANTING_CRACK_STATE.setReadOnly();
-		MOCKING_TIME.setReadOnly();
-	}
+	public static final Rule<Boolean> MOCKING_TIME = registerRule("mockingTime", DataType.BOOLEAN, Boolean.FALSE)
+			.setReadOnly();
 
 	public static boolean hasRule(String name) {
 		return rules.containsKey(name);
@@ -67,6 +63,7 @@ public class TempRules {
 		private T defaultValue;
 		private T value;
 		private boolean readOnly = false;
+		private boolean hidden = false;
 		private List<Consumer<ValueChangeEvent<T>>> listeners = new ArrayList<>();
 
 		private Rule(String name, DataType<T> dataType, T defaultValue) {
@@ -111,8 +108,18 @@ public class TempRules {
 			return readOnly;
 		}
 
-		public void setReadOnly() {
+		public Rule<T> setReadOnly() {
 			readOnly = true;
+			return this;
+		}
+
+		public boolean isHidden() {
+			return hidden;
+		}
+
+		public Rule<T> setHidden() {
+			hidden = true;
+			return this;
 		}
 
 		public void addValueChangeListener(Consumer<ValueChangeEvent<T>> listener) {

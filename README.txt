@@ -78,23 +78,6 @@ Common problems with setup:
 /csimgen (deprecated) - simulated the generation of a world generator.
 /ctemprule - get and set variables which affect the workings of clientcommands. TempRules reset
              when you log out of a world.
-/cenchant - manipulate the XP seed so that you can get the specified enchantments in an
-            enchantment table. This only works if the enchantment seed is cracked (see below).
-            First you specify the type of item you want to enchant, and then zero or more
-            enchantment specifications. There are two types of enchantment specifications:
-               `with` - This enchantment should be included in the enchantments on the item.
-               `without` - This enchantment should not be included in the enchantments on
-                           the item.
-            In addition to the enchantment, you also specify the level of the enchantment
-            you would like. This level can either be an exact number, or a range in the
-            format min..max (e.g. `1..5`).
-            Once you run the command, the enchantment cracker may automatically throw items
-            onto the ground beneath you. Do not look anywhere else while this is happening,
-            as you may not be able to pick the items back up again. Once this is done,
-            follow the instructions the command gives you.
-            Examples:
-               `/cenchant diamond_sword with looting 3 without smite 1..5 without bane_of_arthropods 1..5`
-               `/cenchant fishing_rod with lure 3 with luck_of_the_sea 3`
 /ctime - queries or changes the time client-side. All subcommands except `mock` and `unmock`
          only query the time. Using `/ctime mock <daytime> [doDaylightCycle]` starts mocking
          the time, and `/ctime unmock` stops mocking the time. Mocking the time means
@@ -102,25 +85,3 @@ Common problems with setup:
          side time (which is the time that matters for mob spawning etc.) is unaffected.
          `/ctime mock` is intended for builders to inspect their builds at different times of
          day.
-
-===== ENCHANTING PREDICTION =====
-WARNING: enchanting prediction is very cheaty and could get you banned from a server if an
-         operator finds out. However, given its client-side-only nature it's very difficult
-         to detect. There is also a chance it may be patched.
-
-Enchanting prediction can be used to see all items you would get on an enchantment in an
-enchantment table before you actually enchant the item. To use enchanting prediction,
-you must follow the following steps at the start of every enchanting session:
-   1) run `/ctemprule set enchantingPrediction true`
-   2) waste your first enchantment (enchant a cheap item)
-   3) place another cheap item into the enchantment table (don't enchant it)
-   4) block some more bookshelves with a torch
-   5) repeat steps 3 and 4 until you're in state CRACKED_ENCH_SEED
-   6) enchant the item (you can remove the torches now)
-   7) repeat steps 3-6 once or twice more, until you're in state CRACKED
-   8) there are certain common actions which will reset the process; clientcommands will
-      notify you when this happens. You just have to avoid doing these actions.
-
-Once you are in state CRACKED, you will be able to see all enchantments before you enchant
-the item. You will stay in state CRACKED for the duration of the enchantment session unless
-you do one of the actions from step 8. If this happens, you have to start from step 2 again.
