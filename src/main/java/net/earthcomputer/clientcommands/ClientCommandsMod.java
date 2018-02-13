@@ -41,14 +41,9 @@ public class ClientCommandsMod {
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		initTempRules();
 		registerCommands();
 		registerEventStuff();
-	}
-
-	private void initTempRules() {
-
-		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
+		SpecialActionKey.registerKeyBinding();
 	}
 
 	private void registerCommands() {
@@ -73,6 +68,7 @@ public class ClientCommandsMod {
 		EnchantmentCracker.registerEvents();
 		ToolDamageManager.registerEvents();
 		TempRulesImpl.registerEvents();
+		SpecialActionKey.registerEvents();
 
 		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 
