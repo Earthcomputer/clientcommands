@@ -138,9 +138,6 @@ commands.crelog.errorScreen.line1=Auto-Relog
 commands.crelog.errorScreen.line2=Failed to connect
 commands.crelog.usage=/crelog
 
-commands.csimgen.deprecated=Warning: /csimgen is deprecated
-commands.csimgen.usage=/csimgen <generator> <times> [<x> <y> <z>]
-
 commands.ctemprule.unknownRule=No such TempRule as %s
 commands.ctemprule.readOnly=Cannot modify read-only TempRule %s
 commands.ctemprule.list.success=%d TempRules available

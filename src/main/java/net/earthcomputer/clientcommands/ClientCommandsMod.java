@@ -15,7 +15,6 @@ import net.earthcomputer.clientcommands.command.CommandFindItem;
 import net.earthcomputer.clientcommands.command.CommandLook;
 import net.earthcomputer.clientcommands.command.CommandNote;
 import net.earthcomputer.clientcommands.command.CommandRelog;
-import net.earthcomputer.clientcommands.command.CommandSimGen;
 import net.earthcomputer.clientcommands.command.CommandTempRule;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -59,7 +58,6 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandAbort());
 		ClientCommandHandler.instance.registerCommand(new CommandNote());
 		ClientCommandHandler.instance.registerCommand(new CommandTempRule());
-		ClientCommandHandler.instance.registerCommand(new CommandSimGen());
 		ClientCommandHandler.instance.registerCommand(new CommandCEnchant());
 		ClientCommandHandler.instance.registerCommand(new CommandCTime());
 	}
