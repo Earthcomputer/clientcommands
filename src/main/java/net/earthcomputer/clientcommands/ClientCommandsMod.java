@@ -29,7 +29,7 @@ import net.minecraftforge.fml.relauncher.Side;
 @Mod(modid = ClientCommandsMod.MODID, version = ClientCommandsMod.VERSION, clientSideOnly = true)
 public class ClientCommandsMod {
 	public static final String MODID = "clientcommands";
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "1.0.1";
 
 	@Instance(MODID)
 	public static ClientCommandsMod INSTANCE;
