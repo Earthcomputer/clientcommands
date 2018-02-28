@@ -21,31 +21,41 @@ public class CommandRelog extends ClientCommandBase {
 
 	@Override
 	public void execute(MinecraftServer arg0, ICommandSender arg1, String[] arg2) throws CommandException {
-		if (Minecraft.getMinecraft().isIntegratedServerRunning()) {
-			throw new CommandException("commands.crelog.localWorld");
-		}
-
 		isRelogging = true;
 		Minecraft mc = Minecraft.getMinecraft();
-		ServerData serverData = mc.getCurrentServerData();
+		boolean localWorld = mc.isIntegratedServerRunning();
+		ServerData serverData = null;
+		String worldName = null;
+		String displayName = null;
+		if (!localWorld) {
+			serverData = mc.getCurrentServerData();
+		} else {
+			MinecraftServer integratedServer = mc.getIntegratedServer();
+			worldName = integratedServer.getFolderName();
+			displayName = integratedServer.getWorldName();
+		}
 		mc.world.sendQuittingDisconnectingPacket();
 		mc.loadWorld(null);
-		mc.displayGuiScreen(new GuiConnecting(new GuiErrorScreen(I18n.format("commands.crelog.errorScreen.line1"),
-				I18n.format("commands.crelog.errorScreen.line2")), mc, serverData));
-		// At some point in the relogging process, mc.displayGuiScreen(null) is called,
-		// which happens to open the main menu screen. We don't want this, so an
-		// unfortunate hacky solution is to block it once.
-		TaskManager.addGuiBlocker(new GuiBlocker() {
-			@Override
-			public boolean processGui(GuiScreen gui) {
-				if (gui instanceof GuiMainMenu) {
-					setFinished();
-					return false;
-				} else {
-					return true;
+		if (!localWorld) {
+			mc.displayGuiScreen(new GuiConnecting(new GuiErrorScreen(I18n.format("commands.crelog.errorScreen.line1"),
+					I18n.format("commands.crelog.errorScreen.line2")), mc, serverData));
+			// At some point in the relogging process, mc.displayGuiScreen(null) is called,
+			// which happens to open the main menu screen. We don't want this, so an
+			// unfortunate hacky solution is to block it once.
+			TaskManager.addGuiBlocker(new GuiBlocker() {
+				@Override
+				public boolean processGui(GuiScreen gui) {
+					if (gui instanceof GuiMainMenu) {
+						setFinished();
+						return false;
+					} else {
+						return true;
+					}
 				}
-			}
-		});
+			});
+		} else {
+			mc.launchIntegratedServer(worldName, displayName, null);
+		}
 	}
 
 	@Override
