@@ -13,7 +13,9 @@ import net.minecraft.network.Packet;
 import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -177,6 +179,32 @@ public class EventManager {
 	@SubscribeEvent
 	public void onGuiOpen(GuiOpenEvent e) {
 		guiOpenListeners.invoke(e);
+	}
+
+	// GUI INIT
+
+	private static Listeners<InitGuiEvent.Post> initGuiListeners = new Listeners<>();
+
+	public static void addInitGuiListener(Consumer<InitGuiEvent.Post> listener) {
+		initGuiListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onInitGui(InitGuiEvent.Post e) {
+		initGuiListeners.invoke(e);
+	}
+
+	// GUI ACTION PERFORMED
+
+	private static Listeners<ActionPerformedEvent.Pre> guiActionPerformedListeners = new Listeners<>();
+
+	public static void addGuiActionPerformedListener(Consumer<ActionPerformedEvent.Pre> listener) {
+		guiActionPerformedListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onGuiActionPerformed(ActionPerformedEvent.Pre e) {
+		guiActionPerformedListeners.invoke(e);
 	}
 
 	// GUI OVERLAY

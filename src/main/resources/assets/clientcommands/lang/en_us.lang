@@ -133,9 +133,6 @@ commands.clook.usage=/clook <block|angles|cardinal> ...
 
 commands.cnote.usage=/cnote <message>
 
-commands.crelog.localWorld=This command only works on a remote server
-commands.crelog.errorScreen.line1=Auto-Relog
-commands.crelog.errorScreen.line2=Failed to connect
 commands.crelog.usage=/crelog
 
 commands.ctemprule.unknownRule=No such TempRule as %s
