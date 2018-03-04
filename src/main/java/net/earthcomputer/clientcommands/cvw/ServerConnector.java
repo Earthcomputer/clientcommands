@@ -22,7 +22,7 @@ public abstract class ServerConnector {
 				if (e.getButton().id == 1) {
 					e.getButton().playPressSound(Minecraft.getMinecraft().getSoundHandler());
 					e.getButton().enabled = false;
-					forCurrentServer().disconnect();
+					forCurrentServer().onDisconnectButtonPressed();
 					e.setCanceled(true);
 				}
 			} else if (e.getGui() instanceof GuiScreenRealmsProxy) {
@@ -41,6 +41,10 @@ public abstract class ServerConnector {
 		mc.loadWorld(null);
 	}
 
+	public void onDisconnectButtonPressed() {
+		disconnect();
+	}
+
 	public String getDisconnectButtonText() {
 		return "menu.disconnect";
 	}
@@ -52,7 +56,13 @@ public abstract class ServerConnector {
 	public static ServerConnector forCurrentServer() {
 		if (Minecraft.getMinecraft().isIntegratedServerRunning()) {
 			MinecraftServer server = Minecraft.getMinecraft().getIntegratedServer();
-			return new ServerConnectorLocal(server.getFolderName(), server.getWorldName());
+			if (server instanceof ClientVirtualServer) {
+				ClientVirtualServer cvs = (ClientVirtualServer) server;
+				return new ServerConnectorCVW(cvs.getDimensionId(), cvs.getGameType(), cvs.getPreviousServer(),
+						cvs.getChunks(), cvs.getPlayerTag());
+			} else {
+				return new ServerConnectorLocal(server.getFolderName(), server.getWorldName());
+			}
 		} else if (Minecraft.getMinecraft().isConnectedToRealms()) {
 			return ServerConnectorRealms.forCurrentServer();
 		} else {

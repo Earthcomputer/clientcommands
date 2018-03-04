@@ -1,6 +1,8 @@
 clientcommands.task.timedOut=LongTask timed out, aborting all tasks
 clientcommands.task.alreadyRunning=Looks like there is already a task running! Try /cabort.
 
+cvw.toPreviousServer=Back to Previous Server
+
 enchCrack.state=Crack State: %s
 enchCrack.state.uncracked=Uncracked
 enchCrack.state.crackingEnchSeed=Cracking XP Seed
@@ -145,5 +147,8 @@ commands.ctemprule.get.usage=/ctemprule get <rule>
 commands.ctemprule.reset.success=TempRule %s has been reset to %s
 commands.ctemprule.reset.usage=/ctemprule reset <rule>
 commands.ctemprule.usage=/ctemprule <get|set|reset|list> ...
+
+commands.cvw.usage=/cvw <start|stop> [gamemode]
+commands.cvw.stop.notRunning=There is no CVW running
 
 key.specialAction=Special Action
