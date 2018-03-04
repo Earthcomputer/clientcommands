@@ -2,7 +2,12 @@
 
 ===== SETUP =====
 
-To build the mod:
+To install the mod:
+	1. Make sure you have Minecraft Forge installed
+	2. Go to the downloads page of this project and download the latest version of clientcommands
+	3. Copy the downloaded JAR into the mods folder
+
+To build the mod from source:
 	1. Clone this repository
 	2. Run `gradlew build` from the command line
 	3. The mod JAR file is in build/libs
@@ -85,3 +90,6 @@ Common problems with setup:
          side time (which is the time that matters for mob spawning etc.) is unaffected.
          `/ctime mock` is intended for builders to inspect their builds at different times of
          day.
+/cvw - (upcoming: 1.1) starts or stops a Client Virtual World (CVW). A CVW is basically a copy
+       of the world from the previous server, except you have cheats enabled. This could be
+       useful e.g. for testing out contraptions in creative mode.
