@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 
-version = "1.12.2-1.0.1"
+version = "1.12.2-20180304-snapshot"
 group = "net.earthcomputer.clientcommands"
 archivesBaseName = "clientcommands"
 
