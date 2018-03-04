@@ -1,15 +1,11 @@
 package net.earthcomputer.clientcommands.cvw;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.earthcomputer.clientcommands.ClientCommandsMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -23,12 +19,11 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveConverter;
 import net.minecraft.world.storage.ISaveFormat;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 
 public class ClientVirtualServer extends IntegratedServer {
-
-	private static final Logger LOGGER = LogManager.getLogger(ClientCommandsMod.MODID);
 
 	private int dimensionId;
 	private GameType gameType;
@@ -74,15 +69,16 @@ public class ClientVirtualServer extends IntegratedServer {
 				dimensionId == 0 ? chunks : new Long2ObjectArrayMap<>(0), playerTag);
 		overworld.init();
 		overworld.initialize(worldSettings);
-		overworld.addEventListener(new ServerWorldEventHandler(this, overworld));
-		MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(overworld));
 
-		ClientVirtualWorld world;
-		if (dimensionId == 0) {
-			world = overworld;
-		} else {
-			world = new ClientVirtualWorldMulti(this, dimensionId, worldSettings, chunks, playerTag, overworld);
-			world.init();
+		for (int dim : DimensionManager.getStaticDimensionIDs()) {
+			ClientVirtualWorld world;
+			if (dim == 0) {
+				world = overworld;
+			} else {
+				world = new ClientVirtualWorldMulti(this, dim, worldSettings,
+						dimensionId == dim ? chunks : new Long2ObjectArrayMap<>(0), playerTag, overworld);
+				world.init();
+			}
 			world.addEventListener(new ServerWorldEventHandler(this, world));
 			MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(world));
 		}
@@ -96,7 +92,6 @@ public class ClientVirtualServer extends IntegratedServer {
 
 	@Override
 	public void saveAllWorlds(boolean isSilent) {
-		LOGGER.info("Skipping world saving of CVW");
 	}
 
 	@Override
