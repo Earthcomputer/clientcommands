@@ -9,7 +9,6 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-
 version = "1.12.2-20180304-snapshot"
 group = "net.earthcomputer.clientcommands"
 archivesBaseName = "clientcommands"
@@ -32,6 +31,9 @@ minecraft {
     runDir = "run"
     
     mappings = "snapshot_20171003"
+    
+    replace '${version}', project.version
+    replace '${mcversion}', project.minecraft.version
 }
 
 processResources {

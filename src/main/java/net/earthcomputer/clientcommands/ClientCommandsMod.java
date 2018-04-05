@@ -27,10 +27,10 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
-@Mod(modid = ClientCommandsMod.MODID, version = ClientCommandsMod.VERSION, clientSideOnly = true)
+@Mod(modid = ClientCommandsMod.MODID, version = ClientCommandsMod.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.12,1.13)")
 public class ClientCommandsMod {
 	public static final String MODID = "clientcommands";
-	public static final String VERSION = "1.0.1.20180304";
+	public static final String VERSION = BuildConstants.VERSION;
 
 	@Instance(MODID)
 	public static ClientCommandsMod INSTANCE;
