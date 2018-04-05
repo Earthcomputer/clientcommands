@@ -13,6 +13,10 @@ import net.minecraft.launchwrapper.IClassTransformer;
 
 public class IntegratedServerRaceFixTransformer implements IClassTransformer {
 
+	static {
+		ClientCommandsLoadingPlugin.EXPECTED_TASKS.add("integratedServerRaceFix");
+	}
+
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) {
 		if (!"net.minecraft.network.NetHandlerPlayServer".equals(transformedName)) {
@@ -51,6 +55,7 @@ public class IntegratedServerRaceFixTransformer implements IClassTransformer {
 						if ("x".equals(methodInsn.name) || "func_71263_m".equals(methodInsn.name)
 								|| "initiateShutdown".equals(methodInsn.name)) {
 							method.instructions.set(insn, insn = new InsnNode(Opcodes.POP));
+							ClientCommandsLoadingPlugin.EXPECTED_TASKS.remove("integratedServerRaceFix");
 							break;
 						}
 					}

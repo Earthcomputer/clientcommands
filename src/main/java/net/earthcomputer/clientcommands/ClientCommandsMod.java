@@ -74,6 +74,8 @@ public class ClientCommandsMod {
 
 		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
 
+		EventManager.addPlayerTickListener(new CoreModSanityCheck());
+
 		MinecraftForge.EVENT_BUS.register(EventManager.INSTANCE);
 	}
 

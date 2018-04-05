@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 
 import net.earthcomputer.clientcommands.ToolDamageManager.ToolDamagedEvent;
 import net.earthcomputer.clientcommands.command.CommandRelog;
@@ -47,7 +47,7 @@ public class EventManager {
 
 	private static Listeners<ClientDisconnectionFromServerEvent> disconnectListeners = new Listeners<>();
 
-	public static void addDisconnectListener(Consumer<ClientDisconnectionFromServerEvent> listener) {
+	public static void addDisconnectListener(Listener<ClientDisconnectionFromServerEvent> listener) {
 		disconnectListeners.add(listener);
 	}
 
@@ -64,7 +64,7 @@ public class EventManager {
 
 	private static Listeners<ClientTickEvent> tickListeners = new Listeners<>();
 
-	public static void addTickListener(Consumer<ClientTickEvent> listener) {
+	public static void addTickListener(Listener<ClientTickEvent> listener) {
 		tickListeners.add(listener);
 	}
 
@@ -77,7 +77,7 @@ public class EventManager {
 
 	private static Listeners<PacketEvent.Outbound.Pre> outboundPacketPreListeners = new Listeners<>();
 
-	public static void addOutboundPacketPreListener(Consumer<PacketEvent.Outbound.Pre> listener) {
+	public static void addOutboundPacketPreListener(Listener<PacketEvent.Outbound.Pre> listener) {
 		outboundPacketPreListeners.add(listener);
 	}
 
@@ -99,7 +99,7 @@ public class EventManager {
 
 	private static Listeners<PacketEvent.Outbound.Post> outboundPacketPostListeners = new Listeners<>();
 
-	public static void addOutboundPacketPostListener(Consumer<PacketEvent.Outbound.Post> listener) {
+	public static void addOutboundPacketPostListener(Listener<PacketEvent.Outbound.Post> listener) {
 		outboundPacketPostListeners.add(listener);
 	}
 
@@ -118,7 +118,7 @@ public class EventManager {
 
 	private static Listeners<PacketEvent.Inbound.Pre> inboundPacketPreListeners = new Listeners<>();
 
-	public static void addInboundPacketPreListener(Consumer<PacketEvent.Inbound.Pre> listener) {
+	public static void addInboundPacketPreListener(Listener<PacketEvent.Inbound.Pre> listener) {
 		inboundPacketPreListeners.add(listener);
 	}
 
@@ -146,7 +146,7 @@ public class EventManager {
 
 	private static Listeners<PacketEvent.Inbound.Post> inboundPacketPostListeners = new Listeners<>();
 
-	public static void addInboundPacketPostListener(Consumer<PacketEvent.Inbound.Post> listener) {
+	public static void addInboundPacketPostListener(Listener<PacketEvent.Inbound.Post> listener) {
 		inboundPacketPostListeners.add(listener);
 	}
 
@@ -172,7 +172,7 @@ public class EventManager {
 
 	private static Listeners<GuiOpenEvent> guiOpenListeners = new Listeners<>();
 
-	public static void addGuiOpenListener(Consumer<GuiOpenEvent> listener) {
+	public static void addGuiOpenListener(Listener<GuiOpenEvent> listener) {
 		guiOpenListeners.add(listener);
 	}
 
@@ -185,7 +185,7 @@ public class EventManager {
 
 	private static Listeners<InitGuiEvent.Post> initGuiListeners = new Listeners<>();
 
-	public static void addInitGuiListener(Consumer<InitGuiEvent.Post> listener) {
+	public static void addInitGuiListener(Listener<InitGuiEvent.Post> listener) {
 		initGuiListeners.add(listener);
 	}
 
@@ -198,7 +198,7 @@ public class EventManager {
 
 	private static Listeners<ActionPerformedEvent.Pre> guiActionPerformedListeners = new Listeners<>();
 
-	public static void addGuiActionPerformedListener(Consumer<ActionPerformedEvent.Pre> listener) {
+	public static void addGuiActionPerformedListener(Listener<ActionPerformedEvent.Pre> listener) {
 		guiActionPerformedListeners.add(listener);
 	}
 
@@ -211,7 +211,7 @@ public class EventManager {
 
 	private static Listeners<DrawScreenEvent.Post> guiOverlayListeners = new Listeners<>();
 
-	public static void addGuiOverlayListener(Consumer<DrawScreenEvent.Post> listener) {
+	public static void addGuiOverlayListener(Listener<DrawScreenEvent.Post> listener) {
 		guiOverlayListeners.add(listener);
 	}
 
@@ -224,7 +224,7 @@ public class EventManager {
 
 	private static Listeners<ClientChatEvent> chatSentListeners = new Listeners<>();
 
-	public static void addChatSentListener(Consumer<ClientChatEvent> listener) {
+	public static void addChatSentListener(Listener<ClientChatEvent> listener) {
 		chatSentListeners.add(listener);
 	}
 
@@ -237,7 +237,7 @@ public class EventManager {
 
 	private static Listeners<ClientChatReceivedEvent> chatReceivedListeners = new Listeners<>();
 
-	public static void addChatReceivedListener(Consumer<ClientChatReceivedEvent> listener) {
+	public static void addChatReceivedListener(Listener<ClientChatReceivedEvent> listener) {
 		chatReceivedListeners.add(listener);
 	}
 
@@ -250,7 +250,7 @@ public class EventManager {
 
 	private static Listeners<EntityConstructing> entityConstructingListeners = new Listeners<>();
 
-	public static void addEntityConstructingListener(Consumer<EntityConstructing> listener) {
+	public static void addEntityConstructingListener(Listener<EntityConstructing> listener) {
 		entityConstructingListeners.add(listener);
 	}
 
@@ -263,7 +263,7 @@ public class EventManager {
 
 	private static Listeners<EntityJoinWorldEvent> entitySpawnListeners = new Listeners<>();
 
-	public static void addEntitySpawnListener(Consumer<EntityJoinWorldEvent> listener) {
+	public static void addEntitySpawnListener(Listener<EntityJoinWorldEvent> listener) {
 		entitySpawnListeners.add(listener);
 	}
 
@@ -278,7 +278,7 @@ public class EventManager {
 
 	private static Listeners<PlayerTickEvent> playerTickListeners = new Listeners<>();
 
-	public static void addPlayerTickListener(Consumer<PlayerTickEvent> listener) {
+	public static void addPlayerTickListener(Listener<PlayerTickEvent> listener) {
 		playerTickListeners.add(listener);
 	}
 
@@ -293,7 +293,7 @@ public class EventManager {
 
 	private static Listeners<LivingAttackEvent> livingAttackListeners = new Listeners<>();
 
-	public static void addLivingAttackListener(Consumer<LivingAttackEvent> listener) {
+	public static void addLivingAttackListener(Listener<LivingAttackEvent> listener) {
 		livingAttackListeners.add(listener);
 	}
 
@@ -306,7 +306,7 @@ public class EventManager {
 
 	private static Listeners<AnvilRepairEvent> anvilRepairListeners = new Listeners<>();
 
-	public static void addAnvilRepairListener(Consumer<AnvilRepairEvent> listener) {
+	public static void addAnvilRepairListener(Listener<AnvilRepairEvent> listener) {
 		anvilRepairListeners.add(listener);
 	}
 
@@ -321,7 +321,7 @@ public class EventManager {
 
 	private static Listeners<LeftClickBlock> attackBlockListeners = new Listeners<>();
 
-	public static void addAttackBlockListener(Consumer<LeftClickBlock> listener) {
+	public static void addAttackBlockListener(Listener<LeftClickBlock> listener) {
 		attackBlockListeners.add(listener);
 	}
 
@@ -336,7 +336,7 @@ public class EventManager {
 
 	private static Listeners<AttackEntityEvent> attackEntityListeners = new Listeners<>();
 
-	public static void addAttackEntityListener(Consumer<AttackEntityEvent> listener) {
+	public static void addAttackEntityListener(Listener<AttackEntityEvent> listener) {
 		attackEntityListeners.add(listener);
 	}
 
@@ -351,7 +351,7 @@ public class EventManager {
 
 	private static Listeners<RightClickBlock> useBlockListeners = new Listeners<>();
 
-	public static void addUseBlockListener(Consumer<RightClickBlock> listener) {
+	public static void addUseBlockListener(Listener<RightClickBlock> listener) {
 		useBlockListeners.add(listener);
 	}
 
@@ -366,7 +366,7 @@ public class EventManager {
 
 	private static Listeners<RightClickItem> useItemListeners = new Listeners<>();
 
-	public static void addUseItemListener(Consumer<RightClickItem> listener) {
+	public static void addUseItemListener(Listener<RightClickItem> listener) {
 		useItemListeners.add(listener);
 	}
 
@@ -381,7 +381,7 @@ public class EventManager {
 
 	private static Listeners<LivingEntityUseItemEvent.Stop> stopUseItemListeners = new Listeners<>();
 
-	public static void addStopUseItemListener(Consumer<LivingEntityUseItemEvent.Stop> listener) {
+	public static void addStopUseItemListener(Listener<LivingEntityUseItemEvent.Stop> listener) {
 		stopUseItemListeners.add(listener);
 	}
 
@@ -396,7 +396,7 @@ public class EventManager {
 
 	private static Listeners<EntityInteract> useEntityListeners = new Listeners<>();
 
-	public static void addUseEntityListener(Consumer<EntityInteract> listener) {
+	public static void addUseEntityListener(Listener<EntityInteract> listener) {
 		useEntityListeners.add(listener);
 	}
 
@@ -411,7 +411,7 @@ public class EventManager {
 
 	private static Listeners<ArrowLooseEvent> fireBowListeners = new Listeners<>();
 
-	public static void addFireBowListener(Consumer<ArrowLooseEvent> listener) {
+	public static void addFireBowListener(Listener<ArrowLooseEvent> listener) {
 		fireBowListeners.add(listener);
 	}
 
@@ -426,7 +426,7 @@ public class EventManager {
 
 	private static Listeners<ToolDamagedEvent.Pre> preDamageItemListeners = new Listeners<>();
 
-	public static void addPreDamageItemListener(Consumer<ToolDamagedEvent.Pre> listener) {
+	public static void addPreDamageItemListener(Listener<ToolDamagedEvent.Pre> listener) {
 		preDamageItemListeners.add(listener);
 	}
 
@@ -439,7 +439,7 @@ public class EventManager {
 
 	private static Listeners<ToolDamagedEvent.Post> postDamageItemListeners = new Listeners<>();
 
-	public static void addPostDamageItemListener(Consumer<ToolDamagedEvent.Post> listener) {
+	public static void addPostDamageItemListener(Listener<ToolDamagedEvent.Post> listener) {
 		postDamageItemListeners.add(listener);
 	}
 
@@ -450,15 +450,41 @@ public class EventManager {
 
 	// IMPLEMENTATION
 
+	@FunctionalInterface
+	public static interface Listener<E extends Event> {
+		void accept(E e);
+
+		default boolean isOneTime() {
+			return false;
+		}
+	}
+
 	private static class Listeners<E extends Event> {
-		private List<Consumer<E>> listeners = new ArrayList<>();
+		private List<Listener<E>> listeners = new ArrayList<>();
+		private List<Listener<E>> toAdd = new ArrayList<>();
+		private boolean invoking = false;
 
 		public void invoke(E e) {
-			listeners.forEach(l -> l.accept(e));
+			invoking = true;
+			Iterator<Listener<E>> itr = listeners.iterator();
+			while (itr.hasNext()) {
+				Listener<E> listener = itr.next();
+				listener.accept(e);
+				if (listener.isOneTime()) {
+					itr.remove();
+				}
+			}
+			invoking = false;
+			listeners.addAll(toAdd);
+			toAdd.clear();
 		}
 
-		public void add(Consumer<E> listener) {
-			listeners.add(listener);
+		public void add(Listener<E> listener) {
+			if (invoking) {
+				toAdd.add(listener);
+			} else {
+				listeners.add(listener);
+			}
 		}
 	}
 

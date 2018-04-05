@@ -62,6 +62,13 @@ public class NetHandlerTransformer implements IClassTransformer {
 			+ PACKET_MCP_DESC;
 	private static final String EVENT_MANAGER_POST_METHODS_DESC = "(" + NETWORK_MANAGER_DESC + PACKET_MCP_DESC + ")V";
 
+	static {
+		ClientCommandsLoadingPlugin.EXPECTED_TASKS.add("tfSendPacket1");
+		ClientCommandsLoadingPlugin.EXPECTED_TASKS.add("tfSendPacket2");
+		ClientCommandsLoadingPlugin.EXPECTED_TASKS.add("tfChannelRead0");
+		ClientCommandsLoadingPlugin.EXPECTED_TASKS.add("tfPacketThreadUtilRun");
+	}
+
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) {
 		if (basicClass == null) {
@@ -97,17 +104,20 @@ public class NetHandlerTransformer implements IClassTransformer {
 					|| method.name.equals(SENDPACKET_NOTCH_NAME)) {
 				if (method.desc.equals(SENDPACKET_MCP_DESC) || method.desc.equals(SENDPACKET_NOTCH_DESC)) {
 					transformSendPacketMethod(method);
+					ClientCommandsLoadingPlugin.EXPECTED_TASKS.remove("tfSendPacket1");
 				}
 			}
 			if (method.name.equals(SENDPACKET1_MCP_NAME) || method.name.equals(SENDPACKET1_SRG_NAME)
 					|| method.name.equals(SENDPACKET1_NOTCH_NAME)) {
 				if (method.desc.equals(SENDPACKET1_MCP_DESC) || method.desc.equals(SENDPACKET1_NOTCH_DESC)) {
 					transformSendPacketMethod(method);
+					ClientCommandsLoadingPlugin.EXPECTED_TASKS.remove("tfSendPacket2");
 				}
 			}
 			if (method.name.equals(CHANNELREAD0_NAME)) {
 				if (method.desc.equals(CHANNELREAD0_DESC)) {
 					transformChannelRead0(method);
+					ClientCommandsLoadingPlugin.EXPECTED_TASKS.remove("tfChannelRead0");
 				}
 			}
 		}
@@ -254,6 +264,7 @@ public class NetHandlerTransformer implements IClassTransformer {
 			if (method.name.equals("run")) {
 				if (method.desc.equals("()V")) {
 					transformPacketThreadUtilRun(clazz.name, method, packetField);
+					ClientCommandsLoadingPlugin.EXPECTED_TASKS.remove("tfPacketThreadUtilRun");
 				}
 			}
 		}
