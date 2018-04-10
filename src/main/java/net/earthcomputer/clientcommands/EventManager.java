@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import net.earthcomputer.clientcommands.ToolDamageManager.ToolDamagedEvent;
@@ -461,30 +460,18 @@ public class EventManager {
 
 	private static class Listeners<E extends Event> {
 		private List<Listener<E>> listeners = new ArrayList<>();
-		private List<Listener<E>> toAdd = new ArrayList<>();
-		private boolean invoking = false;
 
 		public void invoke(E e) {
-			invoking = true;
-			Iterator<Listener<E>> itr = listeners.iterator();
-			while (itr.hasNext()) {
-				Listener<E> listener = itr.next();
+			for (Listener<E> listener : new ArrayList<>(listeners)) {
 				listener.accept(e);
 				if (listener.isOneTime()) {
-					itr.remove();
+					listeners.remove(listener);
 				}
 			}
-			invoking = false;
-			listeners.addAll(toAdd);
-			toAdd.clear();
 		}
 
 		public void add(Listener<E> listener) {
-			if (invoking) {
-				toAdd.add(listener);
-			} else {
-				listeners.add(listener);
-			}
+			listeners.add(listener);
 		}
 	}
 

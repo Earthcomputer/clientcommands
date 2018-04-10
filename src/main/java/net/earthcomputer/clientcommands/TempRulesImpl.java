@@ -48,6 +48,23 @@ public class TempRulesImpl {
 				}
 			}
 		});
+		EventManager.addPostDamageItemListener(e -> {
+			if (TempRules.TOOL_BREAK_PROTECTION.getValue()) {
+				// fix client-server desync
+				e.getItemStack().setItemDamage(e.getItemStack().getItemDamage() + e.getDamageAmount());
+				if (EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, e.getItemStack()) > 0) {
+					if (e.getEntityPlayer().openContainer == e.getEntityPlayer().inventoryContainer) {
+						// Pickup the item and put it back again to refresh durability
+						for (int i = 0; i < 2; i++) {
+							Minecraft.getMinecraft().playerController.windowClick(
+									e.getEntityPlayer().openContainer.windowId,
+									e.getEntityPlayer().inventory.currentItem, 0, ClickType.PICKUP,
+									e.getEntityPlayer());
+						}
+					}
+				}
+			}
+		});
 	}
 
 }
