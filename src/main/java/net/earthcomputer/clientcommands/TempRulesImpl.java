@@ -13,9 +13,8 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
 import net.minecraft.inventory.ClickType;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 
 public class TempRulesImpl {
@@ -79,9 +78,9 @@ public class TempRulesImpl {
 				// Test conditions for instant-mining
 				PlayerControllerMP controller = Minecraft.getMinecraft().playerController;
 				IBlockState state = e.getWorld().getBlockState(e.getPos());
-				boolean slowMine = state.getMaterial() != Material.AIR
+				boolean canInstaMine = state.getMaterial() != Material.AIR
 						&& state.getPlayerRelativeBlockHardness(e.getEntityPlayer(), e.getWorld(), e.getPos()) >= 1;
-				if (controller.isNotCreative() && !slowMine) {
+				if (controller.isNotCreative() && canInstaMine) {
 					blocksToUpdate.add(e.getPos());
 				}
 			}
@@ -89,13 +88,13 @@ public class TempRulesImpl {
 		EventManager.addPlayerTickListener(e -> {
 			if (!blocksToUpdate.isEmpty()) {
 				for (BlockPos pos : blocksToUpdate) {
-					// Update block by right clicking
-					Minecraft.getMinecraft().getConnection().sendPacket(
-							new CPacketPlayerTryUseItemOnBlock(pos, EnumFacing.DOWN, EnumHand.MAIN_HAND, 0, 0, 0));
+					// Cause the server to re-send the block
+					Minecraft.getMinecraft().getConnection().sendPacket(new CPacketPlayerDigging(
+							CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, pos, EnumFacing.DOWN));
 				}
 				blocksToUpdate.clear();
 			}
 		});
 	}
-	
+
 }
