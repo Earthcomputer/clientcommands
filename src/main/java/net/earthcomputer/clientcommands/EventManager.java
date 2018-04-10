@@ -283,7 +283,7 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void onPlayerTick(PlayerTickEvent e) {
-		if (e.side == Side.CLIENT && e.phase == TickEvent.Phase.END) {
+		if (e.player == Minecraft.getMinecraft().player && e.phase == TickEvent.Phase.END) {
 			playerTickListeners.invoke(e);
 		}
 	}
