@@ -1,13 +1,22 @@
 package net.earthcomputer.clientcommands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
 import net.minecraft.inventory.ClickType;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 
 public class TempRulesImpl {
 
@@ -17,6 +26,7 @@ public class TempRulesImpl {
 	public static void registerEvents() {
 		initBlockReachDistance();
 		initToolBreakProtection();
+		initGhostBlockFix();
 	}
 
 	private static void initBlockReachDistance() {
@@ -61,4 +71,31 @@ public class TempRulesImpl {
 		});
 	}
 
+	private static List<BlockPos> blocksToUpdate = new ArrayList<>();
+
+	private static void initGhostBlockFix() {
+		EventManager.addAttackBlockListener(e -> {
+			if (TempRules.GHOST_BLOCK_FIX.getValue()) {
+				// Test conditions for instant-mining
+				PlayerControllerMP controller = Minecraft.getMinecraft().playerController;
+				IBlockState state = e.getWorld().getBlockState(e.getPos());
+				boolean slowMine = state.getMaterial() != Material.AIR
+						&& state.getPlayerRelativeBlockHardness(e.getEntityPlayer(), e.getWorld(), e.getPos()) >= 1;
+				if (controller.isNotCreative() && !slowMine) {
+					blocksToUpdate.add(e.getPos());
+				}
+			}
+		});
+		EventManager.addPlayerTickListener(e -> {
+			if (!blocksToUpdate.isEmpty()) {
+				for (BlockPos pos : blocksToUpdate) {
+					// Update block by right clicking
+					Minecraft.getMinecraft().getConnection().sendPacket(
+							new CPacketPlayerTryUseItemOnBlock(pos, EnumFacing.DOWN, EnumHand.MAIN_HAND, 0, 0, 0));
+				}
+				blocksToUpdate.clear();
+			}
+		});
+	}
+	
 }
