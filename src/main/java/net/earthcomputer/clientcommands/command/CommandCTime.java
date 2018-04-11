@@ -25,13 +25,31 @@ import net.minecraft.world.World;
 
 public class CommandCTime extends ClientCommandBase {
 
+	private static long lastMockedTime;
+	private static boolean lastMockedDoDaylightCycle;
+
 	static {
 		EventManager.addInboundPacketPreListener(e -> {
 			Packet<?> packet = e.getPacket();
 			if (packet instanceof SPacketTimeUpdate) {
 				if (TempRules.MOCKING_TIME.getValue()) {
+					lastMockedTime = Minecraft.getMinecraft().world.getWorldTime();
+					lastMockedDoDaylightCycle = Minecraft.getMinecraft().world.getGameRules()
+							.getBoolean("doDaylightCycle");
 					e.setCanceled(true);
 				}
+			}
+		});
+		EventManager.addConnectListener(e -> {
+			if (TempRules.MOCKING_TIME.getValue()) {
+				long worldTime = lastMockedTime;
+				if (!lastMockedDoDaylightCycle) {
+					worldTime = -worldTime;
+					if (worldTime == 0) {
+						worldTime = -1;
+					}
+				}
+				Minecraft.getMinecraft().world.setWorldTime(worldTime);
 			}
 		});
 	}

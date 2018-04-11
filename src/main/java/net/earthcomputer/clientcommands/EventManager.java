@@ -32,6 +32,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -40,6 +41,23 @@ public class EventManager {
 	public static final EventManager INSTANCE = new EventManager();
 
 	private EventManager() {
+	}
+
+	// DISCONNECT EXCEPT RELOG
+
+	private static Listeners<ClientDisconnectionFromServerEvent> disconnectExceptRelogListeners = new Listeners<>();
+
+	public static void addDisconnectExceptRelogListener(Listener<ClientDisconnectionFromServerEvent> listener) {
+		disconnectExceptRelogListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onDisconnectExceptRelog(ClientDisconnectionFromServerEvent e) {
+		if (CommandRelog.isRelogging) {
+			CommandRelog.isRelogging = false;
+		} else {
+			disconnectExceptRelogListeners.invoke(e);
+		}
 	}
 
 	// DISCONNECT
@@ -52,10 +70,33 @@ public class EventManager {
 
 	@SubscribeEvent
 	public void onDisconnect(ClientDisconnectionFromServerEvent e) {
-		if (CommandRelog.isRelogging) {
-			CommandRelog.isRelogging = false;
-		} else {
-			disconnectListeners.invoke(e);
+		disconnectListeners.invoke(e);
+	}
+
+	// CONNECT
+
+	private static boolean connecting = false;
+	private static Listeners<EntityJoinWorldEvent> connectListeners = new Listeners<>();
+
+	public static void addConnectListener(Listener<EntityJoinWorldEvent> listener) {
+		connectListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onConnectedToServer(ClientConnectedToServerEvent e) {
+		connecting = true;
+	}
+
+	@SubscribeEvent
+	public void onDisconnectedFromServer(ClientDisconnectionFromServerEvent e) {
+		connecting = false;
+	}
+
+	@SubscribeEvent
+	public void onConnect(EntityJoinWorldEvent e) {
+		if (connecting && e.getEntity() == Minecraft.getMinecraft().player) {
+			connectListeners.invoke(e);
+			connecting = false;
 		}
 	}
 

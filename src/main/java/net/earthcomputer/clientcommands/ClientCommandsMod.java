@@ -61,7 +61,7 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandTempRule());
 		ClientCommandHandler.instance.registerCommand(new CommandCEnchant());
 		ClientCommandHandler.instance.registerCommand(new CommandCTime());
-		//ClientCommandHandler.instance.registerCommand(new CommandCVW());
+		// ClientCommandHandler.instance.registerCommand(new CommandCVW());
 	}
 
 	private void registerEventStuff() {
@@ -71,7 +71,7 @@ public class ClientCommandsMod {
 		SpecialActionKey.registerEvents();
 		ServerConnector.registerEvents();
 
-		EventManager.addDisconnectListener(e -> TempRules.resetToDefault());
+		EventManager.addDisconnectExceptRelogListener(e -> TempRules.resetToDefault());
 
 		EventManager.addPlayerTickListener(new CoreModSanityCheck());
 
