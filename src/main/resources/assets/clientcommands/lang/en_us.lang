@@ -151,4 +151,14 @@ commands.ctemprule.usage=/ctemprule <get|set|reset|list> ...
 commands.cvw.usage=/cvw <start|stop> [gamemode]
 commands.cvw.stop.notRunning=There is no CVW running
 
+commands.cweather.usage=/cweather [mock|unmock|info] [...]
+commands.cweather.mock.usage=/cweather mock <clear|rain|thunder> [strength]
+commands.cweather.mock.clear.success=Mocking clear weather. Use /cweather unmock to return to normal
+commands.cweather.mock.rain.success=Mocking rainy weather. Use /cweather unmock to return to normal
+commands.cweather.mock.thunder.success=Mocking rain and thunder. Use /cweather unmock to return to normal
+commands.cweather.unmock.success=No longer mocking the weather
+commands.cweather.info.clear=The weather is clear
+commands.cweather.info.rain=The weather is rain with strength %f
+commands.cweather.info.thunder=The weather is rain and thunder with strength %f
+
 key.specialAction=Special Action

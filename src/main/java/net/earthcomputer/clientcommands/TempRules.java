@@ -30,6 +30,8 @@ public class TempRules {
 			Boolean.FALSE);
 	public static final Rule<Boolean> MOCKING_TIME = registerRule("mockingTime", DataType.BOOLEAN, Boolean.FALSE)
 			.setReadOnly();
+	public static final Rule<Boolean> MOCKING_WEATHER = registerRule("mockingWeather", DataType.BOOLEAN, Boolean.FALSE)
+			.setReadOnly();
 	public static final Rule<Boolean> GHOST_BLOCK_FIX = registerRule("ghostBlockFix", DataType.BOOLEAN, Boolean.TRUE);
 
 	public static boolean hasRule(String name) {
