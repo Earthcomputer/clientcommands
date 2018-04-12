@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import java.util.Collections;
 import java.util.List;
 
-import net.earthcomputer.clientcommands.CreativeInventoryListener;
+import net.earthcomputer.clientcommands.network.CreativeInventoryListener;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;

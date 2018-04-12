@@ -2,11 +2,11 @@ package net.earthcomputer.clientcommands.command;
 
 import java.util.List;
 
-import net.earthcomputer.clientcommands.DelegatingContainer;
-import net.earthcomputer.clientcommands.Ptr;
 import net.earthcomputer.clientcommands.task.GuiBlocker;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.DelegatingContainer;
+import net.earthcomputer.clientcommands.util.Ptr;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.client.Minecraft;

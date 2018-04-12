@@ -40,7 +40,7 @@ public class ProxyTransformer implements IClassTransformer {
 			for (FieldNode field : node.fields) {
 				if (field.visibleAnnotations != null) {
 					for (AnnotationNode ann : field.visibleAnnotations) {
-						if ("Lnet/earthcomputer/clientcommands/Proxy;".equals(ann.desc)) {
+						if ("Lnet/earthcomputer/clientcommands/util/Proxy;".equals(ann.desc)) {
 							if (proxyField != null) {
 								throw new AssertionError("There should not be more than one proxy field");
 							}

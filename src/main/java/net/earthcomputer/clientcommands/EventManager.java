@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.earthcomputer.clientcommands.ToolDamageManager.ToolDamagedEvent;
 import net.earthcomputer.clientcommands.command.CommandRelog;
+import net.earthcomputer.clientcommands.network.PacketEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.EnumPacketDirection;
 import net.minecraft.network.NetworkManager;
