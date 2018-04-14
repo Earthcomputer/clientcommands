@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.earthcomputer.clientcommands.network.NetUtils;
 import net.minecraft.block.material.Material;
@@ -35,12 +35,11 @@ public class TempRulesImpl {
 		});
 	}
 
-	private static AtomicInteger hotbarSlotToUpdate = new AtomicInteger(-1);
+	private static AtomicBoolean isDesynced = new AtomicBoolean(false);
 
 	private static void initToolBreakProtection() {
 		EventManager.addPlayerTickListener(e -> {
-			int hotbarSlot = hotbarSlotToUpdate.getAndSet(-1);
-			if (hotbarSlot != -1) {
+			if (isDesynced.getAndSet(false)) {
 				NetUtils.resyncInventory(slot -> slot.inventory == Minecraft.getMinecraft().player.inventory);
 			}
 		});
@@ -58,7 +57,7 @@ public class TempRulesImpl {
 				// fix client-server desync
 				e.getItemStack().setItemDamage(e.getItemStack().getItemDamage() + e.getDamageAmount());
 				if (EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, e.getItemStack()) > 0) {
-					hotbarSlotToUpdate.set(e.getEntityPlayer().inventory.currentItem);
+					isDesynced.set(true);
 				}
 			}
 		});
