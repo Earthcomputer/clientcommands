@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands;
 
 import org.lwjgl.input.Keyboard;
 
+import net.earthcomputer.clientcommands.network.NetUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.KeyBinding;
@@ -44,8 +45,8 @@ public class SpecialActionKey {
 			if (packet instanceof CPacketPlayerTryUseItemOnBlock) {
 				if (isSpecialActionKeyPressed()) {
 					EntityPlayerSP player = Minecraft.getMinecraft().player;
-					Minecraft.getMinecraft().getConnection().sendPacket(new CPacketPlayer.Rotation(
-							MathHelper.wrapDegrees(player.rotationYaw + 180), -player.rotationPitch, player.onGround));
+					NetUtils.sendPacket(new CPacketPlayer.Rotation(MathHelper.wrapDegrees(player.rotationYaw + 180),
+							-player.rotationPitch, player.onGround));
 				}
 			}
 		});
@@ -54,7 +55,7 @@ public class SpecialActionKey {
 			if (packet instanceof CPacketPlayerTryUseItemOnBlock) {
 				if (isSpecialActionKeyPressed()) {
 					EntityPlayerSP player = Minecraft.getMinecraft().player;
-					Minecraft.getMinecraft().getConnection().sendPacket(
+					NetUtils.sendPacket(
 							new CPacketPlayer.Rotation(player.rotationYaw, player.rotationPitch, player.onGround));
 				}
 			}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.earthcomputer.clientcommands.network.NetUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -12,7 +13,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
-import net.minecraft.inventory.ClickType;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -41,13 +41,7 @@ public class TempRulesImpl {
 		EventManager.addPlayerTickListener(e -> {
 			int hotbarSlot = hotbarSlotToUpdate.getAndSet(-1);
 			if (hotbarSlot != -1) {
-				if (e.player.openContainer == e.player.inventoryContainer) {
-					// Pickup the item and put it back again to refresh durability
-					for (int i = 0; i < 2; i++) {
-						Minecraft.getMinecraft().playerController.windowClick(e.player.openContainer.windowId,
-								hotbarSlot, 0, ClickType.PICKUP, e.player);
-					}
-				}
+				NetUtils.resyncInventory(slot -> slot.inventory == Minecraft.getMinecraft().player.inventory);
 			}
 		});
 		EventManager.addPreDamageItemListener(e -> {
@@ -89,8 +83,8 @@ public class TempRulesImpl {
 			if (!blocksToUpdate.isEmpty()) {
 				for (BlockPos pos : blocksToUpdate) {
 					// Cause the server to re-send the block
-					Minecraft.getMinecraft().getConnection().sendPacket(new CPacketPlayerDigging(
-							CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, pos, EnumFacing.DOWN));
+					NetUtils.sendPacket(new CPacketPlayerDigging(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, pos,
+							EnumFacing.DOWN));
 				}
 				blocksToUpdate.clear();
 			}

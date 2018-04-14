@@ -27,7 +27,7 @@ public class CoreModSanityCheck implements Listener<PlayerTickEvent> {
 	}
 
 	@Override
-	public boolean isOneTime() {
+	public boolean wasFinalAction() {
 		return true;
 	}
 

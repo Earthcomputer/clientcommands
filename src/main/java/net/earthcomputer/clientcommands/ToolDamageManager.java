@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.earthcomputer.clientcommands.network.NetUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.BlockStructure;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -69,7 +69,7 @@ public class ToolDamageManager {
 				ItemStack elytra = player.inventory.armorItemInSlot(2);
 				if (!elytra.isEmpty() && elytra.getItem() == Items.ELYTRA) {
 					if (postToolDamaged(player, elytra, 1)) {
-						((EntityPlayerSP) player).connection.sendPacket(
+						NetUtils.sendPacket(
 								new CPacketEntityAction(player, CPacketEntityAction.Action.START_FALL_FLYING));
 					}
 				}

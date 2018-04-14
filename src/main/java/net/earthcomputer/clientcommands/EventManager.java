@@ -495,7 +495,7 @@ public class EventManager {
 	public static interface Listener<E extends Event> {
 		void accept(E e);
 
-		default boolean isOneTime() {
+		default boolean wasFinalAction() {
 			return false;
 		}
 	}
@@ -506,7 +506,7 @@ public class EventManager {
 		public void invoke(E e) {
 			for (Listener<E> listener : new ArrayList<>(listeners)) {
 				listener.accept(e);
-				if (listener.isOneTime()) {
+				if (listener.wasFinalAction()) {
 					listeners.remove(listener);
 				}
 			}
