@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import net.earthcomputer.clientcommands.EnchantmentCracker;
 import net.earthcomputer.clientcommands.EnchantmentCracker.EnchantManipulationStatus;
-import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -33,11 +32,6 @@ public class CommandCEnchant extends ClientCommandBase {
 	@Override
 	public String getUsage(ICommandSender sender) {
 		return "commands.cenchant.usage";
-	}
-
-	@Override
-	public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
-		return TempRules.ENCHANTING_CRACK_STATE.getValue() == EnchantmentCracker.EnumCrackState.CRACKED;
 	}
 
 	@Override

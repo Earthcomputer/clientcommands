@@ -20,10 +20,10 @@ public class TempRules {
 	private static Map<String, Rule<?>> rules = new HashMap<>();
 
 	public static final Rule<Boolean> ENCHANTING_PREDICTION = registerRule("enchantingPrediction", DataType.BOOLEAN,
-			Boolean.FALSE).setHidden();
+			Boolean.FALSE);
 	public static final Rule<EnchantmentCracker.EnumCrackState> ENCHANTING_CRACK_STATE = registerRule(
 			"enchantingCrackState", EnumDataType.of(EnchantmentCracker.EnumCrackState.class),
-			EnchantmentCracker.EnumCrackState.UNCRACKED).setReadOnly().setHidden();
+			EnchantmentCracker.EnumCrackState.UNCRACKED).setReadOnly();
 	public static final Rule<Double> BLOCK_REACH_DISTANCE = registerRule("blockReachDistance", DataType.DOUBLE.min(0),
 			5.0);
 	public static final Rule<Boolean> TOOL_BREAK_PROTECTION = registerRule("toolBreakProtection", DataType.BOOLEAN,
