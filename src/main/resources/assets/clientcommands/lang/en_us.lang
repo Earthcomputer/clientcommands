@@ -148,6 +148,12 @@ commands.ctemprule.reset.success=TempRule %s has been reset to %s
 commands.ctemprule.reset.usage=/ctemprule reset <rule>
 commands.ctemprule.usage=/ctemprule <get|set|reset|list> ...
 
+commands.ctick.usage=/ctick <client|server> <health>
+commands.ctick.measuring=Measuring...
+commands.ctick.tps=Ticks per second = %s
+commands.ctick.mspt=Milliseconds per tick = %s
+commands.ctick.mspt.inaccurate=MSPT is inaccurate above 20TPS
+
 commands.cvw.usage=/cvw <start|stop> [gamemode]
 commands.cvw.stop.notRunning=There is no CVW running
 

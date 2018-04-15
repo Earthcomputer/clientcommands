@@ -32,7 +32,9 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -105,13 +107,46 @@ public class EventManager {
 
 	private static Listeners<ClientTickEvent> tickListeners = new Listeners<>();
 
+	private static Listeners<ClientTickEvent> endTickListeners = new Listeners<>();
+
 	public static void addTickListener(Listener<ClientTickEvent> listener) {
 		tickListeners.add(listener);
 	}
 
+	public static void addEndTickListener(Listener<ClientTickEvent> listener) {
+		endTickListeners.add(listener);
+	}
+
 	@SubscribeEvent
 	public void onTick(ClientTickEvent e) {
-		tickListeners.invoke(e);
+		if (e.phase == Phase.START) {
+			tickListeners.invoke(e);
+		} else {
+			endTickListeners.invoke(e);
+		}
+	}
+
+	// SERVER TICK
+
+	private static Listeners<ServerTickEvent> serverTickListeners = new Listeners<>();
+
+	private static Listeners<ServerTickEvent> serverEndTickListeners = new Listeners<>();
+
+	public static void addServerTickListener(Listener<ServerTickEvent> listener) {
+		serverTickListeners.add(listener);
+	}
+
+	public static void addServerEndTickListener(Listener<ServerTickEvent> listener) {
+		serverEndTickListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onServerTick(ServerTickEvent e) {
+		if (e.phase == Phase.START) {
+			serverTickListeners.invoke(e);
+		} else {
+			serverEndTickListeners.invoke(e);
+		}
 	}
 
 	// OUTBOUND PACKET PRE

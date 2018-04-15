@@ -17,6 +17,7 @@ import net.earthcomputer.clientcommands.command.CommandLook;
 import net.earthcomputer.clientcommands.command.CommandNote;
 import net.earthcomputer.clientcommands.command.CommandRelog;
 import net.earthcomputer.clientcommands.command.CommandTempRule;
+import net.earthcomputer.clientcommands.command.CommandTick;
 import net.earthcomputer.clientcommands.cvw.ServerConnector;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -64,6 +65,7 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandCTime());
 		// ClientCommandHandler.instance.registerCommand(new CommandCVW());
 		ClientCommandHandler.instance.registerCommand(new CommandCWeather());
+		ClientCommandHandler.instance.registerCommand(new CommandTick());
 	}
 
 	private void registerEventStuff() {
