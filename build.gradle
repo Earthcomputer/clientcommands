@@ -9,7 +9,13 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.12-20180411-snapshot"
+file("build.properties").withReader {
+	def prop = new Properties()
+	prop.load(it)
+	project.ext.config = new ConfigSlurper().parse prop
+}
+
+version = config.clientcommandsVersion
 group = "net.earthcomputer.clientcommands"
 archivesBaseName = "clientcommands"
 
