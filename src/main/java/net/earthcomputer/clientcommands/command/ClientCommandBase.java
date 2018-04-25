@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
+import net.minecraft.command.CommandSenderWrapper;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -14,6 +15,16 @@ import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.client.IClientCommand;
 
 public abstract class ClientCommandBase extends CommandBase implements IClientCommand {
+
+	protected static ICommandSender correctSender(ICommandSender sender) {
+		return new CommandSenderWrapper(sender, sender.getPositionVector(), sender.getPosition().add(-0.5, 0, -0.5), 0,
+				sender.getCommandSenderEntity(), true) {
+			@Override
+			public boolean canUseCommand(int permLevel, String commandName) {
+				return sender.canUseCommand(permLevel, commandName);
+			}
+		};
+	}
 
 	@Override
 	public boolean checkPermission(MinecraftServer p_checkPermission_1_, ICommandSender p_checkPermission_2_) {

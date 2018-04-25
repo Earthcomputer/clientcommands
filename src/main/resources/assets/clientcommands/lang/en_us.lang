@@ -67,6 +67,9 @@ commands.ccalc.usage=/ccalc <expression>
 
 commands.cclear.usage=/cclear [item] [data] [maxCount] [dataTag]
 
+commands.cclone.usage=/cclone <x1> <y1> <z1> <x2> <y2> <z2> <x> <y> <z> [maskMode] [cloneMode] [block] [state]
+commands.cclone.overlapNotSupported=The cclone command does not support overlap
+
 commands.cenchant.success=Starting enchantment manipulation
 commands.cenchant.unknownEnchantment=Unknown enchantment %s
 commands.cenchant.usage=/cenchant <item> [(<with|without> <enchantment> <level>)...]
@@ -103,6 +106,8 @@ commands.ctime.mock.success=Mocking from time %d. Use /ctime unmock to return to
 commands.ctime.unmock.success=No longer mocking the time
 commands.ctime.mock.usage=/ctime mock <daytime> [doDaylightCycle]
 commands.ctime.usage=/ctime [daytime|day|gametime|info|mock|unmock] [...]
+
+commands.cfill.usage=/cfill <x1> <y1> <z1> <x2> <y2> <z2> <block> [state] [oldBlockHandling] [dataTag]
 
 commands.cfind.success=%d entities matched your query
 commands.cfind.found.left=Found %1$s at

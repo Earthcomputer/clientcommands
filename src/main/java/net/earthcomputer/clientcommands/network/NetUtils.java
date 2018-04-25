@@ -10,6 +10,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.client.CPacketClickWindow;
 
 public class NetUtils {
@@ -38,6 +39,13 @@ public class NetUtils {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Sends a message in chat to the server
+	 */
+	public static void sendChatMessage(String message) {
+		sendPacket(new CPacketChatMessage(message));
 	}
 
 }
