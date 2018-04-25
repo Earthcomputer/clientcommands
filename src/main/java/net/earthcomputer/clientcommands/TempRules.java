@@ -33,6 +33,7 @@ public class TempRules {
 	public static final Rule<Boolean> MOCKING_WEATHER = registerRule("mockingWeather", DataType.BOOLEAN, Boolean.FALSE)
 			.setReadOnly();
 	public static final Rule<Boolean> GHOST_BLOCK_FIX = registerRule("ghostBlockFix", DataType.BOOLEAN, Boolean.FALSE);
+	public static final Rule<Double> CALC_ANSWER = registerRule("calcAns", DataType.DOUBLE, 0.0).setReadOnly();
 
 	public static boolean hasRule(String name) {
 		return rules.containsKey(name);

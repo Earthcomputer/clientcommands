@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.DoubleSupplier;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.ToDoubleFunction;
 
+import net.earthcomputer.clientcommands.TempRules;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -20,12 +22,13 @@ import net.minecraft.util.text.TextFormatting;
 
 public class CommandCalc extends ClientCommandBase {
 
-	private static final Map<String, Double> CONSTANTS = new HashMap<>();
+	private static final Map<String, DoubleSupplier> VARIABLES = new HashMap<>();
 	private static final Map<String, ToDoubleFunction<double[]>> FUNCTIONS = new HashMap<>();
 
 	static {
-		CONSTANTS.put("pi", Math.PI);
-		CONSTANTS.put("e", Math.E);
+		VARIABLES.put("pi", () -> Math.PI);
+		VARIABLES.put("e", () -> Math.E);
+		VARIABLES.put("ans", TempRules.CALC_ANSWER::getValue);
 
 		FUNCTIONS.put("sqrt", new SimpleFunction("sqrt", Math::sqrt));
 		FUNCTIONS.put("abs", new SimpleFunction("abs", Math::abs));
@@ -158,6 +161,8 @@ public class CommandCalc extends ClientCommandBase {
 		} catch (ArithmeticException e) {
 			throw new CommandException("commands.ccalc.mathError", e.getMessage());
 		}
+
+		TempRules.CALC_ANSWER.setValue(ans);
 
 		// Output the formatted answer
 		if (ans > 0 && ans % 1 == 0 && Double.isFinite(ans)) {
@@ -339,13 +344,13 @@ public class CommandCalc extends ClientCommandBase {
 				// if it's numerical, it's a number
 				return new NumberTerm(tokenizer.nval);
 			case StreamTokenizer.TT_WORD:
-				// if it's a word, it's either a constant or a function
-				Double constVal = CONSTANTS.get(tokenizer.sval.toLowerCase(Locale.ENGLISH));
-				if (constVal == null) {
+				// if it's a word, it's either a variable or a function
+				DoubleSupplier supplier = VARIABLES.get(tokenizer.sval.toLowerCase(Locale.ENGLISH));
+				if (supplier == null) {
 					tokenizer.pushBack();
 					return FunctionTerm.parse(tokenizer);
 				} else {
-					return new NumberTerm(constVal);
+					return new NumberTerm(supplier.getAsDouble());
 				}
 			case '(':
 				// if it's an open parenthesis, it's a parenthesized nested expression
