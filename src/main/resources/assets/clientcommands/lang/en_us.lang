@@ -142,6 +142,11 @@ commands.cnote.usage=/cnote <message>
 
 commands.crelog.usage=/crelog
 
+commands.crender.usage=/crender <enable|disable> <entities> [type...]
+commands.crender.entities.unknown=Unknown entity %s
+commands.crender.entities.enable.success=Enabled rendering for %s entities
+commands.crender.entities.disable.success=Disabled rendering for %s entities
+
 commands.ctemprule.unknownRule=No such TempRule as %s
 commands.ctemprule.readOnly=Cannot modify read-only TempRule %s
 commands.ctemprule.list.success=%d TempRules available

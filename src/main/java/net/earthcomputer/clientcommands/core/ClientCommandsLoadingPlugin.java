@@ -22,7 +22,7 @@ public class ClientCommandsLoadingPlugin implements IFMLLoadingPlugin {
 	public String[] getASMTransformerClass() {
 		EXPECTED_TASKS.remove("loadCoreMod");
 		return new String[] { ProxyTransformer.class.getName(), NetHandlerTransformer.class.getName(),
-				IntegratedServerRaceFixTransformer.class.getName() };
+				IntegratedServerRaceFixTransformer.class.getName(), RenderManagerTransformer.class.getName() };
 	}
 
 	@Override
