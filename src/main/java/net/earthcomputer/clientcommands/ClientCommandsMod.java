@@ -19,6 +19,8 @@ import net.earthcomputer.clientcommands.command.CommandLook;
 import net.earthcomputer.clientcommands.command.CommandNote;
 import net.earthcomputer.clientcommands.command.CommandRelog;
 import net.earthcomputer.clientcommands.command.CommandRender;
+import net.earthcomputer.clientcommands.command.CommandSelect;
+import net.earthcomputer.clientcommands.command.CommandStack;
 import net.earthcomputer.clientcommands.command.CommandTempRule;
 import net.earthcomputer.clientcommands.command.CommandTick;
 import net.earthcomputer.clientcommands.cvw.ServerConnector;
@@ -73,6 +75,8 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandCFill());
 		ClientCommandHandler.instance.registerCommand(new CommandCClone());
 		ClientCommandHandler.instance.registerCommand(new CommandRender());
+		ClientCommandHandler.instance.registerCommand(new CommandSelect());
+		ClientCommandHandler.instance.registerCommand(new CommandStack());
 	}
 
 	private void registerEventStuff() {

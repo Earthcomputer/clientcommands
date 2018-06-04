@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import net.earthcomputer.clientcommands.WorldEditSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -51,6 +52,37 @@ public abstract class ClientCommandBase extends CommandBase implements IClientCo
 		text.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
 				new TextComponentString(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()))));
 		return text;
+	}
+
+	protected static SelectionInfo parseSelectionInfo(ICommandSender sender, String[] args, int index)
+			throws CommandException {
+		try {
+			if ("selection".equals(args[index])) {
+				if (WorldEditSettings.hasSelection()) {
+					return new SelectionInfo(WorldEditSettings.getSelectFrom(), WorldEditSettings.getSelectTo(), 1);
+				} else {
+					throw new CommandException("commands.generic.noSelection");
+				}
+			} else {
+				BlockPos from = parseBlockPos(sender, args, index, false);
+				BlockPos to = parseBlockPos(sender, args, index + 3, false);
+				return new SelectionInfo(from, to, 6);
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new CommandException("commands.generic.invalidSelection");
+		}
+	}
+
+	public static class SelectionInfo {
+		public BlockPos from;
+		public BlockPos to;
+		public int argLen;
+
+		public SelectionInfo(BlockPos from, BlockPos to, int argLen) {
+			this.from = from;
+			this.to = to;
+			this.argLen = argLen;
+		}
 	}
 
 }

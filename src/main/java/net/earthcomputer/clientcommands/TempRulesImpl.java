@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import net.earthcomputer.clientcommands.EventManager.Listener;
 import net.earthcomputer.clientcommands.network.NetUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -13,9 +14,13 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
+import net.minecraft.init.Items;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class TempRulesImpl {
 
@@ -26,6 +31,7 @@ public class TempRulesImpl {
 		initBlockReachDistance();
 		initToolBreakProtection();
 		initGhostBlockFix();
+		initAxeWand();
 	}
 
 	private static void initBlockReachDistance() {
@@ -86,6 +92,59 @@ public class TempRulesImpl {
 							EnumFacing.DOWN));
 				}
 				blocksToUpdate.clear();
+			}
+		});
+	}
+
+	private static void initAxeWand() {
+		EventManager.addUseItemListener(e -> {
+			if (TempRules.AXE_WAND.getValue() && e.getItemStack().getItem() == Items.WOODEN_AXE) {
+				RayTraceResult rayTrace = Minecraft.getMinecraft().objectMouseOver;
+				BlockPos pos;
+				if (rayTrace.typeOfHit == RayTraceResult.Type.BLOCK) {
+					pos = rayTrace.getBlockPos();
+				} else {
+					pos = new BlockPos(Minecraft.getMinecraft().player);
+				}
+				WorldEditSettings.setSelectTo(pos);
+				e.setCanceled(true);
+			}
+		});
+		EventManager.addAttackBlockListener(e -> {
+			if (TempRules.AXE_WAND.getValue() && e.getItemStack().getItem() == Items.WOODEN_AXE) {
+				RayTraceResult rayTrace = Minecraft.getMinecraft().objectMouseOver;
+				BlockPos pos;
+				if (rayTrace.typeOfHit == RayTraceResult.Type.BLOCK) {
+					pos = rayTrace.getBlockPos();
+				} else {
+					pos = new BlockPos(Minecraft.getMinecraft().player);
+				}
+				WorldEditSettings.setSelectFrom(pos);
+				EventManager.addEndTickListener(new Listener<ClientTickEvent>() {
+					@Override
+					public void accept(ClientTickEvent e) {
+						Minecraft.getMinecraft().playerController.resetBlockRemoving();
+					}
+
+					@Override
+					public boolean wasFinalAction() {
+						return true;
+					}
+				});
+				e.setCanceled(true);
+			}
+		});
+		EventManager.addOutboundPacketPreListener(e -> {
+			if (TempRules.AXE_WAND.getValue()) {
+				if (e.getPacket() instanceof CPacketPlayerDigging) {
+					CPacketPlayerDigging diggingPacket = (CPacketPlayerDigging) e.getPacket();
+					if (diggingPacket.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
+						if (Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() == Items.WOODEN_AXE
+								&& Minecraft.getMinecraft().playerController.isInCreativeMode()) {
+							e.setCanceled(true);
+						}
+					}
+				}
 			}
 		});
 	}

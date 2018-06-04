@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,20 +31,20 @@ public class CommandCFill extends CommandAreaExtension {
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		if (args.length < 7) {
-			throw new WrongUsageException(getUsage(sender));
-		}
-
 		sender = correctSender(sender);
 
-		BlockPos pos1 = parseBlockPos(sender, args, 0, false);
-		BlockPos pos2 = parseBlockPos(sender, args, 3, false);
+		SelectionInfo selectionInfo = parseSelectionInfo(sender, args, 0);
+		BlockPos pos1 = selectionInfo.from;
+		BlockPos pos2 = selectionInfo.to;
+		int index = selectionInfo.argLen;
 
 		// Validation
-		Block block = getBlockByText(sender, args[6]);
+		if (args.length <= index)
+			throw new WrongUsageException(getUsage(sender));
+		Block block = getBlockByText(sender, args[index]);
 		IBlockState state;
-		if (args.length >= 8) {
-			state = convertArgToBlockState(block, args[7]);
+		if (args.length >= index + 2) {
+			state = convertArgToBlockState(block, args[index + 1]);
 		} else {
 			state = block.getDefaultState();
 		}
@@ -51,23 +52,23 @@ public class CommandCFill extends CommandAreaExtension {
 		boolean hollow = false;
 		boolean outline = false;
 
-		if (args.length >= 9) {
-			if ("replace".equals(args[8]) && !block.hasTileEntity(state) && args.length >= 10) {
-				Block replacedBlock = getBlockByText(sender, args[9]);
-				if (args.length >= 11)
-					convertArgToBlockStatePredicate(replacedBlock, args[10]);
-			} else if ("hollow".equals(args[8])) {
+		if (args.length >= index + 3) {
+			if ("replace".equals(args[index + 2]) && !block.hasTileEntity(state) && args.length >= index + 4) {
+				Block replacedBlock = getBlockByText(sender, args[index + 3]);
+				if (args.length >= index + 5)
+					convertArgToBlockStatePredicate(replacedBlock, args[index + 4]);
+			} else if ("hollow".equals(args[index + 2])) {
 				hollow = true;
-				args[8] = "replace";
-			} else if ("outline".equals(args[8])) {
+				args[index + 2] = "replace";
+			} else if ("outline".equals(args[index + 2])) {
 				outline = true;
-				args[8] = "replace";
+				args[index + 2] = "replace";
 			}
 		}
 
-		if (args.length >= 10 && block.hasTileEntity(state)) {
+		if (args.length >= index + 4 && block.hasTileEntity(state)) {
 			try {
-				JsonToNBT.getTagFromJson(buildString(args, 9));
+				JsonToNBT.getTagFromJson(buildString(args, index + 3));
 			} catch (NBTException e) {
 				throw new CommandException("commands.fill.tagError", e.getMessage());
 			}
@@ -79,7 +80,7 @@ public class CommandCFill extends CommandAreaExtension {
 		BlockPos to = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()),
 				Math.max(pos1.getZ(), pos2.getZ()));
 
-		String[] extraArgs = Arrays.copyOfRange(args, 6, args.length);
+		String[] extraArgs = Arrays.copyOfRange(args, index, args.length);
 		if (!hollow || !outline || to.getX() - from.getX() < 2 || to.getY() - from.getY() < 2
 				|| to.getZ() - from.getZ() < 2)
 			areaExecute(from, to, extraArgs);
@@ -108,16 +109,27 @@ public class CommandCFill extends CommandAreaExtension {
 			BlockPos targetPos) {
 		if (args.length == 0) {
 			return Collections.emptyList();
-		} else if (args.length > 0 && args.length <= 3) {
-			return getTabCompletionCoordinate(args, 0, targetPos);
-		} else if (args.length > 3 && args.length <= 6) {
-			return getTabCompletionCoordinate(args, 3, targetPos);
-		} else if (args.length == 7) {
+		} else if (args.length == 1) {
+			List<String> tabs = new ArrayList<>();
+			tabs.add("selection");
+			tabs.addAll(getTabCompletionCoordinate(args, 0, targetPos));
+			return tabs;
+		}
+		boolean selection = "selection".equals(args[0]);
+		if (selection) {
+			if (args.length > 0 && args.length <= 3) {
+				return getTabCompletionCoordinate(args, 0, targetPos);
+			} else if (args.length > 3 && args.length <= 6) {
+				return getTabCompletionCoordinate(args, 3, targetPos);
+			}
+		}
+		int index = selection ? 1 : 6;
+		if (args.length == index + 1) {
 			return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
-		} else if (args.length == 9) {
+		} else if (args.length == index + 3) {
 			return getListOfStringsMatchingLastWord(args, "replace", "destroy", "keep", "hollow", "outline");
-		} else if (args.length == 10) {
-			if ("replace".equals(args[9])) {
+		} else if (args.length == index + 4) {
+			if ("replace".equals(args[index + 3])) {
 				return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
 			} else {
 				return Collections.emptyList();

@@ -53,7 +53,6 @@ tempRules.string.invalid=%s is not accepted
 tempRules.enum.invalid=%s is an invalid enum
 tempRules.toolBreakProtection.protected=Protected your tool from breaking
 
-
 commands.client.blockpos=(%d, %d, %d)
 commands.client.notCreative=This action requires creative mode
 
@@ -67,8 +66,10 @@ commands.ccalc.usage=/ccalc <expression>
 
 commands.cclear.usage=/cclear [item] [data] [maxCount] [dataTag]
 
-commands.cclone.usage=/cclone <x1> <y1> <z1> <x2> <y2> <z2> <x> <y> <z> [maskMode] [cloneMode] [block] [state]
+commands.cclone.usage=/cclone <<x1> <y1> <z1> <x2> <y2> <z2>>|selection <x> <y> <z> [maskMode]
 commands.cclone.overlapNotSupported=The cclone command does not support overlap
+
+commands.cstack.usage=/cstack <<x1> <y1> <z1> <x2> <y2> <z2>>|selection <count> [direction|<<dx> <dy> <dz>>] [maskMode]
 
 commands.cenchant.success=Starting enchantment manipulation
 commands.cenchant.unknownEnchantment=Unknown enchantment %s
@@ -107,7 +108,7 @@ commands.ctime.unmock.success=No longer mocking the time
 commands.ctime.mock.usage=/ctime mock <daytime> [doDaylightCycle]
 commands.ctime.usage=/ctime [daytime|day|gametime|info|mock|unmock] [...]
 
-commands.cfill.usage=/cfill <x1> <y1> <z1> <x2> <y2> <z2> <block> [state] [oldBlockHandling] [dataTag]
+commands.cfill.usage=/cfill <<x1> <y1> <z1> <x2> <y2> <z2>>|selection <block> [state] [oldBlockHandling] [dataTag]
 
 commands.cfind.success=%d entities matched your query
 commands.cfind.found.left=Found %1$s at
@@ -147,6 +148,11 @@ commands.crender.entities.unknown=Unknown entity %s
 commands.crender.entities.enable.success=Enabled rendering for %s entities
 commands.crender.entities.disable.success=Disabled rendering for %s entities
 
+commands.cselect.usage=/cselect <start|end|deselect> [<x> <y> <z>]
+commands.cselect.deselect.success=Deselected
+commands.cselect.end.success=Selection end set to (%s, %s, %s)
+commands.cselect.start.success=Selection start set to (%s, %s, %s)
+
 commands.ctemprule.unknownRule=No such TempRule as %s
 commands.ctemprule.readOnly=Cannot modify read-only TempRule %s
 commands.ctemprule.list.success=%d TempRules available
@@ -176,5 +182,8 @@ commands.cweather.unmock.success=No longer mocking the weather
 commands.cweather.info.clear=The weather is clear
 commands.cweather.info.rain=The weather is rain with strength %f
 commands.cweather.info.thunder=The weather is rain and thunder with strength %f
+
+commands.generic.invalidSelection=Invalid selection argument
+commands.generic.noSelection=No selection
 
 key.specialAction=Special Action

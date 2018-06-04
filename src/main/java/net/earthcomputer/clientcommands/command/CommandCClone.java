@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,25 +29,30 @@ public class CommandCClone extends CommandAreaExtension {
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		if (args.length < 9) {
-			throw new WrongUsageException(getUsage(sender));
-		}
-
 		sender = correctSender(sender);
 
-		BlockPos pos1 = parseBlockPos(sender, args, 0, false);
-		BlockPos pos2 = parseBlockPos(sender, args, 3, false);
-		BlockPos destPos = parseBlockPos(sender, args, 6, false);
+		SelectionInfo selectionInfo = parseSelectionInfo(sender, args, 0);
+		BlockPos pos1 = selectionInfo.from;
+		BlockPos pos2 = selectionInfo.to;
+
+		int index = selectionInfo.argLen;
+
+		if (args.length < index + 3) {
+			throw new WrongUsageException(getUsage(sender));
+		}
+		BlockPos destPos = parseBlockPos(sender, args, index, false);
+
+		index += 3;
 
 		// Validation
-		if (args.length >= 10) {
-			if ("filtered".equals(args[9])) {
-				if (args.length < 12) {
+		if (args.length > index) {
+			if ("filtered".equals(args[index])) {
+				if (args.length < index + 2) {
 					throw new WrongUsageException(getUsage(sender));
 				}
-				Block block = getBlockByText(sender, args[11]);
-				if (args.length < 13) {
-					convertArgToBlockStatePredicate(block, args[12]);
+				Block block = getBlockByText(sender, args[index + 1]);
+				if (args.length > index + 2) {
+					convertArgToBlockStatePredicate(block, args[index + 2]);
 				}
 			}
 		}
@@ -54,7 +60,7 @@ public class CommandCClone extends CommandAreaExtension {
 		StructureBoundingBox sbbSrc = new StructureBoundingBox(pos1, pos2);
 		StructureBoundingBox sbbDest = new StructureBoundingBox(destPos, destPos.add(sbbSrc.getLength()));
 		if (sbbSrc.intersectsWith(sbbDest)) {
-			if (args.length < 11 || (!"force".equals(args[10]) && !"move".equals(args[10]))) {
+			if (args.length < index + 2 || (!"force".equals(args[index + 1]) && !"move".equals(args[index + 1]))) {
 				throw new CommandException("commands.clone.noOverlap");
 			} else {
 				throw new CommandException("commands.cclone.overlapNotSupported");
@@ -62,9 +68,9 @@ public class CommandCClone extends CommandAreaExtension {
 		}
 
 		Vec3i relativePos = destPos.subtract(pos1);
-		Object[] extraArgs = new Object[args.length - 9 + 1];
+		Object[] extraArgs = new Object[args.length - index + 1];
 		extraArgs[0] = relativePos;
-		System.arraycopy(args, 9, extraArgs, 1, args.length - 9);
+		System.arraycopy(args, index, extraArgs, 1, args.length - index);
 		areaExecute(pos1, pos2, extraArgs);
 	}
 
@@ -82,18 +88,31 @@ public class CommandCClone extends CommandAreaExtension {
 			BlockPos targetPos) {
 		if (args.length == 0) {
 			return Collections.emptyList();
-		} else if (args.length > 0 && args.length <= 3) {
-			return getTabCompletionCoordinate(args, 0, targetPos);
-		} else if (args.length > 3 && args.length <= 6) {
-			return getTabCompletionCoordinate(args, 3, targetPos);
-		} else if (args.length > 6 && args.length <= 9) {
-			return getTabCompletionCoordinate(args, 6, targetPos);
-		} else if (args.length == 10) {
+		} else if (args.length == 1) {
+			List<String> tabs = new ArrayList<>();
+			tabs.add("selection");
+			tabs.addAll(getTabCompletionCoordinate(args, 0, targetPos));
+			return tabs;
+		}
+		boolean selection = "selection".equals(args[0]);
+		if (selection) {
+			if (args.length > 0 && args.length <= 3) {
+				return getTabCompletionCoordinate(args, 0, targetPos);
+			} else if (args.length > 3 && args.length <= 6) {
+				return getTabCompletionCoordinate(args, 3, targetPos);
+			}
+		}
+		int index = selection ? 1 : 6;
+		if (args.length > index && args.length <= index + 3) {
+			return getTabCompletionCoordinate(args, index, targetPos);
+		}
+		index += 3;
+		if (args.length == index + 1) {
 			return getListOfStringsMatchingLastWord(args, "replace", "masked", "filtered");
-		} else if (args.length == 11) {
+		} else if (args.length == index + 2) {
 			return getListOfStringsMatchingLastWord(args, "normal", "force", "move");
-		} else if (args.length == 12) {
-			if ("filtered".equals(args[9])) {
+		} else if (args.length == index + 3) {
+			if ("filtered".equals(args[index])) {
 				return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
 			} else {
 				return Collections.emptyList();
