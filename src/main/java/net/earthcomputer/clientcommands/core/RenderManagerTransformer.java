@@ -18,6 +18,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 public class RenderManagerTransformer implements IClassTransformer {
 
 	static {
+		ClientCommandsLoadingPlugin.EXPECTED_TASKS.add("transformRenderManager");
 		ClientCommandsLoadingPlugin.EXPECTED_TASKS.add("transformShouldRender");
 	}
 
@@ -41,10 +42,12 @@ public class RenderManagerTransformer implements IClassTransformer {
 	}
 
 	private static void transformRenderManager(ClassNode clazz) {
+		ClientCommandsLoadingPlugin.EXPECTED_TASKS.remove("transformRenderManager");
 		for (MethodNode method : clazz.methods) {
 			if ("shouldRender".equals(method.name) || "func_178635_a".equals(method.name) || "a".equals(method.name)) {
 				if ("(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;DDD)Z"
-						.equals(method.desc) || "(Lvg;Lbxy;DDD)Z".equals(method.desc)) {
+						.equals(method.desc) || "(Lvg;Lbxy;DDD)Z".equals(method.desc)
+						|| "(Lve;Lbxw;DDD)Z".equals(method.desc)) {
 					transformShouldRender(method);
 					break;
 				}
