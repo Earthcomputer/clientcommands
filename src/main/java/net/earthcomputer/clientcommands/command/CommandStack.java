@@ -68,12 +68,13 @@ public class CommandStack extends ClientCommandBase {
 				dz = facing.getFrontOffsetZ() * zSize;
 				break;
 			default:
-				if (index + 3 >= args.length)
+				if (index + 2 >= args.length)
 					throw new WrongUsageException(getUsage(sender));
 				dx = parseInt(args[index++], 0, 1000);
 				dy = parseInt(args[index++], 0, sender.getEntityWorld().getHeight());
 				dz = parseInt(args[index++], 0, 1000);
-				// TODO: validation
+				if (dx < xSize && dy < ySize && dz < zSize)
+					throw new CommandException("commands.clone.noOverlap");
 				break;
 			}
 		}

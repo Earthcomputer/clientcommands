@@ -40,6 +40,7 @@ public class CommandSelect extends ClientCommandBase {
 			break;
 		case "deselect":
 			WorldEditSettings.deselect();
+			break;
 		default:
 			throw new WrongUsageException(getUsage(sender));
 		}
