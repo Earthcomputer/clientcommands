@@ -16,6 +16,7 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.KeyboardInputEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -268,6 +269,19 @@ public class EventManager {
 	@SubscribeEvent
 	public void onInitGui(InitGuiEvent.Post e) {
 		initGuiListeners.invoke(e);
+	}
+
+	// GUI KEY PRESSED
+
+	private static Listeners<KeyboardInputEvent.Pre> guiKeyPressedListeners = new Listeners<>();
+
+	public static void addGuiKeyPressedListener(Listener<KeyboardInputEvent.Pre> listener) {
+		guiKeyPressedListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onGuiKeyPressed(KeyboardInputEvent.Pre e) {
+		guiKeyPressedListeners.invoke(e);
 	}
 
 	// GUI ACTION PERFORMED

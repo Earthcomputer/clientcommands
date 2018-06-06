@@ -2,6 +2,8 @@ package net.earthcomputer.clientcommands;
 
 import java.util.Map;
 
+import org.lwjgl.input.Keyboard;
+
 import net.earthcomputer.clientcommands.command.CommandAbort;
 import net.earthcomputer.clientcommands.command.CommandCClear;
 import net.earthcomputer.clientcommands.command.CommandCClone;
@@ -90,6 +92,11 @@ public class ClientCommandsMod {
 		EventManager.addDisconnectExceptRelogListener(e -> TempRules.resetToDefault());
 
 		EventManager.addPlayerTickListener(new CoreModSanityCheck());
+
+		EventManager.addGuiKeyPressedListener(e -> {
+			if (Keyboard.getEventKey() == Keyboard.KEY_NONE && Keyboard.getEventCharacter() == Keyboard.CHAR_NONE)
+				e.setCanceled(true);
+		});
 
 		MinecraftForge.EVENT_BUS.register(EventManager.INSTANCE);
 	}
