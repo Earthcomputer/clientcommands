@@ -26,8 +26,7 @@ compileJava {
 
 jar {
 	manifest {
-		attributes 'FMLCorePlugin': 'net.earthcomputer.clientcommands.core.ClientCommandsLoadingPlugin',
-				'FMLCorePluginContainsFMLMod': true,
+		attributes 'FMLCorePluginContainsFMLMod': true,
 				'FMLAT': 'clientcommands_at.cfg'
 	}
 }
@@ -40,6 +39,8 @@ minecraft {
     
     replace '${version}', project.version
     replace '${mcversion}', project.minecraft.version
+    
+    coreMod = 'net.earthcomputer.clientcommands.core.ClientCommandsLoadingPlugin'
 }
 
 processResources {
