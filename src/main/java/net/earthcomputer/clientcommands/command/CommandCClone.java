@@ -95,7 +95,7 @@ public class CommandCClone extends CommandAreaExtension {
 			return tabs;
 		}
 		boolean selection = "selection".equals(args[0]);
-		if (selection) {
+		if (!selection) {
 			if (args.length > 0 && args.length <= 3) {
 				return getTabCompletionCoordinate(args, 0, targetPos);
 			} else if (args.length > 3 && args.length <= 6) {

@@ -112,7 +112,7 @@ public class CommandStack extends ClientCommandBase {
 			return tabs;
 		}
 		boolean selection = "selection".equals(args[0]);
-		if (selection) {
+		if (!selection) {
 			if (args.length > 0 && args.length <= 3) {
 				return getTabCompletionCoordinate(args, 0, targetPos);
 			} else if (args.length > 3 && args.length <= 6) {
@@ -122,6 +122,9 @@ public class CommandStack extends ClientCommandBase {
 		int index = selection ? 1 : 6;
 		index++; // count
 		if (args.length == index) {
+			return Collections.emptyList();
+		}
+		if (args.length == index + 1) {
 			return getListOfStringsMatchingLastWord(args, "west", "east", "down", "up", "north", "south");
 		}
 		switch (args[index]) {
@@ -132,10 +135,12 @@ public class CommandStack extends ClientCommandBase {
 		case "north":
 		case "south":
 			index++;
+			break;
 		default:
 			index += 3;
+			break;
 		}
-		if (args.length == index) {
+		if (args.length == index + 1) {
 			return getListOfStringsMatchingLastWord(args, "replace", "masked", "filtered");
 		}
 		return Collections.emptyList();
