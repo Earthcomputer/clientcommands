@@ -108,16 +108,14 @@ public class TempRulesImpl {
 				e.setCanceled(true);
 			}
 		});
+		EventManager.addAttackAirListener(e -> {
+			if (WorldEditSettings.isWand(e.getItemStack())) {
+				WorldEditSettings.setSelectFrom(e.getPos());
+			}
+		});
 		EventManager.addAttackBlockListener(e -> {
 			if (WorldEditSettings.isWand(e.getItemStack())) {
-				RayTraceResult rayTrace = Minecraft.getMinecraft().objectMouseOver;
-				BlockPos pos;
-				if (rayTrace.typeOfHit == RayTraceResult.Type.BLOCK) {
-					pos = rayTrace.getBlockPos();
-				} else {
-					pos = new BlockPos(Minecraft.getMinecraft().player);
-				}
-				WorldEditSettings.setSelectFrom(pos);
+				WorldEditSettings.setSelectFrom(e.getPos());
 				EventManager.addEndTickListener(new Listener<ClientTickEvent>() {
 					@Override
 					public void accept(ClientTickEvent e) {

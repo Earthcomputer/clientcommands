@@ -27,6 +27,7 @@ import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickEmpty;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -404,6 +405,21 @@ public class EventManager {
 	public void onAnvilRepair(AnvilRepairEvent e) {
 		if (e.getEntityPlayer() == Minecraft.getMinecraft().player) {
 			anvilRepairListeners.invoke(e);
+		}
+	}
+
+	// ATTACK AIR
+
+	private static Listeners<LeftClickEmpty> attackAirListeners = new Listeners<>();
+
+	public static void addAttackAirListener(Listener<LeftClickEmpty> listener) {
+		attackAirListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onAttackAir(LeftClickEmpty e) {
+		if (e.getSide() == Side.CLIENT) {
+			attackAirListeners.invoke(e);
 		}
 	}
 
