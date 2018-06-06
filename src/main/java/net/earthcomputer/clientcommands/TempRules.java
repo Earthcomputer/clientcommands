@@ -34,7 +34,6 @@ public class TempRules {
 			.setReadOnly();
 	public static final Rule<Boolean> GHOST_BLOCK_FIX = registerRule("ghostBlockFix", DataType.BOOLEAN, Boolean.FALSE);
 	public static final Rule<Double> CALC_ANSWER = registerRule("calcAns", DataType.DOUBLE, 0.0).setReadOnly();
-	public static final Rule<Boolean> AXE_WAND = registerRule("axeWand", DataType.BOOLEAN, Boolean.FALSE);
 
 	public static boolean hasRule(String name) {
 		return rules.containsKey(name);

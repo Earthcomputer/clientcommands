@@ -1,5 +1,7 @@
 package net.earthcomputer.clientcommands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.lwjgl.input.Keyboard;
@@ -27,6 +29,12 @@ import net.earthcomputer.clientcommands.command.CommandTempRule;
 import net.earthcomputer.clientcommands.command.CommandTick;
 import net.earthcomputer.clientcommands.cvw.ServerConnector;
 import net.earthcomputer.clientcommands.render.RenderSettings;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -54,6 +62,7 @@ public class ClientCommandsMod {
 		registerCommands();
 		registerEventStuff();
 		SpecialActionKey.registerKeyBinding();
+		createCreativeTab();
 	}
 
 	private void registerCommands() {
@@ -93,12 +102,43 @@ public class ClientCommandsMod {
 
 		EventManager.addPlayerTickListener(new CoreModSanityCheck());
 
+		// Hackfix for my driver issues that hopefully won't affect anyone else <3
 		EventManager.addGuiKeyPressedListener(e -> {
 			if (Keyboard.getEventKey() == Keyboard.KEY_NONE && Keyboard.getEventCharacter() == Keyboard.CHAR_NONE)
 				e.setCanceled(true);
 		});
 
 		MinecraftForge.EVENT_BUS.register(EventManager.INSTANCE);
+	}
+
+	private void createCreativeTab() {
+		new CreativeTabs("clientcommands") {
+			private List<ItemStack> cachedItems;
+
+			@Override
+			public ItemStack getTabIconItem() {
+				return new ItemStack(Blocks.REPEATING_COMMAND_BLOCK);
+			}
+
+			@Override
+			public void displayAllRelevantItems(NonNullList<ItemStack> list) {
+				if (cachedItems == null) {
+					cachedItems = new ArrayList<>();
+					cachedItems.add(WorldEditSettings.createWand());
+					NonNullList<ItemStack> testList = NonNullList.create();
+					for (Item item : Item.REGISTRY) {
+						if (item == Items.AIR)
+							continue;
+						item.getSubItems(CreativeTabs.SEARCH, testList);
+						if (testList.isEmpty())
+							cachedItems.add(new ItemStack(item));
+						else
+							testList.clear();
+					}
+				}
+				list.addAll(cachedItems);
+			}
+		};
 	}
 
 }

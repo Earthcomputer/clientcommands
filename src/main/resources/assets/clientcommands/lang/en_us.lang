@@ -186,4 +186,7 @@ commands.cweather.info.thunder=The weather is rain and thunder with strength %f
 commands.generic.invalidSelection=Invalid selection argument
 commands.generic.noSelection=No selection
 
+item.clientcommandsWand.name=Wand
+itemGroup.clientcommands=Client Commands
+
 key.specialAction=Special Action

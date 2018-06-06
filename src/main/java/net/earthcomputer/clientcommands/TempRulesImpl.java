@@ -14,12 +14,10 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
-import net.minecraft.init.Items;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class TempRulesImpl {
@@ -98,7 +96,7 @@ public class TempRulesImpl {
 
 	private static void initAxeWand() {
 		EventManager.addUseItemListener(e -> {
-			if (TempRules.AXE_WAND.getValue() && e.getItemStack().getItem() == Items.WOODEN_AXE) {
+			if (WorldEditSettings.isWand(e.getItemStack())) {
 				RayTraceResult rayTrace = Minecraft.getMinecraft().objectMouseOver;
 				BlockPos pos;
 				if (rayTrace.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -111,7 +109,7 @@ public class TempRulesImpl {
 			}
 		});
 		EventManager.addAttackBlockListener(e -> {
-			if (TempRules.AXE_WAND.getValue() && e.getItemStack().getItem() == Items.WOODEN_AXE) {
+			if (WorldEditSettings.isWand(e.getItemStack())) {
 				RayTraceResult rayTrace = Minecraft.getMinecraft().objectMouseOver;
 				BlockPos pos;
 				if (rayTrace.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -132,19 +130,6 @@ public class TempRulesImpl {
 					}
 				});
 				e.setCanceled(true);
-			}
-		});
-		EventManager.addOutboundPacketPreListener(e -> {
-			if (TempRules.AXE_WAND.getValue()) {
-				if (e.getPacket() instanceof CPacketPlayerDigging) {
-					CPacketPlayerDigging diggingPacket = (CPacketPlayerDigging) e.getPacket();
-					if (diggingPacket.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-						if (Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() == Items.WOODEN_AXE
-								&& Minecraft.getMinecraft().playerController.isInCreativeMode()) {
-							e.setCanceled(true);
-						}
-					}
-				}
 			}
 		});
 	}
