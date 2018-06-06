@@ -19,6 +19,15 @@ public abstract class CommandAreaExtension extends ClientCommandBase {
 	protected void areaExecute(BlockPos from, BlockPos to, Object[] extraArgs) {
 		// https://stackoverflow.com/questions/37644269/dividing-a-cuboid-of-n-into-smaller-cuboids-of-m-volume
 
+		int minX = Math.min(from.getX(), to.getX());
+		int minY = Math.min(from.getY(), to.getY());
+		int minZ = Math.min(from.getZ(), to.getZ());
+		int maxX = Math.max(from.getX(), to.getX());
+		int maxY = Math.max(from.getY(), to.getY());
+		int maxZ = Math.max(from.getZ(), to.getZ());
+		from = new BlockPos(minX, minY, minZ);
+		to = new BlockPos(maxX, maxY, maxZ);
+
 		int xSize = to.getX() - from.getX() + 1;
 		int ySize = to.getY() - from.getY() + 1;
 		int zSize = to.getZ() - from.getZ() + 1;
