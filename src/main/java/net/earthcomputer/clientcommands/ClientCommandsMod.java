@@ -97,6 +97,7 @@ public class ClientCommandsMod {
 		SpecialActionKey.registerEvents();
 		ServerConnector.registerEvents();
 		RenderSettings.registerEvents();
+		WorldEditSettings.registerEvents();
 
 		EventManager.addDisconnectExceptRelogListener(e -> TempRules.resetToDefault());
 

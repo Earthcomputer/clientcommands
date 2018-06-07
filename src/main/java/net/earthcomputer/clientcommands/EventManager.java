@@ -17,6 +17,7 @@ import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.KeyboardInputEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -244,6 +245,19 @@ public class EventManager {
 			}
 		}
 		MinecraftForge.EVENT_BUS.post(new PacketEvent.Inbound.Post(packet));
+	}
+
+	// RENDER WORLD LAST
+
+	private static Listeners<RenderWorldLastEvent> renderWorldLastListeners = new Listeners<>();
+
+	public static void addRenderWorldLastListener(Listener<RenderWorldLastEvent> listener) {
+		renderWorldLastListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onRenderWorldLast(RenderWorldLastEvent e) {
+		renderWorldLastListeners.invoke(e);
 	}
 
 	// GUI OPENED
