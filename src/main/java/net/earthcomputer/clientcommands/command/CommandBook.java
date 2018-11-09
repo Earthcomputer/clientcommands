@@ -12,10 +12,13 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.IntSupplier;
@@ -54,7 +57,7 @@ public class CommandBook extends ClientCommandBase {
                 characterGenerator = IntStream.generate(() -> 0x10ffff);
                 break;
             case "random":
-                characterGenerator = new Random().ints(0x80, 0x10ffff + 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
+                characterGenerator = new Random().ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
                 break;
             default:
                 throw new CommandException(getUsage(sender));
@@ -77,5 +80,16 @@ public class CommandBook extends ClientCommandBase {
         player.connection.sendPacket(new CPacketCustomPayload("MC|BEdit", buf));
 
         sender.sendMessage(new TextComponentTranslation("commands.cbook.success"));
+    }
+
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        if (args.length == 0) {
+            return Collections.emptyList();
+        }
+        if (args.length == 1) {
+            return getListOfStringsMatchingLastWord(args, "fill", "random");
+        }
+        return Collections.emptyList();
     }
 }
