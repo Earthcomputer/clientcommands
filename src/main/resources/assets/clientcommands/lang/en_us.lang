@@ -60,6 +60,11 @@ commands.cabort.success=Successfully aborted the current task
 commands.cabort.noTask=No task to abort
 commands.cabort.usage=/cabort
 
+commands.cbook.success=Successfully edited book
+commands.cbook.noBook=You are not holding a book
+commands.cbook.noPlayer=You are not a player
+commands.cbook.usage=/cbook <fill|random>
+
 commands.ccalc.mathError=Math error: %s
 commands.ccalc.syntaxError=Syntax error
 commands.ccalc.usage=/ccalc <expression>

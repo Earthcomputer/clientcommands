@@ -4,29 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.earthcomputer.clientcommands.command.*;
 import org.lwjgl.input.Keyboard;
 
-import net.earthcomputer.clientcommands.command.CommandAbort;
-import net.earthcomputer.clientcommands.command.CommandCClear;
-import net.earthcomputer.clientcommands.command.CommandCClone;
-import net.earthcomputer.clientcommands.command.CommandCEnchant;
-import net.earthcomputer.clientcommands.command.CommandCFill;
-import net.earthcomputer.clientcommands.command.CommandCGive;
-import net.earthcomputer.clientcommands.command.CommandCHelp;
-import net.earthcomputer.clientcommands.command.CommandCTime;
-import net.earthcomputer.clientcommands.command.CommandCWeather;
-import net.earthcomputer.clientcommands.command.CommandCalc;
-import net.earthcomputer.clientcommands.command.CommandFind;
-import net.earthcomputer.clientcommands.command.CommandFindBlock;
-import net.earthcomputer.clientcommands.command.CommandFindItem;
-import net.earthcomputer.clientcommands.command.CommandLook;
-import net.earthcomputer.clientcommands.command.CommandNote;
-import net.earthcomputer.clientcommands.command.CommandRelog;
-import net.earthcomputer.clientcommands.command.CommandRender;
-import net.earthcomputer.clientcommands.command.CommandSelect;
-import net.earthcomputer.clientcommands.command.CommandStack;
-import net.earthcomputer.clientcommands.command.CommandTempRule;
-import net.earthcomputer.clientcommands.command.CommandTick;
 import net.earthcomputer.clientcommands.cvw.ServerConnector;
 import net.earthcomputer.clientcommands.render.RenderSettings;
 import net.minecraft.creativetab.CreativeTabs;
@@ -88,6 +68,7 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandRender());
 		ClientCommandHandler.instance.registerCommand(new CommandSelect());
 		ClientCommandHandler.instance.registerCommand(new CommandStack());
+		ClientCommandHandler.instance.registerCommand(new CommandBook());
 	}
 
 	private void registerEventStuff() {
