@@ -512,6 +512,21 @@ public class EventManager {
 		}
 	}
 
+	// FINISH USE ITEM
+
+	private static Listeners<LivingEntityUseItemEvent.Finish> finishUseItemListeners = new Listeners<>();
+
+	public static void addFinishUseItemListener(Listener<LivingEntityUseItemEvent.Finish> listener) {
+		finishUseItemListeners.add(listener);
+	}
+
+	@SubscribeEvent
+	public void onFinishUseItem(LivingEntityUseItemEvent.Finish e) {
+		if (e.getEntity() == Minecraft.getMinecraft().player) {
+			finishUseItemListeners.invoke(e);
+		}
+	}
+
 	// USE ENTITY
 
 	private static Listeners<EntityInteract> useEntityListeners = new Listeners<>();

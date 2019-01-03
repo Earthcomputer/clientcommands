@@ -188,9 +188,21 @@ public class EnchantmentCracker {
 					return;
 				}
 
-				if (e.getItemStack().getItemUseAction() == EnumAction.EAT) {
+				if (e.getItemStack().getItemUseAction() == EnumAction.EAT
+						&& TempRules.ENCHANTING_CRACK_STATE.getValue() != EnumCrackState.CRACKED) {
 					resetCracker("eat");
 				}
+			}
+		});
+		EventManager.addStopUseItemListener(e -> {
+			if (e.getItem().getItemUseAction() == EnumAction.EAT)
+				resetCracker("eat"); // hard to tell exactly how many ticks we've been eating for
+		});
+		EventManager.addFinishUseItemListener(e -> {
+			if (e.getItem().getItemUseAction() == EnumAction.EAT
+					&& TempRules.ENCHANTING_CRACK_STATE.getValue() == EnumCrackState.CRACKED) {
+				for (int i = 0; i < (5 * 3 + 3) * 6 + (16 * 3 + 3); i++)
+					playerRand.nextInt();
 			}
 		});
 		EventManager.addAttackEntityListener(e -> {
