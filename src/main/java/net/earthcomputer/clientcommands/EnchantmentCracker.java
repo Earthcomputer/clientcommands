@@ -243,7 +243,6 @@ public class EnchantmentCracker {
 			ItemStack heldStack = e.getItemStack();
 			if (EnchantmentHelper.getEnchantments(heldStack).containsKey(Enchantments.UNBREAKING)) {
 				if (TempRules.INFINITE_TOOLS.getValue()) {
-					System.out.println("Simulating unbreaking");
 					for (int i = 0; i < e.getDamageAmount(); i++)
 						EnchantmentDurability.negateDamage(e.getItemStack(), EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, e.getItemStack()), playerRand);
 				} else {

@@ -140,7 +140,6 @@ public class TempRulesImpl {
 		EventManager.addPreDamageItemListener(e -> {
 			if (TempRules.INFINITE_TOOLS.getValue()) {
 				int unbreakingLvl = EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, e.getItemStack());
-				System.out.println(unbreakingLvl);
 				if (unbreakingLvl > 0) {
 					EnchantmentCracker.EnchantManipulationStatus status =
 							EnchantmentCracker.throwItemsUntil(rand -> {
