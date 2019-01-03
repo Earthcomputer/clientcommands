@@ -69,6 +69,7 @@ public class ClientCommandsMod {
 		ClientCommandHandler.instance.registerCommand(new CommandSelect());
 		ClientCommandHandler.instance.registerCommand(new CommandStack());
 		ClientCommandHandler.instance.registerCommand(new CommandBook());
+		ClientCommandHandler.instance.registerCommand(new CommandCrackPlayerRNG());
 	}
 
 	private void registerEventStuff() {

@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
+import net.minecraft.enchantment.EnchantmentDurability;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -240,7 +242,13 @@ public class EnchantmentCracker {
 		EventManager.addPostDamageItemListener(e -> {
 			ItemStack heldStack = e.getItemStack();
 			if (EnchantmentHelper.getEnchantments(heldStack).containsKey(Enchantments.UNBREAKING)) {
-				resetCracker("unbreaking");
+				if (TempRules.INFINITE_TOOLS.getValue()) {
+					System.out.println("Simulating unbreaking");
+					for (int i = 0; i < e.getDamageAmount(); i++)
+						EnchantmentDurability.negateDamage(e.getItemStack(), EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, e.getItemStack()), playerRand);
+				} else {
+					resetCracker("unbreaking");
+				}
 			} else if (heldStack.getItemDamage() + e.getDamageAmount() > heldStack.getMaxDamage() + 1) {
 				resetCracker("itemBreak");
 			}
@@ -725,6 +733,60 @@ public class EnchantmentCracker {
 		});
 
 		return EnchantManipulationStatus.OK;
+	}
+
+	public static EnchantManipulationStatus throwItemsUntil(Predicate<Random> condition) {
+		return throwItemsUntil(condition, Integer.MAX_VALUE);
+	}
+
+	public static EnchantManipulationStatus throwItemsUntil(Predicate<Random> condition, int max) {
+		if (TempRules.ENCHANTING_CRACK_STATE.getValue() != EnumCrackState.CRACKED)
+			return EnchantManipulationStatus.NOT_CRACKED;
+
+		long seed = ReflectionHelper.<AtomicLong, Random>getPrivateValue(Random.class, playerRand, "seed").get();
+		Random rand = new Random(seed ^ MULTIPLIER);
+
+		int itemsNeeded = 0;
+		for (; itemsNeeded <= max && !condition.test(rand); itemsNeeded++) {
+			for (int i = 0; i < 4; i++)
+				seed = (seed * MULTIPLIER + ADDEND) & MASK;
+			rand.setSeed(seed ^ MULTIPLIER);
+		}
+		if (itemsNeeded > max)
+			return EnchantManipulationStatus.IMPOSSIBLE;
+
+		EntityPlayerSP player = Minecraft.getMinecraft().player;
+
+		for (int i = 0; i < itemsNeeded; i++) {
+			EnchantManipulationStatus status = manipulateEnchantmentsSanityCheck(player);
+			if (status != EnchantManipulationStatus.OK)
+				return status;
+			Slot matchingSlot = player.inventoryContainer.inventorySlots.stream()
+					.filter(Slot::getHasStack).findAny().orElse(null);
+			if (matchingSlot == null) {
+				return EnchantManipulationStatus.EMPTY_INVENTORY;
+			}
+			expectedThrows++;
+			for (int j = 0; j < 4; j++) {
+				playerRand.nextInt();
+			}
+			Minecraft.getMinecraft().playerController.windowClick(player.inventoryContainer.windowId,
+					matchingSlot.slotNumber, 0, ClickType.THROW, player);
+		}
+
+		return EnchantManipulationStatus.OK;
+	}
+
+	public static long singlePlayerCrackRNG() {
+		EntityPlayerMP serverPlayer = Minecraft.getMinecraft().getIntegratedServer().getPlayerList().getPlayerByUUID(Minecraft.getMinecraft().player.getUniqueID());
+		long seed = ReflectionHelper.<AtomicLong, Random>getPrivateValue(Random.class, serverPlayer.getRNG(), "seed").get();
+		playerRand.setSeed(seed ^ MULTIPLIER);
+
+		possibleXPSeeds.clear();
+		possibleXPSeeds.add(serverPlayer.getXPSeed());
+
+		TempRules.ENCHANTING_CRACK_STATE.setValue(EnumCrackState.CRACKED);
+		return seed;
 	}
 
 	public static enum EnchantManipulationStatus {

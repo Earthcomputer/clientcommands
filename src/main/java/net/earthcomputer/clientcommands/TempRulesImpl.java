@@ -11,6 +11,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.enchantment.EnchantmentDurability;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
@@ -18,6 +19,8 @@ import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 public class TempRulesImpl {
@@ -30,6 +33,7 @@ public class TempRulesImpl {
 		initToolBreakProtection();
 		initGhostBlockFix();
 		initAxeWand();
+		initIniniteTools();
 	}
 
 	private static void initBlockReachDistance() {
@@ -128,6 +132,28 @@ public class TempRulesImpl {
 					}
 				});
 				e.setCanceled(true);
+			}
+		});
+	}
+
+	private static void initIniniteTools() {
+		EventManager.addPreDamageItemListener(e -> {
+			if (TempRules.INFINITE_TOOLS.getValue()) {
+				int unbreakingLvl = EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, e.getItemStack());
+				System.out.println(unbreakingLvl);
+				if (unbreakingLvl > 0) {
+					EnchantmentCracker.EnchantManipulationStatus status =
+							EnchantmentCracker.throwItemsUntil(rand -> {
+								for (int i = 0; i < e.getDamageAmount(); i++)
+									if (!EnchantmentDurability.negateDamage(e.getItemStack(), unbreakingLvl, rand))
+										return false;
+								return true;
+							});
+					if (status != EnchantmentCracker.EnchantManipulationStatus.OK) {
+						Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(
+								TextFormatting.RED + I18n.format(status.getTranslation())));
+					}
+				}
 			}
 		});
 	}
