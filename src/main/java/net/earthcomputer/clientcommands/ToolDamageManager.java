@@ -7,6 +7,7 @@ import java.util.List;
 import net.earthcomputer.clientcommands.network.NetUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCommandBlock;
+import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockStructure;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -93,8 +94,23 @@ public class ToolDamageManager {
 				}
 			}
 			if (e.getEntityPlayer().canPlayerEdit(e.getPos().offset(e.getFace()), e.getFace(), stack)) {
-				if (item instanceof ItemHoe || item == Items.FLINT_AND_STEEL) {
-					// tilling the ground or setting it on fire
+				if (item instanceof ItemHoe) {
+					boolean usedHoe = false;
+					if (state.getBlock() == Blocks.GRASS || state.getBlock() == Blocks.GRASS_PATH) {
+						usedHoe = true;
+					} else if (state.getBlock() == Blocks.DIRT) {
+						BlockDirt.DirtType variant = state.getValue(BlockDirt.VARIANT);
+						usedHoe = variant == BlockDirt.DirtType.DIRT || variant == BlockDirt.DirtType.COARSE_DIRT;
+					}
+					if (usedHoe) {
+						if (postToolDamaged(e.getEntityPlayer(), stack, 1)) {
+							e.setCanceled(true);
+							packetsToBlock.add(CPacketPlayerTryUseItemOnBlock.class);
+						}
+					}
+					return;
+				}
+				else if (item == Items.FLINT_AND_STEEL) {
 					if (postToolDamaged(e.getEntityPlayer(), stack, 1)) {
 						e.setCanceled(true);
 						packetsToBlock.add(CPacketPlayerTryUseItemOnBlock.class);
