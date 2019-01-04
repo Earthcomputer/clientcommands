@@ -63,7 +63,7 @@ commands.cabort.usage=/cabort
 commands.cbook.success=Successfully edited book
 commands.cbook.noBook=You are not holding a book
 commands.cbook.noPlayer=You are not a player
-commands.cbook.usage=/cbook <fill|random>
+commands.cbook.usage=/cbook <fill|random> <pages>
 
 commands.ccalc.mathError=Math error: %s
 commands.ccalc.syntaxError=Syntax error
@@ -73,10 +73,6 @@ commands.cclear.usage=/cclear [item] [data] [maxCount] [dataTag]
 
 commands.cclone.usage=/cclone <<x1> <y1> <z1> <x2> <y2> <z2>>|selection <x> <y> <z> [maskMode]
 commands.cclone.overlapNotSupported=The cclone command does not support overlap
-
-commands.ccrackplayerrng.success=Player RNG cracked: %d
-commands.ccrackplayerrng.multiplayer=This command only works in singleplayer
-commands.ccrackplayerrng.usage=/ccrackplayerrng
 
 commands.cstack.usage=/cstack <<x1> <y1> <z1> <x2> <y2> <z2>>|selection <count> [direction|<<dx> <dy> <dz>>] [maskMode]
 
