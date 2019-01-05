@@ -63,7 +63,7 @@ commands.cabort.usage=/cabort
 commands.cbook.success=Successfully edited book
 commands.cbook.noBook=You are not holding a book
 commands.cbook.noPlayer=You are not a player
-commands.cbook.usage=/cbook <fill|random> <pages>
+commands.cbook.usage=/cbook <fill|random> [pages] [random-seed]
 
 commands.ccalc.mathError=Math error: %s
 commands.ccalc.syntaxError=Syntax error

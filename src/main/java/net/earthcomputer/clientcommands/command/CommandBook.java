@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -15,6 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -36,13 +38,15 @@ public class CommandBook extends ClientCommandBase {
         return "commands.cbook.usage";
     }
 
-    @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 0)
             throw new WrongUsageException(getUsage(sender));
 
         if (!(sender instanceof EntityPlayerSP))
             throw new CommandException("commands.cbook.noPlayer");
+
+        int limit = args.length > 1 ? parseInt(args[1], 1, 50) : 50;
+        Random rand = args.length > 2 ? new Random(parseLong(args[2])) : new Random();
 
         EntityPlayerSP player = (EntityPlayerSP) sender;
         ItemStack heldItem = player.getHeldItemMainhand();
@@ -57,7 +61,7 @@ public class CommandBook extends ClientCommandBase {
                 characterGenerator = IntStream.generate(() -> 0x10ffff);
                 break;
             case "random":
-                characterGenerator = new Random().ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
+                characterGenerator = rand.ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
                 break;
             default:
                 throw new CommandException(getUsage(sender));
@@ -66,7 +70,8 @@ public class CommandBook extends ClientCommandBase {
         String joinedPages = characterGenerator.limit(50 * 210).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
 
         NBTTagList pages = new NBTTagList();
-        for (int page = 0; page < 50; page++) {
+
+        for (int page = 0; page < limit; page++) {
             pages.appendTag(new NBTTagString(joinedPages.substring(page * 210, (page + 1) * 210)));
         }
 
@@ -80,16 +85,5 @@ public class CommandBook extends ClientCommandBase {
         player.connection.sendPacket(new CPacketCustomPayload("MC|BEdit", buf));
 
         sender.sendMessage(new TextComponentTranslation("commands.cbook.success"));
-    }
-
-    @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        if (args.length == 0) {
-            return Collections.emptyList();
-        }
-        if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(args, "fill", "random");
-        }
-        return Collections.emptyList();
     }
 }
