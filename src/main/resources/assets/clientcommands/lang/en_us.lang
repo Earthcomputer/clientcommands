@@ -162,6 +162,8 @@ commands.cselect.deselect.success=Deselected
 commands.cselect.end.success=Selection end set to (%s, %s, %s)
 commands.cselect.start.success=Selection start set to (%s, %s, %s)
 
+commands.cshrug.usage=/cshrug
+
 commands.ctemprule.unknownRule=No such TempRule as %s
 commands.ctemprule.readOnly=Cannot modify read-only TempRule %s
 commands.ctemprule.list.success=%d TempRules available
