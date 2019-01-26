@@ -63,6 +63,8 @@ public class CommandBook extends ClientCommandBase {
             case "random":
                 characterGenerator = rand.ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
                 break;
+            case "ascii":
+                characterGenerator = rand.ints(0x20, 0x7f);
             default:
                 throw new CommandException(getUsage(sender));
         }
