@@ -33,7 +33,7 @@ Common problems with setup:
 ===== COMMANDS =====
 /cabort - aborts the current task. You are usually told when you need to use this.
 /ccalc - calculates an expression. For example, `/ccalc 7 / 2` would return the
-         result `4.5`. For positive integers it also doubles as an item stack
+         result `3.5`. For positive integers it also doubles as an item stack
          calculator. For example, `/ccalc 1000` would return `1000 = 15 * 64 + 40`,
          indicating that 1000 items consists of 15 full stacks, and an extra stack
          of 40.
