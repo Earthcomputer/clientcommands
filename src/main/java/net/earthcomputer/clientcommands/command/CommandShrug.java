@@ -6,9 +6,10 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 
 public class CommandShrug extends ClientCommandBase {
+
     @Override
     public String getName() {
-        return "chsrug";
+        return "cshrug";
     }
 
     @Override
