@@ -3,6 +3,8 @@
   "package": "net.earthcomputer.clientcommands.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinClientPlayNetworkHandler",
+    "MixinScreen"
   ],
   "injectors": {
     "defaultRequire": 1
