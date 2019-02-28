@@ -1,0 +1,15 @@
+{
+  "id": "clientcommands",
+  "name": "Client Commands",
+  "description": "Useful client-side commands",
+  "version": "${version}",
+  "side": "client",
+  "initializers": [
+    "net.earthcomputer.clientcommands.ClientCommands"
+  ],
+  "requires": {
+  },
+  "mixins": {
+    "client": "mixins.clientcommands.json"
+  }
+}
