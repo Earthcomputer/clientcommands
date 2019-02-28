@@ -8,6 +8,7 @@
     "net.earthcomputer.clientcommands.ClientCommands"
   ],
   "requires": {
+    "fabric": "*"
   },
   "mixins": {
     "client": "mixins.clientcommands.json"
