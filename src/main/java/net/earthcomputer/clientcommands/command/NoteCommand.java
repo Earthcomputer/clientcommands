@@ -2,15 +2,16 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.CommandSource;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.StringTextComponent;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.minecraft.server.command.ServerCommandManager.*;
 
 public class NoteCommand {
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cnote");
 
         dispatcher.register(literal("cnote")

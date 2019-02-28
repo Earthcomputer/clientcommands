@@ -2,15 +2,11 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandException;
-import net.minecraft.server.command.CommandSource;
 import net.minecraft.text.*;
 import net.minecraft.text.event.ClickEvent;
 import net.minecraft.text.event.HoverEvent;
@@ -52,7 +48,7 @@ public class ClientCommandManager {
     public static void executeCommand(StringReader reader, String command) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         try {
-            player.networkHandler.method_2886().execute(reader, player.networkHandler.getCommandSource());
+            player.networkHandler.method_2886().execute(reader, new FakeCommandSource(player));
         } catch (CommandException e) {
             ClientCommandManager.sendError(e.getMessageComponent());
         } catch (CommandSyntaxException e) {
@@ -78,14 +74,6 @@ public class ClientCommandManager {
                     .modifyStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, error))));
             e.printStackTrace();
         }
-    }
-
-    public static <T> RequiredArgumentBuilder<CommandSource, T> argument(String name, ArgumentType<T> type) {
-        return RequiredArgumentBuilder.argument(name, type);
-    }
-
-    public static LiteralArgumentBuilder<CommandSource> literal(String str) {
-        return LiteralArgumentBuilder.literal(str);
     }
 
     public static long parseLong(String str) throws CommandSyntaxException {

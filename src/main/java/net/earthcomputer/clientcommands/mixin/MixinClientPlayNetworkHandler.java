@@ -5,6 +5,7 @@ import net.earthcomputer.clientcommands.ClientCommands;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.packet.CommandTreeS2CPacket;
 import net.minecraft.server.command.CommandSource;
+import net.minecraft.server.command.ServerCommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,9 +18,10 @@ public class MixinClientPlayNetworkHandler {
     @Shadow
     private CommandDispatcher<CommandSource> commandDispatcher;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "onCommandTree", at = @At("TAIL"))
     public void onOnCommandTree(CommandTreeS2CPacket packet, CallbackInfo ci) {
-        ClientCommands.registerCommands(commandDispatcher);
+        ClientCommands.registerCommands((CommandDispatcher<ServerCommandSource>) (Object) commandDispatcher);
     }
 
 }

@@ -11,6 +11,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.server.command.CommandSource;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.packet.BookUpdateC2SPacket;
 import net.minecraft.util.Hand;
 
@@ -21,6 +22,7 @@ import java.util.stream.IntStream;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.minecraft.server.command.ServerCommandManager.*;
 
 public class BookCommand {
 
@@ -29,7 +31,7 @@ public class BookCommand {
     private static final int MAX_LIMIT = 100;
     private static final int DEFAULT_LIMIT = 50;
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cbook");
 
         dispatcher.register(literal("cbook")
