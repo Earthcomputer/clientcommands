@@ -62,19 +62,17 @@ public class RenderManagerTransformer implements IClassTransformer {
 		/*
 		 * Add:
 		 * 
-		 * if (RenderSettings.isEntityRenderingDisabled(entityIn.getClass()))
+		 * if (!RenderSettings.shouldRender(entityIn))
 		 *    return false;
 		 */
 		// @formatter:on
 
 		InsnList insns = new InsnList();
 		insns.add(new VarInsnNode(Opcodes.ALOAD, 1));
-		insns.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;",
-				false));
 		insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "net/earthcomputer/clientcommands/render/RenderSettings",
-				"isEntityRenderingDisabled", "(Ljava/lang/Class;)Z", false));
+				"shouldRender", "(Lnet/minecraft/entity/Entity;)Z", false));
 		LabelNode label = new LabelNode();
-		insns.add(new JumpInsnNode(Opcodes.IFEQ, label));
+		insns.add(new JumpInsnNode(Opcodes.IFNE, label));
 		insns.add(new InsnNode(Opcodes.ICONST_0));
 		insns.add(new InsnNode(Opcodes.IRETURN));
 		insns.add(label);

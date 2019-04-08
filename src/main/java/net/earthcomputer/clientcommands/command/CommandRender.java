@@ -11,6 +11,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -57,33 +60,37 @@ public class CommandRender extends ClientCommandBase {
 
 	private void toggleEntities(ICommandSender sender, String[] args, boolean enable) throws CommandException {
 		Set<ResourceLocation> types;
+		NBTTagCompound nbt = new NBTTagCompound();
 		if (args.length < 3) {
 			types = EntityList.getEntityNameList();
 		} else {
 			types = new HashSet<>();
-			for (int i = 2; i < args.length; i++) {
+			int i;
+			for (i = 2; i < args.length; i++) {
+				if (args[i].startsWith("{"))
+					break;
 				ResourceLocation type = new ResourceLocation(args[i]);
 				if (!EntityList.isRegistered(type)) {
 					throw new CommandException("commands.crender.entities.unknown", type);
 				}
 				types.add(type);
 			}
-		}
-		int count = 0;
-		for (ResourceLocation type : types) {
-			Class<? extends Entity> clazz = EntityList.getClass(type);
-			if (RenderSettings.isEntityRenderingDisabled(clazz) == enable) {
-				count++;
-				if (enable)
-					RenderSettings.enableEntityRendering(clazz);
-				else
-					RenderSettings.disableEntityRendering(clazz);
+			if (i != args.length) {
+				try {
+					nbt = JsonToNBT.getTagFromJson(buildString(args, i));
+				} catch (NBTException e) {
+					throw new CommandException("commands.scoreboard.players.set.tagError", e.getMessage());
+				}
 			}
 		}
+		for (ResourceLocation type : types) {
+			Class<? extends Entity> clazz = EntityList.getClass(type);
+			RenderSettings.addRenderingFilter(clazz, nbt, enable);
+		}
 		if (enable)
-			sender.sendMessage(new TextComponentTranslation("commands.crender.entities.enable.success", count));
+			sender.sendMessage(new TextComponentTranslation("commands.crender.entities.enable.success", types.size()));
 		else
-			sender.sendMessage(new TextComponentTranslation("commands.crender.entities.disable.success", count));
+			sender.sendMessage(new TextComponentTranslation("commands.crender.entities.disable.success", types.size()));
 	}
 
 	@Override
