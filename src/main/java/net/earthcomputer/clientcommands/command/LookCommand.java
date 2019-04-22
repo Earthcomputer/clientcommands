@@ -13,7 +13,7 @@ import net.minecraft.util.math.Vec2f;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.command.arguments.BlockPosArgumentType.*;
 import static net.minecraft.command.arguments.RotationArgumentType.*;
-import static net.minecraft.server.command.ServerCommandManager.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class LookCommand {
 
@@ -23,10 +23,10 @@ public class LookCommand {
         dispatcher.register(literal("clook")
             .then(literal("block")
                 .then(argument("pos", BlockPosArgumentType.create())
-                    .executes(ctx -> lookBlock(getPosArgument(ctx, "pos")))))
+                    .executes(ctx -> lookBlock(getBlockPos(ctx, "pos")))))
             .then(literal("angles")
                 .then(argument("rotation", RotationArgumentType.create())
-                    .executes(ctx -> lookAngles(ctx.getSource(), getRotationArgument(ctx, "rotation")))))
+                    .executes(ctx -> lookAngles(ctx.getSource(), getRotation(ctx, "rotation")))))
             .then(literal("cardinal")
                 .then(literal("down")
                     .executes(ctx -> lookCardinal(ctx.getSource().getRotation().y, 90)))
@@ -45,7 +45,7 @@ public class LookCommand {
     private static int lookBlock(BlockPos pos) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         double dx = (pos.getX() + 0.5) - player.x;
-        double dy = (pos.getY() + 0.5) - (player.y + player.getEyeHeight());
+        double dy = (pos.getY() + 0.5) - (player.y + player.getStandingEyeHeight());
         double dz = (pos.getZ() + 0.5) - player.z;
         double dh = Math.sqrt(dx * dx + dz * dz);
         float yaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90;

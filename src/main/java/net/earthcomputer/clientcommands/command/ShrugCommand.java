@@ -5,7 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.command.ServerCommandSource;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.ServerCommandManager.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class ShrugCommand {
 

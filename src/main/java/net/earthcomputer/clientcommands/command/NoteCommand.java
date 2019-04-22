@@ -7,7 +7,7 @@ import net.minecraft.text.StringTextComponent;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.ServerCommandManager.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class NoteCommand {
 
@@ -20,7 +20,7 @@ public class NoteCommand {
     }
 
     private static int note(String message) {
-        MinecraftClient.getInstance().inGameHud.getHudChat().addMessage(new StringTextComponent(message));
+        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new StringTextComponent(message));
         return 0;
     }
 

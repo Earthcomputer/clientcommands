@@ -42,13 +42,13 @@ public class ClientCommandManager {
     }
 
     public static void sendFeedback(TextComponent message) {
-        MinecraftClient.getInstance().inGameHud.getHudChat().addMessage(message);
+        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
     }
 
     public static void executeCommand(StringReader reader, String command) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         try {
-            player.networkHandler.method_2886().execute(reader, new FakeCommandSource(player));
+            player.networkHandler.getCommandDispatcher().execute(reader, new FakeCommandSource(player));
         } catch (CommandException e) {
             ClientCommandManager.sendError(e.getMessageComponent());
         } catch (CommandSyntaxException e) {
