@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static com.mojang.brigadier.arguments.LongArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -43,14 +43,14 @@ public class BookCommand {
                 .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
                 .then(argument("limit", integer(0, MAX_LIMIT))
                     .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
-                    .then(argument("seed", string())
-                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random(parseLong(getString(ctx, "seed")))), getInteger(ctx, "limit"))))))
+                    .then(argument("seed", longArg())
+                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit"))))))
             .then(literal("ascii")
                 .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
                 .then(argument("limit", integer(0, MAX_LIMIT))
                     .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
-                    .then(argument("seed", string())
-                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random(parseLong(getString(ctx, "seed")))), getInteger(ctx, "limit")))))));
+                    .then(argument("seed", longArg())
+                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit")))))));
     }
 
     private static IntStream fill() {

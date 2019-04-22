@@ -18,9 +18,6 @@ public class ClientCommandManager {
 
     private static Set<String> clientSideCommands = new HashSet<>();
 
-    private static DynamicCommandExceptionType INVALID_LONG =
-            new DynamicCommandExceptionType(value -> new LiteralMessage("Invalid long '" + value + "'"));
-
     public static void clearClientSideCommands() {
         clientSideCommands.clear();
     }
@@ -73,14 +70,6 @@ public class ClientCommandManager {
             ClientCommandManager.sendError(new TranslatableTextComponent("command.failed")
                     .modifyStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, error))));
             e.printStackTrace();
-        }
-    }
-
-    public static long parseLong(String str) throws CommandSyntaxException {
-        try {
-            return Long.parseLong(str);
-        } catch (NumberFormatException e) {
-            throw INVALID_LONG.create(str);
         }
     }
 
