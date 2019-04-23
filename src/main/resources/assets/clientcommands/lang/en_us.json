@@ -6,5 +6,9 @@
   "commands.cfind.noMatch": "No entities matched your query",
   "commands.cfind.success": "%d entities matched your query",
 
+  "commands.cfindblock.notFound": "No such block found",
+  "commands.cfindblock.success.left": "Closest match is at ",
+  "commands.cfindblock.success.right": ", %1$.2f blocks away",
+
   "commands.client.blockpos": "(%d, %d, %d)"
 }

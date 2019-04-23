@@ -25,7 +25,7 @@ public class FindCommand {
 
     private static int listEntities(ServerCommandSource source, List<Entity> entities) {
         if (entities.isEmpty()) {
-            sendFeedback(new TranslatableTextComponent("commands.cfind.noMatch").applyFormat(TextFormat.RED));
+            sendError(new TranslatableTextComponent("commands.cfind.noMatch"));
             return 0;
         }
 

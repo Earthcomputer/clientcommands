@@ -74,7 +74,7 @@ public class ClientCommandManager {
         }
     }
 
-    protected static TextComponent getCoordsTextComponent(BlockPos pos) {
+    public static TextComponent getCoordsTextComponent(BlockPos pos) {
         TextComponent text = new TranslatableTextComponent("commands.client.blockpos", pos.getX(), pos.getY(),
                 pos.getZ());
         text.getStyle().setUnderline(true);
