@@ -1,3 +1,10 @@
 {
-  "commands.cbook.success": "Successfully edited book"
+  "commands.cbook.success": "Successfully edited book",
+
+  "commands.cfind.found.left": "Found %1$s at ",
+  "commands.cfind.found.right": ", %2$.2f blocks away",
+  "commands.cfind.noMatch": "No entities matched your query",
+  "commands.cfind.success": "%d entities matched your query",
+
+  "commands.client.blockpos": "(%d, %d, %d)"
 }

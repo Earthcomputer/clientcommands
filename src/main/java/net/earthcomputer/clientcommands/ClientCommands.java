@@ -17,5 +17,6 @@ public class ClientCommands implements ClientModInitializer {
         LookCommand.register(dispatcher);
         NoteCommand.register(dispatcher);
         ShrugCommand.register(dispatcher);
+        FindCommand.register(dispatcher);
     }
 }

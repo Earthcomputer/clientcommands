@@ -10,6 +10,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.text.*;
 import net.minecraft.text.event.ClickEvent;
 import net.minecraft.text.event.HoverEvent;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -71,6 +72,17 @@ public class ClientCommandManager {
                     .modifyStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, error))));
             e.printStackTrace();
         }
+    }
+
+    protected static TextComponent getCoordsTextComponent(BlockPos pos) {
+        TextComponent text = new TranslatableTextComponent("commands.client.blockpos", pos.getX(), pos.getY(),
+                pos.getZ());
+        text.getStyle().setUnderline(true);
+        text.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())));
+        text.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new StringTextComponent(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()))));
+        return text;
     }
 
 }
