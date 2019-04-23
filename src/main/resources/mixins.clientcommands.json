@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinClientPlayNetworkHandler",
-    "MixinScreen"
+    "MixinScreen",
+    "MixinMinecraftClient",
+    "MixinServerCommandSource"
   ],
   "injectors": {
     "defaultRequire": 1

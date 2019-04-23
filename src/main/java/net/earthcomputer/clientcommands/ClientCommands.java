@@ -20,5 +20,7 @@ public class ClientCommands implements ClientModInitializer {
         ShrugCommand.register(dispatcher);
         FindCommand.register(dispatcher);
         FindBlockCommand.register(dispatcher);
+        FindItemCommand.register(dispatcher);
+        TaskCommand.register(dispatcher);
     }
 }

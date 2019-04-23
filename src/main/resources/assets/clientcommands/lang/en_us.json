@@ -10,5 +10,17 @@
   "commands.cfindblock.success.left": "Closest match is at ",
   "commands.cfindblock.success.right": ", %1$.2f blocks away",
 
+  "commands.cfinditem.match.left": "%dx %s found at ",
+  "commands.cfinditem.match.right": "",
+  "commands.cfinditem.starting": "Searching for %s",
+  "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s.",
+  "commands.cfinditem.starting.cancel": "Cancel",
+  "commands.cfinditem.total": "Found %dx %s total",
+
+  "commands.ctask.list.noTasks": "No currently executing tasks",
+  "commands.ctask.list.success": "%d currently executing tasks",
+  "commands.ctask.stop.noMatch": "No matching tasks",
+  "commands.ctask.stop.success": "Stopped %d tasks",
+
   "commands.client.blockpos": "(%d, %d, %d)"
 }
