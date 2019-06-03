@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.brigadier.StringReader;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

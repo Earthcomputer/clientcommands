@@ -1,10 +1,10 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.ChatFormat;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TextFormat;
-import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
@@ -25,16 +25,16 @@ public class FindCommand {
 
     private static int listEntities(ServerCommandSource source, List<Entity> entities) {
         if (entities.isEmpty()) {
-            sendError(new TranslatableTextComponent("commands.cfind.noMatch"));
+            sendError(new TranslatableComponent("commands.cfind.noMatch"));
             return 0;
         }
 
-        sendFeedback(new TranslatableTextComponent("commands.cfind.success", entities.size()).applyFormat(TextFormat.BOLD));
+        sendFeedback(new TranslatableComponent("commands.cfind.success", entities.size()).applyFormat(ChatFormat.BOLD));
         for (Entity entity : entities) {
             double distance = Math.sqrt(entity.squaredDistanceTo(source.getPosition()));
-            sendFeedback(new TranslatableTextComponent("commands.cfind.found.left", entity.getName(), distance)
+            sendFeedback(new TranslatableComponent("commands.cfind.found.left", entity.getName(), distance)
                     .append(getCoordsTextComponent(new BlockPos(entity)))
-                    .append(new TranslatableTextComponent("commands.cfind.found.right", entity.getName(), distance)));
+                    .append(new TranslatableComponent("commands.cfind.found.right", entity.getName(), distance)));
         }
 
         return entities.size();

@@ -5,13 +5,13 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.BlockStateArgumentType;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,13 +58,13 @@ public class FindBlockCommand {
                 .orElse(null);
 
         if (closestBlock == null) {
-            sendError(new TranslatableTextComponent("commands.cfindblock.notFound"));
+            sendError(new TranslatableComponent("commands.cfindblock.notFound"));
             return 0;
         } else {
             double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
-            sendFeedback(new TranslatableTextComponent("commands.cfindblock.success.left", foundRadius)
+            sendFeedback(new TranslatableComponent("commands.cfindblock.success.left", foundRadius)
                     .append(getCoordsTextComponent(closestBlock))
-                    .append(new TranslatableTextComponent("commands.cfindblock.success.right", foundRadius)));
+                    .append(new TranslatableComponent("commands.cfindblock.success.right", foundRadius)));
             return 1;
         }
     }

@@ -69,10 +69,10 @@ public class BookCommand {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
         ItemStack heldItem = player.getMainHandStack();
-        Hand hand = Hand.MAIN;
+        Hand hand = Hand.MAIN_HAND;
         if (heldItem.getItem() != Items.WRITABLE_BOOK) {
             heldItem = player.getOffHandStack();
-            hand = Hand.OFF;
+            hand = Hand.OFF_HAND;
             if (heldItem.getItem() != Items.WRITABLE_BOOK) {
                 throw NO_BOOK.create();
             }
@@ -86,11 +86,7 @@ public class BookCommand {
             pages.add(new StringTag(joinedPages.substring(page * 210, (page + 1) * 210)));
         }
 
-        if (heldItem.hasTag()) {
-            heldItem.getTag().put("pages", pages);
-        } else {
-            heldItem.setChildTag("pages", pages);
-        }
+        heldItem.getOrCreateTag().put("pages", pages);
         player.networkHandler.sendPacket(new BookUpdateC2SPacket(heldItem, false, hand));
 
         sendFeedback("commands.cbook.success");

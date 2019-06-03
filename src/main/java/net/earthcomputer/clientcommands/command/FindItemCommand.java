@@ -7,14 +7,15 @@ import net.earthcomputer.clientcommands.IServerCommandSource;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.minecraft.ChatFormat;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.ContainerScreen;
-import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.ContainerProvider;
 import net.minecraft.command.arguments.ItemStackArgument;
 import net.minecraft.command.arguments.ItemStackArgumentType;
 import net.minecraft.container.Container;
@@ -28,13 +29,8 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TextComponent;
-import net.minecraft.text.TextFormat;
-import net.minecraft.text.TranslatableTextComponent;
-import net.minecraft.text.event.ClickEvent;
-import net.minecraft.text.event.HoverEvent;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -75,15 +71,15 @@ public class FindItemCommand {
     private static int findItem(ServerCommandSource source, boolean noSearchShulkerBox, boolean keepSearching, ItemStackArgument item) {
         String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item, !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
-            TextComponent cancel = new TranslatableTextComponent("commands.cfinditem.starting.cancel");
+            Component cancel = new TranslatableComponent("commands.cfinditem.starting.cancel");
             cancel.getStyle().setUnderline(true);
             cancel.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ctask stop " + taskName));
-            cancel.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("/ctask stop " + taskName)));
-            sendFeedback(new TranslatableTextComponent("commands.cfinditem.starting.keepSearching", Registry.ITEM.getId(item.getItem()))
+            cancel.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("/ctask stop " + taskName)));
+            sendFeedback(new TranslatableComponent("commands.cfinditem.starting.keepSearching", Registry.ITEM.getId(item.getItem()))
                     .append(" ")
                     .append(cancel));
         } else {
-            sendFeedback(new TranslatableTextComponent("commands.cfinditem.starting", Registry.ITEM.getId(item.getItem())));
+            sendFeedback(new TranslatableComponent("commands.cfinditem.starting", Registry.ITEM.getId(item.getItem())));
         }
 
         return 0;
@@ -191,9 +187,9 @@ public class FindItemCommand {
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
                 public boolean accept(Screen screen) {
-                    if (!(screen instanceof ContainerScreen))
+                    if (!(screen instanceof ContainerProvider))
                         return true;
-                    Container container = ((ContainerScreen) screen).getContainer();
+                    Container container = ((ContainerProvider) screen).getContainer();
                     Set<Integer> playerInvSlots = new HashSet<>();
                     for (Slot slot : container.slotList)
                         if (slot.inventory instanceof PlayerInventory)
@@ -212,24 +208,24 @@ public class FindItemCommand {
                                     continue;
                                 ItemStack stack = stacks.get(slot);
                                 if (searchingFor.test(stack))
-                                    matchingItems += stack.getAmount();
+                                    matchingItems += stack.getCount();
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    CompoundTag blockEntityTag = stack.getSubCompoundTag("BlockEntityTag");
+                                    CompoundTag blockEntityTag = stack.getSubTag("BlockEntityTag");
                                     if (blockEntityTag != null && blockEntityTag.containsKey("Items")) {
                                         DefaultedList<ItemStack> boxInv = DefaultedList.create(27, ItemStack.EMPTY);
                                         Inventories.fromTag(blockEntityTag, boxInv);
                                         for (ItemStack stackInBox : boxInv) {
                                             if (searchingFor.test(stackInBox)) {
-                                                matchingItems += stackInBox.getAmount();
+                                                matchingItems += stackInBox.getCount();
                                             }
                                         }
                                     }
                                 }
                             }
                             if (matchingItems > 0) {
-                                sendFeedback(new TranslatableTextComponent("commands.cfinditem.match.left", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))
+                                sendFeedback(new TranslatableComponent("commands.cfinditem.match.left", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))
                                         .append(getCoordsTextComponent(currentlySearching))
-                                        .append(new TranslatableTextComponent("commands.cfinditem.match.right", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))));
+                                        .append(new TranslatableComponent("commands.cfinditem.match.right", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))));
                                 totalFound += matchingItems;
                             }
                             currentlySearching = null;
@@ -240,7 +236,7 @@ public class FindItemCommand {
                     return false;
                 }
             });
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN,
+            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND,
                     new BlockHitResult(clickPos,
                             Direction.getFacing((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
                             pos, false));
@@ -248,7 +244,7 @@ public class FindItemCommand {
 
         @Override
         public void onCompleted() {
-            sendFeedback(new TranslatableTextComponent("commands.cfinditem.total", totalFound, Registry.ITEM.getId(searchingFor.getItem())).applyFormat(TextFormat.BOLD));
+            sendFeedback(new TranslatableComponent("commands.cfinditem.total", totalFound, Registry.ITEM.getId(searchingFor.getItem())).applyFormat(ChatFormat.BOLD));
         }
     }
 }

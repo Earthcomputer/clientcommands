@@ -2,10 +2,10 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.minecraft.ChatFormat;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.StringTextComponent;
-import net.minecraft.text.TextFormat;
-import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +34,11 @@ public class TaskCommand {
         int taskCount = TaskManager.getTaskCount();
 
         if (taskCount == 0) {
-            sendError(new TranslatableTextComponent("commands.ctask.list.noTasks"));
+            sendError(new TranslatableComponent("commands.ctask.list.noTasks"));
         } else {
-            sendFeedback(new TranslatableTextComponent("commands.ctask.list.success", taskCount).applyFormat(TextFormat.BOLD));
+            sendFeedback(new TranslatableComponent("commands.ctask.list.success", taskCount).applyFormat(ChatFormat.BOLD));
             for (String task : tasks) {
-                sendFeedback(new StringTextComponent("- " + task));
+                sendFeedback(new TextComponent("- " + task));
             }
         }
 
@@ -56,11 +56,11 @@ public class TaskCommand {
 
         if (tasksToStop.isEmpty())
             if (pattern.isEmpty())
-                sendError(new TranslatableTextComponent("commands.ctask.list.noTasks"));
+                sendError(new TranslatableComponent("commands.ctask.list.noTasks"));
             else
-                sendError(new TranslatableTextComponent("commands.ctask.stop.noMatch"));
+                sendError(new TranslatableComponent("commands.ctask.stop.noMatch"));
         else
-            sendFeedback(new TranslatableTextComponent("commands.ctask.stop.success", tasksToStop.size()));
+            sendFeedback(new TranslatableComponent("commands.ctask.stop.success", tasksToStop.size()));
         return tasksToStop.size();
     }
 

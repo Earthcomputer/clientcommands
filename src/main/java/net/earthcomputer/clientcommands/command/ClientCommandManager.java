@@ -2,12 +2,11 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandException;
-import net.minecraft.text.*;
-import net.minecraft.text.event.ClickEvent;
-import net.minecraft.text.event.HoverEvent;
+import net.minecraft.network.chat.*;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashSet;
@@ -29,15 +28,15 @@ public class ClientCommandManager {
         return clientSideCommands.contains(name);
     }
 
-    public static void sendError(TextComponent error) {
-        sendFeedback(new StringTextComponent("").append(error).applyFormat(TextFormat.RED));
+    public static void sendError(Component error) {
+        sendFeedback(new TextComponent("").append(error).applyFormat(ChatFormat.RED));
     }
 
     public static void sendFeedback(String message) {
-        sendFeedback(new TranslatableTextComponent(message));
+        sendFeedback(new TranslatableComponent(message));
     }
 
-    public static void sendFeedback(TextComponent message) {
+    public static void sendFeedback(Component message) {
         MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
     }
 
@@ -48,38 +47,38 @@ public class ClientCommandManager {
         } catch (CommandException e) {
             ClientCommandManager.sendError(e.getMessageComponent());
         } catch (CommandSyntaxException e) {
-            ClientCommandManager.sendError(TextFormatter.message(e.getRawMessage()));
+            ClientCommandManager.sendError(Components.message(e.getRawMessage()));
             if (e.getInput() != null && e.getCursor() >= 0) {
                 int cursor = Math.min(e.getCursor(), e.getInput().length());
-                TextComponent text = new StringTextComponent("").applyFormat(TextFormat.GRAY)
+                Component text = new TextComponent("").applyFormat(ChatFormat.GRAY)
                         .modifyStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)));
                 if (cursor > 10)
                     text.append("...");
 
                 text.append(e.getInput().substring(Math.max(0, cursor - 10), cursor));
                 if (cursor < e.getInput().length()) {
-                    text.append(new StringTextComponent(e.getInput().substring(cursor)).applyFormat(TextFormat.RED, TextFormat.UNDERLINE));
+                    text.append(new TextComponent(e.getInput().substring(cursor)).applyFormat(ChatFormat.RED, ChatFormat.UNDERLINE));
                 }
 
-                text.append(new TranslatableTextComponent("command.context.here").applyFormat(TextFormat.RED, TextFormat.ITALIC));
+                text.append(new TranslatableComponent("command.context.here").applyFormat(ChatFormat.RED, ChatFormat.ITALIC));
                 ClientCommandManager.sendError(text);
             }
         } catch (Exception e) {
-            TextComponent error = new StringTextComponent(e.getMessage() == null ? e.getClass().getName() : e.getMessage());
-            ClientCommandManager.sendError(new TranslatableTextComponent("command.failed")
+            TextComponent error = new TextComponent(e.getMessage() == null ? e.getClass().getName() : e.getMessage());
+            ClientCommandManager.sendError(new TranslatableComponent("command.failed")
                     .modifyStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, error))));
             e.printStackTrace();
         }
     }
 
-    public static TextComponent getCoordsTextComponent(BlockPos pos) {
-        TextComponent text = new TranslatableTextComponent("commands.client.blockpos", pos.getX(), pos.getY(),
+    public static Component getCoordsTextComponent(BlockPos pos) {
+        Component text = new TranslatableComponent("commands.client.blockpos", pos.getX(), pos.getY(),
                 pos.getZ());
         text.getStyle().setUnderline(true);
         text.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                 String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())));
         text.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new StringTextComponent(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()))));
+                new TextComponent(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()))));
         return text;
     }
 

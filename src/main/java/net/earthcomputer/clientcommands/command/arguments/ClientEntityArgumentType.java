@@ -19,8 +19,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TextComponent;
-import net.minecraft.text.TranslatableTextComponent;
+import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.NumberRange;
 import net.minecraft.util.TagHelper;
@@ -282,11 +282,11 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
         }
 
         private CompletableFuture<Suggestions> suggestAtSelectors(SuggestionsBuilder builder, Consumer<SuggestionsBuilder> playerNameSuggestor) {
-            builder.suggest("@p", new TranslatableTextComponent("argument.entity.selector.nearestPlayer"));
-            builder.suggest("@a", new TranslatableTextComponent("argument.entity.selector.allPlayers"));
-            builder.suggest("@r", new TranslatableTextComponent("argument.entity.selector.randomPlayer"));
-            builder.suggest("@s", new TranslatableTextComponent("argument.entity.selector.self"));
-            builder.suggest("@e", new TranslatableTextComponent("argument.entity.selector.allEntities"));
+            builder.suggest("@p", new TranslatableComponent("argument.entity.selector.nearestPlayer"));
+            builder.suggest("@a", new TranslatableComponent("argument.entity.selector.allPlayers"));
+            builder.suggest("@r", new TranslatableComponent("argument.entity.selector.randomPlayer"));
+            builder.suggest("@s", new TranslatableComponent("argument.entity.selector.self"));
+            builder.suggest("@e", new TranslatableComponent("argument.entity.selector.allEntities"));
             return builder.buildFuture();
         }
 
@@ -494,7 +494,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
                         int cursor = parser.reader.getCursor();
                         boolean neg = parser.readNegationCharacter();
-                        Identifier typeId = Identifier.parse(parser.reader);
+                        Identifier typeId = Identifier.fromCommandInput(parser.reader);
                         EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(typeId).orElseThrow(() -> {
                             parser.reader.setCursor(cursor);
                             return EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(parser.reader, typeId);
@@ -521,7 +521,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         parser.addFilter((origin, entity) -> {
                             CompoundTag entityNbt = entity.toTag(new CompoundTag());
                             if (entity instanceof PlayerEntity) {
-                                ItemStack heldItem = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.HAND_MAIN);
+                                ItemStack heldItem = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.MAINHAND);
                                 if (!heldItem.isEmpty())
                                     entityNbt.put("SelectedItem", heldItem.toTag(new CompoundTag()));
                             }
@@ -536,9 +536,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 });
             }
 
-            final TextComponent desc;
+            final BaseComponent desc;
             private Option(String desc) {
-                this.desc = new TranslatableTextComponent(desc);
+                this.desc = new TranslatableComponent(desc);
             }
 
             abstract void apply(Parser parser) throws CommandSyntaxException;
