@@ -13,6 +13,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ContainerProvider;
@@ -151,6 +152,12 @@ public class FindItemCommand {
                         if (closestPos.squaredDistanceTo(origin) > reachDistance * reachDistance)
                             continue;
                         searchedBlocks.add(pos);
+                        BlockState state = world.getBlockState(pos);
+                        if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
+                            BlockPos offsetPos = pos.offset(ChestBlock.getFacing(state));
+                            if (world.getBlockState(offsetPos).getBlock() == state.getBlock())
+                                searchedBlocks.add(offsetPos);
+                        }
                         startSearch(world, pos, origin, closestPos);
                         scheduleDelay();
                         return;
@@ -169,15 +176,26 @@ public class FindItemCommand {
             if (!(blockEntity instanceof Inventory) && state.getBlock() != Blocks.ENDER_CHEST)
                 return false;
             if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
-                if (world.getBlockState(pos.up()).isSimpleFullBlock(world, pos.up()))
+                if (isChestBlocked(world, pos))
                     return false;
-                List<CatEntity> cats = world.getEntities(CatEntity.class, new BoundingBox(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
-                for (CatEntity cat : cats) {
-                    if (cat.isSitting())
+                if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
+                    BlockPos offsetPos = pos.offset(ChestBlock.getFacing(state));
+                    if (world.getBlockState(offsetPos).getBlock() == state.getBlock() && isChestBlocked(world, offsetPos))
                         return false;
                 }
             }
             return true;
+        }
+
+        private static boolean isChestBlocked(World world, BlockPos pos) {
+            if (world.getBlockState(pos.up()).isSimpleFullBlock(world, pos.up()))
+                return true;
+            List<CatEntity> cats = world.getEntities(CatEntity.class, new BoundingBox(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
+            for (CatEntity cat : cats) {
+                if (cat.isSitting())
+                    return true;
+            }
+            return false;
         }
 
         private void startSearch(World world, BlockPos pos, Vec3d cameraPos, Vec3d clickPos) {
