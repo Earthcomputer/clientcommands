@@ -9,7 +9,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;

@@ -31,5 +31,7 @@
   "commands.ctemprule.reset.success": "TempRule %s has been reset to %s",
   "commands.ctemprule.set.success": "TempRule %s has been updated to %s",
 
+  "commands.cwiki.failed": "Could not retrieve wiki content",
+
   "commands.client.blockpos": "(%d, %d, %d)"
 }

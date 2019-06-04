@@ -26,5 +26,6 @@ public class ClientCommands implements ClientModInitializer {
         TempRuleCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
         CHelpCommand.register(dispatcher);
+        WikiCommand.register(dispatcher);
     }
 }
