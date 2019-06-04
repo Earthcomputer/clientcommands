@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.GuiBlocker;
+import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,6 +28,12 @@ public class MixinMinecraftClient {
     public void onOpenScreen(Screen screen, CallbackInfo ci) {
         if (!GuiBlocker.onOpenGui(screen))
             ci.cancel();
+    }
+
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
+    public void onDisconnect(Screen screen, CallbackInfo ci) {
+        for (String rule : TempRules.getRules())
+            TempRules.reset(rule);
     }
 
 }

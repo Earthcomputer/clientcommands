@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.earthcomputer.clientcommands.TempRules;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -302,7 +303,8 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
         private static final Map<String, DoubleSupplier> CONSTANTS = ImmutableMap.of(
                 "pi", () -> Math.PI,
-                "e", () -> Math.E
+                "e", () -> Math.E,
+                "ans", () -> TempRules.calcAnswer
         );
 
         private DoubleSupplier constant;

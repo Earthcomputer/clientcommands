@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
 import net.minecraft.ChatFormat;
 import net.minecraft.network.chat.Component;
@@ -23,6 +24,7 @@ public class CalcCommand {
 
     private static int evaluateExpression(ServerCommandSource source, ExpressionArgumentType.Expression expression) {
         double result = expression.eval();
+        TempRules.calcAnswer = result;
         int iresult = 0;
 
         Component feedback = new TextComponent(expression.strVal + " = ");

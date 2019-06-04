@@ -25,5 +25,9 @@
   "commands.ctask.stop.noMatch": "No matching tasks",
   "commands.ctask.stop.success": "Stopped %d tasks",
 
+  "commands.ctemprule.list.header": "Listing %d TempRules:",
+  "commands.ctemprule.reset.success": "TempRule %s has been reset to %s",
+  "commands.ctemprule.set.success": "TempRule %s has been updated to %s",
+
   "commands.client.blockpos": "(%d, %d, %d)"
 }
