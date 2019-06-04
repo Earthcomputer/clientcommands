@@ -1,6 +1,9 @@
 {
   "commands.cbook.success": "Successfully edited book",
 
+  "commands.ccalc.expected": "Expected %s",
+  "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %d arguments",
+
   "commands.cfind.found.left": "Found %1$s at ",
   "commands.cfind.found.right": ", %2$.2f blocks away",
   "commands.cfind.noMatch": "No entities matched your query",
