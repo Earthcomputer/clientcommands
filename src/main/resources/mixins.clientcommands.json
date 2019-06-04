@@ -6,7 +6,8 @@
     "MixinClientPlayNetworkHandler",
     "MixinScreen",
     "MixinMinecraftClient",
-    "MixinServerCommandSource"
+    "MixinServerCommandSource",
+    "MixinEntityRendererDispatcher"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.GuiBlocker;
+import net.earthcomputer.clientcommands.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
@@ -34,6 +35,7 @@ public class MixinMinecraftClient {
     public void onDisconnect(Screen screen, CallbackInfo ci) {
         for (String rule : TempRules.getRules())
             TempRules.reset(rule);
+        RenderSettings.clearEntityRenderSelectors();
     }
 
 }

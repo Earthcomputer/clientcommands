@@ -20,6 +20,8 @@
   "commands.cfinditem.starting.cancel": "Cancel",
   "commands.cfinditem.total": "Found %dx %s total",
 
+  "commands.crender.entities.success": "Entity rendering rules have been updated",
+
   "commands.ctask.list.noTasks": "No currently executing tasks",
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",

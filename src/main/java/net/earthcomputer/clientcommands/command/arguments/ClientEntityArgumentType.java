@@ -43,6 +43,10 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
         return new ClientEntityArgumentType();
     }
 
+    public static ClientEntitySelector getEntitySelector(CommandContext<ServerCommandSource> context, String arg) {
+        return context.getArgument(arg, ClientEntitySelector.class);
+    }
+
     public static List<Entity> getEntities(CommandContext<ServerCommandSource> context, String arg) {
         return context.getArgument(arg, ClientEntitySelector.class).getEntities(context.getSource());
     }
