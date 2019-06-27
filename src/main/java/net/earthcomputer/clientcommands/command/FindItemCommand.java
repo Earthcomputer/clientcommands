@@ -7,7 +7,6 @@ import net.earthcomputer.clientcommands.IServerCommandSource;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.minecraft.ChatFormat;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
@@ -30,9 +29,10 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.*;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.*;
 import net.minecraft.util.DefaultedList;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
@@ -72,15 +72,15 @@ public class FindItemCommand {
     private static int findItem(ServerCommandSource source, boolean noSearchShulkerBox, boolean keepSearching, ItemStackArgument item) {
         String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item, !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
-            Component cancel = new TranslatableComponent("commands.cfinditem.starting.cancel");
+            Text cancel = new TranslatableText("commands.cfinditem.starting.cancel");
             cancel.getStyle().setUnderline(true);
             cancel.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ctask stop " + taskName));
-            cancel.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("/ctask stop " + taskName)));
-            sendFeedback(new TranslatableComponent("commands.cfinditem.starting.keepSearching", Registry.ITEM.getId(item.getItem()))
+            cancel.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("/ctask stop " + taskName)));
+            sendFeedback(new TranslatableText("commands.cfinditem.starting.keepSearching", Registry.ITEM.getId(item.getItem()))
                     .append(" ")
                     .append(cancel));
         } else {
-            sendFeedback(new TranslatableComponent("commands.cfinditem.starting", Registry.ITEM.getId(item.getItem())));
+            sendFeedback(new TranslatableText("commands.cfinditem.starting", Registry.ITEM.getId(item.getItem())));
         }
 
         return 0;
@@ -190,7 +190,7 @@ public class FindItemCommand {
         private static boolean isChestBlocked(World world, BlockPos pos) {
             if (world.getBlockState(pos.up()).isSimpleFullBlock(world, pos.up()))
                 return true;
-            List<CatEntity> cats = world.getEntities(CatEntity.class, new BoundingBox(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
+            List<CatEntity> cats = world.getEntities(CatEntity.class, new Box(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
             for (CatEntity cat : cats) {
                 if (cat.isSitting())
                     return true;
@@ -241,9 +241,9 @@ public class FindItemCommand {
                                 }
                             }
                             if (matchingItems > 0) {
-                                sendFeedback(new TranslatableComponent("commands.cfinditem.match.left", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))
+                                sendFeedback(new TranslatableText("commands.cfinditem.match.left", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))
                                         .append(getCoordsTextComponent(currentlySearching))
-                                        .append(new TranslatableComponent("commands.cfinditem.match.right", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))));
+                                        .append(new TranslatableText("commands.cfinditem.match.right", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))));
                                 totalFound += matchingItems;
                             }
                             currentlySearching = null;
@@ -262,7 +262,7 @@ public class FindItemCommand {
 
         @Override
         public void onCompleted() {
-            sendFeedback(new TranslatableComponent("commands.cfinditem.total", totalFound, Registry.ITEM.getId(searchingFor.getItem())).applyFormat(ChatFormat.BOLD));
+            sendFeedback(new TranslatableText("commands.cfinditem.total", totalFound, Registry.ITEM.getId(searchingFor.getItem())).formatted(Formatting.BOLD));
         }
     }
 }

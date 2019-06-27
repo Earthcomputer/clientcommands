@@ -5,8 +5,8 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.BlockStateArgumentType;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
@@ -58,13 +58,13 @@ public class FindBlockCommand {
                 .orElse(null);
 
         if (closestBlock == null) {
-            sendError(new TranslatableComponent("commands.cfindblock.notFound"));
+            sendError(new TranslatableText("commands.cfindblock.notFound"));
             return 0;
         } else {
             double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
-            sendFeedback(new TranslatableComponent("commands.cfindblock.success.left", foundRadius)
+            sendFeedback(new TranslatableText("commands.cfindblock.success.left", foundRadius)
                     .append(getCoordsTextComponent(closestBlock))
-                    .append(new TranslatableComponent("commands.cfindblock.success.right", foundRadius)));
+                    .append(new TranslatableText("commands.cfindblock.success.right", foundRadius)));
             return 1;
         }
     }

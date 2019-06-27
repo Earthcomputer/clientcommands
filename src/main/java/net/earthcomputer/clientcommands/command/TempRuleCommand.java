@@ -3,9 +3,9 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.earthcomputer.clientcommands.TempRules;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Comparator;
 import java.util.List;
@@ -64,28 +64,28 @@ public class TempRuleCommand {
         List<String> rules = TempRules.getRules();
         rules.sort(Comparator.naturalOrder());
 
-        sendFeedback(new TranslatableComponent("commands.ctemprule.list.header", rules.size()));
+        sendFeedback(new TranslatableText("commands.ctemprule.list.header", rules.size()));
         for (String rule : rules) {
-            sendFeedback(new TextComponent("- " + rule));
+            sendFeedback(new LiteralText("- " + rule));
         }
 
         return rules.size();
     }
 
     private static int getRule(ServerCommandSource source, String rule) {
-        sendFeedback(new TextComponent(rule + " = " + TempRules.get(rule)));
+        sendFeedback(new LiteralText(rule + " = " + TempRules.get(rule)));
         return 0;
     }
 
     private static int setRule(ServerCommandSource source, String rule, Object value) {
         TempRules.set(rule, value);
-        sendFeedback(new TranslatableComponent("commands.ctemprule.set.success", rule, value));
+        sendFeedback(new TranslatableText("commands.ctemprule.set.success", rule, value));
         return 0;
     }
 
     private static int resetRule(ServerCommandSource source, String rule) {
         TempRules.reset(rule);
-        sendFeedback(new TranslatableComponent("commands.ctemprule.reset.success", rule, TempRules.get(rule)));
+        sendFeedback(new TranslatableText("commands.ctemprule.reset.success", rule, TempRules.get(rule)));
         return 0;
     }
 

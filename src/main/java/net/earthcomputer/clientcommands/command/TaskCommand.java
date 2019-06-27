@@ -2,10 +2,10 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.minecraft.ChatFormat;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +34,11 @@ public class TaskCommand {
         int taskCount = TaskManager.getTaskCount();
 
         if (taskCount == 0) {
-            sendError(new TranslatableComponent("commands.ctask.list.noTasks"));
+            sendError(new TranslatableText("commands.ctask.list.noTasks"));
         } else {
-            sendFeedback(new TranslatableComponent("commands.ctask.list.success", taskCount).applyFormat(ChatFormat.BOLD));
+            sendFeedback(new TranslatableText("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
             for (String task : tasks) {
-                sendFeedback(new TextComponent("- " + task));
+                sendFeedback(new LiteralText("- " + task));
             }
         }
 
@@ -56,11 +56,11 @@ public class TaskCommand {
 
         if (tasksToStop.isEmpty())
             if (pattern.isEmpty())
-                sendError(new TranslatableComponent("commands.ctask.list.noTasks"));
+                sendError(new TranslatableText("commands.ctask.list.noTasks"));
             else
-                sendError(new TranslatableComponent("commands.ctask.stop.noMatch"));
+                sendError(new TranslatableText("commands.ctask.stop.noMatch"));
         else
-            sendFeedback(new TranslatableComponent("commands.ctask.stop.success", tasksToStop.size()));
+            sendFeedback(new TranslatableText("commands.ctask.stop.success", tasksToStop.size()));
         return tasksToStop.size();
     }
 

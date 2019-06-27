@@ -5,9 +5,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import java.util.Map;
 
@@ -17,7 +17,7 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class CHelpCommand {
 
-    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableComponent("commands.help.failed"));
+    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.help.failed"));
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("chelp");
@@ -30,11 +30,11 @@ public class CHelpCommand {
                     if (isClientSideCommand(cmdName)) {
                         Map<CommandNode<ServerCommandSource>, String> usage = dispatcher.getSmartUsage(command, ctx.getSource());
                         for (String u : usage.values()) {
-                            sendFeedback(new TextComponent("/" + cmdName + " " + u));
+                            sendFeedback(new LiteralText("/" + cmdName + " " + u));
                         }
                         cmdCount += usage.size();
                         if (usage.size() == 0) {
-                            sendFeedback(new TextComponent("/" + cmdName));
+                            sendFeedback(new LiteralText("/" + cmdName));
                             cmdCount++;
                         }
                     }
@@ -53,7 +53,7 @@ public class CHelpCommand {
 
                     Map<CommandNode<ServerCommandSource>, String> usage = dispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), ctx.getSource());
                     for (String u : usage.values()) {
-                        sendFeedback(new TextComponent("/" + cmdName + " " + u));
+                        sendFeedback(new LiteralText("/" + cmdName + " " + u));
                     }
 
                     return usage.size();

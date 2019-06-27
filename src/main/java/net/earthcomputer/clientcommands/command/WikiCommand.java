@@ -2,9 +2,9 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.WikiRetriever;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
@@ -24,13 +24,13 @@ public class WikiCommand {
         String content = WikiRetriever.getWikiSummary(page);
 
         if (content == null) {
-            sendError(new TranslatableComponent("commands.cwiki.failed"));
+            sendError(new TranslatableText("commands.cwiki.failed"));
             return 0;
         }
 
         content = content.trim();
         for (String line : content.split("\n")) {
-            sendFeedback(new TextComponent(line));
+            sendFeedback(new LiteralText(line));
         }
 
         return content.length();

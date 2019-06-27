@@ -10,8 +10,8 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.TempRules;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.TranslatableText;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -23,8 +23,8 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
     private static final Collection<String> EXAMPLES = Arrays.asList("123", "ans", "(1+2)", "1*3");
 
-    private static final DynamicCommandExceptionType EXPECTED_EXCEPTION = new DynamicCommandExceptionType(obj -> new TranslatableComponent("commands.ccalc.expected", obj));
-    private static final Dynamic2CommandExceptionType INVALID_ARGUMENT_COUNT = new Dynamic2CommandExceptionType((func, count) -> new TranslatableComponent("commands.ccalc.invalidArgumentCount", func, count));
+    private static final DynamicCommandExceptionType EXPECTED_EXCEPTION = new DynamicCommandExceptionType(obj -> new TranslatableText("commands.ccalc.expected", obj));
+    private static final Dynamic2CommandExceptionType INVALID_ARGUMENT_COUNT = new Dynamic2CommandExceptionType((func, count) -> new TranslatableText("commands.ccalc.invalidArgumentCount", func, count));
 
     private ExpressionArgumentType() {}
 

@@ -19,8 +19,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.NumberRange;
 import net.minecraft.util.TagHelper;
@@ -286,11 +286,11 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
         }
 
         private CompletableFuture<Suggestions> suggestAtSelectors(SuggestionsBuilder builder, Consumer<SuggestionsBuilder> playerNameSuggestor) {
-            builder.suggest("@p", new TranslatableComponent("argument.entity.selector.nearestPlayer"));
-            builder.suggest("@a", new TranslatableComponent("argument.entity.selector.allPlayers"));
-            builder.suggest("@r", new TranslatableComponent("argument.entity.selector.randomPlayer"));
-            builder.suggest("@s", new TranslatableComponent("argument.entity.selector.self"));
-            builder.suggest("@e", new TranslatableComponent("argument.entity.selector.allEntities"));
+            builder.suggest("@p", new TranslatableText("argument.entity.selector.nearestPlayer"));
+            builder.suggest("@a", new TranslatableText("argument.entity.selector.allPlayers"));
+            builder.suggest("@r", new TranslatableText("argument.entity.selector.randomPlayer"));
+            builder.suggest("@s", new TranslatableText("argument.entity.selector.self"));
+            builder.suggest("@e", new TranslatableText("argument.entity.selector.allEntities"));
             return builder.buildFuture();
         }
 
@@ -312,7 +312,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         String name = parser.reader.readString();
                         if (!neg)
                             parser.hasName = true;
-                        parser.addFilter((origin, entity) -> entity.getName().getText().equals(name) != neg);
+                        parser.addFilter((origin, entity) -> entity.getName().asString().equals(name) != neg);
                     }
 
                     @Override
@@ -540,9 +540,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 });
             }
 
-            final BaseComponent desc;
+            final Text desc;
             private Option(String desc) {
-                this.desc = new TranslatableComponent(desc);
+                this.desc = new TranslatableText(desc);
             }
 
             abstract void apply(Parser parser) throws CommandSyntaxException;
