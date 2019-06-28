@@ -6,10 +6,12 @@ import net.earthcomputer.clientcommands.TempRules;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.StringIdentifiable;
 
 import java.util.Comparator;
 import java.util.List;
 
+import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.server.command.CommandManager.*;
@@ -40,10 +42,21 @@ public class TempRuleCommand {
         ArgumentBuilder<ServerCommandSource, ?> subcmd = literal("set");
         for (String rule : TempRules.getWritableRules()) {
             Class<?> type = TempRules.getType(rule);
-            if (type == double.class) {
+            if (type == boolean.class) {
+                subcmd.then(literal(rule)
+                    .then(argument("value", bool())
+                        .executes(ctx -> setRule(ctx.getSource(), rule, getBool(ctx, "value")))));
+            } else if (type == double.class) {
                 subcmd.then(literal(rule)
                     .then(argument("value", doubleArg())
                         .executes(ctx -> setRule(ctx.getSource(), rule, getDouble(ctx, "value")))));
+            } else if (type.isEnum() && StringIdentifiable.class.isAssignableFrom(type)) {
+                ArgumentBuilder<ServerCommandSource, ?> subsubcmd = literal(rule);
+                subcmd.then(subsubcmd);
+                for (Object val : type.getEnumConstants()) {
+                    subsubcmd.then(literal(((StringIdentifiable) val).asString())
+                        .executes(ctx -> setRule(ctx.getSource(), rule, val)));
+                }
             } else {
                 throw new AssertionError("Unsupported rule of " + type);
             }
@@ -73,7 +86,9 @@ public class TempRuleCommand {
     }
 
     private static int getRule(ServerCommandSource source, String rule) {
-        sendFeedback(new LiteralText(rule + " = " + TempRules.get(rule)));
+        Object val = TempRules.get(rule);
+        String str = val instanceof StringIdentifiable ? ((StringIdentifiable) val).asString() : val.toString();
+        sendFeedback(new LiteralText(rule + " = " + str));
         return 0;
     }
 

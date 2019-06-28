@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.command.FindBlockCommand;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.command.ServerCommandSource;
 
 public class ClientCommands implements ClientModInitializer {
@@ -27,5 +28,10 @@ public class ClientCommands implements ClientModInitializer {
         RenderCommand.register(dispatcher);
         CHelpCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
+        CEnchantCommand.register(dispatcher);
+
+        if (MinecraftClient.getInstance().isIntegratedServerRunning()) {
+            CrackPlayerRNGCommand.register(dispatcher);
+        }
     }
 }

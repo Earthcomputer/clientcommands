@@ -7,7 +7,10 @@
     "MixinScreen",
     "MixinMinecraftClient",
     "MixinServerCommandSource",
-    "MixinEntityRendererDispatcher"
+    "MixinEntityRendererDispatcher",
+    "MixinEnchantingScreen",
+    "MixinEnchantingTableContainer",
+    "MixinClientPlayerInteractionManager"
   ],
   "injectors": {
     "defaultRequire": 1

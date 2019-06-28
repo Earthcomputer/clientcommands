@@ -312,7 +312,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         String name = parser.reader.readString();
                         if (!neg)
                             parser.hasName = true;
-                        parser.addFilter((origin, entity) -> entity.getName().asString().equals(name) != neg);
+                        parser.addFilter((origin, entity) -> entity.getName().getString().equals(name) != neg);
                     }
 
                     @Override

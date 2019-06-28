@@ -44,6 +44,7 @@ public class TaskManager {
     public static String addTask(String name, LongTask task) {
         String actualName = (nextTaskId++) + "." + name;
         tasks.put(actualName, task);
+        task.initialize();
         return actualName;
     }
 

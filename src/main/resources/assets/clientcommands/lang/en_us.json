@@ -4,6 +4,12 @@
   "commands.ccalc.expected": "Expected %s",
   "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %d arguments",
 
+  "commands.ccrackplayerrng.success": "Player RNG cracked: %d",
+
+  "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
+  "commands.cenchant.incompatible": "Incompatible enchantments",
+  "commands.cenchant.success": "Starting enchantment manipulation",
+
   "commands.cfind.found.left": "Found %1$s at ",
   "commands.cfind.found.right": ", %2$.2f blocks away",
   "commands.cfind.noMatch": "No entities matched your query",
@@ -33,5 +39,53 @@
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
-  "commands.client.blockpos": "(%d, %d, %d)"
+  "commands.client.blockpos": "(%d, %d, %d)",
+
+  "enchCrack.state": "Crack State: %s",
+  "enchCrack.state.uncracked": "Uncracked",
+  "enchCrack.state.crackingEnchSeed": "Cracking XP Seed",
+  "enchCrack.state.crackedEnchSeed": "Cracked XP Seed",
+  "enchCrack.state.cracking": "Cracking",
+  "enchCrack.state.cracked": "Cracked",
+  "enchCrack.state.invalid": "Invalid",
+
+  "enchCrack.enchantments": "Enchantments:",
+  "enchCrack.clues": "Clues:",
+  "enchCrack.slot": "Slot %d:",
+
+  "enchCrack.reset": "Restarting enchantment cracking. Reason: %s",
+  "enchCrack.reset.playerHurt": "Player Hurt",
+  "enchCrack.reset.sprint": "Sprinted",
+  "enchCrack.reset.enterWater": "Entered Water",
+  "enchCrack.reset.swim": "Swum",
+  "enchCrack.reset.potion": "Potion Effect Active",
+  "enchCrack.reset.mending": "Mended Item",
+  "enchCrack.reset.respiration": "Respiration Helmet Used",
+  "enchCrack.reset.dropItem": "Dropped Item",
+  "enchCrack.reset.anvil": "Anvil Used",
+  "enchCrack.reset.food": "Eaten",
+  "enchCrack.reset.baneOfArthropods": "Hit Arthropod with Bane of Arthropods",
+  "enchCrack.reset.advancement": "Gained Advancement",
+  "enchCrack.reset.shield": "Blocked with Shield",
+  "enchCrack.reset.give": "Give Command Used",
+  "enchCrack.reset.unbreaking": "Unbreaking Item Used",
+  "enchCrack.reset.itemBreak": "Item Broken",
+  "enchCrack.reset.frostWalker": "Frost Walker Used",
+
+  "enchCrack.xpSeed.one": "XP Seed: %08X",
+  "enchCrack.xpSeed.many": "Possible XP seeds: %d",
+  "enchCrack.playerRNGSeed.many": "Possible player RNG seeds: %d",
+
+  "enchCrack.insn.dummy": "Do a dummy enchantment",
+  "enchCrack.insn.ready": "Your enchantment seed is ready",
+  "enchCrack.insn.bookshelves": "Bookshelves needed: %d",
+  "enchCrack.insn.slot": "In slot: %d",
+
+  "enchCrack.manipStatus.notCracked": "You need to be in crack state Cracked",
+  "enchCrack.manipStatus.notOnGround": "You are not on solid ground",
+  "enchCrack.manipStatus.emptyInventory": "Your inventory is empty",
+  "enchCrack.manipStatus.impossible": "It's impossible or would take too long to get those enchantments",
+
+  "enchCrack.addInfo": "Add Info"
+
 }

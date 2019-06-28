@@ -5,13 +5,29 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class TempRules {
 
     @Rule(readOnly = true)
     public static double calcAnswer = 0;
+
+    @Rule(readOnly = true)
+    public static EnchantmentCracker.EnumCrackState enchCrackState = EnchantmentCracker.EnumCrackState.UNCRACKED;
+
+    @Rule(setter = "setEnchantingPrediction")
+    private static boolean enchantingPrediction = false;
+    public static boolean getEnchantingPrediction() {
+        return enchantingPrediction;
+    }
+    public static void setEnchantingPrediction(boolean enchantingPrediction) {
+        TempRules.enchantingPrediction = enchantingPrediction;
+        if (!enchantingPrediction)
+            EnchantmentCracker.resetCracker();
+    }
 
     public static Object get(String name) {
         Field field = rules.get(name);
@@ -25,14 +41,10 @@ public class TempRules {
     }
 
     public static void set(String name, Object value) {
-        Field field = rules.get(name);
-        if (field == null)
+        Consumer<Object> setter = setters.get(name);
+        if (setter == null)
             throw new IllegalArgumentException();
-        try {
-            field.set(null, value);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
+        setter.accept(value);
     }
 
     public static void reset(String name) {
@@ -55,11 +67,36 @@ public class TempRules {
     }
 
     private static final Map<String, Field> rules = new HashMap<>();
+    private static final Map<String, Consumer<Object>> setters = new HashMap<>();
     private static final Map<String, Object> defaults = new HashMap<>();
     static {
-        for (Field field : TempRules.class.getFields()) {
+        for (Field field : TempRules.class.getDeclaredFields()) {
             if (field.isAnnotationPresent(Rule.class)) {
                 rules.put(field.getName(), field);
+                String setter = field.getAnnotation(Rule.class).setter();
+                if (setter.isEmpty()) {
+                    setters.put(field.getName(), val -> {
+                        try {
+                            field.set(null, val);
+                        } catch (ReflectiveOperationException e) {
+                            throw new AssertionError(e);
+                        }
+                    });
+                } else {
+                    Method setterMethod;
+                    try {
+                        setterMethod = TempRules.class.getMethod(setter, field.getType());
+                    } catch (NoSuchMethodException e) {
+                        throw new AssertionError(e);
+                    }
+                    setters.put(field.getName(), val -> {
+                        try {
+                            setterMethod.invoke(null, val);
+                        } catch (ReflectiveOperationException e) {
+                            throw new AssertionError(e);
+                        }
+                    });
+                }
                 try {
                     defaults.put(field.getName(), field.get(null));
                 } catch (ReflectiveOperationException e) {
@@ -73,6 +110,7 @@ public class TempRules {
     @Retention(RetentionPolicy.RUNTIME)
     private static @interface Rule {
         boolean readOnly() default false;
+        String setter() default "";
     }
 
 }
