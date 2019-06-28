@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.RenderSettings;
+import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.minecraft.server.command.ServerCommandSource;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;

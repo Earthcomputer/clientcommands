@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.EnchantmentCracker;
-import net.earthcomputer.clientcommands.IEnchantingTableContainer;
+import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractContainerScreen;
 import net.minecraft.client.gui.screen.ingame.EnchantingScreen;

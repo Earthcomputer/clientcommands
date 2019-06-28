@@ -1,5 +1,7 @@
 package net.earthcomputer.clientcommands;
 
+import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

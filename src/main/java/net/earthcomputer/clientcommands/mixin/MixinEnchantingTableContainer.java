@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.IEnchantingTableContainer;
+import net.earthcomputer.clientcommands.interfaces.IEnchantingTableContainer;
 import net.minecraft.container.BlockContext;
 import net.minecraft.container.EnchantingTableContainer;
 import org.spongepowered.asm.mixin.Mixin;

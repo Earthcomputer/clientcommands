@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.interfaces;
 
 public interface IServerCommandSource {
 

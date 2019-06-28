@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.GuiBlocker;
-import net.earthcomputer.clientcommands.IServerCommandSource;
+import net.earthcomputer.clientcommands.interfaces.IServerCommandSource;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
