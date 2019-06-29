@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.brigadier.StringReader;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,6 +23,8 @@ public class MixinScreen {
             if (ClientCommandManager.isClientSideCommand(commandName)) {
                 ClientCommandManager.executeCommand(reader, message);
                 ci.cancel();
+            } else if ("give".equals(commandName)) {
+                EnchantmentCracker.onGiveCommand();
             }
         }
     }

@@ -23,7 +23,9 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.container.EnchantingTableContainer;
 import net.minecraft.container.Slot;
 import net.minecraft.container.SlotActionType;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.enchantment.InfoEnchantment;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -110,6 +112,97 @@ public class EnchantmentCracker {
                     "enchCrack.reset", I18n.translate("enchCrack.reset." + reason))));
         }
         resetCracker();
+    }
+
+    public static void onDropItem() {
+        if (expectedThrows > 0)
+            expectedThrows--;
+        else
+            resetCracker("dropItem");
+    }
+
+    public static void onEntityCramming() {
+        resetCracker("entityCramming");
+    }
+
+    public static void onDrink() {
+        resetCracker("drink");
+    }
+
+    public static void onEat() {
+        resetCracker("food");
+    }
+
+    public static void onUnderwater() {
+        resetCracker("swim");
+    }
+
+    public static void onSwimmingStart() {
+        resetCracker("enterWater");
+    }
+
+    public static void onDamage() {
+        resetCracker("playerHurt");
+    }
+
+    public static void onSprinting() {
+        resetCracker("sprint");
+    }
+
+    public static void onEquipmentBreak() {
+        resetCracker("toolBreak");
+    }
+
+    public static void onPotionParticles() {
+        resetCracker("potion");
+    }
+
+    public static void onGiveCommand() {
+        resetCracker("give");
+    }
+
+    public static void onAnvilUse() {
+        resetCracker("anvil");
+    }
+
+    public static void onFrostWalker() {
+        resetCracker("frostWalker");
+    }
+
+    public static void onBaseOfArthropods() {
+        resetCracker("baneOfArthropods");
+    }
+
+    public static void onUnbreaking(int amount, int unbreakingLevel) {
+        resetCracker("unbreaking");
+    }
+
+    public static void onUnbreakingUncertain(int minAmount, int maxAmount, int unbreakingLevel) {
+        resetCracker("unbreaking");
+    }
+
+    public static void onItemDamage(int amount, LivingEntity holder, ItemStack stack) {
+        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).abilities.creativeMode) {
+            if (stack.isDamageable()) {
+                if (amount > 0) {
+                    int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
+                    if (unbreakingLevel > 0)
+                        onUnbreaking(amount, unbreakingLevel);
+                }
+            }
+        }
+    }
+
+    public static void onItemDamageUncertain(int minAmount, int maxAmount, LivingEntity holder, ItemStack stack) {
+        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).abilities.creativeMode) {
+            if (stack.isDamageable()) {
+                if (maxAmount > 0) {
+                    int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
+                    if (unbreakingLevel > 0)
+                        onUnbreakingUncertain(minAmount, maxAmount, unbreakingLevel);
+                }
+            }
+        }
     }
 
     // RENDERING

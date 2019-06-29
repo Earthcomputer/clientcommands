@@ -10,7 +10,25 @@
     "MixinEntityRendererDispatcher",
     "MixinEnchantingScreen",
     "MixinEnchantingTableContainer",
-    "MixinClientPlayerInteractionManager"
+    "MixinClientPlayerInteractionManager",
+    "MixinClientPlayerEntity",
+    "MixinPlayerEntity",
+    "MixinPlayerInventory",
+    "MixinLivingEntity",
+    "MixinEntity",
+    "MixinAnvilContainer2",
+    "MixinDamageEnchantment",
+    "MixinItemStack",
+    "MixinCreeperMooshroomSheepAndSnowGolemEntity",
+    "MixinShearsItem",
+    "MixinFlintAndSteelItem",
+    "MixinAxeHoeAndShovelItem",
+    "MixinBowAndTridentItem",
+    "MixinCarrotOnAStickItem",
+    "MixinPumpkinBlock",
+    "MixinFishingRodItem",
+    "MixinMiningToolItem",
+    "MixinCrossbowItem"
   ],
   "injectors": {
     "defaultRequire": 1

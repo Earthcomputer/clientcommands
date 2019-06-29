@@ -64,6 +64,7 @@
   "enchCrack.reset.dropItem": "Dropped Item",
   "enchCrack.reset.anvil": "Anvil Used",
   "enchCrack.reset.food": "Eaten",
+  "enchCrack.reset.drink": "Drunk",
   "enchCrack.reset.baneOfArthropods": "Hit Arthropod with Bane of Arthropods",
   "enchCrack.reset.advancement": "Gained Advancement",
   "enchCrack.reset.shield": "Blocked with Shield",
@@ -71,6 +72,8 @@
   "enchCrack.reset.unbreaking": "Unbreaking Item Used",
   "enchCrack.reset.itemBreak": "Item Broken",
   "enchCrack.reset.frostWalker": "Frost Walker Used",
+  "enchCrack.reset.entityCramming": "Entity Cramming",
+  "enchCrack.reset.enchanting": "Enchanted Item",
 
   "enchCrack.xpSeed.one": "XP Seed: %08X",
   "enchCrack.xpSeed.many": "Possible XP seeds: %d",
