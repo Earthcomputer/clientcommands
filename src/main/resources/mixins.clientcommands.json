@@ -28,7 +28,8 @@
     "MixinPumpkinBlock",
     "MixinFishingRodItem",
     "MixinMiningToolItem",
-    "MixinCrossbowItem"
+    "MixinCrossbowItem",
+    "MixinArmorStandEntity"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -150,7 +150,7 @@ public class EnchantmentCracker {
     }
 
     public static void onEquipmentBreak() {
-        resetCracker("toolBreak");
+        resetCracker("itemBreak");
     }
 
     public static void onPotionParticles() {
