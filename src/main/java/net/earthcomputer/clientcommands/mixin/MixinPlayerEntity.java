@@ -39,7 +39,6 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 
     @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", ordinal = 0))
     public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount) {
-        System.out.println("Attacking");
         if (!world.isClient || !isThePlayer())
             return target.damage(source, amount);
 
@@ -91,31 +90,26 @@ public abstract class MixinPlayerEntity extends LivingEntity {
                     Vec3d rotationDelta = attackVector.reverseSubtract(new Vec3d(this.x, this.y, this.z)).normalize();
                     rotationDelta = new Vec3d(rotationDelta.x, 0.0D, rotationDelta.z);
                     if (rotationDelta.dotProduct(livingRotation) < 0.0D) {
-                        System.out.println("Can't attack because shield");
                         canAttack = false;
                     }
                 }
             }
             if (living.timeUntilRegen >= 10 && amount <= ((ILivingEntity) living).getLastDamage()) {
-                System.out.println("Can't attack because invuln");
                 canAttack = false;
             }
         }
 
         if (target.isInvulnerableTo(source)) {
-            System.out.println("Can't attack because invuln 2");
             canAttack = false;
         }
 
         if (canAttack) {
-            System.out.println("Can attack");
             ItemStack heldStack = getMainHandStack();
             if (!heldStack.isEmpty() && target instanceof LivingEntity) {
                 Item item = heldStack.getItem();
                 if (item instanceof MiningToolItem) {
                     EnchantmentCracker.onItemDamage(2, this, heldStack);
                 } else if (item instanceof HoeItem || item instanceof SwordItem || item instanceof TridentItem) {
-                    System.out.println("Might be sword");
                     EnchantmentCracker.onItemDamage(1, this, heldStack);
                 }
             }
