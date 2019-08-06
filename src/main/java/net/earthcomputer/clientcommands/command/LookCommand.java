@@ -3,9 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.command.arguments.PosArgument;
-import net.minecraft.command.arguments.RotationArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
@@ -22,10 +20,10 @@ public class LookCommand {
 
         dispatcher.register(literal("clook")
             .then(literal("block")
-                .then(argument("pos", BlockPosArgumentType.create())
+                .then(argument("pos", blockPos())
                     .executes(ctx -> lookBlock(getBlockPos(ctx, "pos")))))
             .then(literal("angles")
-                .then(argument("rotation", RotationArgumentType.create())
+                .then(argument("rotation", rotation())
                     .executes(ctx -> lookAngles(ctx.getSource(), getRotation(ctx, "rotation")))))
             .then(literal("cardinal")
                 .then(literal("down")

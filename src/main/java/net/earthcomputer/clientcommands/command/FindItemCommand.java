@@ -17,7 +17,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ContainerProvider;
 import net.minecraft.command.arguments.ItemStackArgument;
-import net.minecraft.command.arguments.ItemStackArgumentType;
 import net.minecraft.container.Container;
 import net.minecraft.container.Slot;
 import net.minecraft.entity.Entity;
@@ -61,7 +60,7 @@ public class FindItemCommand {
                 .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_NO_SEARCH_SHULKER_BOX)))
             .then(literal("--keep-searching")
                 .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_KEEP_SEARCHING)))
-            .then(argument("item", ItemStackArgumentType.create())
+            .then(argument("item", itemStack())
                 .executes(ctx ->
                         findItem(ctx.getSource(),
                                 (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_NO_SEARCH_SHULKER_BOX) != 0,
@@ -230,7 +229,7 @@ public class FindItemCommand {
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
                                     CompoundTag blockEntityTag = stack.getSubTag("BlockEntityTag");
                                     if (blockEntityTag != null && blockEntityTag.containsKey("Items")) {
-                                        DefaultedList<ItemStack> boxInv = DefaultedList.create(27, ItemStack.EMPTY);
+                                        DefaultedList<ItemStack> boxInv = DefaultedList.ofSize(27, ItemStack.EMPTY);
                                         Inventories.fromTag(blockEntityTag, boxInv);
                                         for (ItemStack stackInBox : boxInv) {
                                             if (searchingFor.test(stackInBox)) {

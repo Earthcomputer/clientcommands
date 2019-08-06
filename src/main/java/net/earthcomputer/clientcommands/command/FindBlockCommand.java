@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.command.arguments.BlockStateArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -31,7 +30,7 @@ public class FindBlockCommand {
         addClientSideCommand("cfindblock");
 
         dispatcher.register(literal("cfindblock")
-            .then(argument("block", BlockStateArgumentType.create())
+            .then(argument("block", blockState())
                 .executes(ctx -> findBlock(ctx.getSource(), getBlockState(ctx, "block"), MAX_RADIUS, RadiusType.CARTESIAN))
                 .then(argument("radius", integer(0, MAX_RADIUS))
                     .executes(ctx -> findBlock(ctx.getSource(), getBlockState(ctx, "block"), getInteger(ctx, "radius"), RadiusType.CARTESIAN))
