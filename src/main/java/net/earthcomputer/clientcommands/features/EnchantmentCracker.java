@@ -94,7 +94,7 @@ public class EnchantmentCracker {
      * we want and determine n.
      */
 
-    private static final Logger LOGGER = LogManager.getLogger("EnchantmentCracker");
+    public static final Logger LOGGER = LogManager.getLogger("EnchantmentCracker");
 
     // RNG CHECK
     /*
@@ -558,13 +558,8 @@ public class EnchantmentCracker {
 
                     @Override
                     public void onCompleted() {
-                        Slot matchingSlot = player.container.slotList.stream()
-                                .filter(Slot::hasStack).findAny().orElse(null);
-                        assert matchingSlot != null;
-                        expectedThrows++;
-                        for (int i = 0; i < 4; i++) playerRand.nextInt();
-
-                        MinecraftClient.getInstance().interactionManager.method_2906(player.container.syncId, matchingSlot.id, 0, SlotActionType.THROW, player);
+                        EnchantManipulationStatus status = throwItem();
+                        assert status == EnchantManipulationStatus.OK;
 
                         scheduleDelay();
                     }
@@ -615,12 +610,11 @@ public class EnchantmentCracker {
     }
     */
 
-    /*
     public static EnchantManipulationStatus throwItemsUntil(Predicate<Random> condition, int max) {
         if (TempRules.enchCrackState != EnumCrackState.CRACKED)
             return EnchantManipulationStatus.NOT_CRACKED;
 
-        long seed = ReflectionHelper.<AtomicLong, Random>getPrivateValue(Random.class, playerRand, "seed").get();
+        long seed = getSeed(playerRand);
         Random rand = new Random(seed ^ MULTIPLIER);
 
         int itemsNeeded = 0;
@@ -632,28 +626,37 @@ public class EnchantmentCracker {
         if (itemsNeeded > max)
             return EnchantManipulationStatus.IMPOSSIBLE;
 
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
-
         for (int i = 0; i < itemsNeeded; i++) {
-            EnchantManipulationStatus status = manipulateEnchantmentsSanityCheck(player);
+            EnchantManipulationStatus status = throwItem();
             if (status != EnchantManipulationStatus.OK)
                 return status;
-            Slot matchingSlot = player.inventoryContainer.inventorySlots.stream()
-                    .filter(Slot::getHasStack).findAny().orElse(null);
-            if (matchingSlot == null) {
-                return EnchantManipulationStatus.EMPTY_INVENTORY;
-            }
-            expectedThrows++;
-            for (int j = 0; j < 4; j++) {
-                playerRand.nextInt();
-            }
-            Minecraft.getMinecraft().playerController.windowClick(player.inventoryContainer.windowId,
-                    matchingSlot.slotNumber, 0, ClickType.THROW, player);
         }
 
         return EnchantManipulationStatus.OK;
     }
-    */
+
+    public static EnchantManipulationStatus throwItem() {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+
+        EnchantManipulationStatus status = manipulateEnchantmentsSanityCheck(player);
+        if (status != EnchantManipulationStatus.OK && status != EnchantManipulationStatus.NOT_CRACKED)
+            return status;
+        Slot matchingSlot = player.container.slotList.stream()
+                .filter(Slot::hasStack).findAny().orElse(null);
+        if (matchingSlot == null) {
+            return EnchantManipulationStatus.EMPTY_INVENTORY;
+        }
+        if (status != EnchantManipulationStatus.NOT_CRACKED) {
+            expectedThrows++;
+            for (int j = 0; j < 4; j++) {
+                playerRand.nextInt();
+            }
+        }
+        MinecraftClient.getInstance().interactionManager.method_2906(player.container.syncId,
+                matchingSlot.id, 0, SlotActionType.THROW, player);
+
+        return status;
+    }
 
     public static long singlePlayerCrackRNG() {
         ServerPlayerEntity serverPlayer = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayer(MinecraftClient.getInstance().player.getUuid());

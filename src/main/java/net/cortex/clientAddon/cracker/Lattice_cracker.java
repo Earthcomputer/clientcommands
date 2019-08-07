@@ -1,6 +1,9 @@
 package net.cortex.clientAddon.cracker;
 
+import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Lattice_cracker
@@ -155,7 +158,7 @@ public class Lattice_cracker
         {
             if(isInRegion(v,LowerBounds,UpperBounds))
             {
-                System.out.println("404 NOT FOUND");
+                EnchantmentCracker.LOGGER.info("Found possible seed: " + Arrays.toString(v));
                 results.add(v.clone());
             }
             if(!getNextPoint(temp, v, A, mins, maxs))

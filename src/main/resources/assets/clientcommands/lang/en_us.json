@@ -93,6 +93,8 @@
 
   "enchCrack.addInfo": "Add Info",
 
-  "enchCrack.toolBreakWarning": "Warning: tool has %d durability left"
+  "enchCrack.toolBreakWarning": "Warning: tool has %d durability left",
+
+  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
 
 }
