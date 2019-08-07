@@ -8,18 +8,18 @@ import net.minecraft.text.TranslatableText;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.server.command.CommandManager.*;
 
-public class CrackPlayerRNGCommand {
+public class CheatCrackRNGCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ccrackplayerrng");
+        addClientSideCommand("ccheatcrackrng");
 
-        dispatcher.register(literal("ccrackplayerrng")
+        dispatcher.register(literal("ccheatcrackrng")
             .executes(ctx -> crackPlayerRNG(ctx.getSource())));
     }
 
     private static int crackPlayerRNG(ServerCommandSource source) {
         long seed = EnchantmentCracker.singlePlayerCrackRNG();
-        sendFeedback(new TranslatableText("commands.ccrackplayerrng.success", Long.toHexString(seed)));
+        sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
         return (int) seed;
     }
 
