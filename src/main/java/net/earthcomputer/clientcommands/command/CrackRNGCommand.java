@@ -13,18 +13,18 @@ import static net.earthcomputer.clientcommands.features.EnchantmentCracker.EnumC
 import static net.earthcomputer.clientcommands.features.EnchantmentCracker.MULTIPLIER;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class CrackPlayerRNGWithItemsCommand {
+public class CrackRNGCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("citemrngcrack");
+        addClientSideCommand("ccrackrng");
 
-        dispatcher.register(literal("citemrngcrack")
+        dispatcher.register(literal("ccrackrng")
             .executes(ctx -> crackPlayerRNG(ctx.getSource())));
     }
 
     private static int crackPlayerRNG(ServerCommandSource source) {
         SeedCracker.crack(seed -> {
-            sendFeedback(new TranslatableText("commands.ccrackplayerrng.success", Long.toHexString(seed)));
+            sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
             EnchantmentCracker.playerRand.setSeed(seed ^ MULTIPLIER);
             TempRules.enchCrackState=CRACKED_PLAYER_SEED;
         });

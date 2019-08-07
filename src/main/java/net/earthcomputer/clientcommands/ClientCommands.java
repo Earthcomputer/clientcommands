@@ -30,10 +30,10 @@ public class ClientCommands implements ClientModInitializer {
         WikiCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher);
 
-        CrackPlayerRNGWithItemsCommand.register(dispatcher);
+        CrackRNGCommand.register(dispatcher);
         
         if (MinecraftClient.getInstance().isIntegratedServerRunning()) {
-            CrackPlayerRNGCommand.register(dispatcher);
+            CheatCrackRNGCommand.register(dispatcher);
         }
     }
 }

@@ -4,7 +4,7 @@
   "commands.ccalc.expected": "Expected %s",
   "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %d arguments",
 
-  "commands.ccrackplayerrng.success": "Player RNG cracked: %d",
+  "commands.ccrackrng.success": "Player RNG cracked: %d",
 
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.incompatible": "Incompatible enchantments",
