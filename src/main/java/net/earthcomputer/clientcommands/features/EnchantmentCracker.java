@@ -294,7 +294,7 @@ public class EnchantmentCracker {
     private static Set<Integer> possibleXPSeeds = new HashSet<>(1 << 20);
     private static boolean onFirstXPSeed = true;
     private static Set<Long> possiblePlayerRandSeeds = new HashSet<>(1 << 16);
-    private static Random playerRand = new Random();
+    public static Random playerRand = new Random();
     private static boolean doneEnchantment = false;
     public static BlockPos enchantingTablePos = null;
 
