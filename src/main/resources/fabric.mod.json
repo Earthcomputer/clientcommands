@@ -11,6 +11,6 @@
     "fabric": "*"
   },
   "mixins": {
-    "client": ["mixins.clientcommands.json","mixins.client_addon.json"]
+    "client": ["mixins.clientcommands.json"]
   }
 }

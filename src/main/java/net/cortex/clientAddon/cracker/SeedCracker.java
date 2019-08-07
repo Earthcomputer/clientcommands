@@ -3,6 +3,8 @@ package net.cortex.clientAddon.cracker;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.packet.EntitySpawnS2CPacket;
+import net.minecraft.entity.EntityType;
 import net.minecraft.network.MessageType;
 import net.minecraft.server.network.packet.PlayerActionC2SPacket;
 import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
@@ -77,5 +79,28 @@ public class SeedCracker {
             cracking=true;
             expectedItems=20;
         }
+    }
+
+    public static void onEntityCreation(EntitySpawnS2CPacket packet) {
+        if (packet.getEntityTypeId() == EntityType.ITEM && SeedCracker.expectedItems>0) {
+
+            long rand_val = (long) ((Math.atan2(packet.getVelocityz(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
+            long top_bits = rand_val;
+            short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
+            SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
+            SeedCracker.expectedItems--;
+        }
+        if(SeedCracker.expectedItems==0&&SeedCracker.cracking)//if its the last item
+        {
+            SeedCracker.attemptCrack();
+        }
+        /*
+        else
+        {
+            long rand_val = (long) ((Math.atan2(this.getVelocityz(), this.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
+            long top_bits = rand_val;
+            short value = (short) ((top_bits >> (24 - 4)) ^ 0x8L);
+            System.out.println("Entity item spawn: Top 4 bits of direction: "+padLeftZeros(Long.toBinaryString(value), 4));
+        }*/
     }
 }
