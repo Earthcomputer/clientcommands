@@ -27,6 +27,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.enchantment.InfoEnchantment;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
@@ -117,6 +118,9 @@ public class EnchantmentCracker {
     public static void onDropItem() {
         if (expectedThrows > 0)
             expectedThrows--;
+        else if (canMaintainPlayerRNG())
+            for (int i = 0; i < 4; i++)
+                playerRand.nextInt();
         else
             resetCracker("dropItem");
     }
@@ -162,22 +166,37 @@ public class EnchantmentCracker {
     }
 
     public static void onAnvilUse() {
-        resetCracker("anvil");
+        if (canMaintainPlayerRNG())
+            playerRand.nextInt();
+        else
+            resetCracker("anvil");
     }
 
     public static void onFrostWalker() {
         resetCracker("frostWalker");
     }
 
-    public static void onBaseOfArthropods() {
-        resetCracker("baneOfArthropods");
+    public static void onBaneOfArthropods() {
+        if (canMaintainPlayerRNG())
+            playerRand.nextInt();
+        else
+            resetCracker("baneOfArthropods");
     }
 
-    public static void onUnbreaking(int amount, int unbreakingLevel) {
-        resetCracker("unbreaking");
+    public static void onRecreatePlayer() {
+        resetCracker("recreated");
     }
 
-    public static void onUnbreakingUncertain(int minAmount, int maxAmount, int unbreakingLevel) {
+    public static void onUnbreaking(ItemStack stack, int amount, int unbreakingLevel) {
+        if (canMaintainPlayerRNG())
+            for (int i = 0; i < amount; i++)
+                if (!(stack.getItem() instanceof ArmorItem) || playerRand.nextFloat() >= 0.6)
+                    playerRand.nextInt(unbreakingLevel + 1);
+        else
+            resetCracker("unbreaking");
+    }
+
+    public static void onUnbreakingUncertain(ItemStack stack, int minAmount, int maxAmount, int unbreakingLevel) {
         resetCracker("unbreaking");
     }
 
@@ -187,7 +206,7 @@ public class EnchantmentCracker {
                 if (amount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
                     if (unbreakingLevel > 0)
-                        onUnbreaking(amount, unbreakingLevel);
+                        onUnbreaking(stack, amount, unbreakingLevel);
                 }
             }
         }
@@ -199,10 +218,14 @@ public class EnchantmentCracker {
                 if (maxAmount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
                     if (unbreakingLevel > 0)
-                        onUnbreakingUncertain(minAmount, maxAmount, unbreakingLevel);
+                        onUnbreakingUncertain(stack, minAmount, maxAmount, unbreakingLevel);
                 }
             }
         }
+    }
+
+    private static boolean canMaintainPlayerRNG() {
+        return TempRules.playerRNGMaintenance && TempRules.enchCrackState == EnumCrackState.CRACKED;
     }
 
     // RENDERING

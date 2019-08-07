@@ -74,6 +74,7 @@
   "enchCrack.reset.frostWalker": "Frost Walker Used",
   "enchCrack.reset.entityCramming": "Entity Cramming",
   "enchCrack.reset.enchanting": "Enchanted Item",
+  "enchCrack.reset.recreated": "Player Recreated",
 
   "enchCrack.xpSeed.one": "XP Seed: %08X",
   "enchCrack.xpSeed.many": "Possible XP seeds: %d",

@@ -16,7 +16,7 @@ public class MixinDamageEnchantment {
     @Inject(method = "onTargetDamaged", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", remap = false))
     public void onAttackArthropod(LivingEntity attacker, Entity attacked, int level, CallbackInfo ci) {
         if (attacker instanceof ClientPlayerEntity) {
-            EnchantmentCracker.onBaseOfArthropods();
+            EnchantmentCracker.onBaneOfArthropods();
         }
     }
 

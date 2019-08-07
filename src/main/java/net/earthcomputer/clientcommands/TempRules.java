@@ -31,6 +31,9 @@ public class TempRules {
             EnchantmentCracker.resetCracker();
     }
 
+    @Rule
+    public static boolean playerRNGMaintenance = true;
+
     public static Object get(String name) {
         Field field = rules.get(name);
         if (field == null)
