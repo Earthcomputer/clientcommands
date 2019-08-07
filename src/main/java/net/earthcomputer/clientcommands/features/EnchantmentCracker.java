@@ -231,7 +231,7 @@ public class EnchantmentCracker {
     }
 
     private static boolean canMaintainPlayerRNG() {
-        return TempRules.playerRNGMaintenance && TempRules.enchCrackState == EnumCrackState.CRACKED;
+        return TempRules.playerRNGMaintenance && (TempRules.enchCrackState == EnumCrackState.CRACKED || TempRules.enchCrackState == EnumCrackState.CRACKED_PLAYER_SEED);
     }
 
     // RENDERING
@@ -399,7 +399,7 @@ public class EnchantmentCracker {
 
     private static void addPlayerRNGInfo(int enchantmentSeed) {
         EnumCrackState crackState = TempRules.enchCrackState;
-        if (crackState == EnumCrackState.CRACKED) {
+        if (crackState == EnumCrackState.CRACKED || crackState == EnumCrackState.CRACKED_PLAYER_SEED) {
             return;
         }
 
@@ -441,9 +441,10 @@ public class EnchantmentCracker {
     public static void onEnchantedItem() {
         doneEnchantment = true;
         EnumCrackState crackState = TempRules.enchCrackState;
-        if (crackState == EnumCrackState.CRACKED) {
+        if (crackState == EnumCrackState.CRACKED || crackState == EnumCrackState.CRACKED_PLAYER_SEED) {
             possibleXPSeeds.clear();
             possibleXPSeeds.add(playerRand.nextInt());
+            TempRules.enchCrackState = EnumCrackState.CRACKED;
         } else if (crackState == EnumCrackState.CRACKED_ENCH_SEED) {
             possibleXPSeeds.clear();
             TempRules.enchCrackState = EnumCrackState.CRACKING;
@@ -460,7 +461,7 @@ public class EnchantmentCracker {
      */
 
     private static EnchantManipulationStatus manipulateEnchantmentsSanityCheck(PlayerEntity player) {
-        if (TempRules.enchCrackState != EnumCrackState.CRACKED) {
+        if (TempRules.enchCrackState != EnumCrackState.CRACKED && TempRules.enchCrackState != EnumCrackState.CRACKED_PLAYER_SEED) {
             return EnchantManipulationStatus.NOT_CRACKED;
         } else if (!player.onGround) {
             return EnchantManipulationStatus.NOT_ON_GROUND;
@@ -488,7 +489,7 @@ public class EnchantmentCracker {
         int bookshelvesNeeded = 0;
         int slot = 0;
         int[] enchantLevels = new int[3];
-        outerLoop: for (int i = -1; i < 1000; i++) {
+        outerLoop: for (int i = TempRules.enchCrackState == EnumCrackState.CRACKED_PLAYER_SEED ? 0 : -1; i < 1000; i++) {
             int xpSeed = (int) ((i == -1 ? seed : ((seed * MULTIPLIER + ADDEND) & MASK)) >>> 16);
             Random rand = new Random();
             for (bookshelvesNeeded = 0; bookshelvesNeeded <= 15; bookshelvesNeeded++) {
@@ -772,7 +773,7 @@ public class EnchantmentCracker {
 
     public static enum EnumCrackState implements StringIdentifiable {
         UNCRACKED("uncracked"), CRACKING_ENCH_SEED("crackingEnchSeed"), CRACKED_ENCH_SEED("crackedEnchSeed"), CRACKING(
-                "cracking"), CRACKED("cracked"), INVALID("invalid");
+                "cracking"), CRACKED("cracked"), CRACKED_PLAYER_SEED("crackedPlayerSeed"), INVALID("invalid");
 
         private String name;
 

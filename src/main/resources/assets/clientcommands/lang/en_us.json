@@ -47,6 +47,7 @@
   "enchCrack.state.crackedEnchSeed": "Cracked XP Seed",
   "enchCrack.state.cracking": "Cracking",
   "enchCrack.state.cracked": "Cracked",
+  "enchCrack.state.crackedPlayerSeed": "Cracked Player Seed",
   "enchCrack.state.invalid": "Invalid",
 
   "enchCrack.enchantments": "Enchantments:",
