@@ -4,7 +4,7 @@
   "commands.ccalc.expected": "Expected %s",
   "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %d arguments",
 
-  "commands.ccrackplayerrng.success": "Player RNG cracked: %d",
+  "commands.ccrackrng.success": "Player RNG cracked: %d",
 
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.incompatible": "Incompatible enchantments",
@@ -93,6 +93,8 @@
 
   "enchCrack.addInfo": "Add Info",
 
-  "enchCrack.toolBreakWarning": "Warning: tool has %d durability left"
+  "enchCrack.toolBreakWarning": "Warning: tool has %d durability left",
+
+  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
 
 }
