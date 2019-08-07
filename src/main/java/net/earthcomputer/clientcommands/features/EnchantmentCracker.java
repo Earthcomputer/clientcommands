@@ -287,9 +287,9 @@ public class EnchantmentCracker {
      * This section is in charge of the logic of the cracking
      */
 
-    private static final long MULTIPLIER = 0x5deece66dL;
-    private static final long ADDEND = 0xbL;
-    private static final long MASK = (1L << 48) - 1;
+    public static final long MULTIPLIER = 0x5deece66dL;
+    public static final long ADDEND = 0xbL;
+    public static final long MASK = (1L << 48) - 1;
 
     private static Set<Integer> possibleXPSeeds = new HashSet<>(1 << 20);
     private static boolean onFirstXPSeed = true;
@@ -763,7 +763,7 @@ public class EnchantmentCracker {
         }
         RANDOM_SEED.setAccessible(true);
     }
-    private static long getSeed(Random rand) {
+    public static long getSeed(Random rand) {
         try {
             return ((AtomicLong) RANDOM_SEED.get(rand)).get();
         } catch (ReflectiveOperationException e) {
