@@ -34,6 +34,9 @@ public class TempRules {
     @Rule
     public static boolean playerRNGMaintenance = true;
 
+    @Rule
+    public static boolean toolBreakWarning = false;
+
     public static Object get(String name) {
         Field field = rules.get(name);
         if (field == null)

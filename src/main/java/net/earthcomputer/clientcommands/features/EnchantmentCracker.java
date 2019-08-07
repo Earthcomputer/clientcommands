@@ -207,6 +207,12 @@ public class EnchantmentCracker {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
                     if (unbreakingLevel > 0)
                         onUnbreaking(stack, amount, unbreakingLevel);
+
+                    if (TempRules.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
+                        MinecraftClient.getInstance().inGameHud.setOverlayMessage(
+                                new TranslatableText("enchCrack.toolBreakWarning", stack.getMaxDamage() - stack.getDamage() - 1),
+                                false);
+                    }
                 }
             }
         }

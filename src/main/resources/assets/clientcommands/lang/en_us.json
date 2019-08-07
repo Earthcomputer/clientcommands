@@ -90,6 +90,8 @@
   "enchCrack.manipStatus.emptyInventory": "Your inventory is empty",
   "enchCrack.manipStatus.impossible": "It's impossible or would take too long to get those enchantments",
 
-  "enchCrack.addInfo": "Add Info"
+  "enchCrack.addInfo": "Add Info",
+
+  "enchCrack.toolBreakWarning": "Warning: tool has %d durability left"
 
 }
