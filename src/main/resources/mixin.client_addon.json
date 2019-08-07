@@ -3,13 +3,7 @@
   "package": "net.cortex.clientAddon.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "S2CEntityCreation",
-    "ClientPlayer",
-    "GameRendererInjection",
-    "EntityRendererInjection",
-    "MixinKeyboardInput",
-    "KeyPressOverride",
-    "BlockUpdate"
+    "S2CEntityCreation"
   ],
   "injectors": {
     "defaultRequire": 1
