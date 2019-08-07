@@ -50,13 +50,14 @@ public abstract class S2CEntityCreation {
         {
             SeedCracker.attemptCrack();
         }
+        /*
         else
         {
             long rand_val = (long) ((Math.atan2(this.getVelocityz(), this.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
             long top_bits = rand_val;
             short value = (short) ((top_bits >> (24 - 4)) ^ 0x8L);
             System.out.println("Entity item spawn: Top 4 bits of direction: "+padLeftZeros(Long.toBinaryString(value), 4));
-        }
+        }*/
     }
 
 
