@@ -27,7 +27,9 @@ public class TempRules {
     }
     public static void setEnchantingPrediction(boolean enchantingPrediction) {
         TempRules.enchantingPrediction = enchantingPrediction;
-        if (!enchantingPrediction)
+        if (enchantingPrediction)
+            ServerBrandManager.rngWarning();
+        else
             EnchantmentCracker.resetCracker();
     }
 

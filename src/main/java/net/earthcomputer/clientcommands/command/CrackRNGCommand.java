@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.cortex.clientAddon.cracker.SeedCracker;
+import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.minecraft.server.command.ServerCommandSource;
@@ -23,6 +24,7 @@ public class CrackRNGCommand {
     }
 
     private static int crackPlayerRNG(ServerCommandSource source) {
+        ServerBrandManager.rngWarning();
         SeedCracker.crack(seed -> {
             sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
             EnchantmentCracker.playerRand.setSeed(seed ^ MULTIPLIER);

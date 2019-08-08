@@ -92,6 +92,7 @@
   "enchCrack.manipStatus.impossible": "It's impossible or would take too long to get those enchantments",
 
   "enchCrack.addInfo": "Add Info",
+  "enchCrack.serverBrandWarning": "Warning: the server you are playing on is modded. RNG features in this mod are not guaranteed to work!",
 
   "enchCrack.toolBreakWarning": "Warning: tool has %d durability left",
 
