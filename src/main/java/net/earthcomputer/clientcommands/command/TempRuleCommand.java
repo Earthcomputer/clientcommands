@@ -13,6 +13,7 @@ import java.util.List;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -46,6 +47,10 @@ public class TempRuleCommand {
                 subcmd.then(literal(rule)
                     .then(argument("value", bool())
                         .executes(ctx -> setRule(ctx.getSource(), rule, getBool(ctx, "value")))));
+            } else if (type == int.class) {
+                subcmd.then(literal(rule)
+                    .then(argument("value", integer())
+                        .executes(ctx -> setRule(ctx.getSource(), rule, getInteger(ctx, "value")))));
             } else if (type == double.class) {
                 subcmd.then(literal(rule)
                     .then(argument("value", doubleArg())
