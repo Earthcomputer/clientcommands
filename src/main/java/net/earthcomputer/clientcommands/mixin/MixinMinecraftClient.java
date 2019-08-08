@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.GuiBlocker;
+import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
@@ -38,6 +39,7 @@ public class MixinMinecraftClient {
         for (String rule : TempRules.getRules())
             TempRules.reset(rule);
         RenderSettings.clearEntityRenderSelectors();
+        ServerBrandManager.onDisconnect();
     }
 
 }
