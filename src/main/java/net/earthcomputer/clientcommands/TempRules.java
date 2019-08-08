@@ -46,6 +46,9 @@ public class TempRules {
         TempRules.maxEnchantItemThrows = MathHelper.clamp(maxEnchantItemThrows, 0, 1000000);
     }
 
+    @Rule
+    public static boolean infiniteTools = false;
+
     public static Object get(String name) {
         Field field = rules.get(name);
         if (field == null)

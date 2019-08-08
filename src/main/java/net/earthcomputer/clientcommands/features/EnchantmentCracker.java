@@ -213,6 +213,19 @@ public class EnchantmentCracker {
                                 new TranslatableText("enchCrack.toolBreakWarning", stack.getMaxDamage() - stack.getDamage() - 1),
                                 false);
                     }
+
+                    if (TempRules.infiniteTools && (TempRules.enchCrackState == EnumCrackState.CRACKED || TempRules.enchCrackState == EnumCrackState.CRACKED_PLAYER_SEED)) {
+                        System.out.println("Hello");
+                        throwItemsUntil(rand -> {
+                            for (int i = 0; i < amount; i++) {
+                                if (stack.getItem() instanceof ArmorItem && playerRand.nextFloat() < 0.6)
+                                    return false;
+                                if (rand.nextInt(unbreakingLevel + 1) == 0)
+                                    return false;
+                            }
+                            return true;
+                        }, 64);
+                    }
                 }
             }
         }
@@ -611,7 +624,7 @@ public class EnchantmentCracker {
     */
 
     public static EnchantManipulationStatus throwItemsUntil(Predicate<Random> condition, int max) {
-        if (TempRules.enchCrackState != EnumCrackState.CRACKED)
+        if (TempRules.enchCrackState != EnumCrackState.CRACKED && TempRules.enchCrackState != EnumCrackState.CRACKED_PLAYER_SEED)
             return EnchantManipulationStatus.NOT_CRACKED;
 
         long seed = getSeed(playerRand);
@@ -623,6 +636,7 @@ public class EnchantmentCracker {
                 seed = (seed * MULTIPLIER + ADDEND) & MASK;
             rand.setSeed(seed ^ MULTIPLIER);
         }
+        System.out.println(itemsNeeded);
         if (itemsNeeded > max)
             return EnchantManipulationStatus.IMPOSSIBLE;
 
