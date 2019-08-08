@@ -235,7 +235,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                 int level = 30 + 1 + enchantability / 4 + enchantability / 4;
                 level += Math.round(level * 0.15f);
                 for (maxLevel = enchantment.getMaximumLevel(); maxLevel >= 1; maxLevel--) {
-                    if (level >= enchantment.getMinimumPower(maxLevel) && level <= enchantment.getMaximumPower(maxLevel))
+                    if (level >= enchantment.getMinimumPower(maxLevel))
                         break;
                 }
             }
