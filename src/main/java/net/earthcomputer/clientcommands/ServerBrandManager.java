@@ -7,6 +7,7 @@ import net.minecraft.util.Formatting;
 public class ServerBrandManager {
 
     private static String serverBrand = "vanilla";
+    private static boolean hasWarnedRng = false;
 
     public static void setServerBrand(String brand) {
         serverBrand = brand;
@@ -20,10 +21,15 @@ public class ServerBrandManager {
         return "vanilla".equals(serverBrand);
     }
 
+    public static void onDisconnect() {
+        hasWarnedRng = false;
+    }
+
     public static void rngWarning() {
-        if (!isVanilla() && !MinecraftClient.getInstance().isIntegratedServerRunning()) {
+        if (!isVanilla() && !hasWarnedRng && !MinecraftClient.getInstance().isIntegratedServerRunning()) {
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
                     new TranslatableText("enchCrack.serverBrandWarning").formatted(Formatting.YELLOW));
+            hasWarnedRng = true;
         }
     }
 
