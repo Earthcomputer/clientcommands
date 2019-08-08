@@ -636,7 +636,6 @@ public class EnchantmentCracker {
                 seed = (seed * MULTIPLIER + ADDEND) & MASK;
             rand.setSeed(seed ^ MULTIPLIER);
         }
-        System.out.println(itemsNeeded);
         if (itemsNeeded > max)
             return EnchantManipulationStatus.IMPOSSIBLE;
 
