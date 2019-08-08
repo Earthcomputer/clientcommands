@@ -489,7 +489,7 @@ public class EnchantmentCracker {
         int bookshelvesNeeded = 0;
         int slot = 0;
         int[] enchantLevels = new int[3];
-        outerLoop: for (int i = TempRules.enchCrackState == EnumCrackState.CRACKED_PLAYER_SEED ? 0 : -1; i < 1000; i++) {
+        outerLoop: for (int i = TempRules.enchCrackState == EnumCrackState.CRACKED_PLAYER_SEED ? 0 : -1; i < TempRules.maxEnchantItemThrows; i++) {
             int xpSeed = (int) ((i == -1 ? seed : ((seed * MULTIPLIER + ADDEND) & MASK)) >>> 16);
             Random rand = new Random();
             for (bookshelvesNeeded = 0; bookshelvesNeeded <= 15; bookshelvesNeeded++) {

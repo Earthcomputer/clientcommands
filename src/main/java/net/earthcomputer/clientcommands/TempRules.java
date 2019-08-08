@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.minecraft.util.math.MathHelper;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -38,6 +39,12 @@ public class TempRules {
 
     @Rule
     public static boolean toolBreakWarning = false;
+
+    @Rule(setter = "setMaxEnchantItemThrows")
+    public static int maxEnchantItemThrows = 64 * 32;
+    public static void setMaxEnchantItemThrows(int maxEnchantItemThrows) {
+        TempRules.maxEnchantItemThrows = MathHelper.clamp(maxEnchantItemThrows, 0, 1000000);
+    }
 
     public static Object get(String name) {
         Field field = rules.get(name);
