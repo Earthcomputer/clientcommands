@@ -1,13 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
@@ -654,8 +648,7 @@ public class EnchantmentCracker {
         EnchantManipulationStatus status = manipulateEnchantmentsSanityCheck(player);
         if (status != EnchantManipulationStatus.OK && status != EnchantManipulationStatus.NOT_CRACKED)
             return status;
-        Slot matchingSlot = player.container.slotList.stream()
-                .filter(Slot::hasStack).findAny().orElse(null);
+        Slot matchingSlot = getBestItemThrowSlot(player.container.slotList);
         if (matchingSlot == null) {
             return EnchantManipulationStatus.EMPTY_INVENTORY;
         }
@@ -669,6 +662,21 @@ public class EnchantmentCracker {
                 matchingSlot.id, 0, SlotActionType.THROW, player);
 
         return status;
+    }
+
+    private static Slot getBestItemThrowSlot(List<Slot> slots) {
+        Map<Item, Integer> itemCounts = new HashMap<>();
+        for (Slot slot : slots) {
+            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0) {
+                itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
+            }
+        }
+        if (itemCounts.isEmpty())
+            return null;
+        //noinspection OptionalGetWithoutIsPresent
+        Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getMaxCount).thenComparing(itemCounts::get)).get();
+        //noinspection OptionalGetWithoutIsPresent
+        return slots.stream().filter(slot -> slot.getStack().getItem() == preferredItem).findFirst().get();
     }
 
     public static long singlePlayerCrackRNG() {
