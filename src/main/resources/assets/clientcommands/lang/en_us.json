@@ -8,6 +8,8 @@
 
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.incompatible": "Incompatible enchantments",
+  "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled.",
+  "commands.cenchant.needEnchantingPrediction.enable": "Enable",
   "commands.cenchant.success": "Starting enchantment manipulation",
 
   "commands.cfind.found.left": "Found %1$s at ",
