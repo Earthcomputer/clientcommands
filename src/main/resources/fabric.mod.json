@@ -1,16 +1,34 @@
 {
+  "schemaVersion": 1,
   "id": "clientcommands",
   "name": "Client Commands",
   "description": "Useful client-side commands",
   "version": "${version}",
-  "side": "client",
-  "initializers": [
-    "net.earthcomputer.clientcommands.ClientCommands"
+  "environment": "client",
+  "license": "MIT",
+  "icon": "assets/clientcommands/icon.png",
+  "contact": {
+    "homepage": "https://earthcomputer.net/",
+    "issues": "https://github.com/Earthcomputer/clientcommands/issues"
+  },
+  "authors": [
+    "Earthcomputer"
   ],
+  "contributors": [
+    "cortex"
+  ],
+  "entrypoints": {
+    "client": [
+      "net.earthcomputer.clientcommands.ClientCommands"
+    ]
+  },
   "requires": {
     "fabric": "*"
   },
-  "mixins": {
-    "client": ["mixins.clientcommands.json"]
+  "mixins": [
+    "mixins.clientcommands.json"
+  ],
+  "custom": {
+    "modmenu:clientsideOnly": true
   }
 }
