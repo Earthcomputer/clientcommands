@@ -4,6 +4,7 @@
   "commands.ccalc.expected": "Expected %s",
   "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %d arguments",
 
+  "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
 
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
@@ -25,7 +26,6 @@
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Searching for %s",
   "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s.",
-  "commands.cfinditem.starting.cancel": "Cancel",
   "commands.cfinditem.total": "Found %dx %s total",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
@@ -42,6 +42,7 @@
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
   "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.cancel": "Cancel",
 
   "enchCrack.state": "Crack State: %s",
   "enchCrack.state.uncracked": "Uncracked",

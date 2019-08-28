@@ -27,12 +27,7 @@ public class CEnchantCommand {
             Text text = new TranslatableText("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
                     .append(" ")
-                    .append(new TranslatableText("commands.cenchant.needEnchantingPrediction.enable")
-                            .styled(style -> {
-                                style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("/ctemprule set enchantingPrediction true")));
-                                style.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ctemprule set enchantingPrediction true"));
-                                style.setUnderline(Boolean.TRUE);
-                            }));
+                    .append(getCommandTextComponent("commands.cenchant.needEnchantingPrediction.enable", "/ctemprule set enchantingPrediction true"));
             sendFeedback(text);
             return 0;
         }

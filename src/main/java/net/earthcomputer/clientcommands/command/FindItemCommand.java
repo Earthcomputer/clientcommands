@@ -71,13 +71,9 @@ public class FindItemCommand {
     private static int findItem(ServerCommandSource source, boolean noSearchShulkerBox, boolean keepSearching, ItemStackArgument item) {
         String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item, !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
-            Text cancel = new TranslatableText("commands.cfinditem.starting.cancel");
-            cancel.getStyle().setUnderline(true);
-            cancel.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ctask stop " + taskName));
-            cancel.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("/ctask stop " + taskName)));
             sendFeedback(new TranslatableText("commands.cfinditem.starting.keepSearching", Registry.ITEM.getId(item.getItem()))
                     .append(" ")
-                    .append(cancel));
+                    .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
         } else {
             sendFeedback(new TranslatableText("commands.cfinditem.starting", Registry.ITEM.getId(item.getItem())));
         }

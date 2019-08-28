@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftClient.class)
 public class MixinMinecraftClient {
 
-    @Inject(method = "handleInputEvents", at = @At("HEAD"))
+    @Inject(method = "tick", at = @At("HEAD"))
     public void onHandleInputEvents(CallbackInfo ci) {
         TaskManager.tick();
         GuiBlocker.tick();

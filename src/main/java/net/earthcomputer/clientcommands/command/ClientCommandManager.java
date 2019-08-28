@@ -82,4 +82,11 @@ public class ClientCommandManager {
         return text;
     }
 
+    public static Text getCommandTextComponent(String translationKey, String command) {
+        Text text = new TranslatableText(translationKey).styled(style -> style.setUnderline(true));
+        text.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+        text.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command)));
+        return text;
+    }
+
 }

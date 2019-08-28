@@ -1,13 +1,16 @@
 package net.cortex.clientAddon.cracker;
 
+import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.packet.EntitySpawnS2CPacket;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.MessageType;
 import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.util.Random;
@@ -21,6 +24,7 @@ public class SeedCracker {
     public static long[] bits=new long[20];
     public static int expectedItems=0;
     public static boolean cracking=false;
+    public static LongTask currentTask;
 
     //returns True on success or false on failer
     private static boolean throwItems()
@@ -73,6 +77,14 @@ public class SeedCracker {
         {
             cracking=true;
             expectedItems=20;
+            if (currentTask == null) {
+                currentTask = new SeedCrackTask();
+                String taskName = TaskManager.addTask("ccrackrng", currentTask);
+                Text message = new TranslatableText("commands.ccrackrng.starting")
+                        .append(" ")
+                        .append(ClientCommandManager.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName));
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
+            }
         }
     }
 
