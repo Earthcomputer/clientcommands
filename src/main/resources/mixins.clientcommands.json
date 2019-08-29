@@ -38,7 +38,10 @@
     "MixinLoomContainer",
     "MixinPlayerContainer",
     "MixinStonecutterContainer",
-    "MixinMerchantContainer"
+    "MixinMerchantContainer",
+    "MixinEnchantmentWeight",
+    "MixinEnchantmentHelper",
+    "MixinProtectionEnchantment"
   ],
   "injectors": {
     "defaultRequire": 1
