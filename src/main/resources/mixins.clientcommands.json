@@ -29,7 +29,16 @@
     "MixinFishingRodItem",
     "MixinMiningToolItem",
     "MixinCrossbowItem",
-    "MixinArmorStandEntity"
+    "MixinArmorStandEntity",
+    "MixinGuiClosePacket",
+    "MixinAnvilContainer",
+    "MixinCartographyTableContainer",
+    "MixinCraftingTableContainer",
+    "MixinGrindstoneContainer",
+    "MixinLoomContainer",
+    "MixinPlayerContainer",
+    "MixinStonecutterContainer",
+    "MixinMerchantContainer"
   ],
   "injectors": {
     "defaultRequire": 1

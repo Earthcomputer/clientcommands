@@ -17,19 +17,11 @@ public class MixinPlayerInventory {
 
     @Shadow @Final public DefaultedList<ItemStack> main;
 
-    @Shadow @Final public DefaultedList<ItemStack> offHand;
-
     @Inject(method = "offerOrDrop", at = @At("HEAD"))
     public void onOfferOrDrop(World world, ItemStack stack, CallbackInfo ci) {
         if (world.isClient) {
             int stackSize = stack.getCount();
             for (ItemStack item : main) {
-                if (item.isEmpty())
-                    stackSize -= stack.getMaxCount();
-                else if (item.isItemEqual(stack))
-                    stackSize -= stack.getMaxCount() - item.getCount();
-            }
-            for (ItemStack item : offHand) {
                 if (item.isEmpty())
                     stackSize -= stack.getMaxCount();
                 else if (item.isItemEqual(stack))
