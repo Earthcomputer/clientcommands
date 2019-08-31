@@ -41,7 +41,8 @@
     "MixinMerchantContainer",
     "MixinEnchantmentWeight",
     "MixinEnchantmentHelper",
-    "MixinProtectionEnchantment"
+    "MixinProtectionEnchantment",
+    "MixinChatScreen"
   ],
   "injectors": {
     "defaultRequire": 1
