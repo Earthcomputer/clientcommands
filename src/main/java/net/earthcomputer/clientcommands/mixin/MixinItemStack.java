@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ public class MixinItemStack {
 
     @Inject(method = "damage(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At("HEAD"))
     public <T extends LivingEntity> void onDamage(int amount, T holder, Consumer<T> breakHandler, CallbackInfo ci) {
-        EnchantmentCracker.onItemDamage(amount, holder, (ItemStack) (Object) this);
+        PlayerRandCracker.onItemDamage(amount, holder, (ItemStack) (Object) this);
     }
 
 }

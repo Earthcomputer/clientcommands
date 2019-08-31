@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ItemStack;
@@ -17,7 +17,7 @@ public class MixinCrossbowItem {
 
     @Inject(method = "shoot", at = @At("HEAD"))
     private static void shoot(World world, LivingEntity shooter, Hand hand, ItemStack crossbow, ItemStack projectile, float soundPitch, boolean creative, float speed, float divergence, float simulated, CallbackInfo ci) {
-        EnchantmentCracker.onItemDamage(projectile.getItem() == Items.FIREWORK_ROCKET ? 3 : 1, shooter, crossbow);
+        PlayerRandCracker.onItemDamage(projectile.getItem() == Items.FIREWORK_ROCKET ? 3 : 1, shooter, crossbow);
     }
 
 }

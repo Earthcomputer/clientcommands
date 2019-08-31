@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -25,7 +25,7 @@ public class MixinGuiClosePacket {
 
         PlayerInventory playerInv = player.inventory;
         if (!playerInv.getCursorStack().isEmpty())
-            EnchantmentCracker.onDropItem();
+            PlayerRandCracker.onDropItem();
 
         Container container = player.container;
         if (container instanceof IDroppableInventoryContainer) {
@@ -46,7 +46,7 @@ public class MixinGuiClosePacket {
                     }
                 }
                 if (stackSize > 0) {
-                    EnchantmentCracker.onDropItem();
+                    PlayerRandCracker.onDropItem();
                 }
             }
         }
@@ -54,7 +54,7 @@ public class MixinGuiClosePacket {
         if (container instanceof BeaconContainer) {
             Slot paymentSlot = container.getSlot(0);
             if (paymentSlot.getStack().getCount() > paymentSlot.getMaxStackAmount())
-                EnchantmentCracker.onDropItem();
+                PlayerRandCracker.onDropItem();
 
         }
     }

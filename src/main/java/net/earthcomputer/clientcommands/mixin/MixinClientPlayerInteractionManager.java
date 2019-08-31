@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
@@ -37,7 +38,7 @@ public class MixinClientPlayerInteractionManager {
         if (item instanceof MiningToolItem) {
             BlockState state = world.getBlockState(pos);
             if (state.getHardness(world, pos) != 0)
-                EnchantmentCracker.onItemDamage(1, player, stack);
+                PlayerRandCracker.onItemDamage(1, player, stack);
         }
     }
 

@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PumpkinBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,7 +18,7 @@ public class MixinPumpkinBlock {
 
     @Inject(method = "activate", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z"))
     public void onShear(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<Boolean> ci) {
-        EnchantmentCracker.onItemDamage(1, player, player.getStackInHand(hand));
+        PlayerRandCracker.onItemDamage(1, player, player.getStackInHand(hand));
     }
 
 }

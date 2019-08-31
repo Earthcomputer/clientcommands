@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DefaultedList;
@@ -28,7 +28,7 @@ public class MixinPlayerInventory {
                     stackSize -= stack.getMaxCount() - item.getCount();
             }
             if (stackSize > 0) {
-                EnchantmentCracker.onDropItem();
+                PlayerRandCracker.onDropItem();
             }
         }
     }

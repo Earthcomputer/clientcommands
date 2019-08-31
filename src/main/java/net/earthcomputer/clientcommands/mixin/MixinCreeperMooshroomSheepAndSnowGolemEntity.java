@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.SheepEntity;
@@ -17,7 +17,7 @@ public class MixinCreeperMooshroomSheepAndSnowGolemEntity {
 
     @Inject(method = "interactMob", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z"))
     public void onInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<Boolean> ci) {
-        EnchantmentCracker.onItemDamage(1, player, player.getStackInHand(hand));
+        PlayerRandCracker.onItemDamage(1, player, player.getStackInHand(hand));
     }
 
 }

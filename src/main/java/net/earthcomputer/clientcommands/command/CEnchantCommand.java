@@ -31,10 +31,19 @@ public class CEnchantCommand {
             sendFeedback(text);
             return 0;
         }
-        EnchantmentCracker.EnchantManipulationStatus status =
-                EnchantmentCracker.manipulateEnchantments(itemAndEnchantmentsPredicate.item, itemAndEnchantmentsPredicate.predicate);
-        if (status != EnchantmentCracker.EnchantManipulationStatus.OK) {
-            throw new CommandException(new TranslatableText(status.getTranslation()));
+        if (!TempRules.playerCrackState.knowsSeed() && TempRules.enchCrackState != EnchantmentCracker.CrackState.CRACKED) {
+            Text text = new TranslatableText("commands.cenchant.uncracked")
+                    .formatted(Formatting.RED)
+                    .append(" ")
+                    .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+            sendFeedback(text);
+            return 0;
+        }
+
+        boolean success = EnchantmentCracker.manipulateEnchantments(itemAndEnchantmentsPredicate.item, itemAndEnchantmentsPredicate.predicate);
+        if (!success) {
+            sendFeedback("commands.cenchant.failed");
+            return 0;
         } else {
             sendFeedback("commands.cenchant.success");
             return 0;

@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IArmorStandEntity;
 import net.earthcomputer.clientcommands.interfaces.ILivingEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -34,7 +34,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
     @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"))
     public void onDropItem(ItemStack stack, boolean randomDirection, boolean thisIsThrower, CallbackInfoReturnable<ItemEntity> ci) {
         if (isThePlayer())
-            EnchantmentCracker.onDropItem();
+            PlayerRandCracker.onDropItem();
     }
 
     @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", ordinal = 0))
@@ -108,9 +108,9 @@ public abstract class MixinPlayerEntity extends LivingEntity {
             if (!heldStack.isEmpty() && target instanceof LivingEntity) {
                 Item item = heldStack.getItem();
                 if (item instanceof MiningToolItem) {
-                    EnchantmentCracker.onItemDamage(2, this, heldStack);
+                    PlayerRandCracker.onItemDamage(2, this, heldStack);
                 } else if (item instanceof HoeItem || item instanceof SwordItem || item instanceof TridentItem) {
-                    EnchantmentCracker.onItemDamage(1, this, heldStack);
+                    PlayerRandCracker.onItemDamage(1, this, heldStack);
                 }
             }
         }

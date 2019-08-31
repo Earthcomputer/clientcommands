@@ -4,14 +4,12 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
-import static net.earthcomputer.clientcommands.features.EnchantmentCracker.EnumCrackState.CRACKED_PLAYER_SEED;
-import static net.earthcomputer.clientcommands.features.EnchantmentCracker.MULTIPLIER;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class CrackRNGCommand {
@@ -27,8 +25,8 @@ public class CrackRNGCommand {
         ServerBrandManager.rngWarning();
         SeedCracker.crack(seed -> {
             sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
-            EnchantmentCracker.playerRand.setSeed(seed ^ MULTIPLIER);
-            TempRules.enchCrackState=CRACKED_PLAYER_SEED;
+            PlayerRandCracker.setSeed(seed);
+            TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
         });
         return 0;
     }

@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.DamageEnchantment;
 import net.minecraft.entity.Entity;
@@ -16,7 +16,7 @@ public class MixinDamageEnchantment {
     @Inject(method = "onTargetDamaged", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", remap = false))
     public void onAttackArthropod(LivingEntity attacker, Entity attacked, int level, CallbackInfo ci) {
         if (attacker instanceof ClientPlayerEntity) {
-            EnchantmentCracker.onBaneOfArthropods();
+            PlayerRandCracker.onBaneOfArthropods();
         }
     }
 

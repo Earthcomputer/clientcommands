@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.CarrotOnAStickItem;
@@ -19,7 +19,7 @@ public class MixinCarrotOnAStickItem {
     @Inject(method = "use", at = @At("HEAD"))
     public void onUse(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> ci) {
         if (player.hasVehicle() && player.getVehicle() instanceof PigEntity) {
-            EnchantmentCracker.onItemDamageUncertain(0, 7, player, player.getStackInHand(hand));
+            PlayerRandCracker.onItemDamageUncertain(0, 7, player, player.getStackInHand(hand));
         }
     }
 

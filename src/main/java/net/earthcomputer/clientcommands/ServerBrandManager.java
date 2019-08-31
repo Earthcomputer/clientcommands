@@ -28,7 +28,7 @@ public class ServerBrandManager {
     public static void rngWarning() {
         if (!isVanilla() && !hasWarnedRng && !MinecraftClient.getInstance().isIntegratedServerRunning()) {
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
-                    new TranslatableText("enchCrack.serverBrandWarning").formatted(Formatting.YELLOW));
+                    new TranslatableText("playerManip.serverBrandWarning").formatted(Formatting.YELLOW));
             hasWarnedRng = true;
         }
     }

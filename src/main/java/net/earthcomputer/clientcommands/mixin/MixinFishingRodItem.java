@@ -1,9 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
-import net.minecraft.entity.passive.PigEntity;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.CarrotOnAStickItem;
 import net.minecraft.item.FishingRodItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -19,7 +17,7 @@ public class MixinFishingRodItem {
 
     @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z"))
     public void onUse(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> ci) {
-        EnchantmentCracker.onItemDamageUncertain(1, 5, player, player.getStackInHand(hand));
+        PlayerRandCracker.onItemDamageUncertain(1, 5, player, player.getStackInHand(hand));
     }
 
 }

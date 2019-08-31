@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.ItemUsageContext;
@@ -16,7 +16,7 @@ public class MixinAxeHoeAndShovelItem {
 
     @Inject(method = "useOnBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z"))
     public void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> ci) {
-        EnchantmentCracker.onItemDamage(1, context.getPlayer(), context.getStack());
+        PlayerRandCracker.onItemDamage(1, context.getPlayer(), context.getStack());
     }
 
 }

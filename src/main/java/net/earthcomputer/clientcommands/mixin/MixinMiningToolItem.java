@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -18,7 +18,7 @@ public class MixinMiningToolItem {
     @Inject(method = "postMine", at = @At("HEAD"))
     public void onPostMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner, CallbackInfoReturnable<Boolean> ci) {
         if (state.getHardness(world, pos) != 0)
-            EnchantmentCracker.onItemDamage(1, miner, stack);
+            PlayerRandCracker.onItemDamage(1, miner, stack);
     }
 
 }

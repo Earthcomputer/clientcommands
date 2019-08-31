@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
@@ -18,7 +18,7 @@ public class CheatCrackRNGCommand {
     }
 
     private static int crackPlayerRNG(ServerCommandSource source) {
-        long seed = EnchantmentCracker.singlePlayerCrackRNG();
+        long seed = PlayerRandCracker.singlePlayerCrackRNG();
         sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
         return (int) seed;
     }

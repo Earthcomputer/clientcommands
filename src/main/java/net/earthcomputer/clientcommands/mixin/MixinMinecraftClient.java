@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -24,7 +24,7 @@ public class MixinMinecraftClient {
 
     @Inject(method = "setWorld", at = @At("HEAD"))
     public void onSetWorld(CallbackInfo ci) {
-        EnchantmentCracker.onRecreatePlayer();
+        PlayerRandCracker.onRecreatePlayer();
         TaskManager.onWorldUnload();
     }
 

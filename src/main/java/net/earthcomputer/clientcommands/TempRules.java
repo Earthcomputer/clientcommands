@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.util.math.MathHelper;
 
 import java.lang.annotation.ElementType;
@@ -19,7 +20,10 @@ public class TempRules {
     public static double calcAnswer = 0;
 
     @Rule(readOnly = true)
-    public static EnchantmentCracker.EnumCrackState enchCrackState = EnchantmentCracker.EnumCrackState.UNCRACKED;
+    public static EnchantmentCracker.CrackState enchCrackState = EnchantmentCracker.CrackState.UNCRACKED;
+
+    @Rule(readOnly = true)
+    public static PlayerRandCracker.CrackState playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
 
     @Rule(setter = "setEnchantingPrediction")
     private static boolean enchantingPrediction = false;

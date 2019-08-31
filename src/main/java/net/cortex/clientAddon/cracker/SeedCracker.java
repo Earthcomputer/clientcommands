@@ -1,7 +1,9 @@
 package net.cortex.clientAddon.cracker;
 
+import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
@@ -14,7 +16,6 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.util.Random;
-import static net.earthcomputer.clientcommands.features.EnchantmentCracker.MULTIPLIER;
 
 public class SeedCracker {
     public interface OnCrack {void callback(long seed); }
@@ -23,7 +24,6 @@ public class SeedCracker {
     public static OnCrack callback;
     public static long[] bits=new long[20];
     public static int expectedItems=0;
-    public static boolean cracking=false;
     public static LongTask currentTask;
 
     //returns True on success or false on failer
@@ -33,8 +33,8 @@ public class SeedCracker {
         player.setPositionAndAngles(player.x, player.y, player.z, 0, 90);
         MinecraftClient.getInstance().getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(0, 90, true)); // point to correct location
         for (int i = 0; i < 20; i++) {
-            EnchantmentCracker.EnchantManipulationStatus status = EnchantmentCracker.throwItem();
-            if (status != EnchantmentCracker.EnchantManipulationStatus.OK && status != EnchantmentCracker.EnchantManipulationStatus.NOT_CRACKED) {
+            boolean success = PlayerRandCracker.throwItem();
+            if (!success) {
                 MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.GAME_INFO, new TranslatableText("itemCrack.notEnoughItems").formatted(Formatting.RED));
                 EnchantmentCracker.LOGGER.info("Unable to use rng SeedCracker |not enough items|");
                 return false;
@@ -44,7 +44,6 @@ public class SeedCracker {
     }
 	public static void attemptCrack()
 	{
-		cracking=false;
 		long seed= Lattice_cracker.crack(SeedCracker.bits);
 
 		if(seed==0)//Basicaly if seed is zero it means it failed to try to crack again
@@ -53,9 +52,11 @@ public class SeedCracker {
 			return;
 		}
 		//Else, got a seed
+
+        TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
 		
 		Random rand=new Random();
-		rand.setSeed(seed ^ MULTIPLIER);
+		rand.setSeed(seed ^ PlayerRandCracker.MULTIPLIER);
 		rand.nextFloat();
 		rand.nextFloat();
 		//rand.nextFloat();
@@ -69,13 +70,13 @@ public class SeedCracker {
 			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" \n");
 		}*/
 
-		callback.callback(EnchantmentCracker.getSeed(rand));//extract seed and call callback
+		callback.callback(PlayerRandCracker.getSeed(rand));//extract seed and call callback
 	}
     public static void crack(OnCrack Callback){
         callback=Callback;
         if(throwItems())
         {
-            cracking=true;
+            TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
             expectedItems=20;
             if (currentTask == null) {
                 currentTask = new SeedCrackTask();
@@ -97,7 +98,7 @@ public class SeedCracker {
             SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
             SeedCracker.expectedItems--;
         }
-        if(SeedCracker.expectedItems==0&&SeedCracker.cracking)//if its the last item
+        if(SeedCracker.expectedItems == 0 && TempRules.playerCrackState == PlayerRandCracker.CrackState.CRACKING)//if its the last item
         {
             SeedCracker.attemptCrack();
         }

@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import com.google.common.base.Objects;
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.ILivingEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -36,38 +36,38 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
     @Inject(method = "tickPushing", at = @At("HEAD"))
     public void onEntityCramming(CallbackInfo ci) {
         if (isThePlayer() && world.getEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
-            EnchantmentCracker.onEntityCramming();
+            PlayerRandCracker.onEntityCramming();
         }
     }
 
     @Inject(method = "spawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getDrinkSound(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/sound/SoundEvent;"))
     public void onDrink(CallbackInfo ci) {
         if (isThePlayer())
-            EnchantmentCracker.onDrink();
+            PlayerRandCracker.onDrink();
     }
 
     @Inject(method = "spawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getEatSound(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/sound/SoundEvent;"))
     public void onEat(CallbackInfo ci) {
         if (isThePlayer())
-            EnchantmentCracker.onEat();
+            PlayerRandCracker.onEat();
     }
 
     @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"))
     public void onUnderwater(CallbackInfo ci) {
         if (isThePlayer())
-            EnchantmentCracker.onUnderwater();
+            PlayerRandCracker.onUnderwater();
     }
 
     @Inject(method = "playEquipmentBreakEffects", at = @At("HEAD"))
     public void onEquipmentBreak(ItemStack stack, CallbackInfo ci) {
         if (isThePlayer())
-            EnchantmentCracker.onEquipmentBreak();
+            PlayerRandCracker.onEquipmentBreak();
     }
 
     @Inject(method = "spawnPotionParticles", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isInvisible()Z"))
     public void onPotionParticles(CallbackInfo ci) {
         if (isThePlayer())
-            EnchantmentCracker.onPotionParticles();
+            PlayerRandCracker.onPotionParticles();
     }
 
     @Inject(method = "baseTick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z", ordinal = 2))
@@ -87,7 +87,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
                         BlockState offsetState = world.getBlockState(offsetPos);
                         if (offsetState.getMaterial() == Material.WATER && offsetState.get(FluidBlock.LEVEL) == 0 && world.canPlace(frostedIce, offsetPos, EntityContext.absent())) {
                             if (world.isAir(offsetPos.up())) {
-                                EnchantmentCracker.onFrostWalker();
+                                PlayerRandCracker.onFrostWalker();
                             }
                         }
                     }

@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
@@ -16,7 +16,7 @@ public class MixinBowAndTridentItem {
 
     @Inject(method = "onStoppedUsing", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z"))
     public void onOnStoppedUsing(ItemStack stack, World world, LivingEntity thrower, int remainingUseTicks, CallbackInfo ci) {
-        EnchantmentCracker.onItemDamage(1, thrower, stack);
+        PlayerRandCracker.onItemDamage(1, thrower, stack);
     }
 
 }

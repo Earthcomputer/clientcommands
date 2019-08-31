@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.item.FlintAndSteelItem;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.util.ActionResult;
@@ -14,7 +14,7 @@ public class MixinFlintAndSteelItem {
 
     @Inject(method = "useOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemUsageContext;getStack()Lnet/minecraft/item/ItemStack;", ordinal = 0))
     public void onUseOnBlock(ItemUsageContext context, CallbackInfoReturnable<ActionResult> ci) {
-        EnchantmentCracker.onItemDamage(1, context.getPlayer(), context.getStack());
+        PlayerRandCracker.onItemDamage(1, context.getPlayer(), context.getStack());
     }
 
 }
