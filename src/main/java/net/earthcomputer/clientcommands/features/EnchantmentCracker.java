@@ -288,7 +288,7 @@ public class EnchantmentCracker {
      * seed
      */
 
-    public static boolean manipulateEnchantments(Item item, Predicate<List<InfoEnchantment>> enchantmentsPredicate) {
+    public static ManipulateResult manipulateEnchantments(Item item, Predicate<List<InfoEnchantment>> enchantmentsPredicate, boolean simulate) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
         ItemStack stack = new ItemStack(item);
@@ -298,9 +298,10 @@ public class EnchantmentCracker {
         int timesNeeded = -2;
         int bookshelvesNeeded = 0;
         int slot = 0;
+        List<InfoEnchantment> enchantments = null;
         int[] enchantLevels = new int[3];
         outerLoop:
-        for (int i = TempRules.enchCrackState == CrackState.CRACKED ? 0 : -1;
+        for (int i = TempRules.enchCrackState == CrackState.CRACKED ? -1 : 0;
              i < (TempRules.playerCrackState.knowsSeed() ? TempRules.maxEnchantItemThrows : 0);
              i++) {
             int xpSeed = i == -1 ?
@@ -317,7 +318,7 @@ public class EnchantmentCracker {
                     enchantLevels[slot] = level;
                 }
                 for (slot = 0; slot < 3; slot++) {
-                    List<InfoEnchantment> enchantments = getEnchantmentList(rand, xpSeed, stack, slot,
+                    enchantments = getEnchantmentList(rand, xpSeed, stack, slot,
                             enchantLevels[slot]);
                     if (enchantmentsPredicate.test(enchantments)) {
                         timesNeeded = i;
@@ -333,7 +334,11 @@ public class EnchantmentCracker {
             }
         }
         if (timesNeeded == -2) {
-            return false;
+            return null;
+        }
+
+        if (simulate) {
+            return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments);
         }
 
         LongTaskList taskList = new LongTaskList();
@@ -420,7 +425,7 @@ public class EnchantmentCracker {
 
         TaskManager.addTask("enchantmentCracker", taskList);
 
-        return true;
+        return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments);
     }
 
     // MISCELLANEOUS HELPER METHODS & ENCHANTING SIMULATION
@@ -488,6 +493,36 @@ public class EnchantmentCracker {
             ItemStack enchantingStack = enchContainer.getSlot(0).getStack();
             int enchantLevels = enchContainer.enchantmentPower[slot];
             return getEnchantmentList(rand, xpSeed, enchantingStack, slot, enchantLevels);
+        }
+    }
+
+    public static class ManipulateResult {
+        private final int itemThrows;
+        private final int bookshelves;
+        private final int slot;
+        private final List<InfoEnchantment> enchantments;
+
+        public ManipulateResult(int itemThrows, int bookshelves, int slot, List<InfoEnchantment> enchantments) {
+            this.itemThrows = itemThrows;
+            this.bookshelves = bookshelves;
+            this.slot = slot;
+            this.enchantments = enchantments;
+        }
+
+        public int getItemThrows() {
+            return itemThrows;
+        }
+
+        public int getBookshelves() {
+            return bookshelves;
+        }
+
+        public int getSlot() {
+            return slot;
+        }
+
+        public List<InfoEnchantment> getEnchantments() {
+            return enchantments;
         }
     }
 

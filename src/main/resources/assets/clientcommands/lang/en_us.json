@@ -65,6 +65,9 @@
   "enchCrack.insn.ready": "Your enchantment seed is ready",
   "enchCrack.insn.bookshelves": "Bookshelves needed: %d",
   "enchCrack.insn.slot": "In slot: %d",
+  "enchCrack.insn.itemThrows": "Item throws needed: %d (about %f seconds)",
+  "enchCrack.insn.itemThrows.noDummy": "No dummy enchantment",
+  "enchCrack.insn.enchantments": "Enchantments on item:",
 
   "playerManip.state": "Player Crack State: %s",
   "playerManip.state.uncracked": "Uncracked",
