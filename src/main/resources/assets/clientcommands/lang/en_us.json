@@ -78,7 +78,7 @@
   "playerManip.state.cracking": "Cracking",
   "playerManip.state.eating": "Eating",
   "playerManip.state.manipulating_enchantments": "Manipulating Enchantments",
-  "playerManip.state.waiting_dummy_enchantment": "Waiting for Dummy Enchantment",
+  "playerManip.state.waiting_dummy_enchant": "Waiting for Dummy Enchantment",
 
   "playerManip.reset": "Restarting player RNG manipulation. Reason: %s",
   "playerManip.reset.playerHurt": "Player Hurt",
