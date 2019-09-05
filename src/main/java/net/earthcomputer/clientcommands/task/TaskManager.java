@@ -4,10 +4,14 @@ import java.util.*;
 
 public class TaskManager {
 
+    private static List<LongTask> newTasks = new ArrayList<>();
     private static Map<String, LongTask> tasks = new LinkedHashMap<>();
     private static long nextTaskId = 1;
 
     public static void tick() {
+        newTasks.forEach(LongTask::initialize);
+        newTasks.clear();
+
         if (tasks.isEmpty())
             return;
 
@@ -44,7 +48,7 @@ public class TaskManager {
     public static String addTask(String name, LongTask task) {
         String actualName = (nextTaskId++) + "." + name;
         tasks.put(actualName, task);
-        task.initialize();
+        newTasks.add(task);
         return actualName;
     }
 

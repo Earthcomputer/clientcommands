@@ -135,6 +135,7 @@ public class EnchantmentCracker {
     static Set<Integer> possibleXPSeeds = new HashSet<>(1 << 20);
     private static int firstXpSeed;
     public static BlockPos enchantingTablePos = null;
+    private static boolean doneEnchantment = false;
 
     public static void resetCracker() {
         TempRules.enchCrackState = CrackState.UNCRACKED;
@@ -280,6 +281,7 @@ public class EnchantmentCracker {
             PlayerRandCracker.onUnexpectedItemEnchant();
             TempRules.enchCrackState = CrackState.UNCRACKED;
         }
+        doneEnchantment = false;
     }
 
     // ENCHANTMENT MANIPULATION
@@ -393,6 +395,7 @@ public class EnchantmentCracker {
                 public void initialize() {
                     TempRules.playerCrackState = PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
                     player.sendMessage(new TranslatableText("enchCrack.insn.dummy"));
+                    doneEnchantment = false;
                 }
 
                 @Override
@@ -412,10 +415,11 @@ public class EnchantmentCracker {
         }
         final int bookshelvesNeeded_f = bookshelvesNeeded;
         final int slot_f = slot;
+        doneEnchantment = true;
         taskList.addTask(new OneTickTask() {
             @Override
             public void run() {
-                if (TempRules.enchCrackState == CrackState.CRACKED) {
+                if (TempRules.enchCrackState == CrackState.CRACKED && doneEnchantment) {
                     player.sendMessage(new LiteralText(Formatting.BOLD + I18n.translate("enchCrack.insn.ready")));
                     player.sendMessage(new TranslatableText("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
                     player.sendMessage(new TranslatableText("enchCrack.insn.slot", slot_f + 1));
