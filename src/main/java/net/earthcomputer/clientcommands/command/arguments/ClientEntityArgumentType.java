@@ -143,8 +143,11 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
         void parsePlayerName() throws CommandSyntaxException {
             if (reader.canRead()) {
+                int start = reader.getCursor();
                 suggestor = (builder, playerNameSuggestor) -> {
-                    playerNameSuggestor.accept(builder);
+                    SuggestionsBuilder newBuilder = builder.createOffset(start);
+                    playerNameSuggestor.accept(newBuilder);
+                    builder.add(newBuilder);
                     return builder.buildFuture();
                 };
             }
@@ -295,8 +298,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
         }
 
         private CompletableFuture<Suggestions> suggestOption(SuggestionsBuilder builder, Consumer<SuggestionsBuilder> playerNameSuggestor) {
+            String arg = builder.getRemaining().toLowerCase(Locale.ROOT);
             Option.options.forEach((name, opt) -> {
-                if (opt.applicable(this))
+                if (opt.applicable(this) && name.toLowerCase(Locale.ROOT).startsWith(arg))
                     builder.suggest(name + "=", opt.desc);
             });
             return builder.buildFuture();

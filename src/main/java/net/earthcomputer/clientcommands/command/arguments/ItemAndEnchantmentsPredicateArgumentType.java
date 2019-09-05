@@ -320,7 +320,11 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
         private void suggestWithWithout() {
             int start = reader.getCursor();
-            suggestor = suggestions -> suggestions.add(suggestions.createOffset(start).suggest("with").suggest("without"));
+            suggestor = suggestions -> {
+                SuggestionsBuilder builder = suggestions.createOffset(start);
+                CommandSource.suggestMatching(new String[] {"with", "without"}, builder);
+                suggestions.add(builder);
+            };
         }
     }
 }

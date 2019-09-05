@@ -10,6 +10,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.TempRules;
+import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
@@ -186,10 +187,8 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
             int cursor = reader.getCursor();
             suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                for (String constant : ConstantExpression.CONSTANTS.keySet())
-                    newBuilder.suggest(constant);
-                for (String function : FunctionExpression.FUNCTIONS.keySet())
-                    newBuilder.suggest(function);
+                CommandSource.suggestMatching(ConstantExpression.CONSTANTS.keySet(), newBuilder);
+                CommandSource.suggestMatching(FunctionExpression.FUNCTIONS.keySet(), newBuilder);
                 builder.add(newBuilder);
             };
 
