@@ -1,6 +1,8 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.interfaces.IServerCommandSource;
@@ -16,7 +18,6 @@ import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ContainerProvider;
-import net.minecraft.command.arguments.ItemStackArgument;
 import net.minecraft.container.Container;
 import net.minecraft.container.Slot;
 import net.minecraft.entity.Entity;
@@ -35,15 +36,17 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.arguments.ItemStackArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class FindItemCommand {
@@ -60,29 +63,30 @@ public class FindItemCommand {
                 .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_NO_SEARCH_SHULKER_BOX)))
             .then(literal("--keep-searching")
                 .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_KEEP_SEARCHING)))
-            .then(argument("item", itemStack())
+            .then(argument("item", withString(clientItemPredicate()))
                 .executes(ctx ->
-                        findItem(ctx.getSource(),
+                        findItem(ctx,
                                 (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_NO_SEARCH_SHULKER_BOX) != 0,
                                 (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_KEEP_SEARCHING) != 0,
-                                getItemStackArgument(ctx, "item")))));
+                                getWithString(ctx, "item", ItemPredicateArgument.class)))));
     }
 
-    private static int findItem(ServerCommandSource source, boolean noSearchShulkerBox, boolean keepSearching, ItemStackArgument item) {
-        String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item, !noSearchShulkerBox, keepSearching));
+    private static int findItem(CommandContext<ServerCommandSource> source, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, ItemPredicateArgument> item) throws CommandSyntaxException {
+        String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item.getLeft(), item.getRight().create(source), !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
-            sendFeedback(new TranslatableText("commands.cfinditem.starting.keepSearching", Registry.ITEM.getId(item.getItem()))
+            sendFeedback(new TranslatableText("commands.cfinditem.starting.keepSearching", item.getLeft())
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
         } else {
-            sendFeedback(new TranslatableText("commands.cfinditem.starting", Registry.ITEM.getId(item.getItem())));
+            sendFeedback(new TranslatableText("commands.cfinditem.starting", item.getLeft()));
         }
 
         return 0;
     }
 
     private static class FindItemsTask extends LongTask {
-        private final ItemStackArgument searchingFor;
+        private final String searchingForName;
+        private final Predicate<ItemStack> searchingFor;
         private final boolean searchShulkerBoxes;
         private final boolean keepSearching;
 
@@ -91,7 +95,8 @@ public class FindItemCommand {
         private BlockPos currentlySearching = null;
         private int currentlySearchingTimeout;
 
-        public FindItemsTask(ItemStackArgument searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+        public FindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+            this.searchingForName = searchingForName;
             this.searchingFor = searchingFor;
             this.searchShulkerBoxes = searchShulkerBoxes;
             this.keepSearching = keepSearching;
@@ -236,9 +241,9 @@ public class FindItemCommand {
                                 }
                             }
                             if (matchingItems > 0) {
-                                sendFeedback(new TranslatableText("commands.cfinditem.match.left", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))
+                                sendFeedback(new TranslatableText("commands.cfinditem.match.left", matchingItems, searchingForName)
                                         .append(getCoordsTextComponent(currentlySearching))
-                                        .append(new TranslatableText("commands.cfinditem.match.right", matchingItems, Registry.ITEM.getId(searchingFor.getItem()))));
+                                        .append(new TranslatableText("commands.cfinditem.match.right", matchingItems, searchingForName)));
                                 totalFound += matchingItems;
                             }
                             currentlySearching = null;
@@ -257,7 +262,7 @@ public class FindItemCommand {
 
         @Override
         public void onCompleted() {
-            sendFeedback(new TranslatableText("commands.cfinditem.total", totalFound, Registry.ITEM.getId(searchingFor.getItem())).formatted(Formatting.BOLD));
+            sendFeedback(new TranslatableText("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
         }
     }
 }
