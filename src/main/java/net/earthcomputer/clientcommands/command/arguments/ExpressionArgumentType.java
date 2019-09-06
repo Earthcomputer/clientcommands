@@ -258,7 +258,22 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         }
 
         private Expression parseExpression7() throws CommandSyntaxException {
-            return new LiteralExpression(reader.readDouble());
+            int start = reader.getCursor();
+            while (reader.canRead() && isAllowedNumber(reader.peek()))
+                reader.skip();
+            String number = reader.getString().substring(start, reader.getCursor());
+            if (number.isEmpty())
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedDouble().createWithContext(reader);
+            try {
+                return new LiteralExpression(Double.parseDouble(number));
+            } catch (NumberFormatException e) {
+                reader.setCursor(start);
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidDouble().createWithContext(reader, number);
+            }
+        }
+
+        private static boolean isAllowedNumber(char c) {
+            return (c >= '0' && c <= '9') || c == '.';
         }
     }
 
