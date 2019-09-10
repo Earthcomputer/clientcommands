@@ -31,6 +31,7 @@ import net.minecraft.util.registry.Registry;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.*;
+import java.util.regex.Pattern;
 
 public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelector> {
 
@@ -313,10 +314,15 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                     @Override
                     void apply(Parser parser) throws CommandSyntaxException {
                         boolean neg = parser.readNegationCharacter();
-                        String name = parser.reader.readString();
+                        if (parser.reader.canRead() && parser.reader.peek() == '/') {
+                            Pattern regex = RegexArgumentType.parseSlashyRegex(parser.reader);
+                            parser.addFilter((origin, entity) -> regex.matcher(entity.getName().getString()).matches() != neg);
+                        } else {
+                            String name = parser.reader.readString();
+                            parser.addFilter((origin, entity) -> entity.getName().getString().equals(name) != neg);
+                        }
                         if (!neg)
                             parser.hasName = true;
-                        parser.addFilter((origin, entity) -> entity.getName().getString().equals(name) != neg);
                     }
 
                     @Override
