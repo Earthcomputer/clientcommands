@@ -281,7 +281,7 @@ public class EnchantmentCracker {
             PlayerRandCracker.onUnexpectedItemEnchant();
             TempRules.enchCrackState = CrackState.UNCRACKED;
         }
-        doneEnchantment = false;
+        doneEnchantment = true;
     }
 
     // ENCHANTMENT MANIPULATION
