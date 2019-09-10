@@ -46,6 +46,7 @@
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "Cancel",
   "commands.client.crack": "Crack",
+  "commands.client.expectedRegex": "Invalid regex %s",
 
   "enchCrack.state": "Enchantment Crack State: %s",
   "enchCrack.state.uncracked": "Uncracked",
