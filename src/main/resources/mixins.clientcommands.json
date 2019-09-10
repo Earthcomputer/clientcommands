@@ -42,7 +42,8 @@
     "MixinEnchantmentWeight",
     "MixinEnchantmentHelper",
     "MixinProtectionEnchantment",
-    "MixinChatScreen"
+    "MixinChatScreen",
+    "MixinEntityRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
