@@ -11,7 +11,13 @@ import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mixin(MinecraftClient.class)
 public class MixinMinecraftClient {
@@ -40,6 +46,21 @@ public class MixinMinecraftClient {
             TempRules.reset(rule);
         RenderSettings.clearEntityRenderSelectors();
         ServerBrandManager.onDisconnect();
+    }
+
+    // Earth annoying his friends <3 nothing to see here
+    @ModifyArg(method = "init", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/WindowProvider;createWindow(Lnet/minecraft/client/WindowSettings;Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/client/util/Window;"))
+    private String modifyWindowTitle(String title) {
+        String playerName = MinecraftClient.getInstance().getSession().getProfile().getName();
+        if (!"Earthcomputer".equals(playerName)
+                && !"Azteched".equals(playerName)
+                && !"samnrad".equals(playerName)
+                && !"allocator".equals(playerName))
+            return title;
+
+        List<Character> chars = title.chars().mapToObj(c -> (char)c).collect(Collectors.toCollection(ArrayList::new));
+        Collections.shuffle(chars);
+        return chars.stream().map(String::valueOf).collect(Collectors.joining());
     }
 
 }
