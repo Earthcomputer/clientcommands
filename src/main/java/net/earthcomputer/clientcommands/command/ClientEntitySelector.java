@@ -5,7 +5,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
@@ -18,16 +17,16 @@ public class ClientEntitySelector {
 
     private final BiPredicate<Vec3d, Entity> filter;
     private final BiConsumer<Vec3d, List<Entity>> sorter;
-    private final int count;
+    private final int limit;
     private final boolean senderOnly;
     private final Double originX;
     private final Double originY;
     private final Double originZ;
 
-    public ClientEntitySelector(BiPredicate<Vec3d, Entity> filter, BiConsumer<Vec3d, List<Entity>> sorter, int count, boolean senderOnly, Double originX, Double originY, Double originZ) {
+    public ClientEntitySelector(BiPredicate<Vec3d, Entity> filter, BiConsumer<Vec3d, List<Entity>> sorter, int limit, boolean senderOnly, Double originX, Double originY, Double originZ) {
         this.filter = filter;
         this.sorter = sorter;
-        this.count = count;
+        this.limit = limit;
         this.senderOnly = senderOnly;
         this.originX = originX;
         this.originY = originY;
@@ -58,7 +57,10 @@ public class ClientEntitySelector {
 
         sorter.accept(origin, entities);
 
-        return entities.size() <= count ? entities : entities.subList(0, count);
+        return entities.size() <= limit ? entities : entities.subList(0, limit);
     }
 
+    public int getLimit() {
+        return limit;
+    }
 }

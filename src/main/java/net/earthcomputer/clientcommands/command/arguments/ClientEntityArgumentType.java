@@ -10,6 +10,7 @@ import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.minecraft.command.EntitySelectorOptions;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.command.FloatRange;
+import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -37,15 +38,26 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
     private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "@e", "@e[type=foo]");
 
-    private ClientEntityArgumentType() {
+    private final boolean singleTarget;
+
+    private ClientEntityArgumentType(boolean singleTarget) {
+        this.singleTarget = singleTarget;
+    }
+
+    public static ClientEntityArgumentType entity() {
+        return new ClientEntityArgumentType(true);
     }
 
     public static ClientEntityArgumentType entities() {
-        return new ClientEntityArgumentType();
+        return new ClientEntityArgumentType(false);
     }
 
     public static ClientEntitySelector getEntitySelector(CommandContext<ServerCommandSource> context, String arg) {
         return context.getArgument(arg, ClientEntitySelector.class);
+    }
+
+    public static Entity getEntity(CommandContext<ServerCommandSource> context, String arg) throws CommandSyntaxException {
+        return context.getArgument(arg, ClientEntitySelector.class).getEntity(context.getSource());
     }
 
     public static List<Entity> getEntities(CommandContext<ServerCommandSource> context, String arg) {
@@ -54,7 +66,15 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
     @Override
     public ClientEntitySelector parse(StringReader reader) throws CommandSyntaxException {
-        return new Parser(reader).parse();
+        final int start = reader.getCursor();
+        ClientEntitySelector ret = new Parser(reader).parse();
+
+        if (ret.getLimit() > 1 && singleTarget) {
+            reader.setCursor(start);
+            throw EntityArgumentType.TOO_MANY_ENTITIES_EXCEPTION.createWithContext(reader);
+        }
+
+        return ret;
     }
 
     @Override
@@ -92,7 +112,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
         private boolean playersOnlyForced = false;
         private BiPredicate<Vec3d, Entity> filter = (origin, entity) -> true;
         private BiConsumer<Vec3d, List<Entity>> sorter = UNSORTED;
-        private int count = Integer.MAX_VALUE;
+        private int limit = Integer.MAX_VALUE;
         private boolean senderOnly = false;
         private Double originX = null;
         private Double originY = null;
@@ -139,7 +159,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
             if (playersOnly || playersOnlyForced) {
                 addFilter((origin, entity) -> entity instanceof PlayerEntity);
             }
-            return new ClientEntitySelector(filter, sorter, count, senderOnly, originX, originY, originZ);
+            return new ClientEntitySelector(filter, sorter, limit, senderOnly, originX, originY, originZ);
         }
 
         void parsePlayerName() throws CommandSyntaxException {
@@ -162,7 +182,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
             playersOnlyForced = true;
             filter = (origin, entity) -> ((PlayerEntity) entity).getGameProfile().getName().equals(playerName);
-            count = 1;
+            limit = 1;
         }
 
         void parseAtSelector() throws CommandSyntaxException {
@@ -175,29 +195,29 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 case 'p':
                     playersOnly = true;
                     sorter = NEAREST;
-                    count = 1;
+                    limit = 1;
                     hasType = true;
                     break;
                 case 'a':
                     playersOnly = true;
                     sorter = UNSORTED;
-                    count = Integer.MAX_VALUE;
+                    limit = Integer.MAX_VALUE;
                     hasType = true;
                     break;
                 case 'r':
                     playersOnly = true;
                     sorter = RANDOM;
-                    count = 1;
+                    limit = 1;
                     break;
                 case 'e':
                     playersOnly = false;
                     sorter = UNSORTED;
-                    count = Integer.MAX_VALUE;
+                    limit = Integer.MAX_VALUE;
                     break;
                 case 's':
                     playersOnly = true;
                     sorter = UNSORTED;
-                    count = 1;
+                    limit = 1;
                     senderOnly = true;
                     addFilter((origin, entity) -> entity.isAlive());
                     break;
@@ -456,7 +476,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                             parser.reader.setCursor(cursor);
                             throw EntitySelectorOptions.TOO_SMALL_LEVEL_EXCEPTION.createWithContext(parser.reader);
                         }
-                        parser.count = limit;
+                        parser.limit = limit;
                         parser.hasLimit = true;
                     }
 

@@ -30,6 +30,7 @@ public class ClientCommands implements ClientModInitializer {
         WikiCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher);
         GlowCommand.register(dispatcher);
+        GetDataCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
         
