@@ -1,0 +1,111 @@
+{
+  "commands.cbook.success": "Das Buch wurde bearbeitet",
+
+  "commands.ccalc.expected": "%s erwartet",
+  "commands.ccalc.invalidArgumentCount": "Funktion \"%s\" kann %d Argumente nicht nehmen",
+
+  "commands.ccrackrng.starting": "Spielerseed knacken",
+  "commands.ccrackrng.success": "Spieler-RNG geknackt: %d",
+
+  "commands.cenchant.expectedWithWithout": "\"with\"/\"without\" erwartet",
+  "commands.cenchant.failed": "Es ist unmöglich oder würde zu lange brauchen, diese Verzauberungen zu bekommen",
+  "commands.cenchant.incompatible": "Unvereinbare Verzauberungen",
+  "commands.cenchant.needEnchantingPrediction": "Zauberprognose muss aktiviert sein, um dieser Befehl zu führen.",
+  "commands.cenchant.needEnchantingPrediction.enable": "Aktivieren",
+  "commands.cenchant.success": "Zaubermanipulation anfangen",
+  "commands.cenchant.uncracked": "Seed muss geknackt sein.",
+
+  "commands.cfind.found.left": "Fand %1$s an ",
+  "commands.cfind.found.right": ", %2$.2f Blöcke entfernt",
+  "commands.cfind.noMatch": "Keine Objekte haben die Abfrage entsprochen",
+  "commands.cfind.success": "%d Objekte haben die Abfrage entsprochen",
+
+  "commands.cfindblock.notFound": "Passender Block existiert nicht",
+  "commands.cfindblock.success.left": "Nächster passender Block ist an ",
+  "commands.cfindblock.success.right": ", %1$.2f Blöcke entfernt",
+
+  "commands.cfinditem.match.left": "%dx %s wurde an ",
+  "commands.cfinditem.match.right": " gefunden",
+  "commands.cfinditem.starting": "Nach %s suchen",
+  "commands.cfinditem.starting.keepSearching": "Unendlich nach %s suchen.",
+  "commands.cfinditem.total": "Fand %dx %s gesamt",
+
+  "commands.crender.entities.success": "Objektrenderingregeln wurden geändert",
+
+  "commands.ctask.list.noTasks": "Keine Tasks derzeit ausführen",
+  "commands.ctask.list.success": "%d Tasks derzeit ausführen",
+  "commands.ctask.stop.noMatch": "Keine passende Tasks",
+  "commands.ctask.stop.success": "%d Tasks wurden beendet",
+
+  "commands.ctemprule.list.header": "%d TempRules aufzählen:",
+  "commands.ctemprule.reset.success": "TempRule %s wurde zu %s zurücksetzen",
+  "commands.ctemprule.set.success": "TempRule %s wurde zu %s geändert",
+
+  "commands.cwiki.failed": "Konnte Wiki-Inhalt nicht abrufen",
+
+  "commands.client.cancel": "Abbrechen",
+  "commands.client.crack": "Knacken",
+  "commands.client.expectedRegex": "Ungütliges Regex %s",
+
+  "enchCrack.state": "Zauberknackzustand: %s",
+  "enchCrack.state.uncracked": "Ungeknackt",
+  "enchCrack.state.cracking": "Knacken",
+  "enchCrack.state.cracked": "Geknackt",
+
+  "enchCrack.enchantments": "Verzauberungen:",
+  "enchCrack.clues": "Hinweise:",
+  "enchCrack.slot": "Position %d:",
+
+  "enchCrack.xpSeed.one": "XP-Seed: %08X",
+  "enchCrack.xpSeed.many": "Anzahl die mögliche XP-Seeds: %d",
+  "enchCrack.playerRNGSeed.many": "Anzahl die mögliche Spielerseeds: %d",
+  "enchCrack.addInfo": "Information hinzufügen",
+
+  "enchCrack.insn.dummy": "Machen Sie eine Dummy-Verzauberung",
+  "enchCrack.insn.ready": "Ihr Zauberseed ist bereit",
+  "enchCrack.insn.bookshelves": "Erforderliche Bücherregale: %d",
+  "enchCrack.insn.slot": "In Position: %d",
+  "enchCrack.insn.itemThrows": "Erforderliche Gegenstände: %d (ungefähr %f Sekunden)",
+  "enchCrack.insn.itemThrows.noDummy": "Keine Dummy-Verzauberung",
+  "enchCrack.insn.enchantments": "Verzauberungen auf dem Gegenstand:",
+
+  "playerManip.state": "Spielerknackzustand: %s",
+  "playerManip.state.uncracked": "Ungeknackt",
+  "playerManip.state.cracked": "Geknackt",
+  "playerManip.state.ench_cracking_1": "Zauberseed 1 knacken",
+  "playerManip.state.half_cracked": "Halb Geknackt",
+  "playerManip.state.ench_cracking_2": "Zauberseed 2 knacken",
+  "playerManip.state.cracking": "Knacken",
+  "playerManip.state.eating": "Essen",
+  "playerManip.state.manipulating_enchantments": "Verzauberungen manipulieren",
+  "playerManip.state.waiting_dummy_enchant": "Auf einer Dummy-Verzauberung warten",
+
+  "playerManip.reset": "Spieler-RNG-Manipulation neu starten. Grund: %s",
+  "playerManip.reset.playerHurt": "Spieler verletzt",
+  "playerManip.reset.sprint": "Gesprintet",
+  "playerManip.reset.enterWater": "Wasser betreten",
+  "playerManip.reset.swim": "Geschwommen",
+  "playerManip.reset.potion": "Statuseffekt aktiv",
+  "playerManip.reset.mending": "Gegenstand repariert",
+  "playerManip.reset.respiration": "Helm mit Atmung benutzt",
+  "playerManip.reset.dropItem": "Gegenstand fallen lassen",
+  "playerManip.reset.anvil": "Amboss benutzt",
+  "playerManip.reset.food": "Gegessen",
+  "playerManip.reset.drink": "Getrunken",
+  "playerManip.reset.baneOfArthropods": "Hit Gliederfüßer mit Nemesis der Gliederfüßer schlagen",
+  "playerManip.reset.advancement": "Fortschritt erzielt",
+  "playerManip.reset.shield": "Mit Schild abgewehrt",
+  "playerManip.reset.give": "Give-Befehl benutzt",
+  "playerManip.reset.unbreaking": "Gegenstand mit Haltbarkeit benutzt",
+  "playerManip.reset.itemBreak": "Gegenstand gebrochen",
+  "playerManip.reset.frostWalker": "Eisläufer benutzt",
+  "playerManip.reset.entityCramming": "Objekt-Cramming",
+  "playerManip.reset.enchanting": "Gegenstand verzaubert",
+  "playerManip.reset.recreated": "Spieler neu erstellt",
+
+  "playerManip.serverBrandWarning": "Warnung: der Server, auf dem Sie spielen, ist modifiziert. Es gibt keine Garantie, dass RNG-Features in dieses Mod richtig funktionieren werden!",
+  "playerManip.toolBreakWarning": "Warnung: Werkzeug hat übrig %d Haltbarkeit",
+
+  "itemCrack.notEnoughItems": "Kann nicht RNG-SeedCracker benutzen: Nicht genug Gegenstände in der Hand des Spielers"
+
+}

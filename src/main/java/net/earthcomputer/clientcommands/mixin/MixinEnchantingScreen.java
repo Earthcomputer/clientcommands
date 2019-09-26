@@ -37,7 +37,7 @@ public abstract class MixinEnchantingScreen extends AbstractContainerScreen<Ench
     protected void init() {
         super.init();
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
-            addButton(new ButtonWidget(width - 100, 0, 100, 20, I18n.translate("enchCrack.addInfo"), button -> {
+            addButton(new ButtonWidget(width - 150, 0, 150, 20, I18n.translate("enchCrack.addInfo"), button -> {
                 EnchantmentCracker.addEnchantmentSeedInfo(MinecraftClient.getInstance().world, getContainer());
             }));
         }
