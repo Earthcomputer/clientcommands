@@ -57,8 +57,8 @@
   "enchCrack.slot": "Position %d:",
 
   "enchCrack.xpSeed.one": "XP-Seed: %08X",
-  "enchCrack.xpSeed.many": "Anzahl die mögliche XP-Seeds: %d",
-  "enchCrack.playerRNGSeed.many": "Anzahl die mögliche Spielerseeds: %d",
+  "enchCrack.xpSeed.many": "Anzahl der möglichen XP-Seeds: %d",
+  "enchCrack.playerRNGSeed.many": "Anzahl der möglichen Spielerseeds: %d",
   "enchCrack.addInfo": "Information hinzufügen",
 
   "enchCrack.insn.dummy": "Machen Sie eine Dummy-Verzauberung",
@@ -78,7 +78,7 @@
   "playerManip.state.cracking": "Knacken",
   "playerManip.state.eating": "Essen",
   "playerManip.state.manipulating_enchantments": "Verzauberungen manipulieren",
-  "playerManip.state.waiting_dummy_enchant": "Auf einer Dummy-Verzauberung warten",
+  "playerManip.state.waiting_dummy_enchant": "Auf eine Dummy-Verzauberung warten",
 
   "playerManip.reset": "Spieler-RNG-Manipulation neu starten. Grund: %s",
   "playerManip.reset.playerHurt": "Spieler verletzt",
@@ -92,7 +92,7 @@
   "playerManip.reset.anvil": "Amboss benutzt",
   "playerManip.reset.food": "Gegessen",
   "playerManip.reset.drink": "Getrunken",
-  "playerManip.reset.baneOfArthropods": "Hit Gliederfüßer mit Nemesis der Gliederfüßer schlagen",
+  "playerManip.reset.baneOfArthropods": "Gliederfüßer mit Nemesis der Gliederfüßer schlagen",
   "playerManip.reset.advancement": "Fortschritt erzielt",
   "playerManip.reset.shield": "Mit Schild abgewehrt",
   "playerManip.reset.give": "Give-Befehl benutzt",
@@ -103,9 +103,9 @@
   "playerManip.reset.enchanting": "Gegenstand verzaubert",
   "playerManip.reset.recreated": "Spieler neu erstellt",
 
-  "playerManip.serverBrandWarning": "Warnung: der Server, auf dem Sie spielen, ist modifiziert. Es gibt keine Garantie, dass RNG-Features in dieses Mod richtig funktionieren werden!",
-  "playerManip.toolBreakWarning": "Warnung: Werkzeug hat übrig %d Haltbarkeit",
+  "playerManip.serverBrandWarning": "Warnung: der Server, auf dem Sie spielen, ist modifiziert. Es gibt keine Garantie, dass RNG-Features in diesem Mod richtig funktionieren werden!",
+  "playerManip.toolBreakWarning": "Warnung: Werkzeug hat %d Haltbarkeit übrig",
 
-  "itemCrack.notEnoughItems": "Kann nicht RNG-SeedCracker benutzen: Nicht genug Gegenstände in der Hand des Spielers"
+  "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers"
 
 }
