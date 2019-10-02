@@ -1,0 +1,111 @@
+{
+    "commands.cbook.success": "Knjiga je bila uspešno urejena",
+  
+    "commands.ccalc.expected": "Pričakovano %s",
+    "commands.ccalc.invalidArgumentCount": "Funkcija \"%s\" no more vzeti %d argumentov",
+  
+    "commands.ccrackrng.starting": "Ugotavljanje semena igralca",
+    "commands.ccrackrng.success": "RNG seme igralca uspešno ugotovljeno: %d",
+  
+    "commands.cenchant.expectedWithWithout": "Pričakovano \"z\"/\"brez\"",
+    "commands.cenchant.failed": "Nemogoče je ali bi trajalo pre dolgo, da bi dobile te čare",
+    "commands.cenchant.incompatible": "Nezdružljivi čari",
+    "commands.cenchant.needEnchantingPrediction": "Ta ukaz zahteva, da je omogočeno predvidevanje čaranja.",
+    "commands.cenchant.needEnchantingPrediction.enable": "Omogoči",
+    "commands.cenchant.success": "Začatek manipulacije čaranja",
+    "commands.cenchant.uncracked": "Seme mora biti ugotovljeno.",
+  
+    "commands.cfind.found.left": "Najdeno %1$s ob ",
+    "commands.cfind.found.right": ", %2$.2f blokov proč",
+    "commands.cfind.noMatch": "Nič se ne ujema z vašo poizvedbo",
+    "commands.cfind.success": "%d entitete se ujemajo z vašo poizvedbo",
+  
+    "commands.cfindblock.notFound": "Takega bloka ni mogoče najti",
+    "commands.cfindblock.success.left": "Najbližje ujemanje je ob ",
+    "commands.cfindblock.success.right": ", %1$.2f blokov vstran",
+  
+    "commands.cfinditem.match.left": "%dx %s najdeno ob ",
+    "commands.cfinditem.match.right": "",
+    "commands.cfinditem.starting": "Iskati %s",
+    "commands.cfinditem.starting.keepSearching": "Neskončno iskanje za %s.",
+    "commands.cfinditem.total": "Skupno najdeno %dx %s",
+  
+    "commands.crender.entities.success": "Pravila za upodabljanje entitet so bila posodobljena",
+  
+    "commands.ctask.list.noTasks": "Nič trenutno izvajajočih nalog",
+    "commands.ctask.list.success": "%d trenutno izvajajočih nalog",
+    "commands.ctask.stop.noMatch": "Ni ujemajočih se nalog",
+  
+    "commands.ctemprule.list.header": "Naštevanje  %d začasnih pravil:",
+    "commands.ctemprule.reset.success": "Začasno pravilo %s je bilo ponastavljeno na %s",
+    "commands.ctemprule.set.success": "Začasno pravilo %s je bilo posodobljeno na %s",
+  
+    "commands.cwiki.failed": "Vsebine wikija ni bilo mogoče pridobiti",
+  
+    "commands.client.blockpos": "(%d, %d, %d)",
+    "commands.client.cancel": "Prekliči",
+    "commands.client.crack": "Ugotovi",
+    "commands.client.expectedRegex": "Nepravilen regex %s",
+  
+    "enchCrack.state": "Stanje ugotavljanja semena čaranja: %s",
+    "enchCrack.state.uncracked": "Neugotovljeno",
+    "enchCrack.state.cracking": "Se ugotavlja",
+    "enchCrack.state.cracked": "Ugotovljeno",
+  
+    "enchCrack.enchantments": "Uroki:",
+    "enchCrack.clues": "Namigi:",
+    "enchCrack.slot": "Mesto %d:",
+  
+    "enchCrack.xpSeed.one": "XP Seme: %08X",
+    "enchCrack.xpSeed.many": "Možna XP semena: %d",
+    "enchCrack.playerRNGSeed.many": "Možna RNG semena igralci: %d",
+    "enchCrack.addInfo": "Dodaj informacije",
+  
+    "enchCrack.insn.dummy": "Opravite poskusno čaranje",
+    "enchCrack.insn.ready": "Vaše seme čaranje je pripravljeno",
+    "enchCrack.insn.bookshelves": "Knjižne police potrebovane: %d",
+    "enchCrack.insn.slot": "V mestu: %d",
+    "enchCrack.insn.itemThrows": "Potrebovana: %d (V priblžno %f sekundah)",
+    "enchCrack.insn.itemThrows.noDummy": "Brez poskusnega čaranja",
+    "enchCrack.insn.enchantments": "Čari na predmetu:",
+  
+    "playerManip.state": "Stanje ugotavljanja semena igralca: %s",
+    "playerManip.state.uncracked": "Neugotovljeno",
+    "playerManip.state.cracked": "Ugotovljeno",
+    "playerManip.state.ench_cracking_1": "Ugotavljanje Semena Čaranja 1",
+    "playerManip.state.half_cracked": "Napol Ugotovljeno",
+    "playerManip.state.ench_cracking_2": "Ugotavljanje Semena Čaranja 2",
+    "playerManip.state.cracking": "Se ugotavlja",
+    "playerManip.state.eating": "Jesti",
+    "playerManip.state.manipulating_enchantments": "Manipularanje Čaranja",
+    "playerManip.state.waiting_dummy_enchant": "Čakanje na Poskusno Čaranje",
+  
+    "playerManip.reset": "Restarting player RNG manipulation. Reason: %s",
+    "playerManip.reset.playerHurt": "Igralec Ranjen",
+    "playerManip.reset.sprint": "Tek",
+    "playerManip.reset.enterWater": "Vstop v Vodo",
+    "playerManip.reset.swim": "Plavanje",
+    "playerManip.reset.potion": "Učinek Napoja Aktiven",
+    "playerManip.reset.mending": "Mended Item",
+    "playerManip.reset.respiration": "Dihalna Čelada Uporabljena",
+    "playerManip.reset.dropItem": "Izrvžen Predmet",
+    "playerManip.reset.anvil": "Nakovalo Uporabljeno",
+    "playerManip.reset.food": "Jesti",
+    "playerManip.reset.drink": "Piti",
+    "playerManip.reset.baneOfArthropods": "Zadet Členonožec z Uničevalcem Členonožcev",
+    "playerManip.reset.advancement": "Dosežen Napreded",
+    "playerManip.reset.shield": "Blokirano z Ščitom",
+    "playerManip.reset.give": "Give Ukaz Uporabljen",
+    "playerManip.reset.unbreaking": "Uporabljen Predmet z Neuničevanjem",
+    "playerManip.reset.itemBreak": "Predmet Razbit",
+    "playerManip.reset.frostWalker": "Ledeni Sprehajalec uporabljen",
+    "playerManip.reset.entityCramming": "Entity Cramming",
+    "playerManip.reset.enchanting": "Predmet Začaran",
+    "playerManip.reset.recreated": "Igraled Obnovljen",
+  
+    "playerManip.serverBrandWarning": "Opozirilo: Strežnik na katerem igrate je modiran. Funkcije RNG morda ne modo delovale!",
+    "playerManip.toolBreakWarning": "Opozorilo: orodju ostaja %d trajnosti",
+  
+    "itemCrack.notEnoughItems": "Ni mogoče uporabiti RNG UgotavljalcaSemena: Ni dovolj predmetov v roki igralca"
+  
+  }
