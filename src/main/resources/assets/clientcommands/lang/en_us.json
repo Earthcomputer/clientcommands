@@ -32,6 +32,10 @@
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
+  "commands.cscript.notFound": "Script \"%s\" not found",
+  "commands.cscript.reload.success": "Reloaded scripts",
+  "commands.cscript.run.success": "Script ran successfully",
+
   "commands.ctask.list.noTasks": "No currently executing tasks",
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",
@@ -47,6 +51,7 @@
   "commands.client.cancel": "Cancel",
   "commands.client.crack": "Crack",
   "commands.client.expectedRegex": "Invalid regex %s",
+  "commands.client.notClient": "Not a client-side command",
 
   "enchCrack.state": "Enchantment Crack State: %s",
   "enchCrack.state.uncracked": "Uncracked",
