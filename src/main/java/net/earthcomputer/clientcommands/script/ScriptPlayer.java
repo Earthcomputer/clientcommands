@@ -1,22 +1,22 @@
 package net.earthcomputer.clientcommands.script;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-
-import java.lang.ref.WeakReference;
+import net.minecraft.entity.Entity;
 
 public class ScriptPlayer extends ScriptEntity {
 
-    private final WeakReference<ClientPlayerEntity> player;
-
-    public ScriptPlayer(ClientPlayerEntity player) {
-        super(player);
-        this.player = new WeakReference<>(player);
+    public ScriptPlayer() {
+        super(getPlayer());
     }
 
-    private ClientPlayerEntity getPlayer() {
-        ClientPlayerEntity player = this.player.get();
-        assert player != null;
-        return player;
+    private static ClientPlayerEntity getPlayer() {
+        return MinecraftClient.getInstance().player;
+    }
+
+    @Override
+    Entity getEntity() {
+        return getPlayer();
     }
 
     public void setYaw(float yaw) {

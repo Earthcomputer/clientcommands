@@ -5,6 +5,7 @@ import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -26,6 +27,7 @@ public class MixinMinecraftClient {
     public void onHandleInputEvents(CallbackInfo ci) {
         TaskManager.tick();
         GuiBlocker.tick();
+        ScriptManager.tick();
     }
 
     @Inject(method = "setWorld", at = @At("HEAD"))

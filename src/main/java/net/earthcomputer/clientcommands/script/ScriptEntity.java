@@ -13,7 +13,7 @@ public class ScriptEntity {
         this.entity = new WeakReference<>(entity);
     }
 
-    private Entity getEntity() {
+    Entity getEntity() {
         Entity entity = this.entity.get();
         assert entity != null;
         return entity;

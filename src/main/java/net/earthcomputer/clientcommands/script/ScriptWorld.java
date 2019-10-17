@@ -3,26 +3,17 @@ package net.earthcomputer.clientcommands.script;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
-import java.lang.ref.WeakReference;
-
 public class ScriptWorld {
 
-    private final WeakReference<ClientWorld> world;
-
-    public ScriptWorld(ClientWorld world) {
-        this.world = new WeakReference<>(world);
-    }
-
-    private ClientWorld getWorld() {
-        ClientWorld world = this.world.get();
-        assert world != null;
-        return world;
+    private static ClientWorld getWorld() {
+        return MinecraftClient.getInstance().world;
     }
 
     public String getBlock(int x, int y, int z) {

@@ -5,6 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -22,10 +24,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ScriptManager {
@@ -35,6 +36,9 @@ public class ScriptManager {
 
     private static File scriptDir;
     private static Map<String, String> scripts = new HashMap<>();
+
+    private static ScriptInstance currentScript = null;
+    private static List<ScriptInstance> runningScripts = new ArrayList<>();
 
     static final ScriptEngine ENGINE;
     static {
@@ -49,6 +53,7 @@ public class ScriptManager {
             engine = null;
         }
         ENGINE = engine;
+        addBuiltinVariables();
     }
 
     public static void reloadScripts() {
@@ -89,8 +94,58 @@ public class ScriptManager {
         if (scriptSource == null)
             throw SCRIPT_NOT_FOUND_EXCEPTION.create(scriptName);
 
-        ENGINE.put("player", new ScriptPlayer(MinecraftClient.getInstance().player));
-        ENGINE.put("world", new ScriptWorld(MinecraftClient.getInstance().world));
+        ScriptInstance instance = new ScriptInstance();
+        Thread thread = new Thread(() -> {
+            try {
+                ENGINE.eval(scriptSource);
+            } catch (ScriptInterruptedException ignore) {
+            } catch (ScriptException e) {
+                if (!(e.getCause() instanceof ScriptInterruptedException))
+                    ClientCommandManager.sendError(new LiteralText(e.getMessage()));
+            }
+            instance.paused.set(true);
+            instance.running = false;
+            runningScripts.remove(instance);
+        });
+        thread.setDaemon(true);
+        instance.thread = thread;
+        LongTask task = new LongTask() {
+            @Override
+            public void initialize() {
+            }
+
+            @Override
+            public boolean condition() {
+                return instance.running;
+            }
+
+            @Override
+            public void increment() {
+            }
+
+            @Override
+            public void body() {
+                scheduleDelay();
+            }
+        };
+        instance.task = task;
+        TaskManager.addTask("cscript", task);
+        runningScripts.add(instance);
+        currentScript = instance;
+
+        thread.start();
+        while (!instance.paused.get()) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private static void addBuiltinVariables() {
+        ENGINE.put("player", new ScriptPlayer());
+        ENGINE.put("world", new ScriptWorld());
         ENGINE.put("$", (Function<String, Integer>) command -> {
             StringReader reader = new StringReader(command);
             String commandName = reader.readUnquotedString();
@@ -101,11 +156,45 @@ public class ScriptManager {
             }
             return ClientCommandManager.executeCommand(reader, command);
         });
-        try {
-            ENGINE.eval(scriptSource);
-        } catch (ScriptException e) {
-            ClientCommandManager.sendError(new LiteralText(e.getMessage()));
+        ENGINE.put("print", (Consumer<String>) message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message)));
+        ENGINE.put("tick", (Runnable) () -> {
+            ScriptInstance script = currentScript;
+            script.paused.set(true);
+            while (script.paused.get()) {
+                if (script.task.isCompleted())
+                    throw new ScriptInterruptedException();
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+    }
+
+    public static void tick() {
+        if (ENGINE == null)
+            return;
+
+        for (ScriptInstance script : new ArrayList<>(runningScripts)) {
+            currentScript = script;
+            script.paused.set(false);
+            while (!script.paused.get()) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
+        currentScript = null;
+    }
+
+    private static class ScriptInstance {
+        private Thread thread;
+        private AtomicBoolean paused = new AtomicBoolean(false);
+        private boolean running = true;
+        private LongTask task;
     }
 
 }
