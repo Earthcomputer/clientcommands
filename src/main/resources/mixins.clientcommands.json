@@ -43,7 +43,8 @@
     "MixinProtectionEnchantment",
     "MixinChatScreen",
     "MixinEntityRenderer",
-    "MixinLivingEntityRenderer"
+    "MixinLivingEntityRenderer",
+    "MixinSlot"
   ],
   "injectors": {
     "defaultRequire": 1

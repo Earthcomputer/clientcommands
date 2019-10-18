@@ -12,6 +12,8 @@ import net.minecraft.util.registry.Registry;
 
 public class ScriptWorld {
 
+    ScriptWorld() {}
+
     private static ClientWorld getWorld() {
         return MinecraftClient.getInstance().world;
     }

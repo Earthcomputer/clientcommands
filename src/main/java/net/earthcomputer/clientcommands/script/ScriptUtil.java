@@ -1,5 +1,7 @@
 package net.earthcomputer.clientcommands.script;
 
+import jdk.nashorn.api.scripting.AbstractJSObject;
+import jdk.nashorn.api.scripting.JSObject;
 import net.minecraft.nbt.*;
 import net.minecraft.util.Identifier;
 
@@ -39,10 +41,21 @@ public class ScriptUtil {
     }
 
     public static String simplifyIdentifier(Identifier id) {
+        if (id == null)
+            return "null";
         if ("minecraft".equals(id.getNamespace()))
             return id.getPath();
         else
             return id.toString();
+    }
+
+    public static String asString(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof JSObject) {
+            return (String) AbstractJSObject.getDefaultValue((JSObject) obj, String.class);
+        } else {
+            return String.valueOf(obj);
+        }
     }
 
 }

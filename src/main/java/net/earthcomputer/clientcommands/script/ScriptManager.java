@@ -5,9 +5,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientEntitySelector;
+import net.earthcomputer.clientcommands.command.FakeCommandSource;
+import net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import org.apache.commons.io.FileUtils;
@@ -100,8 +104,13 @@ public class ScriptManager {
                 ENGINE.eval(scriptSource);
             } catch (ScriptInterruptedException ignore) {
             } catch (ScriptException e) {
-                if (!(e.getCause() instanceof ScriptInterruptedException))
+                if (!(e.getCause() instanceof ScriptInterruptedException)) {
                     ClientCommandManager.sendError(new LiteralText(e.getMessage()));
+                    e.getCause().printStackTrace();
+                }
+            } catch (Throwable e) {
+                ClientCommandManager.sendError(new LiteralText(e.toString()));
+                e.printStackTrace();
             }
             instance.paused.set(true);
             instance.running = false;
@@ -146,8 +155,22 @@ public class ScriptManager {
     private static void addBuiltinVariables() {
         ENGINE.put("player", new ScriptPlayer());
         ENGINE.put("world", new ScriptWorld());
-        ENGINE.put("$", (Function<String, Integer>) command -> {
+        ENGINE.put("$", (Function<String, Object>) command -> {
             StringReader reader = new StringReader(command);
+            if (command.startsWith("@")) {
+                try {
+                    ClientEntitySelector selector = ClientEntityArgumentType.entities().parse(reader);
+                    if (reader.getRemainingLength() != 0)
+                        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(reader);
+                    List<Entity> entities = selector.getEntities(new FakeCommandSource(MinecraftClient.getInstance().player));
+                    List<Object> ret = new ArrayList<>(entities.size());
+                    for (Entity entity : entities)
+                        ret.add(ScriptEntity.create(entity));
+                    return ret;
+                } catch (CommandSyntaxException e) {
+                    throw new IllegalArgumentException("Invalid selector syntax", e);
+                }
+            }
             String commandName = reader.readUnquotedString();
             reader.setCursor(0);
             if (!ClientCommandManager.isClientSideCommand(commandName)) {
