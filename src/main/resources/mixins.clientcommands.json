@@ -44,7 +44,8 @@
     "MixinChatScreen",
     "MixinEntityRenderer",
     "MixinLivingEntityRenderer",
-    "MixinSlot"
+    "MixinSlot",
+    "MixinKeyboardInput"
   ],
   "injectors": {
     "defaultRequire": 1

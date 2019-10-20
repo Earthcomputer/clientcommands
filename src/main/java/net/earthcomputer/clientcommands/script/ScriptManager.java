@@ -11,6 +11,7 @@ import net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentTy
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.input.Input;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -180,19 +181,7 @@ public class ScriptManager {
             return ClientCommandManager.executeCommand(reader, command);
         });
         ENGINE.put("print", (Consumer<String>) message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message)));
-        ENGINE.put("tick", (Runnable) () -> {
-            ScriptInstance script = currentScript;
-            script.paused.set(true);
-            while (script.paused.get()) {
-                if (script.task.isCompleted())
-                    throw new ScriptInterruptedException();
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        });
+        ENGINE.put("tick", (Runnable) ScriptManager::passTick);
     }
 
     public static void tick() {
@@ -213,11 +202,64 @@ public class ScriptManager {
         currentScript = null;
     }
 
+    static void passTick() {
+        ScriptInstance script = currentScript;
+        script.paused.set(true);
+        while (script.paused.get()) {
+            if (script.task.isCompleted())
+                throw new ScriptInterruptedException();
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    static void blockInput(boolean blockInput) {
+        currentScript.blockingInput = blockInput;
+    }
+
+    static boolean isCurrentScriptBlockingInput() {
+        return currentScript.blockingInput;
+    }
+
+    public static boolean blockingInput() {
+        for (ScriptInstance script : runningScripts)
+            if (script.blockingInput)
+                return true;
+        return false;
+    }
+
+    static Input getScriptInput() {
+        return currentScript.input;
+    }
+
+    public static void copyScriptInputToPlayer(boolean inSneakingPose, boolean spectator) {
+        Input playerInput = MinecraftClient.getInstance().player.input;
+        for (ScriptInstance script : runningScripts) {
+            playerInput.pressingForward |= script.input.pressingForward;
+            playerInput.pressingBack |= script.input.pressingBack;
+            playerInput.pressingLeft |= script.input.pressingLeft;
+            playerInput.pressingRight |= script.input.pressingRight;
+            playerInput.jumping |= script.input.jumping;
+            playerInput.sneaking |= script.input.sneaking;
+        }
+        playerInput.movementForward = playerInput.pressingForward ^ playerInput.pressingBack ? (playerInput.pressingForward ? 1 : -1) : 0;
+        playerInput.movementSideways = playerInput.pressingLeft ^ playerInput.pressingRight ? (playerInput.pressingLeft ? 1 : -1) : 0;
+        if (!spectator && (playerInput.sneaking || inSneakingPose)) {
+            playerInput.movementSideways = (float)(playerInput.movementSideways * 0.3D);
+            playerInput.movementForward = (float)(playerInput.movementForward * 0.3D);
+        }
+    }
+
     private static class ScriptInstance {
         private Thread thread;
         private AtomicBoolean paused = new AtomicBoolean(false);
         private boolean running = true;
         private LongTask task;
+        private boolean blockingInput = false;
+        private Input input = new Input();
     }
 
 }

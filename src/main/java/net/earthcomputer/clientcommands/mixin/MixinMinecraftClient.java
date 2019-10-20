@@ -5,11 +5,13 @@ import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.interfaces.IMinecraftClient;
 import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -21,13 +23,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mixin(MinecraftClient.class)
-public class MixinMinecraftClient {
+public abstract class MixinMinecraftClient implements IMinecraftClient {
+
+    @Shadow protected int attackCooldown;
+
+    @Shadow protected abstract void method_1590(boolean boolean_1);
 
     @Inject(method = "tick", at = @At("HEAD"))
-    public void onHandleInputEvents(CallbackInfo ci) {
+    public void onTick(CallbackInfo ci) {
         TaskManager.tick();
         GuiBlocker.tick();
         ScriptManager.tick();
+    }
+
+    @Inject(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z", ordinal = 0), cancellable = true)
+    public void onHandleInputEvents(CallbackInfo ci) {
+        if (ScriptManager.blockingInput())
+            ci.cancel();
     }
 
     @Inject(method = "setWorld", at = @At("HEAD"))
@@ -65,4 +77,13 @@ public class MixinMinecraftClient {
         return chars.stream().map(String::valueOf).collect(Collectors.joining());
     }
 
+    @Override
+    public void continueBreakingBlock() {
+        method_1590(true);
+    }
+
+    @Override
+    public void resetAttackCooldown() {
+        attackCooldown = 0;
+    }
 }
