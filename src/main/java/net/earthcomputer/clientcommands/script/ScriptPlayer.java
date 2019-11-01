@@ -9,7 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
+import net.minecraft.container.Container;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -88,7 +88,11 @@ public class ScriptPlayer extends ScriptLivingEntity {
     }
 
     public ScriptInventory getOpenContainer() {
-        return new ScriptInventory(getPlayer().container);
+        Container container = getPlayer().container;
+        if (container == getPlayer().playerContainer)
+            return null;
+        else
+            return new ScriptInventory(getPlayer().container);
     }
 
     public boolean pick(Object itemStack) {
@@ -147,36 +151,61 @@ public class ScriptPlayer extends ScriptLivingEntity {
     }
 
     public boolean leftClick(int x, int y, int z) {
+        return leftClick(x, y, z, null);
+    }
+
+    public boolean leftClick(int x, int y, int z, String side) {
         BlockPos pos = new BlockPos(x, y, z);
+        Direction dir = null;
+        if (side != null) {
+            for (Direction d : Direction.values()) {
+                if (d.name().equalsIgnoreCase(side)) {
+                    dir = d;
+                    break;
+                }
+            }
+        }
         ClientWorld world = MinecraftClient.getInstance().world;
         BlockState state = world.getBlockState(pos);
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin);
-        System.out.println(closestPos);
+        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin, dir);
         if (origin.squaredDistanceTo(closestPos) < 6 * 6) {
             lookAt(closestPos.x, closestPos.y, closestPos.z);
             getPlayer().swingHand(Hand.MAIN_HAND);
             return MinecraftClient.getInstance().interactionManager.attackBlock(pos,
-                    Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)));
+                    dir == null ? Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)) : dir);
         }
         return false;
     }
 
     public boolean rightClick(int x, int y, int z) {
+        return rightClick(x, y, z, null);
+    }
+
+    public boolean rightClick(int x, int y, int z, String side) {
         BlockPos pos = new BlockPos(x, y, z);
+        Direction dir = null;
+        if (side != null) {
+            for (Direction d : Direction.values()) {
+                if (d.name().equalsIgnoreCase(side)) {
+                    dir = d;
+                    break;
+                }
+            }
+        }
         ClientWorld world = MinecraftClient.getInstance().world;
         BlockState state = world.getBlockState(pos);
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin);
+        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin, dir);
         if (origin.squaredDistanceTo(closestPos) < 6 * 6) {
             for (Hand hand : Hand.values()) {
                 ActionResult result = MinecraftClient.getInstance().interactionManager.interactBlock(getPlayer(), world, hand,
                         new BlockHitResult(closestPos,
-                                Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)),
+                                dir == null ? Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)) : dir,
                                 pos, false));
                 if (result == ActionResult.SUCCESS) {
                     lookAt(closestPos.x, closestPos.y, closestPos.z);

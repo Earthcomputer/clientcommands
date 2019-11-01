@@ -13,6 +13,10 @@ public class ScriptLivingEntity extends ScriptEntity {
         return (LivingEntity) super.getEntity();
     }
 
+    public double getStandingEyeHeight() {
+        return getEntity().getStandingEyeHeight();
+    }
+
     public double getEyeHeight() {
         return getEntity().getEyeHeight(getEntity().getPose());
     }

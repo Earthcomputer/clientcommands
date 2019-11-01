@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.container.*;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
@@ -69,8 +70,21 @@ public class ScriptInventory {
         SlotActionType type = typeStr == null ? SlotActionType.PICKUP :
                 Arrays.stream(SlotActionType.values()).filter(it -> it.name().equalsIgnoreCase(typeStr)).findAny().orElse(SlotActionType.PICKUP);
 
-        boolean rightClick = options == null || !options.hasMember("rightClick") ? false :
-                (Boolean) ScriptUtils.convert(options.getMember("rightClick"), Boolean.class);
+        int mouseButton;
+        if (type == SlotActionType.SWAP) {
+            if (!options.hasMember("hotbarSlot"))
+                throw new IllegalArgumentException("When the click type is swap, the options must also contain the hotbar slot to swap with");
+            mouseButton = MathHelper.clamp((int)(Number)ScriptUtils.convert(options.getMember("hotbarSlot"), Number.class), 0, 8);
+        } else if (type == SlotActionType.QUICK_CRAFT) {
+            if (!options.hasMember("quickCraftStage"))
+                throw new IllegalArgumentException("When the click type is quick_craft, the options must also contain the quick craft stage");
+            mouseButton = (int)(Number)ScriptUtils.convert(options.getMember("quickCraftStage"), Number.class);
+        } else {
+            if (options == null || !options.hasMember("rightClick"))
+                mouseButton = 0;
+            else
+                mouseButton = (Boolean) ScriptUtils.convert(options.getMember("rightClick"), Boolean.class) ? 1 : 0;
+        }
 
         int slotId = -1;
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
@@ -104,7 +118,7 @@ public class ScriptInventory {
             throw new IllegalArgumentException("Slot not in open container");
         }
 
-        MinecraftClient.getInstance().interactionManager.method_2906(container.syncId, slotId, rightClick ? 1 : 0, type, player);
+        MinecraftClient.getInstance().interactionManager.method_2906(container.syncId, slotId, mouseButton, type, player);
     }
 
     @Override

@@ -18,6 +18,10 @@ public class ScriptWorld {
         return MinecraftClient.getInstance().world;
     }
 
+    public String getDimension() {
+        return ScriptUtil.simplifyIdentifier(Registry.DIMENSION.getId(getWorld().dimension.getType()));
+    }
+
     public String getBlock(int x, int y, int z) {
         Block block = getWorld().getBlockState(new BlockPos(x, y, z)).getBlock();
         return ScriptUtil.simplifyIdentifier(Registry.BLOCK.getId(block));
@@ -28,6 +32,8 @@ public class ScriptWorld {
         for (Property<?> propertyObj : state.getProperties()) {
             if (propertyObj.getName().equals(property)) {
                 Object val = state.get(propertyObj);
+                if (val instanceof Boolean)
+                    return val;
                 if (val instanceof Number)
                     return val;
                 else
