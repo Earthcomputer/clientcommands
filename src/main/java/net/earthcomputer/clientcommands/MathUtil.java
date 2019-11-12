@@ -45,6 +45,9 @@ public class MathUtil {
     }
 
     public static Vec3d getClosestVisiblePoint(World world, BlockPos targetPos, Vec3d sourcePos, Entity excludingEntity, Direction dir) {
+        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z, false) > 7 * 7)
+            return null;
+
         Box totalArea = new Box(sourcePos, new Vec3d(targetPos));
         List<Box> obscurers = new ArrayList<>();
         for (BlockPos pos : BlockPos.iterate(MathHelper.floor(totalArea.minX), MathHelper.floor(totalArea.minY), MathHelper.floor(totalArea.minZ),

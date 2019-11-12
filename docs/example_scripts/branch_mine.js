@@ -222,7 +222,6 @@ var mineNearbyOre = function(x, y, z) {
     // mine blocks around head and above head
     var stepUpDirs = [];
     for (var dy = 1; dy <= 2; dy++) {
-        // TODO: if we don't want the block at dy = 2, but there are visible wanted blocks next to it, they won't be mined
         if (canWalkThrough(world.getBlock(x, y + dy, z))) {
             for (var dir = 0; dir < cardinals6.length; dir++) {
                 var ddx = cardinals6[dir][0], ddy = cardinals6[dir][1], ddz = cardinals6[dir][2];
@@ -345,6 +344,43 @@ var mineNearbyOre = function(x, y, z) {
                         player.jumping = true;
                         tick();
                         player.jumping = false;
+                        while (Math.floor(player.x) !== x || Math.floor(player.z) !== z)
+                            tick();
+                        player.pressingForward = false;
+                        player.unblockInput();
+                    }
+                }
+            }
+        }
+    }
+
+    for (var dy = 1; dy >= 0; dy--) {
+        for (var i = 0; i < 4; i++) {
+            var dx = cardinals4[i][0], dz = cardinals4[i][1];
+            if (canWalkThrough(world.getBlock(x + dx, y + dy, z + dz))) {
+                for (var j = 0; j < 6; j++) {
+                    var ddx = cardinals6[j][0], ddy = cardinals6[j][1], ddz = cardinals6[j][2];
+                    if (isWantedBlock(world.getBlock(x + dx + ddx, y + dy + ddy, z + dz + ddz))) {
+                        if (!clearWay(x, y, z, dx, dz))
+                            return false;
+
+                        centerPlayer();
+
+                        player.lookAt(player.x + dx, player.y + player.eyeHeight, player.z + dz);
+                        player.blockInput();
+                        player.pressingForward = true;
+                        while (Math.floor(player.x) === x && Math.floor(player.z) === z)
+                            tick();
+                        player.pressingForward = false;
+                        player.unblockInput();
+
+                        mineNearbyOre(x + dx, y, z + dz);
+
+                        centerPlayer();
+
+                        player.lookAt(player.x - dx, player.y + player.eyeHeight, player.z - dz);
+                        player.blockInput();
+                        player.pressingForward = true;
                         while (Math.floor(player.x) !== x || Math.floor(player.z) !== z)
                             tick();
                         player.pressingForward = false;
