@@ -267,6 +267,8 @@ var mineNearbyOre = function(x, y, z) {
 
         mineNearbyOre(x + dx, y + 1, z + dz);
 
+        centerPlayer();
+
         player.lookAt(player.x - dx, player.y + player.eyeHeight, player.z - dz);
         player.blockInput();
         player.pressingForward = true;
@@ -287,6 +289,13 @@ var mineNearbyOre = function(x, y, z) {
                 return false;
 
             if (!canWalkThrough(world.getBlock(x + dx, y - 1, z + dz))) {
+                if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz))) {
+                    if (!mineBlock(x + dx, y + 1, z + dz))
+                        return false;
+                }
+
+                centerPlayer();
+
                 player.lookAt(player.x + dx, player.y + player.eyeHeight, player.z + dz);
                 player.blockInput();
                 player.pressingForward = true;
@@ -296,6 +305,8 @@ var mineNearbyOre = function(x, y, z) {
                 player.unblockInput();
 
                 mineNearbyOre(x + dx, y, z + dz);
+
+                centerPlayer();
 
                 player.lookAt(player.x - dx, player.y + player.eyeHeight, player.z - dz);
                 player.blockInput();
@@ -323,6 +334,8 @@ var mineNearbyOre = function(x, y, z) {
                             return false;
 
                         mineNearbyOre(x + dx, y, z + dz);
+
+                        centerPlayer();
 
                         player.lookAt(player.x - dx, player.y + player.eyeHeight, player.z - dz);
                         player.blockInput();

@@ -21,6 +21,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TagHelper;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -301,15 +302,26 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (!interactionManager.isBreakingBlock())
             return false;
         boolean wasBlockingInput = ScriptManager.isCurrentScriptBlockingInput();
+        boolean successful = true;
         ScriptManager.blockInput(true);
+        BlockPos pos = new BlockPos(x, y, z);
         do {
+            HitResult hitResult = MinecraftClient.getInstance().hitResult;
+            if (hitResult.getType() != HitResult.Type.BLOCK || !((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
+                Vec3d closestPos = MathUtil.getClosestVisiblePoint(MinecraftClient.getInstance().world, pos, getPlayer().getCameraPosVec(0), getPlayer());
+                if (closestPos == null) {
+                    successful = false;
+                    break;
+                }
+                lookAt(closestPos.x, closestPos.y, closestPos.z);
+            }
             IMinecraftClient imc = (IMinecraftClient) MinecraftClient.getInstance();
             imc.resetAttackCooldown();
             imc.continueBreakingBlock();
             ScriptManager.passTick();
         } while (interactionManager.isBreakingBlock());
         ScriptManager.blockInput(wasBlockingInput);
-        return true;
+        return successful;
     }
 
     public void setPressingForward(boolean pressingForward) {
