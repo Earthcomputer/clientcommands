@@ -29,6 +29,7 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.function.Predicate;
 
+@SuppressWarnings("unused")
 public class ScriptPlayer extends ScriptLivingEntity {
 
     ScriptPlayer() {
@@ -42,6 +43,23 @@ public class ScriptPlayer extends ScriptLivingEntity {
     @Override
     ClientPlayerEntity getEntity() {
         return getPlayer();
+    }
+
+    public void snapTo(double x, double y, double z) {
+        snapTo(x, y, z, false);
+    }
+
+    public void snapTo(double x, double y, double z, boolean sync) {
+        double dx = x - getX();
+        double dy = y - getY();
+        double dz = z - getZ();
+        if (dx * dx + dy * dy + dz * dz > 0.5 * 0.5)
+            return;
+
+        getPlayer().setPosition(x, y, z);
+
+        if (sync)
+            getPlayer().networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, getPlayer().onGround));
     }
 
     public void setYaw(float yaw) {
@@ -93,6 +111,11 @@ public class ScriptPlayer extends ScriptLivingEntity {
             return null;
         else
             return new ScriptInventory(getPlayer().container);
+    }
+
+    public void closeContainer() {
+        if (getPlayer().container != getPlayer().playerContainer)
+            getPlayer().closeContainer();
     }
 
     public boolean pick(Object itemStack) {
@@ -335,6 +358,14 @@ public class ScriptPlayer extends ScriptLivingEntity {
 
     public boolean isSneaking() {
         return ScriptManager.getScriptInput().sneaking || getPlayer().input.sneaking;
+    }
+
+    public void setSprinting(boolean sprinting) {
+        ScriptManager.setSprinting(sprinting);
+    }
+
+    public boolean isSprinting() {
+        return ScriptManager.isCurrentScriptSprinting() || MinecraftClient.getInstance().options.keySprint.isPressed();
     }
 
 }

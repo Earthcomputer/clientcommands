@@ -9,7 +9,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.LightType;
 
+@SuppressWarnings("unused")
 public class ScriptWorld {
 
     ScriptWorld() {}
@@ -48,6 +50,14 @@ public class ScriptWorld {
         if (be == null)
             return null;
         return ScriptUtil.fromNbt(be.toTag(new CompoundTag()));
+    }
+
+    public int getBlockLight(int x, int y, int z) {
+        return getWorld().getLightLevel(LightType.BLOCK, new BlockPos(x, y, z));
+    }
+
+    public int getSkyLight(int x, int y, int z) {
+        return getWorld().getLightLevel(LightType.SKY, new BlockPos(x, y, z));
     }
 
     @SuppressWarnings("unchecked")

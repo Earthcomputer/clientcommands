@@ -8,6 +8,7 @@ import net.minecraft.util.registry.Registry;
 
 import java.lang.ref.WeakReference;
 
+@SuppressWarnings("unused")
 public class ScriptEntity {
 
     private final WeakReference<Entity> entity;

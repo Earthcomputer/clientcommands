@@ -51,13 +51,19 @@ declare class Entity {
      */
     readonly yaw: number;
     /**
-     * The pitch of the entity in degrees
+     * The pitch of the entity in degrees. 0 degrees is forwards, increasing downwards
      */
     readonly pitch: number;
     /**
      * The NBT of the entity
      */
     readonly nbt: object;
+
+    /**
+     * Returns whether this entity is the same entity as the other entity
+     * @param other The other entity
+     */
+    equals(other: Entity): boolean;
 }
 
 /**
@@ -85,12 +91,25 @@ declare class Player extends LivingEntity {
  * A player which the user has control over
  */
 declare class ControllablePlayer extends Player {
+
+    /**
+     * Teleports the player a limited distance. This function cannot teleport the player more than 0.5 blocks,
+     * and is meant for alignment rather than movement. Use properties like {@link pressingForward} and
+     * {@link sprinting} for movement.
+     * @param x The x-position to snap the player to
+     * @param y The y-position to snap the player to
+     * @param z The z-position to snap the player to
+     * @param sync Whether to sync the position with the server immediately after the teleport, rather than
+     * at the start of the next tick. If absent, defaults to false
+     */
+    snapTo(x: number, y: number, z: number, sync?: boolean): void;
+
     /**
      * The yaw of the player in degrees. 0 degrees is to the south, increasing clockwise
      */
     yaw: number;
     /**
-     * The pitch of the player in degrees
+     * The pitch of the player in degrees. 0 degrees is forwards, increasing downwards
      */
     pitch: number;
 
@@ -143,6 +162,11 @@ declare class ControllablePlayer extends Player {
      * in any container
      */
     readonly openContainer: Inventory | null;
+
+    /**
+     * Closes the currently opened container, if any is open
+     */
+    closeContainer(): void;
 
     /**
      * "picks" an item from the player's inventory, and selects it in the hotbar, in a similar fashion to the
@@ -278,6 +302,12 @@ declare class ControllablePlayer extends Player {
      * is pressed by the current script.
      */
     sneaking: boolean;
+    /**
+     * Whether the script is pressing the sprint key for the player. This shouldn't be used to get whether sprint is
+     * being pressed, it will produce inconsistent results. It should be used to <b>set</b> whether sprint
+     * is pressed by the current script.
+     */
+    sprinting: boolean;
 }
 
 /**
@@ -334,6 +364,12 @@ declare class Inventory {
      * @param options The options of the inventory action. See {@link InventoryClickOptions}.
      */
     click(slot: number | null, options?: InventoryClickOptions): void;
+
+    /**
+     * Return whether this inventory is the same as another inventory
+     * @param other The other inventory
+     */
+    equals(other: Inventory): boolean;
 }
 
 /**
@@ -374,4 +410,20 @@ declare class World {
      * @return The NBT object of the block entity, or <tt>null</tt> if there was no block entity
      */
     getBlockEntityNbt(x: number, y: number, z: number): object | null;
+
+    /**
+     * Gets the block light at the given position, 0-15
+     * @param x The x-coordinate of the position to get the block light of
+     * @param y The y-coordinate of the position to get the block light of
+     * @param z The z-coordinate of the position to get the block light of
+     */
+    getBlockLight(x: number, y: number, z: number): number;
+
+    /**
+     * Gets the sky light at the given position, 0-15
+     * @param x The x-coordinate of the position to get the sky light of
+     * @param y The y-coordinate of the position to get the sky light of
+     * @param z The z-coordinate of the position to get the sky light of
+     */
+    getSkyLight(x: number, y: number, z: number): number;
 }

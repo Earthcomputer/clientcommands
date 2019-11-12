@@ -253,6 +253,21 @@ public class ScriptManager {
         }
     }
 
+    static void setSprinting(boolean sprinting) {
+        currentScript.sprinting = sprinting;
+    }
+
+    static boolean isCurrentScriptSprinting() {
+        return currentScript.sprinting;
+    }
+
+    public static boolean isSprinting() {
+        for (ScriptInstance script : runningScripts)
+            if (script.sprinting)
+                return true;
+        return false;
+    }
+
     private static class ScriptInstance {
         private Thread thread;
         private AtomicBoolean paused = new AtomicBoolean(false);
@@ -260,6 +275,7 @@ public class ScriptManager {
         private LongTask task;
         private boolean blockingInput = false;
         private Input input = new Input();
+        private boolean sprinting = false;
     }
 
 }

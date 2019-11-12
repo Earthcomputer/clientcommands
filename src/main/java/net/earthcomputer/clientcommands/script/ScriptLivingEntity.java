@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.script;
 
 import net.minecraft.entity.LivingEntity;
 
+@SuppressWarnings("unused")
 public class ScriptLivingEntity extends ScriptEntity {
 
     ScriptLivingEntity(LivingEntity entity) {
