@@ -46,7 +46,8 @@
     "MixinLivingEntityRenderer",
     "MixinSlot",
     "MixinKeyboardInput",
-    "MixinKeyBinding"
+    "MixinKeyBinding",
+    "MixinMouse"
   ],
   "injectors": {
     "defaultRequire": 1
