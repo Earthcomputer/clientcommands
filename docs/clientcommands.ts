@@ -55,6 +55,18 @@ declare class Entity {
      */
     readonly pitch: number;
     /**
+     * The x-velocity of the entity
+     */
+    readonly motionX: number;
+    /**
+     * The y-velocity of the entity
+     */
+    readonly motionY: number;
+    /**
+     * The z-velocity of the entity
+     */
+    readonly motionZ: number;
+    /**
      * The NBT of the entity
      */
     readonly nbt: object;

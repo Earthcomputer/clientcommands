@@ -57,6 +57,18 @@ public class ScriptEntity {
         return getEntity().pitch;
     }
 
+    public double getMotionX() {
+        return getEntity().getVelocity().x;
+    }
+
+    public double getMotionY() {
+        return getEntity().getVelocity().y;
+    }
+
+    public double getMotionZ() {
+        return getEntity().getVelocity().z;
+    }
+
     public Object getNbt() {
         return ScriptUtil.fromNbt(getEntity().toTag(new CompoundTag()));
     }
