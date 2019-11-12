@@ -149,10 +149,7 @@ var makeBridge = function(x, y, z, dx, dz) {
     // face backwards
     player.lookAt(player.x - dx, player.y, player.z - dz);
     // sneak backwards
-    player.blockInput();
-    player.sneaking = true;
-    var timeout = 0;
-    while (Math.floor(player.x) === x && Math.floor(player.z) === z) {
+    var continueSneaking = function() {
         player.pressingBack = true;
         tick();
         if (!pickUpItems()) {
@@ -171,6 +168,19 @@ var makeBridge = function(x, y, z, dx, dz) {
             }
             player.sneaking = true;
         }
+        return true;
+    };
+    player.blockInput();
+    player.sneaking = true;
+    var timeout = 0;
+    while (Math.floor(player.x) === x && Math.floor(player.z) === z) {
+        if (!continueSneaking())
+            return false;
+    }
+    // keep sneaking for an extra 5 ticks to make sure there's part of the block in view
+    for (var i = 0; i < 5; i++) {
+        if (!continueSneaking())
+            return false;
     }
     player.pressingBack = false;
     player.sneaking = false;
