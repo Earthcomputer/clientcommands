@@ -170,7 +170,9 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin, dir);
+        Vec3d closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
+        if (closestPos == null)
+            return false;
         if (origin.squaredDistanceTo(closestPos) < 6 * 6) {
             lookAt(closestPos.x, closestPos.y, closestPos.z);
             getPlayer().swingHand(Hand.MAIN_HAND);
@@ -200,7 +202,9 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin, dir);
+        Vec3d closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
+        if (closestPos == null)
+            return false;
         if (origin.squaredDistanceTo(closestPos) < 6 * 6) {
             for (Hand hand : Hand.values()) {
                 ActionResult result = MinecraftClient.getInstance().interactionManager.interactBlock(getPlayer(), world, hand,
