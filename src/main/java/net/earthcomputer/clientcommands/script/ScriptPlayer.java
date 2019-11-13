@@ -27,6 +27,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 
 import java.util.function.Predicate;
 
@@ -46,21 +47,85 @@ public class ScriptPlayer extends ScriptLivingEntity {
         return getPlayer();
     }
 
-    public void snapTo(double x, double y, double z) {
-        snapTo(x, y, z, false);
+    public boolean snapTo(double x, double y, double z) {
+        return snapTo(x, y, z, false);
     }
 
-    public void snapTo(double x, double y, double z, boolean sync) {
+    public boolean snapTo(double x, double y, double z, boolean sync) {
         double dx = x - getX();
         double dy = y - getY();
         double dz = z - getZ();
         if (dx * dx + dy * dy + dz * dz > 0.5 * 0.5)
-            return;
+            return false;
 
         getPlayer().setPosition(x, y, z);
 
         if (sync)
             getPlayer().networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, getPlayer().onGround));
+
+        return true;
+    }
+
+    public boolean moveTo(double x, double z) {
+        return moveTo(x, z, true);
+    }
+
+    public boolean moveTo(double x, double z, boolean smart) {
+        if (getPlayer().squaredDistanceTo(x, getY(), z) < 0.01) {
+            snapTo(x, getY(), z);
+            return true;
+        }
+
+        lookAt(x, getY() + getEyeHeight(), z);
+        boolean wasBlockingInput = ScriptManager.isCurrentScriptBlockingInput();
+        ScriptManager.blockInput(true);
+        boolean wasPressingForward = ScriptManager.getScriptInput().pressingForward;
+        ScriptManager.getScriptInput().pressingForward = true;
+
+        double lastDistanceSq = getPlayer().squaredDistanceTo(x, getY(), z);
+        int tickCounter = 0;
+        boolean successful = true;
+
+        do {
+            if (smart) {
+                double dx = x - getX();
+                double dz = z - getZ();
+                double n = Math.sqrt(dx * dx + dz * dz);
+                dx /= n;
+                dz /= n;
+                BlockPos pos = new BlockPos(MathHelper.floor(getX() + dx), MathHelper.floor(getY()), MathHelper.floor(getZ() + dz));
+                World world = getPlayer().world;
+                if (!world.getBlockState(pos).getCollisionShape(world, pos).isEmpty()
+                        && world.getBlockState(pos.up()).getCollisionShape(world, pos.up()).isEmpty()
+                        && world.getBlockState(pos.up(2)).getCollisionShape(world, pos.up(2)).isEmpty()) {
+                    BlockPos aboveHead = new BlockPos(getPlayer()).up(2);
+                    if (world.getBlockState(aboveHead).getCollisionShape(world, aboveHead).isEmpty()) {
+                        boolean wasJumping = ScriptManager.getScriptInput().jumping;
+                        ScriptManager.getScriptInput().jumping = true;
+                        ScriptManager.passTick();
+                        ScriptManager.getScriptInput().jumping = wasJumping;
+                    }
+                }
+            }
+            lookAt(x, getY() + getEyeHeight(), z);
+            ScriptManager.passTick();
+
+            tickCounter++;
+            if (tickCounter % 20 == 0) {
+                double distanceSq = getPlayer().squaredDistanceTo(x, getY(), z);
+                if (distanceSq >= lastDistanceSq) {
+                    successful = false;
+                    break;
+                }
+                lastDistanceSq = distanceSq;
+            }
+        } while (getPlayer().squaredDistanceTo(x, getY(), z) > 0.25 * 0.25);
+        snapTo(x, getY(), z);
+
+        ScriptManager.getScriptInput().pressingForward = wasPressingForward;
+        ScriptManager.blockInput(wasBlockingInput);
+
+        return successful;
     }
 
     public void setYaw(float yaw) {
@@ -194,7 +259,13 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        Vec3d closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
+        HitResult hitResult = MinecraftClient.getInstance().hitResult;
+        Vec3d closestPos;
+        if (hitResult.getType() == HitResult.Type.BLOCK && ((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
+            closestPos = hitResult.getPos();
+        } else {
+            closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
+        }
         if (closestPos == null)
             return false;
         if (origin.squaredDistanceTo(closestPos) < 6 * 6) {
@@ -226,7 +297,13 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        Vec3d closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
+        HitResult hitResult = MinecraftClient.getInstance().hitResult;
+        Vec3d closestPos;
+        if (hitResult.getType() == HitResult.Type.BLOCK && ((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
+            closestPos = hitResult.getPos();
+        } else {
+            closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
+        }
         if (closestPos == null)
             return false;
         if (origin.squaredDistanceTo(closestPos) < 6 * 6) {

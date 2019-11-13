@@ -107,14 +107,24 @@ declare class ControllablePlayer extends Player {
     /**
      * Teleports the player a limited distance. This function cannot teleport the player more than 0.5 blocks,
      * and is meant for alignment rather than movement. Use properties like {@link pressingForward} and
-     * {@link sprinting} for movement.
+     * {@link sprinting} for movement. Returns whether successful (the player was close enough to the
+     * given position).
      * @param x The x-position to snap the player to
      * @param y The y-position to snap the player to
      * @param z The z-position to snap the player to
      * @param sync Whether to sync the position with the server immediately after the teleport, rather than
      * at the start of the next tick. If absent, defaults to false
      */
-    snapTo(x: number, y: number, z: number, sync?: boolean): void;
+    snapTo(x: number, y: number, z: number, sync?: boolean): boolean;
+
+    /**
+     * Moves the player in a straight line to the specified target position. Blocks until it reaches there.
+     * Returns whether successful
+     * @param x The x-position of the target
+     * @param z The z-position of the target
+     * @param smart Default true, whether to jump up single block gaps
+     */
+    moveTo(x: number, z: number, smart?: boolean): boolean;
 
     /**
      * The yaw of the player in degrees. 0 degrees is to the south, increasing clockwise
@@ -214,7 +224,8 @@ declare class ControllablePlayer extends Player {
     rightClick(): boolean;
     /**
      * Right clicks a block. Will click on the closest part of the block at the given position.
-     * This function also modifies the player rotation to look at where they clicked.
+     * This function also modifies the player rotation to look at where they clicked, if they are
+     * not already hovering over the block.
      * @param x The x-position of the block to right click
      * @param y The y-position of the block to right click
      * @param z The z-position of the block to right click
@@ -232,7 +243,8 @@ declare class ControllablePlayer extends Player {
 
     /**
      * Left clicks on a block. Will click on the closest part of the block at the given position.
-     * This function also modifies the player rotation to look at where they clicked.
+     * This function also modifies the player rotation to look at where they clicked, if they are
+     * not already hovering over the block.
      *
      * Warning: left-clicking many blocks is a continuous mining action. This function on its own
      * will not work for this! For an easy way to mine blocks, see {@link longMineBlock}
