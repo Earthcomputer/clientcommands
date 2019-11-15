@@ -121,23 +121,23 @@ var clearWay = function(x, y, z, dx, dz) {
     // mine block in front of player's face if necessary
     if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz))) {
         if (!mineBlock(x + dx, y + 1, z + dz)) {
-            return false;
+            throw new Error();
         }
         if (!pickUpItems())
-            return false;
+            throw new Error();
     }
     // mine block in front of player's feet if necessary
     if (!canWalkThrough(world.getBlock(x + dx, y, z + dz))) {
         if (!mineBlock(x + dx, y, z + dz)) {
-            return false;
+            throw new Error();
         }
         if (!pickUpItems())
-            return false;
+            throw new Error();
     }
     // build bridge if necessary
     if (!canWalkOn(world.getBlock(x + dx, y - 1, z + dz))) {
         if (!makeBridge(x, y, z, dx, dz)) {
-            return false;
+            throw new Error();
         }
     }
     return true;
@@ -154,16 +154,18 @@ var mineBlock = function(x, y, z) {
         }
     }
     if (!picked)
-        return false;
+        throw new Error();
 
     var oldBlock = world.getBlock(x, y, z);
     if (oldBlock === "air") return true;
     var failCount = 0;
     do {
-        if (!player.longMineBlock(x, y, z))
+        if (!player.longMineBlock(x, y, z)) {
             failCount++;
+            tick();
+        }
         if (failCount > 5)
-            return false;
+            throw new Error("Block pos: (" + x + ", " + y + ", " + z + ")");
     } while (world.getBlock(x, y, z) === oldBlock);
 
     var blockAbove = world.getBlock(x, y + 1, z);
@@ -172,7 +174,7 @@ var mineBlock = function(x, y, z) {
         while (world.getBlock(x, y, z) !== blockAbove)
             tick();
         if (!mineBlock(x, y, z))
-            return false;
+            throw new Error();
     }
 
     return true;
@@ -182,7 +184,7 @@ var makeBridge = function(x, y, z, dx, dz) {
     if (!player.pick(function(itemNbt) {
         return itemNbt.id === "minecraft:cobblestone" || itemNbt.id === "minecraft:stone";
     }))
-        return false;
+        throw new Error();
     // face backwards
     player.lookAt(player.x - dx, player.y, player.z - dz);
     // sneak backwards
@@ -193,7 +195,7 @@ var makeBridge = function(x, y, z, dx, dz) {
             player.pressingBack = false;
             player.sneaking = false;
             player.unblockInput();
-            return false;
+            throw new Error();
         }
         timeout++;
         if (timeout % 20 === 0) {
@@ -201,7 +203,7 @@ var makeBridge = function(x, y, z, dx, dz) {
             player.sneaking = false;
             if (!clearWay(x, y, z, dx, dz)) {
                 player.unblockInput();
-                return false;
+                throw new Error();
             }
             player.sneaking = true;
         }
@@ -212,12 +214,12 @@ var makeBridge = function(x, y, z, dx, dz) {
     var timeout = 0;
     while (Math.floor(player.x) === x && Math.floor(player.z) === z) {
         if (!continueSneaking())
-            return false;
+            throw new Error();
     }
     // keep sneaking for an extra 5 ticks to make sure there's part of the block in view
     for (var i = 0; i < 5; i++) {
         if (!continueSneaking())
-            return false;
+            throw new Error();
     }
     player.pressingBack = false;
     player.sneaking = false;
@@ -239,9 +241,9 @@ var mineNearbyOre = function(x, y, z) {
                 var ddx = cardinals6[dir][0], ddy = cardinals6[dir][1], ddz = cardinals6[dir][2];
                 if (isWantedBlock(world.getBlock(x + ddx, y + dy + ddy, z + ddz))) {
                     if (!mineBlock(x + ddx, y + dy + ddy, z + ddz))
-                        return false;
+                        throw new Error();
                     if (!pickUpItems())
-                        return false;
+                        throw new Error();
                     if (dy === 2 && dir < 4)
                         stepUpDirs.push(dir);
                 }
@@ -256,17 +258,17 @@ var mineNearbyOre = function(x, y, z) {
         // mine block to allow us to step up if necessary
         if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz)))
             if (!mineBlock(x + dx, y + 1, z + dz))
-                return false;
+                throw new Error();
         if (canWalkThrough(world.getBlock(x + dx, y, z + dz)))
             continue;
 
         centerPlayer();
 
         // do the step up
-        if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) return false;
-        if (!mineNearbyOre(x + dx, y + 1, z + dz)) return false;
+        if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
+        if (!mineNearbyOre(x + dx, y + 1, z + dz)) throw new Error();
         centerPlayer();
-        if (!player.moveTo(x + 0.5, z + 0.5)) return false;
+        if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
     }
 
     // mine blocks around feet level
@@ -274,34 +276,34 @@ var mineNearbyOre = function(x, y, z) {
         var dx = cardinals4[i][0], dz = cardinals4[i][1];
         if (isWantedBlock(world.getBlock(x + dx, y, z + dz))) {
             if (!mineBlock(x + dx, y, z + dz))
-                return false;
+                throw new Error();
             if (!pickUpItems())
-                return false;
+                throw new Error();
 
             if (!canWalkThrough(world.getBlock(x + dx, y - 1, z + dz))) {
                 if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz))) {
                     if (!mineBlock(x + dx, y + 1, z + dz))
-                        return false;
+                        throw new Error();
                 }
 
                 centerPlayer();
-                if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) return false;
-                if (!mineNearbyOre(x + dx, y, z + dz)) return false;
+                if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
+                if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
                 centerPlayer();
-                if (!player.moveTo(x + 0.5, z + 0.5)) return false;
+                if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
 
                 // mine block below feet level
                 if (isWantedBlock(world.getBlock(x + dx, y - 1, z + dz))) {
                     if (!mineBlock(x + dx, y - 1, z + dz))
-                        return false;
+                        throw new Error();
                     if (!canWalkThrough(world.getBlock(x + dx, y - 2, z + dz))) {
                         // collect the block
-                        if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) return false;
+                        if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
                         if (!pickUpItems())
-                            return false;
-                        if (!mineNearbyOre(x + dx, y, z + dz)) return false;
+                            throw new Error();
+                        if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
                         centerPlayer();
-                        if (!player.moveTo(x + 0.5, z + 0.5)) return false;
+                        if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
                     }
                 }
             }
@@ -318,13 +320,13 @@ var mineNearbyOre = function(x, y, z) {
                     if (ddy === -1 && dy === 0) continue; // mineNearbyOre doesn't mine straight down
                     if (isWantedBlock(world.getBlock(x + dx + ddx, y + dy + ddy, z + dz + ddz))) {
                         if (!clearWay(x, y, z, dx, dz))
-                            return false;
+                            throw new Error();
 
                         centerPlayer();
-                        if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) return false;
-                        if (!mineNearbyOre(x + dx, y, z + dz)) return false;
+                        if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
+                        if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
                         centerPlayer();
-                        if (!player.moveTo(x + 0.5, z + 0.5)) return false;
+                        if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
                     }
                 }
             }
@@ -337,39 +339,20 @@ var makeTunnel = function(x, y, z, dx, dz) {
     centerPlayer();
 
     if (!clearWay(x, y, z, dx, dz))
-        return false;
+        throw new Error();
 
     // walk to next spot
-    player.lookAt(player.x + dx, player.y + player.eyeHeight, player.z + dz);
-    player.blockInput();
-    var timeout = 0;
-    while (Math.floor(player.x) === x && Math.floor(player.z) === z) {
-        player.pressingForward = true;
-        tick();
-        if (!pickUpItems()) {
-            player.pressingForward = false;
-            player.unblockInput();
-            return false;
-        }
-        timeout++;
-        if (timeout % 20 === 0) {
-            player.pressingForward = false;
-            if (!clearWay(x, y, z, dx, dz))
-                return false;
-        }
-    }
-    player.pressingForward = false;
-    player.unblockInput();
+    player.moveTo(player.x + dx, player.z + dz, false);
 
     // place torch
     if (world.getBlockLight(x, y, z) <= 1) {
         if (!player.pick("torch"))
-            return false;
+            throw new Error();
         if (!player.rightClick(x, y - 1, z, "up"))
             print("Couldn't place torch");
     }
 
-    if (!mineNearbyOre(x + dx, y, z + dz)) return false;
+    if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
 
     return true;
 };

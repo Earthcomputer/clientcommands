@@ -212,14 +212,19 @@ public class MathUtil {
         if (behindSource[0] && behindSource[1] && behindSource[2] && behindSource[3])
             return null;
 
-        int firstInFront;
-        //noinspection StatementWithEmptyBody
-        for (firstInFront = 0; behindSource[firstInFront]; firstInFront++)
-            ;
-        int lastInFront;
-        //noinspection StatementWithEmptyBody
-        for (lastInFront = 3; behindSource[lastInFront]; lastInFront--)
-            ;
+        int firstInFront, lastInFront;
+        if (!behindSource[0] && !behindSource[3] && (behindSource[1] || behindSource[2])) {
+            // deal with situations like behindSource = [false, true, true, false]
+            firstInFront = behindSource[2] ? 3 : 2;
+            lastInFront = behindSource[1] ? 0 : 1;
+        } else {
+            //noinspection StatementWithEmptyBody
+            for (firstInFront = 0; behindSource[firstInFront]; firstInFront++)
+                ;
+            //noinspection StatementWithEmptyBody
+            for (lastInFront = 3; behindSource[lastInFront]; lastInFront--)
+                ;
+        }
 
         double firstShadowX = 0, firstShadowY = 0, lastShadowX = 0, lastShadowY = 0;
 
@@ -285,7 +290,7 @@ public class MathUtil {
         double firstDx, firstDy;
         {
             // do it again for the other infinite ray
-            int firstBehind = lastInFront == 3 ? 0 : firstInFront + 1;
+            int firstBehind = lastInFront == 3 ? 0 : lastInFront + 1;
             double dx1 = obscurer[firstBehind][0] - obscurer[lastInFront][0],
                     dy1 = obscurer[firstBehind][1] - obscurer[lastInFront][1],
                     dz1 = obscurer[firstBehind][2] - obscurer[lastInFront][2];
