@@ -451,3 +451,86 @@ declare class World {
      */
     getSkyLight(x: number, y: number, z: number): number;
 }
+
+/**
+ * Defines a "thread", which is an action which can run "concurrently" with other threads.
+ * This is not concurrency in the sense you may be used to as a programmer. Only one thread
+ * can run at a time. When you start another thread, that thread gains control immediately,
+ * until either it stops or it calls the {@link tick} function, which allows other script
+ * threads to run their code, and the game to run a tick. Therefore, you do not have to
+ * worry about thread safety, as all operations are thread safe.
+ */
+declare class Thread {
+    /**
+     * The currently executing thread
+     */
+    static current: Thread;
+
+    /**
+     * Whether the thread is currently running. Note this does not necessarily mean this
+     * thread is the currently executing thread. To test that, use <tt>thread === Thread.current</tt>
+     */
+    readonly running: boolean;
+
+    /**
+     * Whether the thread has been paused by {@link pause}. To pause an unpause threads, use the methods
+     */
+    readonly paused: boolean;
+
+    /**
+     * Whether the thread is a daemon thread. If true, this thread will be killed when the parent thread
+     * stops; if false, this thread may outlive its parent
+     */
+    readonly daemon: boolean;
+
+    /**
+     * The thread which started this thread. If null, either this thread was not started by a script, or
+     * this thread is not a daemon and the parent thread has died
+     */
+    readonly parent: Thread | null;
+
+    /**
+     * An array view of running threads started by this thread
+     */
+    readonly children: Array<Thread>;
+
+    /**
+     * Creates a thread which will execute the given function on it when run. Does not
+     * run automatically, remember to explicitly call the {@link run} function.
+     * @param action The function to be executed on this thread
+     * @param daemon Whether this thread will be killed when the thread which started it
+     * is terminated. Defaults to true. If false, the thread can outlive the thread which
+     * started it.
+     */
+    constructor(action: () => void, daemon?: boolean);
+
+    /**
+     * Starts the thread. Does nothing if the thread has already started.
+     */
+    run(): void;
+
+    /**
+     * Pauses the thread. The thread will not return from the {@link tick} function until it
+     * has been unpaused. If a thread pauses itself, it will continue execution until the next
+     * time it calls the {@link tick} function.
+     */
+    pause(): void;
+
+    /**
+     * Unpauses the thread
+     */
+    unpause(): void;
+
+    /**
+     * Kills the thread, which stops it running any more code. If a thread tries to kill itself,
+     * it will continue running until it calls the {@link tick} function, at which point it will
+     * be killed
+     */
+    kill(): void;
+
+    /**
+     * Blocks the currently executing thread until this thread has finished executing. An exception
+     * is thrown if a thread tries to wait for itself
+     */
+    waitFor(): void;
+}

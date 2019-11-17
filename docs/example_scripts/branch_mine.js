@@ -68,71 +68,18 @@ var centerPlayer = function() {
     return true;
 };
 
-var pickUpItems = function() {
-    // find items needed to be picked up
-    var items = $("@e[type=item,distance=..3]");
-    var itemsWanted = [];
-    for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        if (Math.abs(item.x - player.x) < 1.425 && Math.abs(item.z - player.z) < 1.425
-            && item.y - player.y >= -0.5 && item.y - player.y < 2.3 - player.standingEyeHeight + player.eyeHeight) {
-            if (isWantedItemEntity(item)) {
-                var nbt = item.nbt;
-                var itemId;
-                if (nbt.Item && itemsWanted.indexOf(itemId = nbt.Item.id) === -1)
-                    itemsWanted.push(itemId);
-            }
-        }
-    }
-
-    // throw out items from inventory if there's no space
-    var playerItems = player.inventory.items;
-    var cobblestoneCount = 0;
-    for (var slot = 0; slot < 36; slot++) {
-        if (playerItems[slot].Count < 64 && itemsWanted.indexOf(playerItems[slot].id) !== -1)
-            itemsWanted.splice(itemsWanted.indexOf(playerItems[slot].id), 1);
-        if (playerItems[slot].id === "minecraft:cobblestone" || playerItems[slot].id === "minecraft:stone")
-            cobblestoneCount++;
-    }
-    for (var slot = 0; slot < 36 && itemsWanted.length > 0; slot++) {
-        if (playerItems[slot].id === "minecraft:air")
-            itemsWanted.pop();
-    }
-    for (var slot = 0; slot < 36 && itemsWanted.length > 0; slot++) {
-        var itemId = playerItems[slot].id;
-        var canThrow = false;
-        if ((itemId === "minecraft:cobblestone" || itemId === "minecraft:stone") && cobblestoneCount > 1) {
-            cobblestoneCount--;
-            canThrow = true;
-        } else if (itemId === "minecraft:dirt" || itemId === "minecraft:gravel"
-            || itemId === "minecraft:granite" || itemId === "minecraft:diorite"
-            || itemId === "minecraft:andesite") {
-            canThrow = true;
-        }
-        if (canThrow) {
-            player.inventory.click(slot, {type: 'throw', rightClick: true});
-            itemsWanted.pop();
-        }
-    }
-    return itemsWanted.length === 0;
-};
-
 var clearWay = function(x, y, z, dx, dz) {
     // mine block in front of player's face if necessary
     if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz))) {
         if (!mineBlock(x + dx, y + 1, z + dz)) {
             throw new Error();
         }
-        if (!pickUpItems())
-            throw new Error();
     }
     // mine block in front of player's feet if necessary
     if (!canWalkThrough(world.getBlock(x + dx, y, z + dz))) {
         if (!mineBlock(x + dx, y, z + dz)) {
             throw new Error();
         }
-        if (!pickUpItems())
-            throw new Error();
     }
     // build bridge if necessary
     if (!canWalkOn(world.getBlock(x + dx, y - 1, z + dz))) {
@@ -191,12 +138,6 @@ var makeBridge = function(x, y, z, dx, dz) {
     var continueSneaking = function() {
         player.pressingBack = true;
         tick();
-        if (!pickUpItems()) {
-            player.pressingBack = false;
-            player.sneaking = false;
-            player.unblockInput();
-            throw new Error();
-        }
         timeout++;
         if (timeout % 20 === 0) {
             player.pressingBack = false;
@@ -242,8 +183,6 @@ var mineNearbyOre = function(x, y, z) {
                 if (isWantedBlock(world.getBlock(x + ddx, y + dy + ddy, z + ddz))) {
                     if (!mineBlock(x + ddx, y + dy + ddy, z + ddz))
                         throw new Error();
-                    if (!pickUpItems())
-                        throw new Error();
                     if (dy === 2 && dir < 4)
                         stepUpDirs.push(dir);
                 }
@@ -277,8 +216,6 @@ var mineNearbyOre = function(x, y, z) {
         if (isWantedBlock(world.getBlock(x + dx, y, z + dz))) {
             if (!mineBlock(x + dx, y, z + dz))
                 throw new Error();
-            if (!pickUpItems())
-                throw new Error();
 
             if (!canWalkThrough(world.getBlock(x + dx, y - 1, z + dz))) {
                 if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz))) {
@@ -299,8 +236,6 @@ var mineNearbyOre = function(x, y, z) {
                     if (!canWalkThrough(world.getBlock(x + dx, y - 2, z + dz))) {
                         // collect the block
                         if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
-                        if (!pickUpItems())
-                            throw new Error();
                         if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
                         centerPlayer();
                         if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
@@ -357,16 +292,85 @@ var makeTunnel = function(x, y, z, dx, dz) {
     return true;
 };
 
-var x = Math.floor(player.x);
-var y = Math.floor(player.y);
-var z = Math.floor(player.z);
-var dx = 1, dz = 0;
+var makeTunnelLoop = function() {
+    try {
+        var x = Math.floor(player.x);
+        var y = Math.floor(player.y);
+        var z = Math.floor(player.z);
+        var dx = 1, dz = 0;
 
-while (true) {
-    if (!makeTunnel(x, y, z, dx, dz))
-        break;
-    x += dx;
-    z += dz;
-}
+        while (makeTunnel(x, y, z, dx, dz)) {
+            x += dx;
+            z += dz;
+        }
+    } catch (err) {
+        throw err;
+    } finally {
+        mainThread.kill();
+        print("Stopped making tunnel");
+    }
+};
 
-print("Finished making tunnel");
+var pickUpItemsLoop = function() {
+    while (true) {
+        // find items needed to be picked up
+        var items = $("@e[type=item,distance=..3]");
+        var itemsWanted = [];
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (Math.abs(item.x - player.x) < 1.425 && Math.abs(item.z - player.z) < 1.425
+                && item.y - player.y >= -0.5 && item.y - player.y < 2.3 - player.standingEyeHeight + player.eyeHeight) {
+                if (isWantedItemEntity(item)) {
+                    var nbt = item.nbt;
+                    var itemId;
+                    if (nbt.Item && itemsWanted.indexOf(itemId = nbt.Item.id) === -1)
+                        itemsWanted.push(itemId);
+                }
+            }
+        }
+
+        // throw out items from inventory if there's no space
+        var playerItems = player.inventory.items;
+        var cobblestoneCount = 0;
+        for (var slot = 0; slot < 36; slot++) {
+            if (playerItems[slot].Count < 64 && itemsWanted.indexOf(playerItems[slot].id) !== -1)
+                itemsWanted.splice(itemsWanted.indexOf(playerItems[slot].id), 1);
+            if (playerItems[slot].id === "minecraft:cobblestone" || playerItems[slot].id === "minecraft:stone")
+                cobblestoneCount++;
+        }
+        for (var slot = 0; slot < 36 && itemsWanted.length > 0; slot++) {
+            if (playerItems[slot].id === "minecraft:air")
+                itemsWanted.pop();
+        }
+        for (var slot = 0; slot < 36 && itemsWanted.length > 0; slot++) {
+            var itemId = playerItems[slot].id;
+            var canThrow = false;
+            if ((itemId === "minecraft:cobblestone" || itemId === "minecraft:stone") && cobblestoneCount > 1) {
+                cobblestoneCount--;
+                canThrow = true;
+            } else if (itemId === "minecraft:dirt" || itemId === "minecraft:gravel"
+                || itemId === "minecraft:granite" || itemId === "minecraft:diorite"
+                || itemId === "minecraft:andesite") {
+                canThrow = true;
+            }
+            if (canThrow) {
+                player.inventory.click(slot, {type: 'throw', rightClick: true});
+                itemsWanted.pop();
+            }
+        }
+
+        if (itemsWanted.length !== 0)
+            break;
+
+        tick();
+    }
+    print("Stopped picking up items");
+    mainThread.kill();
+};
+
+var mainThread = Thread.current;
+
+new Thread(pickUpItemsLoop).run();
+new Thread(makeTunnelLoop).run();
+
+while (true) tick(); // keep running until killed

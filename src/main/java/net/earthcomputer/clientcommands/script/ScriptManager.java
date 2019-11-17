@@ -1,18 +1,13 @@
 package net.earthcomputer.clientcommands.script;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
-import net.earthcomputer.clientcommands.command.ClientEntitySelector;
-import net.earthcomputer.clientcommands.command.FakeCommandSource;
-import net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.Input;
-import net.minecraft.entity.Entity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import org.apache.commons.io.FileUtils;
@@ -30,9 +25,8 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ScriptManager {
 
@@ -42,8 +36,8 @@ public class ScriptManager {
     private static File scriptDir;
     private static Map<String, String> scripts = new HashMap<>();
 
-    private static ScriptInstance currentScript = null;
-    private static List<ScriptInstance> runningScripts = new ArrayList<>();
+    private static Deque<ThreadInstance> threadStack = new ArrayDeque<>();
+    private static List<ThreadInstance> runningThreads = new ArrayList<>();
 
     static final ScriptEngine ENGINE;
     static {
@@ -57,8 +51,9 @@ public class ScriptManager {
         } catch (ReflectiveOperationException e) {
             engine = null;
         }
+        if (engine != null)
+            ScriptBuiltins.addBuiltinVariables(engine);
         ENGINE = engine;
-        addBuiltinVariables();
     }
 
     public static void reloadScripts() {
@@ -94,15 +89,25 @@ public class ScriptManager {
         return Collections.unmodifiableSet(scripts.keySet());
     }
 
+    static ThreadInstance currentThread() {
+        return threadStack.peek();
+    }
+
     public static void execute(String scriptName) throws CommandSyntaxException {
         String scriptSource = scripts.get(scriptName);
         if (scriptSource == null)
             throw SCRIPT_NOT_FOUND_EXCEPTION.create(scriptName);
 
-        ScriptInstance instance = new ScriptInstance();
-        Thread thread = new Thread(() -> {
+        ThreadInstance thread = createThread(() -> (Void)ENGINE.eval(scriptSource), false);
+        runThread(thread);
+    }
+
+    static ThreadInstance createThread(Callable<Void> task, boolean daemon) {
+        ThreadInstance thread = new ThreadInstance();
+        thread.handle = new ScriptThread(thread);
+        thread.javaThread = new Thread(() -> {
             try {
-                ENGINE.eval(scriptSource);
+                task.call();
             } catch (ScriptInterruptedException ignore) {
             } catch (ScriptException e) {
                 if (!(e.getCause() instanceof ScriptInterruptedException)) {
@@ -110,23 +115,29 @@ public class ScriptManager {
                     e.getCause().printStackTrace();
                 }
             } catch (Throwable e) {
-                ClientCommandManager.sendError(new LiteralText(e.toString()));
+                ClientCommandManager.sendError(new LiteralText(e.getMessage()));
                 e.printStackTrace();
             }
-            instance.paused.set(true);
-            instance.running = false;
-            runningScripts.remove(instance);
+            runningThreads.remove(thread);
+            if (thread.parent != null)
+                thread.parent.children.remove(thread);
+            for (ThreadInstance child : thread.children) {
+                child.parent = null;
+                if (child.daemon)
+                    child.killed = true;
+            }
+            thread.running = false;
+            thread.blocked.set(true);
         });
-        thread.setDaemon(true);
-        instance.thread = thread;
-        LongTask task = new LongTask() {
+        thread.javaThread.setDaemon(true);
+        thread.task = new LongTask() {
             @Override
             public void initialize() {
             }
 
             @Override
             public boolean condition() {
-                return instance.running;
+                return thread.running;
             }
 
             @Override
@@ -138,75 +149,58 @@ public class ScriptManager {
                 scheduleDelay();
             }
         };
-        instance.task = task;
-        TaskManager.addTask("cscript", task);
-        runningScripts.add(instance);
-        currentScript = instance;
+        thread.daemon = daemon;
 
-        thread.start();
-        while (!instance.paused.get()) {
+        return thread;
+    }
+
+    static void runThread(ThreadInstance thread) {
+        TaskManager.addTask("cscript", thread.task);
+        runningThreads.add(thread);
+        thread.running = true;
+
+        if (currentThread() != null) {
+            currentThread().children.add(thread);
+            thread.parent = currentThread();
+        }
+
+        threadStack.push(thread);
+        thread.javaThread.start();
+        while (!thread.blocked.get()) {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-    }
-
-    private static void addBuiltinVariables() {
-        ENGINE.put("player", new ScriptPlayer());
-        ENGINE.put("world", new ScriptWorld());
-        ENGINE.put("$", (Function<String, Object>) command -> {
-            StringReader reader = new StringReader(command);
-            if (command.startsWith("@")) {
-                try {
-                    ClientEntitySelector selector = ClientEntityArgumentType.entities().parse(reader);
-                    if (reader.getRemainingLength() != 0)
-                        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(reader);
-                    List<Entity> entities = selector.getEntities(new FakeCommandSource(MinecraftClient.getInstance().player));
-                    List<Object> ret = new ArrayList<>(entities.size());
-                    for (Entity entity : entities)
-                        ret.add(ScriptEntity.create(entity));
-                    return ret;
-                } catch (CommandSyntaxException e) {
-                    throw new IllegalArgumentException("Invalid selector syntax", e);
-                }
-            }
-            String commandName = reader.readUnquotedString();
-            reader.setCursor(0);
-            if (!ClientCommandManager.isClientSideCommand(commandName)) {
-                ClientCommandManager.sendError(new TranslatableText("commands.client.notClient"));
-                return 1;
-            }
-            return ClientCommandManager.executeCommand(reader, command);
-        });
-        ENGINE.put("print", (Consumer<String>) message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message)));
-        ENGINE.put("tick", (Runnable) ScriptManager::passTick);
+        threadStack.pop();
     }
 
     public static void tick() {
         if (ENGINE == null)
             return;
 
-        for (ScriptInstance script : new ArrayList<>(runningScripts)) {
-            currentScript = script;
-            script.paused.set(false);
-            while (!script.paused.get()) {
+        for (ThreadInstance thread : new ArrayList<>(runningThreads)) {
+            if (thread.paused || !thread.running) continue;
+
+            threadStack.push(thread);
+            thread.blocked.set(false);
+            while (!thread.blocked.get()) {
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
+            threadStack.pop();
         }
-        currentScript = null;
     }
 
     static void passTick() {
-        ScriptInstance script = currentScript;
-        script.paused.set(true);
-        while (script.paused.get()) {
-            if (script.task.isCompleted())
+        ThreadInstance thread = currentThread();
+        thread.blocked.set(true);
+        while (thread.blocked.get()) {
+            if (thread.killed || thread.task.isCompleted())
                 throw new ScriptInterruptedException();
             try {
                 Thread.sleep(1);
@@ -217,33 +211,33 @@ public class ScriptManager {
     }
 
     static void blockInput(boolean blockInput) {
-        currentScript.blockingInput = blockInput;
+        currentThread().blockingInput = blockInput;
     }
 
     static boolean isCurrentScriptBlockingInput() {
-        return currentScript.blockingInput;
+        return currentThread().blockingInput;
     }
 
     public static boolean blockingInput() {
-        for (ScriptInstance script : runningScripts)
+        for (ThreadInstance script : runningThreads)
             if (script.blockingInput)
                 return true;
         return false;
     }
 
     static Input getScriptInput() {
-        return currentScript.input;
+        return currentThread().input;
     }
 
     public static void copyScriptInputToPlayer(boolean inSneakingPose, boolean spectator) {
         Input playerInput = MinecraftClient.getInstance().player.input;
-        for (ScriptInstance script : runningScripts) {
-            playerInput.pressingForward |= script.input.pressingForward;
-            playerInput.pressingBack |= script.input.pressingBack;
-            playerInput.pressingLeft |= script.input.pressingLeft;
-            playerInput.pressingRight |= script.input.pressingRight;
-            playerInput.jumping |= script.input.jumping;
-            playerInput.sneaking |= script.input.sneaking;
+        for (ThreadInstance thread : runningThreads) {
+            playerInput.pressingForward |= thread.input.pressingForward;
+            playerInput.pressingBack |= thread.input.pressingBack;
+            playerInput.pressingLeft |= thread.input.pressingLeft;
+            playerInput.pressingRight |= thread.input.pressingRight;
+            playerInput.jumping |= thread.input.jumping;
+            playerInput.sneaking |= thread.input.sneaking;
         }
         playerInput.movementForward = playerInput.pressingForward ^ playerInput.pressingBack ? (playerInput.pressingForward ? 1 : -1) : 0;
         playerInput.movementSideways = playerInput.pressingLeft ^ playerInput.pressingRight ? (playerInput.pressingLeft ? 1 : -1) : 0;
@@ -254,24 +248,32 @@ public class ScriptManager {
     }
 
     static void setSprinting(boolean sprinting) {
-        currentScript.sprinting = sprinting;
+        currentThread().sprinting = sprinting;
     }
 
-    static boolean isCurrentScriptSprinting() {
-        return currentScript.sprinting;
+    static boolean isCurrentThreadSprinting() {
+        return currentThread().sprinting;
     }
 
     public static boolean isSprinting() {
-        for (ScriptInstance script : runningScripts)
-            if (script.sprinting)
+        for (ThreadInstance thread : runningThreads)
+            if (thread.sprinting)
                 return true;
         return false;
     }
 
-    private static class ScriptInstance {
-        private Thread thread;
-        private AtomicBoolean paused = new AtomicBoolean(false);
-        private boolean running = true;
+    static class ThreadInstance {
+        ScriptThread handle;
+
+        boolean daemon;
+        boolean paused;
+        boolean killed;
+        ThreadInstance parent;
+        List<ThreadInstance> children = new ArrayList<>(0);
+
+        private Thread javaThread;
+        private AtomicBoolean blocked = new AtomicBoolean(false);
+        boolean running;
         private LongTask task;
         private boolean blockingInput = false;
         private Input input = new Input();
