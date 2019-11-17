@@ -45,6 +45,10 @@ public class ScriptWorld {
         return null;
     }
 
+    public ScriptBlockInfo getBlockInfo(int x, int y, int z) {
+        return new ScriptBlockInfo(getWorld().getBlockState(new BlockPos(x, y, z)));
+    }
+
     public Object getBlockEntityNbt(int x, int y, int z) {
         BlockEntity be = getWorld().getBlockEntity(new BlockPos(x, y, z));
         if (be == null)

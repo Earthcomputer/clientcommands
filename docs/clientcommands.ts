@@ -27,6 +27,13 @@ declare function print(x: string): void;
 declare function tick(): void;
 
 /**
+ * Gets information about the given block. Note: this will return information about the default block
+ * state of the block. You may sometimes get more accurate information by using {@link World.getBlockInfo}
+ * @param block The block to get the information about
+ */
+declare function getBlockInfo(block: string): BlockInfo;
+
+/**
  * Represents a generic entity
  */
 declare class Entity {
@@ -427,6 +434,14 @@ declare class World {
     getBlockProperty(x: number, y: number, z: number, property: string): boolean | number | string;
 
     /**
+     * Gets information about the block state at the given position.
+     * @param x The x-position of the block to get information about
+     * @param y The y-position of the block to get information about
+     * @param z The z-position of the block to get information about
+     */
+    getBlockInfo(x: number, y: number, z: number): BlockInfo;
+
+    /**
      * Gets the client-side block entity NBT at the given coordinates
      * @param x The x-position of the block entity whose NBT to get
      * @param y The y-position of the block entity whose NBT to get
@@ -464,7 +479,7 @@ declare class Thread {
     /**
      * The currently executing thread
      */
-    static current: Thread;
+    static readonly current: Thread;
 
     /**
      * Whether the thread is currently running. Note this does not necessarily mean this
@@ -533,4 +548,138 @@ declare class Thread {
      * is thrown if a thread tries to wait for itself
      */
     waitFor(): void;
+}
+
+/**
+ * Contains information about a block or block state
+ */
+declare class BlockInfo {
+    /**
+     * The light level emitted, 0-15
+     */
+    luminance: number;
+
+    /**
+     * The hardness of the block, proportional to how long it takes to mine. For example:
+     * <ul>
+     * <li>Tall grass: 0</li>
+     * <li>Dirt: 0.5</li>
+     * <li>Stone: 1.5</li>
+     * <li>Obsidian: 50</li>
+     * <li>Bedrock: -1</li>
+     * </ul>
+     */
+    hardness: number;
+
+    /**
+     * How resistant this block is to explosions. For example:
+     * <ul>
+     * <li>Stone: 6</li>
+     * <li>Obsidian: 1200</li>
+     * <li>Bedrock: 3600000</li>
+     * </ul>
+     * Note: the wiki has these values 5 times larger than they should be
+     */
+    blastResistance: number;
+
+    /**
+     * Whether this block responds to random ticks
+     */
+    randomTickable: boolean;
+
+    /**
+     * A value between 0-1 indicating how slippery a block is. A value of 1 means no friction at all
+     * (as if an entity was moving sideways in air), a value of 0 will stop an entity instantly. Most
+     * blocks have a slipperiness of 0.6, while ice has a slipperiness of 0.98
+     */
+    slipperiness: number;
+
+    /**
+     * A list of block state properties supported by this block, i.e. those that can be used
+     * in {@link World.getBlockProperty}
+     */
+    stateProperties: Array<string>;
+
+    /**
+     * The loot table used to drop items after this block is mined
+     */
+    lootTable: string;
+
+    /**
+     * The translation key used to get the name of this block
+     */
+    translationKey: string;
+
+    /**
+     * The item corresponding to this block, or null if the block has no corresponding item
+     */
+    item: string | null;
+
+    /**
+     * A unique ID of the material of the block, may change across Minecraft versions or when other mods
+     * add materials. It's safest to compare against the material ID of a block with a known material
+     */
+    materialId: number;
+
+    /**
+     * The map color of this block, in packed 0xRRGGBB format
+     */
+    mapColor: number;
+
+    /**
+     * How this block reacts to being pushed by a piston.
+     * <table>
+     *     <tr><th>Value</th><th>Example</th><th>Description</th></tr>
+     *     <tr><td><tt>"normal"</tt></td><td>Stone</td><td>Piston will move the block</td></tr>
+     *     <tr><td><tt>"destroy"</tt></td><td>Torch</td><td>Piston will destroy the block (it will "pop off")</td></tr>
+     *     <tr><td><tt>"block"</tt></td><td>Obsidian</td><td>Piston cannot pull the block and block will prevent piston from pushing</td></tr>
+     *     <tr><td><tt>"push_only"</tt></td><td>Glazed terracotta</td><td>Block can only be pushed, does not stick to slime</td></tr>
+     * </table>
+     */
+    pistonBehavior: string;
+
+    /**
+     * Whether this block is flammable
+     */
+    flammable: boolean;
+
+    /**
+     * Whether this block will drop without using the correct tool
+     */
+    canBreakByHand: boolean;
+
+    /**
+     * Whether this block is a liquid
+     */
+    liquid: boolean;
+
+    /**
+     * Whether this block blocks light TODO: investigate
+     */
+    blocksLight: boolean;
+
+    /**
+     * Whether this block is replaced when placing a block, e.g. tall grass
+     */
+    replaceable: boolean;
+
+    /**
+     * Whether this is a solid block TODO: investigate
+     */
+    solid: boolean;
+
+    /**
+     * The burn chance, related to how quickly the block burns once it has caught fire
+     */
+    burnChance: number;
+
+    /**
+     * The spread chance, related to how quickly a block catches fire in response to nearby fire
+     */
+    spreadChance: number;
+
+    /**
+     * Whether this block will fall like sand when unsupported
+     */
+    fallable: boolean;
 }

@@ -9,10 +9,13 @@ import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.earthcomputer.clientcommands.command.FakeCommandSource;
 import net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType;
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import javax.script.ScriptEngine;
 import java.util.ArrayList;
@@ -54,6 +57,13 @@ class ScriptBuiltins {
         });
         engine.put("print", (Consumer<String>) message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message)));
         engine.put("tick", (Runnable) ScriptManager::passTick);
+        engine.put("getBlockInfo", (Function<String, ScriptBlockInfo>) blockName -> {
+            Identifier id = new Identifier(blockName);
+            if (!Registry.BLOCK.containsId(id))
+                throw new IllegalArgumentException("No such block: " + blockName);
+            return new ScriptBlockInfo(Registry.BLOCK.get(id).getDefaultState());
+        });
+
         engine.put("Thread", new AbstractJSObject() {
             @Override
             public Object newObject(Object... args) {

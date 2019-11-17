@@ -47,7 +47,10 @@
     "MixinSlot",
     "MixinKeyboardInput",
     "MixinKeyBinding",
-    "MixinMouse"
+    "MixinMouse",
+    "MixinBlock",
+    "MixinMaterial",
+    "MixinFireBlock"
   ],
   "injectors": {
     "defaultRequire": 1

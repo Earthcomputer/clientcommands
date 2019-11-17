@@ -45,10 +45,6 @@ var canWalkOn = function(block) {
     return true;
 };
 
-var isFallingBlock = function(block) {
-    return block === "gravel" || block === "sand" || block === "red_sand";
-};
-
 var getTool = function(block) {
     if (block === "dirt" || block === "gravel" || block === "grass_block")
         return "shovel";
@@ -115,9 +111,7 @@ var mineBlock = function(x, y, z) {
             throw new Error("Block pos: (" + x + ", " + y + ", " + z + ")");
     } while (world.getBlock(x, y, z) === oldBlock);
 
-    var blockAbove = world.getBlock(x, y + 1, z);
-
-    if (isFallingBlock(blockAbove)) {
+    if (world.getBlockInfo(x, y + 1, z).fallable) {
         while (world.getBlock(x, y, z) !== blockAbove)
             tick();
         if (!mineBlock(x, y, z))
@@ -303,11 +297,8 @@ var makeTunnelLoop = function() {
             x += dx;
             z += dz;
         }
-    } catch (err) {
-        throw err;
     } finally {
         mainThread.kill();
-        print("Stopped making tunnel");
     }
 };
 
@@ -364,7 +355,6 @@ var pickUpItemsLoop = function() {
 
         tick();
     }
-    print("Stopped picking up items");
     mainThread.kill();
 };
 

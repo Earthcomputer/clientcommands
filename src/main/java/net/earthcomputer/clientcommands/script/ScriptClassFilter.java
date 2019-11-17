@@ -18,6 +18,7 @@ public class ScriptClassFilter implements ClassFilter {
         allow("java.util.HashMap");
         allow("java.util.Set");
         allow("java.util.HashSet");
+        allow(ScriptBlockInfo.class.getName());
         allow(ScriptEntity.class.getName());
         allow(ScriptInventory.class.getName());
         allow(ScriptLivingEntity.class.getName());
