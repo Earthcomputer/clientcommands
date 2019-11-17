@@ -557,7 +557,7 @@ declare class BlockInfo {
     /**
      * The light level emitted, 0-15
      */
-    luminance: number;
+    readonly luminance: number;
 
     /**
      * The hardness of the block, proportional to how long it takes to mine. For example:
@@ -569,7 +569,7 @@ declare class BlockInfo {
      * <li>Bedrock: -1</li>
      * </ul>
      */
-    hardness: number;
+    readonly hardness: number;
 
     /**
      * How resistant this block is to explosions. For example:
@@ -580,51 +580,51 @@ declare class BlockInfo {
      * </ul>
      * Note: the wiki has these values 5 times larger than they should be
      */
-    blastResistance: number;
+    readonly blastResistance: number;
 
     /**
      * Whether this block responds to random ticks
      */
-    randomTickable: boolean;
+    readonly randomTickable: boolean;
 
     /**
      * A value between 0-1 indicating how slippery a block is. A value of 1 means no friction at all
      * (as if an entity was moving sideways in air), a value of 0 will stop an entity instantly. Most
      * blocks have a slipperiness of 0.6, while ice has a slipperiness of 0.98
      */
-    slipperiness: number;
+    readonly slipperiness: number;
 
     /**
      * A list of block state properties supported by this block, i.e. those that can be used
      * in {@link World.getBlockProperty}
      */
-    stateProperties: Array<string>;
+    readonly stateProperties: Array<string>;
 
     /**
      * The loot table used to drop items after this block is mined
      */
-    lootTable: string;
+    readonly lootTable: string;
 
     /**
      * The translation key used to get the name of this block
      */
-    translationKey: string;
+    readonly translationKey: string;
 
     /**
      * The item corresponding to this block, or null if the block has no corresponding item
      */
-    item: string | null;
+    readonly item: string | null;
 
     /**
      * A unique ID of the material of the block, may change across Minecraft versions or when other mods
      * add materials. It's safest to compare against the material ID of a block with a known material
      */
-    materialId: number;
+    readonly materialId: number;
 
     /**
      * The map color of this block, in packed 0xRRGGBB format
      */
-    mapColor: number;
+    readonly mapColor: number;
 
     /**
      * How this block reacts to being pushed by a piston.
@@ -636,50 +636,50 @@ declare class BlockInfo {
      *     <tr><td><tt>"push_only"</tt></td><td>Glazed terracotta</td><td>Block can only be pushed, does not stick to slime</td></tr>
      * </table>
      */
-    pistonBehavior: string;
+    readonly pistonBehavior: string;
 
     /**
      * Whether this block is flammable
      */
-    flammable: boolean;
+    readonly flammable: boolean;
 
     /**
      * Whether this block will drop without using the correct tool
      */
-    canBreakByHand: boolean;
+    readonly canBreakByHand: boolean;
 
     /**
      * Whether this block is a liquid
      */
-    liquid: boolean;
+    readonly liquid: boolean;
 
     /**
      * Whether this block blocks light TODO: investigate
      */
-    blocksLight: boolean;
+    readonly blocksLight: boolean;
 
     /**
      * Whether this block is replaced when placing a block, e.g. tall grass
      */
-    replaceable: boolean;
+    readonly replaceable: boolean;
 
     /**
      * Whether this is a solid block TODO: investigate
      */
-    solid: boolean;
+    readonly solid: boolean;
 
     /**
      * The burn chance, related to how quickly the block burns once it has caught fire
      */
-    burnChance: number;
+    readonly burnChance: number;
 
     /**
      * The spread chance, related to how quickly a block catches fire in response to nearby fire
      */
-    spreadChance: number;
+    readonly spreadChance: number;
 
     /**
      * Whether this block will fall like sand when unsupported
      */
-    fallable: boolean;
+    readonly fallable: boolean;
 }
