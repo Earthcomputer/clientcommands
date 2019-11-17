@@ -40,19 +40,27 @@ var canWalkThrough = function(block) {
 var canWalkOn = function(block) {
     if (canWalkThrough(block))
         return false;
-    if (block === "water" || block === "flowing_water" || block === "lava" || block === "flowing_lava")
+    if (BlockState.defaultState(block).liquid)
         return false;
     return true;
 };
 
 var getTool = function(block) {
-    if (block === "dirt" || block === "gravel" || block === "grass_block")
+    var effective = function(item, block) {
+        var stack = ItemStack.of(item);
+        if (!BlockState.defaultState(block).canBreakByHand && !stack.isEffectiveOn(block))
+            return false;
+        return stack.getMiningSpeed(block) > 1;
+    };
+    if (effective("diamond_pickaxe", block))
+        return "pickaxe";
+    if (effective("diamond_shovel", block))
         return "shovel";
-    if (block.endsWith("_planks") || block.endsWith("_fence"))
+    if (effective("diamond_axe", block))
         return "axe";
-    if (block === "cobweb")
+    if (effective("diamond_sword", block))
         return "sword";
-    return "pickaxe";
+    return null;
 };
 
 var centerPlayer = function() {
@@ -89,15 +97,17 @@ var clearWay = function(x, y, z, dx, dz) {
 var mineBlock = function(x, y, z) {
     var toolMaterialOrder = ["diamond", "iron", "stone", "wooden", "golden"];
     var tool = getTool(world.getBlock(x, y, z));
-    var picked = false;
-    for (var i = 0; i < toolMaterialOrder.length; i++) {
-        if (player.pick(toolMaterialOrder[i] + "_" + tool)) {
-            picked = true;
-            break;
+    if (tool) {
+        var picked = false;
+        for (var i = 0; i < toolMaterialOrder.length; i++) {
+            if (player.pick(toolMaterialOrder[i] + "_" + tool)) {
+                picked = true;
+                break;
+            }
         }
+        if (!picked)
+            throw new Error();
     }
-    if (!picked)
-        throw new Error();
 
     var oldBlock = world.getBlock(x, y, z);
     if (oldBlock === "air") return true;
@@ -111,7 +121,7 @@ var mineBlock = function(x, y, z) {
             throw new Error("Block pos: (" + x + ", " + y + ", " + z + ")");
     } while (world.getBlock(x, y, z) === oldBlock);
 
-    if (world.getBlockInfo(x, y + 1, z).fallable) {
+    if (world.getBlockState(x, y + 1, z).fallable) {
         while (world.getBlock(x, y, z) !== blockAbove)
             tick();
         if (!mineBlock(x, y, z))

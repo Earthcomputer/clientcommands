@@ -7,7 +7,9 @@ import net.earthcomputer.clientcommands.interfaces.IMaterial;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
@@ -15,12 +17,38 @@ import java.util.List;
 import java.util.Locale;
 
 @SuppressWarnings("unused")
-public class ScriptBlockInfo {
+public class ScriptBlockState {
 
-    private BlockState state;
+    static ScriptBlockState defaultState(String block) {
+        Identifier id = new Identifier(block);
+        if (!Registry.BLOCK.containsId(id))
+            throw new IllegalArgumentException("No such block: " + block);
+        return new ScriptBlockState(Registry.BLOCK.get(id).getDefaultState());
+    }
 
-    ScriptBlockInfo(BlockState state) {
+    BlockState state;
+
+    ScriptBlockState(BlockState state) {
         this.state = state;
+    }
+
+    public String getBlock() {
+        return ScriptUtil.simplifyIdentifier(Registry.BLOCK.getId(state.getBlock()));
+    }
+
+    public Object getProperty(String property) {
+        for (Property<?> propertyObj : state.getProperties()) {
+            if (propertyObj.getName().equals(property)) {
+                Object val = state.get(propertyObj);
+                if (val instanceof Boolean)
+                    return val;
+                if (val instanceof Number)
+                    return val;
+                else
+                    return propertyGetName(propertyObj, val);
+            }
+        }
+        return null;
     }
 
     public int getLuminance() {
@@ -110,6 +138,18 @@ public class ScriptBlockInfo {
 
     public boolean isFallable() {
         return state.getBlock() instanceof FallingBlock;
+    }
+
+    public List<String> getTags() {
+        //noinspection ConstantConditions
+        return Lists.transform(
+                new ArrayList<>(MinecraftClient.getInstance().getNetworkHandler().getTagManager().blocks().getTagsFor(state.getBlock())),
+                ScriptUtil::simplifyIdentifier);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Comparable<T>> String propertyGetName(Property<T> prop, Object val) {
+        return prop.getName((T) val);
     }
 
 }

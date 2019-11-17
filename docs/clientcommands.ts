@@ -27,13 +27,6 @@ declare function print(x: string): void;
 declare function tick(): void;
 
 /**
- * Gets information about the given block. Note: this will return information about the default block
- * state of the block. You may sometimes get more accurate information by using {@link World.getBlockInfo}
- * @param block The block to get the information about
- */
-declare function getBlockInfo(block: string): BlockInfo;
-
-/**
  * Represents a generic entity
  */
 declare class Entity {
@@ -424,22 +417,21 @@ declare class World {
 
     /**
      * Gets the block state property with the given name at the given position.
+     * Equivalent to <tt>getBlockState(x, y, z).getProperty(property)</tt>
      * @param x The x-position of the block state to query
      * @param y The y-position of the block state to query
      * @param z The z-position of the block state to query
      * @param property The property name to query. E.g. could be <tt>"power"</tt> for redstone dust, or <tt>"bed_part"</tt> for beds.
-     * @return A value representing the property value. If it is a boolean property, returns a boolean. If it is a
-     * numeric property, returns a number. Otherwise, returns the string representation of the property value (e.g. if it's a north/south/east/west property).
      */
     getBlockProperty(x: number, y: number, z: number, property: string): boolean | number | string;
 
     /**
-     * Gets information about the block state at the given position.
-     * @param x The x-position of the block to get information about
-     * @param y The y-position of the block to get information about
-     * @param z The z-position of the block to get information about
+     * Gets the block state at the given position.
+     * @param x The x-position of the block state to get
+     * @param y The y-position of the block state to get
+     * @param z The z-position of the block state to get
      */
-    getBlockInfo(x: number, y: number, z: number): BlockInfo;
+    getBlockState(x: number, y: number, z: number): BlockState;
 
     /**
      * Gets the client-side block entity NBT at the given coordinates
@@ -551,9 +543,35 @@ declare class Thread {
 }
 
 /**
- * Contains information about a block or block state
+ * Contains information about a block state
  */
-declare class BlockInfo {
+declare class BlockState {
+
+    /**
+     * Returns the default block state of the given block
+     * @param block The block to get the default block state of
+     */
+    static defaultState(block: string): BlockState;
+
+    /**
+     * The block of this block state
+     */
+    readonly block: string;
+
+    /**
+     * A list of block state properties supported by this block, i.e. those that can be used
+     * in {@link World.getBlockProperty}
+     */
+    readonly stateProperties: Array<string>;
+
+    /**
+     * Returns the value of the given property of the block state.
+     * If the property is a boolean or numeric property, then the value of the property
+     * is returned directly. Otherwise, a string representation of the value is returned.
+     * @param property The property to get
+     */
+    getProperty(property: string): boolean | number | string;
+
     /**
      * The light level emitted, 0-15
      */
@@ -593,12 +611,6 @@ declare class BlockInfo {
      * blocks have a slipperiness of 0.6, while ice has a slipperiness of 0.98
      */
     readonly slipperiness: number;
-
-    /**
-     * A list of block state properties supported by this block, i.e. those that can be used
-     * in {@link World.getBlockProperty}
-     */
-    readonly stateProperties: Array<string>;
 
     /**
      * The loot table used to drop items after this block is mined
@@ -682,4 +694,94 @@ declare class BlockInfo {
      * Whether this block will fall like sand when unsupported
      */
     readonly fallable: boolean;
+
+    /**
+     * The tags applying to this block
+     */
+    readonly tags: Array<string>;
+}
+
+/**
+ * Represents an item stack, used to get certain properties of that stack. Note that translating
+ * to and from this representation is inefficient, so shouldn't be done unnecessarily frequently
+ */
+declare class ItemStack {
+
+    /**
+     * Returns the ItemStack representation of the given item stack NBT
+     * @param stack The NBT representation of the item stack
+     */
+    static of(stack: object): ItemStack;
+
+    /**
+     * Creates an item stack of size 1 with the given item
+     * @param item The item to make a stack of
+     */
+    static of(item: string): ItemStack;
+
+    /**
+     * Returns the NBT representation of this item stack
+     */
+    readonly stack: object;
+
+    /**
+     * Gets the mining speed of this item stack against a given block state. This is a multiplier,
+     * where a value of 1 indicates the same speed as with a fist against a block which doesn't require
+     * a tool
+     * @param block The block or block state to test against
+     */
+    getMiningSpeed(block: string | BlockState): number;
+
+    /**
+     * Returns whether this item is effective against a block which requires a tool. Note this does not
+     * affect mining speed, only whether the block drops its items or not
+     * @param block The block or block state to test against
+     */
+    isEffectiveOn(block: string | BlockState): boolean;
+
+    /**
+     * The maximum stack size of this item. Usually 64, but may also be 1 or 16 in vanilla.
+     * A value of 1 indicates that this item is non-stackable
+     */
+    readonly maxCount: number;
+
+    /**
+     * The maximum amount of damage this item can take, if it is for example a tool
+     */
+    readonly maxDamage: number;
+
+    /**
+     * Whether this item is a food item
+     */
+    readonly isFood: boolean;
+
+    /**
+     * The amount of hunger this item restores, or 0 if this is not a food item
+     */
+    readonly hungerRestored: number;
+
+    /**
+     * The amount of saturation this item restores, or 0 if this is not a food item
+     */
+    readonly saturationRestored: number;
+
+    /**
+     * Whether this is a food item and is meat (used for whether wolves like it)
+     */
+    readonly isMeat: boolean;
+
+    /**
+     * Whether this is a food item and can be eaten even with full hunger (e.g. golden apple)
+     */
+    readonly alwaysEdible: boolean;
+
+    /**
+     * Whether this is a snack food item, which doesn't take as long to eat (e.g. berries)
+     */
+    readonly isSnack: boolean;
+
+    /**
+     * The tags applying to this item
+     */
+    readonly tags: Array<string>;
 }

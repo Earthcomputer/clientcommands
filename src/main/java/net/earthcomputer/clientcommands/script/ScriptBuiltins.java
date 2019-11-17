@@ -9,9 +9,12 @@ import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.earthcomputer.clientcommands.command.FakeCommandSource;
 import net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -24,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 class ScriptBuiltins {
 
@@ -57,12 +59,6 @@ class ScriptBuiltins {
         });
         engine.put("print", (Consumer<String>) message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message)));
         engine.put("tick", (Runnable) ScriptManager::passTick);
-        engine.put("getBlockInfo", (Function<String, ScriptBlockInfo>) blockName -> {
-            Identifier id = new Identifier(blockName);
-            if (!Registry.BLOCK.containsId(id))
-                throw new IllegalArgumentException("No such block: " + blockName);
-            return new ScriptBlockInfo(Registry.BLOCK.get(id).getDefaultState());
-        });
 
         engine.put("Thread", new AbstractJSObject() {
             @Override
@@ -97,6 +93,58 @@ class ScriptBuiltins {
             @Override
             public boolean isInstance(Object instance) {
                 return instance instanceof ScriptThread;
+            }
+        });
+        engine.put("BlockState", new AbstractJSObject() {
+            @Override
+            public Object getMember(String name) {
+                return "defaultState".equals(name) ? (Function<String, ScriptBlockState>) ScriptBlockState::defaultState : null;
+            }
+
+            @Override
+            public boolean hasMember(String name) {
+                return "defaultState".equals(name) || super.hasMember(name);
+            }
+
+            @Override
+            public Set<String> keySet() {
+                return Collections.singleton("defaultState");
+            }
+
+            @Override
+            public boolean isInstance(Object instance) {
+                return instance instanceof ScriptBlockState;
+            }
+        });
+        engine.put("ItemStack", new AbstractJSObject() {
+            @Override
+            public Object getMember(String name) {
+                return "of".equals(name) ? (Function<Object, ScriptItemStack>) obj -> {
+                    Tag itemNbt = ScriptUtil.toNbt(obj);
+                    if (!(itemNbt instanceof CompoundTag)) {
+                        Identifier itemId = new Identifier(ScriptUtil.asString(obj));
+                        if (!Registry.ITEM.containsId(itemId))
+                            throw new IllegalArgumentException("Cannot convert " + obj + " to item");
+                        return new ScriptItemStack(new ItemStack(Registry.ITEM.get(itemId)));
+                    }
+                    ItemStack stack = ItemStack.fromTag((CompoundTag) itemNbt);
+                    return new ScriptItemStack(stack);
+                } : null;
+            }
+
+            @Override
+            public boolean hasMember(String name) {
+                return "of".equals(name) || super.hasMember(name);
+            }
+
+            @Override
+            public Set<String> keySet() {
+                return Collections.singleton("of");
+            }
+
+            @Override
+            public boolean isInstance(Object instance) {
+                return instance instanceof ScriptItemStack;
             }
         });
     }

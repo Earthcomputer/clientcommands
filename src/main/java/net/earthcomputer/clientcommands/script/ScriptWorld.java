@@ -30,23 +30,11 @@ public class ScriptWorld {
     }
 
     public Object getBlockProperty(int x, int y, int z, String property) {
-        BlockState state = getWorld().getBlockState(new BlockPos(x, y, z));
-        for (Property<?> propertyObj : state.getProperties()) {
-            if (propertyObj.getName().equals(property)) {
-                Object val = state.get(propertyObj);
-                if (val instanceof Boolean)
-                    return val;
-                if (val instanceof Number)
-                    return val;
-                else
-                    return propertyGetName(propertyObj, val);
-            }
-        }
-        return null;
+        return getBlockState(x, y, z).getProperty(property);
     }
 
-    public ScriptBlockInfo getBlockInfo(int x, int y, int z) {
-        return new ScriptBlockInfo(getWorld().getBlockState(new BlockPos(x, y, z)));
+    public ScriptBlockState getBlockState(int x, int y, int z) {
+        return new ScriptBlockState(getWorld().getBlockState(new BlockPos(x, y, z)));
     }
 
     public Object getBlockEntityNbt(int x, int y, int z) {
@@ -62,10 +50,5 @@ public class ScriptWorld {
 
     public int getSkyLight(int x, int y, int z) {
         return getWorld().getLightLevel(LightType.SKY, new BlockPos(x, y, z));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Comparable<T>> String propertyGetName(Property<T> prop, Object val) {
-        return prop.getName((T) val);
     }
 }
