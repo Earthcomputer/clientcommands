@@ -282,7 +282,8 @@ var makeTunnel = function(x, y, z, dx, dz) {
         throw new Error();
 
     // walk to next spot
-    player.moveTo(player.x + dx, player.z + dz, false);
+    if (!player.moveTo(x + dx + 0.5, z + dz + 0.5, false))
+        throw new Error();
 
     // place torch
     if (world.getBlockLight(x, y, z) <= 1) {
