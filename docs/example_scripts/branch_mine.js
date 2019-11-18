@@ -121,8 +121,9 @@ var mineBlock = function(x, y, z) {
             throw new Error("Block pos: (" + x + ", " + y + ", " + z + ")");
     } while (world.getBlock(x, y, z) === oldBlock);
 
-    if (world.getBlockState(x, y + 1, z).fallable) {
-        while (world.getBlock(x, y, z) !== blockAbove)
+    var stateAbove = world.getBlockState(x, y + 1, z);
+    if (stateAbove.fallable) {
+        while (world.getBlock(x, y, z) !== stateAbove.block)
             tick();
         if (!mineBlock(x, y, z))
             throw new Error();
