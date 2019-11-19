@@ -94,6 +94,21 @@ var clearWay = function(x, y, z, dx, dz) {
     return true;
 };
 
+var placeBlock = function(x, y, z) {
+    if (!player.pick(function(itemNbt) {
+        return itemNbt.id === "minecraft:cobblestone" || itemNbt.id === "minecraft:stone";
+    }))
+        throw new Error();
+
+    if (player.rightClick(x - 1, y, z, "east")) return true;
+    if (player.rightClick(x + 1, y, z, "west")) return true;
+    if (player.rightClick(x, y, z - 1, "south")) return true;
+    if (player.rightClick(x, y, z + 1, "north")) return true;
+    if (player.rightClick(x, y - 1, z, "up")) return true;
+    if (player.rightClick(x, y + 1, z, "down")) return true;
+    return false;
+};
+
 var mineBlock = function(x, y, z) {
     var toolMaterialOrder = ["diamond", "iron", "stone", "wooden", "golden"];
     var tool = getTool(world.getBlock(x, y, z));
@@ -105,7 +120,7 @@ var mineBlock = function(x, y, z) {
                 break;
             }
         }
-        if (!picked)
+        if (!picked && !world.getBlockState(x, y, z).canBreakByHand)
             throw new Error();
     }
 
@@ -133,10 +148,6 @@ var mineBlock = function(x, y, z) {
 };
 
 var makeBridge = function(x, y, z, dx, dz) {
-    if (!player.pick(function(itemNbt) {
-        return itemNbt.id === "minecraft:cobblestone" || itemNbt.id === "minecraft:stone";
-    }))
-        throw new Error();
     // face backwards
     player.lookAt(player.x - dx, player.y, player.z - dz);
     // sneak backwards
@@ -170,7 +181,7 @@ var makeBridge = function(x, y, z, dx, dz) {
     player.pressingBack = false;
     player.sneaking = false;
     player.unblockInput();
-    return player.rightClick(x, y - 1, z, getDirectionName(dx, dz));
+    return placeBlock(x + dx, y - 1, z + dz);
 };
 
 var mineNearbyOre = function(x, y, z) {
@@ -180,7 +191,6 @@ var mineNearbyOre = function(x, y, z) {
     var cardinals6 = [[-1, 0, 0], [1, 0, 0], [0, 0, -1], [0, 0, 1], [0, -1, 0], [0, 1, 0]];
 
     // mine blocks around head and above head
-    var stepUpDirs = [];
     for (var dy = 1; dy <= 2; dy++) {
         if (canWalkThrough(world.getBlock(x, y + dy, z))) {
             for (var dir = 0; dir < cardinals6.length; dir++) {
@@ -188,23 +198,38 @@ var mineNearbyOre = function(x, y, z) {
                 if (isWantedBlock(world.getBlock(x + ddx, y + dy + ddy, z + ddz))) {
                     if (!mineBlock(x + ddx, y + dy + ddy, z + ddz))
                         throw new Error();
-                    if (dy === 2 && dir < 4)
-                        stepUpDirs.push(dir);
                 }
             }
         }
     }
 
-    // step up if possible
-    for (var i = 0; i < stepUpDirs.length; i++) {
-        var dx = cardinals4[stepUpDirs[i]][0], dz = cardinals4[stepUpDirs[i]][1];
+    // step up
+    for (var i = 0; i < 4; i++) {
+        var dx = cardinals4[i][0], dz = cardinals4[i][1];
 
-        // mine block to allow us to step up if necessary
+        // check if we want to step up
+        if (!canWalkThrough(world.getBlock(x + dx, y + 2, z + dz))) continue;
+        if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz)) && !canWalkThrough(world.getBlock(x, y + 2, z))) continue;
+        var wantToStepUp = false;
+        for (var j = 0; j < 6; j++) {
+            var ddx = cardinals6[j][0], ddy = cardinals6[j][1], ddz = cardinals6[j][2];
+            if (isWantedBlock(world.getBlock(x + dx + ddx, y + 2 + ddy, z + dz + ddz))) {
+                wantToStepUp = true;
+                break;
+            }
+        }
+        if (!wantToStepUp) continue;
+
+        // mine block(s) to allow us to step up if necessary
         if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz)))
             if (!mineBlock(x + dx, y + 1, z + dz))
                 throw new Error();
-        if (canWalkThrough(world.getBlock(x + dx, y, z + dz)))
-            continue;
+        if (!canWalkThrough(world.getBlock(x, y + 2, z)))
+            if (!mineBlock(x, y + 2, z))
+                throw new Error();
+        if (!canWalkOn(world.getBlock(x + dx, y, z + dz)))
+            if (!placeBlock(x + dx, y, z + dz))
+                continue;
 
         centerPlayer();
 
@@ -212,6 +237,13 @@ var mineNearbyOre = function(x, y, z) {
         if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
         if (!mineNearbyOre(x + dx, y + 1, z + dz)) throw new Error();
         centerPlayer();
+        for (var dy = 2; dy >= 0; dy--) {
+            if (!canWalkThrough(world.getBlock(x, y + dy, z)))
+                if (!mineBlock(x, y + dy, z))
+                    throw new Error();
+        }
+        if (!canWalkOn(world.getBlock(x, y - 1, z)))
+            if (!placeBlock(x, y - 1, z)) throw new Error();
         if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
     }
 
@@ -222,35 +254,31 @@ var mineNearbyOre = function(x, y, z) {
             if (!mineBlock(x + dx, y, z + dz))
                 throw new Error();
 
-            if (!canWalkThrough(world.getBlock(x + dx, y - 1, z + dz))) {
-                if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz))) {
-                    if (!mineBlock(x + dx, y + 1, z + dz))
-                        throw new Error();
-                }
+            if (!canWalkOn(world.getBlock(x + dx, y - 1, z + dz)))
+                if (!placeBlock(x + dx, y - 1, z + dz))
+                    continue;
 
-                centerPlayer();
-                if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
-                if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
-                centerPlayer();
-                if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
-
-                // mine block below feet level
-                if (isWantedBlock(world.getBlock(x + dx, y - 1, z + dz))) {
-                    if (!mineBlock(x + dx, y - 1, z + dz))
-                        throw new Error();
-                    if (!canWalkThrough(world.getBlock(x + dx, y - 2, z + dz))) {
-                        // collect the block
-                        if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
-                        if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
-                        centerPlayer();
-                        if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
-                    }
-                }
+            if (!canWalkThrough(world.getBlock(x + dx, y + 1, z + dz))) {
+                if (!mineBlock(x + dx, y + 1, z + dz))
+                    throw new Error();
             }
+
+            centerPlayer();
+            if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
+            if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
+            centerPlayer();
+            for (var dy = 1; dy >= 0; dy--) {
+                if (!canWalkThrough(world.getBlock(x, y + dy, z)))
+                    if (!mineBlock(x, y + dy, z))
+                        throw new Error();
+            }
+            if (!canWalkOn(world.getBlock(x, y - 1, z)))
+                if (!placeBlock(x, y - 1, z)) throw new Error();
+            if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
         }
     }
 
-    // keep mining for blocks possible exposed by the mining operation
+    // keep mining for blocks possibly exposed by the mining operation
     for (var dy = 1; dy >= 0; dy--) {
         for (var i = 0; i < 4; i++) {
             var dx = cardinals4[i][0], dz = cardinals4[i][1];
@@ -266,12 +294,49 @@ var mineNearbyOre = function(x, y, z) {
                         if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
                         if (!mineNearbyOre(x + dx, y, z + dz)) throw new Error();
                         centerPlayer();
+                        for (var dy = 1; dy >= 0; dy--) {
+                            if (!canWalkThrough(world.getBlock(x, y + dy, z)))
+                                if (!mineBlock(x, y + dy, z))
+                                    throw new Error();
+                        }
+                        if (!canWalkOn(world.getBlock(x, y - 1, z)))
+                            if (!placeBlock(x, y - 1, z)) throw new Error();
                         if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
                     }
                 }
             }
         }
     }
+
+    // mine block below feet level
+    for (var i = 0; i < 4; i++) {
+        var dx = cardinals4[i][0], dz = cardinals4[i][1];
+
+        if (canWalkThrough(world.getBlock(x + dx, y, z + dz)) && isWantedBlock(world.getBlock(x + dx, y - 1, z + dz))) {
+            if (!mineBlock(x + dx, y - 1, z + dz))
+                throw new Error();
+            if (!canWalkOn(world.getBlock(x + dx, y - 2, z + dz)))
+                if (!placeBlock(x + dx, y - 2, z + dz))
+                    continue;
+
+            // collect the block
+            if (!player.moveTo(x + dx + 0.5, z + dz + 0.5)) throw new Error();
+            if (!mineNearbyOre(x + dx, y - 1, z + dz)) throw new Error();
+            centerPlayer();
+            if (!canWalkThrough(x + dx, y + 1, z + dz))
+                if (!mineBlock(x + dx, y + 1, z + dz))
+                    throw new Error();
+            for (var dy = 1; dy >= 0; dy--) {
+                if (!canWalkThrough(world.getBlock(x, y + dy, z)))
+                    if (!mineBlock(x, y + dy, z))
+                        throw new Error();
+            }
+            if (!canWalkOn(world.getBlock(x, y - 1, z)))
+                if (!placeBlock(x, y - 1, z)) throw new Error();
+            if (!player.moveTo(x + 0.5, z + 0.5)) throw new Error();
+        }
+    }
+
     return true;
 };
 

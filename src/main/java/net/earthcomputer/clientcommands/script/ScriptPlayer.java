@@ -22,10 +22,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TagHelper;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
@@ -100,10 +97,13 @@ public class ScriptPlayer extends ScriptLivingEntity {
                         && world.getBlockState(pos.up(2)).getCollisionShape(world, pos.up(2)).isEmpty()) {
                     BlockPos aboveHead = new BlockPos(getPlayer()).up(2);
                     if (world.getBlockState(aboveHead).getCollisionShape(world, aboveHead).isEmpty()) {
-                        boolean wasJumping = ScriptManager.getScriptInput().jumping;
-                        ScriptManager.getScriptInput().jumping = true;
-                        ScriptManager.passTick();
-                        ScriptManager.getScriptInput().jumping = wasJumping;
+                        if (getPlayer().squaredDistanceTo(x, getY(), z) > 1
+                                || getPlayer().getBoundingBox().offset(x - getX(), 0, z - getZ()).intersects(new Box(pos))) {
+                            boolean wasJumping = ScriptManager.getScriptInput().jumping;
+                            ScriptManager.getScriptInput().jumping = true;
+                            ScriptManager.passTick();
+                            ScriptManager.getScriptInput().jumping = wasJumping;
+                        }
                     }
                 }
             }
