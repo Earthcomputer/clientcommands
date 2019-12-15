@@ -83,7 +83,7 @@ public class GetDataCommand {
     }
 
     private static int getData(ServerCommandSource source, DataCommandObject dataObj) throws CommandSyntaxException {
-        sendFeedback(dataObj.getQueryFeedback(dataObj.getTag()));
+        sendFeedback(dataObj.feedbackQuery(dataObj.getTag()));
         return 1;
     }
 
@@ -102,7 +102,7 @@ public class GetDataCommand {
             throw GET_UNKNOWN_EXCEPTION.create(path.toString());
         }
 
-        sendFeedback(dataObj.getQueryFeedback(tag));
+        sendFeedback(dataObj.feedbackQuery(tag));
         return ret;
     }
 

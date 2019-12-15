@@ -30,7 +30,7 @@ public class SeedCracker {
     private static boolean throwItems()
     {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        player.setPositionAndAngles(player.x, player.y, player.z, 0, 90);
+        player.setPositionAndAngles(player.getX(), player.getY(), player.getZ(), 0, 90);
         MinecraftClient.getInstance().getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(0, 90, true)); // point to correct location
         for (int i = 0; i < 20; i++) {
             boolean success = PlayerRandCracker.throwItem();

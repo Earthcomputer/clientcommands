@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.minecraft.command.EntitySelectorOptions;
 import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.command.FloatRange;
+import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -17,14 +17,14 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.predicate.NumberRange;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.NumberRange;
-import net.minecraft.util.TagHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
@@ -152,9 +152,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 double xMax = (xNeg || boxX == null ? 0 : boxX) + 1;
                 double yMax = (yNeg || boxY == null ? 0 : boxY) + 1;
                 double zMax = (zNeg || boxZ == null ? 0 : boxZ) + 1;
-                addFilter((origin, entity) -> entity.x - origin.x >= xMin && entity.x - origin.x < xMax
-                        && entity.y - origin.y >= yMin && entity.y - origin.y < yMax
-                        && entity.z - origin.z >= zMin && entity.z - origin.z < zMax);
+                addFilter((origin, entity) -> entity.getX() - origin.x >= xMin && entity.getX() - origin.x < xMax
+                        && entity.getY() - origin.y >= yMin && entity.getY() - origin.y < yMax
+                        && entity.getZ() - origin.z >= zMin && entity.getZ() - origin.z < zMax);
             }
             if (playersOnly || playersOnlyForced) {
                 addFilter((origin, entity) -> entity instanceof PlayerEntity);
@@ -360,7 +360,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                             throw EntitySelectorOptions.NEGATIVE_DISTANCE_EXCEPTION.createWithContext(parser.reader);
                         }
                         parser.hasDistance = true;
-                        parser.addFilter((origin, entity) -> range.matchesSquared(entity.squaredDistanceTo(origin)));
+                        parser.addFilter((origin, entity) -> range.testSqrt(entity.squaredDistanceTo(origin)));
                     }
 
                     @Override
@@ -434,7 +434,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 options.put("x_rotation", new Option("argument.entity.options.x_rotation.description") {
                     @Override
                     void apply(Parser parser) throws CommandSyntaxException {
-                        FloatRange range = FloatRange.parse(parser.reader, true, MathHelper::wrapDegrees);
+                        FloatRangeArgument range = FloatRangeArgument.parse(parser.reader, true, MathHelper::wrapDegrees);
                         float min = range.getMin() == null ? 0 : range.getMin();
                         float max = range.getMax() == null ? 359 : range.getMax();
                         if (max < min)
@@ -452,7 +452,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 options.put("y_rotation", new Option("argument.entity.options.y_rotation.description") {
                     @Override
                     void apply(Parser parser) throws CommandSyntaxException {
-                        FloatRange range = FloatRange.parse(parser.reader, true, MathHelper::wrapDegrees);
+                        FloatRangeArgument range = FloatRangeArgument.parse(parser.reader, true, MathHelper::wrapDegrees);
                         float min = range.getMin() == null ? 0 : range.getMin();
                         float max = range.getMax() == null ? 359 : range.getMax();
                         if (max < min)
@@ -559,7 +559,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                                 if (!heldItem.isEmpty())
                                     entityNbt.put("SelectedItem", heldItem.toTag(new CompoundTag()));
                             }
-                            return TagHelper.areTagsEqual(nbt, entityNbt, true) != neg;
+                            return NbtHelper.matches(nbt, entityNbt, true) != neg;
                         });
                     }
 

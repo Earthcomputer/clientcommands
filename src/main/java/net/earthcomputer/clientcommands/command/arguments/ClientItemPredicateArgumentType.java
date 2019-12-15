@@ -9,10 +9,10 @@ import net.minecraft.command.arguments.ItemStringReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TagHelper;
 
 import java.util.function.Predicate;
 
@@ -35,7 +35,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
     }
 
     @Override
-    public ItemPredicateArgument method_9800(StringReader reader) throws CommandSyntaxException {
+    public ItemPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
         ItemStringReader itemReader = new ItemStringReader(reader, true).consume();
         if (itemReader.getItem() != null) {
             ItemPredicate predicate = new ItemPredicate(itemReader.getItem(), itemReader.getTag());
@@ -66,7 +66,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
 
         @Override
         public boolean test(ItemStack stack) {
-            return this.tag.contains(stack.getItem()) && TagHelper.areTagsEqual(this.compound, stack.getTag(), true);
+            return this.tag.contains(stack.getItem()) && NbtHelper.matches(this.compound, stack.getTag(), true);
         }
     }
 
@@ -81,7 +81,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
 
         @Override
         public boolean test(ItemStack stack) {
-            return stack.getItem() == this.item && TagHelper.areTagsEqual(this.compound, stack.getTag(), true);
+            return stack.getItem() == this.item && NbtHelper.matches(this.compound, stack.getTag(), true);
         }
     }
 }

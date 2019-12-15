@@ -27,9 +27,9 @@ public class MathUtil {
             for (Direction face : dirs) {
                 Box faceBox = getFace(box, face);
                 // Since the faces are axis aligned, it's a simple clamp operation
-                Vec3d val = new Vec3d(MathHelper.clamp(pos.x, faceBox.minX, faceBox.maxX),
-                        MathHelper.clamp(pos.y, faceBox.minY, faceBox.maxY),
-                        MathHelper.clamp(pos.z, faceBox.minZ, faceBox.maxZ));
+                Vec3d val = new Vec3d(MathHelper.clamp(pos.x, faceBox.x1, faceBox.x2),
+                        MathHelper.clamp(pos.y, faceBox.y1, faceBox.y2),
+                        MathHelper.clamp(pos.z, faceBox.z1, faceBox.z2));
                 double distanceSq = val.squaredDistanceTo(pos);
                 if (distanceSq < result.distanceSq) {
                     result.val = val;
@@ -50,8 +50,8 @@ public class MathUtil {
 
         Box totalArea = new Box(sourcePos, new Vec3d(targetPos));
         List<Box> obscurers = new ArrayList<>();
-        for (BlockPos pos : BlockPos.iterate(MathHelper.floor(totalArea.minX), MathHelper.floor(totalArea.minY), MathHelper.floor(totalArea.minZ),
-                MathHelper.ceil(totalArea.maxX), MathHelper.ceil(totalArea.maxY), MathHelper.ceil(totalArea.maxZ))) {
+        for (BlockPos pos : BlockPos.iterate(MathHelper.floor(totalArea.z1), MathHelper.floor(totalArea.y1), MathHelper.floor(totalArea.z1),
+                MathHelper.ceil(totalArea.x2), MathHelper.ceil(totalArea.y2), MathHelper.ceil(totalArea.z2))) {
             if (!pos.equals(targetPos)) {
                 world.getBlockState(pos).getOutlineShape(world, pos).forEachBox((x1, y1, z1, x2, y2, z2) ->
                         obscurers.add(new Box(x1, y1, z1, x2, y2, z2).offset(pos).expand(EPSILON)));
@@ -70,7 +70,7 @@ public class MathUtil {
         for (Box box : targetBoxes) {
             for (Direction face : dirs) {
                 Box faceBox = getFace(box.expand(-EPSILON), face);
-                if (sourcePos.subtract(faceBox.minX, faceBox.minY, faceBox.minZ)
+                if (sourcePos.subtract(faceBox.x1, faceBox.y1, faceBox.z1)
                         .dotProduct(new Vec3d(face.getOffsetX(), face.getOffsetY(), face.getOffsetZ())) > 0) {
                     @SuppressWarnings("ConstantConditions") Vec3d val = getClosestVisiblePoint(world,
                                     Iterables.concat(obscurers,
@@ -110,13 +110,13 @@ public class MathUtil {
                 throw new AssertionError();
         }
 
-        double minX = getComponent(face.minX, face.minY, face.minZ, xAxis);
-        double minY = getComponent(face.minX, face.minY, face.minZ, yAxis);
-        double maxX = getComponent(face.maxX, face.maxY, face.maxZ, xAxis);
-        double maxY = getComponent(face.maxX, face.maxY, face.maxZ, yAxis);
+        double minX = getComponent(face.x1, face.y1, face.z1, xAxis);
+        double minY = getComponent(face.x1, face.y1, face.z1, yAxis);
+        double maxX = getComponent(face.x2, face.y2, face.z2, xAxis);
+        double maxY = getComponent(face.x2, face.y2, face.z2, yAxis);
         Area area = new Area(new Rectangle2D.Double(minX + EPSILON, minY + EPSILON, maxX - minX - 2 * EPSILON, maxY - minY - 2 * EPSILON));
 
-        double f = getComponent(face.minX, face.minY, face.minZ, dir.getAxis());
+        double f = getComponent(face.x1, face.y1, face.z1, dir.getAxis());
         double s = getComponent(sourcePos, dir.getAxis());
         double sx = getComponent(sourcePos, xAxis);
         double sy = getComponent(sourcePos, yAxis);
@@ -197,13 +197,13 @@ public class MathUtil {
         boolean[] behindSource = new boolean[4];
         {
             Direction dirB = obscurerFaceNormal.getAxis() == Direction.Axis.Y ? Direction.WEST : obscurerFaceNormal.rotateYClockwise();
-            Direction dirC = obscurerFaceNormal.rotateClockwise(dirB.getAxis());
+            Direction dirC = rotateClockwise(obscurerFaceNormal, dirB.getAxis());
             for (int i = 0; i < 4; i++) {
                 Box vertex = getFace(getFace(obscurerFace, i < 2 ? dirB : dirB.getOpposite()), i == 0 || i == 3 ? dirC : dirC.getOpposite());
-                obscurer[i][0] = vertex.minX;
-                obscurer[i][1] = vertex.minY;
-                obscurer[i][2] = vertex.minZ;
-                double vertexOffset = getComponent(vertex.minX, vertex.minY, vertex.minZ, targetPlaneNormal.getAxis());
+                obscurer[i][0] = vertex.x1;
+                obscurer[i][1] = vertex.y1;
+                obscurer[i][2] = vertex.z1;
+                double vertexOffset = getComponent(vertex.x1, vertex.y1, vertex.z1, targetPlaneNormal.getAxis());
                 behindSource[i] = sourceOffset < targetPlaneCoord ? vertexOffset < sourceOffset : vertexOffset > sourceOffset;
             }
         }
@@ -418,19 +418,77 @@ public class MathUtil {
     private static Box getFace(Box box, Direction dir) {
         switch (dir) {
             case WEST:
-                return new Box(box.minX, box.minY, box.minZ, box.minX, box.maxY, box.maxZ);
+                return new Box(box.x1, box.y1, box.z1, box.x1, box.y2, box.z2);
             case EAST:
-                return new Box(box.maxX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+                return new Box(box.x2, box.y1, box.z1, box.x2, box.y2, box.z2);
             case DOWN:
-                return new Box(box.minX, box.minY, box.minZ, box.maxX, box.minY, box.maxZ);
+                return new Box(box.x1, box.y1, box.z1, box.x2, box.y1, box.z2);
             case UP:
-                return new Box(box.minX, box.maxY, box.minZ, box.maxX, box.maxY, box.maxZ);
+                return new Box(box.x1, box.y2, box.z1, box.x2, box.y2, box.z2);
             case NORTH:
-                return new Box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ);
+                return new Box(box.x1, box.y1, box.z1, box.x2, box.y2, box.z1);
             case SOUTH:
-                return new Box(box.minX, box.minY, box.maxZ, box.maxX, box.maxY, box.maxZ);
+                return new Box(box.x1, box.y1, box.z2, box.x2, box.y2, box.z2);
             default:
                 throw new AssertionError();
+        }
+    }
+
+    public static Direction rotateClockwise(Direction dir, Direction.Axis axis) {
+        switch(axis) {
+            case X:
+                if (dir != Direction.WEST && dir != Direction.EAST) {
+                    return rotateXClockwise(dir);
+                }
+
+                return dir;
+            case Y:
+                if (dir != Direction.UP && dir != Direction.DOWN) {
+                    return dir.rotateYClockwise();
+                }
+
+                return dir;
+            case Z:
+                if (dir != Direction.NORTH && dir != Direction.SOUTH) {
+                    return rotateZClockwise(dir);
+                }
+
+                return dir;
+            default:
+                throw new IllegalStateException("Unable to get CW facing for axis " + axis);
+        }
+    }
+
+    public static Direction rotateXClockwise(Direction dir) {
+        switch(dir) {
+            case NORTH:
+                return Direction.DOWN;
+            case EAST:
+            case WEST:
+            default:
+                throw new IllegalStateException("Unable to get X-rotated facing of " + dir);
+            case SOUTH:
+                return Direction.UP;
+            case UP:
+                return Direction.NORTH;
+            case DOWN:
+                return Direction.SOUTH;
+        }
+    }
+
+    public static Direction rotateZClockwise(Direction dir) {
+        switch(dir) {
+            case EAST:
+                return Direction.DOWN;
+            case SOUTH:
+            default:
+                throw new IllegalStateException("Unable to get Z-rotated facing of " + dir);
+            case WEST:
+                return Direction.UP;
+            case UP:
+                return Direction.EAST;
+            case DOWN:
+                return Direction.WEST;
         }
     }
 

@@ -4,7 +4,7 @@ import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.VisibleRegion;
+import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
@@ -23,9 +23,9 @@ public class MixinEntityRendererDispatcher {
         RenderSettings.preRenderEntities();
     }
 
-    @Redirect(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderer;isVisible(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/VisibleRegion;DDD)Z"))
-    public boolean redirectIsVisible(EntityRenderer<Entity> entityRenderer, Entity entity, VisibleRegion visibleRegion, double x, double y, double z) {
-        return entityRenderer.isVisible(entity, visibleRegion, x, y, z) && RenderSettings.shouldRenderEntity(entity);
+    @Redirect(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderer;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
+    public boolean redirectShouldRender(EntityRenderer<Entity> entityRenderer, Entity entity, Frustum frustum, double x, double y, double z) {
+        return entityRenderer.shouldRender(entity, frustum, x, y, z) && RenderSettings.shouldRenderEntity(entity);
     }
 
 }

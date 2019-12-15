@@ -32,7 +32,7 @@ public class ScriptUtil {
 
     public static Object fromNbtCompound(CompoundTag tag) {
         Map<String, Object> map = new HashMap<>(tag.getSize());
-        tag.getKeys().forEach(key -> map.put(key, fromNbt(tag.getTag(key))));
+        tag.getKeys().forEach(key -> map.put(key, fromNbt(tag.get(key))));
         return map;
     }
 
@@ -51,19 +51,19 @@ public class ScriptUtil {
             //noinspection unchecked
             return listToNbtList((List<Object>) obj);
         } else if (obj instanceof String) {
-            return new StringTag((String) obj);
+            return StringTag.of((String) obj);
         } else if (obj instanceof Byte) {
-            return new ByteTag((Byte) obj);
+            return ByteTag.of((Byte) obj);
         } else if (obj instanceof Short) {
-            return new ShortTag((Short) obj);
+            return ShortTag.of((Short) obj);
         } else if (obj instanceof Integer) {
-            return new IntTag((Integer) obj);
+            return IntTag.of((Integer) obj);
         } else if (obj instanceof Long) {
-            return new LongTag((Long) obj);
+            return LongTag.of((Long) obj);
         } else if (obj instanceof Float) {
-            return new FloatTag((Float) obj);
+            return FloatTag.of((Float) obj);
         } else if (obj instanceof Double) {
-            return new DoubleTag((Double) obj);
+            return DoubleTag.of((Double) obj);
         } else {
             throw new IllegalStateException("Don't know how to convert object of type " + obj.getClass() + " to NBT");
         }

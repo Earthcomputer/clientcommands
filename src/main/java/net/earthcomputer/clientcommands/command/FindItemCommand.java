@@ -190,7 +190,7 @@ public class FindItemCommand {
         private static boolean isChestBlocked(World world, BlockPos pos) {
             if (world.getBlockState(pos.up()).isSimpleFullBlock(world, pos.up()))
                 return true;
-            List<CatEntity> cats = world.getEntities(CatEntity.class, new Box(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
+            List<CatEntity> cats = world.getNonSpectatingEntities(CatEntity.class, new Box(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
             for (CatEntity cat : cats) {
                 if (cat.isSitting())
                     return true;
@@ -229,7 +229,7 @@ public class FindItemCommand {
                                     matchingItems += stack.getCount();
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
                                     CompoundTag blockEntityTag = stack.getSubTag("BlockEntityTag");
-                                    if (blockEntityTag != null && blockEntityTag.containsKey("Items")) {
+                                    if (blockEntityTag != null && blockEntityTag.contains("Items")) {
                                         DefaultedList<ItemStack> boxInv = DefaultedList.ofSize(27, ItemStack.EMPTY);
                                         Inventories.fromTag(blockEntityTag, boxInv);
                                         for (ItemStack stackInBox : boxInv) {

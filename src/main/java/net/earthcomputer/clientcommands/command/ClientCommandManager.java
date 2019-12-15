@@ -45,7 +45,7 @@ public class ClientCommandManager {
         try {
             return player.networkHandler.getCommandDispatcher().execute(reader, new FakeCommandSource(player));
         } catch (CommandException e) {
-            ClientCommandManager.sendError(e.getMessageText());
+            ClientCommandManager.sendError(e.getTextMessage());
         } catch (CommandSyntaxException e) {
             ClientCommandManager.sendError(Texts.toText(e.getRawMessage()));
             if (e.getInput() != null && e.getCursor() >= 0) {

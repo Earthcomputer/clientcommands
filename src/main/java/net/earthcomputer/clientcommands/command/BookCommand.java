@@ -83,7 +83,7 @@ public class BookCommand {
         ListTag pages = new ListTag();
 
         for (int page = 0; page < limit; page++) {
-            pages.add(new StringTag(joinedPages.substring(page * 210, (page + 1) * 210)));
+            pages.add(StringTag.of(joinedPages.substring(page * 210, (page + 1) * 210)));
         }
 
         heldItem.getOrCreateTag().put("pages", pages);

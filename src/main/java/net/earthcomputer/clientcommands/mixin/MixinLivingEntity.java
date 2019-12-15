@@ -14,12 +14,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,7 +35,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
         super(entityType_1, world_1);
     }
 
-    @Inject(method = "tickPushing", at = @At("HEAD"))
+    @Inject(method = "tickCramming", at = @At("HEAD"))
     public void onEntityCramming(CallbackInfo ci) {
         if (isThePlayer() && world.getEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
             PlayerRandCracker.onEntityCramming();
@@ -64,7 +66,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
             PlayerRandCracker.onEquipmentBreak();
     }
 
-    @Inject(method = "spawnPotionParticles", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isInvisible()Z"))
+    @Inject(method = "tickStatusEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isInvisible()Z"))
     public void onPotionParticles(CallbackInfo ci) {
         if (isThePlayer())
             PlayerRandCracker.onPotionParticles();
@@ -101,7 +103,11 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
         return (Object) this instanceof ClientPlayerEntity;
     }
 
-    @Accessor("field_6253")
+    @Accessor
     @Override
-    public abstract float getLastDamage();
+    public abstract float getLastDamageTaken();
+
+    @Invoker
+    @Override
+    public abstract boolean callBlockedByShield(DamageSource damageSource);
 }

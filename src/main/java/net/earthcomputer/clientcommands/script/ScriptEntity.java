@@ -38,15 +38,15 @@ public class ScriptEntity {
     }
 
     public double getX() {
-        return getEntity().x;
+        return getEntity().getX();
     }
 
     public double getY() {
-        return getEntity().y;
+        return getEntity().getY();
     }
 
     public double getZ() {
-        return getEntity().z;
+        return getEntity().getZ();
     }
 
     public float getYaw() {

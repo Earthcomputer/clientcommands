@@ -32,8 +32,8 @@ public class MixinEntity implements IEntity {
         return !glowingTickets.isEmpty();
     }
 
-    @Override
-    public int getGlowingTicketColor() {
+    @Unique
+    private int getGlowingTicketColor() {
         return glowingTickets.isEmpty() ? 0xffffff : glowingTickets.get(glowingTickets.size() - 1).getColor();
     }
 
@@ -66,6 +66,12 @@ public class MixinEntity implements IEntity {
     public void onSprinting(CallbackInfo ci) {
         if (isThePlayer())
             PlayerRandCracker.onSprinting();
+    }
+
+    @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
+    public void injectGetTeamColorValue(CallbackInfoReturnable<Integer> ci) {
+        if (hasGlowingTicket())
+            ci.setReturnValue(getGlowingTicketColor());
     }
 
     private boolean isThePlayer() {

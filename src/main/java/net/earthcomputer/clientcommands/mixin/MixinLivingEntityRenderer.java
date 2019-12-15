@@ -10,13 +10,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(LivingEntityRenderer.class)
-public class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
+public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
 
-    @Shadow protected boolean disableOutlineRender;
+    @Shadow protected abstract boolean method_4056(T livingEntity_1, boolean boolean_1);
 
-    @Redirect(method = "method_4054", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;disableOutlineRender:Z"))
-    private boolean redirectDisableOutlineRender(LivingEntityRenderer _this, T entity, double x, double y, double z, float yaw, float pitch) {
-        return this.disableOutlineRender && !((IEntity) entity).hasGlowingTicket();
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;method_4056(Lnet/minecraft/entity/LivingEntity;Z)Z"))
+    private boolean redirectDisableOutlineRender(LivingEntityRenderer _this, T entity, boolean flag) {
+        return this.method_4056(entity, flag) || ((IEntity) entity).hasGlowingTicket();
     }
 
 }

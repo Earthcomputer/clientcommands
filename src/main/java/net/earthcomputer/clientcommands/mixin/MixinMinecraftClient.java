@@ -63,7 +63,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
     }
 
     // Earth annoying his friends <3 nothing to see here
-    @ModifyArg(method = "init", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/WindowProvider;createWindow(Lnet/minecraft/client/WindowSettings;Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/client/util/Window;"))
+    @ModifyArg(method = "<init>", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/WindowProvider;createWindow(Lnet/minecraft/client/WindowSettings;Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/client/util/Window;"))
     private String modifyWindowTitle(String title) {
         String playerName = MinecraftClient.getInstance().getSession().getProfile().getName();
         if (!"Earthcomputer".equals(playerName)

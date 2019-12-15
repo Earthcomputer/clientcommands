@@ -14,12 +14,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TagHelper;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -138,9 +138,9 @@ public class ScriptPlayer extends ScriptLivingEntity {
 
     public void lookAt(double x, double y, double z) {
         ClientPlayerEntity player = getPlayer();
-        double dx = x - player.x;
-        double dy = y - (player.y + getEyeHeight());
-        double dz = z - player.z;
+        double dx = x - player.getX();
+        double dy = y - (player.getY() + getEyeHeight());
+        double dz = z - player.getZ();
         double dh = Math.sqrt(dx * dx + dz * dz);
         player.yaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90;
         player.pitch = (float) -Math.toDegrees(Math.atan2(dy, dh));
@@ -199,7 +199,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
             Tag nbt = ScriptUtil.toNbt(itemStack);
             if (!(nbt instanceof CompoundTag))
                 throw new IllegalArgumentException(itemStack.toString());
-            predicate = stack -> TagHelper.areTagsEqual(nbt, stack.toTag(new CompoundTag()), true);
+            predicate = stack -> NbtHelper.matches(nbt, stack.toTag(new CompoundTag()), true);
         }
 
         PlayerInventory inv = getPlayer().inventory;
@@ -259,7 +259,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        HitResult hitResult = MinecraftClient.getInstance().hitResult;
+        HitResult hitResult = MinecraftClient.getInstance().crosshairTarget;
         Vec3d closestPos;
         if (hitResult.getType() == HitResult.Type.BLOCK && ((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
             closestPos = hitResult.getPos();
@@ -297,7 +297,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (state.isAir())
             return false;
         Vec3d origin = getPlayer().getCameraPosVec(0);
-        HitResult hitResult = MinecraftClient.getInstance().hitResult;
+        HitResult hitResult = MinecraftClient.getInstance().crosshairTarget;
         Vec3d closestPos;
         if (hitResult.getType() == HitResult.Type.BLOCK && ((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
             closestPos = hitResult.getPos();
@@ -383,7 +383,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
         ScriptManager.blockInput(true);
         BlockPos pos = new BlockPos(x, y, z);
         do {
-            HitResult hitResult = MinecraftClient.getInstance().hitResult;
+            HitResult hitResult = MinecraftClient.getInstance().crosshairTarget;
             if (hitResult.getType() != HitResult.Type.BLOCK || !((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
                 Vec3d closestPos = MathUtil.getClosestVisiblePoint(MinecraftClient.getInstance().world, pos, getPlayer().getCameraPosVec(0), getPlayer());
                 if (closestPos == null) {

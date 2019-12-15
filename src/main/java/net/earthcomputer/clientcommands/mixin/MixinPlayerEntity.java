@@ -16,7 +16,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.item.*;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,6 +36,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
             PlayerRandCracker.onDropItem();
     }
 
+    // TODO: update-sensitive: type hierarchy of Entity.damage
     @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", ordinal = 0))
     public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount) {
         if (!world.isClient || !isThePlayer())
@@ -72,7 +72,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
             canAttack = false;
         } else if (target instanceof WitherEntity) {
             WitherEntity wither = (WitherEntity) target;
-            if (wither.getInvulTimer() > 0) {
+            if (wither.getInvulnerableTimer() > 0) {
                 canAttack = false;
             }
         }
@@ -82,19 +82,10 @@ public abstract class MixinPlayerEntity extends LivingEntity {
             if (living.getHealth() <= 0) {
                 canAttack = false;
             }
-            if (living.method_6039()) { // isBlockingWithShield
-                // check if the attack vector is broadly in the opposite direction to the shield
-                Vec3d attackVector = source.method_5510();
-                if (attackVector != null) {
-                    Vec3d livingRotation = this.getRotationVec(1.0F);
-                    Vec3d rotationDelta = attackVector.reverseSubtract(new Vec3d(this.x, this.y, this.z)).normalize();
-                    rotationDelta = new Vec3d(rotationDelta.x, 0.0D, rotationDelta.z);
-                    if (rotationDelta.dotProduct(livingRotation) < 0.0D) {
-                        canAttack = false;
-                    }
-                }
+            if (((ILivingEntity) living).callBlockedByShield(source)) {
+                canAttack = false;
             }
-            if (living.timeUntilRegen >= 10 && amount <= ((ILivingEntity) living).getLastDamage()) {
+            if (living.timeUntilRegen >= 10 && amount <= ((ILivingEntity) living).getLastDamageTaken()) {
                 canAttack = false;
             }
         }

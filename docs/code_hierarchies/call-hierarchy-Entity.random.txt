@@ -1,0 +1,885 @@
+Field
+random
+Found usages
+Value read
+Gradle: net.minecraft:minecraft:1.15-mapped-net.fabricmc.yarn-2
+net.minecraft.client.network
+ClientPlayerEntity
+updateNausea()
+            this.client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_PORTAL_TRIGGER, this.random.nextFloat() * 0.4F + 0.8F));
+net.minecraft.entity
+AreaEffectCloudEntity
+tick()
+            if (this.random.nextBoolean()) {
+                  float float_2 = this.random.nextFloat() * 6.2831855F;
+                  float_3 = MathHelper.sqrt(this.random.nextFloat()) * 0.2F;
+                     int int_2 = this.random.nextBoolean() ? 16777215 : this.getColor();
+               float_3 = this.random.nextFloat() * 6.2831855F;
+               float_4 = MathHelper.sqrt(this.random.nextFloat()) * float_1;
+....r...
+EnderEyeEntity
+moveTowards(BlockPos)
+      this.dropsItem = this.random.nextInt(5) > 0;
+tick()
+....r...
+Entity
+Entity(EntityType<?>, World)
+      this.uuid = MathHelper.randomUuid(this.random);
+move(MovementType, Vec3d)
+            this.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+playSwimSound(float)
+      this.playSound(this.getSwimSound(), float_1, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+onSwimmingStart()
+         this.playSound(this.getSplashSound(), float_2, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+         this.playSound(this.getHighSpeedSplashSound(), float_2, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+         float_6 = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
+         float_7 = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
+....r...
+         float_6 = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
+         float_7 = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
+spawnSprintingParticles()
+....r...
+pushOutOfBlocks(double, double, double)
+      float float_1 = this.random.nextFloat() * 0.2F + 0.1F;
+getParticleX(double)
+      return this.offsetX((2.0D * this.random.nextDouble() - 1.0D) * double_1);
+getRandomBodyY()
+      return this.getBodyY(this.random.nextDouble());
+getParticleZ(double)
+      return this.offsetZ((2.0D * this.random.nextDouble() - 1.0D) * double_1);
+ExperienceOrbEntity
+ExperienceOrbEntity(World, double, double, double, int)
+      this.yaw = (float)(this.random.nextDouble() * 360.0D);
+....r...
+tick()
+         this.setVelocity((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.20000000298023224D, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F));
+         this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
+FallingBlockEntity
+handleFallDamage(float, float)
+            if (boolean_1 && (double)this.random.nextFloat() < 0.05000000074505806D + (double)int_1 * 0.05D) {
+FireworkEntity
+FireworkEntity(World, double, double, double, ItemStack)
+      this.setVelocity(this.random.nextGaussian() * 0.001D, 0.05D, this.random.nextGaussian() * 0.001D);
+      this.lifeTime = 10 * int_1 + this.random.nextInt(6) + this.random.nextInt(7);
+tick()
+....r...
+handleStatus(byte)
+            for(int int_1 = 0; int_1 < this.random.nextInt(3) + 2; ++int_1) {
+               this.world.addParticle(ParticleTypes.POOF, this.getX(), this.getY(), this.getZ(), this.random.nextGaussian() * 0.05D, 0.005D, this.random.nextGaussian() * 0.05D);
+setVelocity(double, double, double, float, float)
+      double_1 += this.random.nextGaussian() * 0.007499999832361937D * (double)float_2;
+      double_2 += this.random.nextGaussian() * 0.007499999832361937D * (double)float_2;
+      double_3 += this.random.nextGaussian() * 0.007499999832361937D * (double)float_2;
+ItemEntity
+ItemEntity(World, double, double, double)
+      this.yaw = this.random.nextFloat() * 360.0F;
+      this.setVelocity(this.random.nextDouble() * 0.2D - 0.1D, 0.2D, this.random.nextDouble() * 0.2D - 0.1D);
+tick()
+               this.setVelocity((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.20000000298023224D, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F));
+               this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
+LightningEntity
+LightningEntity(World, double, double, double, boolean)
+      this.seed = this.random.nextLong();
+      this.remainingActions = this.random.nextInt(3) + 1;
+tick()
+....r...
+         this.world.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F);
+         } else if (this.ambientTick < -this.random.nextInt(10)) {
+            this.seed = this.random.nextLong();
+spawnFire(int)
+            BlockPos blockPos_2 = blockPos_1.add(this.random.nextInt(3) - 1, this.random.nextInt(3) - 1, this.random.nextInt(3) - 1);
+LivingEntity
+baseTick()
+                     float float_1 = this.random.nextFloat() - this.random.nextFloat();
+                     float float_2 = this.random.nextFloat() - this.random.nextFloat();
+                     float float_3 = this.random.nextFloat() - this.random.nextFloat();
+updatePostDeath()
+            double double_1 = this.random.nextGaussian() * 0.02D;
+            double double_2 = this.random.nextGaussian() * 0.02D;
+            double double_3 = this.random.nextGaussian() * 0.02D;
+getNextAirUnderwater(int)
+      return int_2 > 0 && this.random.nextInt(int_2 + 1) > 0 ? int_1 : int_1 - 1;
+getRandom()
+      return this.random;
+tickStatusEffects()
+            boolean_3 = this.random.nextInt(15) == 0;
+            boolean_3 = this.random.nextBoolean();
+            boolean_3 &= this.random.nextInt(5) == 0;
+damage(DamageSource, float)
+            this.getEquippedStack(EquipmentSlot.HEAD).damage((int)(float_1 * 4.0F + this.random.nextFloat() * float_1 * 2.0F), this, (livingEntity_1x) -> {
+getLootContextBuilder(boolean, DamageSource)
+....r...
+takeKnockback(Entity, float, double, double)
+      if (this.random.nextDouble() >= this.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE).getValue()) {
+handleStatus(byte)
+            this.playSound(SoundEvents.ENCHANT_THORNS_HIT, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+            this.playSound(soundEvent_1, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+            this.playSound(soundEvent_2, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+            float float_1 = (this.random.nextFloat() - 0.5F) * 0.2F;
+            float float_2 = (this.random.nextFloat() - 0.5F) * 0.2F;
+            float float_3 = (this.random.nextFloat() - 0.5F) * 0.2F;
+            double double_2 = MathHelper.lerp(double_1, this.prevX, this.getX()) + (this.random.nextDouble() - 0.5D) * (double)this.getWidth() * 2.0D;
+            double double_3 = MathHelper.lerp(double_1, this.prevY, this.getY()) + this.random.nextDouble() * (double)this.getHeight();
+            double double_4 = MathHelper.lerp(double_1, this.prevZ, this.getZ()) + (this.random.nextDouble() - 0.5D) * (double)this.getWidth() * 2.0D;
+getSoundPitch()
+      return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.5F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F;
+tickCramming()
+         if (int_1 > 0 && list_1.size() > int_1 - 1 && this.random.nextInt(4) == 0) {
+scheduleVelocityUpdate()
+      this.velocityModified = this.random.nextDouble() >= this.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE).getValue();
+spawnConsumptionEffects(ItemStack, int)
+            this.playSound(this.getEatSound(itemStack_1), 0.5F + 0.5F * (float)this.random.nextInt(2), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+spawnItemParticles(ItemStack, int)
+         Vec3d vec3d_1 = new Vec3d(((double)this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
+         double double_1 = (double)(-this.random.nextFloat()) * 0.6D - 0.3D;
+         Vec3d vec3d_2 = new Vec3d(((double)this.random.nextFloat() - 0.5D) * 0.3D, double_1, 0.6D);
+net.minecraft.entity.boss
+WitherEntity
+tickMovement()
+....r...
+....r...
+....r...
+mobTick()
+               this.field_7091[int_2 - 1] = this.age + 10 + this.random.nextInt(10);
+                     double double_1 = MathHelper.nextDouble(this.random, this.getX() - 10.0D, this.getX() + 10.0D);
+                     double double_2 = MathHelper.nextDouble(this.random, this.getY() - 5.0D, this.getY() + 5.0D);
+                     double double_3 = MathHelper.nextDouble(this.random, this.getZ() - 10.0D, this.getZ() + 10.0D);
+                        this.field_7091[int_2 - 1] = this.age + 40 + this.random.nextInt(20);
+                     LivingEntity livingEntity_1 = (LivingEntity)list_1.get(this.random.nextInt(list_1.size()));
+method_6878(int, LivingEntity)
+....r...
+net.minecraft.entity.boss.dragon
+EnderDragonEntity
+tickMovement()
+               this.world.playSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_ENDER_DRAGON_FLAP, this.getSoundCategory(), 5.0F, 0.8F + this.random.nextFloat() * 0.3F, false);
+               this.world.playSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_ENDER_DRAGON_GROWL, this.getSoundCategory(), 2.5F, 0.8F + this.random.nextFloat() * 0.3F, false);
+               this.field_7018 = 200 + this.random.nextInt(200);
+         float_1 = (this.random.nextFloat() - 0.5F) * 8.0F;
+         float_6 = (this.random.nextFloat() - 0.5F) * 4.0F;
+         float float_5 = (this.random.nextFloat() - 0.5F) * 8.0F;
+method_6830()
+      if (this.random.nextInt(10) == 0) {
+method_6821(Box)
+         BlockPos blockPos_2 = new BlockPos(int_1 + this.random.nextInt(int_4 - int_1 + 1), int_2 + this.random.nextInt(int_5 - int_2 + 1), int_3 + this.random.nextInt(int_6 - int_3 + 1));
+updatePostDeath()
+         float float_1 = (this.random.nextFloat() - 0.5F) * 8.0F;
+         float float_2 = (this.random.nextFloat() - 0.5F) * 4.0F;
+         float float_3 = (this.random.nextFloat() - 0.5F) * 8.0F;
+net.minecraft.entity.decoration
+EnderCrystalEntity
+EnderCrystalEntity(EntityType<? extends EnderCrystalEntity>, World)
+      this.field_7034 = this.random.nextInt(100000);
+ItemFrameEntity
+dropHeldStack(Entity, boolean)
+            if (this.random.nextFloat() < this.itemDropChance) {
+net.minecraft.entity.decoration.painting
+PaintingEntity
+PaintingEntity(World, BlockPos, Direction)
+         this.motive = (PaintingMotive)list_1.get(this.random.nextInt(list_1.size()));
+net.minecraft.entity.mob
+AbstractSkeletonEntity
+tickMovement()
+               itemStack_1.setDamage(itemStack_1.getDamage() + this.random.nextInt(2));
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * localDifficulty_1.getClampedLocalDifficulty());
+         if (int_2 == 10 && int_1 == 31 && this.random.nextFloat() < 0.25F) {
+            this.equipStack(EquipmentSlot.HEAD, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
+BlazeEntity
+tickMovement()
+         if (this.random.nextInt(24) == 0 && !this.isSilent()) {
+....r...
+mobTick()
+         this.field_7214 = 0.5F + (float)this.random.nextGaussian() * 3.0F;
+CreeperEntity
+interactMob(PlayerEntity, Hand)
+         this.world.playSound(playerEntity_1, this.getX(), this.getY(), this.getZ(), SoundEvents.ITEM_FLINTANDSTEEL_USE, this.getSoundCategory(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
+DrownedEntity
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      if (this.getEquippedStack(EquipmentSlot.OFFHAND).isEmpty() && this.random.nextFloat() < 0.03F) {
+initEquipment(LocalDifficulty)
+      if ((double)this.random.nextFloat() > 0.9D) {
+         int int_1 = this.random.nextInt(16);
+EndermanEntity
+tickMovement()
+....r...
+mobTick()
+         if (float_1 > 0.5F && this.world.isSkyVisible(new BlockPos(this)) && this.random.nextFloat() * 30.0F < (float_1 - 0.4F) * 2.0F) {
+teleportRandomly()
+         double double_1 = this.getX() + (this.random.nextDouble() - 0.5D) * 64.0D;
+         double double_2 = this.getY() + (double)(this.random.nextInt(64) - 32);
+         double double_3 = this.getZ() + (this.random.nextDouble() - 0.5D) * 64.0D;
+teleportTo(Entity)
+      double double_2 = this.getX() + (this.random.nextDouble() - 0.5D) * 8.0D - vec3d_1.x * 16.0D;
+      double double_3 = this.getY() + (double)(this.random.nextInt(16) - 8) - vec3d_1.y * 16.0D;
+      double double_4 = this.getZ() + (this.random.nextDouble() - 0.5D) * 8.0D - vec3d_1.z * 16.0D;
+damage(DamageSource, float)
+         if (!this.world.isClient() && damageSource_1.bypassesArmor() && this.random.nextInt(10) != 0) {
+EndermiteEntity
+tickMovement()
+....r...
+EvokerEntity.SummonVexGoal
+canStart()
+            return EvokerEntity.this.random.nextInt(8) + 1 > int_1;
+castSpell()
+            BlockPos blockPos_1 = (new BlockPos(EvokerEntity.this)).add(-2 + EvokerEntity.this.random.nextInt(5), 1, -2 + EvokerEntity.this.random.nextInt(5));
+            vexEntity_1.setLifeTicks(20 * (30 + EvokerEntity.this.random.nextInt(90)));
+EvokerEntity.WololoGoal
+canStart()
+               EvokerEntity.this.setWololoTarget((SheepEntity)list_1.get(EvokerEntity.this.random.nextInt(list_1.size())));
+EvokerFangsEntity
+tick()
+                  double double_1 = this.getX() + (this.random.nextDouble() * 2.0D - 1.0D) * (double)this.getWidth() * 0.5D;
+                  double double_2 = this.getY() + 0.05D + this.random.nextDouble();
+                  double double_3 = this.getZ() + (this.random.nextDouble() * 2.0D - 1.0D) * (double)this.getWidth() * 0.5D;
+                  double double_4 = (this.random.nextDouble() * 2.0D - 1.0D) * 0.3D;
+                  double double_5 = 0.3D + this.random.nextDouble() * 0.3D;
+                  double double_6 = (this.random.nextDouble() * 2.0D - 1.0D) * 0.3D;
+handleStatus(byte)
+            this.world.playSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_EVOKER_FANGS_ATTACK, this.getSoundCategory(), 1.0F, this.random.nextFloat() * 0.2F + 0.85F, false);
+GuardianEntity
+GuardianEntity(EntityType<? extends GuardianEntity>, World)
+      this.spikesExtension = this.random.nextFloat();
+tickMovement()
+               this.tailAngle = this.random.nextFloat();
+                  double double_6 = this.random.nextDouble();
+                     double_6 += 1.8D - double_1 + this.random.nextDouble() * (1.7D - double_1);
+            this.setVelocity(this.getVelocity().add((double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.4F), 0.5D, (double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.4F)));
+            this.yaw = this.random.nextFloat() * 360.0F;
+IllusionerEntity
+tickMovement()
+....r...
+MobEntity
+baseTick()
+      if (this.isAlive() && this.random.nextInt(1000) < this.ambientSoundChance++) {
+getCurrentExperience(PlayerEntity)
+               int_1 += 1 + this.random.nextInt(3);
+               int_1 += 1 + this.random.nextInt(3);
+playSpawnEffects()
+            double double_1 = this.random.nextGaussian() * 0.02D;
+            double double_2 = this.random.nextGaussian() * 0.02D;
+            double double_3 = this.random.nextGaussian() * 0.02D;
+getLootContextBuilder(boolean, DamageSource)
+      return super.getLootContextBuilder(boolean_1, damageSource_1).setRandom(this.lootTableSeed, this.random);
+loot(ItemEntity)
+         if (!itemStack_2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1F, 0.0F) < double_1) {
+checkDespawn()
+            if (this.despawnCounter > 600 && this.random.nextInt(800) == 0 && double_1 > 1024.0D && this.canImmediatelyDespawn(double_1)) {
+dropEquipment(DamageSource, int, boolean)
+         if (!itemStack_1.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack_1) && (boolean_1 || boolean_2) && Math.max(this.random.nextFloat() - (float)int_1 * 0.01F, 0.0F) < float_1) {
+               itemStack_1.setDamage(itemStack_1.getMaxDamage() - this.random.nextInt(1 + this.random.nextInt(Math.max(itemStack_1.getMaxDamage() - 3, 1))));
+initEquipment(LocalDifficulty)
+      if (this.random.nextFloat() < 0.15F * localDifficulty_1.getClampedLocalDifficulty()) {
+         int int_1 = this.random.nextInt(2);
+         if (this.random.nextFloat() < 0.095F) {
+         if (this.random.nextFloat() < 0.095F) {
+         if (this.random.nextFloat() < 0.095F) {
+               if (!boolean_1 && this.random.nextFloat() < float_1) {
+updateEnchantments(LocalDifficulty)
+      if (!this.getMainHandStack().isEmpty() && this.random.nextFloat() < 0.25F * float_1) {
+         this.equipStack(EquipmentSlot.MAINHAND, EnchantmentHelper.enchant(this.random, this.getMainHandStack(), (int)(5.0F + float_1 * (float)this.random.nextInt(18)), false));
+            if (!itemStack_1.isEmpty() && this.random.nextFloat() < 0.5F * float_1) {
+               this.equipStack(equipmentSlot_1, EnchantmentHelper.enchant(this.random, itemStack_1, (int)(5.0F + float_1 * (float)this.random.nextInt(18)), false));
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+....r...
+      if (this.random.nextFloat() < 0.05F) {
+tryAttack(Entity)
+               if (this.random.nextFloat() < float_3) {
+isInDaylight()
+         if (float_1 > 0.5F && this.random.nextFloat() * 30.0F < (float_1 - 0.4F) * 2.0F && this.world.isSkyVisible(blockPos_1)) {
+PatrolEntity
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      if (spawnType_1 != SpawnType.PATROL && spawnType_1 != SpawnType.EVENT && spawnType_1 != SpawnType.STRUCTURE && this.random.nextFloat() < 0.06F && this.canLead()) {
+setRandomPatrolTarget()
+      this.patrolTarget = (new BlockPos(this)).add(-500 + this.random.nextInt(1000), 0, -500 + this.random.nextInt(1000));
+PhantomEntity
+tick()
+....r...
+PhantomEntity.CircleMovementGoal
+start()
+         this.field_7327 = 5.0F + PhantomEntity.this.random.nextFloat() * 10.0F;
+         this.field_7326 = -4.0F + PhantomEntity.this.random.nextFloat() * 9.0F;
+         this.field_7324 = PhantomEntity.this.random.nextBoolean() ? 1.0F : -1.0F;
+tick()
+         if (PhantomEntity.this.random.nextInt(350) == 0) {
+            this.field_7326 = -4.0F + PhantomEntity.this.random.nextFloat() * 9.0F;
+         if (PhantomEntity.this.random.nextInt(250) == 0) {
+         if (PhantomEntity.this.random.nextInt(450) == 0) {
+            this.field_7328 = PhantomEntity.this.random.nextFloat() * 2.0F * 3.1415927F;
+PhantomEntity.StartAttackGoal
+stop()
+         PhantomEntity.this.field_7312 = PhantomEntity.this.world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, PhantomEntity.this.field_7312).up(10 + PhantomEntity.this.random.nextInt(20));
+tick()
+               this.field_7322 = (8 + PhantomEntity.this.random.nextInt(4)) * 20;
+               PhantomEntity.this.playSound(SoundEvents.ENTITY_PHANTOM_SWOOP, 10.0F, 0.95F + PhantomEntity.this.random.nextFloat() * 0.1F);
+method_7102()
+         PhantomEntity.this.field_7312 = (new BlockPos(PhantomEntity.this.getTarget())).up(20 + PhantomEntity.this.random.nextInt(20));
+PillagerEntity
+initEquipment(LocalDifficulty)
+      if (this.random.nextInt(300) == 0) {
+addBonusForWave(int, boolean)
+      boolean boolean_2 = this.random.nextFloat() <= raid_1.getEnchantmentChance();
+RavagerEntity
+spawnStunnedParticles()
+      if (this.random.nextInt(6) == 0) {
+         double double_1 = this.getX() - (double)this.getWidth() * Math.sin((double)(this.bodyYaw * 0.017453292F)) + (this.random.nextDouble() * 0.6D - 0.3D);
+         double double_3 = this.getZ() + (double)this.getWidth() * Math.cos((double)(this.bodyYaw * 0.017453292F)) + (this.random.nextDouble() * 0.6D - 0.3D);
+knockback(LivingEntity)
+         if (this.random.nextDouble() < 0.5D) {
+roar()
+            double double_1 = this.random.nextGaussian() * 0.2D;
+            double double_2 = this.random.nextGaussian() * 0.2D;
+            double double_3 = this.random.nextGaussian() * 0.2D;
+ShulkerEntity
+method_7127()
+            BlockPos blockPos_2 = blockPos_1.add(8 - this.random.nextInt(17), 8 - this.random.nextInt(17), 8 - this.random.nextInt(17));
+damage(DamageSource, float)
+         if ((double)this.getHealth() < (double)this.getMaximumHealth() * 0.5D && this.random.nextInt(4) == 0) {
+ShulkerEntity.PeekGoal
+canStart()
+         return ShulkerEntity.this.getTarget() == null && ShulkerEntity.this.random.nextInt(40) == 0;
+start()
+         this.counter = 20 * (1 + ShulkerEntity.this.random.nextInt(3));
+ShulkerEntity.ShootBulletGoal
+tick()
+                  this.counter = 20 + ShulkerEntity.this.random.nextInt(10) * 20 / 2;
+                  ShulkerEntity.this.playSound(SoundEvents.ENTITY_SHULKER_SHOOT, 2.0F, (ShulkerEntity.this.random.nextFloat() - ShulkerEntity.this.random.nextFloat()) * 0.2F + 1.0F);
+SlimeEntity
+tick()
+            float float_1 = this.random.nextFloat() * 6.2831855F;
+            float float_2 = this.random.nextFloat() * 0.5F + 0.5F;
+         this.playSound(this.getSquishSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) / 0.8F);
+getTicksUntilNextJump()
+      return this.random.nextInt(20) + 10;
+onTrackedDataSet(TrackedData<?>)
+         if (this.isInsideWater() && this.random.nextInt(20) == 0) {
+remove()
+         int int_2 = 2 + this.random.nextInt(3);
+            slimeEntity_1.setPositionAndAngles(this.getX() + (double)float_1, this.getY() + 0.5D, this.getZ() + (double)float_2, this.random.nextFloat() * 360.0F, 0.0F);
+damage(LivingEntity)
+            this.playSound(SoundEvents.ENTITY_SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      int int_1 = this.random.nextInt(3);
+      if (int_1 < 2 && this.random.nextFloat() < 0.5F * localDifficulty_1.getClampedLocalDifficulty()) {
+VexEntity.ChargeTargetGoal
+canStart()
+         if (VexEntity.this.getTarget() != null && !VexEntity.this.getMoveControl().isMoving() && VexEntity.this.random.nextInt(7) == 0) {
+VexEntity.LookAtTargetGoal
+canStart()
+         return !VexEntity.this.getMoveControl().isMoving() && VexEntity.this.random.nextInt(7) == 0;
+tick()
+            BlockPos blockPos_2 = blockPos_1.add(VexEntity.this.random.nextInt(15) - 7, VexEntity.this.random.nextInt(11) - 5, VexEntity.this.random.nextInt(15) - 7);
+VindicatorEntity
+addBonusForWave(int, boolean)
+      boolean boolean_2 = this.random.nextFloat() <= raid_1.getEnchantmentChance();
+VindicatorEntity.BreakDoorGoal
+canStart()
+         return vindicatorEntity_1.hasActiveRaid() && vindicatorEntity_1.random.nextInt(10) == 0 && super.canStart();
+WitchEntity
+tickMovement()
+            if (this.random.nextFloat() < 0.15F && this.isInFluid(FluidTags.WATER) && !this.hasStatusEffect(StatusEffects.WATER_BREATHING)) {
+....r...
+            } else if (this.random.nextFloat() < 0.05F && this.getHealth() < this.getMaximumHealth()) {
+            } else if (this.random.nextFloat() < 0.5F && this.getTarget() != null && !this.hasStatusEffect(StatusEffects.SPEED) && this.getTarget().squaredDistanceTo(this) > 121.0D) {
+               this.world.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_WITCH_DRINK, this.getSoundCategory(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+         if (this.random.nextFloat() < 7.5E-4F) {
+handleStatus(byte)
+         for(int int_1 = 0; int_1 < this.random.nextInt(35) + 10; ++int_1) {
+....r...
+attack(LivingEntity, float)
+         } else if (float_2 <= 3.0F && !livingEntity_1.hasStatusEffect(StatusEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
+         this.world.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_WITCH_THROW, this.getSoundCategory(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+ZombieEntity
+initAttributes()
+      this.getAttributes().register(SPAWN_REINFORCEMENTS).setBaseValue(this.random.nextDouble() * 0.10000000149011612D);
+tickMovement()
+                  itemStack_1.setDamage(itemStack_1.getDamage() + this.random.nextInt(2));
+damage(DamageSource, float)
+....r...
+               int int_5 = int_1 + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
+               int int_6 = int_2 + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
+               int int_7 = int_3 + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
+tryAttack(Entity)
+         if (this.getMainHandStack().isEmpty() && this.isOnFire() && this.random.nextFloat() < float_1 * 0.3F) {
+initEquipment(LocalDifficulty)
+      if (this.random.nextFloat() < (this.world.getDifficulty() == Difficulty.HARD ? 0.05F : 0.01F)) {
+         int int_1 = this.random.nextInt(3);
+onKilledOther(LivingEntity)
+         if (this.world.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * float_1);
+         this.setCanBreakDoors(this.shouldBreakDoors() && this.random.nextFloat() < float_1 * 0.1F);
+         if (int_2 == 10 && int_1 == 31 && this.random.nextFloat() < 0.25F) {
+            this.equipStack(EquipmentSlot.HEAD, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
+applyAttributeModifiers(float)
+....r...
+      double double_1 = this.random.nextDouble() * 1.5D * (double)float_1;
+      if (this.random.nextFloat() < float_1 * 0.05F) {
+....r...
+....r...
+ZombieEntity.DestroyEggGoal
+tickStepping(IWorld, BlockPos)
+         iWorld_1.playSound((PlayerEntity)null, blockPos_1, SoundEvents.ENTITY_ZOMBIE_DESTROY_EGG, SoundCategory.HOSTILE, 0.5F, 0.9F + ZombieEntity.this.random.nextFloat() * 0.2F);
+ZombiePigmanEntity
+mobTick()
+         this.playSound(SoundEvents.ENTITY_ZOMBIE_PIGMAN_ANGRY, this.getSoundVolume() * 2.0F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 1.8F);
+method_20804(LivingEntity)
+      this.angrySoundDelay = this.random.nextInt(40);
+method_20806()
+      return 400 + this.random.nextInt(400);
+ZombieVillagerEntity
+ZombieVillagerEntity(EntityType<? extends ZombieVillagerEntity>, World)
+      this.setVillagerData(this.getVillagerData().withProfession((VillagerProfession)Registry.VILLAGER_PROFESSION.getRandom(this.random)));
+interactMob(PlayerEntity, Hand)
+            this.setConverting(playerEntity_1.getUuid(), this.random.nextInt(2401) + 3600);
+handleStatus(byte)
+....r...
+getConversionRate()
+      if (this.random.nextFloat() < 0.01F) {
+                     if (this.random.nextFloat() < 0.3F) {
+getSoundPitch()
+      return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 2.0F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F;
+net.minecraft.entity.passive
+AbstractDonkeyEntity
+playAddChestSound()
+      this.playSound(SoundEvents.ENTITY_DONKEY_CHEST, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+AbstractTraderEntity
+produceParticles(ParticleEffect)
+         double double_1 = this.random.nextGaussian() * 0.02D;
+         double double_2 = this.random.nextGaussian() * 0.02D;
+         double double_3 = this.random.nextGaussian() * 0.02D;
+fillRecipesFromPool(TraderOfferList, Factory[], int)
+            set_1.add(this.random.nextInt(tradeOffers$Factorys_1.length));
+         TradeOffer tradeOffer_1 = tradeOffers$Factory_1.create(this, this.random);
+AnimalEntity
+tickMovement()
+            double double_1 = this.random.nextGaussian() * 0.02D;
+            double double_2 = this.random.nextGaussian() * 0.02D;
+            double double_3 = this.random.nextGaussian() * 0.02D;
+handleStatus(byte)
+            double double_1 = this.random.nextGaussian() * 0.02D;
+            double double_2 = this.random.nextGaussian() * 0.02D;
+            double double_3 = this.random.nextGaussian() * 0.02D;
+BatEntity
+getAmbientSound()
+      return this.isRoosting() && this.random.nextInt(4) != 0 ? null : SoundEvents.ENTITY_BAT_AMBIENT;
+mobTick()
+            if (this.random.nextInt(200) == 0) {
+               this.headYaw = (float)this.random.nextInt(360);
+         if (this.hangingPosition == null || this.random.nextInt(30) == 0 || this.hangingPosition.isWithinDistance(this.getPos(), 2.0D)) {
+....r...
+         if (this.random.nextInt(100) == 0 && this.world.getBlockState(blockPos_2).isSimpleFullBlock(this.world, blockPos_2)) {
+BeeEntity
+tick()
+      if (this.hasNectar() && this.getCropsGrownSincePollination() < 10 && this.random.nextFloat() < 0.05F) {
+         for(int int_1 = 0; int_1 < this.random.nextInt(2) + 1; ++int_1) {
+mobTick()
+         if (this.ticksSinceSting % 5 == 0 && this.random.nextInt(MathHelper.clamp(1200 - this.ticksSinceSting, 1, 1200)) == 0) {
+setBeeAttacker(Entity)
+      this.setAnger(400 + this.random.nextInt(400));
+BeeEntity.BeeWanderAroundGoal
+canStart()
+         return BeeEntity.this.navigation.isIdle() && BeeEntity.this.random.nextInt(10) == 0;
+BeeEntity.GrowCropsGoal
+canBeeStart()
+         } else if (BeeEntity.this.random.nextFloat() < 0.3F) {
+tick()
+         if (BeeEntity.this.random.nextInt(30) == 0) {
+BeeEntity.PollinateGoal
+canBeeStart()
+         } else if (BeeEntity.this.random.nextFloat() < 0.7F) {
+canBeeContinue()
+            return BeeEntity.this.random.nextFloat() < 0.2F;
+tick()
+                     boolean boolean_3 = BeeEntity.this.random.nextInt(100) == 0;
+                  if (BeeEntity.this.random.nextFloat() < 0.05F && this.pollinationTicks > this.lastPollinationTick + 60) {
+getRandomOffset()
+         return (BeeEntity.this.random.nextFloat() * 2.0F - 1.0F) * 0.33333334F;
+CatEntity
+setCatType(int)
+         int_1 = this.random.nextInt(10);
+getAmbientSound()
+            return this.random.nextInt(4) == 0 ? SoundEvents.ENTITY_CAT_PURREOW : SoundEvents.ENTITY_CAT_AMBIENT;
+updateAnimations()
+         this.playSound(SoundEvents.ENTITY_CAT_PURR, 0.6F + 0.4F * (this.random.nextFloat() - this.random.nextFloat()), 1.0F);
+createChild(PassiveEntity)
+         if (this.random.nextBoolean()) {
+            if (this.random.nextBoolean()) {
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+         this.setCatType(this.random.nextInt(11));
+         this.setCatType(this.random.nextInt(10));
+interactMob(PlayerEntity, Hand)
+            if (this.random.nextInt(3) == 0) {
+ChickenEntity
+ChickenEntity(EntityType<? extends ChickenEntity>, World)
+      this.eggLayTime = this.random.nextInt(6000) + 6000;
+tickMovement()
+         this.playSound(SoundEvents.ENTITY_CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+         this.eggLayTime = this.random.nextInt(6000) + 6000;
+DolphinEntity
+tick()
+               this.setVelocity(this.getVelocity().add((double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.2F), 0.5D, (double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.2F)));
+               this.yaw = this.random.nextFloat() * 360.0F;
+            float float_3 = 1.2F - this.random.nextFloat() * 0.7F;
+spawnParticlesAround(ParticleEffect)
+         double double_1 = this.random.nextGaussian() * 0.01D;
+         double double_2 = this.random.nextGaussian() * 0.01D;
+         double double_3 = this.random.nextGaussian() * 0.01D;
+DolphinEntity.PlayWithItemsGoal
+stop()
+            this.field_6758 = DolphinEntity.this.age + DolphinEntity.this.random.nextInt(100);
+spitOutItem(ItemStack)
+            float float_2 = DolphinEntity.this.random.nextFloat() * 6.2831855F;
+            float float_3 = 0.02F * DolphinEntity.this.random.nextFloat();
+FishEntity
+tickMovement()
+         this.setVelocity(this.getVelocity().add((double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.05F), 0.4000000059604645D, (double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.05F)));
+FoxEntity
+tickMovement()
+            } else if (this.eatingTime > 560 && this.random.nextFloat() < 0.1F) {
+      if (this.isAggressive() && this.random.nextFloat() < 0.05F) {
+initEquipment(LocalDifficulty)
+      if (this.random.nextFloat() < 0.2F) {
+         float float_1 = this.random.nextFloat();
+            itemStack_6 = this.random.nextBoolean() ? new ItemStack(Items.RABBIT_FOOT) : new ItemStack(Items.RABBIT_HIDE);
+handleStatus(byte)
+               Vec3d vec3d_1 = (new Vec3d(((double)this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D)).rotateX(-this.pitch * 0.017453292F).rotateY(-this.yaw * 0.017453292F);
+createChild(PassiveEntity)
+      foxEntity_1.setType(this.random.nextBoolean() ? this.getFoxType() : ((FoxEntity)passiveEntity_1).getFoxType());
+getAmbientSound()
+         if (!this.world.isDay() && this.random.nextFloat() < 0.1F) {
+FoxEntity.DelayedCalmDownGoal
+DelayedCalmDownGoal()
+         this.timer = FoxEntity.this.random.nextInt(140);
+stop()
+         this.timer = FoxEntity.this.random.nextInt(140);
+FoxEntity.EatSweetBerriesGoal
+tick()
+         } else if (!this.hasReached() && FoxEntity.this.random.nextFloat() < 0.05F) {
+HorseBaseEntity
+playEatingAnimation()
+....r...
+getHurtSound(DamageSource)
+      if (this.random.nextInt(3) == 0) {
+getAmbientSound()
+      if (this.random.nextInt(10) == 0 && !this.isImmobile()) {
+tickMovement()
+      if (this.random.nextInt(200) == 0) {
+         if (this.random.nextInt(900) == 0 && this.deathTime == 0) {
+            if (!this.isEatingGrass() && !this.hasPassengers() && this.random.nextInt(300) == 0 && this.world.getBlockState((new BlockPos(this)).down()).getBlock() == Blocks.GRASS_BLOCK) {
+spawnPlayerReactionParticles(boolean)
+         double double_1 = this.random.nextGaussian() * 0.02D;
+         double double_2 = this.random.nextGaussian() * 0.02D;
+         double double_3 = this.random.nextGaussian() * 0.02D;
+getChildHealthBonus()
+      return 15.0F + (float)this.random.nextInt(8) + (float)this.random.nextInt(9);
+getChildJumpStrengthBonus()
+      return 0.4000000059604645D + this.random.nextDouble() * 0.2D + this.random.nextDouble() * 0.2D + this.random.nextDouble() * 0.2D;
+getChildMovementSpeedBonus()
+      return (0.44999998807907104D + this.random.nextDouble() * 0.3D + this.random.nextDouble() * 0.3D + this.random.nextDouble() * 0.3D) * 0.25D;
+HorseEntity
+playWalkSound(BlockSoundGroup)
+      if (this.random.nextInt(10) == 0) {
+createChild(PassiveEntity)
+         int int_1 = this.random.nextInt(9);
+            int_4 = this.random.nextInt(7);
+         int int_5 = this.random.nextInt(5);
+            int_4 |= this.random.nextInt(5) << 8 & '\uff00';
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+         int_2 = this.random.nextInt(7);
+      this.setVariant(int_2 | this.random.nextInt(5) << 8);
+IronGolemEntity
+tickMovement()
+      if (squaredHorizontalLength(this.getVelocity()) > 2.500000277905201E-7D && this.random.nextInt(5) == 0) {
+....r...
+tryAttack(Entity)
+      float float_2 = float_1 > 0.0F ? float_1 / 2.0F + (float)this.random.nextInt((int)float_1) : 0.0F;
+interactMob(PlayerEntity, Hand)
+            float float_2 = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
+LlamaEntity
+initializeStrength()
+      int int_1 = this.random.nextFloat() < 0.04F ? 5 : 3;
+      this.setStrength(1 + this.random.nextInt(int_1));
+receiveFood(PlayerEntity, ItemStack)
+....r...
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+         int_2 = this.random.nextInt(4);
+playAddChestSound()
+      this.playSound(SoundEvents.ENTITY_LLAMA_CHEST, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+createChild(PassiveEntity)
+      int int_1 = this.random.nextInt(Math.max(this.getStrength(), llamaEntity_2.getStrength())) + 1;
+      if (this.random.nextFloat() < 0.03F) {
+      llamaEntity_1.setVariant(this.random.nextBoolean() ? this.getVariant() : llamaEntity_2.getVariant());
+spitAt(LivingEntity)
+....r...
+MooshroomEntity
+interactMob(PlayerEntity, Hand)
+....r...
+....r...
+chooseBabyType(MooshroomEntity)
+      if (mooshroomEntity$Type_1 == mooshroomEntity$Type_2 && this.random.nextInt(1024) == 0) {
+         mooshroomEntity$Type_4 = this.random.nextBoolean() ? mooshroomEntity$Type_1 : mooshroomEntity$Type_2;
+MuleEntity
+playAddChestSound()
+      this.playSound(SoundEvents.ENTITY_MULE_CHEST, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+OcelotEntity
+interactMob(PlayerEntity, Hand)
+            if (this.random.nextInt(3) == 0) {
+showEmoteParticle(boolean)
+         double double_1 = this.random.nextGaussian() * 0.02D;
+         double double_2 = this.random.nextGaussian() * 0.02D;
+         double double_3 = this.random.nextGaussian() * 0.02D;
+PandaEntity
+setMainGene(Gene)
+         pandaEntity$Gene_1 = PandaEntity.Gene.createRandom(this.random);
+setHiddenGene(Gene)
+         pandaEntity$Gene_1 = PandaEntity.Gene.createRandom(this.random);
+updateEatingAnimation()
+      if (!this.isEating() && this.isScared() && !this.method_6524() && !this.getEquippedStack(EquipmentSlot.MAINHAND).isEmpty() && this.random.nextInt(80) == 1) {
+         if (!this.world.isClient && this.getEatingTicks() > 80 && this.random.nextInt(20) == 1) {
+playEatingAnimation()
+         this.playSound(SoundEvents.ENTITY_PANDA_EAT, 0.5F + 0.5F * (float)this.random.nextInt(2), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+            Vec3d vec3d_1 = new Vec3d(((double)this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, ((double)this.random.nextFloat() - 0.5D) * 0.1D);
+            double double_1 = (double)(-this.random.nextFloat()) * 0.6D - 0.3D;
+            Vec3d vec3d_2 = new Vec3d(((double)this.random.nextFloat() - 0.5D) * 0.8D, double_1, 1.0D + ((double)this.random.nextFloat() - 0.5D) * 0.4D);
+sneeze()
+      if (!this.world.isClient() && this.random.nextInt(700) == 0 && this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      this.setMainGene(PandaEntity.Gene.createRandom(this.random));
+      this.setHiddenGene(PandaEntity.Gene.createRandom(this.random));
+initGenes(PandaEntity, PandaEntity)
+         if (this.random.nextBoolean()) {
+            this.setHiddenGene(PandaEntity.Gene.createRandom(this.random));
+            this.setMainGene(PandaEntity.Gene.createRandom(this.random));
+      } else if (this.random.nextBoolean()) {
+      if (this.random.nextInt(32) == 0) {
+         this.setMainGene(PandaEntity.Gene.createRandom(this.random));
+      if (this.random.nextInt(32) == 0) {
+         this.setHiddenGene(PandaEntity.Gene.createRandom(this.random));
+getRandomGene()
+      return this.random.nextBoolean() ? this.getMainGene() : this.getHiddenGene();
+PandaEntity.LieOnBackGoal
+canStart()
+         return this.nextLieOnBackAge < this.panda.age && this.panda.isLazy() && this.panda.method_18442() && this.panda.random.nextInt(400) == 1;
+shouldContinue()
+         if (!this.panda.isInsideWater() && (this.panda.isLazy() || this.panda.random.nextInt(600) != 1)) {
+            return this.panda.random.nextInt(2000) != 1;
+PandaEntity.PickUpFoodGoal
+shouldContinue()
+         if (!PandaEntity.this.isInsideWater() && (PandaEntity.this.isLazy() || PandaEntity.this.random.nextInt(600) != 1)) {
+            return PandaEntity.this.random.nextInt(2000) != 1;
+stop()
+            int int_1 = PandaEntity.this.isLazy() ? PandaEntity.this.random.nextInt(50) + 10 : PandaEntity.this.random.nextInt(150) + 10;
+PandaEntity.PlayGoal
+canStart()
+               } else if (this.panda.isPlayful() && this.panda.random.nextInt(60) == 1) {
+                  return this.panda.random.nextInt(500) == 1;
+PandaEntity.SneezeGoal
+canStart()
+            if (this.panda.isWeak() && this.panda.random.nextInt(500) == 1) {
+               return this.panda.random.nextInt(6000) == 1;
+ParrotEntity
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      this.setVariant(this.random.nextInt(5));
+interactMob(PlayerEntity, Hand)
+....r...
+            if (this.random.nextInt(10) == 0) {
+getAmbientSound()
+      return getRandomSound(this.random);
+getSoundPitch()
+      return getSoundPitch(this.random);
+PassiveEntity
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+      if (passiveEntity$EntityData_1.canSpawnBaby() && passiveEntity$EntityData_1.getSpawnedCount() > 0 && this.random.nextFloat() <= passiveEntity$EntityData_1.getBabyChance()) {
+RabbitEntity
+setJumping(boolean)
+         this.playSound(this.getJumpSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.8F);
+mobTick()
+         this.moreCarrotTicks -= this.random.nextInt(3);
+tryAttack(Entity)
+         this.playSound(SoundEvents.ENTITY_RABBIT_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+createChild(PassiveEntity)
+      if (this.random.nextInt(20) != 0) {
+         if (passiveEntity_1 instanceof RabbitEntity && this.random.nextBoolean()) {
+chooseType(IWorld)
+      int int_1 = this.random.nextInt(100);
+SheepEntity
+dropItems()
+         int int_1 = 1 + this.random.nextInt(3);
+....r...
+SquidEntity
+SquidEntity(EntityType<? extends SquidEntity>, World)
+      this.random.setSeed((long)this.getEntityId());
+      this.field_6912 = 1.0F / (this.random.nextFloat() + 1.0F) * 0.2F;
+tickMovement()
+            if (this.random.nextInt(10) == 0) {
+               this.field_6912 = 1.0F / (this.random.nextFloat() + 1.0F) * 0.2F;
+squirt()
+         Vec3d vec3d_2 = this.method_6671(new Vec3d((double)this.random.nextFloat() * 0.6D - 0.3D, -1.0D, (double)this.random.nextFloat() * 0.6D - 0.3D));
+         Vec3d vec3d_3 = vec3d_2.multiply(0.3D + (double)(this.random.nextFloat() * 2.0F));
+TameableEntity
+showEmoteParticle(boolean)
+         double double_1 = this.random.nextGaussian() * 0.02D;
+         double double_2 = this.random.nextGaussian() * 0.02D;
+         double double_3 = this.random.nextGaussian() * 0.02D;
+TropicalFishEntity
+initialize(IWorld, LocalDifficulty, SpawnType, EntityData, CompoundTag)
+         } else if ((double)this.random.nextFloat() < 0.9D) {
+            int int_5 = COMMON_VARIANTS[this.random.nextInt(COMMON_VARIANTS.length)];
+            int_6 = this.random.nextInt(2);
+            int_7 = this.random.nextInt(6);
+            int_8 = this.random.nextInt(15);
+            int_9 = this.random.nextInt(15);
+TurtleEntity.LayEggGoal
+tick()
+               world_1.setBlockState(this.targetPos.up(), (BlockState)Blocks.TURTLE_EGG.getDefaultState().with(TurtleEggBlock.EGGS, this.turtle.random.nextInt(4) + 1), 3);
+TurtleEntity.TravelGoal
+start()
+         Random random_1 = this.turtle.random;
+VillagerEntity
+mobTick()
+      if (!this.isAiDisabled() && this.random.nextInt(100) == 0) {
+afterUsing(TradeOffer)
+      int int_1 = 3 + this.random.nextInt(4);
+createChild(PassiveEntity)
+      double double_1 = this.random.nextDouble();
+talkWithVillager(VillagerEntity, long)
+         this.gossip.shareGossipFrom(villagerEntity_1.gossip, this.random, 10);
+WanderingTraderEntity
+fillRecipes()
+         int int_1 = this.random.nextInt(tradeOffers$Factorys_2.length);
+         TradeOffer tradeOffer_1 = tradeOffers$Factory_1.create(this, this.random);
+afterUsing(TradeOffer)
+         int int_1 = 3 + this.random.nextInt(4);
+WolfEntity
+getAmbientSound()
+      } else if (this.random.nextInt(3) == 0) {
+tick()
+               this.playSound(SoundEvents.ENTITY_WOLF_SHAKE, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+                  float float_2 = (this.random.nextFloat() * 2.0F - 1.0F) * this.getWidth() * 0.5F;
+                  float float_3 = (this.random.nextFloat() * 2.0F - 1.0F) * this.getWidth() * 0.5F;
+interactMob(PlayerEntity, Hand)
+            if (this.random.nextInt(3) == 0) {
+WolfEntity.AvoidLlamaGoal
+isScaredOf(LlamaEntity)
+         return llamaEntity_1.getStrength() >= WolfEntity.this.random.nextInt(5);
+net.minecraft.entity.player
+PlayerEntity
+spawnParticles(ParticleEffect)
+         double double_1 = this.random.nextGaussian() * 0.02D;
+         double double_2 = this.random.nextGaussian() * 0.02D;
+         double double_3 = this.random.nextGaussian() * 0.02D;
+dropItem(ItemStack, boolean, boolean)
+            float_1 = this.random.nextFloat() * 0.5F;
+            float_2 = this.random.nextFloat() * 6.2831855F;
+            float float_8 = this.random.nextFloat() * 6.2831855F;
+            float float_9 = 0.02F * this.random.nextFloat();
+....r...
+readCustomDataFromTag(CompoundTag)
+         this.enchantmentTableSeed = this.random.nextInt();
+disableShield(boolean)
+      if (this.random.nextFloat() < float_1) {
+applyEnchantmentCosts(ItemStack, int)
+      this.enchantmentTableSeed = this.random.nextInt();
+net.minecraft.entity.projectile
+ExplosiveProjectileEntity
+ExplosiveProjectileEntity(EntityType<? extends ExplosiveProjectileEntity>, LivingEntity, double, double, double, World)
+      double_1 += this.random.nextGaussian() * 0.4D;
+      double_2 += this.random.nextGaussian() * 0.4D;
+      double_3 += this.random.nextGaussian() * 0.4D;
+FishingBobberEntity
+FishingBobberEntity(PlayerEntity, World, int, int)
+....r...
+tick()
+               this.setVelocity(vec3d_1.x * 0.9D, vec3d_1.y - double_1 * (double)this.random.nextFloat() * 0.2D, vec3d_1.z * 0.9D);
+tickFishingLogic(BlockPos)
+      if (this.random.nextFloat() < 0.25F && this.world.hasRain(blockPos_2)) {
+      if (this.random.nextFloat() < 0.5F && !this.world.isSkyVisible(blockPos_2)) {
+            this.setVelocity(this.getVelocity().add(0.0D, -0.2D * (double)this.random.nextFloat() * (double)this.random.nextFloat(), 0.0D));
+               this.fishAngle = (float)((double)this.fishAngle + this.random.nextGaussian() * 4.0D);
+                  if (this.random.nextFloat() < 0.15F) {
+               this.setVelocity(vec3d_1.x, (double)(-0.4F * MathHelper.nextFloat(this.random, 0.6F, 1.0F)), vec3d_1.z);
+               this.playSound(SoundEvents.ENTITY_FISHING_BOBBER_SPLASH, 0.25F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
+               this.hookCountdown = MathHelper.nextInt(this.random, 20, 40);
+            if (this.random.nextFloat() < float_6) {
+               float_7 = MathHelper.nextFloat(this.random, 0.0F, 360.0F) * 0.017453292F;
+               float_8 = MathHelper.nextFloat(this.random, 25.0F, 60.0F);
+                  serverWorld_1.spawnParticles(ParticleTypes.SPLASH, double_5, double_6, double_7, 2 + this.random.nextInt(2), 0.10000000149011612D, 0.0D, 0.10000000149011612D, 0.0D);
+               this.fishAngle = MathHelper.nextFloat(this.random, 0.0F, 360.0F);
+               this.fishTravelCountdown = MathHelper.nextInt(this.random, 20, 80);
+            this.waitCountdown = MathHelper.nextInt(this.random, 100, 600);
+use(ItemStack)
+....r...
+               this.owner.world.spawnEntity(new ExperienceOrbEntity(this.owner.world, this.owner.getX(), this.owner.getY() + 0.5D, this.owner.getZ() + 0.5D, this.random.nextInt(6) + 1));
+LlamaSpitEntity
+setVelocity(double, double, double, float, float)
+....r...
+ProjectileEntity
+setVelocity(double, double, double, float, float)
+....r...
+tick()
+            this.setVelocity(vec3d_1.multiply((double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F)));
+onHit(HitResult)
+         this.playSound(this.getSound(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+onEntityHit(EntityHitResult)
+         int_1 += this.random.nextInt(int_1 / 2 + 2);
+         this.playSound(this.sound, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+applyEnchantmentEffects(LivingEntity, float)
+      this.setDamage((double)(float_1 * 2.0F) + this.random.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getId() * 0.11F));
+ShulkerBulletEntity
+method_7486(Axis)
+         direction_1 = Direction.random(this.random);
+               direction_1 = Direction.random(this.random);
+            direction_1 = (Direction)list_1.get(this.random.nextInt(list_1.size()));
+      this.field_7627 = 10 + this.random.nextInt(5) * 10;
+net.minecraft.entity.raid
+RaiderEntity
+loot(ItemEntity)
+         if (!itemStack_2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1F, 0.0F) < double_1) {
+RaiderEntity.AttackHomeGoal
+tryFindHome()
+         }, this::canLootHome, PointOfInterestStorage.OccupationStatus.ANY, blockPos_1, 48, this.raider.random);
+RaiderEntity.CelebrateGoal
+tick()
+         if (!this.raider.isSilent() && this.raider.random.nextInt(100) == 0) {
+         if (!this.raider.hasVehicle() && this.raider.random.nextInt(50) == 0) {
+RaiderEntity.PatrolApproachGoal
+tick()
+               if (this.raider.random.nextInt(50) == 0) {
+net.minecraft.entity.thrown
+ThrownEggEntity
+handleStatus(byte)
+....r...
+onCollision(HitResult)
+         if (this.random.nextInt(8) == 0) {
+            if (this.random.nextInt(32) == 0) {
+ThrownEnderpearlEntity
+onCollision(HitResult)
+         this.world.addParticle(ParticleTypes.PORTAL, this.getX(), this.getY() + this.random.nextDouble() * 2.0D, this.getZ(), this.random.nextGaussian(), 0.0D, this.random.nextGaussian());
+               if (this.random.nextFloat() < 0.05F && this.world.getGameRules().getBoolean(GameRules.DO_MOB_SPAWNING)) {
+ThrownEntity
+setVelocity(double, double, double, float, float)
+....r...
+tick()
+         this.setVelocity(this.getVelocity().multiply((double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F)));
+net.minecraft.entity.vehicle
+BoatEntity
+onBubbleColumnSurfaceCollision(boolean)
+      this.world.addParticle(ParticleTypes.SPLASH, this.getX() + (double)this.random.nextFloat(), this.getY() + 0.7D, this.getZ() + (double)this.random.nextFloat(), 0.0D, 0.0D, 0.0D);
+      if (this.random.nextInt(20) == 0) {
+         this.world.playSound(this.getX(), this.getY(), this.getZ(), this.getSplashSound(), this.getSoundCategory(), 1.0F, 0.8F + 0.4F * this.random.nextFloat(), false);
+tick()
+....r...
+FurnaceMinecartEntity
+tick()
+      if (this.isLit() && this.random.nextInt(4) == 0) {
+TntMinecartEntity
+dropItems(DamageSource)
+            this.fuseTicks = this.random.nextInt(20) + this.random.nextInt(20);
+explode(double)
+         this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)(4.0D + this.random.nextDouble() * 1.5D * double_2), Explosion.DestructionType.BREAK);
+Value write
+Gradle: net.minecraft:minecraft:1.15-mapped-net.fabricmc.yarn-2
+net.minecraft.entity
+Entity
+Entity(EntityType<?>, World)
+      this.random = new Random();

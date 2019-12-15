@@ -6,6 +6,4 @@ public interface IEntity {
 
     boolean hasGlowingTicket();
 
-    int getGlowingTicketColor();
-
 }

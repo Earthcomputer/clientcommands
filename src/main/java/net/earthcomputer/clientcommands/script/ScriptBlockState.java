@@ -149,7 +149,7 @@ public class ScriptBlockState {
 
     @SuppressWarnings("unchecked")
     private static <T extends Comparable<T>> String propertyGetName(Property<T> prop, Object val) {
-        return prop.getName((T) val);
+        return prop.name((T) val);
     }
 
 }

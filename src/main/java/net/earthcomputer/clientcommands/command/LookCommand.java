@@ -42,9 +42,9 @@ public class LookCommand {
 
     private static int lookBlock(BlockPos pos) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        double dx = (pos.getX() + 0.5) - player.x;
-        double dy = (pos.getY() + 0.5) - (player.y + player.getStandingEyeHeight());
-        double dz = (pos.getZ() + 0.5) - player.z;
+        double dx = (pos.getX() + 0.5) - player.getX();
+        double dy = (pos.getY() + 0.5) - (player.getY() + player.getStandingEyeHeight());
+        double dz = (pos.getZ() + 0.5) - player.getZ();
         double dh = Math.sqrt(dx * dx + dz * dz);
         float yaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90;
         float pitch = (float) -Math.toDegrees(Math.atan2(dy, dh));
@@ -61,7 +61,7 @@ public class LookCommand {
     }
 
     private static int doLook(ClientPlayerEntity player, float yaw, float pitch) {
-        player.setPositionAndAngles(player.x, player.y, player.z, yaw, pitch);
+        player.setPositionAndAngles(player.getX(), player.getY(), player.getZ(), yaw, pitch);
         return 0;
     }
 

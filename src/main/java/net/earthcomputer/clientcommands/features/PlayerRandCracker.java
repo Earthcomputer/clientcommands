@@ -71,6 +71,8 @@ public class PlayerRandCracker {
 
     // ===== RESET DETECTION + PLAYER RNG MAINTENANCE ===== //
 
+    // TODO: update-sensitive: call hierarchy of PlayerEntity.random and PlayerEntity.getRandom()
+
     private static int expectedThrows = 0;
 
     public static void resetCracker() {
@@ -261,7 +263,7 @@ public class PlayerRandCracker {
             return false;
         }
         expectedThrows++;
-        MinecraftClient.getInstance().interactionManager.method_2906(player.container.syncId,
+        MinecraftClient.getInstance().interactionManager.clickSlot(player.container.syncId,
                 matchingSlot.id, 0, SlotActionType.THROW, player);
 
         return true;
@@ -284,7 +286,7 @@ public class PlayerRandCracker {
 
     public static long singlePlayerCrackRNG() {
         ServerPlayerEntity serverPlayer = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayer(MinecraftClient.getInstance().player.getUuid());
-        long seed = getSeed(serverPlayer.getRand());
+        long seed = getSeed(serverPlayer.getRandom());
         setSeed(seed);
 
         EnchantmentCracker.possibleXPSeeds.clear();
