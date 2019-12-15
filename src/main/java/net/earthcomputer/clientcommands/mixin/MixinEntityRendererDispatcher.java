@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinEntityRendererDispatcher {
 
     @Inject(method = "configure", at = @At("HEAD"))
-    public void onConfigure(World world, TextRenderer textRenderer, Camera camera, Entity entity, GameOptions gameOptions, CallbackInfo ci) {
+    public void onConfigure(World world, Camera camera, Entity entity, CallbackInfo ci) {
         RenderSettings.preRenderEntities();
     }
 

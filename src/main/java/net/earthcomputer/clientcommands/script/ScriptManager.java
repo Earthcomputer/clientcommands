@@ -229,7 +229,7 @@ public class ScriptManager {
         return currentThread().input;
     }
 
-    public static void copyScriptInputToPlayer(boolean inSneakingPose, boolean spectator) {
+    public static void copyScriptInputToPlayer(boolean inSneakingPose) {
         Input playerInput = MinecraftClient.getInstance().player.input;
         for (ThreadInstance thread : runningThreads) {
             playerInput.pressingForward |= thread.input.pressingForward;
@@ -241,7 +241,7 @@ public class ScriptManager {
         }
         playerInput.movementForward = playerInput.pressingForward ^ playerInput.pressingBack ? (playerInput.pressingForward ? 1 : -1) : 0;
         playerInput.movementSideways = playerInput.pressingLeft ^ playerInput.pressingRight ? (playerInput.pressingLeft ? 1 : -1) : 0;
-        if (!spectator && (playerInput.sneaking || inSneakingPose)) {
+        if (playerInput.sneaking || inSneakingPose) {
             playerInput.movementSideways = (float)(playerInput.movementSideways * 0.3D);
             playerInput.movementForward = (float)(playerInput.movementForward * 0.3D);
         }

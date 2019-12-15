@@ -12,18 +12,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinKeyboardInput {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
-    private void preTick(boolean inSneakingPose, boolean spectator, CallbackInfo ci) {
+    private void preTick(boolean inSneakingPose, CallbackInfo ci) {
         if (ScriptManager.blockingInput()) {
             Input _this = (Input) (Object) this;
             _this.pressingForward = _this.pressingBack = _this.pressingLeft = _this.pressingRight = _this.jumping = _this.sneaking = false;
-            ScriptManager.copyScriptInputToPlayer(inSneakingPose, spectator);
+            ScriptManager.copyScriptInputToPlayer(inSneakingPose);
             ci.cancel();
         }
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
-    private void postTick(boolean inSneakingPose, boolean spectator, CallbackInfo ci) {
-        ScriptManager.copyScriptInputToPlayer(inSneakingPose, spectator);
+    private void postTick(boolean inSneakingPose, CallbackInfo ci) {
+        ScriptManager.copyScriptInputToPlayer(inSneakingPose);
     }
 
 }

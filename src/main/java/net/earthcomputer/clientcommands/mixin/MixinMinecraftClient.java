@@ -27,7 +27,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
 
     @Shadow protected int attackCooldown;
 
-    @Shadow protected abstract void method_1590(boolean boolean_1);
+    @Shadow protected abstract void handleBlockBreaking(boolean boolean_1);
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void onTick(CallbackInfo ci) {
@@ -79,7 +79,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
 
     @Override
     public void continueBreakingBlock() {
-        method_1590(true);
+        handleBlockBreaking(true);
     }
 
     @Override
