@@ -61,7 +61,7 @@ public class LookCommand {
     }
 
     private static int doLook(ClientPlayerEntity player, float yaw, float pitch) {
-        player.setPositionAndAngles(player.getX(), player.getY(), player.getZ(), yaw, pitch);
+        player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), yaw, pitch);
         return 0;
     }
 

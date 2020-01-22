@@ -21,7 +21,7 @@ public class ScriptWorld {
     }
 
     public String getDimension() {
-        return ScriptUtil.simplifyIdentifier(Registry.DIMENSION.getId(getWorld().dimension.getType()));
+        return ScriptUtil.simplifyIdentifier(Registry.DIMENSION_TYPE.getId(getWorld().dimension.getType()));
     }
 
     public String getBlock(int x, int y, int z) {

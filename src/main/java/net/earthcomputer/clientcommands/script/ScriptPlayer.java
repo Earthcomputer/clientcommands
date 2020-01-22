@@ -55,7 +55,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (dx * dx + dy * dy + dz * dz > 0.5 * 0.5)
             return false;
 
-        getPlayer().setPosition(x, y, z);
+        getPlayer().setPos(x, y, z);
 
         if (sync)
             getPlayer().networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, getPlayer().onGround));

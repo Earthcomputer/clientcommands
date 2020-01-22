@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.2.5-SNAPSHOT'
+	id 'fabric-loom' version '0.2.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -25,10 +25,7 @@ dependencies {
 	modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
 	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modCompile('net.earthcomputer:multiconnect:1.1:api') {
-		transitive = false
-	}
-	include('net.earthcomputer:multiconnect:1.1:api') {
+	modApi('net.earthcomputer:multiconnect:1.2.1:api') {
 		transitive = false
 	}
 }
