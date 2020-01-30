@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,18 +63,17 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
     }
 
     // Earth annoying his friends <3 nothing to see here
-    @ModifyArg(method = "<init>", index = 2, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/WindowProvider;createWindow(Lnet/minecraft/client/WindowSettings;Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/client/util/Window;"))
-    private String modifyWindowTitle(String title) {
+    @Inject(method = "getWindowTitle", at = @At("RETURN"), cancellable = true)
+    private void modifyWindowTitle(CallbackInfoReturnable<String> ci) {
         String playerName = MinecraftClient.getInstance().getSession().getProfile().getName();
-        if (!"Earthcomputer".equals(playerName)
-                && !"Azteched".equals(playerName)
-                && !"samnrad".equals(playerName)
-                && !"allocator".equals(playerName))
-            return title;
-
-        List<Character> chars = title.chars().mapToObj(c -> (char)c).collect(Collectors.toCollection(ArrayList::new));
-        Collections.shuffle(chars);
-        return chars.stream().map(String::valueOf).collect(Collectors.joining());
+        if ("Earthcomputer".equals(playerName)
+                || "Azteched".equals(playerName)
+                || "samnrad".equals(playerName)
+                || "allocator".equals(playerName)) {
+            List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));
+            Collections.shuffle(chars);
+            ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
+        }
     }
 
     @Override
