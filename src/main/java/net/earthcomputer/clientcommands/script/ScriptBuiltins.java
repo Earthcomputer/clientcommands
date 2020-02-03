@@ -64,10 +64,8 @@ class ScriptBuiltins {
             @Override
             public Object newObject(Object... args) {
                 if (args.length < 1 || args.length > 2)
-                    throw new UnsupportedOperationException("new Thread() called with wrong number of arguments");
-                JSObject action;
-                if (!(args[0] instanceof JSObject) || !(action = (JSObject) args[0]).isFunction())
-                    throw new IllegalArgumentException("action is not a function");
+                    throw new UnsupportedOperationException("new Thread() called with " + args.length + " arguments, but expected 1 or 2");
+                JSObject action = ScriptUtil.asFunction(args[0]);
                 boolean daemon = args.length < 2 ? true : (Boolean) ScriptUtils.convert(args[1], Boolean.class);
                 return ScriptManager.createThread(() -> {
                         action.call(null);
