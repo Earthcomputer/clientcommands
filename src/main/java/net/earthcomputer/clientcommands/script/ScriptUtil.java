@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.script;
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import net.minecraft.nbt.*;
 import net.minecraft.util.Identifier;
@@ -254,12 +255,51 @@ public class ScriptUtil {
             return id.toString();
     }
 
+    public static Object safeWrap(Object obj) {
+        try {
+            return ScriptUtils.wrap(obj);
+        } catch (NoSuchMethodError e) {
+            // hackfix for older Java 8 builds
+            return ScriptObjectMirror.wrap(obj, getGlobalContext());
+        } catch (IllegalArgumentException e) {
+            return obj;
+        }
+    }
+
     public static String asString(Object obj) {
         if (obj == null) return null;
+        obj = safeWrap(obj);
         if (obj instanceof JSObject) {
             return (String) AbstractJSObject.getDefaultValue((JSObject) obj, String.class);
         } else {
             return String.valueOf(obj);
+        }
+    }
+
+    public static boolean isFunction(Object obj) {
+        try {
+            asFunction(obj);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public static JSObject asFunction(Object obj) {
+        obj = safeWrap(obj);
+        if (obj instanceof JSObject && ((JSObject) obj).isFunction())
+            return (JSObject) obj;
+        throw new IllegalArgumentException("Cannot interpret " + obj + " as a function");
+    }
+
+    // unsafe function, should only be used for compatibility with older Java releases
+    private static Object getGlobalContext() {
+        try {
+            return Class.forName("jdk.nashorn.internal.runtime.Context")
+                    .getMethod("getGlobal")
+                    .invoke(null);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Unable to get global context", e);
         }
     }
 

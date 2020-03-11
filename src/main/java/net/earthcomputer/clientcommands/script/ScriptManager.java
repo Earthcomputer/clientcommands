@@ -115,7 +115,11 @@ public class ScriptManager {
                     e.getCause().printStackTrace();
                 }
             } catch (Throwable e) {
-                ClientCommandManager.sendError(new LiteralText(e.getMessage()));
+                try {
+                    ClientCommandManager.sendError(new LiteralText(e.getMessage()));
+                } catch (Throwable e1) {
+                    LOGGER.error("Error sending error to chat");
+                }
                 e.printStackTrace();
             }
             runningThreads.remove(thread);

@@ -189,8 +189,8 @@ public class ScriptPlayer extends ScriptLivingEntity {
         if (itemStack instanceof String) {
             Item item = Registry.ITEM.get(new Identifier((String) itemStack));
             predicate = stack -> stack.getItem() == item;
-        } else if (itemStack instanceof JSObject && ((JSObject) itemStack).isFunction()) {
-            JSObject jsObject = (JSObject) itemStack;
+        } else if (ScriptUtil.isFunction(itemStack)) {
+            JSObject jsObject = ScriptUtil.asFunction(itemStack);
             predicate = stack -> {
                 Object result = jsObject.call(null, ScriptUtil.fromNbt(stack.toTag(new CompoundTag())));
                 return (Boolean) ScriptUtils.convert(result, Boolean.class);

@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.script;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import net.earthcomputer.clientcommands.interfaces.ISlot;
 import net.minecraft.client.MinecraftClient;
@@ -66,7 +66,7 @@ public class ScriptInventory {
         click(slot, null);
     }
 
-    public void click(Integer slot, ScriptObjectMirror options) {
+    public void click(Integer slot, JSObject options) {
         String typeStr = options == null || !options.hasMember("type") ? null : ScriptUtil.asString(options.getMember("type"));
         SlotActionType type = typeStr == null ? SlotActionType.PICKUP :
                 Arrays.stream(SlotActionType.values()).filter(it -> it.name().equalsIgnoreCase(typeStr)).findAny().orElse(SlotActionType.PICKUP);
