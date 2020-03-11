@@ -22,6 +22,12 @@ declare function $(command: string): number | Array<Entity>;
 declare function print(x: string): void;
 
 /**
+ * Sends a message to the game chat, prefix with "/" to run a server-side command.
+ * @param msg The message to send
+ */
+declare function chat(msg: string): void;
+
+/**
  * Allows the game to run a tick. Pauses script execution until the next tick
  */
 declare function tick(): void;
@@ -353,7 +359,8 @@ interface InventoryClickOptions {
      */
     type?: string;
     /**
-     * Whether to simulate a right click rather than a left click (which is the default)
+     * Whether to simulate a right click rather than a left click (which is the default).
+     * When {@link type} is <tt>"throw"</tt>, then setting this to <tt>true</tt> throws all items rather than just one.
      */
     rightClick?: boolean;
     /**

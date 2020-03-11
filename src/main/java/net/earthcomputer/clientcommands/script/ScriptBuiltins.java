@@ -58,6 +58,7 @@ class ScriptBuiltins {
             return ClientCommandManager.executeCommand(reader, command);
         });
         engine.put("print", (Consumer<String>) message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message)));
+        engine.put("chat", (Consumer<String>) message -> MinecraftClient.getInstance().player.sendChatMessage(message));
         engine.put("tick", (Runnable) ScriptManager::passTick);
 
         engine.put("Thread", new AbstractJSObject() {
