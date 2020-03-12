@@ -119,7 +119,7 @@ public class ScriptInventory {
             throw new IllegalArgumentException("Slot not in open container");
         }
 
-        MinecraftClient.getInstance().interactionManager.clickSlot(container.syncId, slotId, mouseButton, type, player);
+        MinecraftClient.getInstance().interactionManager.clickSlot(player.container.syncId, slotId, mouseButton, type, player);
     }
 
     @Override

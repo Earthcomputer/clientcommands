@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScriptManager {
 
@@ -38,6 +39,8 @@ public class ScriptManager {
 
     private static Deque<ThreadInstance> threadStack = new ArrayDeque<>();
     private static List<ThreadInstance> runningThreads = new ArrayList<>();
+
+    private static AtomicInteger nextThreadId = new AtomicInteger();
 
     static final ScriptEngine ENGINE;
     static {
@@ -111,16 +114,16 @@ public class ScriptManager {
             } catch (ScriptInterruptedException ignore) {
             } catch (ScriptException e) {
                 if (!(e.getCause() instanceof ScriptInterruptedException)) {
-                    ClientCommandManager.sendError(new LiteralText(e.getMessage()));
+                    ClientCommandManager.sendError(new LiteralText(e.getMessage() == null ? e.toString() : e.getMessage()));
                     e.getCause().printStackTrace();
                 }
             } catch (Throwable e) {
                 try {
-                    ClientCommandManager.sendError(new LiteralText(e.getMessage()));
+                    ClientCommandManager.sendError(new LiteralText(e.getMessage() == null ? e.toString() : e.getMessage()));
                 } catch (Throwable e1) {
-                    LOGGER.error("Error sending error to chat");
+                    LOGGER.error("Error sending error to chat", e1);
                 }
-                e.printStackTrace();
+                LOGGER.error("An error occurred in a script command: ", e);
             }
             runningThreads.remove(thread);
             if (thread.parent != null)
@@ -133,6 +136,7 @@ public class ScriptManager {
             thread.running = false;
             thread.blocked.set(true);
         });
+        thread.javaThread.setName("ClientCommands script thread " + nextThreadId.getAndIncrement());
         thread.javaThread.setDaemon(true);
         thread.task = new LongTask() {
             @Override

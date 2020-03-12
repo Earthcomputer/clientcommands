@@ -50,7 +50,7 @@ public class MathUtil {
 
         Box totalArea = new Box(sourcePos, new Vec3d(targetPos));
         List<Box> obscurers = new ArrayList<>();
-        for (BlockPos pos : BlockPos.iterate(MathHelper.floor(totalArea.z1), MathHelper.floor(totalArea.y1), MathHelper.floor(totalArea.z1),
+        for (BlockPos pos : BlockPos.iterate(MathHelper.floor(totalArea.x1), MathHelper.floor(totalArea.y1), MathHelper.floor(totalArea.z1),
                 MathHelper.ceil(totalArea.x2), MathHelper.ceil(totalArea.y2), MathHelper.ceil(totalArea.z2))) {
             if (!pos.equals(targetPos)) {
                 world.getBlockState(pos).getOutlineShape(world, pos).forEachBox((x1, y1, z1, x2, y2, z2) ->
