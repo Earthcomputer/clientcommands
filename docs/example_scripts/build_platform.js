@@ -1,6 +1,8 @@
 
 var GROUP_NAME = "rsf";
 var PLATFORM_Y = 28;
+var TEMPLATE_Y = 20;
+var TEMPLATE_Z = -3367;
 var PLATFORM_X_MIN = 3229;
 var PLATFORM_X_MAX = 3305;
 var PLATFORM_Z_MIN = -3440;
@@ -105,7 +107,7 @@ var gatherStone = function(stoneNeeded) {
             }
         }
     }
-    throw new Error("Not enough cobblestone");
+    throw new Error("Not enough stone");
 };
 
 var ensureResources = function() {
@@ -186,7 +188,7 @@ var ensureResources = function() {
             }
 
             player.openContainer.click(0, {type: "quick_move"});
-            anticheatLessDelay();
+            anticheatMediumDelay();
 
             recipeCount -= 64;
         }
@@ -205,10 +207,17 @@ var ensureResources = function() {
 var placePlatform = function() {
     for (var x = PLATFORM_X_MAX; x >= PLATFORM_X_MIN; x--) {
         var countDown = x % 2 === PLATFORM_X_MAX % 2;
+        var standingX = x;
+        if (!countDown)
+            standingX--;
         for (var z = countDown ? PLATFORM_Z_MAX : PLATFORM_Z_MIN; countDown ? z >= PLATFORM_Z_MIN : z <= PLATFORM_Z_MAX; z += countDown ? -1 : 1) {
             ensureResources();
-            if (!player.moveTo(x + 0.5, z + 0.5))
-                throw new Error("Movement to " + x + ", " + z + " failed");
+            if (world.getBlock(x, PLATFORM_Y, z).endsWith("_slab"))
+                continue;
+            if (!world.getBlockState(x, TEMPLATE_Y, z).solid)
+                continue;
+            if (!player.moveTo(standingX + 0.5, z + 0.5))
+                throw new Error("Movement to " + standingX + ", " + z + " failed");
             player.pick(SLAB_BLOCK);
             var placementSide = -1;
             for (var dir = 0; dir < 4; dir++) {
@@ -228,6 +237,7 @@ var placePlatform = function() {
 };
 
 replenishArea = findReplenishArea();
+chat("/cto");
 if (player.pick(STONE_BLOCK)) {
     anticheatDelay();
     chat("/ctf " + GROUP_NAME);
