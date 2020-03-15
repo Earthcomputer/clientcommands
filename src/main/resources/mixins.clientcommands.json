@@ -3,6 +3,7 @@
   "package": "net.earthcomputer.clientcommands.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "LandPathNodeMakerAccessor",
     "MixinAnvilContainer",
     "MixinAnvilContainer2",
     "MixinArmorStandEntity",
@@ -15,6 +16,7 @@
     "MixinClientPlayerEntity",
     "MixinClientPlayerInteractionManager",
     "MixinClientPlayNetworkHandler",
+    "MixinClientWorld",
     "MixinCommandSuggestor",
     "MixinCraftingTableContainer",
     "MixinCreeperMooshroomSheepAndSnowGolemEntity",

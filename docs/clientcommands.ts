@@ -133,6 +133,30 @@ declare class ControllablePlayer extends Player {
     moveTo(x: number, z: number, smart?: boolean): boolean;
 
     /**
+     * Pathfinds the player to the specified target position. Blocks until it reaches there.
+     * Returns whether successful
+     * @param x The x-position of the target
+     * @param y The y-position of the target
+     * @param z The z-position of the target
+     * @param hints The pathfinding hints
+     */
+    pathTo(x: number, y: number, z: number, hints?: PathfindingHints): boolean;
+    /**
+     * Pathfinds the player to the specified moving target entity. Blocks until it reaches there.
+     * Returns whether successful
+     * @param target The entity to follow
+     * @param hints The pathfinding hints
+     */
+    pathTo(target: Entity, hints?: PathfindingHints): boolean;
+    /**
+     * Pathfinds the player to the specified moving target. The input function will be called periodically
+     * to update the target position. Returns whether successful
+     * @param movingTarget The moving target to follow
+     * @param hints The pathfinding hints
+     */
+    pathTo(movingTarget: () => Position, hints?: PathfindingHints): boolean;
+
+    /**
      * The yaw of the player in degrees. 0 degrees is to the south, increasing clockwise
      */
     yaw: number;
@@ -464,6 +488,16 @@ declare class World {
      * @param z The z-coordinate of the position to get the sky light of
      */
     getSkyLight(x: number, y: number, z: number): number;
+
+    /**
+     * Finds the closest visible point on a block
+     * @param x The x-position of the block to find the closest visible point on
+     * @param y The y-position of the block to find the closest visible point on
+     * @param z The z-position of the block to find the closest visible point on
+     * @param side The side of the block to find the closest visible point on. If not specified, will use the closest side.
+     * @return Whether there was a visible point on the block within reach
+     */
+    getClosestVisiblePoint(x: number, y: number, z: number, side?: string): Position | null;
 }
 
 /**
@@ -791,4 +825,78 @@ declare class ItemStack {
      * The tags applying to this item
      */
     readonly tags: Array<string>;
+}
+
+/**
+ * Represents a 3D position
+ */
+interface Position {
+    x: number;
+    y: number;
+    z: number;
+}
+
+/**
+ * Pathfinding hints
+ */
+interface PathfindingHints {
+
+    /**
+     * A function that gets the path node type for the given coordinates. Returns <tt>null</tt> for vanilla behavior.
+     * A list of current path node types and their penalties as of 1.15 is as follows:
+     * <table>
+     *     <tr><th>Name</th><th>Default penalty</th></tr>
+     *        <tr><td><tt>"blocked"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"open"</tt></td><td>0</td></tr>
+     *        <tr><td><tt>"walkable"</tt></td><td>0</td></tr>
+     *        <tr><td><tt>"trapdoor"</tt></td><td>0</td></tr>
+     *        <tr><td><tt>"fence"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"lava"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"water"</tt></td><td>8</td></tr>
+     *        <tr><td><tt>"water_border"</tt></td><td>8</td></tr>
+     *        <tr><td><tt>"rail"</tt></td><td>0</td></tr>
+     *        <tr><td><tt>"danger_fire"</tt></td><td>8</td></tr>
+     *        <tr><td><tt>"damage_fire"</tt></td><td>16</td></tr>
+     *        <tr><td><tt>"danger_cactus"</tt></td><td>8</td></tr>
+     *        <tr><td><tt>"damage_cactus"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"danger_other"</tt></td><td>8</td></tr>
+     *        <tr><td><tt>"damage_other"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"door_open"</tt></td><td>0</td></tr>
+     *        <tr><td><tt>"door_wood_closed"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"door_iron_closed"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"breach"</tt></td><td>4</td></tr>
+     *        <tr><td><tt>"leaves"</tt></td><td>-1</td></tr>
+     *        <tr><td><tt>"sticky_honey"</tt></td><td>8</td></tr>
+     *        <tr><td><tt>"cocoa"</tt></td><td>0</td></tr>
+     * </table>
+     */
+    nodeTypeFunction?: (x: number, y: number, z: number) => string | null
+
+    /**
+     * A function that gets the pathfinding penalty for the given path node type.
+     * <ul>
+     * <li>Return 0 for no penalty.</li>
+     * <li>Return -1 for a completely impassable block.</li>
+     * <li>Return higher positive numbers for higher penalties.</li>
+     * </ul>
+     * See {@link nodeTypeFunction} for a list of path node types and their default penalties
+     */
+    penaltyFunction?: (type: string) => number | null
+
+    /**
+     * The maximum Euclidean distance to the target that the player can be at any one time.
+     * Defaults to twice the distance to the target.
+     */
+    followRange?: number
+
+    /**
+     * The maximum distance from the target which is sufficient to reach. Defaults to 0
+     */
+    reachDistance?: number
+
+    /**
+     * The maximum length of a path at any one time. Defaults to twice the distance to the target.
+     */
+    maxPathLength?: number
+
 }

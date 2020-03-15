@@ -101,7 +101,10 @@ public class ScriptManager {
         if (scriptSource == null)
             throw SCRIPT_NOT_FOUND_EXCEPTION.create(scriptName);
 
-        ThreadInstance thread = createThread(() -> (Void)ENGINE.eval(scriptSource), false);
+        ThreadInstance thread = createThread(() -> {
+            ENGINE.eval(scriptSource);
+            return null;
+        }, false);
         runThread(thread);
     }
 

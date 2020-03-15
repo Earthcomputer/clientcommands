@@ -75,16 +75,16 @@ public class ScriptInventory {
         if (type == SlotActionType.SWAP) {
             if (!options.hasMember("hotbarSlot"))
                 throw new IllegalArgumentException("When the click type is swap, the options must also contain the hotbar slot to swap with");
-            mouseButton = MathHelper.clamp((int)(Number)ScriptUtils.convert(options.getMember("hotbarSlot"), Number.class), 0, 8);
+            mouseButton = MathHelper.clamp(ScriptUtil.asNumber(options.getMember("hotbarSlot")).intValue(), 0, 8);
         } else if (type == SlotActionType.QUICK_CRAFT) {
             if (!options.hasMember("quickCraftStage"))
                 throw new IllegalArgumentException("When the click type is quick_craft, the options must also contain the quick craft stage");
-            mouseButton = (int)(Number)ScriptUtils.convert(options.getMember("quickCraftStage"), Number.class);
+            mouseButton = ScriptUtil.asNumber(options.getMember("quickCraftStage")).intValue();
         } else {
             if (options == null || !options.hasMember("rightClick"))
                 mouseButton = 0;
             else
-                mouseButton = (Boolean) ScriptUtils.convert(options.getMember("rightClick"), Boolean.class) ? 1 : 0;
+                mouseButton = ScriptUtil.asBoolean(options.getMember("rightClick")) ? 1 : 0;
         }
 
         int slotId = -1;

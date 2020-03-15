@@ -1,15 +1,21 @@
 package net.earthcomputer.clientcommands.script;
 
+import com.google.common.collect.ImmutableSet;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptUtils;
 import net.earthcomputer.clientcommands.MathUtil;
+import net.earthcomputer.clientcommands.features.PathfindingHints;
+import net.earthcomputer.clientcommands.features.PlayerPathfinder;
+import net.earthcomputer.clientcommands.interfaces.IBlockChangeListener;
 import net.earthcomputer.clientcommands.interfaces.IMinecraftClient;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.container.Container;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.pathing.Path;
+import net.minecraft.entity.ai.pathing.PathNode;
+import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,9 +30,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
+import java.util.Locale;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 public class ScriptPlayer extends ScriptLivingEntity {
@@ -128,6 +137,135 @@ public class ScriptPlayer extends ScriptLivingEntity {
         return successful;
     }
 
+    public boolean pathTo(double x, double y, double z) {
+        return pathTo(x, y, z, null);
+    }
+
+    public boolean pathTo(double x, double y, double z, JSObject hints) {
+        BlockPos pos = new BlockPos(x, y, z);
+        return pathTo0(() -> pos, hints, false);
+    }
+
+    public boolean pathTo(Object thing) {
+        return pathTo(thing, null);
+    }
+
+    public boolean pathTo(Object thing, JSObject hints) {
+        if (thing instanceof ScriptEntity) {
+            Entity entity = ((ScriptEntity) thing).getEntity();
+            return pathTo0(() -> new BlockPos(entity), hints, true);
+        } else {
+            JSObject func = ScriptUtil.asFunction(thing);
+            return pathTo0(() -> {
+                JSObject posObj = ScriptUtil.asObject(func.call(null));
+                double x = ScriptUtil.asNumber(posObj.getMember("x")).doubleValue();
+                double y = ScriptUtil.asNumber(posObj.getMember("y")).doubleValue();
+                double z = ScriptUtil.asNumber(posObj.getMember("z")).doubleValue();
+                return new BlockPos(x, y, z);
+            }, hints, true);
+        }
+    }
+
+    private boolean pathTo0(Supplier<BlockPos> target, JSObject hints, boolean movingTarget) {
+        JSObject nodeTypeFunction = hints != null && hints.hasMember("nodeTypeFunction") ? ScriptUtil.asFunction(hints.getMember("nodeTypeFunction")) : null;
+        JSObject penaltyFunction = hints != null && hints.hasMember("penaltyFunction") ? ScriptUtil.asFunction(hints.getMember("penaltyFunction")) : null;
+        Float followRange = hints != null && hints.hasMember("followRange") ? ScriptUtil.asNumber(hints.getMember("followRange")).floatValue() : null;
+        int reachDistance = hints != null && hints.hasMember("reachDistance") ? ScriptUtil.asNumber(hints.getMember("reachDistance")).intValue() : 0;
+        Float maxPathLength = hints != null && hints.hasMember("maxPathLength") ? ScriptUtil.asNumber(hints.getMember("maxPathLength")).floatValue() : null;
+
+        BlockPos[] targetPos = {target.get()};
+
+        PathfindingHints javaHints = new PathfindingHints() {
+            @Override
+            public PathNodeType getNodeType(BlockView world, BlockPos pos) {
+                if (nodeTypeFunction == null)
+                    return null;
+
+                Object typeObj = nodeTypeFunction.call(null, pos.getX(), pos.getY(), pos.getZ());
+                if (typeObj == null)
+                    return null;
+
+                String typeName = ScriptUtil.asString(typeObj);
+                try {
+                    return PathNodeType.valueOf(typeName.toUpperCase(Locale.ROOT));
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Unknown path node type \"" + typeName + "\"");
+                }
+            }
+
+            @Override
+            public float getPathfindingPenalty(PathNodeType type) {
+                if (penaltyFunction == null)
+                    return type.getDefaultPenalty();
+
+                String typeName = type.name().toLowerCase(Locale.ROOT);
+                Object penaltyObj = penaltyFunction.call(null, typeName);
+
+                if (penaltyObj == null)
+                    return type.getDefaultPenalty();
+
+                return ScriptUtil.asNumber(penaltyObj).floatValue();
+            }
+
+            @Override
+            public float getFollowRange() {
+                if (followRange != null)
+                    return followRange;
+                return (float) Math.sqrt(getPlayer().squaredDistanceTo(targetPos[0].getX() + 0.5, targetPos[0].getY() + 0.5, targetPos[0].getZ() + 0.5)) * 2;
+            }
+
+            @Override
+            public int getReachDistance() {
+                return reachDistance;
+            }
+
+            @Override
+            public float getMaxPathLength() {
+                if (maxPathLength != null)
+                    return maxPathLength;
+                return (float) Math.sqrt(getPlayer().squaredDistanceTo(targetPos[0].getX() + 0.5, targetPos[0].getY() + 0.5, targetPos[0].getZ() + 0.5)) * 2;
+            }
+        };
+
+        Path[] path = {PlayerPathfinder.findPathToAny(ImmutableSet.of(targetPos[0]), javaHints)};
+        boolean[] needsRecalc = {false};
+        //noinspection Convert2Lambda - need a new instance every time
+        IBlockChangeListener blockChangeListener = new IBlockChangeListener() {
+            @Override
+            public void onBlockChange(BlockPos pos, BlockState oldState, BlockState newState) {
+                if (path[0] == null || path[0].isFinished() || path[0].getLength() == 0)
+                    return;
+                PathNode end = path[0].getEnd();
+                Vec3d halfway = new Vec3d((end.x + getPlayer().getX()) / 2, (end.y + getPlayer().getY()) / 2, (end.z + getPlayer().getZ()) / 2);
+                if (pos.isWithinDistance(halfway, path[0].getLength() - path[0].getCurrentNodeIndex())) {
+                    needsRecalc[0] = true;
+                }
+            }
+        };
+        IBlockChangeListener.LISTENERS.add(blockChangeListener);
+
+        try {
+            while (path[0] != null && !path[0].isFinished()) {
+                Vec3d currentPosition = path[0].getCurrentPosition();
+                if (!moveTo(currentPosition.x + 0.5, currentPosition.z + 0.5))
+                    return false;
+                path[0].setCurrentNodeIndex(path[0].getCurrentNodeIndex() + 1);
+                if (movingTarget || needsRecalc[0]) {
+                    BlockPos lastTargetPos = target.get();
+                    targetPos[0] = target.get();
+                    if (!lastTargetPos.equals(targetPos[0]) || needsRecalc[0]) {
+                        needsRecalc[0] = false;
+                        path[0] = PlayerPathfinder.findPathToAny(ImmutableSet.of(targetPos[0]), javaHints);
+                    }
+                }
+            }
+        } finally {
+            IBlockChangeListener.LISTENERS.remove(blockChangeListener);
+        }
+
+        return path[0] != null;
+    }
+
     public void setYaw(float yaw) {
         getPlayer().yaw = yaw;
     }
@@ -193,7 +331,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
             JSObject jsObject = ScriptUtil.asFunction(itemStack);
             predicate = stack -> {
                 Object result = jsObject.call(null, ScriptUtil.fromNbt(stack.toTag(new CompoundTag())));
-                return (Boolean) ScriptUtils.convert(result, Boolean.class);
+                return ScriptUtil.asBoolean(result);
             };
         } else {
             Tag nbt = ScriptUtil.toNbt(itemStack);
@@ -244,37 +382,15 @@ public class ScriptPlayer extends ScriptLivingEntity {
     }
 
     public boolean leftClick(int x, int y, int z, String side) {
-        BlockPos pos = new BlockPos(x, y, z);
-        Direction dir = null;
-        if (side != null) {
-            for (Direction d : Direction.values()) {
-                if (d.name().equalsIgnoreCase(side)) {
-                    dir = d;
-                    break;
-                }
-            }
-        }
-        ClientWorld world = MinecraftClient.getInstance().world;
-        BlockState state = world.getBlockState(pos);
-        if (state.isAir())
-            return false;
-        Vec3d origin = getPlayer().getCameraPosVec(0);
-        HitResult hitResult = MinecraftClient.getInstance().crosshairTarget;
-        Vec3d closestPos;
-        if (hitResult.getType() == HitResult.Type.BLOCK && ((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
-            closestPos = hitResult.getPos();
-        } else {
-            closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
-        }
+        Vec3d closestPos = ScriptWorld.getClosestVisiblePoint0(x, y, z, side, true);
         if (closestPos == null)
             return false;
-        if (origin.squaredDistanceTo(closestPos) < 6 * 6) {
-            lookAt(closestPos.x, closestPos.y, closestPos.z);
-            getPlayer().swingHand(Hand.MAIN_HAND);
-            return MinecraftClient.getInstance().interactionManager.attackBlock(pos,
-                    dir == null ? Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)) : dir);
-        }
-        return false;
+        lookAt(closestPos.x, closestPos.y, closestPos.z);
+        getPlayer().swingHand(Hand.MAIN_HAND);
+        Vec3d origin = getPlayer().getCameraPosVec(0);
+        Direction dir = ScriptUtil.getDirectionFromString(side);
+        return MinecraftClient.getInstance().interactionManager.attackBlock(new BlockPos(x, y, z),
+                dir == null ? Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)) : dir);
     }
 
     public boolean rightClick(int x, int y, int z) {
@@ -282,44 +398,23 @@ public class ScriptPlayer extends ScriptLivingEntity {
     }
 
     public boolean rightClick(int x, int y, int z, String side) {
-        BlockPos pos = new BlockPos(x, y, z);
-        Direction dir = null;
-        if (side != null) {
-            for (Direction d : Direction.values()) {
-                if (d.name().equalsIgnoreCase(side)) {
-                    dir = d;
-                    break;
-                }
-            }
-        }
-        ClientWorld world = MinecraftClient.getInstance().world;
-        BlockState state = world.getBlockState(pos);
-        if (state.isAir())
-            return false;
-        Vec3d origin = getPlayer().getCameraPosVec(0);
-        HitResult hitResult = MinecraftClient.getInstance().crosshairTarget;
-        Vec3d closestPos;
-        if (hitResult.getType() == HitResult.Type.BLOCK && ((BlockHitResult) hitResult).getBlockPos().equals(pos)) {
-            closestPos = hitResult.getPos();
-        } else {
-            closestPos = MathUtil.getClosestVisiblePoint(world, pos, origin, getPlayer(), dir);
-        }
+        Vec3d closestPos = ScriptWorld.getClosestVisiblePoint0(x, y, z, side, true);
         if (closestPos == null)
             return false;
-        if (origin.squaredDistanceTo(closestPos) < 6 * 6) {
-            for (Hand hand : Hand.values()) {
-                ActionResult result = MinecraftClient.getInstance().interactionManager.interactBlock(getPlayer(), world, hand,
-                        new BlockHitResult(closestPos,
-                                dir == null ? Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)) : dir,
-                                pos, false));
-                if (result == ActionResult.SUCCESS) {
-                    lookAt(closestPos.x, closestPos.y, closestPos.z);
-                    getPlayer().swingHand(hand);
-                    return true;
-                }
-                if (result == ActionResult.FAIL)
-                    return false;
+        lookAt(closestPos.x, closestPos.y, closestPos.z);
+        Vec3d origin = getPlayer().getCameraPosVec(0);
+        Direction dir = ScriptUtil.getDirectionFromString(side);
+        for (Hand hand : Hand.values()) {
+            ActionResult result = MinecraftClient.getInstance().interactionManager.interactBlock(getPlayer(), MinecraftClient.getInstance().world, hand,
+                    new BlockHitResult(closestPos,
+                            dir == null ? Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)) : dir,
+                            new BlockPos(x, y, z), false));
+            if (result == ActionResult.SUCCESS) {
+                getPlayer().swingHand(hand);
+                return true;
             }
+            if (result == ActionResult.FAIL)
+                return false;
         }
         return false;
     }

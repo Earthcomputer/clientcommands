@@ -24,6 +24,7 @@ public class ScriptClassFilter implements ClassFilter {
         allow(ScriptItemStack.class.getName());
         allow(ScriptLivingEntity.class.getName());
         allow(ScriptPlayer.class.getName());
+        allow(ScriptPosition.class.getName());
         allow(ScriptThread.class.getName());
         allow(ScriptWorld.class.getName());
     }

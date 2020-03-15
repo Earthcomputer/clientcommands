@@ -67,7 +67,7 @@ class ScriptBuiltins {
                 if (args.length < 1 || args.length > 2)
                     throw new UnsupportedOperationException("new Thread() called with " + args.length + " arguments, but expected 1 or 2");
                 JSObject action = ScriptUtil.asFunction(args[0]);
-                boolean daemon = args.length < 2 ? true : (Boolean) ScriptUtils.convert(args[1], Boolean.class);
+                boolean daemon = args.length < 2 || ScriptUtil.asBoolean(args[1]);
                 return ScriptManager.createThread(() -> {
                         action.call(null);
                         return null;

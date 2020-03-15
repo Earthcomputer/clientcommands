@@ -6,6 +6,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
 import net.minecraft.nbt.*;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class ScriptUtil {
         if (input instanceof JSObject) {
             JSObject jsObj = (JSObject) input;
             if (jsObj.isArray()) {
-                int len = (Integer) ScriptUtils.convert(jsObj.getMember("length"), Integer.class);
+                int len = ScriptUtil.asNumber(jsObj.getMember("length")).intValue();
                 List<Object> ret = new ArrayList<>(len);
                 for (int i = 0; i < len; i++)
                     ret.add(jsObj.getSlot(i));
@@ -266,6 +267,22 @@ public class ScriptUtil {
         }
     }
 
+    public static boolean asBoolean(Object obj) {
+        if (obj == null) return false;
+        obj = safeWrap(obj);
+        return (Boolean) ScriptUtils.convert(obj, Boolean.class);
+    }
+
+    public static Number asNumber(Object obj) {
+        if (obj == null) return 0;
+        obj = safeWrap(obj);
+        if (obj instanceof JSObject) {
+            return (Number) AbstractJSObject.getDefaultValue((JSObject) obj, Number.class);
+        } else {
+            return (Number) ScriptUtils.convert(obj, Number.class);
+        }
+    }
+
     public static String asString(Object obj) {
         if (obj == null) return null;
         obj = safeWrap(obj);
@@ -292,6 +309,13 @@ public class ScriptUtil {
         throw new IllegalArgumentException("Cannot interpret " + obj + " as a function");
     }
 
+    public static JSObject asObject(Object obj) {
+        obj = safeWrap(obj);
+        if (obj instanceof JSObject)
+            return (JSObject) obj;
+        throw new IllegalArgumentException("Cannot interpret " + obj + " as an object");
+    }
+
     // unsafe function, should only be used for compatibility with older Java releases
     private static Object getGlobalContext() {
         try {
@@ -303,4 +327,17 @@ public class ScriptUtil {
         }
     }
 
+    static Direction getDirectionFromString(String side) {
+        if (side == null) {
+            return null;
+        }
+
+        for (Direction dir : Direction.values()) {
+            if (dir.name().equalsIgnoreCase(side)) {
+                return dir;
+            }
+        }
+
+        return null;
+    }
 }

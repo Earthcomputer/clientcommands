@@ -1,11 +1,11 @@
 
 var GROUP_NAME = "rsf";
-var PLATFORM_Y = 28;
+var PLATFORM_Y = 32;
 var TEMPLATE_Y = 20;
 var TEMPLATE_Z = -3367;
 var PLATFORM_X_MIN = 3229;
 var PLATFORM_X_MAX = 3305;
-var PLATFORM_Z_MIN = -3440;
+var PLATFORM_Z_MIN = -3442;
 var PLATFORM_Z_MAX = -3364;
 var STONE_BLOCK = "minecraft:stone";
 var SLAB_BLOCK = "minecraft:smooth_stone_slab";
@@ -135,7 +135,7 @@ var ensureResources = function() {
     var targetX = replenishArea[0] + 0.5 - xDistanceToReplenishArea * 2 / hDistanceToReplenishArea;
     var targetZ = replenishArea[2] + 0.5 - zDistanceToReplenishArea * 2 / hDistanceToReplenishArea;
 
-    if (!player.moveTo(targetX, targetZ))
+    if (!player.pathTo(targetX, player.y, targetZ))
         throw new Error("Could not move to replenish area");
 
     // Re-find the replenish area in case it has moved
@@ -214,9 +214,9 @@ var placePlatform = function() {
             ensureResources();
             if (world.getBlock(x, PLATFORM_Y, z).endsWith("_slab"))
                 continue;
-            if (!world.getBlockState(x, TEMPLATE_Y, z).solid)
+            if (!world.getBlockState(x, TEMPLATE_Y, z).solid || world.getBlock(x, TEMPLATE_Y, z).endsWith("sign"))
                 continue;
-            if (!player.moveTo(standingX + 0.5, z + 0.5))
+            if (!player.pathTo(standingX + 0.5, player.y, z + 0.5))
                 throw new Error("Movement to " + standingX + ", " + z + " failed");
             player.pick(SLAB_BLOCK);
             var placementSide = -1;
@@ -228,9 +228,22 @@ var placePlatform = function() {
             }
             if (placementSide === -1)
                 throw new Error("Nothing to place the slab against at " + x + ", " + z);
+            var closestPoint = world.getClosestVisiblePoint(x + dx[placementSide], PLATFORM_Y, z + dz[placementSide], directionNames[opposite(dir)]);
+            if (!closestPoint) {
+                if (!player.moveTo(standingX + 0.5, z + 0.5))
+                    throw new Error("Movement to " + standingX + ", " + z + " failed");
+                closestPoint = world.getClosestVisiblePoint(x + dx[placementSide], PLATFORM_Y, z + dz[placementSide], directionNames[opposite(dir)]);
+                if (!closestPoint)
+                    throw new Error("Slab not in view");
+            }
+            var clickX = closestPoint.x;
+            var clickY = closestPoint.y;
+            var clickZ = closestPoint.z;
+            if (clickY - Math.floor(clickY) < 0.6)
+                clickY += 0.1;
             anticheatMediumDelay();
-            player.lookAt(x + dx[placementSide], PLATFORM_Y, z + dz[placementSide]);
-            player.syncRotation();
+            player.lookAt(clickX, clickY, clickZ);
+            anticheatMediumDelay();
             player.rightClick(x + dx[placementSide], PLATFORM_Y, z + dz[placementSide], directionNames[opposite(dir)]);
         }
     }
