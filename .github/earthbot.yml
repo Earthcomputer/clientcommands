@@ -1,0 +1,2 @@
+templates:
+  modded: RNG manipulation features are not guaranteed to work on a modded server. If you ask your server admin for a world download, run the world in singleplayer, and the RNG feature works, then the mods are causing the problem. In particular, PaperMC is known to break player RNG manipulation features. Modded servers will never be supported.
