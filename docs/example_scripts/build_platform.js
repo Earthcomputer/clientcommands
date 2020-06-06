@@ -1,9 +1,9 @@
 
 var GROUP_NAME = "rsf";
-var PLATFORM_Y = 32;
+var PLATFORM_Y = 40;
 var TEMPLATE_Y = 20;
 var TEMPLATE_Z = -3367;
-var PLATFORM_X_MIN = 3229;
+var PLATFORM_X_MIN = 3227;
 var PLATFORM_X_MAX = 3305;
 var PLATFORM_Z_MIN = -3442;
 var PLATFORM_Z_MAX = -3364;
@@ -29,7 +29,7 @@ var openContainer = function(x, y, z, type) {
     if (!player.rightClick(x, y, z))
         throw new Error("Could not right click on container at " + x + ", " + y + ", " + z);
     var timeout = 0;
-    while (player.openContainer === null || !type(player.openContainer.type)) {
+    while (player.currentContainer === null || !type(player.currentContainer.type)) {
         tick();
         timeout++;
         if (timeout > 100)
@@ -87,11 +87,11 @@ var gatherStone = function(stoneNeeded) {
                 if (world.getBlock(x, y, z) === "chest" || world.getBlock(x, y, z) === "trapped_chest") {
                     try {
                         openContainer(x, y, z, isChestContainer);
-                        var chestItems = player.openContainer.items;
+                        var chestItems = player.currentContainer.items;
                         for (var i = 0; i < chestItems.length; i++) {
                             if (chestItems[i].id === STONE_BLOCK) {
                                 stoneNeeded -= chestItems[i].Count;
-                                player.openContainer.click(i, {type: "quick_move"});
+                                player.currentContainer.click(i, {type: "quick_move"});
                                 anticheatLessDelay();
                                 if (stoneNeeded <= 0)
                                     return;
@@ -161,12 +161,12 @@ var ensureResources = function() {
                         if (count <= itemsNeeded || itemsNeeded === 64) {
                             // drop down all the stone
                             itemsNeeded -= count;
-                            player.openContainer.click(slot);
+                            player.currentContainer.click(slot);
                             anticheatMediumDelay();
                         } else {
                             // drop down as many stone as needed then put the rest back
                             for (var j = 0; j < itemsNeeded; j++) {
-                                player.openContainer.click(slot, {rightClick: true});
+                                player.currentContainer.click(slot, {rightClick: true});
                                 anticheatMediumDelay();
                             }
                             player.inventory.click(i);
@@ -180,14 +180,14 @@ var ensureResources = function() {
             }
 
             var timeout = 0;
-            while (player.openContainer.items[0].id !== SLAB_BLOCK) {
+            while (player.currentContainer.items[0].id !== SLAB_BLOCK) {
                 tick();
                 timeout++;
                 if (timeout > 100)
                     throw new Error("Failed to craft slabs");
             }
 
-            player.openContainer.click(0, {type: "quick_move"});
+            player.currentContainer.click(0, {type: "quick_move"});
             anticheatMediumDelay();
 
             recipeCount -= 64;

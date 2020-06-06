@@ -1,19 +1,21 @@
 package net.earthcomputer.clientcommands.script;
 
+import com.google.common.collect.Lists;
 import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptUtils;
 import net.earthcomputer.clientcommands.interfaces.ISlot;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.container.*;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class ScriptInventory {
@@ -79,7 +81,9 @@ public class ScriptInventory {
         } else if (type == SlotActionType.QUICK_CRAFT) {
             if (!options.hasMember("quickCraftStage"))
                 throw new IllegalArgumentException("When the click type is quick_craft, the options must also contain the quick craft stage");
-            mouseButton = ScriptUtil.asNumber(options.getMember("quickCraftStage")).intValue();
+            int quickCraftStage = ScriptUtil.asNumber(options.getMember("quickCraftStage")).intValue();
+            int button = options.hasMember("rightClick") && ScriptUtil.asBoolean(options.getMember("rightClick")) ? 1 : 0;
+            mouseButton = Container.packClickData(quickCraftStage, button);
         } else {
             if (options == null || !options.hasMember("rightClick"))
                 mouseButton = 0;
@@ -87,39 +91,163 @@ public class ScriptInventory {
                 mouseButton = ScriptUtil.asBoolean(options.getMember("rightClick")) ? 1 : 0;
         }
 
-        int slotId = -1;
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        int slotId;
         if (slot == null) {
             slotId = -999;
-        } else if (container == player.playerContainer) {
-            if (player.container == player.playerContainer && slot >= player.inventory.getInvSize() && slot < player.inventory.getInvSize() + 5) {
-                slotId = slot - player.inventory.getInvSize();
-            } else {
-                for (Slot s : player.container.slotList) {
-                    if (s.inventory == player.inventory && ((ISlot) s).getInvSlot() == slot) {
-                        slotId = s.id;
-                        break;
-                    }
-                }
-            }
-        } else if (container == player.container) {
-            int curSlotId = 0;
-            for (Slot s : container.slotList) {
-                if (s.inventory != player.inventory) {
-                    if (curSlotId == slot) {
-                        slotId = curSlotId;
-                        break;
-                    }
-                    curSlotId++;
-                }
-            }
+        } else {
+            Slot theSlot = getSlot(slot);
+            if (theSlot == null)
+                throw new IllegalArgumentException("Slot not in open container");
+            slotId = theSlot.id;
         }
 
-        if (slotId == -1) {
-            throw new IllegalArgumentException("Slot not in open container");
-        }
-
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
         MinecraftClient.getInstance().interactionManager.clickSlot(player.container.syncId, slotId, mouseButton, type, player);
+    }
+
+    public Integer findSlot(Object item) {
+        return findSlot(item, false);
+    }
+
+    public Integer findSlot(Object item, boolean reverse) {
+        Predicate<ItemStack> itemPredicate = ScriptUtil.asItemStackPredicate(item);
+
+        List<Slot> slots = getSlots();
+        if (reverse)
+            slots = Lists.reverse(slots);
+
+        for (Slot slot : slots) {
+            if (itemPredicate.test(slot.getStack())) {
+                return getIdForSlot(slot);
+            }
+        }
+
+        return null;
+    }
+
+    public List<Integer> findSlots(Object item, int count) {
+        return findSlots(item, count, false);
+    }
+
+    public List<Integer> findSlots(Object item, int count, boolean reverse) {
+        Predicate<ItemStack> itemPredicate = ScriptUtil.asItemStackPredicate(item);
+
+        List<Slot> slots = getSlots();
+        if (reverse)
+            slots = Lists.reverse(slots);
+
+        List<Integer> slotIds = new ArrayList<>();
+        int itemsFound = 0;
+        for (Slot slot : slots) {
+            if (itemPredicate.test(slot.getStack())) {
+                slotIds.add(getIdForSlot(slot));
+                itemsFound += slot.getStack().getCount();
+                if (count != -1 && itemsFound >= count)
+                    break;
+            }
+        }
+
+        return slotIds;
+    }
+
+    public int moveItems(Object item, int count) {
+        return moveItems(item, count, false);
+    }
+
+    public int moveItems(Object item, int count, boolean reverse) {
+        Predicate<ItemStack> itemPredicate = ScriptUtil.asItemStackPredicate(item);
+
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        assert player != null;
+        ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
+        assert interactionManager != null;
+
+        List<Slot> slots = getSlots();
+        if (reverse)
+            slots = Lists.reverse(slots);
+
+        int itemsFound = 0;
+        for (Slot slot : slots) {
+            if (itemPredicate.test(slot.getStack())) {
+                interactionManager.clickSlot(player.container.syncId, slot.id, 0, SlotActionType.QUICK_MOVE, player);
+                itemsFound += slot.getStack().getCount();
+                if (count != -1 && itemsFound >= count)
+                    break;
+            }
+        }
+
+        return itemsFound;
+    }
+
+    private Slot getSlot(int id) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        assert player != null;
+
+        if (container == player.playerContainer) {
+            if (id < player.inventory.getInvSize())
+                id += 5;
+            else if (id < player.inventory.getInvSize() + 5)
+                id -= player.inventory.getInvSize();
+            for (int i = 0; i < player.container.slotList.size(); i++) {
+                Slot slot = player.container.getSlot(i);
+                if (slot.inventory == player.inventory) {
+                    if (((ISlot) slot).getInvSlot() == id)
+                        return slot;
+                }
+            }
+        } else {
+            int containerId = 0;
+            for (int i = 0; i < container.slotList.size(); i++) {
+                Slot slot = container.getSlot(i);
+                if (slot.inventory != player.inventory) {
+                    if (id == containerId)
+                        return slot;
+                    containerId++;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private int getIdForSlot(Slot slot) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        assert player != null;
+
+        if (container == player.playerContainer) {
+            int id = ((ISlot) slot).getInvSlot();
+            if (id < 5)
+                return id + player.inventory.getInvSize();
+            else
+                return id - 5;
+        } else {
+            int containerId = 0;
+            for (int i = 0; i < container.slotList.size(); i++) {
+                Slot otherSlot = container.getSlot(i);
+                if (otherSlot.inventory != player.inventory) {
+                    if (otherSlot == slot)
+                        return containerId;
+                    containerId++;
+                }
+            }
+            return -1;
+        }
+    }
+
+    private List<Slot> getSlots() {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        assert player != null;
+
+        if (container == player.playerContainer) {
+            return player.container.slotList.stream()
+                    .filter(slot -> slot.inventory == player.inventory)
+                    .sorted(Comparator.comparingInt(this::getIdForSlot))
+                    .collect(Collectors.toList());
+        } else {
+            return container.slotList.stream()
+                    .filter(slot -> slot.inventory != player.inventory)
+                    .collect(Collectors.toList());
+        }
     }
 
     @Override

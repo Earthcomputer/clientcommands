@@ -33,6 +33,13 @@ declare function chat(msg: string): void;
 declare function tick(): void;
 
 /**
+ * If a string, matches items by their name, with the "minecraft:" prefix removed if it exists.
+ * If an object, matches the item NBT.
+ * If a function, it should return true or false based on the input item NBT.
+ */
+type ItemPredicate = string | object | ((itemNbt: object) => boolean);
+
+/**
  * Represents a generic entity
  */
 declare class Entity {
@@ -213,7 +220,29 @@ declare class ControllablePlayer extends Player {
      * The inventory of the container the player is looking in, or <tt>null</tt> if the player isn't looking
      * in any container
      */
-    readonly openContainer: Inventory | null;
+    readonly currentContainer: Inventory | null;
+
+    /**
+     * Opens a container by right clicking the block at the given block position, and wait for a container
+     * of type <tt>expectedContainerType</tt> to be opened.
+     * @param x The x-position of the container block
+     * @param y The y-position of the container block
+     * @param z The z-position of the container block
+     * @param expectedContainerType The container type to expect, or a function that returns true/false
+     *                              depending on whether a container type should be accepted
+     * @return Whether successful
+     */
+    openContainer(x: number, y: number, z: number, expectedContainerType: string | ((containerType: string) => boolean)): boolean;
+
+    /**
+     * Opens a container by right clicking the given entity, and wait for a container of type
+     * <tt>expectedContainerType</tt> to be opened.
+     * @param entity The entity to click on
+     * @param expectedContainerType The container type to expect, or a function that returns true/false
+     *                              depending on whether a container type should be accepted
+     * @return Whether successful
+     */
+    openContainer(entity: Entity, expectedContainerType: string | ((containerType: string) => boolean)): boolean;
 
     /**
      * Closes the currently opened container, if any is open
@@ -221,28 +250,27 @@ declare class ControllablePlayer extends Player {
     closeContainer(): void;
 
     /**
+     * If the player currently has a crafting container open, crafts as many times as possible up to the given
+     * number of times. Places items matching the given parameters into the given pattern, waits for a result matching
+     * <tt>result</tt> to appear, and pulls it out of the crafting grid.
+     * @param result The expected result of the recipe
+     * @param craftCount The number of crafts
+     * @param pattern An array of rows of the pattern. Each character corresponds to an item, use spaces for blank slots
+     * @param ingredients Associates characters with items
+     * @return The number of crafts managed
+     */
+    craft(result: ItemPredicate,
+          craftCount: number,
+          pattern: Array<string>,
+          ingredients: {[keys: string]: ItemPredicate}): number;
+
+    /**
      * "picks" an item from the player's inventory, and selects it in the hotbar, in a similar fashion to the
      * vanilla pick block feature.
-     * @param item The item to pick, using the item name specified in commands
+     * @param item The item to pick
      * @return Whether a matching item could be found in the inventory
      */
-    pick(item: string): boolean;
-    /**
-     * "picks" an item from the player's inventory, and selects it in the hotbar, in a similar fashion to the
-     * vanilla pick block feature. This overloaded function only makes sense when you care about other parts
-     * of the item stack NBT, such as stack size, item damage and NBT.
-     * @param item The item stack NBT to match against
-     * @return Whether a matching item could be found in the inventory
-     */
-    pick(item: object): boolean;
-    /**
-     * "picks" an item from the player's inventory, and selects it in the hotbar, in a similar fashion to the
-     * vanilla pick block feature. This overloaded function takes a predicate function as a parameter, which
-     * takes in an item stack NBT and returns a boolean whether that item stack is eligible to be picked.
-     * @param itemPredicate The predicate function which tests whether item stacks are eligible to be picked
-     * @return Whether a matching item could be found in the inventory
-     */
-    pick(itemPredicate: (itemNbt: object) => boolean): boolean;
+    pick(item: ItemPredicate): boolean;
 
     /**
      * Right clicks the currently held item in air
@@ -419,6 +447,35 @@ declare class Inventory {
      * @param options The options of the inventory action. See {@link InventoryClickOptions}.
      */
     click(slot: number | null, options?: InventoryClickOptions): void;
+
+    /**
+     * Finds the first slot in the container with an item that matches the given item predicate
+     * @param item The item to search for
+     * @param reverse If true, returns the last matching slot rather than the first one
+     * @return The index of the first matching slot, or <tt>null</tt> if no such slot is found.
+     */
+    findSlot(item: ItemPredicate, reverse?: boolean): number | null;
+
+    /**
+     * Lists the slots in the container with an item that matches the given item predicate, up
+     * until the maximum number of items has been reached.
+     * @param item The item to search for
+     * @param count The maximum amount of this item to search for, or -1 for no maximum
+     * @param reverse If true, returns the last matching slots first rather than the first matching slot first
+     * @return An array of matching slot indices
+     */
+    findSlots(item: ItemPredicate, count: number, reverse?: boolean): Array<number>;
+
+    /**
+     * Shift clicks all the matching items in this container, up until the maximum number of items has been reached.
+     * @param item The item to search for
+     * @param count The maximum amount of this item to shift lick, or -1 for no maximum
+     * @param reverse If true, shift clicks the items in reverse order of slot indices
+     * @return The actual number of items shift clicked, may be greater than or equal to <tt>count</tt> if there
+     *         are sufficient items in this container, or equal to the number of matching items if there are
+     *         insufficient items.
+     */
+    moveItems(item: ItemPredicate, count: number, reverse?: boolean): number;
 
     /**
      * Return whether this inventory is the same as another inventory
@@ -870,7 +927,7 @@ interface PathfindingHints {
      *        <tr><td><tt>"cocoa"</tt></td><td>0</td></tr>
      * </table>
      */
-    nodeTypeFunction?: (x: number, y: number, z: number) => string | null
+    nodeTypeFunction?: (x: number, y: number, z: number) => string | null;
 
     /**
      * A function that gets the pathfinding penalty for the given path node type.
@@ -881,22 +938,22 @@ interface PathfindingHints {
      * </ul>
      * See {@link nodeTypeFunction} for a list of path node types and their default penalties
      */
-    penaltyFunction?: (type: string) => number | null
+    penaltyFunction?: (type: string) => number | null;
 
     /**
      * The maximum Euclidean distance to the target that the player can be at any one time.
      * Defaults to twice the distance to the target.
      */
-    followRange?: number
+    followRange?: number;
 
     /**
      * The maximum distance from the target which is sufficient to reach. Defaults to 0
      */
-    reachDistance?: number
+    reachDistance?: number;
 
     /**
      * The maximum length of a path at any one time. Defaults to twice the distance to the target.
      */
-    maxPathLength?: number
+    maxPathLength?: number;
 
 }

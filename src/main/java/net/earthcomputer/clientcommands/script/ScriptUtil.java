@@ -4,15 +4,19 @@ import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import jdk.nashorn.api.scripting.ScriptUtils;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.registry.Registry;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class ScriptUtil {
 
@@ -339,5 +343,23 @@ public class ScriptUtil {
         }
 
         return null;
+    }
+
+    static Predicate<ItemStack> asItemStackPredicate(Object obj) {
+        if (obj instanceof String) {
+            Item item = Registry.ITEM.get(new Identifier((String) obj));
+            return stack -> stack.getItem() == item;
+        } else if (isFunction(obj)) {
+            JSObject func = asFunction(obj);
+            return stack -> {
+                Object tag = fromNbt(stack.toTag(new CompoundTag()));
+                return asBoolean(func.call(null, tag));
+            };
+        } else {
+            Tag nbt = toNbt(obj);
+            if (!(nbt instanceof CompoundTag))
+                throw new IllegalArgumentException(obj.toString());
+            return stack -> NbtHelper.matches(nbt, stack.toTag(new CompoundTag()), true);
+        }
     }
 }

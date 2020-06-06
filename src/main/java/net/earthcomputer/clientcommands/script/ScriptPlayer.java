@@ -11,29 +11,28 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.container.Container;
+import net.minecraft.container.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.pathing.Path;
 import net.minecraft.entity.ai.pathing.PathNode;
 import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -309,7 +308,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
         return new ScriptInventory(getPlayer().playerContainer);
     }
 
-    public ScriptInventory getOpenContainer() {
+    public ScriptInventory getCurrentContainer() {
         Container container = getPlayer().container;
         if (container == getPlayer().playerContainer)
             return null;
@@ -317,28 +316,239 @@ public class ScriptPlayer extends ScriptLivingEntity {
             return new ScriptInventory(getPlayer().container);
     }
 
+    public boolean openContainer(int x, int y, int z, Object containerType) {
+        return openContainer0(() -> rightClick(x, y, z), containerType);
+    }
+
+    public boolean openContainer(ScriptEntity entity, Object containerType) {
+        return openContainer0(() -> rightClick(entity), containerType);
+    }
+
+    private boolean openContainer0(BooleanSupplier rightClickFunction, Object containerType) {
+        Predicate<String> containerTypePredicate;
+        if (ScriptUtil.isFunction(containerType)) {
+            JSObject containerTypeFunc = ScriptUtil.asFunction(containerType);
+            containerTypePredicate = type -> ScriptUtil.asBoolean(containerTypeFunc.call(null, type));
+        } else {
+            String containerTypeName = ScriptUtil.asString(containerType);
+            containerTypePredicate = containerTypeName::equals;
+        }
+
+        if (!rightClickFunction.getAsBoolean())
+            return false;
+
+        int timeout = 0;
+        while (getCurrentContainer() == null || !containerTypePredicate.test(getCurrentContainer().getType())) {
+            ScriptManager.passTick();
+            timeout++;
+            if (timeout > 100)
+                return false;
+        }
+
+        return true;
+    }
+
     public void closeContainer() {
         if (getPlayer().container != getPlayer().playerContainer)
             getPlayer().closeContainer();
     }
 
-    public boolean pick(Object itemStack) {
-        Predicate<ItemStack> predicate;
-        if (itemStack instanceof String) {
-            Item item = Registry.ITEM.get(new Identifier((String) itemStack));
-            predicate = stack -> stack.getItem() == item;
-        } else if (ScriptUtil.isFunction(itemStack)) {
-            JSObject jsObject = ScriptUtil.asFunction(itemStack);
-            predicate = stack -> {
-                Object result = jsObject.call(null, ScriptUtil.fromNbt(stack.toTag(new CompoundTag())));
-                return ScriptUtil.asBoolean(result);
-            };
-        } else {
-            Tag nbt = ScriptUtil.toNbt(itemStack);
-            if (!(nbt instanceof CompoundTag))
-                throw new IllegalArgumentException(itemStack.toString());
-            predicate = stack -> NbtHelper.matches(nbt, stack.toTag(new CompoundTag()), true);
+    public int craft(Object result, int count, String[] pattern, JSObject ingredients) {
+        // Convert js input to something we can handle in Java
+
+        Predicate<ItemStack> resultPredicate = ScriptUtil.asItemStackPredicate(result);
+
+        int patternWidth = -1;
+        Map<Character, Predicate<ItemStack>> ingredientPredicates = new HashMap<>();
+        for (String row : pattern) {
+            if (patternWidth == -1)
+                patternWidth = row.length();
+            else if (row.length() != patternWidth)
+                throw new IllegalArgumentException("Inconsistent pattern width");
+            for (int i = 0; i < row.length(); i++) {
+                char c = row.charAt(i);
+                if (c != ' ') {
+                    ingredientPredicates.computeIfAbsent(c, k -> {
+                        String s = String.valueOf(k);
+                        if (!ingredients.hasMember(s))
+                            throw new IllegalArgumentException("Character '" + k + "' in pattern not found in ingredients");
+                        return ScriptUtil.asItemStackPredicate(ingredients.getMember(s));
+                    });
+                }
+            }
         }
+        if (ingredientPredicates.isEmpty())
+            throw new IllegalArgumentException("Empty pattern");
+
+        // Check if we are actually in a container with a crafting grid, or return if the recipe is too big for the grid
+        if (!(getPlayer().container instanceof CraftingTableContainer) && !(getPlayer().container instanceof PlayerContainer)) {
+            return 0;
+        }
+        CraftingContainer<?> container = (CraftingContainer<?>) getPlayer().container;
+        int resultSlotIndex = container.getCraftingResultSlotIndex();
+        int craftingSlotCount = container.getCraftingSlotCount();
+        if (pattern.length > container.getCraftingHeight())
+            return 0;
+        if (patternWidth > container.getCraftingWidth())
+            return 0;
+
+        ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
+        assert interactionManager != null;
+
+        emptyCraftingGrid(container, resultSlotIndex, craftingSlotCount, interactionManager);
+
+        // Craft the items
+        int craftsNeeded = count;
+        craftLoop: while (craftsNeeded > 0) {
+            Map<Character, List<Integer>> ingredientsNeeded = new HashMap<>();
+            for (int x = 0; x < patternWidth; x++) {
+                for (int y = 0; y < pattern.length; y++) {
+                    char c = pattern[y].charAt(x);
+                    if (c != ' ') {
+                        int slotId = 1 + x + container.getCraftingWidth() * y;
+                        Slot slot = container.getSlot(slotId);
+                        if (!ingredientPredicates.get(c).test(slot.getStack())) {
+                            if (slot.hasStack()) {
+                                if (!getPlayer().inventory.getCursorStack().isEmpty()) {
+                                    craftInsertIntoPlayerInv(container, interactionManager);
+                                }
+                                interactionManager.clickSlot(container.syncId, slotId, 0, SlotActionType.QUICK_MOVE, getPlayer());
+                                if (slot.hasStack()) {
+                                    interactionManager.clickSlot(container.syncId, slotId, 1, SlotActionType.THROW, getPlayer());
+                                }
+                            }
+                            ingredientsNeeded.computeIfAbsent(c, k -> new ArrayList<>()).add(slotId);
+                        }
+                    }
+                }
+            }
+
+            if (ingredientsNeeded.isEmpty()) {
+                int timeout = 0;
+                Slot resultSlot = container.getSlot(resultSlotIndex);
+                while (!resultPredicate.test(resultSlot.getStack())) {
+                    ScriptManager.passTick();
+                    if (timeout++ > 100) {
+                        break craftLoop;
+                    }
+                }
+                ItemStack cursorStack = getPlayer().inventory.getCursorStack();
+                if (!Container.canStacksCombine(getPlayer().inventory.getCursorStack(), resultSlot.getStack())
+                        || cursorStack.getCount() + resultSlot.getStack().getCount() > cursorStack.getMaxCount()) {
+                    craftInsertIntoPlayerInv(container, interactionManager);
+                }
+                interactionManager.clickSlot(container.syncId, resultSlotIndex, 0, SlotActionType.PICKUP, getPlayer());
+                craftsNeeded--;
+            } else {
+                if (!getPlayer().inventory.getCursorStack().isEmpty()) {
+                    craftInsertIntoPlayerInv(container, interactionManager);
+                }
+                boolean craftingGridStartedEmpty = true;
+                for (int slotId = resultSlotIndex + 1; slotId < resultSlotIndex + craftingSlotCount; slotId++) {
+                    if (container.getSlot(slotId).hasStack()) {
+                        craftingGridStartedEmpty = false;
+                        break;
+                    }
+                }
+                ingredientFillLoop: for (Map.Entry<Character, List<Integer>> ingredient : ingredientsNeeded.entrySet()) {
+                    Predicate<ItemStack> ingredientPredicate = ingredientPredicates.get(ingredient.getKey());
+                    List<Integer> destSlots = ingredient.getValue();
+                    while (!destSlots.isEmpty()) {
+                        boolean foundIngredient = false;
+                        for (Slot slot : container.slotList) {
+                            if (isPlayerInvSlot(container, slot)) {
+                                if (ingredientPredicate.test(slot.getStack())) {
+                                    List<Integer> slotsToPlace = slot.getStack().getCount() < destSlots.size() ? destSlots.subList(0, slot.getStack().getCount()) : destSlots;
+                                    interactionManager.clickSlot(container.syncId, slot.id, 0, SlotActionType.PICKUP, getPlayer());
+                                    if (slotsToPlace.size() == 1) {
+                                        interactionManager.clickSlot(container.syncId, slotsToPlace.get(0), 0, SlotActionType.PICKUP, getPlayer());
+                                    } else {
+                                        interactionManager.clickSlot(container.syncId, slotsToPlace.get(0), Container.packClickData(0, 0), SlotActionType.QUICK_CRAFT, getPlayer());
+                                        for (int destSlot : slotsToPlace) {
+                                            interactionManager.clickSlot(container.syncId, destSlot, Container.packClickData(1, 0), SlotActionType.QUICK_CRAFT, getPlayer());
+                                        }
+                                        interactionManager.clickSlot(container.syncId, slotsToPlace.get(slotsToPlace.size() - 1), Container.packClickData(2, 0), SlotActionType.QUICK_CRAFT, getPlayer());
+                                    }
+                                    foundIngredient = !slotsToPlace.isEmpty();
+                                    slotsToPlace.clear();
+                                    break;
+                                }
+                            }
+                        }
+                        if (!foundIngredient) {
+                            if (craftingGridStartedEmpty) {
+                                break craftLoop;
+                            } else {
+                                emptyCraftingGrid(container, resultSlotIndex, craftingSlotCount, interactionManager);
+                                break ingredientFillLoop;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        emptyCraftingGrid(container, resultSlotIndex, craftingSlotCount, interactionManager);
+
+        return count - craftsNeeded;
+    }
+
+    private void emptyCraftingGrid(CraftingContainer<?> container, int resultSlotIndex, int craftingSlotCount, ClientPlayerInteractionManager interactionManager) {
+        // Get rid of all items in the cursor + the crafting grid
+        if (!getPlayer().inventory.getCursorStack().isEmpty()) {
+            craftInsertIntoPlayerInv(container, interactionManager);
+        }
+        for (int slotIndex = resultSlotIndex + 1; slotIndex < resultSlotIndex + craftingSlotCount; slotIndex++) {
+            Slot slot = container.getSlot(slotIndex);
+            if (slot.hasStack()) {
+                interactionManager.clickSlot(container.syncId, slotIndex, 0, SlotActionType.QUICK_MOVE, getPlayer());
+                if (slot.hasStack()) {
+                    interactionManager.clickSlot(container.syncId, slotIndex, 1, SlotActionType.THROW, getPlayer());
+                }
+            }
+        }
+    }
+
+    private void craftInsertIntoPlayerInv(CraftingContainer<?> container, ClientPlayerInteractionManager interactionManager) {
+        ItemStack cursorStack = getPlayer().inventory.getCursorStack();
+        int cursorStackCount = cursorStack.getCount();
+
+        for (int playerSlotIndex = 0; playerSlotIndex < container.slotList.size(); playerSlotIndex++) {
+            Slot slot = container.getSlot(playerSlotIndex);
+            if (isPlayerInvSlot(container, slot)) {
+                if (Container.canStacksCombine(cursorStack, slot.getStack())) {
+                    int maxCount = Math.min(cursorStack.getMaxCount(), slot.getMaxStackAmount(cursorStack));
+                    if (slot.getStack().getCount() < maxCount) {
+                        interactionManager.clickSlot(container.syncId, playerSlotIndex, 0, SlotActionType.PICKUP, getPlayer());
+                        cursorStackCount -= maxCount - slot.getStack().getCount();
+                        if (cursorStackCount <= 0)
+                            return;
+                    }
+                }
+            }
+        }
+        for (int playerSlotIndex = 0; playerSlotIndex < container.slotList.size(); playerSlotIndex++) {
+            Slot slot = container.getSlot(playerSlotIndex);
+            if (isPlayerInvSlot(container, slot)) {
+                if (!slot.hasStack()) {
+                    int maxCount = Math.min(cursorStack.getMaxCount(), slot.getMaxStackAmount(cursorStack));
+                    interactionManager.clickSlot(container.syncId, playerSlotIndex, 0, SlotActionType.PICKUP, getPlayer());
+                    cursorStackCount -= maxCount;
+                    if (cursorStackCount <= 0)
+                        return;
+                }
+            }
+        }
+        interactionManager.clickSlot(container.syncId, -999, 0, SlotActionType.PICKUP, getPlayer());
+    }
+
+    private boolean isPlayerInvSlot(CraftingContainer<?> container, Slot slot) {
+        return slot.inventory instanceof PlayerInventory
+                && (slot.id < container.getCraftingResultSlotIndex() || slot.id >= container.getCraftingResultSlotIndex() + container.getCraftingSlotCount());
+    }
+
+    public boolean pick(Object itemStack) {
+        Predicate<ItemStack> predicate = ScriptUtil.asItemStackPredicate(itemStack);
 
         PlayerInventory inv = getPlayer().inventory;
         int slot;
