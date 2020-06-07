@@ -7,9 +7,14 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.container.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.screen.HorseScreenHandler;
+import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
@@ -20,23 +25,23 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ScriptInventory {
 
-    private final Container container;
+    private final ScreenHandler container;
 
-    ScriptInventory(Container container) {
+    ScriptInventory(ScreenHandler container) {
         this.container = container;
     }
 
     public String getType() {
-        if (container instanceof PlayerContainer)
+        if (container instanceof PlayerScreenHandler)
             return "player";
-        if (container instanceof CreativeInventoryScreen.CreativeContainer)
+        if (container instanceof CreativeInventoryScreen.CreativeScreenHandler)
             return "creative";
-        if (container instanceof HorseContainer)
+        if (container instanceof HorseScreenHandler)
             return "horse";
-        ContainerType<?> type = container.getType();
+        ScreenHandlerType<?> type = container.getType();
         if (type == null)
             return null;
-        return ScriptUtil.simplifyIdentifier(Registry.CONTAINER.getId(type));
+        return ScriptUtil.simplifyIdentifier(Registry.SCREEN_HANDLER.getId(type));
     }
 
     /**
@@ -47,15 +52,15 @@ public class ScriptInventory {
     public List<Object> getItems() {
         List<Object> ret = new ArrayList<>();
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (container == player.playerContainer) {
-            for (int i = 0; i < player.inventory.getInvSize(); i++) {
-                ret.add(ScriptUtil.fromNbt(player.inventory.getInvStack(i).toTag(new CompoundTag())));
+        if (container == player.playerScreenHandler) {
+            for (int i = 0; i < player.inventory.size(); i++) {
+                ret.add(ScriptUtil.fromNbt(player.inventory.getStack(i).toTag(new CompoundTag())));
             }
             // crafting grid
             for (int i = 0; i < 5; i++)
-                ret.add(ScriptUtil.fromNbt(container.slotList.get(i).getStack().toTag(new CompoundTag())));
+                ret.add(ScriptUtil.fromNbt(container.slots.get(i).getStack().toTag(new CompoundTag())));
         } else {
-            for (Slot slot : container.slotList) {
+            for (Slot slot : container.slots) {
                 if (slot.inventory != player.inventory) {
                     ret.add(ScriptUtil.fromNbt(slot.getStack().toTag(new CompoundTag())));
                 }
@@ -83,7 +88,7 @@ public class ScriptInventory {
                 throw new IllegalArgumentException("When the click type is quick_craft, the options must also contain the quick craft stage");
             int quickCraftStage = ScriptUtil.asNumber(options.getMember("quickCraftStage")).intValue();
             int button = options.hasMember("rightClick") && ScriptUtil.asBoolean(options.getMember("rightClick")) ? 1 : 0;
-            mouseButton = Container.packClickData(quickCraftStage, button);
+            mouseButton = ScreenHandler.packQuickCraftData(quickCraftStage, button);
         } else {
             if (options == null || !options.hasMember("rightClick"))
                 mouseButton = 0;
@@ -102,7 +107,7 @@ public class ScriptInventory {
         }
 
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        MinecraftClient.getInstance().interactionManager.clickSlot(player.container.syncId, slotId, mouseButton, type, player);
+        MinecraftClient.getInstance().interactionManager.clickSlot(player.currentScreenHandler.syncId, slotId, mouseButton, type, player);
     }
 
     public Integer findSlot(Object item) {
@@ -169,7 +174,7 @@ public class ScriptInventory {
         int itemsFound = 0;
         for (Slot slot : slots) {
             if (itemPredicate.test(slot.getStack())) {
-                interactionManager.clickSlot(player.container.syncId, slot.id, 0, SlotActionType.QUICK_MOVE, player);
+                interactionManager.clickSlot(player.currentScreenHandler.syncId, slot.id, 0, SlotActionType.QUICK_MOVE, player);
                 itemsFound += slot.getStack().getCount();
                 if (count != -1 && itemsFound >= count)
                     break;
@@ -183,21 +188,21 @@ public class ScriptInventory {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         assert player != null;
 
-        if (container == player.playerContainer) {
-            if (id < player.inventory.getInvSize())
+        if (container == player.playerScreenHandler) {
+            if (id < player.inventory.size())
                 id += 5;
-            else if (id < player.inventory.getInvSize() + 5)
-                id -= player.inventory.getInvSize();
-            for (int i = 0; i < player.container.slotList.size(); i++) {
-                Slot slot = player.container.getSlot(i);
+            else if (id < player.inventory.size() + 5)
+                id -= player.inventory.size();
+            for (int i = 0; i < player.currentScreenHandler.slots.size(); i++) {
+                Slot slot = player.currentScreenHandler.getSlot(i);
                 if (slot.inventory == player.inventory) {
-                    if (((ISlot) slot).getInvSlot() == id)
+                    if (((ISlot) slot).getIndex() == id)
                         return slot;
                 }
             }
         } else {
             int containerId = 0;
-            for (int i = 0; i < container.slotList.size(); i++) {
+            for (int i = 0; i < container.slots.size(); i++) {
                 Slot slot = container.getSlot(i);
                 if (slot.inventory != player.inventory) {
                     if (id == containerId)
@@ -214,15 +219,15 @@ public class ScriptInventory {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         assert player != null;
 
-        if (container == player.playerContainer) {
-            int id = ((ISlot) slot).getInvSlot();
+        if (container == player.playerScreenHandler) {
+            int id = ((ISlot) slot).getIndex();
             if (id < 5)
-                return id + player.inventory.getInvSize();
+                return id + player.inventory.size();
             else
                 return id - 5;
         } else {
             int containerId = 0;
-            for (int i = 0; i < container.slotList.size(); i++) {
+            for (int i = 0; i < container.slots.size(); i++) {
                 Slot otherSlot = container.getSlot(i);
                 if (otherSlot.inventory != player.inventory) {
                     if (otherSlot == slot)
@@ -238,13 +243,13 @@ public class ScriptInventory {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         assert player != null;
 
-        if (container == player.playerContainer) {
-            return player.container.slotList.stream()
+        if (container == player.playerScreenHandler) {
+            return player.currentScreenHandler.slots.stream()
                     .filter(slot -> slot.inventory == player.inventory)
                     .sorted(Comparator.comparingInt(this::getIdForSlot))
                     .collect(Collectors.toList());
         } else {
-            return container.slotList.stream()
+            return container.slots.stream()
                     .filter(slot -> slot.inventory != player.inventory)
                     .collect(Collectors.toList());
         }

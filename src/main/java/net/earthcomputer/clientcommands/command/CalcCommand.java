@@ -5,7 +5,7 @@ import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
@@ -27,7 +27,7 @@ public class CalcCommand {
         TempRules.calcAnswer = result;
         int iresult = 0;
 
-        Text feedback = new LiteralText(expression.strVal + " = ");
+        MutableText feedback = new LiteralText(expression.strVal + " = ");
 
         if (Math.round(result) == result) {
             String strResult = String.valueOf(result);

@@ -8,10 +8,8 @@ import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntityRenderer.class)
@@ -21,10 +19,9 @@ public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extend
         super(dispatcher);
     }
 
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "method_24302", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isGlowing()Z"), cancellable = true)
-    private void onGetRenderLayer(T entity, boolean visible, boolean translucent, CallbackInfoReturnable<RenderLayer> ci) {
-        if (((IEntity) entity).hasGlowingTicket())
+    @Inject(method = "getRenderLayer", at = @At("RETURN"), cancellable = true)
+    private void onGetRenderLayer(T entity, boolean visible, boolean translucent, boolean showOutline, CallbackInfoReturnable<RenderLayer> ci) {
+        if (ci.getReturnValue() == null && ((IEntity) entity).hasGlowingTicket())
             ci.setReturnValue(RenderLayer.getOutline(getTexture(entity)));
     }
 

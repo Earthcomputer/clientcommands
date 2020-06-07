@@ -17,11 +17,9 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerProvider;
-import net.minecraft.container.Container;
-import net.minecraft.container.Slot;
+import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
+import net.minecraft.command.arguments.ItemPredicateArgumentType.ItemPredicateArgument;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.CatEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
@@ -29,11 +27,13 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
-import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
@@ -59,16 +59,16 @@ public class FindItemCommand {
 
         LiteralCommandNode<ServerCommandSource> cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
-            .then(literal("--no-search-shulker-box")
-                .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_NO_SEARCH_SHULKER_BOX)))
-            .then(literal("--keep-searching")
-                .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_KEEP_SEARCHING)))
-            .then(argument("item", withString(clientItemPredicate()))
-                .executes(ctx ->
-                        findItem(ctx,
-                                (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_NO_SEARCH_SHULKER_BOX) != 0,
-                                (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_KEEP_SEARCHING) != 0,
-                                getWithString(ctx, "item", ItemPredicateArgument.class)))));
+                .then(literal("--no-search-shulker-box")
+                        .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_NO_SEARCH_SHULKER_BOX)))
+                .then(literal("--keep-searching")
+                        .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_KEEP_SEARCHING)))
+                .then(argument("item", withString(clientItemPredicate()))
+                        .executes(ctx ->
+                                findItem(ctx,
+                                        (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_NO_SEARCH_SHULKER_BOX) != 0,
+                                        (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_KEEP_SEARCHING) != 0,
+                                        getWithString(ctx, "item", ItemPredicateArgument.class)))));
     }
 
     private static int findItem(CommandContext<ServerCommandSource> source, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, ItemPredicateArgument> item) throws CommandSyntaxException {
@@ -176,26 +176,15 @@ public class FindItemCommand {
             if (!(blockEntity instanceof Inventory) && state.getBlock() != Blocks.ENDER_CHEST)
                 return false;
             if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
-                if (isChestBlocked(world, pos))
+                if (ChestBlock.isChestBlocked(world, pos))
                     return false;
                 if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
                     BlockPos offsetPos = pos.offset(ChestBlock.getFacing(state));
-                    if (world.getBlockState(offsetPos).getBlock() == state.getBlock() && isChestBlocked(world, offsetPos))
+                    if (world.getBlockState(offsetPos).getBlock() == state.getBlock() && ChestBlock.isChestBlocked(world, offsetPos))
                         return false;
                 }
             }
             return true;
-        }
-
-        private static boolean isChestBlocked(World world, BlockPos pos) {
-            if (world.getBlockState(pos.up()).isSimpleFullBlock(world, pos.up()))
-                return true;
-            List<CatEntity> cats = world.getNonSpectatingEntities(CatEntity.class, new Box(pos.getX(), pos.getY() + 1, pos.getZ(), pos.getX() + 1, pos.getY() + 2, pos.getZ() + 1));
-            for (CatEntity cat : cats) {
-                if (cat.isSitting())
-                    return true;
-            }
-            return false;
         }
 
         private void startSearch(World world, BlockPos pos, Vec3d cameraPos, Vec3d clickPos) {
@@ -205,14 +194,14 @@ public class FindItemCommand {
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
                 public boolean accept(Screen screen) {
-                    if (!(screen instanceof ContainerProvider))
+                    if (!(screen instanceof ScreenHandlerProvider))
                         return true;
-                    Container container = ((ContainerProvider) screen).getContainer();
+                    ScreenHandler container = ((ScreenHandlerProvider) screen).getScreenHandler();
                     Set<Integer> playerInvSlots = new HashSet<>();
-                    for (Slot slot : container.slotList)
+                    for (Slot slot : container.slots)
                         if (slot.inventory instanceof PlayerInventory)
                             playerInvSlots.add(slot.id);
-                    MinecraftClient.getInstance().player.container = new Container(container.getType(), container.syncId) {
+                    MinecraftClient.getInstance().player.currentScreenHandler = new ScreenHandler(container.getType(), container.syncId) {
                         @Override
                         public boolean canUse(PlayerEntity var1) {
                             return true;
@@ -248,7 +237,7 @@ public class FindItemCommand {
                             }
                             currentlySearching = null;
                             currentlySearchingTimeout = 0;
-                            MinecraftClient.getInstance().player.closeContainer();
+                            MinecraftClient.getInstance().player.closeHandledScreen();
                         }
                     };
                     return false;

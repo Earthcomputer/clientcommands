@@ -50,8 +50,8 @@ public class ClientCommandManager {
             ClientCommandManager.sendError(Texts.toText(e.getRawMessage()));
             if (e.getInput() != null && e.getCursor() >= 0) {
                 int cursor = Math.min(e.getCursor(), e.getInput().length());
-                Text text = new LiteralText("").formatted(Formatting.GRAY)
-                        .styled(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)));
+                MutableText text = new LiteralText("").formatted(Formatting.GRAY)
+                        .styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command)));
                 if (cursor > 10)
                     text.append("...");
 
@@ -73,21 +73,18 @@ public class ClientCommandManager {
     }
 
     public static Text getCoordsTextComponent(BlockPos pos) {
-        Text text = new TranslatableText("commands.client.blockpos", pos.getX(), pos.getY(),
-                pos.getZ());
-        text.getStyle().setUnderline(true);
-        text.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())));
-        text.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new LiteralText(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()))));
-        return text;
+        return new TranslatableText("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()).styled(style -> style
+                .withFormatting(Formatting.UNDERLINE)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())))
+                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new LiteralText(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())))));
     }
 
     public static Text getCommandTextComponent(String translationKey, String command) {
-        Text text = new TranslatableText(translationKey).styled(style -> style.setUnderline(true));
-        text.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
-        text.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command)));
-        return text;
+        return new TranslatableText(translationKey).styled(style -> style.withFormatting(Formatting.UNDERLINE)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command))));
     }
 
 }

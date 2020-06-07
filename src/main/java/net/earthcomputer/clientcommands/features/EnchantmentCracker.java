@@ -10,19 +10,21 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.container.EnchantingTableContainer;
-import net.minecraft.container.Slot;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.InfoEnchantment;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.screen.EnchantmentScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -85,7 +87,7 @@ public class EnchantmentCracker {
      * This section is in charge of rendering the overlay on the enchantment GUI
      */
 
-    public static void drawEnchantmentGUIOverlay() {
+    public static void drawEnchantmentGUIOverlay(MatrixStack matrices) {
         CrackState crackState = TempRules.enchCrackState;
 
         List<String> lines = new ArrayList<>();
@@ -111,9 +113,9 @@ public class EnchantmentCracker {
 
         for (int slot = 0; slot < 3; slot++) {
             lines.add(I18n.translate("enchCrack.slot", slot + 1));
-            List<InfoEnchantment> enchs = getEnchantmentsInTable(slot);
+            List<EnchantmentLevelEntry> enchs = getEnchantmentsInTable(slot);
             if (enchs != null) {
-                for (InfoEnchantment ench : enchs) {
+                for (EnchantmentLevelEntry ench : enchs) {
                     lines.add("   " + ench.enchantment.getName(ench.level).getString());
                 }
             }
@@ -122,7 +124,7 @@ public class EnchantmentCracker {
         TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
         int y = 0;
         for (String line : lines) {
-            fontRenderer.draw(line, 0, y, 0xffffff);
+            fontRenderer.draw(matrices, line, 0, y, 0xffffff);
             y += fontRenderer.fontHeight;
         }
     }
@@ -151,7 +153,7 @@ public class EnchantmentCracker {
         }
     }
 
-    public static void addEnchantmentSeedInfo(World world, EnchantingTableContainer container) {
+    public static void addEnchantmentSeedInfo(World world, EnchantmentScreenHandler container) {
         CrackState crackState = TempRules.enchCrackState;
         if (crackState == CrackState.CRACKED) {
             return;
@@ -185,7 +187,7 @@ public class EnchantmentCracker {
 
             // check enchantment levels match
             for (int slot = 0; slot < 3; slot++) {
-                int level = EnchantmentHelper.calculateEnchantmentPower(rand, slot, power, itemToEnchant);
+                int level = EnchantmentHelper.calculateRequiredExperienceLevel(rand, slot, power, itemToEnchant);
                 if (level < slot + 1) {
                     level = 0;
                 }
@@ -199,7 +201,7 @@ public class EnchantmentCracker {
             // generate enchantment clues and see if they match
             for (int slot = 0; slot < 3; slot++) {
                 if (actualEnchantLevels[slot] > 0) {
-                    List<InfoEnchantment> enchantments = getEnchantmentList(rand, xpSeed, itemToEnchant, slot,
+                    List<EnchantmentLevelEntry> enchantments = getEnchantmentList(rand, xpSeed, itemToEnchant, slot,
                             actualEnchantLevels[slot]);
                     if (enchantments == null || enchantments.isEmpty()) {
                         // check that there is indeed no enchantment clue
@@ -209,7 +211,7 @@ public class EnchantmentCracker {
                         }
                     } else {
                         // check the right enchantment clue was generated
-                        InfoEnchantment clue = enchantments.get(rand.nextInt(enchantments.size()));
+                        EnchantmentLevelEntry clue = enchantments.get(rand.nextInt(enchantments.size()));
                         if (Registry.ENCHANTMENT.getRawId(clue.enchantment) != actualEnchantmentClues[slot]
                                 || clue.level != actualLevelClues[slot]) {
                             xpSeedItr.remove();
@@ -290,7 +292,7 @@ public class EnchantmentCracker {
      * seed
      */
 
-    public static ManipulateResult manipulateEnchantments(Item item, Predicate<List<InfoEnchantment>> enchantmentsPredicate, boolean simulate) {
+    public static ManipulateResult manipulateEnchantments(Item item, Predicate<List<EnchantmentLevelEntry>> enchantmentsPredicate, boolean simulate) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
         ItemStack stack = new ItemStack(item);
@@ -300,7 +302,7 @@ public class EnchantmentCracker {
         int timesNeeded = -2;
         int bookshelvesNeeded = 0;
         int slot = 0;
-        List<InfoEnchantment> enchantments = null;
+        List<EnchantmentLevelEntry> enchantments = null;
         int[] enchantLevels = new int[3];
         outerLoop:
         for (int i = TempRules.enchCrackState == CrackState.CRACKED ? -1 : 0;
@@ -313,7 +315,7 @@ public class EnchantmentCracker {
             for (bookshelvesNeeded = 0; bookshelvesNeeded <= 15; bookshelvesNeeded++) {
                 rand.setSeed(xpSeed);
                 for (slot = 0; slot < 3; slot++) {
-                    int level = EnchantmentHelper.calculateEnchantmentPower(rand, slot, bookshelvesNeeded, stack);
+                    int level = EnchantmentHelper.calculateRequiredExperienceLevel(rand, slot, bookshelvesNeeded, stack);
                     if (level < slot + 1) {
                         level = 0;
                     }
@@ -348,7 +350,7 @@ public class EnchantmentCracker {
             if (timesNeeded != 0) {
                 player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.yaw, 90);
                 // sync rotation to server before we throw any items
-                player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(player.yaw, 90, player.onGround));
+                player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(player.yaw, 90, player.isOnGround()));
                 TempRules.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
             }
             for (int i = 0; i < timesNeeded; i++) {
@@ -365,7 +367,7 @@ public class EnchantmentCracker {
                             return false;
                         }
 
-                        Slot slot = PlayerRandCracker.getBestItemThrowSlot(MinecraftClient.getInstance().player.container.slotList);
+                        Slot slot = PlayerRandCracker.getBestItemThrowSlot(MinecraftClient.getInstance().player.currentScreenHandler.slots);
                         //noinspection RedundantIfStatement
                         if (slot == null)
                             return true; // keep waiting
@@ -394,7 +396,7 @@ public class EnchantmentCracker {
                 @Override
                 public void initialize() {
                     TempRules.playerCrackState = PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
-                    player.sendMessage(new TranslatableText("enchCrack.insn.dummy"));
+                    player.sendSystemMessage(new TranslatableText("enchCrack.insn.dummy"), Util.NIL_UUID);
                     doneEnchantment = false;
                 }
 
@@ -420,9 +422,9 @@ public class EnchantmentCracker {
             @Override
             public void run() {
                 if (TempRules.enchCrackState == CrackState.CRACKED && doneEnchantment) {
-                    player.sendMessage(new LiteralText(Formatting.BOLD + I18n.translate("enchCrack.insn.ready")));
-                    player.sendMessage(new TranslatableText("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
-                    player.sendMessage(new TranslatableText("enchCrack.insn.slot", slot_f + 1));
+                    player.sendSystemMessage(new LiteralText(Formatting.BOLD + I18n.translate("enchCrack.insn.ready")), Util.NIL_UUID);
+                    player.sendSystemMessage(new TranslatableText("enchCrack.insn.bookshelves", bookshelvesNeeded_f), Util.NIL_UUID);
+                    player.sendSystemMessage(new TranslatableText("enchCrack.insn.slot", slot_f + 1), Util.NIL_UUID);
                 }
             }
         });
@@ -460,10 +462,10 @@ public class EnchantmentCracker {
         return (int) power;
     }
 
-    private static List<InfoEnchantment> getEnchantmentList(Random rand, int xpSeed, ItemStack stack, int enchantSlot,
-                                                            int level) {
+    private static List<EnchantmentLevelEntry> getEnchantmentList(Random rand, int xpSeed, ItemStack stack, int enchantSlot,
+                                                                  int level) {
         rand.setSeed(xpSeed + enchantSlot);
-        List<InfoEnchantment> list = EnchantmentHelper.getEnchantments(rand, stack, level, false);
+        List<EnchantmentLevelEntry> list = EnchantmentHelper.generateEnchantments(rand, stack, level, false);
 
         if (stack.getItem() == Items.BOOK && list.size() > 1) {
             list.remove(rand.nextInt(list.size()));
@@ -474,9 +476,9 @@ public class EnchantmentCracker {
 
     // Same as above method, except does not assume the seed has been cracked. If it
     // hasn't returns the clue given by the server
-    public static List<InfoEnchantment> getEnchantmentsInTable(int slot) {
+    public static List<EnchantmentLevelEntry> getEnchantmentsInTable(int slot) {
         CrackState crackState = TempRules.enchCrackState;
-        EnchantingTableContainer enchContainer = (EnchantingTableContainer) MinecraftClient.getInstance().player.container;
+        EnchantmentScreenHandler enchContainer = (EnchantmentScreenHandler) MinecraftClient.getInstance().player.currentScreenHandler;
 
         if (crackState != CrackState.CRACKED) {
             if (enchContainer.enchantmentId[slot] == -1) {
@@ -488,7 +490,7 @@ public class EnchantmentCracker {
                 Enchantment enchantment = Enchantment.byRawId(enchContainer.enchantmentId[slot]);
                 if (enchantment == null)
                     return null;
-                return Collections.singletonList(new InfoEnchantment(enchantment, enchContainer.enchantmentLevel[slot]));
+                return Collections.singletonList(new EnchantmentLevelEntry(enchantment, enchContainer.enchantmentLevel[slot]));
             }
         } else {
             // return the enchantments using our cracked seed
@@ -504,9 +506,9 @@ public class EnchantmentCracker {
         private final int itemThrows;
         private final int bookshelves;
         private final int slot;
-        private final List<InfoEnchantment> enchantments;
+        private final List<EnchantmentLevelEntry> enchantments;
 
-        public ManipulateResult(int itemThrows, int bookshelves, int slot, List<InfoEnchantment> enchantments) {
+        public ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentLevelEntry> enchantments) {
             this.itemThrows = itemThrows;
             this.bookshelves = bookshelves;
             this.slot = slot;
@@ -525,7 +527,7 @@ public class EnchantmentCracker {
             return slot;
         }
 
-        public List<InfoEnchantment> getEnchantments() {
+        public List<EnchantmentLevelEntry> getEnchantments() {
             return enchantments;
         }
     }

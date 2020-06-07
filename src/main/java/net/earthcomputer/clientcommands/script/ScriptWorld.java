@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +27,9 @@ public class ScriptWorld {
     }
 
     public String getDimension() {
-        return ScriptUtil.simplifyIdentifier(Registry.DIMENSION_TYPE.getId(getWorld().dimension.getType()));
+        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+        assert networkHandler != null;
+        return ScriptUtil.simplifyIdentifier(networkHandler.method_29091().getDimensionTypeRegistry().getId(getWorld().getDimension()));
     }
 
     public String getBlock(int x, int y, int z) {

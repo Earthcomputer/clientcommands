@@ -27,7 +27,7 @@ public class ScriptItemStack {
     }
 
     public float getMiningSpeed(ScriptBlockState block) {
-        return stack.getMiningSpeed(block.state);
+        return stack.getMiningSpeedMultiplier(block.state);
     }
 
     public boolean isEffectiveOn(String block) {

@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ArmorStandEntity.class)
 public abstract class MixinArmorStandEntity implements IArmorStandEntity {
 
-    @Accessor
+    @Accessor("invisible")
     @Override
-    public abstract boolean getField_7111();
+    public abstract boolean isArmorStandInvisible();
 
 }

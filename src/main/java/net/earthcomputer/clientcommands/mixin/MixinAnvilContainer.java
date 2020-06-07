@@ -1,19 +1,20 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
-import net.minecraft.container.AnvilContainer;
-import net.minecraft.inventory.Inventory;
-import org.spongepowered.asm.mixin.Final;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.AnvilScreenHandler;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AnvilContainer.class)
-public class MixinAnvilContainer implements IDroppableInventoryContainer {
+@Mixin(AnvilScreenHandler.class)
+public class MixinAnvilContainer {
 
-    @Shadow @Final private Inventory inventory;
-
-    @Override
-    public Inventory getDroppableInventory() {
-        return inventory;
+    @Inject(method = "onTakeOutput", at = @At("HEAD"))
+    public void onAnvilUse(PlayerEntity entity, ItemStack stack, CallbackInfoReturnable<ItemStack> ci) {
+        PlayerRandCracker.onAnvilUse();
     }
+
 }

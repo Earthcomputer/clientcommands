@@ -5,14 +5,14 @@ import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.container.Slot;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -258,12 +258,12 @@ public class PlayerRandCracker {
     public static boolean throwItem() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
-        Slot matchingSlot = getBestItemThrowSlot(player.container.slotList);
+        Slot matchingSlot = getBestItemThrowSlot(player.currentScreenHandler.slots);
         if (matchingSlot == null) {
             return false;
         }
         expectedThrows++;
-        MinecraftClient.getInstance().interactionManager.clickSlot(player.container.syncId,
+        MinecraftClient.getInstance().interactionManager.clickSlot(player.currentScreenHandler.syncId,
                 matchingSlot.id, 0, SlotActionType.THROW, player);
 
         return true;

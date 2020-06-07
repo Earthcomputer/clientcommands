@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.earthcomputer.clientcommands.interfaces.IBlock;
 import net.earthcomputer.clientcommands.interfaces.IFireBlock;
 import net.earthcomputer.clientcommands.interfaces.IMaterial;
+import net.earthcomputer.clientcommands.mixin.BlockSettingsAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
@@ -56,7 +57,7 @@ public class ScriptBlockState {
     }
 
     public float getHardness() {
-        return ((IBlock) state.getBlock()).getHardness();
+        return ((BlockSettingsAccessor) ((IBlock) state.getBlock()).getSettings()).getHardness();
     }
 
     public float getBlastResistance() {
@@ -76,7 +77,7 @@ public class ScriptBlockState {
     }
 
     public String getLootTable() {
-        return ScriptUtil.simplifyIdentifier(state.getBlock().getDropTableId());
+        return ScriptUtil.simplifyIdentifier(state.getBlock().getLootTableId());
     }
 
     public String getTranslationKey() {
@@ -109,7 +110,7 @@ public class ScriptBlockState {
     }
 
     public boolean isCanBreakByHand() {
-        return state.getMaterial().canBreakByHand();
+        return !state.isToolRequired();
     }
 
     public boolean isLiquid() {

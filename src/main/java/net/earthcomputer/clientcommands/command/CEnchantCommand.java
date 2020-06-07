@@ -3,10 +3,11 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.interfaces.IServerCommandSource;
 import net.minecraft.command.CommandException;
-import net.minecraft.enchantment.InfoEnchantment;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -24,10 +25,10 @@ public class CEnchantCommand {
 
         LiteralCommandNode<ServerCommandSource> cenchant = dispatcher.register(literal("cenchant"));
         dispatcher.register(literal("cenchant")
-            .then(literal("--simulate")
-                .redirect(cenchant, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_SIMULATE)))
-            .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate())
-                .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
+                .then(literal("--simulate")
+                        .redirect(cenchant, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_SIMULATE)))
+                .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate())
+                        .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
     }
 
     private static int cenchant(ServerCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
@@ -69,7 +70,7 @@ public class CEnchantCommand {
                 sendFeedback(new TranslatableText("enchCrack.insn.bookshelves", result.getBookshelves()));
                 sendFeedback(new TranslatableText("enchCrack.insn.slot", result.getSlot()));
                 sendFeedback("enchCrack.insn.enchantments");
-                for (InfoEnchantment ench : result.getEnchantments()) {
+                for (EnchantmentLevelEntry ench : result.getEnchantments()) {
                     sendFeedback(new LiteralText("- ").append(ench.enchantment.getName(ench.level)));
                 }
                 return 0;

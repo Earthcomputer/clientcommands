@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Enchantment.Weight.class)
+@Mixin(Enchantment.Rarity.class)
 public class MixinEnchantmentWeight {
 
     @Inject(method = "getWeight", at = @At("HEAD"), cancellable = true)
@@ -16,7 +16,7 @@ public class MixinEnchantmentWeight {
         int protocolVersion = MultiConnectAPI.instance().getProtocolVersion();
         if (protocolVersion >= Protocols.V1_14 && protocolVersion <= Protocols.V1_14_2) {
             int ret;
-            switch ((Enchantment.Weight) (Object) this) {
+            switch ((Enchantment.Rarity) (Object) this) {
                 case COMMON:
                     ret = 30;
                     break;

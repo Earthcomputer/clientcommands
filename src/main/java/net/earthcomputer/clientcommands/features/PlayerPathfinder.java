@@ -20,7 +20,8 @@ public class PlayerPathfinder extends PathNodeNavigator {
 
     public static Path findPathToAny(Set<BlockPos> positions, PathfindingHints hints) {
         PlayerEntity player = MinecraftClient.getInstance().player;
-        BlockPos centerPos = new BlockPos(player);
+        assert player != null;
+        BlockPos centerPos = player.getBlockPos();
         int range = (int)hints.getFollowRange() + 16;
         ChunkCache chunkCache = new ChunkCache(player.world, centerPos.add(-range, -range, -range), centerPos.add(range, range, range));
         return findPathToAny(chunkCache, player, positions, hints);

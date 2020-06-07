@@ -14,11 +14,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ProtectionEnchantment.class)
 public abstract class MixinProtectionEnchantment extends Enchantment {
 
-    protected MixinProtectionEnchantment(Weight weight, EnchantmentTarget target, EquipmentSlot[] slots) {
+    protected MixinProtectionEnchantment(Rarity weight, EnchantmentTarget target, EquipmentSlot[] slots) {
         super(weight, target, slots);
     }
 
-    @Inject(method = "differs", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "canAccept", at = @At("HEAD"), cancellable = true)
     public void isCompatible1140(Enchantment other, CallbackInfoReturnable<Boolean> ci) {
         int protocolVersion = MultiConnectAPI.instance().getProtocolVersion();
         if (protocolVersion < Protocols.V1_14 || protocolVersion > Protocols.V1_14_2)

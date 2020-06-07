@@ -1,7 +1,9 @@
 package net.earthcomputer.clientcommands.interfaces;
 
+import net.minecraft.block.AbstractBlock;
+
 public interface IBlock {
 
-    float getHardness();
+    AbstractBlock.Settings getSettings();
 
 }

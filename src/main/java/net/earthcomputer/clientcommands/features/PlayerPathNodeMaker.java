@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.features;
 
 import com.google.common.collect.Sets;
 import net.earthcomputer.clientcommands.mixin.LandPathNodeMakerAccessor;
-import net.minecraft.block.BlockPlacementEnvironment;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.pathing.*;
@@ -27,20 +26,20 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
     public void initFromPlayer(PlayerEntity player, PathfindingHints hints) {
         this.player = player;
         this.hints = hints;
-        field_31 = MathHelper.floor(player.getWidth() + 1);
-        field_30 = MathHelper.floor(player.getHeight() + 1);
-        field_28 = MathHelper.floor(player.getWidth() + 1);
+        entityBlockXSize = MathHelper.floor(player.getWidth() + 1);
+        entityBlockYSize = MathHelper.floor(player.getHeight() + 1);
+        entityBlockZSize = MathHelper.floor(player.getWidth() + 1);
     }
 
     @Override
     public void init(ChunkCache chunkCache, MobEntity mobEntity) {
-        field_20622 = chunkCache;
+        cachedWorld = chunkCache;
         pathNodeCache.clear();
     }
 
     @Override
     public void clear() {
-        field_20622 = null;
+        cachedWorld = null;
         player = null;
         hints = null;
     }
@@ -51,32 +50,32 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
         if (canSwim() && player.isTouchingWater()) {
             feetY = MathHelper.floor(player.getY());
             BlockPos.Mutable mutable3 = new BlockPos.Mutable(player.getX(), feetY, player.getZ());
-            BlockState lv2 = field_20622.getBlockState(mutable3);
+            BlockState lv2 = cachedWorld.getBlockState(mutable3);
             while (lv2.getBlock() == Blocks.WATER || lv2.getFluidState() == Fluids.WATER.getStill(false)) {
                 feetY++;
                 mutable3.set(player.getX(), feetY, player.getZ());
-                lv2 = field_20622.getBlockState(mutable3);
+                lv2 = cachedWorld.getBlockState(mutable3);
             }
             feetY--;
         }
-        else if (player.onGround) {
+        else if (player.isOnGround()) {
             feetY = MathHelper.floor(player.getY() + 0.5);
         }
         else {
-            BlockPos pos = new BlockPos(player);
-            while ((field_20622.getBlockState(pos).isAir() || field_20622.getBlockState(pos).canPlaceAtSide(field_20622, pos, BlockPlacementEnvironment.LAND)) && pos.getY() > 0) {
+            BlockPos pos = player.getBlockPos();
+            while ((cachedWorld.getBlockState(pos).isAir() || cachedWorld.getBlockState(pos).canPathfindThrough(cachedWorld, pos, NavigationType.LAND)) && pos.getY() > 0) {
                 pos = pos.down();
             }
             feetY = pos.up().getY();
         }
-        BlockPos entityPos = new BlockPos(player);
+        BlockPos entityPos = player.getBlockPos();
         PathNodeType pathNodeType4 = getNodeType(player, entityPos.getX(), feetY, entityPos.getZ());
         if (hints.getPathfindingPenalty(pathNodeType4) < 0) {
             Set<BlockPos> cornerPositions = Sets.newHashSet();
-            cornerPositions.add(new BlockPos(player.getBoundingBox().x1, feetY, player.getBoundingBox().z1));
-            cornerPositions.add(new BlockPos(player.getBoundingBox().x1, feetY, player.getBoundingBox().z2));
-            cornerPositions.add(new BlockPos(player.getBoundingBox().x2, feetY, player.getBoundingBox().z1));
-            cornerPositions.add(new BlockPos(player.getBoundingBox().x2, feetY, player.getBoundingBox().z2));
+            cornerPositions.add(new BlockPos(player.getBoundingBox().minX, feetY, player.getBoundingBox().minZ));
+            cornerPositions.add(new BlockPos(player.getBoundingBox().minX, feetY, player.getBoundingBox().maxZ));
+            cornerPositions.add(new BlockPos(player.getBoundingBox().maxX, feetY, player.getBoundingBox().minZ));
+            cornerPositions.add(new BlockPos(player.getBoundingBox().maxX, feetY, player.getBoundingBox().maxZ));
             for (final BlockPos corner : cornerPositions) {
                 PathNodeType pathNodeType8 = getNodeType(player, corner);
                 if (hints.getPathfindingPenalty(pathNodeType8) >= 0) {
@@ -102,7 +101,7 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
                 maxYStep = MathHelper.floor(Math.max(1, player.stepHeight));
             }
         }
-        double feetY = getHeight(field_20622, new BlockPos(node.x, node.y, node.z));
+        double feetY = getFeetY(cachedWorld, new BlockPos(node.x, node.y, node.z));
         PathNode successor = getPathNode(node.x, node.y, node.z + 1, maxYStep, feetY, Direction.SOUTH);
         if (successor != null && !successor.visited && successor.penalty >= 0) {
             successors[successorCount++] = successor;
@@ -120,19 +119,19 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x - 1, node.y, node.z - 1, maxYStep, feetY, Direction.NORTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor, successor, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x + 1, node.y, node.z - 1, maxYStep, feetY, Direction.NORTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor, successor, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x - 1, node.y, node.z + 1, maxYStep, feetY, Direction.SOUTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor, successor, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x + 1, node.y, node.z + 1, maxYStep, feetY, Direction.SOUTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor, successor, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         return successorCount;
@@ -141,7 +140,7 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
     private PathNode getPathNode(int x, int y, int z, int maxYStep, double height, Direction direction) {
         PathNode node = null;
         BlockPos pos = new BlockPos(x, y, z);
-        double feetY = getHeight(field_20622, pos);
+        double feetY = getFeetY(cachedWorld, pos);
         if (feetY - height > 1.125) {
             return null;
         }
@@ -166,13 +165,13 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
                 double otherZ = (double)(z - direction.getOffsetZ()) + 0.5;
                 Box box = new Box(
                         otherX - radius,
-                        getHeight(field_20622, new BlockPos(otherX, y + 1, otherZ)) + 0.001,
+                        getFeetY(cachedWorld, new BlockPos(otherX, y + 1, otherZ)) + 0.001,
                         otherZ - radius,
                         otherX + radius,
-                        player.getHeight() + getHeight(field_20622, new BlockPos(node.x, node.y, node.z)) - 0.002,
+                        player.getHeight() + getFeetY(cachedWorld, new BlockPos(node.x, node.y, node.z)) - 0.002,
                         otherZ + radius
                 );
-                if (!field_20622.doesNotCollide(player, box)) {
+                if (!cachedWorld.doesNotCollide(player, box)) {
                     node = null;
                 }
             }
@@ -205,7 +204,7 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
                     y + player.getHeight(),
                     z + radius + 0.5
             );
-            if (!field_20622.doesNotCollide(player, box)) {
+            if (!cachedWorld.doesNotCollide(player, box)) {
                 return null;
             }
 
@@ -268,8 +267,8 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
 
         EnumSet<PathNodeType> nodesInBounds = EnumSet.noneOf(PathNodeType.class);
         PathNodeType type = PathNodeType.BLOCKED;
-        BlockPos entityPos = new BlockPos(player);
-        type = getNodeType(world, x, y, z, sizeX, sizeY, sizeZ, canOpenDoors, canEnterOpenDoors, nodesInBounds, type, entityPos);
+        BlockPos entityPos = player.getBlockPos();
+        type = findNearbyNodeTypes(world, x, y, z, sizeX, sizeY, sizeZ, canOpenDoors, canEnterOpenDoors, nodesInBounds, type, entityPos);
         if (nodesInBounds.contains(PathNodeType.FENCE)) {
             return PathNodeType.FENCE;
         }
@@ -294,6 +293,6 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
     }
 
     private PathNodeType getNodeType(PlayerEntity entity, int x, int y, int z) {
-        return getNodeType(field_20622, x, y, z, null, field_31, field_30, field_28, canOpenDoors(), canEnterOpenDoors());
+        return getNodeType(cachedWorld, x, y, z, null, entityBlockXSize, entityBlockYSize, entityBlockZSize, canOpenDoors(), canEnterOpenDoors());
     }
 }

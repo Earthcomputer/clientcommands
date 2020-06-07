@@ -11,7 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.arguments.ItemEnchantmentArgumentType;
 import net.minecraft.command.arguments.ItemStringReader;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.InfoEnchantment;
+import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -50,10 +50,10 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         Parser parser = new Parser(reader);
         parser.parse();
 
-        Predicate<List<InfoEnchantment>> predicate = enchantments -> {
-            for (InfoEnchantment with : parser.with) {
+        Predicate<List<EnchantmentLevelEntry>> predicate = enchantments -> {
+            for (EnchantmentLevelEntry with : parser.with) {
                 boolean found = false;
-                for (InfoEnchantment ench : enchantments) {
+                for (EnchantmentLevelEntry ench : enchantments) {
                     if (with.enchantment == ench.enchantment && (with.level == -1 || with.level == ench.level)) {
                         found = true;
                         break;
@@ -62,8 +62,8 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                 if (!found)
                     return false;
             }
-            for (InfoEnchantment without : parser.without) {
-                for (InfoEnchantment ench : enchantments) {
+            for (EnchantmentLevelEntry without : parser.without) {
+                for (EnchantmentLevelEntry ench : enchantments) {
                     if (without.enchantment == ench.enchantment && (without.level == -1 || without.level == ench.level)) {
                         return false;
                     }
@@ -99,9 +99,9 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
     public static class ItemAndEnchantmentsPredicate {
         public final Item item;
-        public final Predicate<List<InfoEnchantment>> predicate;
+        public final Predicate<List<EnchantmentLevelEntry>> predicate;
 
-        public ItemAndEnchantmentsPredicate(Item item, Predicate<List<InfoEnchantment>> predicate) {
+        public ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) {
             this.item = item;
             this.predicate = predicate;
         }
@@ -112,18 +112,18 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         private Consumer<SuggestionsBuilder> suggestor;
 
         private Item item;
-        private List<InfoEnchantment> with = new ArrayList<>();
-        private List<InfoEnchantment> without = new ArrayList<>();
+        private List<EnchantmentLevelEntry> with = new ArrayList<>();
+        private List<EnchantmentLevelEntry> without = new ArrayList<>();
 
         public Parser(StringReader reader) {
             this.reader = reader;
         }
 
-        public List<InfoEnchantment> getWith() {
+        public List<EnchantmentLevelEntry> getWith() {
             return with;
         }
 
-        public List<InfoEnchantment> getWithout() {
+        public List<EnchantmentLevelEntry> getWithout() {
             return without;
         }
 
@@ -163,9 +163,9 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             int level = parseEnchantmentLevel(suggest, negative, stack, enchantment);
 
             if (negative)
-                without.add(new InfoEnchantment(enchantment, level));
+                without.add(new EnchantmentLevelEntry(enchantment, level));
             else
-                with.add(new InfoEnchantment(enchantment, level));
+                with.add(new EnchantmentLevelEntry(enchantment, level));
         }
 
         private boolean parseWithWithout() throws CommandSyntaxException {
@@ -187,17 +187,17 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             for (Enchantment ench : Registry.ENCHANTMENT) {
                 boolean allowed = (ench.isAcceptableItem(stack) || stack.getItem() == Items.BOOK) && !ench.isTreasure();
                 if (negative) {
-                    for (InfoEnchantment ench2 : with)
+                    for (EnchantmentLevelEntry ench2 : with)
                         if (ench2.enchantment == ench && ench2.level == -1)
                             allowed = false;
-                    for (InfoEnchantment ench2 : without)
+                    for (EnchantmentLevelEntry ench2 : without)
                         if (ench2.enchantment == ench && ench2.level == -1)
                             allowed = false;
                 } else {
-                    for (InfoEnchantment ench2 : with)
-                        if (ench2.enchantment == ench || !ench2.enchantment.isDifferent(ench)) // "different" = compatible
+                    for (EnchantmentLevelEntry ench2 : with)
+                        if (ench2.enchantment == ench || !ench2.enchantment.canCombine(ench)) // "different" = compatible
                             allowed = false;
-                    for (InfoEnchantment ench2 : without)
+                    for (EnchantmentLevelEntry ench2 : without)
                         if (ench2.enchantment == ench && ench2.level == -1)
                             allowed = false;
                 }
@@ -234,8 +234,8 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                 int enchantability = stack.getItem().getEnchantability();
                 int level = 30 + 1 + enchantability / 4 + enchantability / 4;
                 level += Math.round(level * 0.15f);
-                for (maxLevel = enchantment.getMaximumLevel(); maxLevel >= 1; maxLevel--) {
-                    if (level >= enchantment.getMinimumPower(maxLevel))
+                for (maxLevel = enchantment.getMaxLevel(); maxLevel >= 1; maxLevel--) {
+                    if (level >= enchantment.getMinPower(maxLevel))
                         break;
                 }
             }
@@ -247,16 +247,16 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                 boolean allowed = true;
 
                 if (negative) {
-                    for (InfoEnchantment ench : with) {
+                    for (EnchantmentLevelEntry ench : with) {
                         if (ench.enchantment == enchantment && (level == -1 || level == ench.level))
                             allowed = false;
                     }
-                    for (InfoEnchantment ench : without) {
+                    for (EnchantmentLevelEntry ench : without) {
                         if (ench.enchantment == enchantment && (level == -1 || level == ench.level))
                             allowed = false;
                     }
                 } else {
-                    for (InfoEnchantment ench : without) {
+                    for (EnchantmentLevelEntry ench : without) {
                         if (ench.enchantment == enchantment && (level == -1 || level == ench.level))
                             allowed = false;
                     }

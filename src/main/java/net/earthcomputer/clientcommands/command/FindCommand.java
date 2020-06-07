@@ -5,7 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class FindCommand {
         for (Entity entity : entities) {
             double distance = Math.sqrt(entity.squaredDistanceTo(source.getPosition()));
             sendFeedback(new TranslatableText("commands.cfind.found.left", entity.getName(), distance)
-                    .append(getCoordsTextComponent(new BlockPos(entity)))
+                    .append(getCoordsTextComponent(entity.getBlockPos()))
                     .append(new TranslatableText("commands.cfind.found.right", entity.getName(), distance)));
         }
 

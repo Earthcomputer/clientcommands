@@ -8,12 +8,13 @@ import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.packet.EntitySpawnS2CPacket;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.MessageType;
-import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 
 import java.util.Random;
 
@@ -35,31 +36,31 @@ public class SeedCracker {
         for (int i = 0; i < 20; i++) {
             boolean success = PlayerRandCracker.throwItem();
             if (!success) {
-                MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.GAME_INFO, new TranslatableText("itemCrack.notEnoughItems").formatted(Formatting.RED));
+                MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.GAME_INFO, new TranslatableText("itemCrack.notEnoughItems").formatted(Formatting.RED), Util.NIL_UUID);
                 EnchantmentCracker.LOGGER.info("Unable to use rng SeedCracker |not enough items|");
                 return false;
             }
         }
         return true;
     }
-	public static void attemptCrack()
-	{
-		long seed= Lattice_cracker.crack(SeedCracker.bits);
+    public static void attemptCrack()
+    {
+        long seed= Lattice_cracker.crack(SeedCracker.bits);
 
-		if(seed==0)//Basicaly if seed is zero it means it failed to try to crack again
-		{
-			SeedCracker.crack(SeedCracker.callback);
-			return;
-		}
-		//Else, got a seed
+        if(seed==0)//Basicaly if seed is zero it means it failed to try to crack again
+        {
+            SeedCracker.crack(SeedCracker.callback);
+            return;
+        }
+        //Else, got a seed
 
         TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
-		
-		Random rand=new Random();
-		rand.setSeed(seed ^ PlayerRandCracker.MULTIPLIER);
-		rand.nextFloat();
-		rand.nextFloat();
-		//rand.nextFloat();
+
+        Random rand=new Random();
+        rand.setSeed(seed ^ PlayerRandCracker.MULTIPLIER);
+        rand.nextFloat();
+        rand.nextFloat();
+        //rand.nextFloat();
 		
         /*
 		for(int i=0;i<13;i++) {
@@ -70,8 +71,8 @@ public class SeedCracker {
 			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" \n");
 		}*/
 
-		callback.callback(PlayerRandCracker.getSeed(rand));//extract seed and call callback
-	}
+        callback.callback(PlayerRandCracker.getSeed(rand));//extract seed and call callback
+    }
     public static void crack(OnCrack Callback){
         callback=Callback;
         if(throwItems())

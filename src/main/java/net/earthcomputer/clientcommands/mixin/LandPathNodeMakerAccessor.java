@@ -9,5 +9,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(LandPathNodeMaker.class)
 public interface LandPathNodeMakerAccessor {
     @Invoker
-    boolean callIsValidDiagonalSuccessor(PathNode node, PathNode successor1, PathNode successor2, PathNode diagonalSuccessor);
+    boolean callIsValidDiagonalSuccessor(PathNode node, PathNode successor);
 }

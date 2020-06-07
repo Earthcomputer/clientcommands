@@ -52,7 +52,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
             ArmorStandEntity armorStand = (ArmorStandEntity) target;
             if (armorStand.removed) {
                 canAttack = false;
-            } else if (armorStand.isInvulnerableTo(source) || ((IArmorStandEntity) armorStand).getField_7111() || armorStand.isMarker()) {
+            } else if (armorStand.isInvulnerableTo(source) || ((IArmorStandEntity) armorStand).isArmorStandInvisible() || armorStand.isMarker()) {
                 canAttack = false;
             } else if (!_this.abilities.allowModifyWorld) {
                 canAttack = false;

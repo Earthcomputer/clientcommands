@@ -19,10 +19,10 @@ public abstract class MixinArmorStandEntityRenderer extends LivingEntityRenderer
         super(dispatcher, model, shadowSize);
     }
 
-    @Inject(method = "method_24302", at = @At("HEAD"), cancellable = true)
-    private void onGetRenderLayer(ArmorStandEntity armorStand, boolean visible, boolean translucent, CallbackInfoReturnable<RenderLayer> ci) {
+    @Inject(method = "getRenderLayer", at = @At("HEAD"), cancellable = true)
+    private void onGetRenderLayer(ArmorStandEntity armorStand, boolean visible, boolean translucent, boolean shouldRenderOutline, CallbackInfoReturnable<RenderLayer> ci) {
         if (((IEntity) armorStand).hasGlowingTicket())
-            ci.setReturnValue(super.method_24302(armorStand, visible, translucent));
+            ci.setReturnValue(super.getRenderLayer(armorStand, visible, translucent, shouldRenderOutline));
     }
 
 }

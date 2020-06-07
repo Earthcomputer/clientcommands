@@ -10,9 +10,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.packet.BookUpdateC2SPacket;
 import net.minecraft.util.Hand;
 
 import java.util.Random;
@@ -35,22 +35,22 @@ public class BookCommand {
         addClientSideCommand("cbook");
 
         dispatcher.register(literal("cbook")
-            .then(literal("fill")
-                .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
-                .then(argument("limit", integer(0, MAX_LIMIT))
-                    .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
-            .then(literal("random")
-                .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
-                .then(argument("limit", integer(0, MAX_LIMIT))
-                    .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
-                    .then(argument("seed", longArg())
-                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit"))))))
-            .then(literal("ascii")
-                .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
-                .then(argument("limit", integer(0, MAX_LIMIT))
-                    .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
-                    .then(argument("seed", longArg())
-                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit")))))));
+                .then(literal("fill")
+                        .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
+                        .then(argument("limit", integer(0, MAX_LIMIT))
+                                .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
+                .then(literal("random")
+                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
+                        .then(argument("limit", integer(0, MAX_LIMIT))
+                                .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
+                                .then(argument("seed", longArg())
+                                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit"))))))
+                .then(literal("ascii")
+                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
+                        .then(argument("limit", integer(0, MAX_LIMIT))
+                                .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
+                                .then(argument("seed", longArg())
+                                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit")))))));
     }
 
     private static IntStream fill() {

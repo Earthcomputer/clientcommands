@@ -1,17 +1,16 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
-import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.ForgingScreenHandler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(CraftingScreenHandler.class)
-public class MixinCraftingTableContainer implements IDroppableInventoryContainer {
+@Mixin(ForgingScreenHandler.class)
+public class MixinForgingScreenHandler implements IDroppableInventoryContainer {
 
-    @Shadow @Final private CraftingInventory input;
+    @Shadow @Final protected Inventory input;
 
     @Override
     public Inventory getDroppableInventory() {

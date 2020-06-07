@@ -7,11 +7,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.block.Material;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityContext;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -77,7 +77,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
         if (!isThePlayer())
             return;
 
-        BlockPos pos = new BlockPos(this);
+        BlockPos pos = getBlockPos();
         if (!Objects.equal(pos, this.lastBlockPos)) {
             this.lastBlockPos = pos;
             if (onGround) {
@@ -87,7 +87,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
                     float radius = Math.min(16, frostWalkerLevel + 2);
                     for (BlockPos offsetPos : BlockPos.iterate(pos.add(-radius, -1, -radius), pos.add(radius, -1, radius))) {
                         BlockState offsetState = world.getBlockState(offsetPos);
-                        if (offsetState.getMaterial() == Material.WATER && offsetState.get(FluidBlock.LEVEL) == 0 && world.canPlace(frostedIce, offsetPos, EntityContext.absent())) {
+                        if (offsetState.getMaterial() == Material.WATER && offsetState.get(FluidBlock.LEVEL) == 0 && world.canPlace(frostedIce, offsetPos, ShapeContext.absent())) {
                             if (world.isAir(offsetPos.up())) {
                                 PlayerRandCracker.onFrostWalker();
                             }

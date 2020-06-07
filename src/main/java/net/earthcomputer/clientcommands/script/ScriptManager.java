@@ -287,6 +287,7 @@ public class ScriptManager {
         boolean running;
         private LongTask task;
         private boolean blockingInput = false;
+        @SuppressWarnings("NewExpressionSideOnly")
         private Input input = new Input();
         private boolean sprinting = false;
     }

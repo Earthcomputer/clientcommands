@@ -490,7 +490,7 @@ declare class Inventory {
 declare class World {
     /**
      * The dimension ID of the current dimension. In vanilla, this can either be <tt>"overworld"</tt>,
-     * <tt>"the_nether"</tt> or <tt>"the_end"</tt>; in modded this may take other values.
+     * <tt>"the_nether"</tt> or <tt>"the_end"</tt>; with datapacks or in modded this may take other values.
      */
     readonly dimension: string;
 
