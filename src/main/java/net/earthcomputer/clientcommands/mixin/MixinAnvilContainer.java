@@ -14,7 +14,9 @@ public class MixinAnvilContainer {
 
     @Inject(method = "onTakeOutput", at = @At("HEAD"))
     public void onAnvilUse(PlayerEntity entity, ItemStack stack, CallbackInfoReturnable<ItemStack> ci) {
-        PlayerRandCracker.onAnvilUse();
+        if (!entity.abilities.creativeMode) {
+            PlayerRandCracker.onAnvilUse();
+        }
     }
 
 }

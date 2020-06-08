@@ -105,6 +105,7 @@
   "playerManip.reset.unbreaking": "Unbreaking Item Used",
   "playerManip.reset.itemBreak": "Item Broken",
   "playerManip.reset.frostWalker": "Frost Walker Used",
+  "playerManip.reset.soulSpeed": "Soul Speed Used",
   "playerManip.reset.entityCramming": "Entity Cramming",
   "playerManip.reset.enchanting": "Enchanted Item",
   "playerManip.reset.recreated": "Player Recreated",

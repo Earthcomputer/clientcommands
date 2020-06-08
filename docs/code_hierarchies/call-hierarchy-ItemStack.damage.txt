@@ -1,0 +1,101 @@
+Method
+damage(int, T, Consumer<T>)
+Found usages
+Unclassified usage
+Gradle: net.minecraft:minecraft:1.16-pre2-mapped-net.fabricmc.yarn-1.16-pre2+build.2-v2
+net.minecraft.block
+BeehiveBlock
+onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
+PumpkinBlock
+onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+TntBlock
+onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
+               itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+net.minecraft.enchantment
+ThornsEnchantment
+onUserDamaged(LivingEntity, Entity, int)
+            ((ItemStack)entry.getValue()).damage(3, (LivingEntity)user, (Consumer)((livingEntity) -> {
+         ((ItemStack)entry.getValue()).damage(1, (LivingEntity)user, (Consumer)((livingEntity) -> {
+net.minecraft.entity
+LivingEntity
+method_29502()
+               itemStack.damage(1, (LivingEntity)this, (Consumer)((livingEntity) -> {
+damage(DamageSource, float)
+            this.getEquippedStack(EquipmentSlot.HEAD).damage((int)(amount * 4.0F + this.random.nextFloat() * amount * 2.0F), this, (livingEntityx) -> {
+initAi()
+               itemStack.damage(1, (LivingEntity)this, (Consumer)((livingEntity) -> {
+net.minecraft.entity.mob
+CreeperEntity
+interactMob(PlayerEntity, Hand)
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+net.minecraft.entity.passive
+MooshroomEntity
+interactMob(PlayerEntity, Hand)
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+SheepEntity
+interactMob(PlayerEntity, Hand)
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+SnowGolemEntity
+interactMob(PlayerEntity, Hand)
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+net.minecraft.entity.player
+PlayerEntity
+damageShield(float)
+            this.activeItemStack.damage(i, (LivingEntity)this, (Consumer)((playerEntity) -> {
+PlayerInventory
+damageArmor(DamageSource, float)
+               itemStack.damage((int)f, (LivingEntity)this.player, (Consumer)((playerEntity) -> {
+net.minecraft.item
+AxeItem
+useOnBlock(ItemUsageContext)
+               context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+BowItem
+onStoppedUsing(ItemStack, World, LivingEntity, int)
+                  stack.damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+CrossbowItem
+shoot(World, LivingEntity, Hand, ItemStack, ItemStack, float, boolean, ...)
+         crossbow.damage(bl ? 3 : 1, shooter, (e) -> {
+FishingRodItem
+use(World, PlayerEntity, Hand)
+            itemStack.damage(i, (LivingEntity)user, (Consumer)((p) -> {
+FlintAndSteelItem
+useOnBlock(ItemUsageContext)
+            context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+               itemStack.damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+HoeItem
+useOnBlock(ItemUsageContext)
+                  context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+MiningToolItem
+postHit(ItemStack, LivingEntity, LivingEntity)
+      stack.damage(2, (LivingEntity)attacker, (Consumer)((e) -> {
+postMine(ItemStack, World, BlockState, BlockPos, LivingEntity)
+         stack.damage(1, (LivingEntity)miner, (Consumer)((e) -> {
+OnAStickItem
+use(World, PlayerEntity, Hand)
+               itemStack.damage(this.damagePerUse, (LivingEntity)user, (Consumer)((p) -> {
+ShearsItem
+postMine(ItemStack, World, BlockState, BlockPos, LivingEntity)
+         stack.damage(1, (LivingEntity)miner, (Consumer)((e) -> {
+ShovelItem
+useOnBlock(ItemUsageContext)
+                  context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+SwordItem
+postHit(ItemStack, LivingEntity, LivingEntity)
+      stack.damage(1, (LivingEntity)attacker, (Consumer)((e) -> {
+postMine(ItemStack, World, BlockState, BlockPos, LivingEntity)
+         stack.damage(2, (LivingEntity)miner, (Consumer)((e) -> {
+TridentItem
+onStoppedUsing(ItemStack, World, LivingEntity, int)
+                  stack.damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+postHit(ItemStack, LivingEntity, LivingEntity)
+      stack.damage(1, (LivingEntity)attacker, (Consumer)((e) -> {
+postMine(ItemStack, World, BlockState, BlockPos, LivingEntity)
+         stack.damage(2, (LivingEntity)miner, (Consumer)((e) -> {
+Usage in string constants
+clientcommands.main
+net.earthcomputer.clientcommands.mixin
+MixinItemStack
+onDamage(int, T, Consumer<T>, CallbackInfo)
+    @Inject(method = "damage(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At("HEAD"))

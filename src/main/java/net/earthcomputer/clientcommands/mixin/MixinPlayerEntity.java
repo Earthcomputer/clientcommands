@@ -11,7 +11,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.entity.projectile.WitherSkullEntity;
@@ -59,10 +58,6 @@ public abstract class MixinPlayerEntity extends LivingEntity {
             } else if (source.isSourceCreativePlayer()) {
                 canAttack = false;
             }
-        } else if (target instanceof HorseBaseEntity) {
-            if (target.hasPassengers() && target.hasPassengerDeep(_this)) {
-                canAttack = false;
-            }
         } else if (target instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) target;
             if (player.abilities.invulnerable) {
@@ -100,7 +95,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
                 Item item = heldStack.getItem();
                 if (item instanceof MiningToolItem) {
                     PlayerRandCracker.onItemDamage(2, this, heldStack);
-                } else if (item instanceof HoeItem || item instanceof SwordItem || item instanceof TridentItem) {
+                } else if (item instanceof SwordItem || item instanceof TridentItem) {
                     PlayerRandCracker.onItemDamage(1, this, heldStack);
                 }
             }

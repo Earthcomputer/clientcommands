@@ -31,6 +31,8 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
 
     @Shadow private BlockPos lastBlockPos;
 
+    @Shadow protected abstract boolean isOnSoulSpeedBlock();
+
     public MixinLivingEntity(EntityType<?> entityType_1, World world_1) {
         super(entityType_1, world_1);
     }
@@ -95,6 +97,17 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
                     }
                 }
             }
+        }
+    }
+
+    @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;shouldGetSoulSpeedBoost()Z"))
+    private void testSoulSpeed(CallbackInfo ci) {
+        if (!isThePlayer())
+            return;
+
+        boolean hasSoulSpeed = EnchantmentHelper.hasSoulSpeed((LivingEntity) (Object) this);
+        if (hasSoulSpeed && isOnSoulSpeedBlock()) {
+            PlayerRandCracker.onSoulSpeed();
         }
     }
 

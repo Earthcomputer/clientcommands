@@ -148,6 +148,10 @@ public class PlayerRandCracker {
         resetCracker("frostWalker");
     }
 
+    public static void onSoulSpeed() {
+        resetCracker("soulSpeed");
+    }
+
     public static void onBaneOfArthropods() {
         if (canMaintainPlayerRNG())
             nextInt();
@@ -172,6 +176,7 @@ public class PlayerRandCracker {
         resetCracker("unbreaking");
     }
 
+    // TODO: update-sensitive: call hierarchy of ItemStack.damage
     public static void onItemDamage(int amount, LivingEntity holder, ItemStack stack) {
         if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).abilities.creativeMode) {
             if (stack.isDamageable()) {

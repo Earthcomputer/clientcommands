@@ -99,6 +99,7 @@
   "playerManip.reset.unbreaking": "Gegenstand mit Haltbarkeit benutzt",
   "playerManip.reset.itemBreak": "Gegenstand gebrochen",
   "playerManip.reset.frostWalker": "Eisläufer benutzt",
+  "playerManip.reset.soulSpeed": "Seelenläufer benutzt",
   "playerManip.reset.entityCramming": "Objekt-Cramming",
   "playerManip.reset.enchanting": "Gegenstand verzaubert",
   "playerManip.reset.recreated": "Spieler neu erstellt",
