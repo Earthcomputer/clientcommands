@@ -100,7 +100,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
         }
     }
 
-    @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;shouldGetSoulSpeedBoost()Z"))
+    @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;shouldDisplaySoulSpeedEffects()Z"))
     private void testSoulSpeed(CallbackInfo ci) {
         if (!isThePlayer())
             return;
