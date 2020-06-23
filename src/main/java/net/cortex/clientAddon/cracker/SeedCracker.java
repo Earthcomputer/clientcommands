@@ -93,7 +93,7 @@ public class SeedCracker {
     public static void onEntityCreation(EntitySpawnS2CPacket packet) {
         if (packet.getEntityTypeId() == EntityType.ITEM && SeedCracker.expectedItems>0) {
 
-            long rand_val = (long) ((Math.atan2(packet.getVelocityz(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
+            long rand_val = (long) ((Math.atan2(packet.getVelocityZ(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
             long top_bits = rand_val;
             short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
             SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
