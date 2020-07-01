@@ -43,6 +43,7 @@ public class ClientCommands implements ClientModInitializer {
         GlowCommand.register(dispatcher);
         GetDataCommand.register(dispatcher);
         ScriptCommand.register(dispatcher);
+        StackSizeCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
         

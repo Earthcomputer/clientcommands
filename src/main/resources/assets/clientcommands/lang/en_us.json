@@ -36,6 +36,11 @@
   "commands.cscript.reload.success": "Reloaded scripts",
   "commands.cscript.run.success": "Script ran successfully",
 
+  "commands.cstacksize.success": "%d %s is %d stacks and %d extra",
+  "commands.cstacksize.success.empty": "%d items is %d stacks and %d extra",
+  "commands.cstacksize.success.empty.exact": "%d items is exactly %d stacks",
+  "commands.cstacksize.success.exact": "%d %s is exactly %d stacks",
+
   "commands.ctask.list.noTasks": "No currently executing tasks",
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",
