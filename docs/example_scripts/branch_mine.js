@@ -110,7 +110,7 @@ var placeBlock = function(x, y, z) {
 };
 
 var mineBlock = function(x, y, z) {
-    var toolMaterialOrder = ["diamond", "iron", "stone", "wooden", "golden"];
+    var toolMaterialOrder = ["netherite","diamond", "iron", "stone", "wooden", "golden"];
     var tool = getTool(world.getBlock(x, y, z));
     if (tool) {
         var picked = false;
