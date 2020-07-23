@@ -77,7 +77,7 @@
   "enchCrack.insn.ready": "Twoje ziarno zaklęcia jest gotowe",
   "enchCrack.insn.bookshelves": "Półki na książki: %d",
   "enchCrack.insn.slot": "W Slocie: %d",
-  "enchCrack.insn.itemThrows": "Ile musisz wyrzucić przedmiotów: %d (about %f seconds)",
+  "enchCrack.insn.itemThrows": "Ile musisz wyrzucić przedmiotów: %d (około %f sekund)",
   "enchCrack.insn.itemThrows.noDummy": "Nie potrzebujesz zbędnego przedmiotu",
   "enchCrack.insn.enchantments": "Zaklęcia na przedmiocie:",
 
