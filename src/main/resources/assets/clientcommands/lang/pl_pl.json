@@ -1,5 +1,6 @@
 {
   "commands.cbook.success": "Pomyślnie zedytowano książkę",
+  "commands.cbook.commandException": "Nie trzymasz książki",
 
   "commands.ccalc.expected": "Spodziewane %s",
   "commands.ccalc.invalidArgumentCount": "Funkcja \"%s\" nie może mieć %d argumentów",
@@ -7,7 +8,7 @@
   "commands.ccalcstack.success": "%d %s to %d staki/ów i %d dodatkowe",
   "commands.ccalcstack.success.empty": "%d przedmiotow to %d staki/ów i %d dodatkowe",
   "commands.ccalcstack.success.empty.exact": "%d przedmiotów to dokładnie %d staków",
-  "commands.ccalcstack.success.exact": "%d %s to dokładnie %d staki",
+  "commands.ccalcstack.success.exact": "%d %s to dokładnie %d staki/ów",
 
   "commands.ccrackrng.starting": "Łamanie ziarna gracza",
   "commands.ccrackrng.success": "RNG gracza złamane: %d",

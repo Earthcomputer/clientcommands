@@ -1,5 +1,6 @@
 {
   "commands.cbook.success": "Successfully edited book",
+  "commands.cbook.commandException": "You are not holding a book",
 
   "commands.ccalc.expected": "Expected %s",
   "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %d arguments",
