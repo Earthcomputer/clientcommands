@@ -1,0 +1,124 @@
+{
+  "commands.cbook.success": "Pomyślnie zedytowano książkę",
+  "commands.cbook.commandException": "Nie trzymasz książki",
+
+  "commands.ccalc.expected": "Spodziewane %s",
+  "commands.ccalc.invalidArgumentCount": "Funkcja \"%s\" nie może mieć %d argumentów",
+
+  "commands.ccalcstack.success": "%d %s to %d staki/ów i %d dodatkowe",
+  "commands.ccalcstack.success.empty": "%d przedmiotow to %d staki/ów i %d dodatkowe",
+  "commands.ccalcstack.success.empty.exact": "%d przedmiotów to dokładnie %d staków",
+  "commands.ccalcstack.success.exact": "%d %s to dokładnie %d staki/ów",
+
+  "commands.ccrackrng.starting": "Łamanie ziarna gracza",
+  "commands.ccrackrng.success": "RNG gracza złamane: %d",
+
+  "commands.cenchant.expectedWithWithout": "Spodziewane \"with\"/\"without\"",
+  "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otzymać te zaklęcia",
+  "commands.cenchant.incompatible": "Niekompatybilne zaklęcia",
+  "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączenia \"Enchanting prediction\".",
+  "commands.cenchant.needEnchantingPrediction.enable": "Włącz",
+  "commands.cenchant.success": "Rozpoczynam manipulowanie zaklęciami",
+  "commands.cenchant.uncracked": "Ziarno musi być złamane",
+
+  "commands.cfind.found.left": "Znaleziono %1$s na ",
+  "commands.cfind.found.right": ", %2$.2f bloków dalej",
+  "commands.cfind.noMatch": "Żadne entity nie pasuje twoim wymaganiom",
+  "commands.cfind.success": "%d entity pasuje twoim wymaganiom",
+
+  "commands.cfindblock.notFound": "Nie znaleziono takiego bloku",
+  "commands.cfindblock.success.left": "Najbliższe trafienie jest na ",
+  "commands.cfindblock.success.right": ", %1$.2f bloków dalej",
+
+  "commands.cfinditem.match.left": "%dx %s znaleziono na ",
+  "commands.cfinditem.match.right": "",
+  "commands.cfinditem.starting": "Szukanie %s",
+  "commands.cfinditem.starting.keepSearching": "Ciągłe szukanie %s.",
+  "commands.cfinditem.total": "Znaleziono %dx %s",
+
+  "commands.crender.entities.success": "Reguła renderowania entity została zaktualizowana",
+
+  "commands.cscript.notFound": "Skrypt \"%s\" nie istnieje",
+  "commands.cscript.reload.success": "Przeładowanie Skryptów",
+  "commands.cscript.run.success": "Wykonano skrypt pomyślnie",
+
+  "commands.ctask.list.noTasks": "Nie ma w tej chwili działających zadań.",
+  "commands.ctask.list.success": "Działające zadania: %d",
+  "commands.ctask.stop.noMatch": "Żadnych pasujących zadań",
+  "commands.ctask.stop.success": "Zatrzymano %d zadań",
+
+  "commands.ctemprule.list.header": "Listowanie %d Tymczasowych reguł:",
+  "commands.ctemprule.reset.success": "Tymczasowa reguła %s została zresetowana do wartości %s",
+  "commands.ctemprule.set.success": "Tymczasowa reguła %s została zaktualizowana do wartości %s",
+
+  "commands.cwiki.failed": "Nie można było otrzymać zawartości z wiki",
+
+  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.cancel": "Anuluj",
+  "commands.client.crack": "Złam",
+  "commands.client.expectedRegex": "Nieprawidłowe wyrażenie regularne %s",
+  "commands.client.notClient": "To nie jest polecenie klienta.",
+
+  "enchCrack.state": "Stan ziarna zaklęć: %s",
+  "enchCrack.state.uncracked": "Nie złamano",
+  "enchCrack.state.cracking": "W trakcie",
+  "enchCrack.state.cracked": "Złamano",
+
+  "enchCrack.enchantments": "Zaklęcia:",
+  "enchCrack.clues": "Podpowiedzi:",
+  "enchCrack.slot": "Slot %d:",
+
+  "enchCrack.xpSeed.one": "Ziarno XP: %08X",
+  "enchCrack.xpSeed.many": "Liczba możliwych ziarn XP: %d",
+  "enchCrack.playerRNGSeed.many": "Liczba możliwych RNG gracza: %d",
+  "enchCrack.addInfo": "Dodaj Informacje",
+
+  "enchCrack.insn.dummy": "Zaklnij zbędny przedmiot",
+  "enchCrack.insn.ready": "Twoje ziarno zaklęcia jest gotowe",
+  "enchCrack.insn.bookshelves": "Półki na książki: %d",
+  "enchCrack.insn.slot": "W Slocie: %d",
+  "enchCrack.insn.itemThrows": "Ile musisz wyrzucić przedmiotów: %d (około %f sekund)",
+  "enchCrack.insn.itemThrows.noDummy": "Nie potrzebujesz zbędnego przedmiotu",
+  "enchCrack.insn.enchantments": "Zaklęcia na przedmiocie:",
+
+  "playerManip.state": "Stan ziarna gracza: %s",
+  "playerManip.state.uncracked": "Nie złamano",
+  "playerManip.state.cracked": "Złamano",
+  "playerManip.state.ench_cracking_1": "Łamanie ziarna zaklęcia 1",
+  "playerManip.state.half_cracked": "Złamano w połowie",
+  "playerManip.state.ench_cracking_2": "Łamanie ziarna zaklęcia 2",
+  "playerManip.state.cracking": "W trakcie łamania",
+  "playerManip.state.eating": "Jedzenie",
+  "playerManip.state.manipulating_enchantments": "Manipulowanie Zaklęć",
+  "playerManip.state.waiting_dummy_enchant": "Czekam na zbędny przedmiot",
+
+  "playerManip.reset": "Resetowanie manipulacji RNG. Powód: %s",
+  "playerManip.reset.playerHurt": "Otrzymano obrażenia",
+  "playerManip.reset.sprint": "Włączono sprint",
+  "playerManip.reset.enterWater": "Wskoczono do wody",
+  "playerManip.reset.swim": "Próbowano pływać",
+  "playerManip.reset.potion": "Efekt mikstury aktywny",
+  "playerManip.reset.mending": "Naprawiono przedmiot",
+  "playerManip.reset.respiration": "Użyto hełmu z zaklęciem oddychania",
+  "playerManip.reset.dropItem": "Wyrzucono przedmiot",
+  "playerManip.reset.anvil": "Użyto kowadła",
+  "playerManip.reset.food": "Zjedzono coś",
+  "playerManip.reset.drink": "Wypito coś",
+  "playerManip.reset.baneOfArthropods": "Uderzono stawonoga z Pogromcą Stawonogów",
+  "playerManip.reset.advancement": "Zdobyto Osiągnięcie",
+  "playerManip.reset.shield": "Zablokowano tarczą",
+  "playerManip.reset.give": "Użyto polecenia /give",
+  "playerManip.reset.unbreaking": "Użyto niezniszczalnego narzędzia",
+  "playerManip.reset.itemBreak": "Narzędzie się zniszczyło",
+  "playerManip.reset.frostWalker": "Użyto mroźnego piechura",
+  "playerManip.reset.soulSpeed": "Prędkość dusz włączona",
+  "playerManip.reset.entityCramming": "Wepchnięto sie w Entity",
+  "playerManip.reset.enchanting": "Zaklęto przedmiot",
+  "playerManip.reset.recreated": "Player Recreated",
+
+  "playerManip.serverBrandWarning": "Ostrzeżenie: Serwer na którym grasz jest zmodyfikowany. Nie ma gwarancji że funkcje RNG będą działać na tym serwerze",
+  "playerManip.toolBreakWarning": "Ostrzeżenie: Narzędzie ma %d wytrzymałości",
+
+  "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: zbyt mało przedmiotów w ekwipunku"
+
+}

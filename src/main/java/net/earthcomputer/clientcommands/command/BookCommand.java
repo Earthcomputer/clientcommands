@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.client.MinecraftClient;
@@ -13,6 +12,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
 
 import java.util.Random;
@@ -26,7 +26,7 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class BookCommand {
 
-    private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(new LiteralMessage("You are not holding a book"));
+    private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(new TranslatableText("commands.cbook.commandException"));
 
     private static final int MAX_LIMIT = 100;
     private static final int DEFAULT_LIMIT = 50;
