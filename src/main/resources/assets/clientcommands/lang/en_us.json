@@ -36,7 +36,7 @@
   "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s.",
   "commands.cfinditem.total": "Found %dx %s total",
 
-  "commands.cgamma.success": "Set gamma to %d",
+  "commands.cgamma.success": "Set gamma to %f",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
