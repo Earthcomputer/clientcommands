@@ -189,16 +189,15 @@ public class ScriptInventory {
         assert player != null;
 
         if (container == player.playerScreenHandler) {
-            if (id < player.inventory.size())
-                id += 5;
-            else if (id < player.inventory.size() + 5)
-                id -= player.inventory.size();
-            for (int i = 0; i < player.currentScreenHandler.slots.size(); i++) {
-                Slot slot = player.currentScreenHandler.getSlot(i);
-                if (slot.inventory == player.inventory) {
-                    if (((ISlot) slot).getIndex() == id)
+            if (id < player.inventory.size()) {
+                for (Slot slot : container.slots) {
+                    if (slot.inventory == player.inventory && ((ISlot) slot).getIndex() == id) {
                         return slot;
+                    }
                 }
+            }
+            if (container == player.currentScreenHandler) {
+                return container.getSlot(id - player.inventory.size());
             }
         } else {
             int containerId = 0;
@@ -220,11 +219,11 @@ public class ScriptInventory {
         assert player != null;
 
         if (container == player.playerScreenHandler) {
-            int id = ((ISlot) slot).getIndex();
-            if (id < 5)
-                return id + player.inventory.size();
-            else
-                return id - 5;
+            if (slot.inventory == player.inventory) {
+                return ((ISlot) slot).getIndex();
+            } else {
+                return ((ISlot) slot).getIndex() + player.inventory.size();
+            }
         } else {
             int containerId = 0;
             for (int i = 0; i < container.slots.size(); i++) {
