@@ -81,45 +81,21 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         }
 
         private Expression parseExpression1() throws CommandSyntaxException {
-            List<Expression> subExpressions = new ArrayList<>();
-            subExpressions.add(parseExpression2());
-
-            reader.skipWhitespace();
-            while (reader.canRead() && reader.peek() == '^') {
-                reader.skip();
-                reader.skipWhitespace();
-                subExpressions.add(parseExpression2());
-                reader.skipWhitespace();
-            }
-
-            if (subExpressions.size() == 1) {
-                return subExpressions.get(0);
-            } else {
-                Expression right = subExpressions.get(subExpressions.size() - 1);
-                for (int i = subExpressions.size() - 2; i >= 0; i--) {
-                    Expression left = subExpressions.get(i);
-                    right = new BinaryOpExpression(left, right, Math::pow);
-                }
-                return right;
-            }
-        }
-
-        private Expression parseExpression2() throws CommandSyntaxException {
-            Expression left = parseExpression3();
+            Expression left = parseExpression2();
 
             reader.skipWhitespace();
             if (reader.canRead()) {
                 if (reader.peek() == '+') {
                     reader.skip();
                     reader.skipWhitespace();
-                    Expression right = parseExpression2();
+                    Expression right = parseExpression1();
                     return new BinaryOpExpression(left, right, Double::sum);
                 }
 
                 if (reader.peek() == '-') {
                     reader.skip();
                     reader.skipWhitespace();
-                    Expression right = parseExpression2();
+                    Expression right = parseExpression1();
                     return new BinaryOpExpression(left, right, (l, r) -> l - r);
                 }
             }
@@ -127,29 +103,29 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
             return left;
         }
 
-        private Expression parseExpression3() throws CommandSyntaxException {
-            Expression left = parseExpression4();
+        private Expression parseExpression2() throws CommandSyntaxException {
+            Expression left = parseExpression3();
 
             reader.skipWhitespace();
             if (reader.canRead()) {
                 if (reader.peek() == '*') {
                     reader.skip();
                     reader.skipWhitespace();
-                    Expression right = parseExpression3();
+                    Expression right = parseExpression2();
                     return new BinaryOpExpression(left, right, (l, r) -> l * r);
                 }
 
                 if (reader.peek() == '/') {
                     reader.skip();
                     reader.skipWhitespace();
-                    Expression right = parseExpression3();
+                    Expression right = parseExpression2();
                     return new BinaryOpExpression(left, right, (l, r) -> l / r);
                 }
 
                 if (reader.peek() == '%') {
                     reader.skip();
                     reader.skipWhitespace();
-                    Expression right = parseExpression3();
+                    Expression right = parseExpression2();
                     return new BinaryOpExpression(left, right, (l, r) -> l % r);
                 }
 
@@ -165,6 +141,30 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
             }
 
             return left;
+        }
+
+        private Expression parseExpression3() throws CommandSyntaxException {
+            List<Expression> subExpressions = new ArrayList<>();
+            subExpressions.add(parseExpression4());
+
+            reader.skipWhitespace();
+            while (reader.canRead() && reader.peek() == '^') {
+                reader.skip();
+                reader.skipWhitespace();
+                subExpressions.add(parseExpression4());
+                reader.skipWhitespace();
+            }
+
+            if (subExpressions.size() == 1) {
+                return subExpressions.get(0);
+            } else {
+                Expression right = subExpressions.get(subExpressions.size() - 1);
+                for (int i = subExpressions.size() - 2; i >= 0; i--) {
+                    Expression left = subExpressions.get(i);
+                    right = new BinaryOpExpression(left, right, Math::pow);
+                }
+                return right;
+            }
         }
 
         private Expression parseExpression4() throws CommandSyntaxException {
