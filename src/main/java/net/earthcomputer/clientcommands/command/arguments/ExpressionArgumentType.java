@@ -395,6 +395,10 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                     }
                 })
                 .put("acoth", (UnaryFunction) n -> 0.5 * Math.log((n + 1) / (n - 1)))
+                .put("and", (TwoOrMoreFunction) vals -> (double)Arrays.stream(vals).mapToInt(val -> (int) val).reduce(0, (a, b) -> a & b))
+                .put("or", (TwoOrMoreFunction) vals -> (double)Arrays.stream(vals).mapToInt(val -> (int) val).reduce(0, (a, b) -> a | b))
+                .put("xor", (TwoOrMoreFunction) vals -> (double)Arrays.stream(vals).mapToInt(val -> (int) val).reduce(0, (a, b) -> a ^ b))
+                .put("not", (UnaryFunction) val -> (double)(~((int)val)))
         .build();
 
         private IFunction function;
@@ -445,6 +449,14 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
             @Override
             default boolean isAcceptableInputCount(int count) {
                 return count == 2;
+            }
+        }
+
+        @FunctionalInterface
+        private static interface TwoOrMoreFunction extends IFunction {
+            @Override
+            default boolean isAcceptableInputCount(int count) {
+                return count >= 2;
             }
         }
 
