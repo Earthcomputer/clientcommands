@@ -190,7 +190,7 @@ public class ScriptInventory {
 
         if (container == player.playerScreenHandler) {
             if (id < player.inventory.size()) {
-                for (Slot slot : container.slots) {
+                for (Slot slot : player.currentScreenHandler.slots) {
                     if (slot.inventory == player.inventory && ((ISlot) slot).getIndex() == id) {
                         return slot;
                     }
