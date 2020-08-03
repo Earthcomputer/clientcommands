@@ -36,6 +36,8 @@
   "commands.cfinditem.starting.keepSearching": "Ciągłe szukanie %s.",
   "commands.cfinditem.total": "Znaleziono %dx %s",
 
+  "commands.cgamma.success": "Ustawiono gamma na %f",
+
   "commands.crender.entities.success": "Reguła renderowania entity została zaktualizowana",
 
   "commands.cscript.notFound": "Skrypt \"%s\" nie istnieje",
