@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.MinecraftClientGame;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -11,10 +12,14 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
@@ -186,8 +191,15 @@ public class PlayerRandCracker {
                         onUnbreaking(stack, amount, unbreakingLevel);
 
                     if (TempRules.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
+
+                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15){
+                            MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10,0.1f);
+                        }
+
+                        MutableText durability = new LiteralText(String.valueOf(stack.getMaxDamage() - stack.getDamage() - 1)).formatted(Formatting.RED);
+
                         MinecraftClient.getInstance().inGameHud.setOverlayMessage(
-                                new TranslatableText("playerManip.toolBreakWarning", stack.getMaxDamage() - stack.getDamage() - 1),
+                                new TranslatableText("playerManip.toolBreakWarning", durability).formatted(Formatting.GOLD),
                                 false);
                     }
 
