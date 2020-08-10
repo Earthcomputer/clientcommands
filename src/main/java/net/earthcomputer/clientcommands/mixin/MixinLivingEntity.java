@@ -39,7 +39,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
 
     @Inject(method = "tickCramming", at = @At("HEAD"))
     public void onEntityCramming(CallbackInfo ci) {
-        if (isThePlayer() && world.getEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
+        if (isThePlayer() && world.getOtherEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
             PlayerRandCracker.onEntityCramming();
         }
     }

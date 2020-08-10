@@ -4,8 +4,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.arguments.ItemPredicateArgumentType;
-import net.minecraft.command.arguments.ItemStringReader;
+import net.minecraft.command.argument.ItemPredicateArgumentType;
+import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -43,7 +43,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         } else {
             Identifier tagId = itemReader.getId();
             return ctx -> {
-                @SuppressWarnings("ConstantConditions") Tag<Item> tag = MinecraftClient.getInstance().getNetworkHandler().getTagManager().items().get(tagId);
+                @SuppressWarnings("ConstantConditions") Tag<Item> tag = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(tagId);
                 if (tag == null) {
                     throw UNKNOWN_TAG_EXCEPTION.create(tagId.toString());
                 } else {

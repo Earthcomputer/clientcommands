@@ -18,7 +18,7 @@ import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.command.arguments.ItemPredicateArgumentType.ItemPredicateArgument;
+import net.minecraft.command.argument.ItemPredicateArgumentType.ItemPredicateArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;

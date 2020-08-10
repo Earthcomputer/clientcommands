@@ -4,7 +4,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.arguments.BlockPredicateArgumentType;
+import net.minecraft.command.argument.BlockPredicateArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.function.Predicate;

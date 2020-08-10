@@ -57,7 +57,7 @@ public class MathUtil {
                         obscurers.add(new Box(x1, y1, z1, x2, y2, z2).offset(pos).expand(EPSILON)));
             }
         }
-        for (Entity entity : world.getEntities(excludingEntity, totalArea, entity -> !entity.isSpectator() && entity.collides())) {
+        for (Entity entity : world.getOtherEntities(excludingEntity, totalArea, entity -> !entity.isSpectator() && entity.collides())) {
             obscurers.add(entity.getBoundingBox().expand(entity.getTargetingMargin() + EPSILON));
         }
         List<Box> targetBoxes = new ArrayList<>();

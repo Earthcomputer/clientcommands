@@ -29,7 +29,7 @@ public class ScriptWorld {
     public String getDimension() {
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
         assert networkHandler != null;
-        return ScriptUtil.simplifyIdentifier(networkHandler.method_29091().getDimensionTypeRegistry().getId(getWorld().getDimension()));
+        return ScriptUtil.simplifyIdentifier(networkHandler.getRegistryManager().getDimensionTypes().getId(getWorld().getDimension()));
     }
 
     public String getBlock(int x, int y, int z) {

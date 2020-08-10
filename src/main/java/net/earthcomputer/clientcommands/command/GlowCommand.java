@@ -12,7 +12,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.*;
-import static net.minecraft.command.arguments.ColorArgumentType.*;
+import static net.minecraft.command.argument.ColorArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class GlowCommand {

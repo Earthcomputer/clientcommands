@@ -2,7 +2,7 @@ Field
 random
 Found usages
 Value read
-Gradle: net.minecraft:minecraft:1.16-pre2-mapped-net.fabricmc.yarn-1.16-pre2+build.2-v2
+Gradle: net.minecraft:minecraft:1.16.2-rc1-mapped-net.fabricmc.yarn-1.16.2-rc1+build.6-v2
 net.minecraft.client.network
 ClientPlayerEntity
 updateNausea()
@@ -50,7 +50,7 @@ tick()
          this.setVelocity((double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.20000000298023224D, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F));
          this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
 EyeOfEnderEntity
-moveTowards(BlockPos)
+initTargetPos(BlockPos)
       this.dropsItem = this.random.nextInt(5) > 0;
 tick()
 ....r...
@@ -79,7 +79,7 @@ baseTick()
                      double f = this.random.nextDouble() - this.random.nextDouble();
                      double g = this.random.nextDouble() - this.random.nextDouble();
                      double h = this.random.nextDouble() - this.random.nextDouble();
-applySoulSpeedClientEffects()
+displaySoulSpeedEffects()
 ....r...
       float f = this.random.nextFloat() * 0.4F + this.random.nextFloat() > 0.9F ? 0.6F : 0.0F;
       this.playSound(SoundEvents.PARTICLE_SOUL_ESCAPE, f, 0.6F + this.random.nextFloat() * 0.4F);
@@ -168,7 +168,7 @@ net.minecraft.entity.mob
 AbstractSkeletonEntity
 tickMovement()
                itemStack.setDamage(itemStack.getDamage() + this.random.nextInt(2));
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * difficulty.getClampedLocalDifficulty());
          if (j == 10 && i == 31 && this.random.nextFloat() < 0.25F) {
             this.equipStack(EquipmentSlot.HEAD, new ItemStack(this.random.nextFloat() < 0.1F ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
@@ -182,14 +182,14 @@ CreeperEntity
 interactMob(PlayerEntity, Hand)
          this.world.playSound(player, this.getX(), this.getY(), this.getZ(), SoundEvents.ITEM_FLINTANDSTEEL_USE, this.getSoundCategory(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
 DrownedEntity
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       if (this.getEquippedStack(EquipmentSlot.OFFHAND).isEmpty() && this.random.nextFloat() < 0.03F) {
 initEquipment(LocalDifficulty)
       if ((double)this.random.nextFloat() > 0.9D) {
          int i = this.random.nextInt(16);
 EndermanEntity
-method_29509()
-      this.method_29514(field_25378.choose(this.random));
+chooseRandomAngerTime()
+      this.setAngerTime(field_25378.choose(this.random));
 tickMovement()
 ....r...
 mobTick()
@@ -203,7 +203,7 @@ teleportTo(Entity)
       double f = this.getY() + (double)(this.random.nextInt(16) - 8) - vec3d.y * 16.0D;
       double g = this.getZ() + (this.random.nextDouble() - 0.5D) * 8.0D - vec3d.z * 16.0D;
 damage(DamageSource, float)
-         if (!this.world.isClient() && this.random.nextInt(10) != 0) {
+         if (!this.world.isClient() && !(source.getAttacker() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
 EndermiteEntity
 tickMovement()
 ....r...
@@ -264,12 +264,13 @@ initEquipment(LocalDifficulty)
          if (this.random.nextFloat() < 0.095F) {
          if (this.random.nextFloat() < 0.095F) {
                if (!bl && this.random.nextFloat() < f) {
-updateEnchantments(LocalDifficulty)
+method_30759(float)
       if (!this.getMainHandStack().isEmpty() && this.random.nextFloat() < 0.25F * f) {
          this.equipStack(EquipmentSlot.MAINHAND, EnchantmentHelper.enchant(this.random, this.getMainHandStack(), (int)(5.0F + f * (float)this.random.nextInt(18)), false));
-            if (!itemStack.isEmpty() && this.random.nextFloat() < 0.5F * f) {
-               this.equipStack(equipmentSlot, EnchantmentHelper.enchant(this.random, itemStack, (int)(5.0F + f * (float)this.random.nextInt(18)), false));
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+method_30758(float, EquipmentSlot)
+      if (!itemStack.isEmpty() && this.random.nextFloat() < 0.5F * f) {
+         this.equipStack(equipmentSlot, EnchantmentHelper.enchant(this.random, itemStack, (int)(5.0F + f * (float)this.random.nextInt(18)), false));
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
 ....r...
       if (this.random.nextFloat() < 0.05F) {
 disablePlayerShield(PlayerEntity, ItemStack, ItemStack)
@@ -277,7 +278,7 @@ disablePlayerShield(PlayerEntity, ItemStack, ItemStack)
 isInDaylight()
          if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.world.isSkyVisible(blockPos)) {
 PatrolEntity
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       if (spawnReason != SpawnReason.PATROL && spawnReason != SpawnReason.EVENT && spawnReason != SpawnReason.STRUCTURE && this.random.nextFloat() < 0.06F && this.canLead()) {
 setRandomPatrolTarget()
       this.patrolTarget = this.getBlockPos().add(-500 + this.random.nextInt(1000), 0, -500 + this.random.nextInt(1000));
@@ -307,7 +308,7 @@ PiglinEntity
 makeInitialWeapon()
       return (double)this.random.nextFloat() < 0.5D ? new ItemStack(Items.CROSSBOW) : new ItemStack(Items.GOLDEN_SWORD);
 PillagerEntity
-initEquipment(LocalDifficulty)
+method_30759(float)
       if (this.random.nextInt(300) == 0) {
 addBonusForWave(int, boolean)
       boolean bl = this.random.nextFloat() <= raid.getEnchantmentChance();
@@ -350,7 +351,7 @@ remove()
             slimeEntity.refreshPositionAndAngles(this.getX() + (double)g, this.getY() + 0.5D, this.getZ() + (double)h, this.random.nextFloat() * 360.0F, 0.0F);
 damage(LivingEntity)
             this.playSound(SoundEvents.ENTITY_SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       int i = this.random.nextInt(3);
       if (i < 2 && this.random.nextFloat() < 0.5F * difficulty.getClampedLocalDifficulty()) {
 getJumpSoundPitch()
@@ -383,9 +384,6 @@ handleStatus(byte)
 attack(LivingEntity, float)
          } else if (g <= 3.0F && !target.hasStatusEffect(StatusEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
             this.world.playSound((PlayerEntity)null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_WITCH_THROW, this.getSoundCategory(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
-ZoglinEntity
-method_26932()
-      if ((double)this.random.nextFloat() < 0.0125D) {
 ZombieEntity
 tickMovement()
                   itemStack.setDamage(itemStack.getDamage() + this.random.nextInt(2));
@@ -399,9 +397,9 @@ tryAttack(Entity)
 initEquipment(LocalDifficulty)
       if (this.random.nextFloat() < (this.world.getDifficulty() == Difficulty.HARD ? 0.05F : 0.01F)) {
          int i = this.random.nextInt(3);
-onKilledOther(LivingEntity)
-         if (this.world.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+onKilledOther(ServerWorld, LivingEntity)
+         if (serverWorld.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       this.setCanPickUpLoot(this.random.nextFloat() < 0.55F * f);
          this.setCanBreakDoors(this.shouldBreakDoors() && this.random.nextFloat() < f * 0.1F);
          if (j == 10 && i == 31 && this.random.nextFloat() < 0.25F) {
@@ -430,12 +428,13 @@ getConversionRate()
 getSoundPitch()
       return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 2.0F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F;
 ZombifiedPiglinEntity
-mobTick()
-            this.angrySoundDelay = field_25382.choose(this.random);
+method_29941()
+         this.field_25608 = field_25609.choose(this.random);
 setTarget(LivingEntity)
          this.angrySoundDelay = field_25382.choose(this.random);
-method_29509()
-      this.method_29514(field_25379.choose(this.random));
+         this.field_25608 = field_25609.choose(this.random);
+chooseRandomAngerTime()
+      this.setAngerTime(field_25379.choose(this.random));
 net.minecraft.entity.passive
 AbstractDonkeyEntity
 playAddChestSound()
@@ -472,8 +471,8 @@ tick()
          for(int i = 0; i < this.random.nextInt(2) + 1; ++i) {
 mobTick()
          if (this.ticksSinceSting % 5 == 0 && this.random.nextInt(MathHelper.clamp(1200 - this.ticksSinceSting, 1, 1200)) == 0) {
-method_29509()
-      this.method_29514(field_25363.choose(this.random));
+chooseRandomAngerTime()
+      this.setAngerTime(field_25363.choose(this.random));
 BeeEntity.BeeWanderAroundGoal
 canStart()
          return BeeEntity.this.navigation.isIdle() && BeeEntity.this.random.nextInt(10) == 0;
@@ -499,10 +498,10 @@ getAmbientSound()
             return this.random.nextInt(4) == 0 ? SoundEvents.ENTITY_CAT_PURREOW : SoundEvents.ENTITY_CAT_AMBIENT;
 updateAnimations()
          this.playSound(SoundEvents.ENTITY_CAT_PURR, 0.6F + 0.4F * (this.random.nextFloat() - this.random.nextFloat()), 1.0F);
-createChild(PassiveEntity)
+createChild(ServerWorld, PassiveEntity)
          if (this.random.nextBoolean()) {
             if (this.random.nextBoolean()) {
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
          this.setCatType(this.random.nextInt(11));
          this.setCatType(this.random.nextInt(10));
 interactMob(PlayerEntity, Hand)
@@ -541,7 +540,7 @@ initEquipment(LocalDifficulty)
             itemStack6 = this.random.nextBoolean() ? new ItemStack(Items.RABBIT_FOOT) : new ItemStack(Items.RABBIT_HIDE);
 handleStatus(byte)
                Vec3d vec3d = (new Vec3d(((double)this.random.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D)).rotateX(-this.pitch * 0.017453292F).rotateY(-this.yaw * 0.017453292F);
-createChild(PassiveEntity)
+createChild(ServerWorld, PassiveEntity)
       foxEntity.setType(this.random.nextBoolean() ? this.getFoxType() : ((FoxEntity)passiveEntity).getFoxType());
 getAmbientSound()
          if (!this.world.isDay() && this.random.nextFloat() < 0.1F) {
@@ -577,20 +576,20 @@ getChildMovementSpeedBonus()
 HorseEntity
 playWalkSound(BlockSoundGroup)
       if (this.random.nextInt(10) == 0) {
-createChild(PassiveEntity)
+createChild(ServerWorld, PassiveEntity)
          int i = this.random.nextInt(9);
             horseColor3 = (HorseColor)Util.getRandom((Object[])HorseColor.values(), this.random);
          int j = this.random.nextInt(5);
             horseMarking3 = (HorseMarking)Util.getRandom((Object[])HorseMarking.values(), this.random);
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
          horseColor2 = (HorseColor)Util.getRandom((Object[])HorseColor.values(), this.random);
       this.setVariant(horseColor2, (HorseMarking)Util.getRandom((Object[])HorseMarking.values(), this.random));
 IronGolemEntity
 tickMovement()
       if (squaredHorizontalLength(this.getVelocity()) > 2.500000277905201E-7D && this.random.nextInt(5) == 0) {
 ....r...
-method_29509()
-      this.method_29514(field_25365.choose(this.random));
+chooseRandomAngerTime()
+      this.setAngerTime(field_25365.choose(this.random));
 tryAttack(Entity)
       float g = (int)f > 0 ? f / 2.0F + (float)this.random.nextInt((int)f) : f;
 interactMob(PlayerEntity, Hand)
@@ -601,11 +600,11 @@ initializeStrength()
       this.setStrength(1 + this.random.nextInt(i));
 receiveFood(PlayerEntity, ItemStack)
 ....r...
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
          j = this.random.nextInt(4);
 playAddChestSound()
       this.playSound(SoundEvents.ENTITY_LLAMA_CHEST, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-createChild(PassiveEntity)
+createChild(ServerWorld, PassiveEntity)
       int i = this.random.nextInt(Math.max(this.getStrength(), llamaEntity2.getStrength())) + 1;
       if (this.random.nextFloat() < 0.03F) {
       llamaEntity.setVariant(this.random.nextBoolean() ? this.getVariant() : llamaEntity2.getVariant());
@@ -643,7 +642,7 @@ playEatingAnimation()
             Vec3d vec3d2 = new Vec3d(((double)this.random.nextFloat() - 0.5D) * 0.8D, d, 1.0D + ((double)this.random.nextFloat() - 0.5D) * 0.4D);
 sneeze()
       if (!this.world.isClient() && this.random.nextInt(700) == 0 && this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       this.setMainGene(PandaEntity.Gene.createRandom(this.random));
       this.setHiddenGene(PandaEntity.Gene.createRandom(this.random));
 initGenes(PandaEntity, PandaEntity)
@@ -678,7 +677,7 @@ canStart()
             if (this.panda.isWeak() && this.panda.random.nextInt(500) == 1) {
                return this.panda.random.nextInt(6000) == 1;
 ParrotEntity
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       this.setVariant(this.random.nextInt(5));
 interactMob(PlayerEntity, Hand)
 ....r...
@@ -686,11 +685,11 @@ interactMob(PlayerEntity, Hand)
 getSoundPitch()
       return getSoundPitch(this.random);
 PassiveEntity
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
       if (passiveData.canSpawnBaby() && passiveData.getSpawnedCount() > 0 && this.random.nextFloat() <= passiveData.getBabyChance()) {
 PolarBearEntity
-method_29509()
-      this.method_29514(field_25369.choose(this.random));
+chooseRandomAngerTime()
+      this.setAngerTime(field_25369.choose(this.random));
 RabbitEntity
 setJumping(boolean)
          this.playSound(this.getJumpSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.8F);
@@ -698,7 +697,7 @@ mobTick()
          this.moreCarrotTicks -= this.random.nextInt(3);
 tryAttack(Entity)
          this.playSound(SoundEvents.ENTITY_RABBIT_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-createChild(PassiveEntity)
+createChild(ServerWorld, PassiveEntity)
       if (this.random.nextInt(20) != 0) {
          if (passiveEntity instanceof RabbitEntity && this.random.nextBoolean()) {
 chooseType(WorldAccess)
@@ -719,12 +718,13 @@ squirt()
          Vec3d vec3d3 = vec3d2.multiply(0.3D + (double)(this.random.nextFloat() * 2.0F));
 StriderEntity
 tick()
-      if (this.temptGoal != null && this.temptGoal.isActive() && this.random.nextInt(100) == 0) {
-      if (this.escapeDangerGoal != null && this.escapeDangerGoal.isActive() && this.random.nextInt(60) == 0) {
+      if (this.method_30079() && this.random.nextInt(140) == 0) {
+      } else if (this.method_30078() && this.random.nextInt(60) == 0) {
 interactMob(PlayerEntity, Hand)
 ....r...
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
          if (this.random.nextInt(30) == 0) {
+            entityData = this.method_30336(serverWorldAccess, difficulty, mobEntity, new ZombieEntity.ZombieData(ZombieEntity.method_29936(this.random), false));
          } else if (this.random.nextInt(10) == 0) {
 TameableEntity
 showEmoteParticle(boolean)
@@ -732,7 +732,7 @@ showEmoteParticle(boolean)
          double e = this.random.nextGaussian() * 0.02D;
          double f = this.random.nextGaussian() * 0.02D;
 TropicalFishEntity
-initialize(WorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
+initialize(ServerWorldAccess, LocalDifficulty, SpawnReason, EntityData, CompoundTag)
          } else if ((double)this.random.nextFloat() < 0.9D) {
             int m = Util.getRandom(COMMON_VARIANTS, this.random);
             n = this.random.nextInt(2);
@@ -750,10 +750,10 @@ mobTick()
       if (!this.isAiDisabled() && this.random.nextInt(100) == 0) {
 afterUsing(TradeOffer)
       int i = 3 + this.random.nextInt(4);
-createChild(PassiveEntity)
+createChild(ServerWorld, PassiveEntity)
       double d = this.random.nextDouble();
-talkWithVillager(VillagerEntity, long)
-         this.gossip.shareGossipFrom(villager.gossip, this.random, 10);
+talkWithVillager(ServerWorld, VillagerEntity, long)
+         this.gossip.shareGossipFrom(villagerEntity.gossip, this.random, 10);
 WanderingTraderEntity
 fillRecipes()
          int i = this.random.nextInt(factorys2.length);
@@ -769,8 +769,8 @@ tick()
                   float h = (this.random.nextFloat() * 2.0F - 1.0F) * this.getWidth() * 0.5F;
 interactMob(PlayerEntity, Hand)
             if (this.random.nextInt(3) == 0) {
-method_29509()
-      this.method_29514(field_25371.choose(this.random));
+chooseRandomAngerTime()
+      this.setAngerTime(ANGER_TIME_RANGE.choose(this.random));
 WolfEntity.AvoidLlamaGoal
 isScaredOf(LlamaEntity)
          return llama.getStrength() >= WolfEntity.this.random.nextInt(5);
@@ -828,7 +828,7 @@ PersistentProjectileEntity
 method_26352()
       this.setVelocity(vec3d.multiply((double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F)));
 onEntityHit(EntityHitResult)
-         i += this.random.nextInt(i / 2 + 2);
+         long l = (long)this.random.nextInt(i / 2 + 2);
          this.playSound(this.sound, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
 onBlockHit(BlockHitResult)
       this.playSound(this.getSound(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
@@ -885,7 +885,7 @@ dropItems(DamageSource)
 explode(double)
          this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), (float)(4.0D + this.random.nextDouble() * 1.5D * e), Explosion.DestructionType.BREAK);
 Value write
-Gradle: net.minecraft:minecraft:1.16-pre2-mapped-net.fabricmc.yarn-1.16-pre2+build.2-v2
+Gradle: net.minecraft:minecraft:1.16.2-rc1-mapped-net.fabricmc.yarn-1.16.2-rc1+build.6-v2
 net.minecraft.entity
 Entity
 Entity(EntityType<?>, World)

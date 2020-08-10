@@ -13,7 +13,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.BlockDataObject;
 import net.minecraft.command.DataCommandObject;
 import net.minecraft.command.EntityDataObject;
-import net.minecraft.command.arguments.NbtPathArgumentType;
+import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.*;
 import net.minecraft.server.command.DataCommand;
 import net.minecraft.server.command.ServerCommandSource;
@@ -28,8 +28,8 @@ import java.util.function.Function;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
-import static net.minecraft.command.arguments.BlockPosArgumentType.*;
-import static net.minecraft.command.arguments.NbtPathArgumentType.*;
+import static net.minecraft.command.argument.BlockPosArgumentType.*;
+import static net.minecraft.command.argument.NbtPathArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class GetDataCommand {

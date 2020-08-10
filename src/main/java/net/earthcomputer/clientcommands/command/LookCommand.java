@@ -3,14 +3,14 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.arguments.PosArgument;
+import net.minecraft.command.argument.PosArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.arguments.BlockPosArgumentType.*;
-import static net.minecraft.command.arguments.RotationArgumentType.*;
+import static net.minecraft.command.argument.BlockPosArgumentType.*;
+import static net.minecraft.command.argument.RotationArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class LookCommand {

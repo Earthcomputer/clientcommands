@@ -78,7 +78,7 @@ public class ScriptItemStack {
     public List<String> getTags() {
         //noinspection ConstantConditions
         return Lists.transform(
-                new ArrayList<>(MinecraftClient.getInstance().getNetworkHandler().getTagManager().items().getTagsFor(stack.getItem())),
+                new ArrayList<>(MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTagsFor(stack.getItem())),
                 ScriptUtil::simplifyIdentifier);
     }
 

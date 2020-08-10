@@ -2,7 +2,7 @@ Method
 damage(int, T, Consumer<T>)
 Found usages
 Unclassified usage
-Gradle: net.minecraft:minecraft:1.16-pre2-mapped-net.fabricmc.yarn-1.16-pre2+build.2-v2
+Gradle: net.minecraft:minecraft:1.16.2-rc1-mapped-net.fabricmc.yarn-1.16.2-rc1+build.6-v2
 net.minecraft.block
 BeehiveBlock
 onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
@@ -16,11 +16,10 @@ onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
 net.minecraft.enchantment
 ThornsEnchantment
 onUserDamaged(LivingEntity, Entity, int)
-            ((ItemStack)entry.getValue()).damage(3, (LivingEntity)user, (Consumer)((livingEntity) -> {
-         ((ItemStack)entry.getValue()).damage(1, (LivingEntity)user, (Consumer)((livingEntity) -> {
+            ((ItemStack)entry.getValue()).damage(2, (LivingEntity)user, (Consumer)((livingEntity) -> {
 net.minecraft.entity
 LivingEntity
-method_29502()
+addSoulSpeedBoostIfNeeded()
                itemStack.damage(1, (LivingEntity)this, (Consumer)((livingEntity) -> {
 damage(DamageSource, float)
             this.getEquippedStack(EquipmentSlot.HEAD).damage((int)(amount * 4.0F + this.random.nextFloat() * amount * 2.0F), this, (livingEntityx) -> {

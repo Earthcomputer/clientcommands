@@ -22,6 +22,7 @@ public class MixinGuiClosePacket {
     @Inject(method = "<init>(I)V", at = @At("RETURN"))
     public void onCreate(int syncId, CallbackInfo ci) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        assert player != null;
 
         PlayerInventory playerInv = player.inventory;
         if (!playerInv.getCursorStack().isEmpty())
@@ -53,7 +54,7 @@ public class MixinGuiClosePacket {
 
         if (container instanceof BeaconScreenHandler) {
             Slot paymentSlot = container.getSlot(0);
-            if (paymentSlot.getStack().getCount() > paymentSlot.getMaxStackAmount())
+            if (paymentSlot.getStack().getCount() > paymentSlot.getMaxItemCount())
                 PlayerRandCracker.onDropItem();
 
         }

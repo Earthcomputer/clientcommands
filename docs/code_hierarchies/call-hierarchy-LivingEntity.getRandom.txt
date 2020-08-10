@@ -7,7 +7,7 @@ net.earthcomputer.clientcommands.features
 PlayerRandCracker
 singlePlayerCrackRNG()
         long seed = getSeed(serverPlayer.getRandom());
-Gradle: net.minecraft:minecraft:1.16-pre2-mapped-net.fabricmc.yarn-1.16-pre2+build.2-v2
+Gradle: net.minecraft:minecraft:1.16.2-rc1-mapped-net.fabricmc.yarn-1.16.2-rc1+build.6-v2
 net.minecraft.advancement
 AdvancementRewards
 apply(ServerPlayerEntity)
@@ -31,11 +31,11 @@ CrossbowUser
 shoot(LivingEntity, LivingEntity, ProjectileEntity, float, float)
       entity.playSound(SoundEvents.ITEM_CROSSBOW_SHOOT, 1.0F, 1.0F / (entity.getRandom().nextFloat() * 0.4F + 0.8F));
 LivingEntity
-method_29502()
+addSoulSpeedBoostIfNeeded()
             if (this.getRandom().nextFloat() < 0.04F) {
 net.minecraft.entity.ai
 TargetFinder
-findTarget(MobEntityWithAi, int, int, int, Vec3d, boolean, double, ...)
+findTarget(PathAwareEntity, int, int, int, Vec3d, boolean, double, ...)
       Random random = mob.getRandom();
 net.minecraft.entity.ai.brain.task
 BreedTask
@@ -74,6 +74,7 @@ tick()
       if (this.mob.getRandom().nextInt(20) == 0) {
 CrossbowAttackGoal
 tick()
+               this.field_25697 = field_25696.choose(this.actor.getRandom());
                this.chargedTicksLeft = 20 + this.actor.getRandom().nextInt(20);
 DolphinJumpGoal
 canStart()
@@ -127,7 +128,7 @@ tick()
 ....g...
          this.updateCountdownTicks = 4 + this.mob.getRandom().nextInt(7);
 MoveToTargetPosGoal
-getInterval(MobEntityWithAi)
+getInterval(PathAwareEntity)
       return 200 + mob.getRandom().nextInt(200);
 start()
       this.safeWaitingTime = this.mob.getRandom().nextInt(this.mob.getRandom().nextInt(1200) + 1200) + 1200;
@@ -249,8 +250,8 @@ shouldContinue()
          if (f >= 0.5F && this.mob.getRandom().nextInt(100) == 0) {
 net.minecraft.entity.passive
 AnimalEntity
-breed(World, AnimalEntity)
-            world.spawnEntity(new ExperienceOrbEntity(world, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
+breed(ServerWorld, AnimalEntity)
+            serverWorld.spawnEntity(new ExperienceOrbEntity(serverWorld, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
 CatEntity.SleepWithOwnerGoal
 dropMorningGifts()
          Random random = this.cat.getRandom();

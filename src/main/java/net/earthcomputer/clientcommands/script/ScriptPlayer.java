@@ -250,7 +250,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
 
         try {
             while (path[0] != null && !path[0].isFinished()) {
-                Vec3i currentPosition = path[0].getCurrentPosition();
+                Vec3i currentPosition = path[0].getNode(path[0].getCurrentNodeIndex()).getPos();
                 if (!moveTo(currentPosition.getX() + 0.5, currentPosition.getZ() + 0.5))
                     return false;
                 path[0].setCurrentNodeIndex(path[0].getCurrentNodeIndex() + 1);
@@ -522,7 +522,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
             Slot slot = container.getSlot(playerSlotIndex);
             if (isPlayerInvSlot(container, slot)) {
                 if (ScreenHandler.canStacksCombine(cursorStack, slot.getStack())) {
-                    int maxCount = Math.min(cursorStack.getMaxCount(), slot.getMaxStackAmount(cursorStack));
+                    int maxCount = Math.min(cursorStack.getMaxCount(), slot.getMaxItemCount(cursorStack));
                     if (slot.getStack().getCount() < maxCount) {
                         interactionManager.clickSlot(container.syncId, playerSlotIndex, 0, SlotActionType.PICKUP, getPlayer());
                         cursorStackCount -= maxCount - slot.getStack().getCount();
@@ -536,7 +536,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
             Slot slot = container.getSlot(playerSlotIndex);
             if (isPlayerInvSlot(container, slot)) {
                 if (!slot.hasStack()) {
-                    int maxCount = Math.min(cursorStack.getMaxCount(), slot.getMaxStackAmount(cursorStack));
+                    int maxCount = Math.min(cursorStack.getMaxCount(), slot.getMaxItemCount(cursorStack));
                     interactionManager.clickSlot(container.syncId, playerSlotIndex, 0, SlotActionType.PICKUP, getPlayer());
                     cursorStackCount -= maxCount;
                     if (cursorStackCount <= 0)

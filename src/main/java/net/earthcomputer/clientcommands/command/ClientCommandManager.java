@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class ClientCommandManager {
 
-    private static Set<String> clientSideCommands = new HashSet<>();
+    private static final Set<String> clientSideCommands = new HashSet<>();
 
     public static void clearClientSideCommands() {
         clientSideCommands.clear();
@@ -66,7 +66,7 @@ public class ClientCommandManager {
         } catch (Exception e) {
             LiteralText error = new LiteralText(e.getMessage() == null ? e.getClass().getName() : e.getMessage());
             ClientCommandManager.sendError(new TranslatableText("command.failed")
-                    .styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, error))));
+                    .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, error))));
             e.printStackTrace();
         }
         return 1;
@@ -77,14 +77,14 @@ public class ClientCommandManager {
                 .withFormatting(Formatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())))
-                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new LiteralText(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())))));
     }
 
     public static Text getCommandTextComponent(String translationKey, String command) {
         return new TranslatableText(translationKey).styled(style -> style.withFormatting(Formatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
-                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command))));
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command))));
     }
 
 }

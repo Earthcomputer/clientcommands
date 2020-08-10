@@ -144,7 +144,7 @@ public class ScriptBlockState {
     public List<String> getTags() {
         //noinspection ConstantConditions
         return Lists.transform(
-                new ArrayList<>(MinecraftClient.getInstance().getNetworkHandler().getTagManager().blocks().getTagsFor(state.getBlock())),
+                new ArrayList<>(MinecraftClient.getInstance().getNetworkHandler().getTagManager().getBlocks().getTagsFor(state.getBlock())),
                 ScriptUtil::simplifyIdentifier);
     }
 
