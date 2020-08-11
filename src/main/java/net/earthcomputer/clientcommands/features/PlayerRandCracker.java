@@ -2,6 +2,8 @@ package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.multiconnect.api.MultiConnectAPI;
+import net.earthcomputer.multiconnect.api.Protocols;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
@@ -102,7 +104,8 @@ public class PlayerRandCracker {
     }
 
     public static void onDrink() {
-        resetCracker("drink");
+        // TODO: was this ever a thing?
+        //resetCracker("drink");
     }
 
     public static void onEat() {
@@ -126,7 +129,9 @@ public class PlayerRandCracker {
     }
 
     public static void onEquipmentBreak() {
-        resetCracker("itemBreak");
+        if (MultiConnectAPI.instance().getProtocolVersion() <= Protocols.V1_13_2) {
+            resetCracker("itemBreak");
+        }
     }
 
     public static void onPotionParticles() {
@@ -142,6 +147,10 @@ public class PlayerRandCracker {
             nextInt();
         else
             resetCracker("anvil");
+    }
+
+    public static void onMending() {
+        resetCracker("mending");
     }
 
     public static void onFrostWalker() {
