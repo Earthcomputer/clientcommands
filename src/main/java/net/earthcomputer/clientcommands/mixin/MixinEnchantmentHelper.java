@@ -1,19 +1,24 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.WeightedPicker;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -57,6 +62,11 @@ public class MixinEnchantmentHelper {
                 level /= 2;
             }
         }
+    }
+
+    @ModifyVariable(method = "getPossibleEntries", ordinal = 0, at = @At(value = "STORE", ordinal = 0))
+    private static Iterator<Enchantment> filterServerUnknwonEnchantments(Iterator<Enchantment> itr) {
+        return Iterators.filter(itr, enchantment -> MultiConnectAPI.instance().doesServerKnow(Registry.ENCHANTMENT, enchantment));
     }
 
 }
