@@ -68,7 +68,7 @@ public class CEnchantCommand {
                     sendFeedback(new TranslatableText("enchCrack.insn.itemThrows", result.getItemThrows(), (float)result.getItemThrows() / 20f));
                 }
                 sendFeedback(new TranslatableText("enchCrack.insn.bookshelves", result.getBookshelves()));
-                sendFeedback(new TranslatableText("enchCrack.insn.slot", result.getSlot()));
+                sendFeedback(new TranslatableText("enchCrack.insn.slot", result.getSlot() + 1));
                 sendFeedback("enchCrack.insn.enchantments");
                 for (EnchantmentLevelEntry ench : result.getEnchantments()) {
                     sendFeedback(new LiteralText("- ").append(ench.enchantment.getName(ench.level)));
