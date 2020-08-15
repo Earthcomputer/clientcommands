@@ -12,10 +12,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,12 +53,22 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/AbstractClientPlayerEntity;tick()V"))
     private void onTick(CallbackInfo ci) {
-        if (Enchantments.MENDING.getEquipment(this).values().stream()
-                .anyMatch(stack -> stack.isDamaged() || MultiConnectAPI.instance().getProtocolVersion() <= Protocols.V1_15_2)) {
+        if (Enchantments.MENDING.getEquipment(this).values().stream().anyMatch(this::couldMendingRepair)) {
             if (!world.getEntitiesByClass(ExperienceOrbEntity.class, getBoundingBox(), null).isEmpty()) {
                 PlayerRandCracker.onMending();
             }
         }
+    }
+
+    @Unique
+    private boolean couldMendingRepair(ItemStack stack) {
+        if (EnchantmentHelper.getLevel(Enchantments.MENDING, stack) <= 0) {
+            return false;
+        }
+        if (MultiConnectAPI.instance().getProtocolVersion() <= Protocols.V1_15_2) {
+            return true; // xp may try to mend items even if they're fully repaired pre-1.16
+        }
+        return stack.isDamaged();
     }
 
     @Inject(method = "dropSelectedItem", at = @At("HEAD"))
