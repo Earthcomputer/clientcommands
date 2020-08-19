@@ -51,6 +51,9 @@ public class ScriptManager {
             Object factory = factoryCls.newInstance();
             Method getScriptEngineMethod = factoryCls.getMethod("getScriptEngine", classFilterCls);
             engine = (ScriptEngine) getScriptEngineMethod.invoke(factory, new ScriptClassFilter());
+
+            LOGGER.info("Java version: " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version"));
+            LOGGER.info("Operating system: " + System.getProperty("os.name"));
         } catch (ReflectiveOperationException e) {
             engine = null;
         }
