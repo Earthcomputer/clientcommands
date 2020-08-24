@@ -18,7 +18,7 @@
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测。",
   "commands.cenchant.needEnchantingPrediction.enable": "启用",
-  "commands.cenchant.success": "正在开始调整附魔",
+  "commands.cenchant.success": "正在开始操控附魔",
   "commands.cenchant.uncracked": "您需要先破解随机种子。",
 
   "commands.cfind.found.left": "在 ",
@@ -94,7 +94,7 @@
   "playerManip.state.manipulating_enchantments": "正在调整附魔",
   "playerManip.state.waiting_dummy_enchant": "等待附魔其他物品",
 
-  "playerManip.reset": "重新开始调整玩家随机数。原因： %s",
+  "playerManip.reset": "重新开始操控玩家随机数。原因： %s",
   "playerManip.reset.playerHurt": "玩家受伤",
   "playerManip.reset.sprint": "疾跑",
   "playerManip.reset.enterWater": "进入水体",
