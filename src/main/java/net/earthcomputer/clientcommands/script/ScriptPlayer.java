@@ -354,8 +354,10 @@ public class ScriptPlayer extends ScriptLivingEntity {
     }
 
     public void closeContainer() {
-        if (getPlayer().currentScreenHandler != getPlayer().playerScreenHandler)
-            getPlayer().closeHandledScreen();
+        if (getPlayer().currentScreenHandler != getPlayer().playerScreenHandler) {
+            MinecraftClient.getInstance().execute(getPlayer()::closeHandledScreen);
+            ScriptManager.passTick();
+        }
     }
 
     public int craft(Object result, int count, String[] pattern, JSObject ingredients) {

@@ -245,7 +245,8 @@ declare class ControllablePlayer extends Player {
     openContainer(entity: Entity, expectedContainerType: string | ((containerType: string) => boolean)): boolean;
 
     /**
-     * Closes the currently opened container, if any is open
+     * Closes the currently opened container, if any is open. Due to a threading issue in 1.16, this method delays
+     * the script by 1 tick, if a container was open.
      */
     closeContainer(): void;
 
