@@ -1,0 +1,126 @@
+{
+  "commands.cbook.success": "成功编辑书本",
+  "commands.cbook.commandException": "您没有手握书本",
+
+  "commands.ccalc.expected": "期望值 %s",
+  "commands.ccalc.invalidArgumentCount": "函数 \"%s\" 无法接受 %d 个自变量",
+
+  "commands.ccalcstack.success": "%d 个 %s 是 %d 组余 %d 个",
+  "commands.ccalcstack.success.empty": "%d 个物品是 %d 组余 %d 个",
+  "commands.ccalcstack.success.empty.exact": "%d 个物品是正好 %d 组",
+  "commands.ccalcstack.success.exact": "%d 个 %s 是正好 %d 组",
+
+  "commands.ccrackrng.starting": "正在破解玩家随机种子",
+  "commands.ccrackrng.success": "玩家随机种子已破解： %d",
+
+  "commands.cenchant.expectedWithWithout": "有效参数： \"with\" 或 \"without\"",
+  "commands.cenchant.failed": "您请求的附魔无法获得或者需要太长时间",
+  "commands.cenchant.incompatible": "互斥的附魔",
+  "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测。",
+  "commands.cenchant.needEnchantingPrediction.enable": "启用",
+  "commands.cenchant.success": "正在开始操控附魔",
+  "commands.cenchant.uncracked": "您需要先破解随机种子。",
+
+  "commands.cfind.found.left": "在 ",
+  "commands.cfind.found.right": " 找到 %1$s， 距离您 %2$.2f 格",
+  "commands.cfind.noMatch": "没有实体匹配您的查找条件",
+  "commands.cfind.success": "%d 个实体匹配您的查找条件",
+
+  "commands.cfindblock.notFound": "没有发现此方块",
+  "commands.cfindblock.success.left": "离您最近的匹配方块在 ",
+  "commands.cfindblock.success.right": "， 距离您 %1$.2f 格",
+
+  "commands.cfinditem.match.left": "在 ",
+  "commands.cfinditem.match.right": " 找到 %dx %s",
+  "commands.cfinditem.starting": "正在搜索 %s",
+  "commands.cfinditem.starting.keepSearching": "正在持续搜索 %s。",
+  "commands.cfinditem.total": "一共找到了 %d 个 %s 。",
+
+  "commands.cgamma.success": "将伽马值设为 %f",
+
+  "commands.crender.entities.success": "实体渲染规则已被更新",
+
+  "commands.cscript.notFound": "未找到脚本 \"%s\"",
+  "commands.cscript.reload.success": "已重新加载脚本",
+  "commands.cscript.run.success": "成功运行脚本",
+
+  "commands.ctask.list.noTasks": "当前没有正在执行的任务",
+  "commands.ctask.list.success": "%d 个任务正在执行",
+  "commands.ctask.stop.noMatch": "没有匹配的任务",
+  "commands.ctask.stop.success": "已停止 %d 个任务",
+
+  "commands.ctemprule.list.header": "正在显示 %d 个 TempRules：",
+  "commands.ctemprule.reset.success": "TempRule %s 已被重置为 %s",
+  "commands.ctemprule.set.success": "TempRule %s 已被更新为 %s",
+
+  "commands.cwiki.failed": "无法获得 Wiki 内容",
+
+  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.cancel": "取消",
+  "commands.client.crack": "破解",
+  "commands.client.expectedRegex": "无效的正则表达式 %s",
+  "commands.client.notClient": "不是客户端指令",
+
+  "enchCrack.state": "附魔破解状态： %s",
+  "enchCrack.state.uncracked": "未破解",
+  "enchCrack.state.cracking": "正在破解",
+  "enchCrack.state.cracked": "已破解",
+
+  "enchCrack.enchantments": "附魔：",
+  "enchCrack.clues": "线索：",
+  "enchCrack.slot": "第 %d 行：",
+
+  "enchCrack.xpSeed.one": "经验值种子： %08X",
+  "enchCrack.xpSeed.many": "可能的经验值种子数量： %d",
+  "enchCrack.playerRNGSeed.many": "可能的玩家随机种子数量： %d",
+  "enchCrack.addInfo": "添加信息",
+
+  "enchCrack.insn.dummy": "附魔一件其他物品",
+  "enchCrack.insn.ready": "您的附魔已就绪",
+  "enchCrack.insn.bookshelves": "需要的书架数： %d",
+  "enchCrack.insn.slot": "在附魔台的第 %d 行",
+  "enchCrack.insn.itemThrows": "需要扔出物品： %d 次 （大约 %f 秒）",
+  "enchCrack.insn.itemThrows.noDummy": "无需附魔其他物品",
+  "enchCrack.insn.enchantments": "最终获得的附魔：",
+
+  "playerManip.state": "玩家种子破解状态： %s",
+  "playerManip.state.uncracked": "未破解",
+  "playerManip.state.cracked": "已破解",
+  "playerManip.state.ench_cracking_1": "正在破解附魔种子 1",
+  "playerManip.state.half_cracked": "半破解",
+  "playerManip.state.ench_cracking_2": "正在破解附魔种子 2",
+  "playerManip.state.cracking": "正在破解",
+  "playerManip.state.eating": "正在吃食物",
+  "playerManip.state.manipulating_enchantments": "正在操控附魔",
+  "playerManip.state.waiting_dummy_enchant": "等待附魔其他物品",
+
+  "playerManip.reset": "重新开始操控玩家随机数。原因： %s",
+  "playerManip.reset.playerHurt": "玩家受伤",
+  "playerManip.reset.sprint": "疾跑",
+  "playerManip.reset.enterWater": "进入水体",
+  "playerManip.reset.swim": "游泳",
+  "playerManip.reset.potion": "活跃的药水状态效果",
+  "playerManip.reset.mending": "修理了经验修补的物品",
+  "playerManip.reset.respiration": "使用了水下呼吸头盔",
+  "playerManip.reset.dropItem": "扔出了物品",
+  "playerManip.reset.anvil": "使用了铁砧",
+  "playerManip.reset.food": "吃东西",
+  "playerManip.reset.drink": "喝东西",
+  "playerManip.reset.baneOfArthropods": "使用节肢杀手攻击了节肢生物",
+  "playerManip.reset.advancement": "获得了成就",
+  "playerManip.reset.shield": "用盾牌阻挡了攻击",
+  "playerManip.reset.give": "使用了give命令",
+  "playerManip.reset.unbreaking": "使用了耐久物品",
+  "playerManip.reset.itemBreak": "物品损坏",
+  "playerManip.reset.frostWalker": "使用了冰霜行者",
+  "playerManip.reset.soulSpeed": "使用了灵魂疾行",
+  "playerManip.reset.entityCramming": "实体拥挤伤害",
+  "playerManip.reset.enchanting": "附魔了物品",
+  "playerManip.reset.recreated": "重新创建了玩家",
+
+  "playerManip.serverBrandWarning": "警告： 您正在游玩的服务器包含Mod。随机数相关的功能并不保证能够正常工作！",
+  "playerManip.toolBreakWarning": "警告： 工具还有 %d 耐久度。",
+
+  "itemCrack.notEnoughItems": "无法使用随机数种子破解： 玩家手中没有足够的物品"
+
+}
