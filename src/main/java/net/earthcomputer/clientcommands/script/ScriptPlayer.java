@@ -255,9 +255,9 @@ public class ScriptPlayer extends ScriptLivingEntity {
                     return false;
                 path[0].setCurrentNodeIndex(path[0].getCurrentNodeIndex() + 1);
                 if (movingTarget || needsRecalc[0]) {
-                    BlockPos lastTargetPos = target.get();
-                    targetPos[0] = target.get();
-                    if (!lastTargetPos.equals(targetPos[0]) || needsRecalc[0]) {
+                    BlockPos newTargetPos = target.get();
+                    if (!newTargetPos.equals(targetPos[0]) || needsRecalc[0]) {
+                        targetPos[0] = newTargetPos;
                         needsRecalc[0] = false;
                         path[0] = PlayerPathfinder.findPathToAny(ImmutableSet.of(targetPos[0]), javaHints);
                     }
@@ -267,7 +267,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
             IBlockChangeListener.LISTENERS.remove(blockChangeListener);
         }
 
-        return path[0] != null;
+        return path[0] != null && path[0].getEnd() != null && path[0].getEnd().getPos().equals(targetPos[0]);
     }
 
     public void setYaw(float yaw) {
