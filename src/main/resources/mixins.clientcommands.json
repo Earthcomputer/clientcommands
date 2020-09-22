@@ -54,7 +54,8 @@
     "MixinShearsItem",
     "MixinSlot",
     "MixinStonecutterContainer",
-    "MixinTextFieldWidget"
+    "MixinTextFieldWidget",
+    "ScreenHandlerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

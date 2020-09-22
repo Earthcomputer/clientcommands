@@ -7,6 +7,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.interfaces.IServerCommandSource;
 import net.earthcomputer.clientcommands.MathUtil;
+import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.BlockState;
@@ -196,12 +197,12 @@ public class FindItemCommand {
                 public boolean accept(Screen screen) {
                     if (!(screen instanceof ScreenHandlerProvider))
                         return true;
-                    ScreenHandler container = ((ScreenHandlerProvider) screen).getScreenHandler();
+                    ScreenHandler container = ((ScreenHandlerProvider<?>) screen).getScreenHandler();
                     Set<Integer> playerInvSlots = new HashSet<>();
                     for (Slot slot : container.slots)
                         if (slot.inventory instanceof PlayerInventory)
                             playerInvSlots.add(slot.id);
-                    MinecraftClient.getInstance().player.currentScreenHandler = new ScreenHandler(container.getType(), container.syncId) {
+                    mc.player.currentScreenHandler = new ScreenHandler(((ScreenHandlerAccessor) container).getNullableType(), container.syncId) {
                         @Override
                         public boolean canUse(PlayerEntity var1) {
                             return true;
@@ -237,7 +238,7 @@ public class FindItemCommand {
                             }
                             currentlySearching = null;
                             currentlySearchingTimeout = 0;
-                            MinecraftClient.getInstance().player.closeHandledScreen();
+                            mc.player.closeHandledScreen();
                         }
                     };
                     return false;
