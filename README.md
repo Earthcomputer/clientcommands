@@ -1,6 +1,9 @@
 # clientcommands
 Adds several useful client-side commands to Minecraft
 
+## Discord
+https://discord.gg/Jg7Bun7
+
 ## Installation
 1. Download and run the [Fabric installer](https://fabricmc.net/use).
    - Click the "vanilla" button, leave the other settings as they are,
@@ -23,12 +26,9 @@ Adds several useful client-side commands to Minecraft
    ./gradlew genSources
    ```
    - Note: on Windows, use `gradlew` rather than `./gradlew`.
-1. Generate the IDE project depending on which IDE you prefer
-   ```
-   ./gradlew idea      # For IntelliJ IDEA
-   ./gradlew eclipse   # For Eclipse
-   ```
-1. Import the project in your IDE and edit the code
+1. Import the project into your preferred IDE.
+   1. If you use IntelliJ (the preferred option), you can simply import the project as a Gradle project.
+   1. If you use Eclipse, you need to `./gradlew eclipse` before importing the project as an Eclipse project.
 1. After testing in the IDE, build a JAR to test whether it works outside the IDE too
    ```
    ./gradlew build
