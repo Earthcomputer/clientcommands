@@ -7,12 +7,12 @@ import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
@@ -83,6 +83,7 @@ public class BookCommand {
                 throw NO_BOOK.create();
             }
         }
+        int slot = hand == Hand.MAIN_HAND ? player.inventory.selectedSlot : 40;
 
         String joinedPages = characterGenerator.limit(MAX_LIMIT * 210).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
 
@@ -93,7 +94,7 @@ public class BookCommand {
         }
 
         heldItem.getOrCreateTag().put("pages", pages);
-        player.networkHandler.sendPacket(new BookUpdateC2SPacket(heldItem, false, hand));
+        player.networkHandler.sendPacket(new BookUpdateC2SPacket(heldItem, false, slot));
 
         sendFeedback("commands.cbook.success");
 
