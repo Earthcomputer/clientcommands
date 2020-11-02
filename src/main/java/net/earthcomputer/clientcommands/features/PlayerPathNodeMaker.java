@@ -171,7 +171,7 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
                         player.getHeight() + getFeetY(cachedWorld, new BlockPos(node.x, node.y, node.z)) - 0.002,
                         otherZ + radius
                 );
-                if (!cachedWorld.doesNotCollide(player, box)) {
+                if (!cachedWorld.isSpaceEmpty(player, box)) {
                     node = null;
                 }
             }
@@ -204,7 +204,7 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
                     y + player.getHeight(),
                     z + radius + 0.5
             );
-            if (!cachedWorld.doesNotCollide(player, box)) {
+            if (!cachedWorld.isSpaceEmpty(player, box)) {
                 return null;
             }
 
