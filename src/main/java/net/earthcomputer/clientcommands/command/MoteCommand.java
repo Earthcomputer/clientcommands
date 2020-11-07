@@ -105,12 +105,9 @@ public class MoteCommand {
     }
 
     private static int sendEmoticon(String emoticon) {
-                MinecraftClient.getInstance().player.sendChatMessage(emoticon);
+        MinecraftClient.getInstance().player.sendChatMessage(emoticon);
         return 0;
     }
 
 }
 
-/* to add:
-   added everything, pretty poggers my guy
- */
