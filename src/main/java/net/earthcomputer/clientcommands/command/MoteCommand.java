@@ -104,7 +104,7 @@ public class MoteCommand {
 
     }
 
-    private static int sendEmoticon( String emoticon) {
+    private static int sendEmoticon(String emoticon) {
                 MinecraftClient.getInstance().player.sendChatMessage(emoticon);
         return 0;
     }
