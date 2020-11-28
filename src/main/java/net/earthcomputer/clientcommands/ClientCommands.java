@@ -46,7 +46,8 @@ public class ClientCommands implements ClientModInitializer {
         ScriptCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher);
         GammaCommand.register(dispatcher);
-        MoteCommand.register((dispatcher));
+        MoteCommand.register(dispatcher);
+        ChorusCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 

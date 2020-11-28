@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.command.ChorusCommand;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
@@ -22,11 +23,14 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.math.Vec3d;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
+
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendError;
 
 public class PlayerRandCracker {
 
@@ -110,8 +114,19 @@ public class PlayerRandCracker {
         //resetCracker("drink");
     }
 
-    public static void onEat() {
-        resetCracker("food");
+    public static void onEat(ItemStack stack, Vec3d pos, int particleCount, int itemUseTimeLeft) {
+        if(canMaintainPlayerRNG()) {
+            //Every time a person eats, the particles are random, and when finished more particles spawn(16)
+            for(int i = 0; i < particleCount * 3 + 3; i++)
+                nextInt();
+            if (TempRules.chorusManipulation && stack.getItem().getTranslationKey().equals("item.minecraft.chorus_fruit")) {
+                ChorusCommand.onEat(pos, particleCount, itemUseTimeLeft);
+                if(particleCount == 16) //Consumption randoms
+                    for (int i = 0; i < 5; i++)
+                        nextInt();
+            }
+        } else
+            resetCracker("food");
     }
 
     public static void onUnderwater() {
@@ -267,9 +282,10 @@ public class PlayerRandCracker {
                 seed = (seed * MULTIPLIER + ADDEND) & MASK;
             rand.setSeed(seed ^ MULTIPLIER);
         }
-        if (itemsNeeded > max)
+        if (itemsNeeded > max) {
+            sendError(new LiteralText("Condition not possible or would require more than " + max + " item throws"));
             return false;
-
+        }
         for (int i = 0; i < itemsNeeded; i++) {
             if (!throwItem())
                 return false;
@@ -295,7 +311,7 @@ public class PlayerRandCracker {
     public static Slot getBestItemThrowSlot(List<Slot> slots) {
         Map<Item, Integer> itemCounts = new HashMap<>();
         for (Slot slot : slots) {
-            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0) {
+            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0 && !slot.getStack().getItem().getTranslationKey().equals("item.minecraft.chorus_fruit")) {
                 itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
             }
         }
