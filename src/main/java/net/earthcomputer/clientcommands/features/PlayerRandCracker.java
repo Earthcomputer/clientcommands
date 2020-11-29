@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.command.ChorusCommand;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
@@ -117,16 +116,22 @@ public class PlayerRandCracker {
     public static void onEat(ItemStack stack, Vec3d pos, int particleCount, int itemUseTimeLeft) {
         if(canMaintainPlayerRNG()) {
             //Every time a person eats, the particles are random, and when finished more particles spawn(16)
-            for(int i = 0; i < particleCount * 3 + 3; i++)
+            for(int i = 0; i < particleCount * 3 + 3; i++) {
                 nextInt();
-            if (TempRules.chorusManipulation && stack.getItem().getTranslationKey().equals("item.minecraft.chorus_fruit")) {
-                ChorusCommand.onEat(pos, particleCount, itemUseTimeLeft);
-                if(particleCount == 16) //Consumption randoms
-                    for (int i = 0; i < 5; i++)
-                        nextInt();
             }
-        } else
+
+            if (TempRules.chorusManipulation && stack.getItem().getTranslationKey().equals("item.minecraft.chorus_fruit")) {
+                ChorusManipulation.onEat(pos, particleCount, itemUseTimeLeft);
+                if(particleCount == 16) {
+                    //Consumption randoms
+                    for (int i = 0; i < 5; i++) {
+                        nextInt();
+                    }
+                }
+            }
+        } else {
             resetCracker("food");
+        }
     }
 
     public static void onUnderwater() {

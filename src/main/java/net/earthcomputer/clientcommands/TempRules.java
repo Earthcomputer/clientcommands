@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +10,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -52,16 +54,16 @@ public class TempRules {
     }
 
     @Rule
-    public static boolean infiniteTools = false;
-
-    @Rule
     public static boolean chorusManipulation = false;
 
-    @Rule(readOnly = true)
-    //If the goal is relative to the player
-    public static boolean chorusRelativeTel;
-    public static Vec3d chorusGoalV1;
-    public static Vec3d chorusGoalV2;
+    @Rule(setter = "setMaxChorusItemThrows")
+    public static int maxChorusItemThrows = 64 * 32;
+    public static void setMaxChorusItemThrows(int maxChorusItemThrows) {
+        TempRules.maxChorusItemThrows = MathHelper.clamp(maxChorusItemThrows, 0, 1000000);
+    }
+
+    @Rule
+    public static boolean infiniteTools = false;
 
     public static Object get(String name) {
         Field field = rules.get(name);
