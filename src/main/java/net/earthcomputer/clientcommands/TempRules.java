@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.util.math.MathHelper;
 
@@ -36,6 +37,20 @@ public class TempRules {
             ServerBrandManager.rngWarning();
         else
             EnchantmentCracker.resetCracker();
+    }
+
+    @Rule(setter = "setFishingManipulation")
+    private static boolean fishingManipulation = false;
+    public static boolean getFishingManipulation() {
+        return fishingManipulation;
+    }
+    public static void setFishingManipulation(boolean fishingManipulation) {
+        TempRules.fishingManipulation = fishingManipulation;
+        if (fishingManipulation) {
+            ServerBrandManager.rngWarning();
+        } else {
+            FishingCracker.reset();
+        }
     }
 
     @Rule

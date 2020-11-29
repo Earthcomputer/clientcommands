@@ -28,6 +28,7 @@
     "MixinEntity",
     "MixinEntityRendererDispatcher",
     "MixinFireBlock",
+    "MixinFishingBobberEntity",
     "MixinFishingRodItem",
     "MixinFlintAndSteelItem",
     "MixinForgingScreenHandler",
@@ -55,6 +56,7 @@
     "MixinSlot",
     "MixinStonecutterContainer",
     "MixinTextFieldWidget",
+    "ProjectileEntityAccessor",
     "ScreenHandlerAccessor"
   ],
   "injectors": {
