@@ -12,6 +12,7 @@
 
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
+  "commands.ccheatcrackrng.success": "Player RNG cracked: %d -> %d",
 
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
