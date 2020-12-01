@@ -13,6 +13,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -52,13 +53,13 @@ public class PlayerRandCracker {
 
     public static int nextInt(int bound) {
         if ((bound & -bound) == bound)
-            return (int) ((bound * (long)next(31)) >> 31);
+            return (int) ((bound * (long) next(31)) >> 31);
 
         int bits, val;
         do {
             bits = next(31);
             val = bits % bound;
-        } while (bits - val + (bound-1) < 0);
+        } while (bits - val + (bound - 1) < 0);
 
         return val;
     }
@@ -114,15 +115,15 @@ public class PlayerRandCracker {
     }
 
     public static void onEat(ItemStack stack, Vec3d pos, int particleCount, int itemUseTimeLeft) {
-        if(canMaintainPlayerRNG()) {
+        if (canMaintainPlayerRNG()) {
             //Every time a person eats, the particles are random, and when finished more particles spawn(16)
-            for(int i = 0; i < particleCount * 3 + 3; i++) {
+            for (int i = 0; i < particleCount * 3 + 3; i++) {
                 nextInt();
             }
 
-            if (TempRules.chorusManipulation && stack.getItem().getTranslationKey().equals("item.minecraft.chorus_fruit")) {
+            if (TempRules.chorusManipulation && stack.getItem() == Items.CHORUS_FRUIT) {
                 ChorusManipulation.onEat(pos, particleCount, itemUseTimeLeft);
-                if(particleCount == 16) {
+                if (particleCount == 16) {
                     //Consumption randoms
                     for (int i = 0; i < 5; i++) {
                         nextInt();
@@ -218,8 +219,8 @@ public class PlayerRandCracker {
 
                     if (TempRules.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
 
-                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15){
-                            MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10,0.1f);
+                        if (stack.getDamage() + amount >= stack.getMaxDamage() - 15) {
+                            MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10, 0.1f);
                         }
 
                         MutableText durability = new LiteralText(String.valueOf(stack.getMaxDamage() - stack.getDamage() - 1)).formatted(Formatting.RED);
@@ -270,12 +271,15 @@ public class PlayerRandCracker {
         }
     }
 
-
     // ===== UTILITIES ===== //
-
     public static boolean throwItemsUntil(Predicate<Random> condition, int max) {
-        if (!TempRules.playerCrackState.knowsSeed())
+        return throwItemsUntil(condition, max, false);
+    }
+
+    public static boolean throwItemsUntil(Predicate<Random> condition, int max, boolean sendErrors) {
+        if (!TempRules.playerCrackState.knowsSeed()) {
             return false;
+        }
         TempRules.playerCrackState = CrackState.CRACKED;
 
         long seed = PlayerRandCracker.seed;
@@ -283,17 +287,24 @@ public class PlayerRandCracker {
 
         int itemsNeeded = 0;
         for (; itemsNeeded <= max && !condition.test(rand); itemsNeeded++) {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++) {
                 seed = (seed * MULTIPLIER + ADDEND) & MASK;
+            }
             rand.setSeed(seed ^ MULTIPLIER);
         }
         if (itemsNeeded > max) {
-            sendError(new LiteralText("Condition not possible or would require more than " + max + " item throws"));
+            if (sendErrors) {
+                sendError(new TranslatableText("playerManip.throwError", itemsNeeded));
+            }
             return false;
         }
         for (int i = 0; i < itemsNeeded; i++) {
-            if (!throwItem())
+            if (!throwItem()) {
+                if (sendErrors) {
+                    sendError(new TranslatableText("playerManip.notEnoughItems", i, itemsNeeded));
+                }
                 return false;
+            }
         }
 
         return true;
@@ -316,7 +327,7 @@ public class PlayerRandCracker {
     public static Slot getBestItemThrowSlot(List<Slot> slots) {
         Map<Item, Integer> itemCounts = new HashMap<>();
         for (Slot slot : slots) {
-            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0 && !slot.getStack().getItem().getTranslationKey().equals("item.minecraft.chorus_fruit")) {
+            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0 && slot.getStack().getItem() != Items.CHORUS_FRUIT) {
                 itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
             }
         }

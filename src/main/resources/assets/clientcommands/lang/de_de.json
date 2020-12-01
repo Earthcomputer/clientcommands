@@ -106,7 +106,14 @@
 
   "playerManip.serverBrandWarning": "Warnung: der Server, auf dem Sie spielen, ist modifiziert. Es gibt keine Garantie, dass RNG-Features in diesem Mod richtig funktionieren werden!",
   "playerManip.toolBreakWarning": "Warnung: Werkzeug hat %d Haltbarkeit übrig",
+  "playerManip.throwError": "Bedingung nicht möglich oder würde mehr als %d Gegenstandswürfe erfordern",
+  "playerManip.notEnoughItems": "Nicht genug Gegenstände (%d von %d), um Seed zu manipulieren",
 
-  "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers"
+  "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers",
+
+  "chorusManip.setGoal": "%s-Zielbereich von %s bis %s festlegen",
+  "chorusManip.goalTooFar": "Ziel ist zu weit entfernt!",
+  "chorusManip.landing": "Landung auf: %d, %d, %d",
+  "chorusManip.landingNotPossible": "Landungsmanipulation nicht möglich"
 
 }

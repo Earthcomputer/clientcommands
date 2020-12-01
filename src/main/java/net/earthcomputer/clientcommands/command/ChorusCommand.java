@@ -43,7 +43,11 @@ public class ChorusCommand {
     public static RequiredArgumentBuilder<ServerCommandSource, PosArgument> blockThen(boolean relative) {
         return argument("posGoal", vec3())
                 .executes(ctx -> ChorusManipulation.setGoal(
-                        getVec3(ctx, "posGoal").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(-0.7, 0, -0.7),
-                        getVec3(ctx, "posGoal").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(0.7, 1.8, 0.7), relative));
+                        getVec3(ctx, "posGoal").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(-0.2, 0, -0.2),
+                        getVec3(ctx, "posGoal").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(1.2, 1, 1.2), relative))
+                .then(literal("--perfectly")
+                        .executes(ctx -> ChorusManipulation.setGoal(
+                                getVec3(ctx, "pos").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(0.3, 0, 0.3),
+                                getVec3(ctx, "pos").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(0.7, 1, 0.7), relative)));
     }
 }

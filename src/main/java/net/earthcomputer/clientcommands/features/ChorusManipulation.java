@@ -3,7 +3,8 @@ package net.earthcomputer.clientcommands.features;
 import net.earthcomputer.clientcommands.TempRules;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -24,19 +25,19 @@ public class ChorusManipulation {
         if (relative &&
                 (Math.abs(v1.getX()) > 8.0 || Math.abs(v1.getY()) > 8.0 || Math.abs(v1.getZ()) > 8.0) &&
                 (Math.abs(v2.getX()) > 8.0 || Math.abs(v2.getY()) > 8.0 || Math.abs(v2.getZ()) > 8.0)) {
-            sendError(new LiteralText("Goal is to far away!"));
+            sendError(new TranslatableText("chorusManip.goalTooFar"));
             return -1;
         }
         if (Math.abs(v1.getY() - v2.getY()) == 0.0) {
-            v2 = v2.add(0, 1.8, 0);
+            v2 = v2.add(0, 1, 0);
         }
 
         chorusGoalFrom = v1;
         chorusGoalTo = v2;
         chorusRelativeTel = relative;
-        sendFeedback("Set " +
-                (relative ? "relative" : "absolute")
-                + " goal area from " + chorusGoalFrom + " to " + chorusGoalTo);
+        sendFeedback(new TranslatableText("chorusManip.setGoal",
+                (relative ? "relative" : "absolute"),
+                chorusGoalFrom.toString(), chorusGoalTo.toString()));
         return 0;
     }
 
@@ -54,12 +55,12 @@ public class ChorusManipulation {
         }
         area = new Box(from, to);
         if (!area.expand(8.0).contains(pos)) {
-            sendError(new LiteralText("Goal is too far away!"));
+            sendError(new TranslatableText("chorusManip.goalTooFar"));
             return false;
         }
 
         Box finalArea = area;
-        return throwItemsUntil(rand -> {
+        final boolean success = throwItemsUntil(rand -> {
             if (particleCount != 16) {
                 //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
                 for (int i = 0; i < 33 + 4.5 * itemUseTimeLeft; i++) {
@@ -68,22 +69,29 @@ public class ChorusManipulation {
             }
 
             final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
-            final double y = MathHelper.clamp(pos.getY() + (double)(rand.nextInt(16) - 8), 0.0D, (MinecraftClient.getInstance().world.getDimensionHeight() - 1));
+            final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), 0.0D, (MinecraftClient.getInstance().world.getDimensionHeight() - 1));
             final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
             final Vec3d landingArea = canTeleport(finalArea, new Vec3d(x, y, z));
 
             if (landingArea != null) {
                 if (itemUseTimeLeft == 24) { // || itemUseTimeLeft == 0
-                    sendFeedback("Landing on: " +
-                            Math.round(landingArea.getX() * 100) / 100.0 + ", " +
-                            Math.round(landingArea.getY() * 100) / 100.0 + ", " +
-                            Math.round(landingArea.getZ() * 100) / 100.0);
+                    sendFeedback(new TranslatableText("chorusManip.landing", Math.round(landingArea.getX() * 100) / 100.0,
+                            Math.round(landingArea.getY() * 100) / 100.0,
+                            Math.round(landingArea.getZ() * 100) / 100.0));
                 }
                 return true;
             } else {
                 return false;
             }
-        }, TempRules.maxChorusItemThrows);
+        }, TempRules.maxChorusItemThrows, true);
+
+        if (!success) {
+            MinecraftClient.getInstance().inGameHud.setOverlayMessage(
+                    new TranslatableText("chorusManip.landingNotPossible").formatted(Formatting.RED), false);
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -100,7 +108,7 @@ public class ChorusManipulation {
         if (world != null && world.isChunkLoaded(blockPos)) {
             boolean blockBelowIsGround = false;
 
-            while(!blockBelowIsGround && blockPos.getY() > 0) {
+            while (!blockBelowIsGround && blockPos.getY() > 0) {
                 BlockPos blockPos2 = blockPos.down();
                 BlockState blockState = world.getBlockState(blockPos2);
                 if (blockState.getMaterial().blocksMovement()) {
@@ -112,8 +120,8 @@ public class ChorusManipulation {
 
             if (blockBelowIsGround) {
                 goalVec = new Vec3d(goalVec.getX(), blockPos.getY(), goalVec.getZ());
-                final Box boundingBox = new Box(goalVec.getX()-0.3, goalVec.getY(), goalVec.getZ()-0.3, goalVec.getX()+0.3, goalVec.getY()+1.8, goalVec.getZ()+0.3);
-                if (goalArea.contains(goalVec) &&  world.isSpaceEmpty(boundingBox) && !world.containsFluid(boundingBox)) {
+                final Box boundingBox = new Box(goalVec.getX() - 0.3, goalVec.getY(), goalVec.getZ() - 0.3, goalVec.getX() + 0.3, goalVec.getY() + 1.8, goalVec.getZ() + 0.3);
+                if (goalArea.contains(goalVec) && world.isSpaceEmpty(boundingBox) && !world.containsFluid(boundingBox)) {
                     return goalVec;
                 }
             }
