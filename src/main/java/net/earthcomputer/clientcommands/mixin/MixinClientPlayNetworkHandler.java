@@ -56,7 +56,9 @@ public class MixinClientPlayNetworkHandler {
         // Called on network thread first, FishingCracker.waitingForFishingRod
 
         ClientPlayerEntity player = client.player;
-        assert player != null;
+        if (player == null) {
+            return;
+        }
 
         if (!TempRules.getFishingManipulation() || !FishingCracker.waitingForFishingRod || packet.getEntityData() != player.getEntityId() || packet.getEntityTypeId() != EntityType.FISHING_BOBBER) {
             return;

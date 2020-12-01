@@ -292,6 +292,7 @@ public class FishingCracker {
         private final FishingBobberEntity fakeEntity = new FishingBobberEntity(Objects.requireNonNull(MinecraftClient.getInstance().player), world, 0, 0);
 
         // state variables
+        private UUID uuid;
         private Vec3d pos;
         private Box boundingBox;
         private Vec3d velocity;
@@ -315,6 +316,10 @@ public class FishingCracker {
         private final int lureLevel;
         private final int luckLevel;
 
+        private final Random velocityRandom = new Random();
+
+        private int tickCounter = 0;
+
         // output variables
         private boolean failed;
 
@@ -323,8 +328,7 @@ public class FishingCracker {
             //this.random.setSeed(seed ^ 0x5deece66dL);
             this.random = new Random(seed ^ 0x5deece66dL);
             // entity UUID
-            random.nextLong();
-            random.nextLong();
+            this.uuid = MathHelper.randomUuid(random);
 
             // entity yaw and pitch
             random.nextGaussian();
@@ -359,6 +363,9 @@ public class FishingCracker {
         }
 
         public void tick() {
+            tickCounter++;
+            velocityRandom.setSeed(this.uuid.getLeastSignificantBits() ^ this.tickCounter);
+
             //((TestRandom) random).dump();
 
             assert world != null;
@@ -404,7 +411,7 @@ public class FishingCracker {
                         this.outOfOpenWaterTicks = Math.max(0, this.outOfOpenWaterTicks - 1);
                         if (this.caughtFish) {
                             // this will just drag the bobber down which we don't care about
-                            //this.velocity = (this.velocity.add(0.0D, -0.1D * (double)this.velocityRandom.nextFloat() * (double)this.velocityRandom.nextFloat(), 0.0D));
+                            this.velocity = (this.velocity.add(0.0D, -0.1D * (double)this.velocityRandom.nextFloat() * (double)this.velocityRandom.nextFloat(), 0.0D));
                         }
 
                         this.tickFishingLogic(blockPos);
@@ -714,6 +721,7 @@ public class FishingCracker {
                         //serverWorld.spawnParticles(ParticleTypes.FISHING, this.getX(), m, this.getZ(), (int)(1.0F + this.getWidth() * 20.0F), (double)this.getWidth(), 0.0D, (double)this.getWidth(), 0.20000000298023224D);
                         this.hookCountdown = MathHelper.nextInt(this.random, 20, 40);
                         this.caughtFish = true;
+                        this.velocity = new Vec3d(this.velocity.x, (double)(-0.4F * MathHelper.nextFloat(this.velocityRandom, 0.6F, 1.0F)), this.velocity.z);
                     }
                 } else if (this.waitCountdown > 0) {
                     this.waitCountdown -= i;

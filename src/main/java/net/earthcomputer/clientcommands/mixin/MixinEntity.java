@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Mixin(Entity.class)
 public class MixinEntity implements IEntity {
@@ -31,9 +33,14 @@ public class MixinEntity implements IEntity {
 
     @Shadow public World world;
 
+    @Shadow protected UUID uuid;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void redirectRandomCreation(CallbackInfo ci) {
         if ((Object) this instanceof FishingBobberEntity && !world.isClient) {
+            random.setSeed(0x5deece66dL);
+            uuid = MathHelper.randomUuid(random);
+
             long prevSeed = PlayerRandCracker.getSeed(random);
             //random = new TestRandom("server");
             random.setSeed(prevSeed ^ 0x5deece66dL);

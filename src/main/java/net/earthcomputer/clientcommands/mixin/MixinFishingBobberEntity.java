@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -62,5 +63,10 @@ public abstract class MixinFishingBobberEntity extends Entity {
             }
             //System.out.println("Server: " + state + " " + tickCounter + " " + waitCountdown + " " + fishTravelCountdown);
         }
+    }
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTime()J"))
+    private long onGetTime(World world) {
+        return tickCounter;
     }
 }
