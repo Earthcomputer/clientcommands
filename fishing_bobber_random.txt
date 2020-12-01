@@ -4,3 +4,11 @@ Constructor:
 
 Doesn't seem to be any calls when bobber is flying outside of water
 
+- DamageSourcePropertiesLootCondition
+- EntityPropertiesLootCondition
+- LocationCheckLootCondition
+- TimeCheckLootCondition
+- WeatherCheckLootCondition
+- ExplorationMapLootFunction
+- FurnaceSmeltLootFunction
+

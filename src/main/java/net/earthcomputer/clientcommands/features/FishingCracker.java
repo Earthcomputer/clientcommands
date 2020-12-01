@@ -1,5 +1,14 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import net.earthcomputer.clientcommands.mixin.AlternativeLootConditionAccessor;
+import net.earthcomputer.clientcommands.mixin.LocationCheckLootConditionAccessor;
+import net.earthcomputer.clientcommands.mixin.LocationPredicateAccessor;
+import net.earthcomputer.clientcommands.mixin.LootContextAccessor;
+import net.earthcomputer.clientcommands.mixin.LootPoolAccessor;
+import net.earthcomputer.clientcommands.mixin.LootPoolEntryAccessor;
+import net.earthcomputer.clientcommands.mixin.LootTableAccessor;
 import net.earthcomputer.clientcommands.mixin.ProjectileEntityAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -8,6 +17,8 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.data.server.FishingLootTableGenerator;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
@@ -17,9 +28,22 @@ import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootPool;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTables;
+import net.minecraft.loot.condition.AlternativeLootCondition;
+import net.minecraft.loot.condition.EntityPropertiesLootCondition;
+import net.minecraft.loot.condition.LocationCheckLootCondition;
+import net.minecraft.loot.condition.LootCondition;
+import net.minecraft.loot.condition.LootConditionTypes;
+import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameter;
+import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.entry.LootPoolEntry;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.tag.Tag;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.ReusableStream;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.HitResult;
@@ -27,18 +51,116 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 public class FishingCracker {
+    private static final Logger LOGGER = LogManager.getLogger();
 
+    private static final Map<Identifier, LootTable> FISHING_LOOT_TABLES;
+    private static final LootTable FISHING_LOOT_TABLE;
+    private static final LootContextParameter<Boolean> IN_OPEN_WATER_PARAMETER = new LootContextParameter<>(new Identifier("clientcommands", "in_open_water"));
+    static {
+        ImmutableMap.Builder<Identifier, LootTable> fishingLootTables = ImmutableMap.builder();
+        new FishingLootTableGenerator().accept((id, builder) -> fishingLootTables.put(id, builder.build()));
+        FISHING_LOOT_TABLES = fishingLootTables.build();
+
+        {
+            LootTable lootTable = FISHING_LOOT_TABLES.get(LootTables.FISHING_GAMEPLAY);
+            FISHING_LOOT_TABLE = lootTable;
+            LootPool[] pools = ((LootTableAccessor) lootTable).getPools();
+            LootPoolEntry[] entries = ((LootPoolAccessor) pools[0]).getEntries();
+            for (LootPoolEntry entry : entries) {
+                LootCondition[] conditions = ((LootPoolEntryAccessor) entry).getConditions();
+                for (int i = 0; i < conditions.length; i++) {
+                    LootCondition condition = conditions[i];
+                    if (condition instanceof EntityPropertiesLootCondition) {
+                        conditions[i] = new EntityPropertiesLootCondition(null, null) {
+                            @Override
+                            public Set<LootContextParameter<?>> getRequiredParameters() {
+                                return ImmutableSet.<LootContextParameter<?>>builder().addAll(super.getRequiredParameters()).add(IN_OPEN_WATER_PARAMETER).build();
+                            }
+
+                            @Override
+                            public boolean test(LootContext lootContext) {
+                                Boolean ret = lootContext.get(IN_OPEN_WATER_PARAMETER);
+                                assert ret != null;
+                                return ret;
+                            }
+                        };
+                        ((LootPoolEntryAccessor) entry).setConditionPredicate(LootConditionTypes.joinAnd(conditions));
+                    }
+                }
+            }
+        }
+
+        {
+            LootTable lootTable = FISHING_LOOT_TABLES.get(LootTables.FISHING_JUNK_GAMEPLAY);
+            LootPool[] pools = ((LootTableAccessor) lootTable).getPools();
+            for (LootPool pool : pools) {
+                LootPoolEntry[] entries = ((LootPoolAccessor) pool).getEntries();
+                for (LootPoolEntry entry : entries) {
+                    LootCondition[] conditions = ((LootPoolEntryAccessor) entry).getConditions();
+                    for (LootCondition condition : conditions) {
+                        if (condition instanceof AlternativeLootCondition) {
+                            LootCondition[] terms = ((AlternativeLootConditionAccessor) condition).getTerms();
+                            for (int i = 0; i < terms.length; i++) {
+                                LootCondition term = terms[i];
+                                if (term instanceof LocationCheckLootCondition) {
+                                    LocationCheckLootConditionAccessor accessor = (LocationCheckLootConditionAccessor) term;
+                                    LocationPredicateAccessor predicateAccessor = (LocationPredicateAccessor) accessor.getPredicate();
+                                    terms[i] = new LocationCheckLootCondition(accessor.getPredicate(), accessor.getOffset()) {
+                                        @Override
+                                        public boolean test(LootContext lootContext) {
+                                            ClientWorld world = MinecraftClient.getInstance().world;
+                                            assert world != null;
+                                            Vec3d origin = lootContext.get(LootContextParameters.ORIGIN);
+                                            if (origin == null) {
+                                                return false;
+                                            }
+                                            origin = origin.add(accessor.getOffset().getX(), accessor.getOffset().getY(), accessor.getOffset().getZ());
+                                            if (!predicateAccessor.getX().test((float)origin.getX()) || !predicateAccessor.getY().test((float)origin.getY()) || !predicateAccessor.getZ().test((float)origin.getZ())) {
+                                                return false;
+                                            }
+                                            Optional<RegistryKey<Biome>> biome = world.getRegistryManager().get(Registry.BIOME_KEY).getKey(world.getBiome(new BlockPos(origin)));
+                                            return biome.isPresent() && biome.get() == predicateAccessor.getBiome();
+                                        }
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static LootContext createLootContext(Random rand, float luck, Map<LootContextParameter<?>, Object> parameters) {
+        return LootContextAccessor.createLootContext(rand, luck, null, id -> {
+            LootTable lootTable = FISHING_LOOT_TABLES.get(id);
+            if (lootTable == null) {
+                LOGGER.warn("Unknown loot table: {}", id);
+            }
+            return lootTable;
+        }, id -> null, parameters, Collections.emptyMap());
+    }
 
     public static void main(String[] args) {
         Random rand = new Random(0x5deece66dL);
@@ -104,7 +226,7 @@ public class FishingCracker {
         onFishingRodBobberEntity();
 
         long seed = optionalSeed.getAsLong();
-        SimulatedFishingBobber fishingBobber = new SimulatedFishingBobber(seed, lureLevel, pos, velocity);
+        SimulatedFishingBobber fishingBobber = new SimulatedFishingBobber(seed, tool, pos, velocity);
 
         boolean wasCatchingFish = false;
         int tickCounter = 0;
@@ -114,9 +236,13 @@ public class FishingCracker {
             }
             tickCounter++;
             fishingBobber.tick();
+            if (fishingBobber.failed) {
+                break;
+            }
             //System.out.println("Client simulation: " + fishingBobber.state + " " + tickCounter + " " + fishingBobber.waitCountdown + " " + fishingBobber.fishTravelCountdown);
-            if (fishingBobber.hookCountdown > 0) {
-                //System.out.println("Client fishable: " + tickCounter);
+            if (fishingBobber.canCatchFish()) {
+                System.out.println("Client fishable: " + tickCounter);
+                System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + fishingBobber.generateLoot());
                 wasCatchingFish = true;
             } else if (wasCatchingFish) {
                 break;
@@ -127,14 +253,12 @@ public class FishingCracker {
     private static long throwTime;
     public static long rollingAverageEndOfTickDelay = 0;
     public static boolean waitingForFishingRod;
-    private static int lureLevel;
-    private static int luckOfTheSeaLevel;
+    private static ItemStack tool;
 
     public static void onThrownFishingRod(ItemStack stack) {
         throwTime = System.nanoTime();
         waitingForFishingRod = true;
-        lureLevel = EnchantmentHelper.getLure(stack);
-        luckOfTheSeaLevel = EnchantmentHelper.getLuckOfTheSea(stack);
+        tool = stack;
     }
 
 
@@ -187,12 +311,14 @@ public class FishingCracker {
         private float fishAngle;
 
         private final Random random;
+        private final ItemStack tool;
         private final int lureLevel;
+        private final int luckLevel;
 
         // output variables
         private boolean failed;
 
-        public SimulatedFishingBobber(long seed, int lure, Vec3d pos, Vec3d velocity) {
+        public SimulatedFishingBobber(long seed, ItemStack tool, Vec3d pos, Vec3d velocity) {
             //this.random = new TestRandom("client");
             //this.random.setSeed(seed ^ 0x5deece66dL);
             this.random = new Random(seed ^ 0x5deece66dL);
@@ -205,10 +331,31 @@ public class FishingCracker {
             random.nextGaussian();
             random.nextGaussian();
 
-            this.lureLevel = lure;
+            this.tool = tool;
+            this.lureLevel = EnchantmentHelper.getLure(tool);
+            this.luckLevel = EnchantmentHelper.getLuckOfTheSea(tool);
             this.pos = pos;
             this.velocity = velocity;
             this.boundingBox = FISHING_BOBBER_DIMENSIONS.method_30231(pos.x, pos.y, pos.z);
+        }
+
+        public boolean canCatchFish() {
+            return hookCountdown > 0;
+        }
+
+        public List<ItemStack> generateLoot() {
+            fakeEntity.updatePosition(pos.x, pos.y, pos.z);
+            fakeEntity.setVelocity(velocity);
+
+            Random randomCopy = new Random(PlayerRandCracker.getSeed(random) ^ 0x5deece66dL);
+            Map<LootContextParameter<?>, Object> parameters = ImmutableMap.of(
+                    LootContextParameters.ORIGIN, pos,
+                    LootContextParameters.TOOL, tool,
+                    LootContextParameters.THIS_ENTITY, fakeEntity,
+                    IN_OPEN_WATER_PARAMETER, inOpenWater
+            );
+            LootContext lootContext = createLootContext(randomCopy, luckLevel, parameters);
+            return FISHING_LOOT_TABLE.generateLoot(lootContext);
         }
 
         public void tick() {
@@ -396,7 +543,6 @@ public class FishingCracker {
         }
 
         private void checkForCollision() {
-            assert fakeEntity != null;
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
             HitResult hitResult = ProjectileUtil.getCollision(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanCollideWith);
@@ -440,14 +586,13 @@ public class FishingCracker {
 
             float i = this.getVelocityMultiplier();
             this.velocity = this.velocity.multiply((double)i, 1.0D, (double)i);
-            if (this.world.method_29556(this.boundingBox.contract(0.001D)).noneMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
+            if (this.world.method_29556(this.boundingBox.contract(0.001D)).anyMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
                 failed = true;
             }
         }
 
         private Vec3d adjustMovementForCollisions(Vec3d movement) {
             Box box = this.boundingBox;
-            assert fakeEntity != null;
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
             assert world != null;
