@@ -17,7 +17,6 @@
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.incompatible": "Incompatible enchantments",
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled.",
-  "commands.cenchant.needEnchantingPrediction.enable": "Enable",
   "commands.cenchant.success": "Starting enchantment manipulation",
   "commands.cenchant.uncracked": "Seed needs to be cracked.",
 
@@ -35,6 +34,9 @@
   "commands.cfinditem.starting": "Searching for %s",
   "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s.",
   "commands.cfinditem.total": "Found %dx %s total",
+
+  "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled.",
+  "commands.cfish.noGoals": "There are no fishing manipulation goals",
 
   "commands.cgamma.success": "Set gamma to %f",
 
@@ -58,6 +60,7 @@
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "Cancel",
   "commands.client.crack": "Crack",
+  "commands.client.enable": "Enable",
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.notClient": "Not a client-side command",
 

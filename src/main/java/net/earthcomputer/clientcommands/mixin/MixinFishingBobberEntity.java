@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.features.TestRandom;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -68,5 +69,14 @@ public abstract class MixinFishingBobberEntity extends Entity {
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTime()J"))
     private long onGetTime(World world) {
         return tickCounter;
+    }
+
+    @Inject(method = "tick",
+            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/entity/projectile/FishingBobberEntity;outOfOpenWaterTicks:I", ordinal = 0)),
+            at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", remap = false, ordinal = 0))
+    private void onBobOutOfWater(CallbackInfo ci) {
+        if (FishingCracker.canManipulateFishing() && world.isClient) {
+            FishingCracker.onBobOutOfWater();
+        }
     }
 }

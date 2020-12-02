@@ -38,8 +38,8 @@ public class MixinEntity implements IEntity {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void redirectRandomCreation(CallbackInfo ci) {
         if ((Object) this instanceof FishingBobberEntity && !world.isClient) {
-            random.setSeed(0x5deece66dL);
-            uuid = MathHelper.randomUuid(random);
+//            random.setSeed(0x5deece66dL);
+//            uuid = MathHelper.randomUuid(random);
 
             long prevSeed = PlayerRandCracker.getSeed(random);
             //random = new TestRandom("server");

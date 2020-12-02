@@ -11,7 +11,6 @@
     "commands.cenchant.failed": "Nemogoče je ali bi trajalo pre dolgo, da bi dobile te čare",
     "commands.cenchant.incompatible": "Nezdružljivi čari",
     "commands.cenchant.needEnchantingPrediction": "Ta ukaz zahteva, da je omogočeno predvidevanje čaranja.",
-    "commands.cenchant.needEnchantingPrediction.enable": "Omogoči",
     "commands.cenchant.success": "Začatek manipulacije čaranja",
     "commands.cenchant.uncracked": "Seme mora biti ugotovljeno.",
   
@@ -45,6 +44,7 @@
     "commands.client.blockpos": "(%d, %d, %d)",
     "commands.client.cancel": "Prekliči",
     "commands.client.crack": "Ugotovi",
+    "commands.client.enable": "Omogoči",
     "commands.client.expectedRegex": "Nepravilen regex %s",
   
     "enchCrack.state": "Stanje ugotavljanja semena čaranja: %s",

@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +23,7 @@ public class MixinFishingRodItem {
 
     @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/sound/SoundEvents;ENTITY_FISHING_BOBBER_THROW:Lnet/minecraft/sound/SoundEvent;"))
     private void onThrowFishingRod(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> ci) {
-        if (TempRules.getFishingManipulation()) {
+        if (FishingCracker.canManipulateFishing()) {
             FishingCracker.onThrownFishingRod(user.getStackInHand(hand));
         }
     }

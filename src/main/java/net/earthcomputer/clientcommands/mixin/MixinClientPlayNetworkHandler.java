@@ -48,7 +48,18 @@ public class MixinClientPlayNetworkHandler {
 
     @Inject(method = "onEntitySpawn", at = @At("TAIL"))
     public void onOnEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci) {
+        ClientPlayerEntity player = client.player;
+        if (player == null) {
+            return;
+        }
+
         SeedCracker.onEntityCreation(packet);
+
+        if (FishingCracker.canManipulateFishing()) {
+            if (packet.getEntityData() == player.getEntityId() && packet.getEntityTypeId() == EntityType.FISHING_BOBBER) {
+                FishingCracker.processBobberSpawn(packet.getUuid(), new Vec3d(packet.getX(), packet.getY(), packet.getZ()), new Vec3d(packet.getVelocityX(), packet.getVelocityY(), packet.getVelocityZ()));
+            }
+        }
     }
 
     @Inject(method = "onEntitySpawn", at = @At("HEAD"))
@@ -60,15 +71,18 @@ public class MixinClientPlayNetworkHandler {
             return;
         }
 
-        if (!TempRules.getFishingManipulation() || !FishingCracker.waitingForFishingRod || packet.getEntityData() != player.getEntityId() || packet.getEntityTypeId() != EntityType.FISHING_BOBBER) {
+        if (!FishingCracker.canManipulateFishing() || packet.getEntityData() != player.getEntityId() || packet.getEntityTypeId() != EntityType.FISHING_BOBBER) {
             return;
         }
-        try {
-            FishingCracker.processBobberSpawn(packet.getUuid(), new Vec3d(packet.getX(), packet.getY(), packet.getZ()), new Vec3d(packet.getVelocityX(), packet.getVelocityY(), packet.getVelocityZ()));
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
 
+        FishingCracker.onFishingBobberEntity();
+    }
+
+    @Inject(method = "onWorldTimeUpdate", at = @At("HEAD"))
+    private void onOnWorldTimeUpdatePre(CallbackInfo ci) {
+        if (TempRules.getFishingManipulation()) {
+            FishingCracker.onTimeSync();
+        }
     }
 
     @Inject(method = "onCustomPayload", at = @At("TAIL"))

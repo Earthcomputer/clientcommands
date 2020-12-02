@@ -36,7 +36,7 @@ public class CEnchantCommand {
             Text text = new TranslatableText("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.cenchant.needEnchantingPrediction.enable", "/ctemprule set enchantingPrediction true"));
+                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set enchantingPrediction true"));
             sendFeedback(text);
             return 0;
         }
