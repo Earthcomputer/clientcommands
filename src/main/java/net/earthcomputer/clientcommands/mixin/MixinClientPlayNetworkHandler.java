@@ -80,7 +80,7 @@ public class MixinClientPlayNetworkHandler {
 
     @Inject(method = "onWorldTimeUpdate", at = @At("HEAD"))
     private void onOnWorldTimeUpdatePre(CallbackInfo ci) {
-        if (TempRules.getFishingManipulation()) {
+        if (TempRules.getFishingManipulation() && !MinecraftClient.getInstance().isOnThread()) {
             FishingCracker.onTimeSync();
         }
     }

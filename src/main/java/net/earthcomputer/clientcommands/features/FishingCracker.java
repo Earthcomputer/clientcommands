@@ -44,6 +44,8 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.entry.LootPoolEntry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
@@ -263,14 +265,22 @@ public class FishingCracker {
             if (fishingBobber.failed) {
                 break;
             }
+            /*
+            //Just to speed up fishing
+            if (fishingBobber.waitCountdown > 300) {
+                break;
+            }*/
+
             //System.out.println("Client simulation: " + fishingBobber.state + " " + tickCounter + " " + fishingBobber.waitCountdown + " " + fishingBobber.fishTravelCountdown);
             if (fishingBobber.canCatchFish()) {
                 List<ItemStack> loot = fishingBobber.generateLoot();
                 System.out.println("Client fishable: " + tickCounter);
                 System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + loot);
                 if (goals.stream().anyMatch(goal -> loot.stream().anyMatch(goal))) {
-                    ticksUntilOurItem = ticks;
-                    break;
+                    if (((ListTag)(loot.get(0).getTag().get("StoredEnchantments"))).stream().anyMatch(tag -> ((CompoundTag)tag).get("id").asString().equals("minecraft:mending"))) {
+                        ticksUntilOurItem = ticks;
+                        break;
+                    }
                 }
                 wasCatchingFish = true;
             } else if (wasCatchingFish) {
@@ -288,7 +298,7 @@ public class FishingCracker {
                 interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
             }
         } else {
-            totalTicksToWait = ticksUntilOurItem;
+            totalTicksToWait = ticksUntilOurItem;//CHANGED TEMPORARALY
         }
     }
 
@@ -304,7 +314,9 @@ public class FishingCracker {
         System.arraycopy(timeSyncTimes, 1, timeSyncTimes, 0, timeSyncTimes.length - 1);
         timeSyncTimes[timeSyncTimes.length - 1] = time;
         if (timeSyncTimes[0] != 0) {
-            serverMspt = (int) ((time - timeSyncTimes[0]) / ((timeSyncTimes.length - 1) * 1000000));
+            serverMspt = (int) ((time - timeSyncTimes[0]) / ((timeSyncTimes.length - 1) * 1000000)) / 20;
+            //System.out.println("Server mstp:" + serverMspt);
+            //serverMspt = 50;
         }
 
         if (state == State.WAITING_FOR_FISH) {
@@ -319,13 +331,15 @@ public class FishingCracker {
             if (latestReasonableArriveTick >= totalTicksToWait) {
                 state = State.NOT_MANIPULATING;
                 int timeToStartOfTick = serverMspt - averageTimeToEndOfTick;
-                int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - getLocalPing() - timeToStartOfTick + serverMspt / 2;
+                int delay = (totalTicksToWait - estimatedTicksElapsed + 2) * serverMspt - getLocalPing() - timeToStartOfTick + serverMspt / 2;
+                long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
                     if (!TempRules.getFishingManipulation()) {
                         return;
                     }
                     ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
                     if (networkHandler != null) {
+                        while (System.nanoTime() < targetTime);
                         networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));
                         MinecraftClient.getInstance().send(() -> {
                             ClientPlayerEntity player = MinecraftClient.getInstance().player;
@@ -338,10 +352,11 @@ public class FishingCracker {
                                 if (result.getResult().isAccepted() && result.getResult().shouldSwingHand()) {
                                     player.swingHand(Hand.MAIN_HAND);
                                 }
+                                //networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));
                             }
                         });
                     }
-                }, Math.max(0, delay - 10), TimeUnit.MILLISECONDS);
+                }, Math.max(0, delay - 100), TimeUnit.MILLISECONDS);
             }
         }
     }
