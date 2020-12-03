@@ -274,10 +274,11 @@ public class FishingCracker {
             //System.out.println("Client simulation: " + fishingBobber.state + " " + tickCounter + " " + fishingBobber.waitCountdown + " " + fishingBobber.fishTravelCountdown);
             if (fishingBobber.canCatchFish()) {
                 List<ItemStack> loot = fishingBobber.generateLoot();
-                System.out.println("Client fishable: " + tickCounter);
-                System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + loot);
                 if (goals.stream().anyMatch(goal -> loot.stream().anyMatch(goal))) {
-                    if (((ListTag)(loot.get(0).getTag().get("StoredEnchantments"))).stream().anyMatch(tag -> ((CompoundTag)tag).get("id").asString().equals("minecraft:mending"))) {
+                    //if (((ListTag)(loot.get(0).getTag().get("StoredEnchantments"))).stream().anyMatch(tag -> ((CompoundTag)tag).get("id").asString().equals("minecraft:mending"))) {
+                    {
+                        System.out.println("Client fishable: " + tickCounter);
+                        System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + loot);
                         ticksUntilOurItem = ticks;
                         break;
                     }
@@ -321,13 +322,14 @@ public class FishingCracker {
 
         if (state == State.WAITING_FOR_FISH) {
             if (estimatedTicksElapsed == 0) {
-                int timeToStartOfTick = serverMspt - averageTimeToEndOfTick;
-                estimatedTicksElapsed = (int) Math.round((double) (time - (bobberStartTime - timeToStartOfTick * 1000000)) / (serverMspt * 1000000));
+                int timeToStartOfTick = serverMspt/2 - averageTimeToEndOfTick;
+                //estimatedTicksElapsed = (int) Math.ceil((double) (time - (bobberStartTime - timeToStartOfTick * 1000000)) / (serverMspt * 1000000));
+                estimatedTicksElapsed = (int) Math.ceil((double) (time - bobberStartTime)/(serverMspt * 1000000));
             } else {
                 estimatedTicksElapsed += 20;
             }
 
-            int latestReasonableArriveTick = estimatedTicksElapsed + 20 + getLocalPing() / serverMspt + 2;
+            int latestReasonableArriveTick = estimatedTicksElapsed + 20 + getLocalPing() / serverMspt;
             if (latestReasonableArriveTick >= totalTicksToWait) {
                 state = State.NOT_MANIPULATING;
                 int timeToStartOfTick = serverMspt - averageTimeToEndOfTick;
