@@ -30,8 +30,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendError;
-
 public class PlayerRandCracker {
 
     // ===== RNG IMPLEMENTATION ===== //
@@ -53,13 +51,13 @@ public class PlayerRandCracker {
 
     public static int nextInt(int bound) {
         if ((bound & -bound) == bound)
-            return (int) ((bound * (long) next(31)) >> 31);
+            return (int) ((bound * (long)next(31)) >> 31);
 
         int bits, val;
         do {
             bits = next(31);
             val = bits % bound;
-        } while (bits - val + (bound - 1) < 0);
+        } while (bits - val + (bound-1) < 0);
 
         return val;
     }
@@ -219,8 +217,8 @@ public class PlayerRandCracker {
 
                     if (TempRules.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
 
-                        if (stack.getDamage() + amount >= stack.getMaxDamage() - 15) {
-                            MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10, 0.1f);
+                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15){
+                            MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10,0.1f);
                         }
 
                         MutableText durability = new LiteralText(String.valueOf(stack.getMaxDamage() - stack.getDamage() - 1)).formatted(Formatting.RED);
@@ -272,13 +270,9 @@ public class PlayerRandCracker {
     }
 
     // ===== UTILITIES ===== //
-    public static boolean throwItemsUntil(Predicate<Random> condition, int max) {
-        return throwItemsUntil(condition, max, false);
-    }
-
-    public static boolean throwItemsUntil(Predicate<Random> condition, int max, boolean sendErrors) {
+    public static ThrowItemsState throwItemsUntil(Predicate<Random> condition, int max) {
         if (!TempRules.playerCrackState.knowsSeed()) {
-            return false;
+            return ThrowItemsState.UNKNOWN_SEED;
         }
         TempRules.playerCrackState = CrackState.CRACKED;
 
@@ -293,21 +287,15 @@ public class PlayerRandCracker {
             rand.setSeed(seed ^ MULTIPLIER);
         }
         if (itemsNeeded > max) {
-            if (sendErrors) {
-                sendError(new TranslatableText("playerManip.throwError", itemsNeeded));
-            }
-            return false;
+            return ThrowItemsState.NOT_POSSIBLE.setMessageArgs(itemsNeeded);
         }
         for (int i = 0; i < itemsNeeded; i++) {
             if (!throwItem()) {
-                if (sendErrors) {
-                    sendError(new TranslatableText("playerManip.notEnoughItems", i, itemsNeeded));
-                }
-                return false;
+                return ThrowItemsState.NOT_ENOUGH_ITEMS.setMessageArgs(i, itemsNeeded);
             }
         }
 
-        return true;
+        return ThrowItemsState.SUCCESS;
     }
 
     public static boolean throwItem() {
@@ -366,6 +354,39 @@ public class PlayerRandCracker {
             return ((AtomicLong) RANDOM_SEED.get(rand)).get();
         } catch (ReflectiveOperationException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    public enum ThrowItemsState {
+        NOT_ENOUGH_ITEMS(false, new TranslatableText("playerManip.notEnoughItems")),
+        NOT_POSSIBLE(false, new TranslatableText("playerManip.throwError")),
+        UNKNOWN_SEED(false, new TranslatableText("commands.cenchant.uncracked")),
+        SUCCESS(true),
+        ;
+
+        private final Boolean success;
+        private TranslatableText message;
+
+        ThrowItemsState(Boolean success) {
+            this(success, null);
+        }
+
+        ThrowItemsState(Boolean success, TranslatableText message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public TranslatableText getMessage() {
+            return this.message;
+        }
+
+        public ThrowItemsState setMessageArgs(Object... args) {
+            this.message = new TranslatableText(this.message.getKey(), args);
+            return this;
+        }
+
+        public boolean getSuccess() {
+            return success;
         }
     }
 

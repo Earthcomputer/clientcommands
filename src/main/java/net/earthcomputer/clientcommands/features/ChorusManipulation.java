@@ -60,32 +60,34 @@ public class ChorusManipulation {
         }
 
         Box finalArea = area;
-        final boolean success = throwItemsUntil(rand -> {
-            if (particleCount != 16) {
-                //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
-                for (int i = 0; i < 33 + 4.5 * itemUseTimeLeft; i++) {
-                    rand.nextInt();
+
+        PlayerRandCracker.ThrowItemsState throwItemsState =
+            throwItemsUntil(rand -> {
+                if (particleCount != 16) {
+                    //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
+                    for (int i = 0; i < 33 + 4.5 * itemUseTimeLeft; i++) {
+                        rand.nextInt();
+                    }
                 }
-            }
 
-            final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
-            final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), 0.0D, (MinecraftClient.getInstance().world.getDimensionHeight() - 1));
-            final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
-            final Vec3d landingArea = canTeleport(finalArea, new Vec3d(x, y, z));
+                final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
+                final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), 0.0D, (MinecraftClient.getInstance().world.getDimensionHeight() - 1));
+                final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
+                final Vec3d landingArea = canTeleport(finalArea, new Vec3d(x, y, z));
 
-            if (landingArea != null) {
-                if (itemUseTimeLeft == 24) { // || itemUseTimeLeft == 0
-                    sendFeedback(new TranslatableText("chorusManip.landing", Math.round(landingArea.getX() * 100) / 100.0,
-                            Math.round(landingArea.getY() * 100) / 100.0,
-                            Math.round(landingArea.getZ() * 100) / 100.0));
+                if (landingArea != null) {
+                    if (itemUseTimeLeft == 24) { // || itemUseTimeLeft == 0
+                        sendFeedback(new TranslatableText("chorusManip.landing", Math.round(landingArea.getX() * 100) / 100.0,
+                                Math.round(landingArea.getY() * 100) / 100.0,
+                                Math.round(landingArea.getZ() * 100) / 100.0));
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
-                return true;
-            } else {
-                return false;
-            }
-        }, TempRules.maxChorusItemThrows, true);
-
-        if (!success) {
+            }, TempRules.maxChorusItemThrows);
+        if (!throwItemsState.getSuccess()) {
+            sendError(throwItemsState.getMessage());
             MinecraftClient.getInstance().inGameHud.setOverlayMessage(
                     new TranslatableText("chorusManip.landingNotPossible").formatted(Formatting.RED), false);
             return false;

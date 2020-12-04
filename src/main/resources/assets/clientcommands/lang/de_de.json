@@ -111,7 +111,7 @@
 
   "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers",
 
-  "chorusManip.setGoal": "%s-Zielbereich von %s bis %s festlegen",
+  "chorusManip.setGoal": "%s-Zielbereich von %s bis %s festgelegt",
   "chorusManip.goalTooFar": "Ziel ist zu weit entfernt!",
   "chorusManip.landing": "Landung auf: %d, %d, %d",
   "chorusManip.landingNotPossible": "Landungsmanipulation nicht möglich"
