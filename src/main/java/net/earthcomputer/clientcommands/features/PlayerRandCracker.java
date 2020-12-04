@@ -270,9 +270,10 @@ public class PlayerRandCracker {
     }
 
     // ===== UTILITIES ===== //
-    public static ThrowItemsState throwItemsUntil(Predicate<Random> condition, int max) {
+
+    public static ThrowItemsResult throwItemsUntil(Predicate<Random> condition, int max) {
         if (!TempRules.playerCrackState.knowsSeed()) {
-            return ThrowItemsState.UNKNOWN_SEED;
+            return new ThrowItemsResult(ThrowItemsResult.Type.UNKNOWN_SEED);
         }
         TempRules.playerCrackState = CrackState.CRACKED;
 
@@ -287,15 +288,15 @@ public class PlayerRandCracker {
             rand.setSeed(seed ^ MULTIPLIER);
         }
         if (itemsNeeded > max) {
-            return ThrowItemsState.NOT_POSSIBLE.setMessageArgs(itemsNeeded);
+            return new ThrowItemsResult(ThrowItemsResult.Type.NOT_POSSIBLE, itemsNeeded);
         }
         for (int i = 0; i < itemsNeeded; i++) {
             if (!throwItem()) {
-                return ThrowItemsState.NOT_ENOUGH_ITEMS.setMessageArgs(i, itemsNeeded);
+                return new ThrowItemsResult(ThrowItemsResult.Type.NOT_ENOUGH_ITEMS, i, itemsNeeded);
             }
         }
 
-        return ThrowItemsState.SUCCESS;
+        return new ThrowItemsResult(ThrowItemsResult.Type.SUCCESS);
     }
 
     public static boolean throwItem() {
@@ -357,36 +358,45 @@ public class PlayerRandCracker {
         }
     }
 
-    public enum ThrowItemsState {
-        NOT_ENOUGH_ITEMS(false, new TranslatableText("playerManip.notEnoughItems")),
-        NOT_POSSIBLE(false, new TranslatableText("playerManip.throwError")),
-        UNKNOWN_SEED(false, new TranslatableText("commands.cenchant.uncracked")),
-        SUCCESS(true),
-        ;
+    public static class ThrowItemsResult {
+        private final Type type;
+        private final TranslatableText message;
 
-        private final Boolean success;
-        private TranslatableText message;
-
-        ThrowItemsState(Boolean success) {
-            this(success, null);
+        public ThrowItemsResult(Type type, Object... args) {
+            this.type = type;
+            this.message = new TranslatableText(type.getTranslationKey(), args);
         }
 
-        ThrowItemsState(Boolean success, TranslatableText message) {
-            this.success = success;
-            this.message = message;
+        public Type getType() {
+            return type;
         }
 
         public TranslatableText getMessage() {
-            return this.message;
+            return message;
         }
 
-        public ThrowItemsState setMessageArgs(Object... args) {
-            this.message = new TranslatableText(this.message.getKey(), args);
-            return this;
-        }
+        public enum Type {
+            NOT_ENOUGH_ITEMS(false, "playerManip.notEnoughItems"),
+            NOT_POSSIBLE(false, "playerManip.throwError"),
+            UNKNOWN_SEED(false, "commands.cenchant.uncracked"),
+            SUCCESS(true, null),
+            ;
 
-        public boolean getSuccess() {
-            return success;
+            private final boolean success;
+            private final String translationKey;
+
+            Type(boolean success, String translationKey) {
+                this.success = success;
+                this.translationKey = translationKey;
+            }
+
+            public boolean isSuccess() {
+                return success;
+            }
+
+            public String getTranslationKey() {
+                return translationKey;
+            }
         }
     }
 

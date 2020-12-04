@@ -61,7 +61,7 @@ public class ChorusManipulation {
 
         Box finalArea = area;
 
-        PlayerRandCracker.ThrowItemsState throwItemsState =
+        PlayerRandCracker.ThrowItemsResult throwItemsState =
             throwItemsUntil(rand -> {
                 if (particleCount != 16) {
                     //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
@@ -86,7 +86,7 @@ public class ChorusManipulation {
                     return false;
                 }
             }, TempRules.maxChorusItemThrows);
-        if (!throwItemsState.getSuccess()) {
+        if (!throwItemsState.getType().isSuccess()) {
             sendError(throwItemsState.getMessage());
             MinecraftClient.getInstance().inGameHud.setOverlayMessage(
                     new TranslatableText("chorusManip.landingNotPossible").formatted(Formatting.RED), false);
