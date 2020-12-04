@@ -13,6 +13,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,6 +23,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.math.Vec3d;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -110,8 +112,25 @@ public class PlayerRandCracker {
         //resetCracker("drink");
     }
 
-    public static void onEat() {
-        resetCracker("food");
+    public static void onEat(ItemStack stack, Vec3d pos, int particleCount, int itemUseTimeLeft) {
+        if (canMaintainPlayerRNG()) {
+            //Every time a person eats, the particles are random, and when finished more particles spawn(16)
+            for (int i = 0; i < particleCount * 3 + 3; i++) {
+                nextInt();
+            }
+
+            if (TempRules.chorusManipulation && stack.getItem() == Items.CHORUS_FRUIT) {
+                ChorusManipulation.onEat(pos, particleCount, itemUseTimeLeft);
+                if (particleCount == 16) {
+                    //Consumption randoms
+                    for (int i = 0; i < 5; i++) {
+                        nextInt();
+                    }
+                }
+            }
+        } else {
+            resetCracker("food");
+        }
     }
 
     public static void onUnderwater() {
@@ -253,9 +272,10 @@ public class PlayerRandCracker {
 
     // ===== UTILITIES ===== //
 
-    public static boolean throwItemsUntil(Predicate<Random> condition, int max) {
-        if (!TempRules.playerCrackState.knowsSeed())
-            return false;
+    public static ThrowItemsResult throwItemsUntil(Predicate<Random> condition, int max) {
+        if (!TempRules.playerCrackState.knowsSeed()) {
+            return new ThrowItemsResult(ThrowItemsResult.Type.UNKNOWN_SEED);
+        }
         TempRules.playerCrackState = CrackState.CRACKED;
 
         long seed = PlayerRandCracker.seed;
@@ -263,19 +283,21 @@ public class PlayerRandCracker {
 
         int itemsNeeded = 0;
         for (; itemsNeeded <= max && !condition.test(rand); itemsNeeded++) {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++) {
                 seed = (seed * MULTIPLIER + ADDEND) & MASK;
+            }
             rand.setSeed(seed ^ MULTIPLIER);
         }
-        if (itemsNeeded > max)
-            return false;
-
+        if (itemsNeeded > max) {
+            return new ThrowItemsResult(ThrowItemsResult.Type.NOT_POSSIBLE, itemsNeeded);
+        }
         for (int i = 0; i < itemsNeeded; i++) {
-            if (!throwItem())
-                return false;
+            if (!throwItem()) {
+                return new ThrowItemsResult(ThrowItemsResult.Type.NOT_ENOUGH_ITEMS, i, itemsNeeded);
+            }
         }
 
-        return true;
+        return new ThrowItemsResult(ThrowItemsResult.Type.SUCCESS);
     }
 
     public static boolean throwItem() {
@@ -295,7 +317,7 @@ public class PlayerRandCracker {
     public static Slot getBestItemThrowSlot(List<Slot> slots) {
         Map<Item, Integer> itemCounts = new HashMap<>();
         for (Slot slot : slots) {
-            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0) {
+            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0 && slot.getStack().getItem() != Items.CHORUS_FRUIT) {
                 itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
             }
         }
@@ -334,6 +356,48 @@ public class PlayerRandCracker {
             return ((AtomicLong) RANDOM_SEED.get(rand)).get();
         } catch (ReflectiveOperationException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    public static class ThrowItemsResult {
+        private final Type type;
+        private final TranslatableText message;
+
+        public ThrowItemsResult(Type type, Object... args) {
+            this.type = type;
+            this.message = new TranslatableText(type.getTranslationKey(), args);
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public TranslatableText getMessage() {
+            return message;
+        }
+
+        public enum Type {
+            NOT_ENOUGH_ITEMS(false, "playerManip.notEnoughItems"),
+            NOT_POSSIBLE(false, "playerManip.throwError"),
+            UNKNOWN_SEED(false, "commands.cenchant.uncracked"),
+            SUCCESS(true, null),
+            ;
+
+            private final boolean success;
+            private final String translationKey;
+
+            Type(boolean success, String translationKey) {
+                this.success = success;
+                this.translationKey = translationKey;
+            }
+
+            public boolean isSuccess() {
+                return success;
+            }
+
+            public String getTranslationKey() {
+                return translationKey;
+            }
         }
     }
 

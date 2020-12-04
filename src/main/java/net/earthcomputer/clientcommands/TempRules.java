@@ -10,7 +10,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -48,6 +51,15 @@ public class TempRules {
     public static int maxEnchantItemThrows = 64 * 32;
     public static void setMaxEnchantItemThrows(int maxEnchantItemThrows) {
         TempRules.maxEnchantItemThrows = MathHelper.clamp(maxEnchantItemThrows, 0, 1000000);
+    }
+
+    @Rule
+    public static boolean chorusManipulation = false;
+
+    @Rule(setter = "setMaxChorusItemThrows")
+    public static int maxChorusItemThrows = 64 * 32;
+    public static void setMaxChorusItemThrows(int maxChorusItemThrows) {
+        TempRules.maxChorusItemThrows = MathHelper.clamp(maxChorusItemThrows, 0, 1000000);
     }
 
     @Rule

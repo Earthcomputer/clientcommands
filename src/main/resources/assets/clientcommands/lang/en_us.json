@@ -121,7 +121,13 @@
 
   "playerManip.serverBrandWarning": "Warning: the server you are playing on is modded. RNG features in this mod are not guaranteed to work!",
   "playerManip.toolBreakWarning": "Warning: tool has %d durability left",
+  "playerManip.throwError": "Condition not possible or would require more than %d item throws",
+  "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
 
-  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
+  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
 
+  "chorusManip.setGoal": "Set %s goal area from %s to %s",
+  "chorusManip.goalTooFar": "Goal is too far away!",
+  "chorusManip.landing": "Landing on: %d, %d, %d",
+  "chorusManip.landingNotPossible": "Landing manipulation not possible"
 }
