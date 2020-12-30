@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.mixin.AlternativeLootConditionAccessor;
 import net.earthcomputer.clientcommands.mixin.LocationCheckLootConditionAccessor;
@@ -44,12 +45,13 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.entry.LootPoolEntry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.tag.Tag;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
@@ -66,10 +68,12 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +86,8 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class FishingCracker {
@@ -246,6 +252,7 @@ public class FishingCracker {
         OptionalLong optionalSeed = getSeed(fishingBobberUUID);
         if (!optionalSeed.isPresent()) {
             // TODO: display error to user
+            reset();
             return;
         }
 
@@ -254,16 +261,15 @@ public class FishingCracker {
 
         boolean wasCatchingFish = false;
         int ticksUntilOurItem = -1;
+        List<Catch> possibleExpectedCatches = new ArrayList<>();
+        int ourExpectedCatchIndex = -1;
 
-        int tickCounter = 0;
         for (int ticks = 0; ticks < 10000; ticks++) {
-            if (tickCounter == 0) {
-                //System.out.println("CLIENTSIDE SEED: " + PlayerRandCracker.getSeed(fishingBobber.random));
-            }
-            tickCounter++;
             fishingBobber.tick();
             if (fishingBobber.failed) {
-                break;
+                // TODO: display error
+                reset();
+                return;
             }
             /*
             //Just to speed up fishing
@@ -273,16 +279,16 @@ public class FishingCracker {
 
             //System.out.println("Client simulation: " + fishingBobber.state + " " + tickCounter + " " + fishingBobber.waitCountdown + " " + fishingBobber.fishTravelCountdown);
             if (fishingBobber.canCatchFish()) {
-                List<ItemStack> loot = fishingBobber.generateLoot();
-                if (goals.stream().anyMatch(goal -> loot.stream().anyMatch(goal))) {
-                    //if (((ListTag)(loot.get(0).getTag().get("StoredEnchantments"))).stream().anyMatch(tag -> ((CompoundTag)tag).get("id").asString().equals("minecraft:mending"))) {
-                    {
-                        System.out.println("Client fishable: " + tickCounter);
-                        System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + loot);
-                        ticksUntilOurItem = ticks;
-                        break;
-                    }
+                List<Catch> catches = fishingBobber.generateLoot();
+
+                System.out.println("Client fishable: " + ticks);
+                System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + catches);
+                if (ourExpectedCatchIndex == -1 && goals.stream().anyMatch(goal -> catches.stream().anyMatch(c -> goal.test(c.loot)))) {
+                    bobberDestPos = fishingBobber.pos;
+                    ticksUntilOurItem = ticks;
+                    ourExpectedCatchIndex = possibleExpectedCatches.size();
                 }
+                possibleExpectedCatches.add(catches.get(0));
                 wasCatchingFish = true;
             } else if (wasCatchingFish) {
                 break;
@@ -294,12 +300,65 @@ public class FishingCracker {
             ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
             if (player != null && interactionManager != null) {
                 // retract fishing rod
+                expectedFishingRodUses += 2;
                 interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
-                // extend fishing rod
+                // throw fishing rod
                 interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
+                handleFishingRodThrow(tool);
             }
         } else {
-            totalTicksToWait = ticksUntilOurItem;//CHANGED TEMPORARALY
+            totalTicksToWait = ticksUntilOurItem;
+            Arrays.fill(expectedCatches, null);
+            for (int i = Math.max(0, ourExpectedCatchIndex - expectedCatches.length / 2),
+                     e = Math.min(possibleExpectedCatches.size(), ourExpectedCatchIndex + 1 + expectedCatches.length / 2);
+                 i < e; i++) {
+                expectedCatches[i - ourExpectedCatchIndex + expectedCatches.length / 2] = possibleExpectedCatches.get(i);
+            }
+        }
+    }
+
+    private static ItemStack actualLoot;
+
+    public static void processItemSpawn(Vec3d pos, ItemStack stack) {
+        synchronized (FISHING_LOCK) {
+            if (state != State.WAITING_FOR_ITEM) {
+                return;
+            }
+            if (Math.abs(pos.x - bobberDestPos.x) >= 1 || Math.abs(pos.z - bobberDestPos.z) >= 1 || Math.abs(pos.y - bobberDestPos.y) >= 5) {
+                return;
+            }
+            state = State.WAITING_FOR_XP;
+        }
+
+        actualLoot = stack;
+    }
+
+    public static void processExperienceOrbSpawn(double x, double y, double z, int experienceAmount) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) return;
+
+        synchronized (FISHING_LOCK) {
+            if (state != State.WAITING_FOR_XP) {
+                return;
+            }
+            if (Math.abs(x - player.getX()) >= 1 || Math.abs(z - player.getZ()) >= 1 || Math.abs(y - player.getY()) >= 1) {
+                return;
+            }
+            state = State.NOT_MANIPULATING;
+        }
+
+        Catch actualCatch = new Catch(actualLoot, experienceAmount);
+        Catch expectedCatch = expectedCatches[expectedCatches.length / 2];
+
+        if (actualCatch.equals(expectedCatch)) {
+            ClientCommandManager.sendFeedback(new LiteralText("Got the correct loot").styled(style -> style.withColor(Formatting.GREEN)));
+        } else {
+            List<Integer> indices = IntStream.range(0, expectedCatches.length)
+                    .filter(i -> actualCatch.equals(expectedCatches[i]))
+                    .map(i -> i - expectedCatches.length / 2)
+                    .boxed()
+                    .collect(Collectors.toList());
+            ClientCommandManager.sendFeedback(new LiteralText("Didn't get the correct loot, could have been " + indices + " ticks ahead").styled(style -> style.withColor(Formatting.RED)));
         }
     }
 
@@ -307,6 +366,8 @@ public class FishingCracker {
     private static long bobberStartTime;
     private static int totalTicksToWait;
     private static int estimatedTicksElapsed;
+    private static Vec3d bobberDestPos;
+    private static Catch[] expectedCatches = new Catch[21]; // must be an odd number
 
     private static final long[] timeSyncTimes = new long[5];
     private static int serverMspt = 50;
@@ -315,15 +376,13 @@ public class FishingCracker {
         System.arraycopy(timeSyncTimes, 1, timeSyncTimes, 0, timeSyncTimes.length - 1);
         timeSyncTimes[timeSyncTimes.length - 1] = time;
         if (timeSyncTimes[0] != 0) {
-            serverMspt = (int) ((time - timeSyncTimes[0]) / ((timeSyncTimes.length - 1) * 1000000)) / 20;
-            //System.out.println("Server mstp:" + serverMspt);
+            serverMspt = (int) ((time - timeSyncTimes[0]) / ((timeSyncTimes.length - 1) * 20 * 1000000));
+            //System.out.println("Server mspt:" + serverMspt);
             //serverMspt = 50;
         }
 
         if (state == State.WAITING_FOR_FISH) {
             if (estimatedTicksElapsed == 0) {
-                int timeToStartOfTick = serverMspt/2 - averageTimeToEndOfTick;
-                //estimatedTicksElapsed = (int) Math.ceil((double) (time - (bobberStartTime - timeToStartOfTick * 1000000)) / (serverMspt * 1000000));
                 estimatedTicksElapsed = (int) Math.ceil((double) (time - bobberStartTime)/(serverMspt * 1000000));
             } else {
                 estimatedTicksElapsed += 20;
@@ -333,21 +392,36 @@ public class FishingCracker {
             if (latestReasonableArriveTick >= totalTicksToWait) {
                 state = State.NOT_MANIPULATING;
                 int timeToStartOfTick = serverMspt - averageTimeToEndOfTick;
-                int delay = (totalTicksToWait - estimatedTicksElapsed + 2) * serverMspt - getLocalPing() - timeToStartOfTick + serverMspt / 2;
+                int arbitraryDelayTicks = 0;// = 3;
+                int delay = (totalTicksToWait - estimatedTicksElapsed + arbitraryDelayTicks) * serverMspt - getLocalPing() - timeToStartOfTick + serverMspt / 2;
                 long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
                     if (!TempRules.getFishingManipulation()) {
                         return;
                     }
-                    ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-                    if (networkHandler != null) {
+                    ClientPlayerEntity oldPlayer = MinecraftClient.getInstance().player;
+                    if (oldPlayer != null) {
+                        ClientPlayNetworkHandler networkHandler = oldPlayer.networkHandler;
                         while (System.nanoTime() < targetTime);
+                        FishingBobberEntity oldFishingBobberEntity = oldPlayer.fishHook;
                         networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));
+                        synchronized (FISHING_LOCK) {
+                            state = State.WAITING_FOR_ITEM;
+                        }
                         MinecraftClient.getInstance().send(() -> {
                             ClientPlayerEntity player = MinecraftClient.getInstance().player;
                             if (player != null) {
                                 ItemStack oldStack = player.getMainHandStack();
+
+                                // If the player interaction packet gets handled before the next tick,
+                                // then the fish hook would be null and the client would act as if the fishing rod is extending.
+                                // Temporarily set to the previous fishing hook to fix this.
+                                expectedFishingRodUses++;
+                                FishingBobberEntity prevFishingBobberEntity = player.fishHook;
+                                player.fishHook = oldFishingBobberEntity;
                                 TypedActionResult<ItemStack> result = oldStack.use(player.world, player, Hand.MAIN_HAND);
+                                player.fishHook = prevFishingBobberEntity;
+
                                 if (oldStack != result.getValue()) {
                                     player.setStackInHand(Hand.MAIN_HAND, result.getValue());
                                 }
@@ -365,11 +439,21 @@ public class FishingCracker {
 
     private static volatile long throwTime;
     private static volatile int averageTimeToEndOfTick = 0;
-    private static volatile State state;
+    public static volatile State state = State.NOT_MANIPULATING;
     private static final Object FISHING_LOCK = new Object();
     private static ItemStack tool;
 
+    private static int expectedFishingRodUses = 0;
     public static void onThrownFishingRod(ItemStack stack) {
+        if (expectedFishingRodUses > 0) {
+            expectedFishingRodUses--;
+            return;
+        }
+
+        handleFishingRodThrow(stack);
+    }
+
+    private static void handleFishingRodThrow(ItemStack stack) {
         long time = System.nanoTime();
         synchronized (FISHING_LOCK) {
             throwTime = time;
@@ -377,6 +461,15 @@ public class FishingCracker {
             state = State.WAITING_FOR_BOBBER;
         }
         tool = stack;
+    }
+
+    public static void onRetractedFishingRod(ItemStack stack) {
+        if (expectedFishingRodUses > 0) {
+            expectedFishingRodUses--;
+            return;
+        }
+
+        reset();
     }
 
 
@@ -404,16 +497,47 @@ public class FishingCracker {
     }
 
     public static void reset() {
-        // Called when fishingManipulation TempRule is disabled
-        state = State.NOT_MANIPULATING;
+        synchronized (FISHING_LOCK) {
+            state = State.NOT_MANIPULATING;
+        }
     }
 
 
-    private enum State {
+    public enum State {
         NOT_MANIPULATING,
         WAITING_FOR_BOBBER,
         WAITING_FOR_FIRST_BOBBER_TICK,
         WAITING_FOR_FISH,
+        WAITING_FOR_ITEM,
+        WAITING_FOR_XP,
+    }
+
+    public static final class Catch {
+        private final ItemStack loot;
+        private final int experience;
+
+        public Catch(ItemStack loot, int experience) {
+            this.loot = loot;
+            this.experience = experience;
+        }
+
+        @Override
+        public int hashCode() {
+            return 7 * (31 * Objects.hash(loot.getItem(), loot.getTag()) + loot.getCount()) + experience;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) return true;
+            if (!(other instanceof Catch)) return false;
+            Catch that = (Catch) other;
+            return ItemStack.areEqual(loot, that.loot) && experience == that.experience;
+        }
+
+        @Override
+        public String toString() {
+            return loot + " + " + experience + "xp";
+        }
     }
 
     // ===== SIMULATE FISHING BOBBER ===== //
@@ -479,7 +603,7 @@ public class FishingCracker {
             return hookCountdown > 0;
         }
 
-        public List<ItemStack> generateLoot() {
+        public List<Catch> generateLoot() {
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
 
@@ -491,7 +615,12 @@ public class FishingCracker {
                     IN_OPEN_WATER_PARAMETER, inOpenWater
             );
             LootContext lootContext = createLootContext(randomCopy, luckLevel, parameters);
-            return FISHING_LOOT_TABLE.generateLoot(lootContext);
+
+            List<Catch> catches = new ArrayList<>();
+            for (ItemStack loot : FISHING_LOOT_TABLE.generateLoot(lootContext)) {
+                catches.add(new Catch(loot, 1 + randomCopy.nextInt(6)));
+            }
+            return catches;
         }
 
         public void tick() {

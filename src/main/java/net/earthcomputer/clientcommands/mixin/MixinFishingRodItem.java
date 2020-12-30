@@ -18,12 +18,18 @@ public class MixinFishingRodItem {
 
     @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/sound/SoundEvents;ENTITY_FISHING_BOBBER_RETRIEVE:Lnet/minecraft/sound/SoundEvent;"))
     public void onRetrieveFishingRod(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> ci) {
-        PlayerRandCracker.onItemDamageUncertain(1, 5, player, player.getStackInHand(hand));
+        if (world.isClient) {
+            ItemStack stack = player.getStackInHand(hand);
+            PlayerRandCracker.onItemDamageUncertain(1, 5, player, stack);
+            if (FishingCracker.canManipulateFishing()) {
+                FishingCracker.onRetractedFishingRod(stack);
+            }
+        }
     }
 
     @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/sound/SoundEvents;ENTITY_FISHING_BOBBER_THROW:Lnet/minecraft/sound/SoundEvent;"))
     private void onThrowFishingRod(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> ci) {
-        if (FishingCracker.canManipulateFishing()) {
+        if (world.isClient && FishingCracker.canManipulateFishing()) {
             FishingCracker.onThrownFishingRod(user.getStackInHand(hand));
         }
     }

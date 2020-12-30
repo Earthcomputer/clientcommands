@@ -17,6 +17,7 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
@@ -76,6 +77,13 @@ public class MixinClientPlayNetworkHandler {
         }
 
         FishingCracker.onFishingBobberEntity();
+    }
+
+    @Inject(method = "onExperienceOrbSpawn", at = @At("TAIL"))
+    public void onOnExperienceOrbSpawn(ExperienceOrbSpawnS2CPacket packet, CallbackInfo ci) {
+        if (FishingCracker.canManipulateFishing()) {
+            FishingCracker.processExperienceOrbSpawn(packet.getX(), packet.getY(), packet.getZ(), packet.getExperience());
+        }
     }
 
     @Inject(method = "onWorldTimeUpdate", at = @At("HEAD"))

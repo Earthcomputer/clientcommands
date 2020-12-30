@@ -41,6 +41,7 @@
     "MixinForgingScreenHandler",
     "MixinGrindstoneContainer",
     "MixinGuiClosePacket",
+    "MixinItemEntity",
     "MixinItemStack",
     "MixinKeyBinding",
     "MixinKeyboardInput",
