@@ -350,15 +350,37 @@ public class FishingCracker {
         Catch actualCatch = new Catch(actualLoot, experienceAmount);
         Catch expectedCatch = expectedCatches[expectedCatches.length / 2];
 
+        List<Integer> indices = IntStream.range(0, expectedCatches.length)
+                .filter(i -> actualCatch.equals(expectedCatches[i]))
+                .map(i -> i - expectedCatches.length / 2)
+                .boxed()
+                .collect(Collectors.toList());
+
         if (actualCatch.equals(expectedCatch)) {
-            ClientCommandManager.sendFeedback(new LiteralText("Got the correct loot").styled(style -> style.withColor(Formatting.GREEN)));
+            ClientCommandManager.sendFeedback(new LiteralText("Got the correct loot with correction of " + magicMillisecondsCorrection + "ms")
+                    .styled(style -> style.withColor(Formatting.GREEN)));
         } else {
-            List<Integer> indices = IntStream.range(0, expectedCatches.length)
-                    .filter(i -> actualCatch.equals(expectedCatches[i]))
-                    .map(i -> i - expectedCatches.length / 2)
-                    .boxed()
-                    .collect(Collectors.toList());
-            ClientCommandManager.sendFeedback(new LiteralText("Didn't get the correct loot, could have been " + indices + " ticks ahead").styled(style -> style.withColor(Formatting.RED)));
+            ClientCommandManager.sendFeedback(new LiteralText("Didn't get the correct loot with correction of " + magicMillisecondsCorrection + "ms, could have been " + indices + " ticks ahead")
+                    .styled(style -> style.withColor(Formatting.RED)));
+        }
+
+        if (!indices.isEmpty()) {
+            if (CombinedMedianEM.data.size() >= 10) {
+                CombinedMedianEM.data.remove(0);
+            }
+            ArrayList<Double> sample = new ArrayList<>();
+            for (int index : indices) {
+                sample.add((double) (index * serverMspt) + magicMillisecondsCorrection);
+            }
+            CombinedMedianEM.data.add(sample);
+
+            if (CombinedMedianEM.data.size() >= 5) {
+                CombinedMedianEM.begintime = magicMillisecondsCorrection - serverMspt / 2 - (expectedCatches.length / 2) * serverMspt;
+                CombinedMedianEM.endtime = magicMillisecondsCorrection + serverMspt / 2 + (expectedCatches.length / 2) * serverMspt;
+                CombinedMedianEM.width = serverMspt;
+                CombinedMedianEM.run();
+                magicMillisecondsCorrection = (int) Math.round(CombinedMedianEM.mu);
+            }
         }
     }
 
@@ -392,8 +414,7 @@ public class FishingCracker {
             if (latestReasonableArriveTick >= totalTicksToWait) {
                 state = State.NOT_MANIPULATING;
                 int timeToStartOfTick = serverMspt - averageTimeToEndOfTick;
-                int arbitraryDelayTicks = 0;// = 3;
-                int delay = (totalTicksToWait - estimatedTicksElapsed + arbitraryDelayTicks) * serverMspt - getLocalPing() - timeToStartOfTick + serverMspt / 2;
+                int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - magicMillisecondsCorrection - getLocalPing() - timeToStartOfTick + serverMspt / 2;
                 long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
                     if (!TempRules.getFishingManipulation()) {
@@ -439,6 +460,7 @@ public class FishingCracker {
 
     private static volatile long throwTime;
     private static volatile int averageTimeToEndOfTick = 0;
+    private static volatile int magicMillisecondsCorrection = -100;
     public static volatile State state = State.NOT_MANIPULATING;
     private static final Object FISHING_LOCK = new Object();
     private static ItemStack tool;
@@ -537,6 +559,170 @@ public class FishingCracker {
         @Override
         public String toString() {
             return loot + " + " + experience + "xp";
+        }
+    }
+
+    // ===== NETWORK DELAY ESTIMATION ===== //
+
+    /** @author MC (PseudoGravity) */
+    private static class CombinedMedianEM {
+
+        // a list of samples
+        // each sample is actually a list of points
+        // for each interval, convert it to a point by taking the median value
+        // or... break the 50ms intervals into 2 25ms intervals for better accuracy
+        static ArrayList<ArrayList<Double>> data = new ArrayList<ArrayList<Double>>();
+
+        // width of the intervals
+        static double width = 50;
+
+        // width of time window considered
+        // all of the data points for all samples are within this window
+        static int begintime = -1000;
+        static int endtime = 1000;
+
+        // three parameters and 2 constraints
+        static double packetlossrate = 0.2;
+        static double maxpacketlossrate = 0.5;
+        static double minpacketlossrate = 0.01;
+        static double mu = 0.0;
+        static double sigma = 500;
+        static double maxsigma = 1000;
+        static double minsigma = 10;
+
+        public static void run() {
+            // System.out.println(mass(0));
+
+            ArrayList<Double> droprate = new ArrayList<Double>();
+
+            for (int i = 0; i < data.size(); i++) {
+                ArrayList<Double> sample = data.get(i);
+                droprate.add(sample.size() * width / (endtime - begintime));
+            }
+
+            System.out.println("samples: " + data);
+            System.out.println("rarities: " + droprate);
+
+            ArrayList<Double> times = new ArrayList<Double>();
+            for (int i = begintime; i <= endtime; i += 10) {
+                times.add(i * 1.0);
+            }
+
+            double besttime = 0;
+            double bestscore = Double.MAX_VALUE;
+
+            for (double time : times) {
+                // find score for each option for time
+                double score = 0;
+                for (int i = 0; i < data.size(); i++) {
+                    // for each sample, find the point which adds the least to the score
+                    ArrayList<Double> sample = data.get(i);
+                    double lambda = droprate.get(i) / width; // 50ms = one tick
+                    double bestsubscore = Double.MAX_VALUE;
+                    for (Double x : sample) {
+                        double absdev = Math.abs(x - time);
+                        absdev = (1 - Math.exp(-lambda * absdev)) / lambda; // further curbing outlier effects
+                        if (absdev < bestsubscore) {
+                            bestsubscore = absdev;
+                        }
+                    }
+                    score += bestsubscore;
+                }
+                if (score < bestscore) {
+                    bestscore = score;
+                    besttime = time;
+                }
+            }
+
+            System.out.println("best time: " + besttime);
+            System.out.println("lowest score: " + bestscore);
+
+            mu = besttime;
+            sigma = bestscore / data.size();
+            sigma = Math.max(Math.min(sigma, maxsigma), minsigma);
+
+            System.out.println(" mu: " + mu);
+            System.out.println(" sigma: " + sigma);
+            System.out.println(" packetlossrate: " + packetlossrate);
+
+            for (int repeat = 0; repeat < 1; repeat++) {
+
+                System.out.println("== iteration: " + (repeat + 1));
+
+                // E step
+                // calculate weights (and classifications)
+                ArrayList<ArrayList<Double>> masses = new ArrayList<ArrayList<Double>>();
+                for (int i = 0; i < data.size(); i++) {
+
+                    ArrayList<Double> sample = data.get(i);
+
+                    // process each sample
+                    double sum = 0;
+                    for (double x : sample) {
+                        sum += mass(x);
+                    }
+                    double pXgivenNorm = Math.min(sum, 1); // cap at 1
+
+                    double pXgivenUnif = droprate.get(i) * packetlossrate;
+
+                    double pNorm = pXgivenNorm / (pXgivenNorm + pXgivenUnif);
+
+                    ArrayList<Double> mass = new ArrayList<Double>();
+                    for (double x : sample) {
+                        mass.add(mass(x) / sum * pNorm);
+                    }
+
+                    masses.add(mass);
+                }
+
+                System.out.println(" weights:" + masses);
+
+                // M step
+                // compute new best estimate for parameters
+                double weightedsum = 0;
+                double sumofweights = 0;
+                for (int i = 0; i < data.size(); i++) {
+                    ArrayList<Double> sample = data.get(i);
+                    ArrayList<Double> mass = masses.get(i);
+                    for (int j = 0; j < sample.size(); j++) {
+                        weightedsum += sample.get(j) * mass.get(j);
+                        sumofweights += mass.get(j);
+                    }
+                }
+                double muNext = weightedsum / sumofweights;
+
+                double weightedsumofsquaredeviations = 0;
+                for (int i = 0; i < data.size(); i++) {
+                    ArrayList<Double> sample = data.get(i);
+                    ArrayList<Double> mass = masses.get(i);
+                    for (int j = 0; j < sample.size(); j++) {
+                        weightedsumofsquaredeviations += Math.pow(sample.get(j) - muNext, 2) * mass.get(j);
+                    }
+                }
+                double sigmaNext = Math.sqrt(weightedsumofsquaredeviations / sumofweights);
+                sigmaNext = Math.max(Math.min(sigmaNext, maxsigma), minsigma);
+
+                double packetlossrateNext = (data.size() - sumofweights) / data.size();
+                packetlossrateNext = Math.max(Math.min(packetlossrateNext, maxpacketlossrate), minpacketlossrate);
+
+                mu = muNext;
+                sigma = sigmaNext;
+                packetlossrate = packetlossrateNext;
+
+                System.out.println(" mu: " + mu);
+                System.out.println(" sigma: " + sigma);
+                System.out.println(" packetlossrate: " + packetlossrate);
+
+            }
+
+        }
+
+        public static double mass(double x) {
+            // should be cdf(x+width/2)-cdf(x-width/2) but is simplified to pdf(x)*width and
+            // capped at 1
+            // to avoid pesky erf() functions
+            double pdf = 1 / (sigma * Math.sqrt(2 * Math.PI)) * Math.exp(-Math.pow((x - mu) / sigma, 2) / 2);
+            return Math.min(pdf * width, 1);
         }
     }
 
