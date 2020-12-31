@@ -35,8 +35,16 @@
   "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s.",
   "commands.cfinditem.total": "Found %dx %s total",
 
+  "commands.cfish.addGoal.success": "Successfully added goal %s",
+  "commands.cfish.correctLoot": "Got the correct loot with correction of %dms",
+  "commands.cfish.error.crackFailed": "Failed to crack the fishing bobber RNG, is the server modded?",
+  "commands.cfish.error.failed": "Fishing bobber configuration incorrect",
+  "commands.cfish.error.outOfWater": "Fishing bobber out of water, manipulation won't work",
+  "commands.cfish.listGoals.noGoals": "There are no fishing goals",
+  "commands.cfish.listGoals.success": "There are %d fishing goals:",
   "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled.",
-  "commands.cfish.noGoals": "There are no fishing manipulation goals",
+  "commands.cfish.removeGoal.success": "Successfully removed goal %s",
+  "commands.cfish.wrongLoot": "Didn't get the correct loot with correction of %dms, could have been %s ticks ahead",
 
   "commands.cgamma.success": "Set gamma to %f",
 

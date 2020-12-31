@@ -2,7 +2,9 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.earthcomputer.clientcommands.mixin.InGameHudAccessor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandException;
 import net.minecraft.text.*;
@@ -32,12 +34,18 @@ public class ClientCommandManager {
         sendFeedback(new LiteralText("").append(error).formatted(Formatting.RED));
     }
 
-    public static void sendFeedback(String message) {
-        sendFeedback(new TranslatableText(message));
+    public static void sendFeedback(String message, Object... args) {
+        sendFeedback(new TranslatableText(message, args));
     }
 
     public static void sendFeedback(Text message) {
         MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
+    }
+
+    public static void addOverlayMessage(Text message, int time) {
+        InGameHud inGameHud = MinecraftClient.getInstance().inGameHud;
+        inGameHud.setOverlayMessage(message, false);
+        ((InGameHudAccessor) inGameHud).setOverlayRemaining(time);
     }
 
     public static int executeCommand(StringReader reader, String command) {

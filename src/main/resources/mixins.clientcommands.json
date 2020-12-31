@@ -5,6 +5,7 @@
   "mixins": [
     "AlternativeLootConditionAccessor",
     "BlockSettingsAccessor",
+    "InGameHudAccessor",
     "LandPathNodeMakerAccessor",
     "LocationCheckLootConditionAccessor",
     "LocationPredicateAccessor",

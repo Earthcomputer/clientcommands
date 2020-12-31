@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 @Mixin(LootContext.class)
 public interface LootContextAccessor {
-    @Invoker
+    @Invoker("<init>")
     static LootContext createLootContext(Random random,
                                          float luck,
                                          ServerWorld world,

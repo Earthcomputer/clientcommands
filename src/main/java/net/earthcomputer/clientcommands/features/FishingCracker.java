@@ -50,6 +50,8 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -181,12 +183,6 @@ public class FishingCracker {
         }, id -> null, parameters, Collections.emptyMap());
     }
 
-    public static void main(String[] args) {
-        Random rand = new Random(0x5deece66dL);
-        UUID uuid = MathHelper.randomUuid(rand);
-        getSeed(uuid);
-    }
-
     /**
      * Returns the internal seed of the Random the instant before it generates the UUID via {@link MathHelper#randomUuid(Random)}
      */
@@ -251,7 +247,8 @@ public class FishingCracker {
 
         OptionalLong optionalSeed = getSeed(fishingBobberUUID);
         if (!optionalSeed.isPresent()) {
-            // TODO: display error to user
+            Text error = new TranslatableText("commands.cfish.error.crackFailed").styled(style -> style.withColor(Formatting.RED));
+            ClientCommandManager.addOverlayMessage(error, 100);
             reset();
             return;
         }
@@ -267,7 +264,8 @@ public class FishingCracker {
         for (int ticks = 0; ticks < 10000; ticks++) {
             fishingBobber.tick();
             if (fishingBobber.failed) {
-                // TODO: display error
+                Text error = new TranslatableText("commands.cfish.error.failed").styled(style -> style.withColor(Formatting.RED));
+                ClientCommandManager.addOverlayMessage(error, 100);
                 reset();
                 return;
             }
@@ -281,8 +279,8 @@ public class FishingCracker {
             if (fishingBobber.canCatchFish()) {
                 List<Catch> catches = fishingBobber.generateLoot();
 
-                System.out.println("Client fishable: " + ticks);
-                System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + catches);
+//                System.out.println("Client fishable: " + ticks);
+//                System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + catches);
                 if (ourExpectedCatchIndex == -1 && goals.stream().anyMatch(goal -> catches.stream().anyMatch(c -> goal.test(c.loot)))) {
                     bobberDestPos = fishingBobber.pos;
                     ticksUntilOurItem = ticks;
@@ -357,11 +355,11 @@ public class FishingCracker {
                 .collect(Collectors.toList());
 
         if (actualCatch.equals(expectedCatch)) {
-            ClientCommandManager.sendFeedback(new LiteralText("Got the correct loot with correction of " + magicMillisecondsCorrection + "ms")
-                    .styled(style -> style.withColor(Formatting.GREEN)));
+            ClientCommandManager.addOverlayMessage(new TranslatableText("commands.cfish.correctLoot", magicMillisecondsCorrection)
+                    .styled(style -> style.withColor(Formatting.GREEN)), 100);
         } else {
-            ClientCommandManager.sendFeedback(new LiteralText("Didn't get the correct loot with correction of " + magicMillisecondsCorrection + "ms, could have been " + indices + " ticks ahead")
-                    .styled(style -> style.withColor(Formatting.RED)));
+            ClientCommandManager.addOverlayMessage(new TranslatableText("commands.cfish.wrongLoot", magicMillisecondsCorrection, indices)
+                    .styled(style -> style.withColor(Formatting.RED)), 100);
         }
 
         if (!indices.isEmpty()) {
@@ -515,7 +513,8 @@ public class FishingCracker {
     }
 
     public static void onBobOutOfWater() {
-        // TODO: display error
+        Text message = new TranslatableText("commands.cfish.error.outOfWater").styled(style -> style.withColor(Formatting.RED));
+        ClientCommandManager.addOverlayMessage(message, 100);
     }
 
     public static void reset() {
