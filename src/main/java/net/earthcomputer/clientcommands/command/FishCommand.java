@@ -6,9 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -17,9 +14,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
@@ -94,13 +88,7 @@ public class FishCommand {
 
             @Override
             public boolean test(ItemStack itemStack) {
-                if (itemAndEnchantments.item != itemStack.getItem()) {
-                    return false;
-                }
-                Map<Enchantment, Integer> enchantmentLevels = EnchantmentHelper.get(itemStack);
-                List<EnchantmentLevelEntry> entries = new ArrayList<>(enchantmentLevels.size());
-                enchantmentLevels.forEach((ench, level) -> entries.add(new EnchantmentLevelEntry(ench, level)));
-                return itemAndEnchantments.predicate.test(entries);
+                return itemAndEnchantments.test(itemStack);
             }
         };
 

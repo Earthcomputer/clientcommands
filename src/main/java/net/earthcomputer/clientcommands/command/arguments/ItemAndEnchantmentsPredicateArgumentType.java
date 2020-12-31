@@ -12,6 +12,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.ItemEnchantmentArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -110,13 +112,24 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         return EXAMPLES;
     }
 
-    public static class ItemAndEnchantmentsPredicate {
+    public static class ItemAndEnchantmentsPredicate implements Predicate<ItemStack> {
         public final Item item;
         public final Predicate<List<EnchantmentLevelEntry>> predicate;
 
         public ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) {
             this.item = item;
             this.predicate = predicate;
+        }
+
+        @Override
+        public boolean test(ItemStack stack) {
+            if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
+                return false;
+            }
+            Map<Enchantment, Integer> enchantmentMap = EnchantmentHelper.get(stack);
+            List<EnchantmentLevelEntry> enchantments = new ArrayList<>(enchantmentMap.size());
+            enchantmentMap.forEach((id, lvl) -> enchantments.add(new EnchantmentLevelEntry(id, lvl)));
+            return predicate.test(enchantments);
         }
     }
 
@@ -157,7 +170,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                 reader.setCursor(start);
                 return ItemStringReader.ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
             });
-            if (item.getEnchantability() <= 0 || !itemPredicate.test(item) && (item != Items.ENCHANTED_BOOK || !itemPredicate.test(Items.BOOK))) {
+            if ((item.getEnchantability() <= 0 || !itemPredicate.test(item)) && (item != Items.ENCHANTED_BOOK || !itemPredicate.test(Items.BOOK))) {
                 reader.setCursor(start);
                 throw INCOMPATIBLE_ENCHANTMENT_EXCEPTION.createWithContext(reader);
             }

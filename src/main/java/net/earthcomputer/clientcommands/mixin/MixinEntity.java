@@ -2,17 +2,10 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.EntityGlowingTicket;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.features.TestRandom;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,30 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 @Mixin(Entity.class)
 public class MixinEntity implements IEntity {
-
-    @Shadow @Final @Mutable
-    protected Random random;
-
-    @Shadow public World world;
-
-    @Shadow protected UUID uuid;
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void redirectRandomCreation(CallbackInfo ci) {
-        if ((Object) this instanceof FishingBobberEntity && !world.isClient) {
-//            random.setSeed(0x5deece66dL);
-//            uuid = MathHelper.randomUuid(random);
-
-            long prevSeed = PlayerRandCracker.getSeed(random);
-            //random = new TestRandom("server");
-            random.setSeed(prevSeed ^ 0x5deece66dL);
-        }
-    }
 
     @Unique
     private List<EntityGlowingTicket> glowingTickets = new ArrayList<>(0);

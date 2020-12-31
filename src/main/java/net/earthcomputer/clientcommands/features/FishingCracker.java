@@ -33,6 +33,7 @@ import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTables;
@@ -49,10 +50,8 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.tag.Tag;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -70,7 +69,6 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -94,6 +92,37 @@ import java.util.stream.Stream;
 
 public class FishingCracker {
     private static final Logger LOGGER = LogManager.getLogger();
+
+    // goals
+    public static final List<ClientItemPredicateArgumentType.ClientItemPredicate> goals = new ArrayList<>();
+
+    // loot state
+    private static ItemStack actualLoot;
+    private static Catch[] expectedCatches = new Catch[21]; // must be an odd number
+
+    // bobber state
+    private static ItemStack tool;
+    private static Vec3d bobberDestPos;
+
+    // timing
+    private static volatile long throwTime;
+    private static long bobberStartTime;
+    private static int totalTicksToWait;
+    private static int estimatedTicksElapsed;
+    private static final long[] timeSyncTimes = new long[5];
+    private static int serverMspt = 50;
+    private static volatile int averageTimeToEndOfTick = 0;
+    private static volatile int magicMillisecondsCorrection = -100;
+    private static final ScheduledExecutorService DELAY_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+
+    // state
+    public static volatile State state = State.NOT_MANIPULATING;
+    private static final Object STATE_LOCK = new Object();
+
+    // fishing rod uses
+    private static int expectedFishingRodUses = 0;
+
+    // region LOOT SIMULATION
 
     private static final Map<Identifier, LootTable> FISHING_LOOT_TABLES;
     private static final LootTable FISHING_LOOT_TABLE;
@@ -183,6 +212,10 @@ public class FishingCracker {
         }, id -> null, parameters, Collections.emptyMap());
     }
 
+    // endregion
+
+    // region SEED CRACKING
+
     /**
      * Returns the internal seed of the Random the instant before it generates the UUID via {@link MathHelper#randomUuid(Random)}
      */
@@ -214,14 +247,13 @@ public class FishingCracker {
         return OptionalLong.empty();
     }
 
+    // endregion
 
-
-    public static final List<ClientItemPredicateArgumentType.ClientItemPredicate> goals = new ArrayList<>();
+    // region UTILITY
 
     public static boolean canManipulateFishing() {
         return TempRules.getFishingManipulation() && !goals.isEmpty();
     }
-
 
     private static int getLocalPing() {
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
@@ -231,14 +263,34 @@ public class FishingCracker {
         PlayerListEntry localPlayer = networkHandler.getPlayerListEntry(networkHandler.getProfile().getId());
         if (localPlayer == null)
             return -1;
-        
+
         int ping = localPlayer.getLatency();
 
         return ping;
     }
 
+    private static void handleFishingRodThrow(ItemStack stack) {
+        long time = System.nanoTime();
+        synchronized (STATE_LOCK) {
+            throwTime = time;
+            estimatedTicksElapsed = 0;
+            state = State.WAITING_FOR_BOBBER;
+        }
+        tool = stack;
+    }
+
+    public static void reset() {
+        synchronized (STATE_LOCK) {
+            state = State.NOT_MANIPULATING;
+        }
+    }
+
+    // endregion
+
+    // region EVENT HANDLERS
+
     public static void processBobberSpawn(UUID fishingBobberUUID, Vec3d pos, Vec3d velocity) {
-        synchronized (FISHING_LOCK) {
+        synchronized (STATE_LOCK) {
             if (state != State.WAITING_FOR_FIRST_BOBBER_TICK) {
                 return;
             }
@@ -261,6 +313,7 @@ public class FishingCracker {
         List<Catch> possibleExpectedCatches = new ArrayList<>();
         int ourExpectedCatchIndex = -1;
 
+        // TODO: get a smarter number of max ticks based on the rarity of the item
         for (int ticks = 0; ticks < 10000; ticks++) {
             fishingBobber.tick();
             if (fishingBobber.failed) {
@@ -269,18 +322,10 @@ public class FishingCracker {
                 reset();
                 return;
             }
-            /*
-            //Just to speed up fishing
-            if (fishingBobber.waitCountdown > 300) {
-                break;
-            }*/
 
-            //System.out.println("Client simulation: " + fishingBobber.state + " " + tickCounter + " " + fishingBobber.waitCountdown + " " + fishingBobber.fishTravelCountdown);
             if (fishingBobber.canCatchFish()) {
                 List<Catch> catches = fishingBobber.generateLoot();
 
-//                System.out.println("Client fishable: " + ticks);
-//                System.out.println("Client loot from seed " + PlayerRandCracker.getSeed(fishingBobber.random) + ": " + catches);
                 if (ourExpectedCatchIndex == -1 && goals.stream().anyMatch(goal -> catches.stream().anyMatch(c -> goal.test(c.loot)))) {
                     bobberDestPos = fishingBobber.pos;
                     ticksUntilOurItem = ticks;
@@ -297,12 +342,15 @@ public class FishingCracker {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
             if (player != null && interactionManager != null) {
-                // retract fishing rod
-                expectedFishingRodUses += 2;
-                interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
-                // throw fishing rod
-                interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
-                handleFishingRodThrow(tool);
+                ItemStack stack = player.getMainHandStack();
+                if (stack.getItem() == Items.FISHING_ROD) {
+                    // retract fishing rod
+                    expectedFishingRodUses += 2;
+                    interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
+                    // throw fishing rod
+                    interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
+                    handleFishingRodThrow(stack);
+                }
             }
         } else {
             totalTicksToWait = ticksUntilOurItem;
@@ -315,10 +363,8 @@ public class FishingCracker {
         }
     }
 
-    private static ItemStack actualLoot;
-
     public static void processItemSpawn(Vec3d pos, ItemStack stack) {
-        synchronized (FISHING_LOCK) {
+        synchronized (STATE_LOCK) {
             if (state != State.WAITING_FOR_ITEM) {
                 return;
             }
@@ -335,7 +381,7 @@ public class FishingCracker {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         if (player == null) return;
 
-        synchronized (FISHING_LOCK) {
+        synchronized (STATE_LOCK) {
             if (state != State.WAITING_FOR_XP) {
                 return;
             }
@@ -382,23 +428,12 @@ public class FishingCracker {
         }
     }
 
-    private static final ScheduledExecutorService DELAY_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
-    private static long bobberStartTime;
-    private static int totalTicksToWait;
-    private static int estimatedTicksElapsed;
-    private static Vec3d bobberDestPos;
-    private static Catch[] expectedCatches = new Catch[21]; // must be an odd number
-
-    private static final long[] timeSyncTimes = new long[5];
-    private static int serverMspt = 50;
     public static void onTimeSync() {
         long time = System.nanoTime();
         System.arraycopy(timeSyncTimes, 1, timeSyncTimes, 0, timeSyncTimes.length - 1);
         timeSyncTimes[timeSyncTimes.length - 1] = time;
         if (timeSyncTimes[0] != 0) {
             serverMspt = (int) ((time - timeSyncTimes[0]) / ((timeSyncTimes.length - 1) * 20 * 1000000));
-            //System.out.println("Server mspt:" + serverMspt);
-            //serverMspt = 50;
         }
 
         if (state == State.WAITING_FOR_FISH) {
@@ -424,7 +459,7 @@ public class FishingCracker {
                         while (System.nanoTime() < targetTime);
                         FishingBobberEntity oldFishingBobberEntity = oldPlayer.fishHook;
                         networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));
-                        synchronized (FISHING_LOCK) {
+                        synchronized (STATE_LOCK) {
                             state = State.WAITING_FOR_ITEM;
                         }
                         MinecraftClient.getInstance().send(() -> {
@@ -456,14 +491,6 @@ public class FishingCracker {
         }
     }
 
-    private static volatile long throwTime;
-    private static volatile int averageTimeToEndOfTick = 0;
-    private static volatile int magicMillisecondsCorrection = -100;
-    public static volatile State state = State.NOT_MANIPULATING;
-    private static final Object FISHING_LOCK = new Object();
-    private static ItemStack tool;
-
-    private static int expectedFishingRodUses = 0;
     public static void onThrownFishingRod(ItemStack stack) {
         if (expectedFishingRodUses > 0) {
             expectedFishingRodUses--;
@@ -471,16 +498,6 @@ public class FishingCracker {
         }
 
         handleFishingRodThrow(stack);
-    }
-
-    private static void handleFishingRodThrow(ItemStack stack) {
-        long time = System.nanoTime();
-        synchronized (FISHING_LOCK) {
-            throwTime = time;
-            estimatedTicksElapsed = 0;
-            state = State.WAITING_FOR_BOBBER;
-        }
-        tool = stack;
     }
 
     public static void onRetractedFishingRod(ItemStack stack) {
@@ -492,11 +509,10 @@ public class FishingCracker {
         reset();
     }
 
-
     public static void onFishingBobberEntity() {
         bobberStartTime = System.nanoTime();
 
-        synchronized (FISHING_LOCK) {
+        synchronized (STATE_LOCK) {
             if (state != State.WAITING_FOR_BOBBER) {
                 return;
             }
@@ -506,7 +522,7 @@ public class FishingCracker {
             int localPingMillis = getLocalPing();
 
             //The 1000 divided by 20 is the number milliseconds per tick there are
-            int timeFromEndOfTick = thrownItemDeltaMillis - localPingMillis;// - (1000/20);
+            int timeFromEndOfTick = thrownItemDeltaMillis - localPingMillis;
 
             averageTimeToEndOfTick = (averageTimeToEndOfTick * 3 + timeFromEndOfTick) / 4;
         }
@@ -517,12 +533,9 @@ public class FishingCracker {
         ClientCommandManager.addOverlayMessage(message, 100);
     }
 
-    public static void reset() {
-        synchronized (FISHING_LOCK) {
-            state = State.NOT_MANIPULATING;
-        }
-    }
+    // endregion
 
+    // region STRUCTS
 
     public enum State {
         NOT_MANIPULATING,
@@ -561,9 +574,15 @@ public class FishingCracker {
         }
     }
 
-    // ===== NETWORK DELAY ESTIMATION ===== //
+    // endregion
 
-    /** @author MC (PseudoGravity) */
+    // region NETWORK DELAY ESTIMATION
+
+    /**
+     * Taken from: https://gist.github.com/pseudogravity/294f12225c18bf319e4c1923dd664bd5
+     *
+     * @author MC (PseudoGravity)
+     */
     private static class CombinedMedianEM {
 
         // a list of samples
@@ -590,17 +609,12 @@ public class FishingCracker {
         static double minsigma = 10;
 
         public static void run() {
-            // System.out.println(mass(0));
-
             ArrayList<Double> droprate = new ArrayList<Double>();
 
             for (int i = 0; i < data.size(); i++) {
                 ArrayList<Double> sample = data.get(i);
                 droprate.add(sample.size() * width / (endtime - begintime));
             }
-
-            System.out.println("samples: " + data);
-            System.out.println("rarities: " + droprate);
 
             ArrayList<Double> times = new ArrayList<Double>();
             for (int i = begintime; i <= endtime; i += 10) {
@@ -616,7 +630,7 @@ public class FishingCracker {
                 for (int i = 0; i < data.size(); i++) {
                     // for each sample, find the point which adds the least to the score
                     ArrayList<Double> sample = data.get(i);
-                    double lambda = droprate.get(i) / width; // 50ms = one tick
+                    double lambda = droprate.get(i) / width;
                     double bestsubscore = Double.MAX_VALUE;
                     for (Double x : sample) {
                         double absdev = Math.abs(x - time);
@@ -633,21 +647,11 @@ public class FishingCracker {
                 }
             }
 
-            System.out.println("best time: " + besttime);
-            System.out.println("lowest score: " + bestscore);
-
             mu = besttime;
             sigma = bestscore / data.size();
             sigma = Math.max(Math.min(sigma, maxsigma), minsigma);
 
-            System.out.println(" mu: " + mu);
-            System.out.println(" sigma: " + sigma);
-            System.out.println(" packetlossrate: " + packetlossrate);
-
             for (int repeat = 0; repeat < 1; repeat++) {
-
-                System.out.println("== iteration: " + (repeat + 1));
-
                 // E step
                 // calculate weights (and classifications)
                 ArrayList<ArrayList<Double>> masses = new ArrayList<ArrayList<Double>>();
@@ -660,11 +664,11 @@ public class FishingCracker {
                     for (double x : sample) {
                         sum += mass(x);
                     }
-                    double pXgivenNorm = Math.min(sum, 1); // cap at 1
+                    double pXandNorm = Math.min(sum, 1) * (1 - packetlossrate); // cap at 1
 
-                    double pXgivenUnif = droprate.get(i) * packetlossrate;
+                    double pXandUnif = droprate.get(i) * packetlossrate;
 
-                    double pNorm = pXgivenNorm / (pXgivenNorm + pXgivenUnif);
+                    double pNorm = pXandNorm / (pXandNorm + pXandUnif);
 
                     ArrayList<Double> mass = new ArrayList<Double>();
                     for (double x : sample) {
@@ -673,8 +677,6 @@ public class FishingCracker {
 
                     masses.add(mass);
                 }
-
-                System.out.println(" weights:" + masses);
 
                 // M step
                 // compute new best estimate for parameters
@@ -707,13 +709,7 @@ public class FishingCracker {
                 mu = muNext;
                 sigma = sigmaNext;
                 packetlossrate = packetlossrateNext;
-
-                System.out.println(" mu: " + mu);
-                System.out.println(" sigma: " + sigma);
-                System.out.println(" packetlossrate: " + packetlossrate);
-
             }
-
         }
 
         public static double mass(double x) {
@@ -725,7 +721,9 @@ public class FishingCracker {
         }
     }
 
-    // ===== SIMULATE FISHING BOBBER ===== //
+    // endregion
+
+    // region FISHING BOBBER SIMULATION
 
     private static class SimulatedFishingBobber {
         private static final EntityDimensions FISHING_BOBBER_DIMENSIONS = EntityType.FISHING_BOBBER.getDimensions();
@@ -759,14 +757,10 @@ public class FishingCracker {
         private final int lureLevel;
         private final int luckLevel;
 
-        private int tickCounter = 0;
-
         // output variables
         private boolean failed;
 
         public SimulatedFishingBobber(long seed, ItemStack tool, Vec3d pos, Vec3d velocity) {
-            //this.random = new TestRandom("client");
-            //this.random.setSeed(seed ^ 0x5deece66dL);
             this.random = new Random(seed ^ 0x5deece66dL);
             // entity UUID
             this.uuid = MathHelper.randomUuid(random);
@@ -809,11 +803,6 @@ public class FishingCracker {
         }
 
         public void tick() {
-            tickCounter++;
-            //velocityRandom.setSeed(this.uuid.getLeastSignificantBits() ^ this.tickCounter);
-
-            //((TestRandom) random).dump();
-
             assert world != null;
 
             onBaseTick();
@@ -1215,5 +1204,7 @@ public class FishingCracker {
             BOBBING;
         }
     }
+
+    // endregion
 
 }
