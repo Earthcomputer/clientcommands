@@ -29,8 +29,5 @@
   "mixins": [
     "mixins.clientcommands.json"
   ],
-  "custom": {
-    "modmenu:clientsideOnly": true
-  },
   "accessWidener": "clientcommands.aw"
 }
