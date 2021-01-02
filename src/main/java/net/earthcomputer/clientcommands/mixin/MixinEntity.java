@@ -43,8 +43,8 @@ public class MixinEntity implements IEntity {
             ci.setReturnValue(Boolean.TRUE);
     }
 
-    @Inject(method = "tick", at = @At("HEAD"))
-    private void onTick(CallbackInfo ci) {
+    @Override
+    public void tickGlowingTickets() {
         if (((Entity) (Object) this).world.isClient) {
             Iterator<EntityGlowingTicket> itr = glowingTickets.iterator();
             //noinspection Java8CollectionRemoveIf
