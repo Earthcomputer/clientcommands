@@ -95,6 +95,7 @@ public class FindItemCommand {
         private Set<BlockPos> searchedBlocks = new HashSet<>();
         private BlockPos currentlySearching = null;
         private int currentlySearchingTimeout;
+        private boolean hasSearchedEnderChest = false;
 
         public FindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
             this.searchingForName = searchingForName;
@@ -149,12 +150,17 @@ public class FindItemCommand {
                             continue;
                         if (searchedBlocks.contains(pos))
                             continue;
-                        Vec3d closestPos = MathUtil.getClosestPoint(pos, world.getBlockState(pos).getOutlineShape(world, pos), origin);
+                        BlockState state = world.getBlockState(pos);
+                        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin);
                         if (closestPos.squaredDistanceTo(origin) > reachDistance * reachDistance)
                             continue;
                         searchedBlocks.add(pos);
-                        BlockState state = world.getBlockState(pos);
-                        if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
+                        if (state.getBlock() == Blocks.ENDER_CHEST) {
+                            if (hasSearchedEnderChest) {
+                                continue;
+                            }
+                            hasSearchedEnderChest = true;
+                        } else if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
                             BlockPos offsetPos = pos.offset(ChestBlock.getFacing(state));
                             if (world.getBlockState(offsetPos).getBlock() == state.getBlock())
                                 searchedBlocks.add(offsetPos);
