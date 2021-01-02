@@ -18,7 +18,6 @@
   "commands.cenchant.failed": "您请求的附魔无法获得或者需要太长时间",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测。",
-  "commands.cenchant.needEnchantingPrediction.enable": "启用",
   "commands.cenchant.success": "正在开始操控附魔",
   "commands.cenchant.uncracked": "您需要先破解随机种子。",
 
@@ -59,6 +58,7 @@
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "取消",
   "commands.client.crack": "破解",
+  "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式 %s",
   "commands.client.notClient": "不是客户端指令",
 

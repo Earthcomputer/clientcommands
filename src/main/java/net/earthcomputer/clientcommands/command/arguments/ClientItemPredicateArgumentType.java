@@ -1,6 +1,8 @@
 package net.earthcomputer.clientcommands.command.arguments;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.client.MinecraftClient;
@@ -10,9 +12,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import java.util.function.Predicate;
 
@@ -34,8 +38,12 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         return new ClientItemPredicateArgumentType();
     }
 
+    public static ClientItemPredicate getClientItemPredicate(CommandContext<ServerCommandSource> ctx, String name) throws CommandSyntaxException {
+        return ctx.getArgument(name, ClientItemPredicateArgument.class).create(ctx);
+    }
+
     @Override
-    public ItemPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
+    public ClientItemPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
         ItemStringReader itemReader = new ItemStringReader(reader, true).consume();
         if (itemReader.getItem() != null) {
             ItemPredicate predicate = new ItemPredicate(itemReader.getItem(), itemReader.getTag());
@@ -43,7 +51,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         } else {
             Identifier tagId = itemReader.getId();
             return ctx -> {
-                @SuppressWarnings("ConstantConditions") Tag<Item> tag = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(tagId);
+                @SuppressWarnings("ConstantConditions") Tag.Identified<Item> tag = (Tag.Identified<Item>) MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(tagId);
                 if (tag == null) {
                     throw UNKNOWN_TAG_EXCEPTION.create(tagId.toString());
                 } else {
@@ -53,13 +61,22 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         }
     }
 
+    @FunctionalInterface
+    public interface ClientItemPredicateArgument extends ItemPredicateArgument {
+        @Override
+        ClientItemPredicate create(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException;
+    }
+
+    public interface ClientItemPredicate extends Predicate<ItemStack> {
+        String getPrettyString();
+    }
 
 
-    static class TagPredicate implements Predicate<ItemStack> {
-        private final Tag<Item> tag;
+    static class TagPredicate implements ClientItemPredicate {
+        private final Tag.Identified<Item> tag;
         private final CompoundTag compound;
 
-        public TagPredicate(Tag<Item> tag, CompoundTag compound) {
+        public TagPredicate(Tag.Identified<Item> tag, CompoundTag compound) {
             this.tag = tag;
             this.compound = compound;
         }
@@ -68,9 +85,18 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         public boolean test(ItemStack stack) {
             return this.tag.contains(stack.getItem()) && NbtHelper.matches(this.compound, stack.getTag(), true);
         }
+
+        @Override
+        public String getPrettyString() {
+            String ret = "#" + tag.getId();
+            if (compound != null) {
+                ret += compound;
+            }
+            return ret;
+        }
     }
 
-    static class ItemPredicate implements Predicate<ItemStack> {
+    static class ItemPredicate implements ClientItemPredicate {
         private final Item item;
         private final CompoundTag compound;
 
@@ -82,6 +108,15 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         @Override
         public boolean test(ItemStack stack) {
             return stack.getItem() == this.item && NbtHelper.matches(this.compound, stack.getTag(), true);
+        }
+
+        @Override
+        public String getPrettyString() {
+            String ret = String.valueOf(Registry.ITEM.getId(item));
+            if (compound != null) {
+                ret += compound;
+            }
+            return ret;
         }
     }
 }

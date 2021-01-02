@@ -12,6 +12,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.ItemEnchantmentArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -35,10 +37,23 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
     private static final SimpleCommandExceptionType EXPECTED_WITH_WITHOUT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cenchant.expectedWithWithout"));
     private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cenchant.incompatible"));
 
+    private Predicate<Item> itemPredicate = item -> true;
+    private Predicate<Enchantment> enchantmentPredicate = ench -> true;
+
     private ItemAndEnchantmentsPredicateArgumentType() {}
 
     public static ItemAndEnchantmentsPredicateArgumentType itemAndEnchantmentsPredicate() {
         return new ItemAndEnchantmentsPredicateArgumentType();
+    }
+
+    public ItemAndEnchantmentsPredicateArgumentType withItemPredicate(Predicate<Item> predicate) {
+        this.itemPredicate = predicate;
+        return this;
+    }
+
+    public ItemAndEnchantmentsPredicateArgumentType withEnchantmentPredicate(Predicate<Enchantment> predicate) {
+        this.enchantmentPredicate = predicate;
+        return this;
     }
 
     public static ItemAndEnchantmentsPredicate getItemAndEnchantmentsPredicate(CommandContext<?> context, String name) {
@@ -97,7 +112,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         return EXAMPLES;
     }
 
-    public static class ItemAndEnchantmentsPredicate {
+    public static class ItemAndEnchantmentsPredicate implements Predicate<ItemStack> {
         public final Item item;
         public final Predicate<List<EnchantmentLevelEntry>> predicate;
 
@@ -105,9 +120,20 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             this.item = item;
             this.predicate = predicate;
         }
+
+        @Override
+        public boolean test(ItemStack stack) {
+            if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
+                return false;
+            }
+            Map<Enchantment, Integer> enchantmentMap = EnchantmentHelper.get(stack);
+            List<EnchantmentLevelEntry> enchantments = new ArrayList<>(enchantmentMap.size());
+            enchantmentMap.forEach((id, lvl) -> enchantments.add(new EnchantmentLevelEntry(id, lvl)));
+            return predicate.test(enchantments);
+        }
     }
 
-    private static class Parser {
+    private class Parser {
         private final StringReader reader;
         private Consumer<SuggestionsBuilder> suggestor;
 
@@ -144,9 +170,12 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                 reader.setCursor(start);
                 return ItemStringReader.ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
             });
-            if (item.getEnchantability() <= 0) {
+            if ((item.getEnchantability() <= 0 || !itemPredicate.test(item)) && (item != Items.ENCHANTED_BOOK || !itemPredicate.test(Items.BOOK))) {
                 reader.setCursor(start);
                 throw INCOMPATIBLE_ENCHANTMENT_EXCEPTION.createWithContext(reader);
+            }
+            if (item == Items.ENCHANTED_BOOK) {
+                item = Items.BOOK;
             }
             return item;
         }
@@ -185,7 +214,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         private Enchantment parseEnchantment(boolean suggest, boolean negative, ItemStack stack) throws CommandSyntaxException {
             List<Enchantment> allowedEnchantments = new ArrayList<>();
             for (Enchantment ench : Registry.ENCHANTMENT) {
-                boolean allowed = (ench.isAcceptableItem(stack) || stack.getItem() == Items.BOOK) && !ench.isTreasure();
+                boolean allowed = (ench.isAcceptableItem(stack) || stack.getItem() == Items.BOOK) && enchantmentPredicate.test(ench);
                 if (negative) {
                     for (EnchantmentLevelEntry ench2 : with)
                         if (ench2.enchantment == ench && ench2.level == -1)
@@ -195,7 +224,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                             allowed = false;
                 } else {
                     for (EnchantmentLevelEntry ench2 : with)
-                        if (ench2.enchantment == ench || !ench2.enchantment.canCombine(ench)) // "different" = compatible
+                        if (ench2.enchantment == ench || !ench2.enchantment.canCombine(ench))
                             allowed = false;
                     for (EnchantmentLevelEntry ench2 : without)
                         if (ench2.enchantment == ench && ench2.level == -1)
@@ -307,8 +336,11 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         private void suggestEnchantableItem() {
             List<Identifier> allowed = new ArrayList<>();
             for (Item item : Registry.ITEM) {
-                if (item.getEnchantability() > 0)
+                if (item.getEnchantability() > 0 && itemPredicate.test(item)) {
                     allowed.add(Registry.ITEM.getId(item));
+                } else if (item == Items.ENCHANTED_BOOK && itemPredicate.test(Items.BOOK)) {
+                    allowed.add(Registry.ITEM.getId(Items.ENCHANTED_BOOK));
+                }
             }
             int start = reader.getCursor();
             suggestor = suggestions -> {

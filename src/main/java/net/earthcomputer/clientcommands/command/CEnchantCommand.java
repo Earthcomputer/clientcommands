@@ -27,7 +27,7 @@ public class CEnchantCommand {
         dispatcher.register(literal("cenchant")
                 .then(literal("--simulate")
                         .redirect(cenchant, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_SIMULATE)))
-                .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate())
+                .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
                         .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
     }
 
@@ -36,7 +36,7 @@ public class CEnchantCommand {
             Text text = new TranslatableText("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.cenchant.needEnchantingPrediction.enable", "/ctemprule set enchantingPrediction true"));
+                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set enchantingPrediction true"));
             sendFeedback(text);
             return 0;
         }

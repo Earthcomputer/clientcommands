@@ -31,5 +31,6 @@
   ],
   "custom": {
     "modmenu:clientsideOnly": true
-  }
+  },
+  "accessWidener": "clientcommands.aw"
 }

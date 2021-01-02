@@ -12,7 +12,6 @@
   "commands.cenchant.failed": "Es ist unmöglich oder würde zu lange brauchen, diese Verzauberungen zu bekommen",
   "commands.cenchant.incompatible": "Unvereinbare Verzauberungen",
   "commands.cenchant.needEnchantingPrediction": "Zauberprognose muss aktiviert sein, um dieser Befehl zu führen.",
-  "commands.cenchant.needEnchantingPrediction.enable": "Aktivieren",
   "commands.cenchant.success": "Zaubermanipulation anfangen",
   "commands.cenchant.uncracked": "Seed muss geknackt sein.",
 
@@ -46,6 +45,7 @@
 
   "commands.client.cancel": "Abbrechen",
   "commands.client.crack": "Knacken",
+  "commands.client.enable": "Aktivieren",
   "commands.client.expectedRegex": "Ungütliges Regex %s",
 
   "enchCrack.state": "Zauberknackzustand: %s",
