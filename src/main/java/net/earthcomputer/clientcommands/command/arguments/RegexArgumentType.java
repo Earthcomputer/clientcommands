@@ -44,7 +44,9 @@ public class RegexArgumentType implements ArgumentType<Pattern> {
         if (type == RegexType.GREEDY_PHRASE) {
             String text = reader.getRemaining();
             try {
-                return Pattern.compile(text);
+                Pattern pattern = Pattern.compile(text);
+                reader.setCursor(reader.getTotalLength());
+                return pattern;
             } catch (PatternSyntaxException e) {
                 reader.setCursor(start);
                 throw EXPECTED_REGEX_EXCEPTION.createWithContext(reader, text);

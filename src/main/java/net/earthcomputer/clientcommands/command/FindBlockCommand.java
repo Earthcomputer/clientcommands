@@ -24,7 +24,7 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class FindBlockCommand {
 
-    private static final int MAX_RADIUS = 16 * 8;
+    public static final int MAX_RADIUS = 16 * 8;
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfindblock");
@@ -42,7 +42,7 @@ public class FindBlockCommand {
                         .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), getInteger(ctx, "radius"), RadiusType.TAXICAB))))));
     }
 
-    private static int findBlock(ServerCommandSource source, Predicate<CachedBlockPosition> block, int radius, RadiusType radiusType) {
+    public static int findBlock(ServerCommandSource source, Predicate<CachedBlockPosition> block, int radius, RadiusType radiusType) {
         List<BlockPos> candidates;
         if (radiusType == RadiusType.TAXICAB) {
             candidates = findBlockCandidatesInTaxicabArea(source, block, radius);
@@ -163,7 +163,7 @@ public class FindBlockCommand {
         return found;
     }
 
-    private static enum RadiusType {
+    public static enum RadiusType {
         CARTESIAN(pos -> Math.sqrt(pos.getSquaredDistance(BlockPos.ORIGIN))),
         RECTANGULAR(pos -> Math.max(Math.max(Math.abs(pos.getX()), Math.abs(pos.getY())), Math.abs(pos.getZ()))),
         TAXICAB(pos -> pos.getManhattanDistance(BlockPos.ORIGIN));
