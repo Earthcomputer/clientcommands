@@ -34,6 +34,8 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
 
     @Shadow protected abstract boolean isOnSoulSpeedBlock();
 
+    @Shadow protected int itemUseTimeLeft;
+
     public MixinLivingEntity(EntityType<?> entityType_1, World world_1) {
         super(entityType_1, world_1);
     }
@@ -52,9 +54,9 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
     }
 
     @Inject(method = "spawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getEatSound(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/sound/SoundEvent;"))
-    public void onEat(CallbackInfo ci) {
+    public void onEat(ItemStack stack, int particleCount, CallbackInfo ci) {
         if (isThePlayer())
-            PlayerRandCracker.onEat();
+            PlayerRandCracker.onEat(stack, this.getPos(), particleCount, this.itemUseTimeLeft);
     }
 
     @Inject(method = "baseTick",

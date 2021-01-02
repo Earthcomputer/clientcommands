@@ -12,6 +12,7 @@
 
   "commands.ccrackrng.starting": "正在破解玩家随机种子",
   "commands.ccrackrng.success": "玩家随机种子已破解： %d",
+  "commands.ccheatcrackrng.success": "玩家随机种子已破解： %d -> %d",
 
   "commands.cenchant.expectedWithWithout": "有效参数： \"with\" 或 \"without\"",
   "commands.cenchant.failed": "您请求的附魔无法获得或者需要太长时间",

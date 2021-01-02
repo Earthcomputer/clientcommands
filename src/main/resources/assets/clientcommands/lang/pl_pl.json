@@ -12,6 +12,7 @@
 
   "commands.ccrackrng.starting": "Łamanie ziarna gracza",
   "commands.ccrackrng.success": "RNG gracza złamane: %d",
+  "commands.ccheatcrackrng.success": "RNG gracza złamane: %d -> %d",
 
   "commands.cenchant.expectedWithWithout": "Spodziewane \"with\"/\"without\"",
   "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otzymać te zaklęcia",

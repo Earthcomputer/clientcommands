@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.earthcomputer.clientcommands.command.MoteCommand;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.command.FindBlockCommand;
 import net.earthcomputer.clientcommands.script.ScriptManager;
@@ -45,10 +46,12 @@ public class ClientCommands implements ClientModInitializer {
         ScriptCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher);
         GammaCommand.register(dispatcher);
+        MoteCommand.register(dispatcher);
+        ChorusCommand.register(dispatcher);
         FishCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
-        
+
         if (MinecraftClient.getInstance().isIntegratedServerRunning()) {
             CheatCrackRNGCommand.register(dispatcher);
         }
