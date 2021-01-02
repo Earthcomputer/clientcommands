@@ -50,6 +50,7 @@ public class ClientCommands implements ClientModInitializer {
         ChorusCommand.register(dispatcher);
         FishCommand.register(dispatcher);
         SignSearchCommand.register(dispatcher);
+        GhostBlockCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 

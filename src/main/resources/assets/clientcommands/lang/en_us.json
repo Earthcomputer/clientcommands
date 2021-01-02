@@ -49,6 +49,9 @@
 
   "commands.cgamma.success": "Set gamma to %f",
 
+  "commands.cghostblock.fill.success": "%d ghost blocks filled",
+  "commands.cghostblock.set.success": "Ghost block placed",
+
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
   "commands.cscript.notFound": "Script \"%s\" not found",
