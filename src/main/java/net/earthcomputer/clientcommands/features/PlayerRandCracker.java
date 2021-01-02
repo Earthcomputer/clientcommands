@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
 import net.minecraft.client.MinecraftClient;
@@ -29,6 +30,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class PlayerRandCracker {
 
@@ -315,11 +317,25 @@ public class PlayerRandCracker {
     }
 
     public static Slot getBestItemThrowSlot(List<Slot> slots) {
+        slots = slots.stream().filter(slot -> {
+            if (!slot.hasStack()) {
+                return false;
+            }
+            if (slot instanceof ICreativeSlot) {
+                return false;
+            }
+            if (EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) != 0) {
+                return false;
+            }
+            if (slot.getStack().getItem() == Items.CHORUS_FRUIT) {
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+
         Map<Item, Integer> itemCounts = new HashMap<>();
         for (Slot slot : slots) {
-            if (slot.hasStack() && EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) == 0 && slot.getStack().getItem() != Items.CHORUS_FRUIT) {
-                itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
-            }
+            itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
         }
         if (itemCounts.isEmpty())
             return null;

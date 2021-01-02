@@ -48,6 +48,7 @@
     "MixinKeyboardInput",
     "MixinLivingEntity",
     "MixinLivingEntityRenderer",
+    "MixinLockableSlot",
     "MixinLoomContainer",
     "MixinMaterial",
     "MixinMerchantContainer",
