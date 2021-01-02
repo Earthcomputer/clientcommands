@@ -418,7 +418,7 @@ public class FishingCracker {
             }
             CombinedMedianEM.data.add(sample);
 
-            if (CombinedMedianEM.data.size() >= 5) {
+            if (!CombinedMedianEM.data.isEmpty()) {
                 CombinedMedianEM.begintime = magicMillisecondsCorrection - serverMspt / 2 - (expectedCatches.length / 2) * serverMspt;
                 CombinedMedianEM.endtime = magicMillisecondsCorrection + serverMspt / 2 + (expectedCatches.length / 2) * serverMspt;
                 CombinedMedianEM.width = serverMspt;
