@@ -5,7 +5,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
-import net.earthcomputer.clientcommands.interfaces.IServerCommandSource;
 import net.minecraft.command.CommandException;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.server.command.ServerCommandSource;
@@ -26,7 +25,7 @@ public class CEnchantCommand {
         LiteralCommandNode<ServerCommandSource> cenchant = dispatcher.register(literal("cenchant"));
         dispatcher.register(literal("cenchant")
                 .then(literal("--simulate")
-                        .redirect(cenchant, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_SIMULATE)))
+                        .redirect(cenchant, ctx -> withFlags(ctx.getSource(), FLAG_SIMULATE, true)))
                 .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
                         .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
     }
@@ -49,7 +48,7 @@ public class CEnchantCommand {
             return 0;
         }
 
-        boolean simulate = (((IServerCommandSource) source).getLevel() & FLAG_SIMULATE) != 0;
+        boolean simulate = getFlag(source, FLAG_SIMULATE);
 
         EnchantmentCracker.ManipulateResult result = EnchantmentCracker.manipulateEnchantments(
                 itemAndEnchantmentsPredicate.item,

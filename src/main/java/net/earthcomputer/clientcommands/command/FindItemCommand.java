@@ -5,7 +5,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.GuiBlocker;
-import net.earthcomputer.clientcommands.interfaces.IServerCommandSource;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
 import net.earthcomputer.clientcommands.task.LongTask;
@@ -61,14 +60,14 @@ public class FindItemCommand {
         LiteralCommandNode<ServerCommandSource> cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
                 .then(literal("--no-search-shulker-box")
-                        .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_NO_SEARCH_SHULKER_BOX)))
+                        .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
                 .then(literal("--keep-searching")
-                        .redirect(cfinditem, ctx -> ctx.getSource().withLevel(((IServerCommandSource) ctx.getSource()).getLevel() | FLAG_KEEP_SEARCHING)))
+                        .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
                 .then(argument("item", withString(clientItemPredicate()))
                         .executes(ctx ->
                                 findItem(ctx,
-                                        (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_NO_SEARCH_SHULKER_BOX) != 0,
-                                        (((IServerCommandSource) ctx.getSource()).getLevel() & FLAG_KEEP_SEARCHING) != 0,
+                                        getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
+                                        getFlag(ctx, FLAG_KEEP_SEARCHING),
                                         getWithString(ctx, "item", ItemPredicateArgument.class)))));
     }
 

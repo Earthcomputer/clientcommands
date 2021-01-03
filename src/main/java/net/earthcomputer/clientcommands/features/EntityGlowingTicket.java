@@ -11,7 +11,7 @@ public class EntityGlowingTicket {
     }
 
     public boolean tick() {
-        return ticksLeft-- > 0;
+        return ticksLeft-- >= 0;
     }
 
     public int getColor() {

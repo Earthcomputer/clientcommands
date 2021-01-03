@@ -1,12 +1,15 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.earthcomputer.clientcommands.interfaces.IServerCommandSource;
 import net.earthcomputer.clientcommands.mixin.InGameHudAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandException;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -28,6 +31,22 @@ public class ClientCommandManager {
 
     public static boolean isClientSideCommand(String name) {
         return clientSideCommands.contains(name);
+    }
+
+    public static boolean getFlag(CommandContext<ServerCommandSource> ctx, int flag) {
+        return getFlag(ctx.getSource(), flag);
+    }
+
+    public static boolean getFlag(ServerCommandSource source, int flag) {
+        return (((IServerCommandSource) source).getLevel() & flag) != 0;
+    }
+
+    public static ServerCommandSource withFlags(ServerCommandSource source, int flags, boolean value) {
+        if (value) {
+            return source.withLevel(((IServerCommandSource) source).getLevel() | flags);
+        } else {
+            return source.withLevel(((IServerCommandSource) source).getLevel() & ~flags);
+        }
     }
 
     public static void sendError(Text error) {
