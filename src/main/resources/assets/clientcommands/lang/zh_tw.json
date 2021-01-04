@@ -1,0 +1,154 @@
+{
+  "commands.cbook.success": "成功編輯書本",
+  "commands.cbook.commandException": "您沒有手握書本",
+
+  "commands.ccalc.expected": "期望值 %s",
+  "commands.ccalc.invalidArgumentCount": "函數 \"%s\" 無法接受 %d 個參數",
+
+  "commands.ccalcstack.success": "%d 個 %s 是 %d 組餘 %d 個",
+  "commands.ccalcstack.success.empty": "%d 個物品是 %d 組餘 %d 個",
+  "commands.ccalcstack.success.empty.exact": "%d 個物品是正好 %d 組",
+  "commands.ccalcstack.success.exact": "%d 個 %s 是正好 %d 組",
+
+  "commands.ccrackrng.starting": "正在破譯玩家隨機種子",
+  "commands.ccrackrng.success": "玩家隨機種子已破譯： %d",
+  "commands.ccheatcrackrng.success": "玩家隨機種子已破譯： %d -> %d",
+
+  "commands.cenchant.expectedWithWithout": "有效參數： \"with\" 或 \"without\"",
+  "commands.cenchant.failed": "您請求的附魔無法獲得或者需要太長時間",
+  "commands.cenchant.incompatible": "互斥的附魔",
+  "commands.cenchant.needEnchantingPrediction": "本指令需要啟用附魔預測。",
+  "commands.cenchant.success": "正在開始操控附魔",
+  "commands.cenchant.uncracked": "您需要先破譯隨機種子。",
+
+  "commands.cfind.found.left": "在 ",
+  "commands.cfind.found.right": " 找到 %1$s， 距離您 %2$.2f 格",
+  "commands.cfind.keepSearching.success": "找尋實體中。",
+  "commands.cfind.noMatch": "沒有實體匹配您的查找條件",
+  "commands.cfind.success": "%d 個實體匹配您的查找條件",
+
+  "commands.cfindblock.notFound": "沒有發現此方塊",
+  "commands.cfindblock.success.left": "離您最近的匹配方塊在 ",
+  "commands.cfindblock.success.right": "， 距離您 %1$.2f 格",
+
+  "commands.cfinditem.match.left": "在 ",
+  "commands.cfinditem.match.right": " 找到 %dx %s",
+  "commands.cfinditem.starting": "正在搜索 %s",
+  "commands.cfinditem.starting.keepSearching": "正在持續搜索 %s。",
+  "commands.cfinditem.total": "一共找到了 %d 個 %s 。",
+
+  "commands.cfish.addGoal.success": "成功添加目標 %s",
+  "commands.cfish.correctLoot": "使用 %dms 校正得到目標戰利品",
+  "commands.cfish.error.crackFailed": "無法破譯釣魚氣泡隨機數，這是個模組伺服器?",
+  "commands.cfish.error.failed": "釣魚氣泡配置不正確",
+  "commands.cfish.error.outOfWater": "釣魚氣泡在水域外，操控將無法工作",
+  "commands.cfish.listGoals.noGoals": "沒有設置釣魚目標",
+  "commands.cfish.listGoals.success": "已設置 %d 釣魚目標:",
+  "commands.cfish.needFishingManipulation": "本指令需要啟用釣魚操控。",
+  "commands.cfish.removeGoal.success": "成功移除目標 %s",
+  "commands.cfish.wrongLoot": "使用 %dms 校正沒有得到目標戰利品，大約有 %s 遊戲刻在前面",
+
+  "commands.cgamma.success": "將伽馬值設為 %f",
+
+  "commands.cghostblock.fill.success": "%d 個幽靈方塊被填充",
+  "commands.cghostblock.set.success": "幽靈方塊已放置",
+
+  "commands.cglow.keepSearching.success": "使實體發光。",
+  "commands.cglow.failed": "沒有實體發光",
+  "commands.cglow.success": "成功使 %d 實體發光",
+
+  "commands.crelog.failed": "重啟失敗",
+
+  "commands.crender.entities.success": "實體渲染規則已被更新",
+
+  "commands.cscript.notFound": "未找到腳本 \"%s\"",
+  "commands.cscript.reload.success": "已重新加載腳本",
+  "commands.cscript.run.success": "成功運行腳本",
+
+  "commands.ctask.list.noTasks": "當前沒有正在執行的任務",
+  "commands.ctask.list.success": "%d 個任務正在執行",
+  "commands.ctask.stop.noMatch": "沒有匹配的任務",
+  "commands.ctask.stop.success": "已停止 %d 個任務",
+
+  "commands.ctemprule.list.header": "正在顯示 %d 個 TempRules：",
+  "commands.ctemprule.reset.success": "TempRule %s 已被重置為 %s",
+  "commands.ctemprule.set.success": "TempRule %s 已被更新為 %s",
+
+  "commands.cwiki.failed": "無法獲得 Wiki 內容",
+
+  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.cancel": "取消",
+  "commands.client.crack": "破譯",
+  "commands.client.enable": "啟用",
+  "commands.client.expectedRegex": "無效的正則表達式 %s",
+  "commands.client.notClient": "不是客戶端指令",
+
+  "enchCrack.state": "附魔破譯狀態： %s",
+  "enchCrack.state.uncracked": "未破譯",
+  "enchCrack.state.cracking": "正在破譯",
+  "enchCrack.state.cracked": "已破譯",
+
+  "enchCrack.enchantments": "附魔：",
+  "enchCrack.clues": "線索：",
+  "enchCrack.slot": "第 %d 行：",
+
+  "enchCrack.xpSeed.one": "經驗值種子： %08X",
+  "enchCrack.xpSeed.many": "可能的經驗值種子數量： %d",
+  "enchCrack.playerRNGSeed.many": "可能的玩家隨機種子數量： %d",
+  "enchCrack.addInfo": "添加信息",
+
+  "enchCrack.insn.dummy": "附魔一件其他物品",
+  "enchCrack.insn.ready": "您的附魔已就緒",
+  "enchCrack.insn.bookshelves": "需要的書架數： %d",
+  "enchCrack.insn.slot": "在附魔台的第 %d 行",
+  "enchCrack.insn.itemThrows": "需要扔出物品： %d 次 （大約 %f 秒）",
+  "enchCrack.insn.itemThrows.noDummy": "無需附魔其他物品",
+  "enchCrack.insn.enchantments": "最終獲得的附魔：",
+
+  "playerManip.state": "玩家種子破譯狀態： %s",
+  "playerManip.state.uncracked": "未破譯",
+  "playerManip.state.cracked": "已破譯",
+  "playerManip.state.ench_cracking_1": "正在破譯附魔種子 1",
+  "playerManip.state.half_cracked": "半破譯",
+  "playerManip.state.ench_cracking_2": "正在破譯附魔種子 2",
+  "playerManip.state.cracking": "正在破譯",
+  "playerManip.state.eating": "正在吃食物",
+  "playerManip.state.manipulating_enchantments": "正在操控附魔",
+  "playerManip.state.waiting_dummy_enchant": "等待附魔其他物品",
+
+  "playerManip.reset": "重新開始操控玩家隨機數。原因： %s",
+  "playerManip.reset.playerHurt": "玩家受傷",
+  "playerManip.reset.sprint": "疾跑",
+  "playerManip.reset.enterWater": "進入水體中",
+  "playerManip.reset.swim": "游泳",
+  "playerManip.reset.potion": "活躍的藥水狀態效果",
+  "playerManip.reset.mending": "修理了經驗修補的物品",
+  "playerManip.reset.respiration": "使用了水下呼吸頭盔",
+  "playerManip.reset.dropItem": "扔出了物品",
+  "playerManip.reset.anvil": "使用了鐵砧",
+  "playerManip.reset.food": "吃東西",
+  "playerManip.reset.drink": "喝東西",
+  "playerManip.reset.baneOfArthropods": "使用節肢殺手攻擊了節肢生物",
+  "playerManip.reset.advancement": "獲得了成就",
+  "playerManip.reset.shield": "用盾牌阻擋了攻擊",
+  "playerManip.reset.give": "使用了give指令",
+  "playerManip.reset.unbreaking": "使用了耐久物品",
+  "playerManip.reset.itemBreak": "物品損壞",
+  "playerManip.reset.frostWalker": "使用了冰霜行者",
+  "playerManip.reset.soulSpeed": "使用了靈魂疾行",
+  "playerManip.reset.entityCramming": "實體擁擠傷害",
+  "playerManip.reset.enchanting": "附魔了物品",
+  "playerManip.reset.recreated": "重新創建了玩家",
+
+  "playerManip.serverBrandWarning": "警告： 您正在遊玩的伺服器包含Mod。隨機數相關的功能並不保證能夠正常工作！",
+  "playerManip.toolBreakWarning": "警告： 工具還有 %d 耐久度。",
+  "playerManip.throwError": "條件不可行，或需要超過 %d 個物品拋出",
+  "playerManip.notEnoughItems": "物品數量不足 (%d 的 %d) 來操控種子",
+
+  "itemCrack.notEnoughItems": "無法使用隨機數種子破譯： 玩家手中沒有足夠的物品",
+
+  "chorusManip.setGoal": "設置 %s 目標區域從 %s 至 %s",
+  "chorusManip.goalTooFar": "目標距離過遠!",
+  "chorusManip.landing": "落點在: %d, %d, %d",
+  "chorusManip.landingNotPossible": "落點操控為不可能的"
+}
