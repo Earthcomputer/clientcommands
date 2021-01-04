@@ -51,6 +51,7 @@ public class ClientCommands implements ClientModInitializer {
         FishCommand.register(dispatcher);
         SignSearchCommand.register(dispatcher);
         GhostBlockCommand.register(dispatcher);
+        RelogCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 

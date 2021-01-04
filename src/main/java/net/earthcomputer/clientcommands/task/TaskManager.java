@@ -1,11 +1,13 @@
 package net.earthcomputer.clientcommands.task;
 
+import net.earthcomputer.clientcommands.features.Relogger;
+
 import java.util.*;
 
 public class TaskManager {
 
-    private static List<LongTask> newTasks = new ArrayList<>();
-    private static Map<String, LongTask> tasks = new LinkedHashMap<>();
+    private static final List<LongTask> newTasks = new ArrayList<>();
+    private static final Map<String, LongTask> tasks = new LinkedHashMap<>();
     private static long nextTaskId = 1;
 
     public static void tick() {
@@ -38,10 +40,37 @@ public class TaskManager {
         }
     }
 
-    public static void onWorldUnload() {
-        for (LongTask task : tasks.values()) {
-            if (task.stopOnWorldUnload())
-                task._break();
+    public static void onWorldUnload(boolean isDisconnect) {
+        List<Map.Entry<String, LongTask>> oldTasks = new ArrayList<>();
+        {
+            Iterator<Map.Entry<String, LongTask>> itr = tasks.entrySet().iterator();
+            while (itr.hasNext()) {
+                Map.Entry<String, LongTask> entry = itr.next();
+                if (entry.getValue().stopOnWorldUnload(isDisconnect)) {
+                    itr.remove();
+                    oldTasks.add(entry);
+                }
+            }
+        }
+        List<LongTask> oldNewTasks = new ArrayList<>();
+        {
+            Iterator<LongTask> itr = newTasks.iterator();
+            while (itr.hasNext()) {
+                LongTask newTask = itr.next();
+                if (newTask.stopOnWorldUnload(isDisconnect)) {
+                    itr.remove();
+                    oldNewTasks.add(newTask);
+                }
+            }
+        }
+
+        if (isDisconnect && Relogger.isRelogging) {
+            Relogger.relogSuccessTasks.add(() -> {
+                for (Map.Entry<String, LongTask> oldTask : oldTasks) {
+                    tasks.put(oldTask.getKey(), oldTask.getValue());
+                }
+                newTasks.addAll(oldNewTasks);
+            });
         }
     }
 

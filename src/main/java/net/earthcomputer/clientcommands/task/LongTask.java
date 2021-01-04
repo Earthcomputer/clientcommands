@@ -38,7 +38,7 @@ public abstract class LongTask {
         return delayScheduled;
     }
 
-    public boolean stopOnWorldUnload() {
+    public boolean stopOnWorldUnload(boolean isDisconnect) {
         return true;
     }
 

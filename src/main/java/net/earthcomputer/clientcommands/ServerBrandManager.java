@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands;
 
+import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -22,6 +23,9 @@ public class ServerBrandManager {
     }
 
     public static void onDisconnect() {
+        if (hasWarnedRng && Relogger.isRelogging) {
+            Relogger.relogSuccessTasks.add(() -> hasWarnedRng = true);
+        }
         hasWarnedRng = false;
     }
 

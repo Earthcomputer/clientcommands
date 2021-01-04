@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.FishingCracker;
+import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -39,6 +40,11 @@ public class MixinClientPlayNetworkHandler {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(MinecraftClient mc, Screen screen, ClientConnection connection, GameProfile profile, CallbackInfo ci) {
         ClientCommands.registerCommands((CommandDispatcher<ServerCommandSource>) (Object) commandDispatcher);
+    }
+
+    @Inject(method = "onGameJoin", at = @At("RETURN"))
+    private void postGameJoin(CallbackInfo ci) {
+        Relogger.onRelogSuccess();
     }
 
     @SuppressWarnings("unchecked")

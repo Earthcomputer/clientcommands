@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.script;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -11,7 +12,8 @@ import java.lang.ref.WeakReference;
 @SuppressWarnings("unused")
 public class ScriptEntity {
 
-    private final WeakReference<Entity> entity;
+    private WeakReference<Entity> entity;
+    private int entityId;
 
     static ScriptEntity create(Entity entity) {
         if (entity == MinecraftClient.getInstance().player) {
@@ -24,13 +26,43 @@ public class ScriptEntity {
     }
 
     ScriptEntity(Entity entity) {
-        this.entity = new WeakReference<>(entity);
+        if (entity != null) {
+            this.entity = new WeakReference<>(entity);
+            this.entityId = entity.getEntityId();
+        }
+    }
+
+    Entity getNullableEntity() {
+        ClientWorld theWorld = MinecraftClient.getInstance().world;
+        if (this.entity == null || theWorld == null) {
+            return null;
+        }
+        Entity entity = this.entity.get();
+        if (entity == null || entity.world != theWorld) {
+            entity = theWorld.getEntityById(entityId);
+            if (entity != null) {
+                this.entity = new WeakReference<>(entity);
+            }
+        }
+        if (entity != null && entity.removed) {
+            entity = null;
+        }
+        if (entity == null) {
+            this.entity = null;
+        }
+        return entity;
     }
 
     Entity getEntity() {
-        Entity entity = this.entity.get();
-        assert entity != null;
+        Entity entity = getNullableEntity();
+        if (entity == null) {
+            throw new NullPointerException("Invalid entity reference");
+        }
         return entity;
+    }
+
+    public boolean isValid() {
+        return getNullableEntity() != null;
     }
 
     public String getType() {

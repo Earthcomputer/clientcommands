@@ -9,6 +9,7 @@ import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.earthcomputer.clientcommands.command.FakeCommandSource;
 import net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -32,6 +34,9 @@ class ScriptBuiltins {
         engine.put("player", new ScriptPlayer());
         engine.put("world", new ScriptWorld());
         engine.put("$", (Function<String, Object>) command -> {
+            if (MinecraftClient.getInstance().player == null) {
+                throw new IllegalStateException("Not ingame");
+            }
             StringReader reader = new StringReader(command);
             if (command.startsWith("@")) {
                 try {
@@ -55,9 +60,21 @@ class ScriptBuiltins {
             }
             return ClientCommandManager.executeCommand(reader, command);
         });
-        engine.put("print", (Consumer<String>) message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message)));
-        engine.put("chat", (Consumer<String>) message -> MinecraftClient.getInstance().player.sendChatMessage(message));
+        engine.put("print", (Consumer<String>) message -> {
+            if (MinecraftClient.getInstance().player == null) {
+                throw new IllegalStateException("Not ingame");
+            }
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new LiteralText(message));
+        });
+        engine.put("chat", (Consumer<String>) message -> {
+            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+            if (player == null) {
+                throw new IllegalStateException("Not ingame");
+            }
+            player.sendChatMessage(message);
+        });
         engine.put("tick", (Runnable) ScriptManager::passTick);
+        engine.put("isLoggedIn", (BooleanSupplier) () -> MinecraftClient.getInstance().player != null);
 
         engine.put("Thread", new AbstractJSObject() {
             @Override

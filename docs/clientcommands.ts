@@ -33,6 +33,11 @@ declare function chat(msg: string): void;
 declare function tick(): void;
 
 /**
+ * Returns true if you are logged in to a game, false otherwise. Many operations are invalid if you are not logged in.
+ */
+declare function isLoggedIn(): boolean;
+
+/**
  * If a string, matches items by their name, with the "minecraft:" prefix removed if it exists.
  * If an object, matches the item NBT.
  * If a function, it should return true or false based on the input item NBT.
@@ -43,6 +48,12 @@ type ItemPredicate = string | object | ((itemNbt: object) => boolean);
  * Represents a generic entity
  */
 declare class Entity {
+    /**
+     * Whether this is a valid reference to an entity. A reference may be invalid if you are not ingame, you are in a
+     * different dimension to the entity, or the entity has died or unloaded. All other operations on this entity will
+     * fail if it is invalid.
+     */
+    readonly valid: boolean;
     /**
      * The type of the entity, as used in commands. If the prefix, would be "minecraft:", then that prefix is stripped
      */
@@ -391,6 +402,19 @@ declare class ControllablePlayer extends Player {
      * is pressed by the current script.
      */
     sprinting: boolean;
+
+    /**
+     * Attempts to disconnect from the server. Terminates the script if successful.
+     */
+    disconnect(): void;
+
+    /**
+     * Disconnects and reconnects the player to the server. Returns whether successful. This function may return before
+     * the player has fully logged in again; check {@link isLoggedIn()} in a loop to wait for the player to be logged
+     * in. If the relog failed, depending on how it failed, the script may terminate after the next tick. The script
+     * will continue running if successful.
+     */
+    relog(): boolean;
 }
 
 /**

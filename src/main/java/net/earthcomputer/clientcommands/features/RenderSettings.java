@@ -11,13 +11,19 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class RenderSettings {
 
-    private static List<Pair<ClientEntitySelector, Boolean>> entityRenderSelectors = new ArrayList<>();
-    private static Set<Entity> disabledEntities = new HashSet<>();
+    private static final List<Pair<ClientEntitySelector, Boolean>> entityRenderSelectors = new ArrayList<>();
+    private static final Set<UUID> disabledEntities = new HashSet<>();
 
     public static void clearEntityRenderSelectors() {
+        if (Relogger.isRelogging) {
+            ArrayList<Pair<ClientEntitySelector, Boolean>> oldSelectors = new ArrayList<>(entityRenderSelectors);
+            Relogger.relogSuccessTasks.add(() -> entityRenderSelectors.addAll(oldSelectors));
+        }
         entityRenderSelectors.clear();
     }
 
@@ -32,16 +38,17 @@ public class RenderSettings {
 
         disabledEntities.clear();
         for (Pair<ClientEntitySelector, Boolean> filter : entityRenderSelectors) {
+            List<UUID> entities = filter.getLeft().getEntities(source).stream().map(Entity::getUuid).collect(Collectors.toList());
             if (filter.getRight()) {
-                disabledEntities.removeAll(filter.getLeft().getEntities(source));
+                disabledEntities.removeAll(entities);
             } else {
-                disabledEntities.addAll(filter.getLeft().getEntities(source));
+                disabledEntities.addAll(entities);
             }
         }
     }
 
     public static boolean shouldRenderEntity(Entity entity) {
-        return !disabledEntities.contains(entity);
+        return !disabledEntities.contains(entity.getUuid());
     }
 
 }
