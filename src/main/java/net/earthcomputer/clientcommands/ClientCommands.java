@@ -1,9 +1,7 @@
 package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.command.MoteCommand;
 import net.earthcomputer.clientcommands.command.*;
-import net.earthcomputer.clientcommands.command.FindBlockCommand;
 import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.script.ScriptManager;
