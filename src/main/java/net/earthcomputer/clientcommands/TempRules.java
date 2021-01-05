@@ -68,8 +68,17 @@ public class TempRules {
         TempRules.maxEnchantItemThrows = MathHelper.clamp(maxEnchantItemThrows, 0, 1000000);
     }
 
-    @Rule
-    public static boolean chorusManipulation = false;
+    @Rule(setter = "setChorusManipulation")
+    private static boolean chorusManipulation = false;
+    public static boolean getChorusManipulation() {
+        return chorusManipulation;
+    }
+    public static void setChorusManipulation(boolean chorusManipulation) {
+        TempRules.chorusManipulation = chorusManipulation;
+        if (chorusManipulation) {
+            ServerBrandManager.rngWarning();
+        }
+    }
 
     @Rule(setter = "setMaxChorusItemThrows")
     public static int maxChorusItemThrows = 64 * 32;

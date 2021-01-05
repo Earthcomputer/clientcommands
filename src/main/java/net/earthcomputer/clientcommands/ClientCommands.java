@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.command.MoteCommand;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.command.FindBlockCommand;
+import net.earthcomputer.clientcommands.features.ChorusManipulation;
+import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,6 +23,9 @@ public class ClientCommands implements ClientModInitializer {
         configDir = new File(FabricLoader.getInstance().getConfigDirectory(), "clientcommands");
         //noinspection ResultOfMethodCallIgnored
         configDir.mkdirs();
+
+        RenderQueue.get().add("hand", ChorusManipulation::renderChorusGoal);
+        RenderQueue.get().add("hand", GlowCommand::renderBlockGlow);
 
         ScriptManager.reloadScripts();
     }

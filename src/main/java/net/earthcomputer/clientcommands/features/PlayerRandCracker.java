@@ -121,7 +121,7 @@ public class PlayerRandCracker {
                 nextInt();
             }
 
-            if (TempRules.chorusManipulation && stack.getItem() == Items.CHORUS_FRUIT) {
+            if (TempRules.getChorusManipulation() && stack.getItem() == Items.CHORUS_FRUIT) {
                 ChorusManipulation.onEat(pos, particleCount, itemUseTimeLeft);
                 if (particleCount == 16) {
                     //Consumption randoms
@@ -395,7 +395,7 @@ public class PlayerRandCracker {
         public enum Type {
             NOT_ENOUGH_ITEMS(false, "playerManip.notEnoughItems"),
             NOT_POSSIBLE(false, "playerManip.throwError"),
-            UNKNOWN_SEED(false, "commands.cenchant.uncracked"),
+            UNKNOWN_SEED(false, "playerManip.uncracked"),
             SUCCESS(true, null),
             ;
 

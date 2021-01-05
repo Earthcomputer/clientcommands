@@ -47,7 +47,7 @@ public class ChorusCommand {
                         getVec3(ctx, "posGoal").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(1.2, 1, 1.2), relative))
                 .then(literal("--perfectly")
                         .executes(ctx -> ChorusManipulation.setGoal(
-                                getVec3(ctx, "pos").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(0.3, 0, 0.3),
-                                getVec3(ctx, "pos").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(0.7, 1, 0.7), relative)));
+                                getVec3(ctx, "posGoal").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(0.3, 0, 0.3),
+                                getVec3(ctx, "posGoal").floorAlongAxes(EnumSet.allOf(Direction.Axis.class)).add(0.7, 1, 0.7), relative)));
     }
 }
