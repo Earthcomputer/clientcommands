@@ -15,11 +15,10 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -103,6 +102,16 @@ public class MixinClientPlayNetworkHandler {
     public void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
         if (CustomPayloadS2CPacket.BRAND.equals(packet.getChannel())) {
             ServerBrandManager.setServerBrand(this.client.player.getServerBrand());
+        }
+    }
+
+    @Inject(method = "onPlaySound", at = @At("HEAD"), cancellable = true)
+    public void onOnPlaySound(PlaySoundS2CPacket packet, CallbackInfo ci) {
+        if (FishingCracker.canManipulateFishing() && FishingCracker.state != FishingCracker.State.NOT_MANIPULATING) {
+            SoundEvent sound = packet.getSound();
+            if (sound == SoundEvents.ENTITY_FISHING_BOBBER_THROW || sound == SoundEvents.ENTITY_FISHING_BOBBER_RETRIEVE || sound == SoundEvents.ENTITY_FISHING_BOBBER_SPLASH) {
+                ci.cancel();
+            }
         }
     }
 
