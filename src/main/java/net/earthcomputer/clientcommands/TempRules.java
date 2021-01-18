@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.MathHelper;
 
 import java.lang.annotation.ElementType;
@@ -11,10 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -42,14 +40,29 @@ public class TempRules {
             EnchantmentCracker.resetCracker();
     }
 
+    public enum FishingManipulation implements StringIdentifiable {
+        OFF,
+        MANUAL,
+        AFK;
+
+        @Override
+        public String asString() {
+            return this.name().toLowerCase(Locale.ROOT);
+        }
+
+        public boolean isEnabled() {
+            return this != OFF;
+        }
+    }
+
     @Rule(setter = "setFishingManipulation")
-    private static boolean fishingManipulation = false;
-    public static boolean getFishingManipulation() {
+    private static FishingManipulation fishingManipulation = FishingManipulation.OFF;
+    public static FishingManipulation getFishingManipulation() {
         return fishingManipulation;
     }
-    public static void setFishingManipulation(boolean fishingManipulation) {
+    public static void setFishingManipulation(FishingManipulation fishingManipulation) {
         TempRules.fishingManipulation = fishingManipulation;
-        if (fishingManipulation) {
+        if (fishingManipulation.isEnabled()) {
             ServerBrandManager.rngWarning();
         } else {
             FishingCracker.reset();
@@ -79,6 +92,13 @@ public class TempRules {
 
     @Rule
     public static boolean infiniteTools = false;
+
+    public static String asString(Object value) {
+        if (value instanceof StringIdentifiable) {
+            return ((StringIdentifiable) value).asString();
+        }
+        return String.valueOf(value);
+    }
 
     public static Object get(String name) {
         Field field = rules.get(name);

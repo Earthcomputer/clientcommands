@@ -57,11 +57,11 @@ public class TempRuleCommand {
                         .executes(ctx -> setRule(ctx.getSource(), rule, getDouble(ctx, "value")))));
             } else if (type.isEnum() && StringIdentifiable.class.isAssignableFrom(type)) {
                 ArgumentBuilder<ServerCommandSource, ?> subsubcmd = literal(rule);
-                subcmd.then(subsubcmd);
                 for (Object val : type.getEnumConstants()) {
                     subsubcmd.then(literal(((StringIdentifiable) val).asString())
                         .executes(ctx -> setRule(ctx.getSource(), rule, val)));
                 }
+                subcmd.then(subsubcmd);
             } else {
                 throw new AssertionError("Unsupported rule of " + type);
             }
@@ -92,20 +92,22 @@ public class TempRuleCommand {
 
     private static int getRule(ServerCommandSource source, String rule) {
         Object val = TempRules.get(rule);
-        String str = val instanceof StringIdentifiable ? ((StringIdentifiable) val).asString() : val.toString();
+        String str = TempRules.asString(val);
         sendFeedback(new LiteralText(rule + " = " + str));
         return 0;
     }
 
     private static int setRule(ServerCommandSource source, String rule, Object value) {
         TempRules.set(rule, value);
-        sendFeedback(new TranslatableText("commands.ctemprule.set.success", rule, value));
+        String str = TempRules.asString(value);
+        sendFeedback(new TranslatableText("commands.ctemprule.set.success", rule, str));
         return 0;
     }
 
     private static int resetRule(ServerCommandSource source, String rule) {
         TempRules.reset(rule);
-        sendFeedback(new TranslatableText("commands.ctemprule.reset.success", rule, TempRules.get(rule)));
+        String str = TempRules.asString(TempRules.get(rule));
+        sendFeedback(new TranslatableText("commands.ctemprule.reset.success", rule, str));
         return 0;
     }
 
