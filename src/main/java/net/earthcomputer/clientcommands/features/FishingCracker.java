@@ -13,6 +13,8 @@ import net.earthcomputer.clientcommands.mixin.LootPoolAccessor;
 import net.earthcomputer.clientcommands.mixin.LootPoolEntryAccessor;
 import net.earthcomputer.clientcommands.mixin.LootTableAccessor;
 import net.earthcomputer.clientcommands.mixin.ProjectileEntityAccessor;
+import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -103,6 +105,9 @@ public class FishingCracker {
     // bobber state
     private static ItemStack tool;
     private static Vec3d bobberDestPos;
+
+    // rethrow bobber
+    public static final int RETHROW_COOLDOWN = 20;
 
     // timing
     private static volatile long throwTime;
@@ -251,8 +256,37 @@ public class FishingCracker {
 
     // region UTILITY
 
+    private static boolean interanlInteractFishingBobber(){
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
+        if (player != null && interactionManager != null) {
+            ItemStack stack = player.getMainHandStack();
+            if (stack.getItem() == Items.FISHING_ROD) {
+                expectedFishingRodUses++;
+                interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean retractFishingBobber(){
+        return interanlInteractFishingBobber();
+    }
+
+    public static boolean throwFishingBobber() {
+        if (interanlInteractFishingBobber()){
+            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+            assert player != null;
+            ItemStack stack = player.getMainHandStack();
+            handleFishingRodThrow(stack);
+            return true;
+        }
+        return false;
+    }
+
     public static boolean canManipulateFishing() {
-        return TempRules.getFishingManipulation() && !goals.isEmpty();
+        return TempRules.getFishingManipulation().isEnabled() && !goals.isEmpty();
     }
 
     private static int getLocalPing() {
@@ -282,6 +316,45 @@ public class FishingCracker {
     public static void reset() {
         synchronized (STATE_LOCK) {
             state = State.NOT_MANIPULATING;
+
+            if(canManipulateFishing() && TempRules.getFishingManipulation() == TempRules.FishingManipulation.AFK){
+                state = State.WAITING_FOR_RETRHOW;
+                TaskManager.addTask("cfishRethrow", new LongTask() {
+                    private int counter;
+                    @Override
+                    public void initialize() {
+                        counter = RETHROW_COOLDOWN;
+                    }
+
+                    @Override
+                    public boolean condition() {
+                        synchronized (STATE_LOCK){
+                            return counter > 0 && state == State.WAITING_FOR_RETRHOW;
+                        }
+                    }
+
+                    @Override
+                    public void increment() {
+                        counter--;
+                    }
+
+                    @Override
+                    public void body() {
+                        scheduleDelay();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        synchronized (STATE_LOCK){
+                            if(throwFishingBobber()){
+                                state = State.WAITING_FOR_BOBBER;
+                            } else {
+                                state = State.NOT_MANIPULATING;
+                            }
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -339,18 +412,12 @@ public class FishingCracker {
         }
 
         if (ticksUntilOurItem == -1) {
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
-            ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
-            if (player != null && interactionManager != null) {
-                ItemStack stack = player.getMainHandStack();
-                if (stack.getItem() == Items.FISHING_ROD) {
-                    // retract fishing rod
-                    expectedFishingRodUses += 2;
-                    interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
-                    // throw fishing rod
-                    interactionManager.interactItem(player, player.world, Hand.MAIN_HAND);
-                    handleFishingRodThrow(stack);
+            if (retractFishingBobber()) {
+                if (!throwFishingBobber()) {
+                    reset();
                 }
+            } else {
+                reset();
             }
         } else {
             totalTicksToWait = ticksUntilOurItem;
@@ -388,7 +455,7 @@ public class FishingCracker {
             if (Math.abs(x - player.getX()) >= 1 || Math.abs(z - player.getZ()) >= 1 || Math.abs(y - player.getY()) >= 1) {
                 return;
             }
-            state = State.NOT_MANIPULATING;
+            reset();
         }
 
         Catch actualCatch = new Catch(actualLoot, experienceAmount);
@@ -445,18 +512,22 @@ public class FishingCracker {
 
             int latestReasonableArriveTick = estimatedTicksElapsed + 20 + getLocalPing() / serverMspt;
             if (latestReasonableArriveTick >= totalTicksToWait) {
-                state = State.NOT_MANIPULATING;
+                state = State.ASYNC_WAITING_FOR_FISH;
                 int timeToStartOfTick = serverMspt - averageTimeToEndOfTick;
                 int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - magicMillisecondsCorrection - getLocalPing() - timeToStartOfTick + serverMspt / 2;
                 long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
-                    if (!TempRules.getFishingManipulation()) {
+                    if (!TempRules.getFishingManipulation().isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
                         return;
                     }
                     ClientPlayerEntity oldPlayer = MinecraftClient.getInstance().player;
                     if (oldPlayer != null) {
                         ClientPlayNetworkHandler networkHandler = oldPlayer.networkHandler;
-                        while (System.nanoTime() < targetTime);
+                        while (System.nanoTime() < targetTime) {
+                            if (state != State.ASYNC_WAITING_FOR_FISH){
+                                return;
+                            }
+                        }
                         FishingBobberEntity oldFishingBobberEntity = oldPlayer.fishHook;
                         networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));
                         synchronized (STATE_LOCK) {
@@ -542,8 +613,10 @@ public class FishingCracker {
         WAITING_FOR_BOBBER,
         WAITING_FOR_FIRST_BOBBER_TICK,
         WAITING_FOR_FISH,
+        ASYNC_WAITING_FOR_FISH,
         WAITING_FOR_ITEM,
         WAITING_FOR_XP,
+        WAITING_FOR_RETRHOW,
     }
 
     public static final class Catch {

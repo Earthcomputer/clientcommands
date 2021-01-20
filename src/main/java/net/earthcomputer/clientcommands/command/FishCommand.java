@@ -115,11 +115,11 @@ public class FishCommand {
     }
 
     private static boolean checkFishingManipulationEnabled() {
-        if (!TempRules.getFishingManipulation()) {
+        if (!TempRules.getFishingManipulation().isEnabled()) {
             sendFeedback(new TranslatableText("commands.cfish.needFishingManipulation")
                     .styled(style -> style.withColor(Formatting.RED))
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set fishingManipulation true")));
+                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set fishingManipulation manual")));
             return false;
         } else {
             return true;
