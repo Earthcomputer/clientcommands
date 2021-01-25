@@ -52,6 +52,7 @@ public class ClientCommands implements ClientModInitializer {
         SignSearchCommand.register(dispatcher);
         GhostBlockCommand.register(dispatcher);
         RelogCommand.register(dispatcher);
+        CGiveCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 
