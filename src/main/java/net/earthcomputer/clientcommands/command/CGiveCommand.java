@@ -34,19 +34,19 @@ public class CGiveCommand {
 
     private static int give(ServerCommandSource source, ItemStackArgument itemArgument, int count) throws CommandSyntaxException {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-		if (!player.abilities.creativeMode) {
-			throw NOT_CREATIVE_EXCEPTION.create();
+        if (!player.abilities.creativeMode) {
+            throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-		ItemStack stack = itemArgument.createStack(Math.min(count, itemArgument.getItem().getMaxCount()), false);
+        ItemStack stack = itemArgument.createStack(Math.min(count, itemArgument.getItem().getMaxCount()), false);
 
-		PlayerInventory inventory = player.inventory;
-		inventory.setStack(inventory.selectedSlot, stack);
-		MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack, 36 + inventory.selectedSlot);
-		player.playerScreenHandler.sendContentUpdates();
+        PlayerInventory inventory = player.inventory;
+        inventory.setStack(inventory.selectedSlot, stack);
+        MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack, 36 + inventory.selectedSlot);
+        player.playerScreenHandler.sendContentUpdates();
 
-		sendFeedback(new TranslatableText("commands.cgive.success", count, stack.toHoverableText()));
-		return 0;
+        sendFeedback(new TranslatableText("commands.cgive.success", count, stack.toHoverableText()));
+        return 0;
     }
 
 }
