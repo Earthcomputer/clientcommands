@@ -27,9 +27,7 @@ public class CGiveCommand {
             .then(argument("item", itemStack())
             .executes(ctx -> give(ctx.getSource(), getItemStackArgument(ctx, "item"), 1))
                 .then(argument("count", integer(1))
-                .executes(ctx -> {
-                    return give(ctx.getSource(), getItemStackArgument(ctx, "item"), getInteger(ctx, "count"));
-                }))));
+                .executes(ctx -> give(ctx.getSource(), getItemStackArgument(ctx, "item"), getInteger(ctx, "count"))))));
     }
 
     private static int give(ServerCommandSource source, ItemStackArgument itemArgument, int count) throws CommandSyntaxException {
