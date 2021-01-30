@@ -24,8 +24,7 @@ public class CPlaySoundCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cplaysound");
 
-        RequiredArgumentBuilder<ServerCommandSource, Identifier> builder = CommandManager
-            .argument("sound", identifier())
+        RequiredArgumentBuilder<ServerCommandSource, Identifier> builder = argument("sound", identifier())
             .suggests(SuggestionProviders.AVAILABLE_SOUNDS);
 
         for (SoundCategory category : SoundCategory.values()) {
@@ -36,7 +35,7 @@ public class CPlaySoundCommand {
     }
 
     private static LiteralArgumentBuilder<ServerCommandSource> buildArguments(SoundCategory category) {
-        return CommandManager.literal(category.getName())
+        return literal(category.getName())
             .executes(ctx -> playSound(ctx.getSource(), getIdentifier(ctx, "sound"), category, MinecraftClient.getInstance().player.getPos(), 1, 1))
             .then(argument("pos", vec3())
                 .executes(ctx -> playSound(ctx.getSource(), getIdentifier(ctx, "sound"), category, getVec3(ctx, "pos"), 1, 1))
@@ -46,7 +45,7 @@ public class CPlaySoundCommand {
                         .executes(ctx -> playSound(ctx.getSource(), getIdentifier(ctx, "sound"), category, getVec3(ctx, "pos"), getFloat(ctx, "volume"), getFloat(ctx, "pitch")))));
     }
 
-    private static int playSound(ServerCommandSource source, Identifier sound, SoundCategory category, Vec3d pos, float volume, float pitch) throws CommandSyntaxException {
+    private static int playSound(ServerCommandSource source, Identifier sound, SoundCategory category, Vec3d pos, float volume, float pitch) {
         SoundInstance soundInstance = new PositionedSoundInstance(sound, category, volume, pitch, false, 0, SoundInstance.AttenuationType.LINEAR, pos.getX(), pos.getY(), pos.getZ(), false);
         MinecraftClient.getInstance().getSoundManager().play(soundInstance);
 

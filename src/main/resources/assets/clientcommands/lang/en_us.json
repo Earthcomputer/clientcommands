@@ -70,6 +70,11 @@
   "commands.cscript.reload.success": "Reloaded scripts",
   "commands.cscript.run.success": "Script ran successfully",
 
+  "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
+  "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",
+  "commands.cstopsound.success.source.any": "Stopped all '%s' sounds for self",
+  "commands.cstopsound.success.source.sound": "Stopped sound '%s' on source '%s' for self",
+
   "commands.ctask.list.noTasks": "No currently executing tasks",
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",
