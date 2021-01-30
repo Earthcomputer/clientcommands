@@ -60,6 +60,8 @@
   "commands.cglow.failed": "No entities to glow",
   "commands.cglow.success": "Glowing %d entities",
 
+  "commands.cplaysound.success": "Played sound %s to self",
+
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",

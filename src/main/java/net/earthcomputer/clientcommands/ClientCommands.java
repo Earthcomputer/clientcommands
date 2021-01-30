@@ -53,6 +53,7 @@ public class ClientCommands implements ClientModInitializer {
         GhostBlockCommand.register(dispatcher);
         RelogCommand.register(dispatcher);
         CGiveCommand.register(dispatcher);
+        CPlaySoundCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 
