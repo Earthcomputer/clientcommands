@@ -116,6 +116,13 @@ public class PlayerRandCracker {
 
     public static void onEat(ItemStack stack, Vec3d pos, int particleCount, int itemUseTimeLeft) {
         if (canMaintainPlayerRNG()) {
+
+            if (itemUseTimeLeft < 0 && particleCount != 16) {
+                // We have accounted for all eating ticks, that on the server should be calculated
+                // Sometimes if the connection is laggy we eat more than 24 ticks so just hope for the best
+                return;
+            }
+
             //Every time a person eats, the particles are random, and when finished more particles spawn(16)
             for (int i = 0; i < particleCount * 3 + 3; i++) {
                 nextInt();

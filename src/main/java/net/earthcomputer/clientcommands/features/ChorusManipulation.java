@@ -92,7 +92,8 @@ public class ChorusManipulation {
         goalBox = new Cuboid(area, Formatting.LIGHT_PURPLE.getColorValue(), -1);
         PlayerRandCracker.ThrowItemsResult throwItemsState =
                 throwItemsUntil(rand -> {
-                    if (particleCount != 16) {
+
+                    if (particleCount != 16 && itemUseTimeLeft >= 0) {
                         //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
                         for (int i = 0; i < 33 + 4.5 * itemUseTimeLeft; i++) {
                             rand.nextInt();
