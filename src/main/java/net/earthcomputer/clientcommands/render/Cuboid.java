@@ -6,39 +6,36 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
-import java.awt.*;
-
 /**
  * Copyright (c) 2020 KaptainWutax
  */
-public class Cuboid extends Renderer {
-
-    public Vec3d start;
-    public Vec3d size;
+public class Cuboid extends Shape {
 
     private final Line[] edges = new Line[12];
+    public Vec3d start;
+    public Vec3d size;
 
 //    public Cuboid() {
 //        this(BlockPos.ORIGIN, BlockPos.ORIGIN, Color.WHITE);
 //    }
 
     public Cuboid(Vec3d start, Vec3d end) {
-        this(start, end, Color.WHITE);
+        this(start, end, 0xffffff);
     }
 
-    public Cuboid(BlockBox box, Color color) {
+    public Cuboid(BlockBox box, int color) {
         this(new Vec3d(box.minX, box.minY, box.minZ), new Vec3d(box.maxX, box.maxY, box.maxZ), color);
     }
 
-    public Cuboid(Box box, Color color, int life) {
+    public Cuboid(Box box, int color, int life) {
         this(new Vec3d(box.minX, box.minY, box.minZ), new Vec3d(box.maxX, box.maxY, box.maxZ), color, life);
     }
 
-    public Cuboid(Vec3d start, Vec3d end, Color color) {
+    public Cuboid(Vec3d start, Vec3d end, int color) {
         this(start, end, color, -1);
     }
 
-    public Cuboid(Vec3d start, Vec3d end, Color color, int life) {
+    public Cuboid(Vec3d start, Vec3d end, int color, int life) {
         this.start = start;
         this.size = new Vec3d(end.getX() - start.getX(), end.getY() - start.getY(), end.getZ() - start.getZ());
         this.life = life;

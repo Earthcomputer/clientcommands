@@ -29,7 +29,6 @@
     "MixinCreeperMooshroomSheepAndSnowGolemEntity",
     "MixinCrossbowItem",
     "MixinDamageEnchantment",
-    "MixinDummyProfiler",
     "MixinEnchantingScreen",
     "MixinEnchantingTableContainer",
     "MixinEnchantmentHelper",

@@ -22,7 +22,7 @@ public class ClientCommands implements ClientModInitializer {
         //noinspection ResultOfMethodCallIgnored
         configDir.mkdirs();
 
-        RenderQueue.get().add("hand", ChorusManipulation::renderChorusGoal);
+        RenderQueue.add(RenderQueue.InjectLoc.HAND, ChorusManipulation::renderChorusGoal);
 
         ScriptManager.reloadScripts();
     }

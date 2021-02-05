@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.render.Cuboid;
-import net.earthcomputer.clientcommands.render.Renderer;
+import net.earthcomputer.clientcommands.render.Shape;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
@@ -16,8 +16,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-import java.awt.*;
-
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.earthcomputer.clientcommands.features.PlayerRandCracker.throwItemsUntil;
 
@@ -26,7 +24,7 @@ public class ChorusManipulation {
     public static boolean chorusRelativeTel;
     public static Vec3d chorusGoalFrom;
     public static Vec3d chorusGoalTo;
-    static Renderer renderer;
+    static Shape goalBox;
 
     public static int setGoal(Vec3d v1, Vec3d v2, boolean relative) {
         if (!TempRules.getChorusManipulation()) {
@@ -63,7 +61,7 @@ public class ChorusManipulation {
         chorusRelativeTel = relative;
 
         if (!relative) {
-            renderer = new Cuboid(v1, v2, Color.MAGENTA);
+            goalBox = new Cuboid(v1, v2, Formatting.LIGHT_PURPLE.getColorValue());
         }
 
         sendFeedback(new TranslatableText("chorusManip.setGoal",
@@ -91,7 +89,7 @@ public class ChorusManipulation {
         }
 
         Box finalArea = area;
-        renderer = new Cuboid(area, Color.MAGENTA, -1);
+        goalBox = new Cuboid(area, Formatting.LIGHT_PURPLE.getColorValue(), -1);
         PlayerRandCracker.ThrowItemsResult throwItemsState =
                 throwItemsUntil(rand -> {
                     if (particleCount != 16) {
@@ -163,7 +161,7 @@ public class ChorusManipulation {
     }
 
     public static void renderChorusGoal(MatrixStack matrixStack) {
-        if (renderer == null) return;
+        if (goalBox == null) return;
 
         GlStateManager.pushMatrix();
         GlStateManager.multMatrix(matrixStack.peek().getModel());
@@ -173,7 +171,7 @@ public class ChorusManipulation {
         //Makes it render through blocks.
         GlStateManager.disableDepthTest();
 
-        renderer.render();
+        goalBox.render();
 
         GlStateManager.popMatrix();
     }

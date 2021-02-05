@@ -8,20 +8,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Copyright (c) 2020 KaptainWutax
- */
 @Mixin(GameRenderer.class)
 public abstract class MixinGameRenderer {
 
-    @Inject(method = "renderWorld", at = @At("HEAD"))
-    private void renderWorldStart(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
-        RenderQueue.get().setTrackRender(matrixStack);
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V"))
+    private void renderWorldHand(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
+        RenderQueue.InjectLoc.HAND.onRender(delta, time, matrixStack);
     }
 
-    @Inject(method = "renderWorld", at = @At("TAIL"))
-    private void renderWorldFinish(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
-        RenderQueue.get().setTrackRender(null);
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V"))
+    private void renderWorldCamera(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
+        RenderQueue.InjectLoc.CAMERA.onRender(delta, time, matrixStack);
     }
-
 }

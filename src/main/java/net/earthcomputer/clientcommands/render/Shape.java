@@ -8,32 +8,27 @@ import net.minecraft.util.math.Vec3d;
 /**
  * Copyright (c) 2020 KaptainWutax
  */
-public abstract class Renderer {
+public abstract class Shape {
 
     protected MinecraftClient mc = MinecraftClient.getInstance();
 
     /**
      * The life in number of ticks
-     * Nothing
      */
     protected int life = -1;
-    protected long prevTick;
+    private long prevTick;
 
     public void render() {
-        if (this.mc.world.getTime() != this.prevTick && this.life > 0) {
-            this.life--;
-            this.prevTick = this.mc.world.getTime();
+        if (this.life > 0) {
+            this.life -= this.mc.world.getTime() - this.prevTick;
         }
+        this.prevTick = this.mc.world.getTime();
     }
 
     public abstract BlockPos getPos();
 
     public int getLife() {
         return this.life;
-    }
-
-    public boolean shouldKill() {
-        return (this.life == 0);
     }
 
     protected Vec3d toVec3d(BlockPos pos) {
