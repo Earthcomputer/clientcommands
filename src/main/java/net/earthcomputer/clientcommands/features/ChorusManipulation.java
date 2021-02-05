@@ -92,6 +92,12 @@ public class ChorusManipulation {
         goalBox = new Cuboid(area, Formatting.LIGHT_PURPLE.getColorValue(), -1);
         PlayerRandCracker.ThrowItemsResult throwItemsState =
                 throwItemsUntil(rand -> {
+                    if (itemUseTimeLeft < 0) {
+                        // We have accounted for all eating ticks, that on the server should be calculated
+                        // Sometimes if the connection is laggy we eat more than 24 ticks so just hope for the best
+                        return true;
+                    }
+
                     if (particleCount != 16) {
                         //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
                         for (int i = 0; i < 33 + 4.5 * itemUseTimeLeft; i++) {
