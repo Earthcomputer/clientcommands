@@ -40,6 +40,7 @@
     "MixinFishingRodItem",
     "MixinFlintAndSteelItem",
     "MixinForgingScreenHandler",
+    "MixinGameRenderer",
     "MixinGrindstoneContainer",
     "MixinGuiClosePacket",
     "MixinItemEntity",

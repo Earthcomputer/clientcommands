@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.interfaces.IMinecraftClient;
+import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
@@ -42,6 +43,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void onTick(CallbackInfo ci) {
+        RenderQueue.tick();
         TaskManager.tick();
         GuiBlocker.tick();
         ScriptManager.tick();

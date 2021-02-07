@@ -5,7 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
-import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -50,28 +50,19 @@ public class GlowCommand {
     private static int glowEntities(ServerCommandSource source, ClientEntitySelector entitySelector, int seconds, int color) throws CommandSyntaxException {
         boolean keepSearching = getFlag(source, FLAG_KEEP_SEARCHING);
         if (keepSearching) {
-            String taskName = TaskManager.addTask("cglow", new LongTask() {
-                @Override
-                public void initialize() {
-                }
-
+            String taskName = TaskManager.addTask("cglow", new SimpleTask() {
                 @Override
                 public boolean condition() {
                     return MinecraftClient.getInstance().player != null;
                 }
 
                 @Override
-                public void increment() {
-                }
-
-                @Override
-                public void body() {
+                protected void onTick() {
                     ClientPlayerEntity player = MinecraftClient.getInstance().player;
                     assert player != null;
                     for (Entity entity : entitySelector.getEntities(new FakeCommandSource(player))) {
                         ((IEntity) entity).addGlowingTicket(seconds * 20, color);
                     }
-                    scheduleDelay();
                 }
             });
 

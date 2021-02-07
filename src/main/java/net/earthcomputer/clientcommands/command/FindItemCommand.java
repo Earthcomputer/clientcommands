@@ -7,7 +7,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
-import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -84,7 +84,7 @@ public class FindItemCommand {
         return 0;
     }
 
-    private static class FindItemsTask extends LongTask {
+    private static class FindItemsTask extends SimpleTask {
         private final String searchingForName;
         private final Predicate<ItemStack> searchingFor;
         private final boolean searchShulkerBoxes;
@@ -104,20 +104,12 @@ public class FindItemCommand {
         }
 
         @Override
-        public void initialize() {
-        }
-
-        @Override
         public boolean condition() {
             return true;
         }
 
         @Override
-        public void increment() {
-        }
-
-        @Override
-        public void body() {
+        protected void onTick() {
             World world = MinecraftClient.getInstance().world;
             Entity entity = MinecraftClient.getInstance().cameraEntity;
             if (entity == null) {
@@ -126,11 +118,9 @@ public class FindItemCommand {
             }
             if (currentlySearchingTimeout > 0) {
                 currentlySearchingTimeout--;
-                scheduleDelay();
                 return;
             }
             if (MinecraftClient.getInstance().player.isSneaking()) {
-                scheduleDelay();
                 return;
             }
             Vec3d origin = entity.getCameraPosVec(0);
@@ -170,10 +160,9 @@ public class FindItemCommand {
                     }
                 }
             }
-            if (!keepSearching)
+            if (!keepSearching) {
                 _break();
-            else
-                scheduleDelay();
+            }
         }
 
         private boolean canSearch(World world, BlockPos pos) {

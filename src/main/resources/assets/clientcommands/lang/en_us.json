@@ -93,6 +93,12 @@
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.notClient": "Not a client-side command",
 
+  "chorusManip.landing.success": "Landing on: %d, %d, %d",
+  "chorusManip.landing.failed": "Landing manipulation not possible",
+  "chorusManip.goalTooFar": "Goal is too far away!",
+  "chorusManip.needChorusManipulation": "Chorus Fruit manipulation is not enabled.",
+  "chorusManip.setGoal": "Set %s goal area from %s to %s",
+
   "enchCrack.state": "Enchantment Crack State: %s",
   "enchCrack.state.uncracked": "Uncracked",
   "enchCrack.state.cracking": "Cracking",
@@ -154,11 +160,7 @@
   "playerManip.toolBreakWarning": "Warning: tool has %d durability left",
   "playerManip.throwError": "Condition not possible or would require more than %d item throws",
   "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
+  "playerManip.uncracked": "Player-Seed needs to be cracked.",
 
-  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
-
-  "chorusManip.setGoal": "Set %s goal area from %s to %s",
-  "chorusManip.goalTooFar": "Goal is too far away!",
-  "chorusManip.landing": "Landing on: %d, %d, %d",
-  "chorusManip.landingNotPossible": "Landing manipulation not possible"
+  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
 }

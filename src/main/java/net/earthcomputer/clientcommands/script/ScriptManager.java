@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.Input;
@@ -144,23 +145,14 @@ public class ScriptManager {
         });
         thread.javaThread.setName("ClientCommands script thread " + nextThreadId.getAndIncrement());
         thread.javaThread.setDaemon(true);
-        thread.task = new LongTask() {
-            @Override
-            public void initialize() {
-            }
-
+        thread.task = new SimpleTask() {
             @Override
             public boolean condition() {
                 return thread.running;
             }
 
             @Override
-            public void increment() {
-            }
-
-            @Override
-            public void body() {
-                scheduleDelay();
+            protected void onTick() {
             }
         };
         thread.daemon = daemon;

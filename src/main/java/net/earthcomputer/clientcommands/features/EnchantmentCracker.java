@@ -5,6 +5,7 @@ import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;
 import net.earthcomputer.clientcommands.task.OneTickTask;
+import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -355,11 +356,7 @@ public class EnchantmentCracker {
             }
             for (int i = 0; i < timesNeeded; i++) {
                 // throw the item once it's in the inventory
-                taskList.addTask(new LongTask() {
-                    @Override
-                    public void initialize() {
-                    }
-
+                taskList.addTask(new SimpleTask() {
                     @Override
                     public boolean condition() {
                         if (TempRules.playerCrackState != PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS) {
@@ -376,12 +373,7 @@ public class EnchantmentCracker {
                     }
 
                     @Override
-                    public void increment() {
-                    }
-
-                    @Override
-                    public void body() {
-                        scheduleDelay();
+                    protected void onTick() {
                     }
 
                     @Override

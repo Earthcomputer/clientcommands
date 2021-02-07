@@ -48,6 +48,12 @@
   "commands.client.enable": "Aktivieren",
   "commands.client.expectedRegex": "Ungütliges Regex %s",
 
+  "chorusManip.landing.success": "Landung auf: %d, %d, %d",
+  "chorusManip.landing.failed": "Landungsmanipulation nicht möglich",
+  "chorusManip.goalTooFar": "Ziel ist zu weit entfernt!",
+  "chorusManip.needChorusManipulation": "Chorusfruchtmanipulation muss aktiviert sein, um dieser Befehl zu führen.",
+  "chorusManip.setGoal": "%s-Zielbereich von %s bis %s festgelegt",
+
   "enchCrack.state": "Zauberknackzustand: %s",
   "enchCrack.state.uncracked": "Ungeknackt",
   "enchCrack.state.cracking": "Knacken",
@@ -109,12 +115,8 @@
   "playerManip.toolBreakWarning": "Warnung: Werkzeug hat %d Haltbarkeit übrig",
   "playerManip.throwError": "Bedingung nicht möglich oder würde mehr als %d Gegenstandswürfe erfordern",
   "playerManip.notEnoughItems": "Nicht genug Gegenstände (%d von %d), um Seed zu manipulieren",
+  "playerManip.uncracked": "Spieler-Seed muss geknackt sein.",
 
-  "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers",
-
-  "chorusManip.setGoal": "%s-Zielbereich von %s bis %s festgelegt",
-  "chorusManip.goalTooFar": "Ziel ist zu weit entfernt!",
-  "chorusManip.landing": "Landung auf: %d, %d, %d",
-  "chorusManip.landingNotPossible": "Landungsmanipulation nicht möglich"
+  "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers"
 
 }
