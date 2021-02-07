@@ -1,12 +1,13 @@
 package net.earthcomputer.clientcommands.features;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.render.Cuboid;
-import net.earthcomputer.clientcommands.render.Shape;
+import net.earthcomputer.clientcommands.render.RenderQueue;
+import net.earthcomputer.clientcommands.task.SimpleTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -24,7 +25,25 @@ public class ChorusManipulation {
     public static boolean chorusRelativeTel;
     public static Vec3d chorusGoalFrom;
     public static Vec3d chorusGoalTo;
-    static Shape goalBox;
+    private static final Object GOAL_POS_KEY = new Object();
+
+    public static void onChorusManipEnabled() {
+        TaskManager.addTask("chorusManipRenderer", new SimpleTask() {
+            @Override
+            public boolean condition() {
+                return TempRules.getChorusManipulation() && MinecraftClient.getInstance().player != null;
+            }
+
+            @Override
+            protected void onTick() {
+                if (chorusGoalFrom != null && chorusGoalTo != null) {
+                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                    assert player != null;
+                    RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, GOAL_POS_KEY, getTargetArea(player.getPos()), 0xff55ff, 1);
+                }
+            }
+        });
+    }
 
     public static int setGoal(Vec3d v1, Vec3d v2, boolean relative) {
         if (!TempRules.getChorusManipulation()) {
@@ -60,10 +79,6 @@ public class ChorusManipulation {
         chorusGoalTo = v2;
         chorusRelativeTel = relative;
 
-        if (!relative) {
-            goalBox = new Cuboid(v1, v2, Formatting.LIGHT_PURPLE.getColorValue());
-        }
-
         sendFeedback(new TranslatableText("chorusManip.setGoal",
                 (relative ? "relative" : "absolute"),
                 chorusGoalFrom.toString(), chorusGoalTo.toString()));
@@ -71,25 +86,12 @@ public class ChorusManipulation {
     }
 
     public static boolean onEat(Vec3d pos, int particleCount, int itemUseTimeLeft) {
-        Vec3d from;
-        Vec3d to;
-        Box area;
-
-        if (chorusRelativeTel) {
-            from = chorusGoalFrom.add(pos);
-            to = chorusGoalTo.add(pos);
-        } else {
-            from = chorusGoalFrom;
-            to = chorusGoalTo;
-        }
-        area = new Box(from, to);
+        Box area = getTargetArea(pos);
         if (!area.expand(8.0).contains(pos)) {
             sendError(new TranslatableText("chorusManip.goalTooFar"));
             return false;
         }
 
-        Box finalArea = area;
-        goalBox = new Cuboid(area, Formatting.LIGHT_PURPLE.getColorValue(), -1);
         PlayerRandCracker.ThrowItemsResult throwItemsState =
                 throwItemsUntil(rand -> {
 
@@ -103,7 +105,7 @@ public class ChorusManipulation {
                     final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
                     final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), 0.0D, (MinecraftClient.getInstance().world.getDimensionHeight() - 1));
                     final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
-                    final Vec3d landingArea = canTeleport(finalArea, new Vec3d(x, y, z));
+                    final Vec3d landingArea = canTeleport(area, new Vec3d(x, y, z));
 
                     if (landingArea != null) {
                         if (itemUseTimeLeft == 24) { // || itemUseTimeLeft == 0
@@ -124,6 +126,19 @@ public class ChorusManipulation {
         } else {
             return true;
         }
+    }
+
+    private static Box getTargetArea(Vec3d pos) {
+        Vec3d from;
+        Vec3d to;
+        if (chorusRelativeTel) {
+            from = chorusGoalFrom.add(pos);
+            to = chorusGoalTo.add(pos);
+        } else {
+            from = chorusGoalFrom;
+            to = chorusGoalTo;
+        }
+        return new Box(from, to);
     }
 
     /**
@@ -159,21 +174,5 @@ public class ChorusManipulation {
             }
         }
         return null;
-    }
-
-    public static void renderChorusGoal(MatrixStack matrixStack) {
-        if (goalBox == null) return;
-
-        GlStateManager.pushMatrix();
-        GlStateManager.multMatrix(matrixStack.peek().getModel());
-
-        GlStateManager.disableTexture();
-
-        //Makes it render through blocks.
-        GlStateManager.disableDepthTest();
-
-        goalBox.render();
-
-        GlStateManager.popMatrix();
     }
 }

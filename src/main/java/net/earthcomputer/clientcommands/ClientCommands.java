@@ -22,8 +22,6 @@ public class ClientCommands implements ClientModInitializer {
         //noinspection ResultOfMethodCallIgnored
         configDir.mkdirs();
 
-        RenderQueue.add(RenderQueue.InjectLoc.HAND, ChorusManipulation::renderChorusGoal);
-
         ScriptManager.reloadScripts();
     }
 

@@ -1,55 +1,89 @@
 package net.earthcomputer.clientcommands.render;
 
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
 
 public class RenderQueue {
+    private static int tickCounter = 0;
+    private static final List<AddQueueEntry> addQueue = new ArrayList<>();
+    private static final EnumMap<Layer, Map<Object, Shape>> queue = new EnumMap<>(Layer.class);
 
-    private static final HashMap<String, List<Consumer<MatrixStack>>> queue = new HashMap<>();
-
-    public static void add(InjectLoc injectLoc, Consumer<MatrixStack> runnable) {
-        if (!queue.containsKey(injectLoc.getLocation())) {
-            queue.put(injectLoc.getLocation(), new ArrayList<>());
-        }
-
-        List<Consumer<MatrixStack>> runnableList = queue.get(injectLoc.getLocation());
-        runnableList.add(runnable);
+    public static void add(Layer layer, Object key, Shape shape, int life) {
+        addQueue.add(new AddQueueEntry(layer, key, shape, life));
     }
 
-    public static void remove(InjectLoc injectLoc, Consumer<MatrixStack> runnable) {
-        if (!queue.containsKey(injectLoc.getLocation())) {
-            return;
-        }
-
-        List<Consumer<MatrixStack>> runnableList = queue.get(injectLoc.getLocation());
-        runnableList.remove(runnable);
+    public static void addCuboid(Layer layer, Object key, Vec3d from, Vec3d to, int color, int life) {
+        add(layer, key, new Cuboid(from, to, color), life);
     }
 
-    private static void onRender(float delta, long time, MatrixStack matrixStack, String location) {
-        if (matrixStack == null || !queue.containsKey(location)) return;
-        queue.get(location).forEach(r -> r.accept(matrixStack));
+    public static void addCuboid(Layer layer, Object key, Box cuboid, int color, int life) {
+        add(layer, key, new Cuboid(cuboid, color), life);
     }
 
-    public enum InjectLoc {
-        HAND("hand"),
-        CAMERA("camera"),
-        ;
-        private final String location;
+    public static void addLine(Layer layer, Object key, Vec3d from, Vec3d to, int color, int life) {
+        add(layer, key, new Line(from, to, color), life);
+    }
 
-        InjectLoc(String location) {
-            this.location = location;
+    private static void doAdd(AddQueueEntry entry) {
+        Map<Object, Shape> shapes = queue.computeIfAbsent(entry.layer, k -> new LinkedHashMap<>());
+        Shape oldShape = shapes.get(entry.key);
+        if (oldShape != null) {
+            entry.shape.prevPos = oldShape.prevPos;
+        } else {
+            entry.shape.prevPos = entry.shape.getPos();
         }
+        entry.shape.deathTime = tickCounter + entry.life;
+        shapes.put(entry.key, entry.shape);
+    }
 
-        public void onRender(float delta, long time, MatrixStack matrixStack) {
-            RenderQueue.onRender(delta, time, matrixStack, this.location);
+    public static void tick() {
+        queue.values().forEach(shapes -> shapes.values().forEach(shape -> shape.prevPos = shape.getPos()));
+        tickCounter++;
+        for (AddQueueEntry entry : addQueue) {
+            doAdd(entry);
         }
+        addQueue.clear();
+        for (Map<Object, Shape> shapes : queue.values()) {
+            Iterator<Shape> itr = shapes.values().iterator();
+            while (itr.hasNext()) {
+                Shape shape = itr.next();
+                if (tickCounter == shape.deathTime) {
+                    itr.remove();
+                }
+                shape.tick();
+            }
+        }
+    }
 
-        public String getLocation() {
-            return location;
+    public static void render(Layer layer, MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumerProvider, float delta) {
+        if (!queue.containsKey(layer)) return;
+        queue.get(layer).values().forEach(shape -> shape.render(matrixStack, vertexConsumerProvider, delta));
+    }
+
+    public enum Layer {
+        ON_TOP
+    }
+
+    private static class AddQueueEntry {
+        private final Layer layer;
+        private final Object key;
+        private final Shape shape;
+        private final int life;
+
+        private AddQueueEntry(Layer layer, Object key, Shape shape, int life) {
+            this.layer = layer;
+            this.key = key;
+            this.shape = shape;
+            this.life = life;
         }
     }
 }

@@ -2,25 +2,16 @@ package net.cortex.clientAddon.cracker;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.task.LongTask;
+import net.earthcomputer.clientcommands.task.SimpleTask;
 
-public class SeedCrackTask extends LongTask {
-    @Override
-    public void initialize() {
-    }
-
+public class SeedCrackTask extends SimpleTask {
     @Override
     public boolean condition() {
         return TempRules.playerCrackState == PlayerRandCracker.CrackState.CRACKING;
     }
 
     @Override
-    public void increment() {
-    }
-
-    @Override
-    public void body() {
-        scheduleDelay();
+    protected void onTick() {
     }
 
     @Override

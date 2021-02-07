@@ -1,38 +1,18 @@
 package net.earthcomputer.clientcommands.render;
 
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 
-/**
- * Copyright (c) 2020 KaptainWutax
- */
 public abstract class Shape {
+    int deathTime;
+    protected Vec3d prevPos;
 
-    protected MinecraftClient mc = MinecraftClient.getInstance();
-
-    /**
-     * The life in number of ticks
-     */
-    protected int life = -1;
-    private long prevTick;
-
-    public void render() {
-        if (this.life > 0) {
-            this.life -= this.mc.world.getTime() - this.prevTick;
-        }
-        this.prevTick = this.mc.world.getTime();
+    public void tick() {
     }
 
-    public abstract BlockPos getPos();
+    public abstract void render(MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumerProvider, float delta);
 
-    public int getLife() {
-        return this.life;
-    }
-
-    protected Vec3d toVec3d(BlockPos pos) {
-        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
-    }
+    public abstract Vec3d getPos();
 
 }
