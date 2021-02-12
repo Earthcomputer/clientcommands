@@ -40,7 +40,9 @@ public class ChorusManipulation {
                     ClientPlayerEntity player = MinecraftClient.getInstance().player;
                     assert player != null;
                     RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, GOAL_POS_KEY, getTargetArea(player.getPos()), 0xff55ff, 1);
+
                 }
+
             }
         });
     }
