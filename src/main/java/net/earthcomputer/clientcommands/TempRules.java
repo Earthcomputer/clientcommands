@@ -1,9 +1,6 @@
 package net.earthcomputer.clientcommands;
 
-import net.earthcomputer.clientcommands.features.ChorusManipulation;
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
-import net.earthcomputer.clientcommands.features.FishingCracker;
-import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.features.*;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.MathHelper;
 
@@ -94,7 +91,18 @@ public class TempRules {
             ChorusManipulation.onChorusManipEnabled();
         }
     }
+    @Rule(setter = "setSpeedManipulation")
+    private static boolean speedManipulation = false;
+    public static boolean getSpeedManipulation() {
+        return speedManipulation;
+    }
+    public static void setSpeedManipulation(boolean speedManipulation) {
+        TempRules.speedManipulation = speedManipulation;
+        if (speedManipulation) {
 
+            SpeedManipulation.onSpeedManipEnabled();
+        }
+    }
     @Rule(setter = "setMaxChorusItemThrows")
     public static int maxChorusItemThrows = 64 * 32;
     public static void setMaxChorusItemThrows(int maxChorusItemThrows) {

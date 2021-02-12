@@ -19,7 +19,7 @@ public class ClientCommands implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         configDir = new File(FabricLoader.getInstance().getConfigDirectory(), "clientcommands");
-        //noinspection ResultOfMethodCallIgnored
+        // noinspection ResultOfMethodCallIgnored
         configDir.mkdirs();
 
         ScriptManager.reloadScripts();
@@ -31,6 +31,7 @@ public class ClientCommands implements ClientModInitializer {
         LookCommand.register(dispatcher);
         NoteCommand.register(dispatcher);
         ShrugCommand.register(dispatcher);
+        DabCommand.register(dispatcher);
         FindCommand.register(dispatcher);
         FindBlockCommand.register(dispatcher);
         FindItemCommand.register(dispatcher);
@@ -46,6 +47,8 @@ public class ClientCommands implements ClientModInitializer {
         ScriptCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher);
         GammaCommand.register(dispatcher);
+        CClipCommand.register(dispatcher);
+        VClipCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
         ChorusCommand.register(dispatcher);
         FishCommand.register(dispatcher);
@@ -55,7 +58,7 @@ public class ClientCommands implements ClientModInitializer {
         CGiveCommand.register(dispatcher);
         CPlaySoundCommand.register(dispatcher);
         CStopSoundCommand.register(dispatcher);
-
+        SpeedCommand.register(dispatcher);
         CrackRNGCommand.register(dispatcher);
 
         if (MinecraftClient.getInstance().isIntegratedServerRunning()) {
