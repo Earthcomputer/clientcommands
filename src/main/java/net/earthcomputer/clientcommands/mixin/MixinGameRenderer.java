@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.earthcomputer.clientcommands.render.RenderQueue;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilderStorage;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
@@ -22,11 +23,16 @@ public abstract class MixinGameRenderer {
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
     private void renderWorldHand(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
         matrixStack.push();
+
+        //Render lines through everything
+        RenderSystem.clear(256, MinecraftClient.IS_SYSTEM_MAC);
+
         Vec3d cameraPos = camera.getPos();
         matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
         RenderSystem.disableDepthTest();
         RenderQueue.render(RenderQueue.Layer.ON_TOP, matrixStack, buffers.getEntityVertexConsumers(), delta);
         RenderSystem.enableDepthTest();
+
         matrixStack.pop();
     }
 }
