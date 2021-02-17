@@ -97,7 +97,8 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
         if ("Earthcomputer".equals(playerName)
                 || "Azteched".equals(playerName)
                 || "samnrad".equals(playerName)
-                || "allocator".equals(playerName)) {
+                || "allocator".equals(playerName)
+                || "Google_Alt".equals(playerName)) {
             List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
