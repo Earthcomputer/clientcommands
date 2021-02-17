@@ -8,6 +8,7 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,8 +25,9 @@ public abstract class MixinGameRenderer {
     private void renderWorldHand(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
         matrixStack.push();
 
-        //Render lines through everything
-        RenderSystem.clear(256, MinecraftClient.IS_SYSTEM_MAC);
+        // Render lines through everything
+        // TODO: is this the best approach to render through blocks?
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
 
         Vec3d cameraPos = camera.getPos();
         matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
