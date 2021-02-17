@@ -99,17 +99,22 @@ public class ClientCommandManager {
         return 1;
     }
 
-    public static Text getCoordsTextComponent(BlockPos pos) {
-        return new TranslatableText("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()).styled(style -> style
-                .withFormatting(Formatting.UNDERLINE)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new LiteralText(String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ())))));
+    public static Text getLookCoordsTextComponent(BlockPos pos) {
+        return getCommandTextComponent(new TranslatableText("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
+                String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
+    }
+
+    public static Text getGlowCoordsTextComponent(BlockPos pos) {
+        return getCommandTextComponent(new TranslatableText("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
+                String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static Text getCommandTextComponent(String translationKey, String command) {
-        return new TranslatableText(translationKey).styled(style -> style.withFormatting(Formatting.UNDERLINE)
+        return getCommandTextComponent(new TranslatableText(translationKey), command);
+    }
+
+    public static Text getCommandTextComponent(TranslatableText translatableText, String command) {
+        return translatableText.styled(style -> style.withFormatting(Formatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command))));
     }
