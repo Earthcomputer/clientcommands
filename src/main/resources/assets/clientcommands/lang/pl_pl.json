@@ -23,7 +23,7 @@
 
   "commands.cfind.found.left": "Znaleziono %1$s na ",
   "commands.cfind.found.right": ", %2$.2f bloków dalej",
-  "commands.cfind.noMatch": "Żadne obiekt nie pasuje twoim wymaganiom",
+  "commands.cfind.noMatch": "Żadne obiekty nie pasują twoim wymaganiom",
   "commands.cfind.success": "%d obiektów pasuje twoim wymaganiom",
 
   "commands.cfindblock.notFound": "Nie znaleziono takiego bloku",
