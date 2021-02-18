@@ -1,30 +1,30 @@
 {
-  "commands.cbook.success": "Pomyślnie zedytowano książkę",
+  "commands.cbook.success": "Pomyślnie nadpisano książkę",
   "commands.cbook.commandException": "Nie trzymasz książki",
 
   "commands.ccalc.expected": "Spodziewane %s",
   "commands.ccalc.invalidArgumentCount": "Funkcja \"%s\" nie może mieć %d argumentów",
 
-  "commands.ccalcstack.success": "%d %s to %d staki/ów i %d dodatkowe",
-  "commands.ccalcstack.success.empty": "%d przedmiotow to %d staki/ów i %d dodatkowe",
-  "commands.ccalcstack.success.empty.exact": "%d przedmiotów to dokładnie %d staków",
-  "commands.ccalcstack.success.exact": "%d %s to dokładnie %d staki/ów",
+  "commands.ccalcstack.success": "%d %s to %d staki i %d dodatkowe",
+  "commands.ccalcstack.success.empty": "%d przedmiotow to %d staki i %d dodatkowe",
+  "commands.ccalcstack.success.empty.exact": "%d przedmiotów to dokładnie %d staki",
+  "commands.ccalcstack.success.exact": "%d %s to dokładnie %d staki",
 
   "commands.ccrackrng.starting": "Łamanie ziarna gracza",
   "commands.ccrackrng.success": "RNG gracza złamane: %d",
   "commands.ccheatcrackrng.success": "RNG gracza złamane: %d -> %d",
 
   "commands.cenchant.expectedWithWithout": "Spodziewane \"with\"/\"without\"",
-  "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otzymać te zaklęcia",
+  "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otrzymać te zaklęcia",
   "commands.cenchant.incompatible": "Niekompatybilne zaklęcia",
-  "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączenia \"Enchanting prediction\".",
+  "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączonego \"Enchanting prediction\".",
   "commands.cenchant.success": "Rozpoczynam manipulowanie zaklęciami",
   "commands.cenchant.uncracked": "Ziarno musi być złamane",
 
   "commands.cfind.found.left": "Znaleziono %1$s na ",
   "commands.cfind.found.right": ", %2$.2f bloków dalej",
-  "commands.cfind.noMatch": "Żadne entity nie pasuje twoim wymaganiom",
-  "commands.cfind.success": "%d entity pasuje twoim wymaganiom",
+  "commands.cfind.noMatch": "Żadne obiekt nie pasuje twoim wymaganiom",
+  "commands.cfind.success": "%d obiektów pasuje twoim wymaganiom",
 
   "commands.cfindblock.notFound": "Nie znaleziono takiego bloku",
   "commands.cfindblock.success.left": "Najbliższe trafienie jest na ",
@@ -32,26 +32,57 @@
 
   "commands.cfinditem.match.left": "%dx %s znaleziono na ",
   "commands.cfinditem.match.right": "",
-  "commands.cfinditem.starting": "Szukanie %s",
-  "commands.cfinditem.starting.keepSearching": "Ciągłe szukanie %s.",
+  "commands.cfinditem.starting": "Szukam %s",
+  "commands.cfinditem.starting.keepSearching": "Będę szukać %s.",
   "commands.cfinditem.total": "Znaleziono %dx %s",
+
+  "commands.cfish.addGoal.success": "Ustawiono cel %s",
+  "commands.cfish.correctLoot": "Otrzymano prawidłowy łup z dokładnością do %dms",
+  "commands.cfish.error.crackFailed": "Nie udało się złamac RNG spławika, czy serwer jest zmodowany?",
+  "commands.cfish.error.failed": "Nieprawidłowa konfiguracja spławika",
+  "commands.cfish.error.outOfWater": "Spławik jest poza wodą, manipulacja się nie uda",
+  "commands.cfish.listGoals.noGoals": "Nie mam żadnego celu",
+  "commands.cfish.listGoals.success": "Są %d cele:",
+  "commands.cfish.needFishingManipulation": "Manipulacja łowienia jest wyłączona.",
+  "commands.cfish.removeGoal.success": "Pomyślnie usunięto cel %s",
+  "commands.cfish.wrongLoot": "Nie mogłem otrzymać łupu z dokładnością do %dms, mogłem wyprzedzić %s ticków w przód",
 
   "commands.cgamma.success": "Ustawiono gamma na %f",
 
-  "commands.crender.entities.success": "Reguła renderowania entity została zaktualizowana",
+  "commands.cghostblock.fill.success": "Zapełniono %d \"ghost blocks\"",
+  "commands.cghostblock.set.success": "Położono \"ghost block\"",
+
+  "commands.cgive.success": "Wręczono %d %s",
+  "commands.cgive.notCreative": "Gracz musi być w trybie kreatywnym aby użyć tej komendy",
+
+  "commands.cglow.entity.keepSearching.success": "Podświetlono obiekty.",
+  "commands.cglow.entity.failed": "Brak obiektów do podświetlenia",
+  "commands.cglow.entity.success": "Podświetlono %d obiekty",
+  "commands.cglow.area.success": "Podświetlono %d terenow",
+
+  "commands.cplaysound.success": "Odtworzono dzwięk %s",
+
+  "commands.crelog.failed": "Nie udało się połączyć ponownie",
+
+  "commands.crender.entities.success": "Reguła renderowania obiektu została zaktualizowana",
 
   "commands.cscript.notFound": "Skrypt \"%s\" nie istnieje",
-  "commands.cscript.reload.success": "Przeładowanie Skryptów",
+  "commands.cscript.reload.success": "Przeładowano skrypty",
   "commands.cscript.run.success": "Wykonano skrypt pomyślnie",
+
+  "commands.cstopsound.success.sourceless.any": "Zatrzymano wszystkie dzwięki",
+  "commands.cstopsound.success.sourceless.sound": "Zatrzymano dźwięk '%s'",
+  "commands.cstopsound.success.source.any": "Zatrzymano wszystkie '%s' dźwięki",
+  "commands.cstopsound.success.source.sound": "Zatrzymano dźwięk '%s' na źródle '%s'",
 
   "commands.ctask.list.noTasks": "Nie ma w tej chwili działających zadań.",
   "commands.ctask.list.success": "Działające zadania: %d",
   "commands.ctask.stop.noMatch": "Żadnych pasujących zadań",
   "commands.ctask.stop.success": "Zatrzymano %d zadań",
 
-  "commands.ctemprule.list.header": "Listowanie %d Tymczasowych reguł:",
-  "commands.ctemprule.reset.success": "Tymczasowa reguła %s została zresetowana do wartości %s",
-  "commands.ctemprule.set.success": "Tymczasowa reguła %s została zaktualizowana do wartości %s",
+  "commands.ctemprule.list.header": "Listowanie %d tymczasowych reguł:",
+  "commands.ctemprule.reset.success": "Zresetowano tymczasową regułę %s do %s",
+  "commands.ctemprule.set.success": "Zaktualizowano tymczasową regułę %s do %s",
 
   "commands.cwiki.failed": "Nie można było otrzymać zawartości z wiki",
 
@@ -62,7 +93,13 @@
   "commands.client.expectedRegex": "Nieprawidłowe wyrażenie regularne %s",
   "commands.client.notClient": "To nie jest polecenie klienta.",
 
-  "enchCrack.state": "Stan ziarna zaklęć: %s",
+  "chorusManip.landing.success": "Ląduję na: %d, %d, %d",
+  "chorusManip.landing.failed": "Manipulacja pozycjonowania jest niemożliwa",
+  "chorusManip.goalTooFar": "Cel jest zbyt daleko!",
+  "chorusManip.needChorusManipulation": "Manipulacja kwiatu Chorus'a jest wyłączona.",
+  "chorusManip.setGoal": "Ustawiono %s cel z %s na %s",
+
+  "enchCrack.state": "Stan złamania zaklęcia: %s",
   "enchCrack.state.uncracked": "Nie złamano",
   "enchCrack.state.cracking": "W trakcie",
   "enchCrack.state.cracked": "Złamano",
@@ -73,7 +110,7 @@
 
   "enchCrack.xpSeed.one": "Ziarno XP: %08X",
   "enchCrack.xpSeed.many": "Liczba możliwych ziarn XP: %d",
-  "enchCrack.playerRNGSeed.many": "Liczba możliwych RNG gracza: %d",
+  "enchCrack.playerRNGSeed.many": "Liczba możliwych ziaren RNG gracza: %d",
   "enchCrack.addInfo": "Dodaj Informacje",
 
   "enchCrack.insn.dummy": "Zaklnij zbędny przedmiot",
@@ -92,7 +129,7 @@
   "playerManip.state.ench_cracking_2": "Łamanie ziarna zaklęcia 2",
   "playerManip.state.cracking": "W trakcie łamania",
   "playerManip.state.eating": "Jedzenie",
-  "playerManip.state.manipulating_enchantments": "Manipulowanie Zaklęć",
+  "playerManip.state.manipulating_enchantments": "Manipulowanie zaklęć",
   "playerManip.state.waiting_dummy_enchant": "Czekam na zbędny przedmiot",
 
   "playerManip.reset": "Resetowanie manipulacji RNG. Powód: %s",
@@ -107,8 +144,8 @@
   "playerManip.reset.anvil": "Użyto kowadła",
   "playerManip.reset.food": "Zjedzono coś",
   "playerManip.reset.drink": "Wypito coś",
-  "playerManip.reset.baneOfArthropods": "Uderzono stawonoga z Pogromcą Stawonogów",
-  "playerManip.reset.advancement": "Zdobyto Osiągnięcie",
+  "playerManip.reset.baneOfArthropods": "Uderzono stawonoga, pogromcą stawonogów",
+  "playerManip.reset.advancement": "Zdobyto osiągnięcie",
   "playerManip.reset.shield": "Zablokowano tarczą",
   "playerManip.reset.give": "Użyto polecenia /give",
   "playerManip.reset.unbreaking": "Użyto niezniszczalnego narzędzia",
@@ -121,6 +158,9 @@
 
   "playerManip.serverBrandWarning": "Ostrzeżenie: Serwer na którym grasz jest zmodyfikowany. Nie ma gwarancji że funkcje RNG będą działać na tym serwerze",
   "playerManip.toolBreakWarning": "Ostrzeżenie: Narzędzie ma %d wytrzymałości",
+  "playerManip.throwError": "Czynność jest niemożliwa lub wymagała by więcej niż %d rzutów przedmiotami",
+  "playerManip.notEnoughItems": "Nie wystarczająca ilosc (%d of %d) by manipulować ziarnem",
+  "playerManip.uncracked": "Ziarno gracza musi być złamane.",
 
   "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: zbyt mało przedmiotów w ekwipunku"
 
