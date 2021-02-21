@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.StringReader;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.CommandReader;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IKeyBinding;
 import net.earthcomputer.clientcommands.script.ScriptManager;
@@ -37,7 +37,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
     private void onSendChatMessage(String message, CallbackInfo ci) {
         if (message.startsWith("/")) {
-            StringReader reader = new StringReader(message);
+            CommandReader reader = new CommandReader(message);
             reader.skip();
             int cursor = reader.getCursor();
             String commandName = reader.canRead() ? reader.readUnquotedString() : "";
