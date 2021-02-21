@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands.command;
+package net.earthcomputer.clientcommands.command.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.task.TaskManager;
