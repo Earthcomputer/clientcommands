@@ -2,8 +2,7 @@ package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.command.*;
-import net.earthcomputer.clientcommands.features.ChorusManipulation;
-import net.earthcomputer.clientcommands.render.RenderQueue;
+import net.earthcomputer.clientcommands.command.commands.*;
 import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;

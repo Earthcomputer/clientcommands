@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands.command;
+package net.earthcomputer.clientcommands.command.commands;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;

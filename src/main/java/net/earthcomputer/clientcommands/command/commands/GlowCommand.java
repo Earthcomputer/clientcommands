@@ -1,9 +1,11 @@
-package net.earthcomputer.clientcommands.command;
+package net.earthcomputer.clientcommands.command.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.earthcomputer.clientcommands.command.ClientEntitySelector;
+import net.earthcomputer.clientcommands.command.FakeCommandSource;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
