@@ -65,7 +65,7 @@ public class FindCommand {
     private static void sendEntityFoundMessage(ServerCommandSource source, Entity entity) {
         double distance = Math.sqrt(entity.squaredDistanceTo(source.getPosition()));
         sendFeedback(new TranslatableText("commands.cfind.found.left", entity.getName(), distance)
-                .append(getCoordsTextComponent(entity.getBlockPos()))
+                .append(getLookCoordsTextComponent(entity.getBlockPos()))
                 .append(new TranslatableText("commands.cfind.found.right", entity.getName(), distance)));
     }
 

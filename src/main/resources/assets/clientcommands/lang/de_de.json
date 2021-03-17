@@ -7,7 +7,7 @@
   "commands.ccrackrng.starting": "Spielerseed knacken",
   "commands.ccrackrng.success": "Spieler-RNG geknackt: %d",
   "commands.ccheatcrackrng.success": "Spieler-RNG geknackt: %d -> %d",
-  "commands.ccheatcrackrng.java14": "Dieser Befehl funktionieren seit Java 14 nicht mehr!",
+  "commands.ccheatcrackrng.java14": "Dieser Befehl funktioniert nicht seit Java 14!",
 
   "commands.cenchant.expectedWithWithout": "\"with\"/\"without\" erwartet",
   "commands.cenchant.failed": "Es ist unmöglich oder würde zu lange brauchen, diese Verzauberungen zu bekommen",

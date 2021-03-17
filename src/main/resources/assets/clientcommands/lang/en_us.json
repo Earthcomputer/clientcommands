@@ -57,9 +57,10 @@
   "commands.cgive.success": "Gave %d %s to self",
   "commands.cgive.notCreative": "Player must be in creative mode to give items to self",
 
-  "commands.cglow.keepSearching.success": "Glowing entities.",
-  "commands.cglow.failed": "No entities to glow",
-  "commands.cglow.success": "Glowing %d entities",
+  "commands.cglow.entity.keepSearching.success": "Glowing entities.",
+  "commands.cglow.entity.failed": "No entities to glow",
+  "commands.cglow.entity.success": "Glowing %d entities",
+  "commands.cglow.area.success": "Glowing %d area(s)",
 
   "commands.cplaysound.success": "Played sound %s to self",
 

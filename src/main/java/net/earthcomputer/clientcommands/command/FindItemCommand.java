@@ -226,7 +226,7 @@ public class FindItemCommand {
                             }
                             if (matchingItems > 0) {
                                 sendFeedback(new TranslatableText("commands.cfinditem.match.left", matchingItems, searchingForName)
-                                        .append(getCoordsTextComponent(currentlySearching))
+                                        .append(getLookCoordsTextComponent(currentlySearching))
                                         .append(new TranslatableText("commands.cfinditem.match.right", matchingItems, searchingForName)));
                                 totalFound += matchingItems;
                             }
