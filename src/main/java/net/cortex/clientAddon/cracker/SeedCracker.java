@@ -1,5 +1,6 @@
 package net.cortex.clientAddon.cracker;
 
+import net.earthcomputer.clientcommands.Rand;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
@@ -15,8 +16,6 @@ import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
-
-import java.util.Random;
 
 public class SeedCracker {
     public interface OnCrack {void callback(long seed); }
@@ -56,8 +55,7 @@ public class SeedCracker {
 
         TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
 
-        Random rand=new Random();
-        rand.setSeed(seed ^ PlayerRandCracker.MULTIPLIER);
+        Rand rand=new Rand(seed);
         rand.nextFloat();
         rand.nextFloat();
         //rand.nextFloat();
@@ -71,7 +69,7 @@ public class SeedCracker {
 			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" \n");
 		}*/
 
-        callback.callback(PlayerRandCracker.getSeed(rand));//extract seed and call callback
+        callback.callback(rand.getSeed());//extract seed and call callback
     }
     public static void crack(OnCrack Callback){
         callback=Callback;

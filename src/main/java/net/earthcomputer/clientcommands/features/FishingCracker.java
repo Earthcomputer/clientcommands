@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.features;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.earthcomputer.clientcommands.Rand;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
@@ -825,7 +826,7 @@ public class FishingCracker {
 
         private float fishAngle;
 
-        private final Random random;
+        private final Rand random;
         private final ItemStack tool;
         private final int lureLevel;
         private final int luckLevel;
@@ -834,7 +835,7 @@ public class FishingCracker {
         private boolean failed;
 
         public SimulatedFishingBobber(long seed, ItemStack tool, Vec3d pos, Vec3d velocity) {
-            this.random = new Random(seed ^ 0x5deece66dL);
+            this.random = new Rand(seed);
             // entity UUID
             this.uuid = MathHelper.randomUuid(random);
 
@@ -859,7 +860,7 @@ public class FishingCracker {
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
 
-            Random randomCopy = new Random(PlayerRandCracker.getSeed(random) ^ 0x5deece66dL);
+            Rand randomCopy = new Rand(random);
             Map<LootContextParameter<?>, Object> parameters = ImmutableMap.of(
                     LootContextParameters.ORIGIN, pos,
                     LootContextParameters.TOOL, tool,

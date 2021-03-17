@@ -352,10 +352,13 @@ public class PlayerRandCracker {
         return slots.stream().filter(slot -> slot.getStack().getItem() == preferredItem).findFirst().get();
     }
 
-    public static long singlePlayerCrackRNG() {
+    public static OptionalLong singlePlayerCrackRNG() {
         ServerPlayerEntity serverPlayer = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayer(MinecraftClient.getInstance().player.getUuid());
-        long seed = getSeed(serverPlayer.getRandom());
-        setSeed(seed);
+        OptionalLong seed = getSeed(serverPlayer.getRandom());
+        if (!seed.isPresent()) {
+            return seed;
+        }
+        setSeed(seed.getAsLong());
 
         EnchantmentCracker.possibleXPSeeds.clear();
         EnchantmentCracker.possibleXPSeeds.add(serverPlayer.getEnchantmentTableSeed());
@@ -367,16 +370,26 @@ public class PlayerRandCracker {
 
     private static final Field RANDOM_SEED;
     static {
+        Field randomSeedField;
         try {
-            RANDOM_SEED = Random.class.getDeclaredField("seed");
+            randomSeedField = Random.class.getDeclaredField("seed");
         } catch (NoSuchFieldException e) {
             throw new AssertionError(e);
         }
-        RANDOM_SEED.setAccessible(true);
-    }
-    public static long getSeed(Random rand) {
         try {
-            return ((AtomicLong) RANDOM_SEED.get(rand)).get();
+            randomSeedField.setAccessible(true);
+        } catch (Exception e) {
+            // Java 14+ can't access private fields in these classes
+            randomSeedField = null;
+        }
+        RANDOM_SEED = randomSeedField;
+    }
+    public static OptionalLong getSeed(Random rand) {
+        if (RANDOM_SEED == null) {
+            return OptionalLong.empty();
+        }
+        try {
+            return OptionalLong.of(((AtomicLong) RANDOM_SEED.get(rand)).get());
         } catch (ReflectiveOperationException e) {
             throw new AssertionError(e);
         }
