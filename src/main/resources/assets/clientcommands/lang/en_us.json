@@ -49,6 +49,8 @@
   "commands.cfish.removeGoal.success": "Successfully removed goal %s",
   "commands.cfish.wrongLoot": "Didn't get the correct loot with correction of %dms, could have been %s ticks ahead",
 
+  "commands.cfov.success": "Set FOV to %f",
+
   "commands.cgamma.success": "Set gamma to %f",
 
   "commands.cghostblock.fill.success": "%d ghost blocks filled",

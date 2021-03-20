@@ -55,6 +55,7 @@ public class ClientCommands implements ClientModInitializer {
         CGiveCommand.register(dispatcher);
         CPlaySoundCommand.register(dispatcher);
         CStopSoundCommand.register(dispatcher);
+        FovCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 
