@@ -21,7 +21,7 @@ public class MixinEntityRendererDispatcher {
 
     @Inject(method = "shouldRender", at = @At("RETURN"), cancellable = true)
     public void redirectShouldRender(Entity entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> ci) {
-        if (!RenderSettings.shouldRenderEntity(entity)) {
+        if (ci.getReturnValueZ() && !RenderSettings.shouldRenderEntity(entity)) {
             ci.setReturnValue(false);
         }
     }
