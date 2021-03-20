@@ -18,14 +18,14 @@ public class FovCommand {
 
         dispatcher.register(literal("cfov")
             .then(argument("fov", doubleArg())
-                .executes(ctx -> setGamma(ctx.getSource(), getDouble(ctx, "fov"))))
+                .executes(ctx -> setFov(ctx.getSource(), getDouble(ctx, "fov"))))
             .then(literal("normal")
-                .executes(ctx -> setGamma(ctx.getSource(), 70)))
+                .executes(ctx -> setFov(ctx.getSource(), 70)))
             .then(literal("quakePro")
-                .executes(ctx -> setGamma(ctx.getSource(), 110))));
+                .executes(ctx -> setFov(ctx.getSource(), 110))));
     }
 
-    private static int setGamma(ServerCommandSource source, double fov) {
+    private static int setFov(ServerCommandSource source, double fov) {
         MinecraftClient.getInstance().options.fov = fov;
 
         Text feedback = new TranslatableText("commands.cfov.success", fov);
