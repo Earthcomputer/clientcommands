@@ -49,8 +49,6 @@ public class GlowCommand {
         dispatcher.register(literal("cglow")
                 .then(literal("--keep-searching-entities")
                     .then(entitysArgument(true))
-                    .then(areaArgument(true))
-                    .then(blockArgument(true))
                 )
                 .then(entitysArgument(false))
                 .then(areaArgument(false))
