@@ -31,13 +31,12 @@ public class FindCommand {
         dispatcher.register(literal("cfind")
             .then(literal("--keep-searching")
                 .then(argument("filter", entities())
-                    .executes(ctx -> listEntities(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true), getEntitySelector(ctx, "filter")))))
+                    .executes(ctx -> listEntities(ctx.getSource(), getEntitySelector(ctx, "filter"), true))))
             .then(argument("filter", entities())
-                .executes(ctx -> listEntities(ctx.getSource(), getEntitySelector(ctx, "filter")))));
+                .executes(ctx -> listEntities(ctx.getSource(), getEntitySelector(ctx, "filter"), false))));
     }
 
-    private static int listEntities(ServerCommandSource source, ClientEntitySelector selector) {
-        boolean keepSearching = getFlag(source, FLAG_KEEP_SEARCHING);
+    private static int listEntities(ServerCommandSource source, ClientEntitySelector selector, boolean keepSearching) {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(selector));
 

@@ -32,10 +32,10 @@ public class CEnchantCommand {
 
     public static RequiredArgumentBuilder<ServerCommandSource, ItemAndEnchantmentsPredicate> itemAndEnchantmentsPredicateArgument(boolean simulate) {
         return argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
-                .executes(ctx -> cenchant(withFlags(ctx.getSource(), FLAG_SIMULATE, simulate), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")));
+                .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate"), simulate));
     }
 
-    private static int cenchant(ServerCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
+    private static int cenchant(ServerCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate, boolean simulate) throws CommandException {
         if (!TempRules.getEnchantingPrediction()) {
             Text text = new TranslatableText("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
@@ -52,9 +52,6 @@ public class CEnchantCommand {
             sendFeedback(text);
             return 0;
         }
-
-        boolean simulate = getFlag(source, FLAG_SIMULATE);
-
         EnchantmentCracker.ManipulateResult result = EnchantmentCracker.manipulateEnchantments(
                 itemAndEnchantmentsPredicate.item,
                 itemAndEnchantmentsPredicate.predicate,
