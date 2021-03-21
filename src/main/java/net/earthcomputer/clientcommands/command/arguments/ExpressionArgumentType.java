@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.TempRules;
@@ -26,6 +27,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
     private static final DynamicCommandExceptionType EXPECTED_EXCEPTION = new DynamicCommandExceptionType(obj -> new TranslatableText("commands.ccalc.expected", obj));
     private static final Dynamic2CommandExceptionType INVALID_ARGUMENT_COUNT = new Dynamic2CommandExceptionType((func, count) -> new TranslatableText("commands.ccalc.invalidArgumentCount", func, count));
+    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED = new SimpleCommandExceptionType(new TranslatableText("commands.ccalc.tooDeeplyNested"));
 
     private ExpressionArgumentType() {}
 
@@ -40,7 +42,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
     @Override
     public Expression parse(StringReader reader) throws CommandSyntaxException {
         int start = reader.getCursor();
-        Expression ret = new Parser(reader).parseExpression();
+        Expression ret = new Parser(reader).parse();
         ret.strVal = reader.getString().substring(start, reader.getCursor());
         return ret;
     }
@@ -53,7 +55,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         Parser parser = new Parser(reader);
 
         try {
-            parser.parseExpression();
+            parser.parse();
         } catch (CommandSyntaxException ignore) {
         }
 
@@ -69,105 +71,64 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
     }
 
     private static class Parser {
-        private StringReader reader;
+        private final StringReader reader;
         private Consumer<SuggestionsBuilder> suggestor;
 
         public Parser(StringReader reader) {
             this.reader = reader;
         }
 
-        public Expression parseExpression() throws CommandSyntaxException {
-            return parseExpression1();
-        }
-
-        private Expression parseExpression1() throws CommandSyntaxException {
-            Expression left = parseExpression2();
-
-            reader.skipWhitespace();
-            if (reader.canRead()) {
-                if (reader.peek() == '+') {
-                    reader.skip();
-                    reader.skipWhitespace();
-                    Expression right = parseExpression1();
-                    return new BinaryOpExpression(left, right, Double::sum, "addition");
-                }
-
-                if (reader.peek() == '-') {
-                    reader.skip();
-                    reader.skipWhitespace();
-                    Expression right = parseExpression1();
-                    return new BinaryOpExpression(left, right, (l, r) -> l - r, "subtraction");
-                }
+        public Expression parse() throws CommandSyntaxException {
+            try {
+                return parseExpression();
+            } catch (StackOverflowError e) {
+                suggestor = null;
+                throw TOO_DEEPLY_NESTED.create();
             }
-
-            return left;
         }
 
-        private Expression parseExpression2() throws CommandSyntaxException {
-            Expression left = parseExpression3();
-
+        // <Expression> ::= <Term> | (<Expression> ("+" | "-") <Term>)
+        private Expression parseExpression() throws CommandSyntaxException {
+            Expression expr = parseTerm();
             reader.skipWhitespace();
-            if (reader.canRead()) {
-                if (reader.peek() == '*') {
-                    reader.skip();
-                    reader.skipWhitespace();
-                    Expression right = parseExpression2();
-                    return new BinaryOpExpression(left, right, (l, r) -> l * r, "multiplication");
-                }
 
-                if (reader.peek() == '/') {
-                    reader.skip();
-                    reader.skipWhitespace();
-                    Expression right = parseExpression2();
-                    return new BinaryOpExpression(left, right, (l, r) -> l / r, "division");
-                }
-
-                if (reader.peek() == '%') {
-                    reader.skip();
-                    reader.skipWhitespace();
-                    Expression right = parseExpression2();
-                    return new BinaryOpExpression(left, right, (l, r) -> l % r, "modulo");
-                }
-
-                if (!StringReader.isAllowedNumber(reader.peek())) {
-                    int cursor = reader.getCursor();
-                    try {
-                        Expression right = parseExpression5();
-                        return new BinaryOpExpression(left, right, (l, r) -> l * r, "multiplication");
-                    } catch (CommandSyntaxException e) {
-                        reader.setCursor(cursor);
-                    }
-                }
-            }
-
-            return left;
-        }
-
-        private Expression parseExpression3() throws CommandSyntaxException {
-            List<Expression> subExpressions = new ArrayList<>();
-            subExpressions.add(parseExpression4());
-
-            reader.skipWhitespace();
-            while (reader.canRead() && reader.peek() == '^') {
-                reader.skip();
+            while (reader.canRead() && (reader.peek() == '+' || reader.peek() == '-')) {
+                char operator = reader.read();
                 reader.skipWhitespace();
-                subExpressions.add(parseExpression4());
-                reader.skipWhitespace();
+                Expression right = parseTerm();
+                if (operator == '+') {
+                    expr = new BinaryOpExpression(expr, right, Double::sum, "addition");
+                } else {
+                    expr = new BinaryOpExpression(expr, right, (l, r) -> l - r, "subtraction");
+                }
             }
 
-            if (subExpressions.size() == 1) {
-                return subExpressions.get(0);
-            } else {
-                Expression right = subExpressions.get(subExpressions.size() - 1);
-                for (int i = subExpressions.size() - 2; i >= 0; i--) {
-                    Expression left = subExpressions.get(i);
-                    right = new BinaryOpExpression(left, right, Math::pow, "exponentiation");
-                }
-                return right;
-            }
+            return expr;
         }
 
-        private Expression parseExpression4() throws CommandSyntaxException {
+        // <Term> ::= <Unary> | (<Term> ("*" | "/" | "%") <Unary>)
+        private Expression parseTerm() throws CommandSyntaxException {
+            Expression expr = parseUnary();
+            reader.skipWhitespace();
+
+            while (reader.canRead() && (reader.peek() == '*' || reader.peek() == '/' || reader.peek() == '%')) {
+                char operator = reader.read();
+                reader.skipWhitespace();
+                Expression right = parseUnary();
+                if (operator == '*') {
+                    expr = new BinaryOpExpression(expr, right, (l, r) -> l * r, "multiplication");
+                } else if (operator == '/') {
+                    expr = new BinaryOpExpression(expr, right, (l, r) -> l / r, "division");
+                } else {
+                    expr = new BinaryOpExpression(expr, right, (l, r) -> l % r, "modulo");
+                }
+            }
+
+            return expr;
+        }
+
+        // <Unary> ::= ("+" | "-")* <ImplicitMult>
+        private Expression parseUnary() throws CommandSyntaxException {
             boolean negative = false;
             while (reader.canRead() && (reader.peek() == '+' || reader.peek() == '-')) {
                 if (reader.peek() == '-')
@@ -176,14 +137,50 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 reader.skipWhitespace();
             }
 
-            Expression right = parseExpression5();
+            Expression right = parseImplicitMult();
             if (negative)
                 return new NegateExpression(right);
             else
                 return right;
         }
 
-        private Expression parseExpression5() throws CommandSyntaxException {
+        // <ImplicitMult> ::= <Exponentiation> | (<not lookahead Literal> <ImplicitMult>)
+        private Expression parseImplicitMult() throws CommandSyntaxException {
+            Expression expr = parseExponentiation();
+
+            if (reader.canRead() && !StringReader.isAllowedNumber(reader.peek())) {
+                int cursor = reader.getCursor();
+                try {
+                    Expression right = parseImplicitMult();
+                    return new BinaryOpExpression(expr, right, (l, r) -> l * r, "multiplication");
+                } catch (CommandSyntaxException e) {
+                    reader.setCursor(cursor);
+                }
+            }
+
+            return expr;
+        }
+
+        // <Exponentiation> ::= <ConstantOrFunction> | (<ConstantOrFunction> "^" <Unary>)
+        private Expression parseExponentiation() throws CommandSyntaxException {
+            Expression expr = parseConstantOrFunction();
+            reader.skipWhitespace();
+            if (reader.canRead() && reader.peek() == '^') {
+                reader.skip();
+                reader.skipWhitespace();
+                Expression exponent = parseUnary();
+                return new BinaryOpExpression(expr, exponent, Math::pow, "exponentiation");
+            }
+
+            return expr;
+        }
+
+        // <ConstantOrFunction> ::= <Parenthesized> | <Constant> | <Function>
+        // <Constant> ::= any of the defined constants
+        // <Function> ::= <FunctionName> "(" <FunctionArgumentList> ")"
+        // <FunctionName> ::= any of the defined function names
+        // <FunctionArgumentList> ::= <Expression> | (<Expression> "," <FunctionArgumentList>)
+        private Expression parseConstantOrFunction() throws CommandSyntaxException {
             int cursor = reader.getCursor();
             suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
@@ -238,12 +235,13 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
             if (reader.canRead() && reader.peek() == '(')
                 suggestor = null;
 
-            Expression ret = parseExpression6();
+            Expression ret = parseParenthesized();
             suggestor = null;
             return ret;
         }
 
-        private Expression parseExpression6() throws CommandSyntaxException {
+        // <Parenthesized> ::= <Literal> | ("(" <Expression> ")")
+        private Expression parseParenthesized() throws CommandSyntaxException {
             if (reader.canRead() && reader.peek() == '(') {
                 reader.skip();
                 reader.skipWhitespace();
@@ -254,10 +252,11 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 reader.skip();
                 return ret;
             }
-            return parseExpression7();
+            return parseLiteral();
         }
 
-        private Expression parseExpression7() throws CommandSyntaxException {
+        // <Literal> ::= ("0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | ".")+
+        private Expression parseLiteral() throws CommandSyntaxException {
             int start = reader.getCursor();
             while (reader.canRead() && isAllowedNumber(reader.peek()))
                 reader.skip();
@@ -284,11 +283,10 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
     }
 
     private static class BinaryOpExpression extends Expression {
-
-        private Expression left;
-        private Expression right;
-        private DoubleBinaryOperator operator;
-        private String type;
+        private final Expression left;
+        private final Expression right;
+        private final DoubleBinaryOperator operator;
+        private final String type;
 
         public BinaryOpExpression(Expression left, Expression right, DoubleBinaryOperator operator, String type) {
             this.left = left;
@@ -309,7 +307,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
     }
 
     private static class NegateExpression extends Expression {
-        private Expression right;
+        private final Expression right;
 
         public NegateExpression(Expression right) {
             this.right = right;
@@ -334,8 +332,8 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 "ans", () -> TempRules.calcAnswer
         );
 
-        private String type;
-        private DoubleSupplier constant;
+        private final String type;
+        private final DoubleSupplier constant;
 
         public ConstantExpression(String type, DoubleSupplier constant) {
             this.type = type;
@@ -355,7 +353,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
     public static class FunctionExpression extends Expression {
 
-        private static Map<String, IFunction> FUNCTIONS = ImmutableMap.<String, IFunction>builder()
+        private static final Map<String, IFunction> FUNCTIONS = ImmutableMap.<String, IFunction>builder()
                 .put("sqrt", (UnaryFunction) Math::sqrt)
                 .put("abs", (UnaryFunction) Math::abs)
                 .put("floor", (UnaryFunction) Math::floor)
@@ -423,9 +421,9 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 .put("not", (UnaryFunction) val -> (double)(~((int)val)))
         .build();
 
-        private String type;
-        private IFunction function;
-        private Expression[] arguments;
+        private final String type;
+        private final IFunction function;
+        private final Expression[] arguments;
 
         public FunctionExpression(String type, IFunction function, Expression... arguments) {
             this.type = type;
@@ -504,7 +502,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
     }
 
     private static class LiteralExpression extends Expression {
-        private double val;
+        private final double val;
 
         public LiteralExpression(double val) {
             this.val = val;

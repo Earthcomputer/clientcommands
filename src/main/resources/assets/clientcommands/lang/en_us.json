@@ -15,6 +15,7 @@
   "commands.ccalc.parse.function": "(function '%s' with arguments: %s)",
   "commands.ccalc.parse.literal": "(literal: %s)",
   "commands.ccalc.parse.negate": "(negated: %s)",
+  "commands.ccalc.tooDeeplyNested": "Expression is too deeply nested",
 
   "commands.ccalcstack.success": "%d %s is %d stacks and %d extra",
   "commands.ccalcstack.success.empty": "%d items is %d stacks and %d extra",
