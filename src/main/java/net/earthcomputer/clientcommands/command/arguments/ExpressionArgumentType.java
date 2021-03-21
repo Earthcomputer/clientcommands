@@ -338,6 +338,8 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         private static Map<String, IFunction> FUNCTIONS = ImmutableMap.<String, IFunction>builder()
                 .put("sqrt", (UnaryFunction) Math::sqrt)
                 .put("abs", (UnaryFunction) Math::abs)
+                .put("floor", (UnaryFunction) Math::floor)
+                .put("ceil", (UnaryFunction) Math::ceil)
                 .put("ln", (UnaryFunction) Math::log)
                 .put("log", new IFunction() {
                     @Override
