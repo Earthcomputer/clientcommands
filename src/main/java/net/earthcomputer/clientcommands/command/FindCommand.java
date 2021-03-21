@@ -22,12 +22,9 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class FindCommand {
 
-    private static final int FLAG_KEEP_SEARCHING = 1;
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfind");
 
-        LiteralCommandNode<ServerCommandSource> cfind = dispatcher.register(literal("cfind"));
         dispatcher.register(literal("cfind")
             .then(literal("--keep-searching")
                 .then(argument("filter", entities())

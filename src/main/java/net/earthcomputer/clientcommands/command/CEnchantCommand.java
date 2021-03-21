@@ -17,8 +17,6 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class CEnchantCommand {
 
-    private static final int FLAG_SIMULATE = 1;
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cenchant");
 

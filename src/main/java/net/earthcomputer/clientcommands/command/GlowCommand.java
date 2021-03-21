@@ -40,12 +40,9 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class GlowCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cglow.entity.failed"));
 
-    private static final int FLAG_KEEP_SEARCHING = 1;
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cglow");
 
-        LiteralCommandNode<ServerCommandSource> cglow = dispatcher.register(literal("cglow"));
         dispatcher.register(literal("cglow")
                 .then(literal("--keep-searching-entities")
                     .then(entitysArgument(true))
