@@ -12,7 +12,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.TempRules;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -89,14 +89,14 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                     reader.skip();
                     reader.skipWhitespace();
                     Expression right = parseExpression1();
-                    return new BinaryOpExpression(left, right, Double::sum);
+                    return new BinaryOpExpression(left, right, Double::sum, "addition");
                 }
 
                 if (reader.peek() == '-') {
                     reader.skip();
                     reader.skipWhitespace();
                     Expression right = parseExpression1();
-                    return new BinaryOpExpression(left, right, (l, r) -> l - r);
+                    return new BinaryOpExpression(left, right, (l, r) -> l - r, "subtraction");
                 }
             }
 
@@ -112,28 +112,28 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                     reader.skip();
                     reader.skipWhitespace();
                     Expression right = parseExpression2();
-                    return new BinaryOpExpression(left, right, (l, r) -> l * r);
+                    return new BinaryOpExpression(left, right, (l, r) -> l * r, "multiplication");
                 }
 
                 if (reader.peek() == '/') {
                     reader.skip();
                     reader.skipWhitespace();
                     Expression right = parseExpression2();
-                    return new BinaryOpExpression(left, right, (l, r) -> l / r);
+                    return new BinaryOpExpression(left, right, (l, r) -> l / r, "division");
                 }
 
                 if (reader.peek() == '%') {
                     reader.skip();
                     reader.skipWhitespace();
                     Expression right = parseExpression2();
-                    return new BinaryOpExpression(left, right, (l, r) -> l % r);
+                    return new BinaryOpExpression(left, right, (l, r) -> l % r, "modulo");
                 }
 
                 if (!StringReader.isAllowedNumber(reader.peek())) {
                     int cursor = reader.getCursor();
                     try {
                         Expression right = parseExpression5();
-                        return new BinaryOpExpression(left, right, (l, r) -> l * r);
+                        return new BinaryOpExpression(left, right, (l, r) -> l * r, "multiplication");
                     } catch (CommandSyntaxException e) {
                         reader.setCursor(cursor);
                     }
@@ -161,7 +161,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 Expression right = subExpressions.get(subExpressions.size() - 1);
                 for (int i = subExpressions.size() - 2; i >= 0; i--) {
                     Expression left = subExpressions.get(i);
-                    right = new BinaryOpExpression(left, right, Math::pow);
+                    right = new BinaryOpExpression(left, right, Math::pow, "exponentiation");
                 }
                 return right;
             }
@@ -196,7 +196,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
             if (ConstantExpression.CONSTANTS.containsKey(word)) {
                 suggestor = null;
-                return new ConstantExpression(ConstantExpression.CONSTANTS.get(word));
+                return new ConstantExpression(word, ConstantExpression.CONSTANTS.get(word));
             }
 
             if (FunctionExpression.FUNCTIONS.containsKey(word)) {
@@ -230,7 +230,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                     throw INVALID_ARGUMENT_COUNT.createWithContext(reader, word, arguments.size());
                 }
 
-                return new FunctionExpression(function, arguments.toArray(new Expression[0]));
+                return new FunctionExpression(word, function, arguments.toArray(new Expression[0]));
             }
 
             reader.setCursor(cursor);
@@ -280,6 +280,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
     public static abstract class Expression {
         public String strVal;
         public abstract double eval();
+        public abstract Text getParsedTree();
     }
 
     private static class BinaryOpExpression extends Expression {
@@ -287,16 +288,23 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         private Expression left;
         private Expression right;
         private DoubleBinaryOperator operator;
+        private String type;
 
-        public BinaryOpExpression(Expression left, Expression right, DoubleBinaryOperator operator) {
+        public BinaryOpExpression(Expression left, Expression right, DoubleBinaryOperator operator, String type) {
             this.left = left;
             this.right = right;
             this.operator = operator;
+            this.type = type;
         }
 
         @Override
         public double eval() {
             return operator.applyAsDouble(left.eval(), right.eval());
+        }
+
+        @Override
+        public Text getParsedTree() {
+            return new TranslatableText("commands.ccalc.parse.binaryOperator." + type, left.getParsedTree(), right.getParsedTree());
         }
     }
 
@@ -311,6 +319,11 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         public double eval() {
             return -right.eval();
         }
+
+        @Override
+        public Text getParsedTree() {
+            return new TranslatableText("commands.ccalc.parse.negate", this.right.getParsedTree());
+        }
     }
 
     private static class ConstantExpression extends Expression {
@@ -321,15 +334,22 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 "ans", () -> TempRules.calcAnswer
         );
 
+        private String type;
         private DoubleSupplier constant;
 
-        public ConstantExpression(DoubleSupplier constant) {
+        public ConstantExpression(String type, DoubleSupplier constant) {
+            this.type = type;
             this.constant = constant;
         }
 
         @Override
         public double eval() {
             return constant.getAsDouble();
+        }
+
+        @Override
+        public Text getParsedTree() {
+            return new TranslatableText("commands.ccalc.parse.constant", this.type);
         }
     }
 
@@ -403,10 +423,12 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 .put("not", (UnaryFunction) val -> (double)(~((int)val)))
         .build();
 
+        private String type;
         private IFunction function;
         private Expression[] arguments;
 
-        public FunctionExpression(IFunction function, Expression... arguments) {
+        public FunctionExpression(String type, IFunction function, Expression... arguments) {
+            this.type = type;
             this.function = function;
             this.arguments = arguments;
         }
@@ -417,6 +439,23 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
             for (int i = 0; i < args.length; i++)
                 args[i] = arguments[i].eval();
             return function.eval(args);
+        }
+
+        @Override
+        public Text getParsedTree() {
+            MutableText argumentsText = new LiteralText("");
+            boolean first = true;
+            for (Expression argument : this.arguments) {
+                if (first) {
+                    first = false;
+                } else {
+                    argumentsText.append(", ");
+                }
+
+                argumentsText.append(argument.getParsedTree());
+            }
+
+            return new TranslatableText("commands.ccalc.parse.function", this.type, argumentsText);
         }
 
         private static interface IFunction {
@@ -474,6 +513,11 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         @Override
         public double eval() {
             return val;
+        }
+
+        @Override
+        public Text getParsedTree() {
+            return new TranslatableText("commands.ccalc.parse.literal", this.val);
         }
     }
 
