@@ -98,7 +98,7 @@ public class GlowCommand {
                                 .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))));
     }
 
-    private static int glowEntities(ServerCommandSource source, ClientEntitySelector entitySelector,boolean keepSearching, int seconds, int color) throws CommandSyntaxException {
+    private static int glowEntities(ServerCommandSource source, ClientEntitySelector entitySelector, boolean keepSearching, int seconds, int color) throws CommandSyntaxException {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cglow", new SimpleTask() {
                 @Override

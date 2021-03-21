@@ -23,11 +23,9 @@ public class CEnchantCommand {
         addClientSideCommand("cenchant");
 
         dispatcher.register(literal("cenchant")
+                .then(itemAndEnchantmentsPredicateArgument(false))
                 .then(literal("--simulate")
-                        .then(itemAndEnchantmentsPredicateArgument(true)))
-                .then(
-                        itemAndEnchantmentsPredicateArgument(false)
-                ));
+                        .then(itemAndEnchantmentsPredicateArgument(true))));
     }
 
     public static RequiredArgumentBuilder<ServerCommandSource, ItemAndEnchantmentsPredicate> itemAndEnchantmentsPredicateArgument(boolean simulate) {
