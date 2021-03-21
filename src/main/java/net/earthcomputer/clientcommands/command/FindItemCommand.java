@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
@@ -51,24 +51,29 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class FindItemCommand {
 
-    private static final int FLAG_NO_SEARCH_SHULKER_BOX = 1;
-    private static final int FLAG_KEEP_SEARCHING = 2;
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfinditem");
 
-        LiteralCommandNode<ServerCommandSource> cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
-                .then(literal("--no-search-shulker-box")
-                        .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
+            .then(literal("--no-search-shulker-box")
+                .then(itemArgument(true, false))
                 .then(literal("--keep-searching")
-                        .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
-                .then(argument("item", withString(clientItemPredicate()))
-                        .executes(ctx ->
-                                findItem(ctx,
-                                        getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
-                                        getFlag(ctx, FLAG_KEEP_SEARCHING),
-                                        getWithString(ctx, "item", ItemPredicateArgument.class)))));
+                    .then(itemArgument(true, true))))
+            .then(literal("--keep-searching")
+                .then(itemArgument(false, true))
+                .then(literal("--no-search-shulker-box")
+                    .then(itemArgument(true, true))))
+            .then(itemArgument(false, false))
+        );
+    }
+
+    public static RequiredArgumentBuilder<ServerCommandSource, Pair<String, ItemPredicateArgument>> itemArgument(boolean noSearchShulkerBox, boolean keepSearching) {
+        return argument("item", withString(clientItemPredicate()))
+            .executes(ctx ->
+                findItem(ctx,
+                    noSearchShulkerBox,
+                    keepSearching,
+                    getWithString(ctx, "item", ItemPredicateArgument.class)));
     }
 
     private static int findItem(CommandContext<ServerCommandSource> source, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, ItemPredicateArgument> item) throws CommandSyntaxException {

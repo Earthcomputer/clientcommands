@@ -1,6 +1,8 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -46,41 +48,56 @@ public class GlowCommand {
         LiteralCommandNode<ServerCommandSource> cglow = dispatcher.register(literal("cglow"));
         dispatcher.register(literal("cglow")
                 .then(literal("--keep-searching-entities")
-                    .redirect(cglow, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
-                .then(literal("entities")
-                    .then(argument("targets", entities())
-                        .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), getFlag(ctx, FLAG_KEEP_SEARCHING) ? 0 : 30, 0xffffff))
+                    .then(entitysArgument(true))
+                    .then(areaArgument(true))
+                    .then(blockArgument(true))
+                )
+                .then(entitysArgument(false))
+                .then(areaArgument(false))
+                .then(blockArgument(false))
+
+        );
+    }
+
+    public static ArgumentBuilder<ServerCommandSource, LiteralArgumentBuilder<ServerCommandSource>> entitysArgument(boolean keepSearching){
+        return literal("entities")
+            .then(argument("targets", entities())
+                .executes(ctx -> glowEntities(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getEntitySelector(ctx, "targets"), keepSearching ? 0 : 30, 0xffffff))
+                .then(argument("seconds", integer(0))
+                    .executes(ctx -> glowEntities(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), 0xffffff))
+                    .then(literal("color")
+                        .then(argument("color", color())
+                            .executes(ctx -> glowEntities(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                    .then(literal("colorCode")
+                        .then(argument("color", multibaseInteger(0, 0xffffff))
+                            .executes(ctx -> glowEntities(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))));
+    }
+    public static ArgumentBuilder<ServerCommandSource, LiteralArgumentBuilder<ServerCommandSource>> areaArgument(boolean keepSearching){
+            return literal("area")
+                .then(CommandManager.argument("from", blockPos())
+                    .then(CommandManager.argument("to", blockPos())
+                        .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), 1, 0xffffff))
                         .then(argument("seconds", integer(0))
-                            .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), 0xffffff))
+                            .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getInteger(ctx, "seconds"), 0xffffff))
                             .then(literal("color")
                                 .then(argument("color", color())
-                                    .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                                    .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
                             .then(literal("colorCode")
                                 .then(argument("color", multibaseInteger(0, 0xffffff))
-                                    .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color"))))))))
-                .then(literal("area")
-                    .then(CommandManager.argument("from", blockPos())
-                        .then(CommandManager.argument("to", blockPos())
-                            .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), 1, 0xffffff))
-                            .then(argument("seconds", integer(0))
-                                .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getInteger(ctx, "seconds"), 0xffffff))
-                                .then(literal("color")
-                                    .then(argument("color", color())
-                                        .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
-                                .then(literal("colorCode")
-                                    .then(argument("color", multibaseInteger(0, 0xffffff))
-                                        .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))))
-                .then(literal("block")
-                    .then(CommandManager.argument("block", blockPos())
-                        .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "block"), null, 1, 0xffffff))
-                        .then(argument("seconds", integer(0))
-                            .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), 0xffffff))
-                            .then(literal("color")
-                                .then(argument("color", color())
-                                    .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
-                            .then(literal("colorCode")
-                                .then(argument("color", multibaseInteger(0, 0xffffff))
-                                    .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))));
+                                    .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color"))))))));
+    }
+    public static ArgumentBuilder<ServerCommandSource, LiteralArgumentBuilder<ServerCommandSource>> blockArgument(boolean keepSearching){
+            return literal("block")
+                .then(CommandManager.argument("block", blockPos())
+                    .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "block"), null, 1, 0xffffff))
+                    .then(argument("seconds", integer(0))
+                        .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), 0xffffff))
+                        .then(literal("color")
+                            .then(argument("color", color())
+                                .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                        .then(literal("colorCode")
+                            .then(argument("color", multibaseInteger(0, 0xffffff))
+                                .executes(ctx -> glowBlock(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, keepSearching), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))));
     }
 
     private static int glowEntities(ServerCommandSource source, ClientEntitySelector entitySelector, int seconds, int color) throws CommandSyntaxException {

@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
@@ -22,12 +22,17 @@ public class CEnchantCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cenchant");
 
-        LiteralCommandNode<ServerCommandSource> cenchant = dispatcher.register(literal("cenchant"));
         dispatcher.register(literal("cenchant")
                 .then(literal("--simulate")
-                        .redirect(cenchant, ctx -> withFlags(ctx.getSource(), FLAG_SIMULATE, true)))
-                .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
-                        .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
+                        .then(itemAndEnchantmentsPredicateArgument(true)))
+                .then(
+                        itemAndEnchantmentsPredicateArgument(false)
+                ));
+    }
+
+    public static RequiredArgumentBuilder<ServerCommandSource, ItemAndEnchantmentsPredicate> itemAndEnchantmentsPredicateArgument(boolean simulate) {
+        return argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
+                .executes(ctx -> cenchant(withFlags(ctx.getSource(), FLAG_SIMULATE, simulate), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")));
     }
 
     private static int cenchant(ServerCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {

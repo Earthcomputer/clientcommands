@@ -30,7 +30,8 @@ public class FindCommand {
         LiteralCommandNode<ServerCommandSource> cfind = dispatcher.register(literal("cfind"));
         dispatcher.register(literal("cfind")
             .then(literal("--keep-searching")
-                .redirect(cfind, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
+                .then(argument("filter", entities())
+                    .executes(ctx -> listEntities(withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true), getEntitySelector(ctx, "filter")))))
             .then(argument("filter", entities())
                 .executes(ctx -> listEntities(ctx.getSource(), getEntitySelector(ctx, "filter")))));
     }
