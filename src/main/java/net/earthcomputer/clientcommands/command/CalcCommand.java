@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
@@ -15,21 +14,19 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class CalcCommand {
 
-    private static final int FLAG_PARSE = 1;
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("ccalc");
 
-        LiteralCommandNode<ServerCommandSource> ccalc = dispatcher.register(literal("ccalc"));
         dispatcher.register(literal("ccalc")
             .then(literal("--parse")
-                .redirect(ccalc, ctx -> withFlags(ctx.getSource(), FLAG_PARSE, true)))
+                .then(argument("expr", expression())
+                    .executes(ctx -> evaluateExpression(ctx.getSource(), true, getExpression(ctx, "expr")))))
             .then(argument("expr", expression())
-                .executes(ctx -> evaluateExpression(ctx.getSource(), getExpression(ctx, "expr")))));
+                .executes(ctx -> evaluateExpression(ctx.getSource(), false, getExpression(ctx, "expr")))));
     }
 
-    private static int evaluateExpression(ServerCommandSource source, ExpressionArgumentType.Expression expression) {
-        if (getFlag(source, FLAG_PARSE)) {
+    private static int evaluateExpression(ServerCommandSource source, boolean parse, ExpressionArgumentType.Expression expression) {
+        if (parse) {
             sendFeedback(new TranslatableText("commands.ccalc.parse", expression.getParsedTree()));
         }
 
