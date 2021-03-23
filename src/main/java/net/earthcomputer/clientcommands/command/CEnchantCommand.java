@@ -28,10 +28,10 @@ public class CEnchantCommand {
 
     public static RequiredArgumentBuilder<ServerCommandSource, ItemAndEnchantmentsPredicate> itemAndEnchantmentsPredicateArgument(boolean simulate) {
         return argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
-                .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate"), simulate));
+                .executes(ctx -> cenchant(ctx.getSource(), simulate, getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")));
     }
 
-    private static int cenchant(ServerCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate, boolean simulate) throws CommandException {
+    private static int cenchant(ServerCommandSource source, boolean simulate, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
         if (!TempRules.getEnchantingPrediction()) {
             Text text = new TranslatableText("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)

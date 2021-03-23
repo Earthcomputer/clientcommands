@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
@@ -28,12 +27,12 @@ public class FindCommand {
         dispatcher.register(literal("cfind")
             .then(literal("--keep-searching")
                 .then(argument("filter", entities())
-                    .executes(ctx -> listEntities(ctx.getSource(), getEntitySelector(ctx, "filter"), true))))
+                    .executes(ctx -> listEntities(ctx.getSource(), true, getEntitySelector(ctx, "filter")))))
             .then(argument("filter", entities())
-                .executes(ctx -> listEntities(ctx.getSource(), getEntitySelector(ctx, "filter"), false))));
+                .executes(ctx -> listEntities(ctx.getSource(), false, getEntitySelector(ctx, "filter")))));
     }
 
-    private static int listEntities(ServerCommandSource source, ClientEntitySelector selector, boolean keepSearching) {
+    private static int listEntities(ServerCommandSource source, boolean keepSearching, ClientEntitySelector selector) {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(selector));
 

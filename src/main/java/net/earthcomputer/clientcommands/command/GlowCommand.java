@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
@@ -57,15 +56,15 @@ public class GlowCommand {
     public static ArgumentBuilder<ServerCommandSource, LiteralArgumentBuilder<ServerCommandSource>> entitysArgument(boolean keepSearching){
         return literal("entities")
             .then(argument("targets", entities())
-                .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), keepSearching, keepSearching ? 0 : 30, 0xffffff))
+                .executes(ctx -> glowEntities(ctx.getSource(), keepSearching, getEntitySelector(ctx, "targets"), keepSearching ? 0 : 30, 0xffffff))
                 .then(argument("seconds", integer(0))
-                    .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), keepSearching, getInteger(ctx, "seconds"), 0xffffff))
+                    .executes(ctx -> glowEntities(ctx.getSource(), keepSearching, getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), 0xffffff))
                     .then(literal("color")
                         .then(argument("color", color())
-                            .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), keepSearching, getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                            .executes(ctx -> glowEntities(ctx.getSource(), keepSearching, getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), Optional.ofNullable(getColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
                     .then(literal("colorCode")
                         .then(argument("color", multibaseInteger(0, 0xffffff))
-                            .executes(ctx -> glowEntities(ctx.getSource(), getEntitySelector(ctx, "targets"), keepSearching, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))));
+                            .executes(ctx -> glowEntities(ctx.getSource(), keepSearching, getEntitySelector(ctx, "targets"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))));
     }
     public static ArgumentBuilder<ServerCommandSource, LiteralArgumentBuilder<ServerCommandSource>> areaArgument(){
             return literal("area")
@@ -95,7 +94,7 @@ public class GlowCommand {
                                 .executes(ctx -> glowBlock(ctx.getSource(), getBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))));
     }
 
-    private static int glowEntities(ServerCommandSource source, ClientEntitySelector entitySelector, boolean keepSearching, int seconds, int color) throws CommandSyntaxException {
+    private static int glowEntities(ServerCommandSource source, boolean keepSearching, ClientEntitySelector entitySelector, int seconds, int color) throws CommandSyntaxException {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cglow", new SimpleTask() {
                 @Override
