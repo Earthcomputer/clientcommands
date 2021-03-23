@@ -4,6 +4,18 @@
 
   "commands.ccalc.expected": "Expected %s",
   "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %d arguments",
+  "commands.ccalc.parse": "Parsed expression: %s",
+  "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
+  "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
+  "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
+  "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
+  "commands.ccalc.parse.constant": "(constant '%s')",
+  "commands.ccalc.parse.function": "(function '%s' with arguments: %s)",
+  "commands.ccalc.parse.literal": "(literal: %s)",
+  "commands.ccalc.parse.negate": "(negated: %s)",
+  "commands.ccalc.tooDeeplyNested": "Expression is too deeply nested",
 
   "commands.ccalcstack.success": "%d %s is %d stacks and %d extra",
   "commands.ccalcstack.success.empty": "%d items is %d stacks and %d extra",

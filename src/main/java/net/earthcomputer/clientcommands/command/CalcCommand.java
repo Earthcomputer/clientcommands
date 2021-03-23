@@ -1,11 +1,12 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
@@ -14,15 +15,24 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class CalcCommand {
 
+    private static final int FLAG_PARSE = 1;
+
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("ccalc");
 
+        LiteralCommandNode<ServerCommandSource> ccalc = dispatcher.register(literal("ccalc"));
         dispatcher.register(literal("ccalc")
+            .then(literal("--parse")
+                .redirect(ccalc, ctx -> withFlags(ctx.getSource(), FLAG_PARSE, true)))
             .then(argument("expr", expression())
                 .executes(ctx -> evaluateExpression(ctx.getSource(), getExpression(ctx, "expr")))));
     }
 
     private static int evaluateExpression(ServerCommandSource source, ExpressionArgumentType.Expression expression) {
+        if (getFlag(source, FLAG_PARSE)) {
+            sendFeedback(new TranslatableText("commands.ccalc.parse", expression.getParsedTree()));
+        }
+
         double result = expression.eval();
         TempRules.calcAnswer = result;
         int iresult = 0;
