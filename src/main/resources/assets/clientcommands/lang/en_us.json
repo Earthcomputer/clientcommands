@@ -76,6 +76,17 @@
   "commands.cglow.entity.success": "Glowing %d entities",
   "commands.cglow.area.success": "Glowing %d area(s)",
 
+  "commands.ckit.save.failed": "Could not save kits file",
+  "commands.ckit.load.failed": "Could not load kits file",
+  "commands.ckit.kit.notCreative": "Player must be in creative mode to give items to self",
+  "commands.ckit.kit.notFound": "Kit \"%s\" not found",
+  "commands.ckit.create.success": "Successfully created kit \"%s\"",
+  "commands.ckit.create.alreadyExists": "Kit \"%s\" already exists, overridden",
+  "commands.ckit.delete.success": "Successfully deleted kit \"%s\"",
+  "commands.ckit.edit.notFoundSoCreatedNew": "Kit \"%s\" not found, created new",
+  "commands.ckit.edit.success": "Successfully edited kit \"%s\"",
+  "commands.ckit.kit.success": "Successfully gave kit \"%s\" to self",
+
   "commands.cplaysound.success": "Played sound %s to self",
 
   "commands.crelog.failed": "Failed to relog",
