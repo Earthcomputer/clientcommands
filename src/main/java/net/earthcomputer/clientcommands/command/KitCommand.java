@@ -120,30 +120,14 @@ public class KitCommand {
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        for (int i = 0; i < kit.main.size(); i++) {
-            System.out.println(i + ": " + kit.main.get(i));
-            if (kit.main.get(i) == ItemStack.EMPTY && !override) {
-                continue;
-            }
-            client.player.inventory.main.set(i, kit.main.get(i));
-        }
-        for (int i = 0; i < kit.armor.size(); i++) {
-            if (kit.armor.get(i) == ItemStack.EMPTY && !override) {
-                continue;
-            }
-            client.player.inventory.armor.set(i, kit.armor.get(i));
-        }
-        for (int i = 0; i < kit.offHand.size(); i++) {
-            if (kit.offHand.get(i) == ItemStack.EMPTY && !override) {
-                continue;
-            }
-            client.player.inventory.offHand.set(i, kit.offHand.get(i));
-        }
 
         List<Slot> slots = client.player.playerScreenHandler.slots;
         for (int i = 0; i < slots.size(); i++) {
             if (slots.get(i).inventory == client.player.inventory) {
-                client.interactionManager.clickCreativeStack(kit.getStack(((ISlot) slots.get(i)).getIndex()), i);
+                ItemStack itemStack = kit.getStack(((ISlot) slots.get(i)).getIndex());
+                if (!itemStack.isEmpty() || override) { // same as if (!(itemStack.isEmpty() && !override))
+                    client.interactionManager.clickCreativeStack(itemStack, i);
+                }
             }
         }
 
