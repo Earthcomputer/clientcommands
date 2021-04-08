@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.interfaces.ISlot;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
@@ -33,13 +34,15 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class KitCommand {
 
-    private static final SimpleCommandExceptionType SAVE_FILE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.save.failed"));
-    private static final SimpleCommandExceptionType LOAD_FILE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.load.failed"));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.saveFile.failed"));
+    private static final SimpleCommandExceptionType LOAD_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.loadFile.failed"));
 
-    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.kit.notCreative"));
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.kit.notFound", arg));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.create.alreadyExists", arg));
 
-    private static final Path path = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
+    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.load.notCreative"));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.notFound", arg));
+
+    private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
@@ -61,69 +64,79 @@ public class KitCommand {
                         .then(argument("name", StringArgumentType.string())
                                 .suggests((ctx, builder) -> CommandSource.suggestMatching(kits.keySet(), builder))
                                 .executes(ctx -> edit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))))
-                .then(literal("kit")
+                .then(literal("load")
                         .then(argument("name", StringArgumentType.string())
                                 .suggests((ctx, builder) -> CommandSource.suggestMatching(kits.keySet(), builder))
                                 .then(literal("--override")
-                                        .executes(ctx -> kit(ctx.getSource(), StringArgumentType.getString(ctx, "name"), true)))
-                                .executes(ctx -> kit(ctx.getSource(), StringArgumentType.getString(ctx, "name"), false))))
-                .then(literal("kits")
-                        .executes(ctx -> kits(ctx.getSource()))));
+                                        .executes(ctx -> load(ctx.getSource(), StringArgumentType.getString(ctx, "name"), true)))
+                                .executes(ctx -> load(ctx.getSource(), StringArgumentType.getString(ctx, "name"), false))))
+                .then(literal("list")
+                        .executes(ctx -> list(ctx.getSource()))));
     }
 
     private static int create(ServerCommandSource source, String name) throws CommandSyntaxException {
         loadFile();
 
-        if (kits.put(name, client.player.inventory) == null) {
-            saveFile();
-            sendFeedback("commands.ckit.create.success", name);
-        } else {
-            saveFile();
-            sendFeedback("commands.ckit.create.alreadyExists", name);
+        if (kits.get(name) != null) {
+            throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
-        return 1;
+        kits.put(name, client.player.inventory);
+        saveFile();
+        sendFeedback("commands.ckit.create.success", name);
+        return 0;
     }
 
     private static int delete(ServerCommandSource source, String name) throws CommandSyntaxException {
         loadFile();
 
-        if (kits.remove(name) == null) throw NOT_FOUND_EXCEPTION.create(name);
+        if (kits.remove(name) == null) {
+            throw NOT_FOUND_EXCEPTION.create(name);
+        }
         saveFile();
         sendFeedback("commands.ckit.delete.success", name);
-        return 1;
+        return 0;
     }
 
     private static int edit(ServerCommandSource source, String name) throws CommandSyntaxException {
         loadFile();
 
-        if (kits.put(name, client.player.inventory) == null) {
-            saveFile();
-            sendFeedback("commands.ckit.edit.notFoundSoCreatedNew", name);
-        } else {
-            saveFile();
-            sendFeedback("commands.ckit.edit.success", name);
+        if (kits.get(name) == null) {
+            throw NOT_FOUND_EXCEPTION.create(name);
         }
-        return 1;
+        kits.put(name, client.player.inventory);
+        saveFile();
+        sendFeedback("commands.ckit.edit.success", name);
+        return 0;
     }
 
-    private static int kit(ServerCommandSource source, String name, boolean override) throws CommandSyntaxException {
-        if (!client.player.isCreative() || !client.player.abilities.creativeMode) throw NOT_CREATIVE_EXCEPTION.create();
+    private static int load(ServerCommandSource source, String name, boolean override) throws CommandSyntaxException {
+        if (!client.player.isCreative() || !client.player.abilities.creativeMode) {
+            throw NOT_CREATIVE_EXCEPTION.create();
+        }
 
         loadFile();
 
         PlayerInventory kit = kits.get(name);
-        if (kit == null) throw NOT_FOUND_EXCEPTION.create(name);
-
+        if (kit == null) {
+            throw NOT_FOUND_EXCEPTION.create(name);
+        }
         for (int i = 0; i < kit.main.size(); i++) {
-            if (kit.main.get(i) == ItemStack.EMPTY && !override) continue;
+            System.out.println(i + ": " + kit.main.get(i));
+            if (kit.main.get(i) == ItemStack.EMPTY && !override) {
+                continue;
+            }
             client.player.inventory.main.set(i, kit.main.get(i));
         }
         for (int i = 0; i < kit.armor.size(); i++) {
-            if (kit.armor.get(i) == ItemStack.EMPTY && !override) continue;
+            if (kit.armor.get(i) == ItemStack.EMPTY && !override) {
+                continue;
+            }
             client.player.inventory.armor.set(i, kit.armor.get(i));
         }
         for (int i = 0; i < kit.offHand.size(); i++) {
-            if (kit.offHand.get(i) == ItemStack.EMPTY && !override) continue;
+            if (kit.offHand.get(i) == ItemStack.EMPTY && !override) {
+                continue;
+            }
             client.player.inventory.offHand.set(i, kit.offHand.get(i));
         }
 
@@ -135,48 +148,48 @@ public class KitCommand {
         }
 
         client.player.playerScreenHandler.sendContentUpdates();
-        sendFeedback("commands.ckit.kit.success", name);
-        return 1;
+        sendFeedback("commands.ckit.load.success", name);
+        return 0;
     }
 
-    private static int kits(ServerCommandSource source) throws CommandSyntaxException {
+    private static int list(ServerCommandSource source) throws CommandSyntaxException {
         loadFile();
 
-        sendFeedback("Available kits: " + String.join(", ", kits.keySet()));
-        return 1;
+        String list = String.join(", ", kits.keySet());
+        sendFeedback(list.equals("") ? "No available kits" : "Available kits: " + list);
+        return kits.size();
     }
 
     private static void saveFile() throws CommandSyntaxException {
         try {
             CompoundTag compoundTag = new CompoundTag();
 
-            for (Map.Entry<String, PlayerInventory> entry : kits.entrySet()) {
-                compoundTag.put(entry.getKey(), entry.getValue().serialize(new ListTag()));
-            }
+            kits.forEach((key, value) -> compoundTag.put(key, value.serialize(new ListTag())));
 
-            File file = File.createTempFile("kits", ".dat", path.toFile());
-            NbtIo.write(compoundTag, file);
-            File file2 = new File(path.toFile(), "kits.dat_old");
-            File file3 = new File(path.toFile(), "kits.dat");
-            Util.backupAndReplace(file3, file, file2);
+            File newFile = File.createTempFile("kits", ".dat", configPath.toFile());
+            NbtIo.write(compoundTag, newFile);
+            File backupFile = new File(configPath.toFile(), "kits.dat_old");
+            File currentFile = new File(configPath.toFile(), "kits.dat");
+            Util.backupAndReplace(currentFile, newFile, backupFile);
         } catch (Exception e) {
-            throw SAVE_FILE_EXCEPTION.create();
+            throw SAVE_FAILED_EXCEPTION.create();
         }
     }
 
     private static void loadFile() throws CommandSyntaxException {
         try {
             kits.clear();
-            CompoundTag compoundTag = NbtIo.read(new File(path.toFile(), "kits.dat"));
-            if (compoundTag == null) return;
-
+            CompoundTag compoundTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
+            if (compoundTag == null) {
+                return;
+            }
             compoundTag.getKeys().forEach(key -> {
                 PlayerInventory inventory = new PlayerInventory(client.player);
-                inventory.deserialize(compoundTag.getList(key, 10));
+                inventory.deserialize(compoundTag.getList(key, NbtType.COMPOUND));
                 kits.put(key, inventory);
             });
         } catch (Exception e) {
-            throw LOAD_FILE_EXCEPTION.create();
+            throw LOAD_FAILED_EXCEPTION.create();
         }
     }
 }
