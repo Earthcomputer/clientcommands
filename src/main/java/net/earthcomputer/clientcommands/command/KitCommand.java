@@ -27,10 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class KitCommand {
 
@@ -46,7 +44,7 @@ public class KitCommand {
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    private static final Map<String, PlayerInventory> kits = new HashMap<>();
+    private static final Map<String, ListTag> kits = new HashMap<>();
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("ckit");
@@ -80,7 +78,7 @@ public class KitCommand {
         if (kits.get(name) != null) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.inventory);
+        kits.put(name, client.player.inventory.serialize(new ListTag()));
         saveFile();
         sendFeedback("commands.ckit.create.success", name);
         return 0;
@@ -103,7 +101,7 @@ public class KitCommand {
         if (kits.get(name) == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.inventory);
+        kits.put(name, client.player.inventory.serialize(new ListTag()));
         saveFile();
         sendFeedback("commands.ckit.edit.success", name);
         return 0;
@@ -116,15 +114,17 @@ public class KitCommand {
 
         loadFile();
 
-        PlayerInventory kit = kits.get(name);
+        ListTag kit = kits.get(name);
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
+        PlayerInventory tempInv = new PlayerInventory(client.player);
+        tempInv.deserialize(kit);
         List<Slot> slots = client.player.playerScreenHandler.slots;
         for (int i = 0; i < slots.size(); i++) {
             if (slots.get(i).inventory == client.player.inventory) {
-                ItemStack itemStack = kit.getStack(((ISlot) slots.get(i)).getIndex());
+                ItemStack itemStack = tempInv.getStack(((ISlot) slots.get(i)).getIndex());
                 if (!itemStack.isEmpty() || override) { // same as if (!(itemStack.isEmpty() && !override))
                     client.interactionManager.clickCreativeStack(itemStack, i);
                 }
@@ -147,8 +147,7 @@ public class KitCommand {
     private static void saveFile() throws CommandSyntaxException {
         try {
             CompoundTag compoundTag = new CompoundTag();
-
-            kits.forEach((key, value) -> compoundTag.put(key, value.serialize(new ListTag())));
+            kits.forEach(compoundTag::put);
 
             File newFile = File.createTempFile("kits", ".dat", configPath.toFile());
             NbtIo.write(compoundTag, newFile);
@@ -167,11 +166,7 @@ public class KitCommand {
             if (compoundTag == null) {
                 return;
             }
-            compoundTag.getKeys().forEach(key -> {
-                PlayerInventory inventory = new PlayerInventory(client.player);
-                inventory.deserialize(compoundTag.getList(key, NbtType.COMPOUND));
-                kits.put(key, inventory);
-            });
+            compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
         } catch (Exception e) {
             throw LOAD_FAILED_EXCEPTION.create();
         }
