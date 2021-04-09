@@ -6,16 +6,17 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.ISlot;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.*;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
@@ -146,11 +147,13 @@ public class KitCommand {
 
     private static void saveFile() throws CommandSyntaxException {
         try {
+            CompoundTag rootTag = new CompoundTag();
             CompoundTag compoundTag = new CompoundTag();
             kits.forEach(compoundTag::put);
-
+            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+            rootTag.put("Kits", compoundTag);
             File newFile = File.createTempFile("kits", ".dat", configPath.toFile());
-            NbtIo.write(compoundTag, newFile);
+            NbtIo.write(rootTag, newFile);
             File backupFile = new File(configPath.toFile(), "kits.dat_old");
             File currentFile = new File(configPath.toFile(), "kits.dat");
             Util.backupAndReplace(currentFile, newFile, backupFile);
@@ -162,11 +165,25 @@ public class KitCommand {
     private static void loadFile() throws CommandSyntaxException {
         try {
             kits.clear();
-            CompoundTag compoundTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
-            if (compoundTag == null) {
+            CompoundTag rootTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
+            if (rootTag == null) {
                 return;
             }
-            compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
+            final int version = SharedConstants.getGameVersion().getWorldVersion();
+            CompoundTag compoundTag = rootTag.getCompound("Kits");
+            if (rootTag.getInt("DataVersion") == version) {
+                compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
+            } else {
+                compoundTag.getKeys().forEach(key -> {
+                    ListTag updatedListTag = new ListTag();
+                    compoundTag.getList(key, NbtType.COMPOUND).forEach(tag -> {
+                        Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
+                        Dynamic<Tag> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, rootTag.getInt("DataVersion"), version);
+                        updatedListTag.add(newTagDynamic.getValue());
+                    });
+                    kits.put(key, updatedListTag);
+                });
+            }
         } catch (Exception e) {
             throw LOAD_FAILED_EXCEPTION.create();
         }
