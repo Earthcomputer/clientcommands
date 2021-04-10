@@ -23,6 +23,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Util;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -74,9 +75,7 @@ public class KitCommand {
     }
 
     private static int create(ServerCommandSource source, String name) throws CommandSyntaxException {
-        loadFile();
-
-        if (kits.get(name) != null) {
+        if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
         kits.put(name, client.player.inventory.serialize(new ListTag()));
@@ -99,7 +98,7 @@ public class KitCommand {
     private static int edit(ServerCommandSource source, String name) throws CommandSyntaxException {
         loadFile();
 
-        if (kits.get(name) == null) {
+        if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
         kits.put(name, client.player.inventory.serialize(new ListTag()));
@@ -109,7 +108,7 @@ public class KitCommand {
     }
 
     private static int load(ServerCommandSource source, String name, boolean override) throws CommandSyntaxException {
-        if (!client.player.isCreative() || !client.player.abilities.creativeMode) {
+        if (!client.player.abilities.creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
@@ -126,7 +125,7 @@ public class KitCommand {
         for (int i = 0; i < slots.size(); i++) {
             if (slots.get(i).inventory == client.player.inventory) {
                 ItemStack itemStack = tempInv.getStack(((ISlot) slots.get(i)).getIndex());
-                if (!itemStack.isEmpty() || override) { // same as if (!(itemStack.isEmpty() && !override))
+                if (!itemStack.isEmpty() || override) {
                     client.interactionManager.clickCreativeStack(itemStack, i);
                 }
             }
@@ -157,7 +156,7 @@ public class KitCommand {
             File backupFile = new File(configPath.toFile(), "kits.dat_old");
             File currentFile = new File(configPath.toFile(), "kits.dat");
             Util.backupAndReplace(currentFile, newFile, backupFile);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw SAVE_FAILED_EXCEPTION.create();
         }
     }
@@ -169,22 +168,23 @@ public class KitCommand {
             if (rootTag == null) {
                 return;
             }
-            final int version = SharedConstants.getGameVersion().getWorldVersion();
+            final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
+            final int fileVersion = rootTag.getInt("DataVersion");
             CompoundTag compoundTag = rootTag.getCompound("Kits");
-            if (rootTag.getInt("DataVersion") == version) {
+            if (fileVersion >= currentVersion) {
                 compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
             } else {
                 compoundTag.getKeys().forEach(key -> {
                     ListTag updatedListTag = new ListTag();
                     compoundTag.getList(key, NbtType.COMPOUND).forEach(tag -> {
                         Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                        Dynamic<Tag> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, rootTag.getInt("DataVersion"), version);
+                        Dynamic<Tag> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                         updatedListTag.add(newTagDynamic.getValue());
                     });
                     kits.put(key, updatedListTag);
                 });
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw LOAD_FAILED_EXCEPTION.create();
         }
     }
