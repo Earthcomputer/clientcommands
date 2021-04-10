@@ -75,6 +75,8 @@ public class KitCommand {
     }
 
     private static int create(ServerCommandSource source, String name) throws CommandSyntaxException {
+        loadFile();
+
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
