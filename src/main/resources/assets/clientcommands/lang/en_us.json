@@ -59,6 +59,9 @@
   "commands.cfish.listGoals.success": "There are %d fishing goals:",
   "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled.",
   "commands.cfish.removeGoal.success": "Successfully removed goal %s",
+  "commands.cfish.validateOpenWater.invalid": "Your fishing bobber is not in open water and cannot fish up treasure",
+  "commands.cfish.validateOpenWater.noFishingBobber": "You do not have a fishing bobber",
+  "commands.cfish.validateOpenWater.valid": "Your fishing bobber is in open water and can fish up treasure",
   "commands.cfish.wrongLoot": "Didn't get the correct loot with correction of %dms, could have been %s ticks ahead",
 
   "commands.cfov.success": "Set FOV to %f",
