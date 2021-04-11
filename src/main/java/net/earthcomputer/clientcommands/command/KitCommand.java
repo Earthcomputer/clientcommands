@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.command.CommandSource;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.player.PlayerInventory;
@@ -21,6 +22,8 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +49,15 @@ public class KitCommand {
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Map<String, ListTag> kits = new HashMap<>();
+
+    static {
+        try {
+            loadFile();
+        } catch (IOException e) {
+            final Logger logger = LogManager.getLogger();
+            logger.info(I18n.translate("commands.ckit.loadFile.failed"));
+        }
+    }
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("ckit");
@@ -152,11 +164,11 @@ public class KitCommand {
         }
     }
 
-    public static void loadFile() throws IOException {
+    private static void loadFile() throws IOException {
         kits.clear();
         CompoundTag rootTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
         if (rootTag == null) {
-            throw new IOException();
+            return;
         }
         final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
         final int fileVersion = rootTag.getInt("DataVersion");

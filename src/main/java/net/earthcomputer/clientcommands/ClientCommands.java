@@ -6,13 +6,9 @@ import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.server.command.ServerCommandSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 
 public class ClientCommands implements ClientModInitializer {
 
@@ -59,14 +55,7 @@ public class ClientCommands implements ClientModInitializer {
         CStopSoundCommand.register(dispatcher);
         FovCommand.register(dispatcher);
         HotbarCommand.register(dispatcher);
-        try {
-            KitCommand.loadFile();
-
-            KitCommand.register(dispatcher);
-        } catch (IOException e) {
-            final Logger logger = LogManager.getLogger();
-            logger.error(I18n.translate("commands.ckit.loadFile.failed"));
-        }
+        KitCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 

@@ -81,7 +81,7 @@
 
   "commands.ckit.notFound": "Kit \"%s\" not found",
   "commands.ckit.saveFile.failed": "Could not save kits file",
-  "commands.ckit.loadFile.failed": "Could not load kits file, hence /ckit is not registered",
+  "commands.ckit.loadFile.failed": "Could not load kits file, hence /ckit will not work!",
   "commands.ckit.load.success": "Successfully gave kit \"%s\" to self",
   "commands.ckit.load.notCreative": "Player must be in creative mode to give items to self",
   "commands.ckit.create.success": "Successfully created kit \"%s\"",
