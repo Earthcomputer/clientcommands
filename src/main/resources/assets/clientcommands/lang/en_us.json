@@ -87,6 +87,8 @@
   "commands.ckit.create.alreadyExists": "Kit \"%s\" already exists",
   "commands.ckit.delete.success": "Successfully deleted kit \"%s\"",
   "commands.ckit.edit.success": "Successfully edited kit \"%s\"",
+  "commands.ckit.list": "Available kits: %s",
+  "commands.ckit.list.empty": "No available kits",
 
   "commands.cplaysound.success": "Played sound %s to self",
 
