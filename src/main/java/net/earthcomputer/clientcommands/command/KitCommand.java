@@ -21,6 +21,8 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Util;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +36,9 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class KitCommand {
 
+    private static final Logger logger = LogManager.getLogger("clientcommands");
+
     private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.saveFile.failed"));
-    private static final SimpleCommandExceptionType LOAD_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.loadFile.failed"));
 
     private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.create.alreadyExists", arg));
 
@@ -47,6 +50,14 @@ public class KitCommand {
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Map<String, ListTag> kits = new HashMap<>();
+
+    static {
+        try {
+            loadFile();
+        } catch (IOException e) {
+            logger.info("Could not load kits file, hence /ckit will not work!");
+        }
+    }
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("ckit");
@@ -75,8 +86,6 @@ public class KitCommand {
     }
 
     private static int create(ServerCommandSource source, String name) throws CommandSyntaxException {
-        loadFile();
-
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
@@ -87,8 +96,6 @@ public class KitCommand {
     }
 
     private static int delete(ServerCommandSource source, String name) throws CommandSyntaxException {
-        loadFile();
-
         if (kits.remove(name) == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -98,8 +105,6 @@ public class KitCommand {
     }
 
     private static int edit(ServerCommandSource source, String name) throws CommandSyntaxException {
-        loadFile();
-
         if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -113,8 +118,6 @@ public class KitCommand {
         if (!client.player.abilities.creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
-
-        loadFile();
 
         ListTag kit = kits.get(name);
         if (kit == null) {
@@ -138,9 +141,7 @@ public class KitCommand {
         return 0;
     }
 
-    private static int list(ServerCommandSource source) throws CommandSyntaxException {
-        loadFile();
-
+    private static int list(ServerCommandSource source) {
         String list = String.join(", ", kits.keySet());
         sendFeedback(list.equals("") ? "No available kits" : "Available kits: " + list);
         return kits.size();
@@ -163,31 +164,27 @@ public class KitCommand {
         }
     }
 
-    private static void loadFile() throws CommandSyntaxException {
-        try {
-            kits.clear();
-            CompoundTag rootTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
-            if (rootTag == null) {
-                return;
-            }
-            final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
-            final int fileVersion = rootTag.getInt("DataVersion");
-            CompoundTag compoundTag = rootTag.getCompound("Kits");
-            if (fileVersion >= currentVersion) {
-                compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
-            } else {
-                compoundTag.getKeys().forEach(key -> {
-                    ListTag updatedListTag = new ListTag();
-                    compoundTag.getList(key, NbtType.COMPOUND).forEach(tag -> {
-                        Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                        Dynamic<Tag> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
-                        updatedListTag.add(newTagDynamic.getValue());
-                    });
-                    kits.put(key, updatedListTag);
+    private static void loadFile() throws IOException {
+        kits.clear();
+        CompoundTag rootTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
+        if (rootTag == null) {
+            return;
+        }
+        final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
+        final int fileVersion = rootTag.getInt("DataVersion");
+        CompoundTag compoundTag = rootTag.getCompound("Kits");
+        if (fileVersion >= currentVersion) {
+            compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
+        } else {
+            compoundTag.getKeys().forEach(key -> {
+                ListTag updatedListTag = new ListTag();
+                compoundTag.getList(key, NbtType.COMPOUND).forEach(tag -> {
+                    Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
+                    Dynamic<Tag> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+                    updatedListTag.add(newTagDynamic.getValue());
                 });
-            }
-        } catch (IOException e) {
-            throw LOAD_FAILED_EXCEPTION.create();
+                kits.put(key, updatedListTag);
+            });
         }
     }
 }
