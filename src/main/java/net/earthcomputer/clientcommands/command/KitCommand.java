@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.command.CommandSource;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.player.PlayerInventory;
@@ -37,6 +36,8 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class KitCommand {
 
+    private static final Logger logger = LogManager.getLogger("clientcommands");
+
     private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.saveFile.failed"));
 
     private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.create.alreadyExists", arg));
@@ -54,8 +55,7 @@ public class KitCommand {
         try {
             loadFile();
         } catch (IOException e) {
-            final Logger logger = LogManager.getLogger();
-            logger.info(I18n.translate("commands.ckit.loadFile.failed"));
+            logger.info("Could not load kits file, hence /ckit will not work!");
         }
     }
 
