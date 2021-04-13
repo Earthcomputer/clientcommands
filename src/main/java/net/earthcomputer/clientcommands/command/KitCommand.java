@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -12,14 +13,20 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandSource;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,7 +89,11 @@ public class KitCommand {
                                         .executes(ctx -> load(ctx.getSource(), StringArgumentType.getString(ctx, "name"), true)))
                                 .executes(ctx -> load(ctx.getSource(), StringArgumentType.getString(ctx, "name"), false))))
                 .then(literal("list")
-                        .executes(ctx -> list(ctx.getSource()))));
+                        .executes(ctx -> list(ctx.getSource())))
+                .then(literal("preview")
+                        .then(argument("name", StringArgumentType.string())
+                                .suggests((ctx, builder) -> CommandSource.suggestMatching(kits.keySet(), builder))
+                                .executes(ctx -> preview(ctx.getSource(), StringArgumentType.getString(ctx, "name"))))));
     }
 
     private static int create(ServerCommandSource source, String name) throws CommandSyntaxException {
@@ -147,6 +158,18 @@ public class KitCommand {
         return kits.size();
     }
 
+    private static int preview(ServerCommandSource source, String name) throws CommandSyntaxException {
+        ListTag kit = kits.get(name);
+        if (kit == null) {
+            throw NOT_FOUND_EXCEPTION.create(name);
+        }
+
+        PlayerInventory tempInv = new PlayerInventory(client.player);
+        tempInv.deserialize(kit);
+        client.send(() -> client.openScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, client.player), tempInv, name)));
+        return 0;
+    }
+
     private static void saveFile() throws CommandSyntaxException {
         try {
             CompoundTag rootTag = new CompoundTag();
@@ -186,5 +209,40 @@ public class KitCommand {
                 kits.put(key, updatedListTag);
             });
         }
+    }
+}
+
+class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
+
+    public PreviewScreen(PlayerScreenHandler playerScreenHandler, PlayerInventory inventory, String name) {
+        super(playerScreenHandler, inventory, new LiteralText("kit: " + name).styled(style -> style.withColor(Formatting.RED)));
+        this.passEvents = true;
+        this.titleX = 80;
+    }
+
+    protected void init() {
+        super.init();
+    }
+
+    protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
+        this.textRenderer.draw(matrices, this.title, (float) this.titleX, (float) this.titleY, 4210752);
+    }
+
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        this.drawStatusEffects = false;
+        this.renderBackground(matrices);
+        super.render(matrices, mouseX, mouseY, delta);
+
+        this.drawMouseoverTooltip(matrices, mouseX, mouseY);
+    }
+
+    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.client.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
+        this.drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    }
+
+    public void removed() {
+        super.removed();
     }
 }
