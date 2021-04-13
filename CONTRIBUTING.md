@@ -39,7 +39,7 @@ These instructions are not foundational. You're expected to have an understandin
 * They should always be translated
 ### Statements
 #### `if`, `for` and `while` statements
-* `if`, `for` and `while`-statements should always use braces
+* `if`, `for` and `while` statements should always use braces
 * There should be a space between the keyword and the statement-bracket
 #### `import` statements
 * `import static`s should normally use wildcard imports
@@ -48,7 +48,7 @@ These instructions are not foundational. You're expected to have an understandin
 * Use import statements rather than fully qualified class names
 ### Command registry
 * Execute a command's code mostly in a dedicated method, rather than in the `register` method
-* If the command was successful and there isn't something sensible to return, it should `return 0`. If the command was not successful, an exception should be thrown.
+* If the command was successful and there isn't something sensible to return, it should `return 0`. If the command was not successful, an exception should be thrown
 ### Miscellaneous
 * Only use up to Java 8 in your code
 * Java classes should have a newline at the end of the file
