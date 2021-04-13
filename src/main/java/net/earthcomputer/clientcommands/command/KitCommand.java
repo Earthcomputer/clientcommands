@@ -153,8 +153,12 @@ public class KitCommand {
     }
 
     private static int list(ServerCommandSource source) {
-        String list = String.join(", ", kits.keySet());
-        sendFeedback(list.equals("") ? "No available kits" : "Available kits: " + list);
+        if (kits.isEmpty()) {
+            sendFeedback("commands.ckit.list.empty");
+        } else {
+            String list = String.join(", ", kits.keySet());
+            sendFeedback("commands.ckit.list", list);
+        }
         return kits.size();
     }
 
