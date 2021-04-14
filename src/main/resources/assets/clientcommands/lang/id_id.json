@@ -17,10 +17,10 @@
   "commands.ccalc.parse.negate": "(negate: %s)",
   "commands.ccalc.tooDeeplyNested": "Expresi terlalu rumit",
 
-  "commands.ccalcstack.success": "%d %s itu %d stack dan %d tambahan",
-  "commands.ccalcstack.success.empty": "%d item itu %d stack dan %d tambahan",
-  "commands.ccalcstack.success.empty.exact": "%d item itu %d stack persis",
-  "commands.ccalcstack.success.exact": "%d %s itu %d stack persis",
+  "commands.ccalcstack.success": "%d %s adalah %d stack dan %d tambahan",
+  "commands.ccalcstack.success.empty": "%d item adalah %d stack dan %d tambahan",
+  "commands.ccalcstack.success.empty.exact": "%d item adalah %d stack persis",
+  "commands.ccalcstack.success.exact": "%d %s adalah %d stack persis",
 
   "commands.ccrackrng.starting": "Memecahkan player seed",
   "commands.ccrackrng.success": "Player RNG telah di pecahkan: %d",
