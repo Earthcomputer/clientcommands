@@ -32,24 +32,32 @@ Please adhere to these styling instructions when contributing. If you don't do t
 These instructions are not foundational. You're expected to have an understanding of what is clean Java code and what isn't. These instructions build on general consensus.
 ### Variables
 #### Naming
-* Use descriptive variable names everywhere, except when they are meaningless (loop-indices etc.)
-#### Command exceptions
-* Exception variables should use SCREAMING_SNAKE_CASE
-* Mark exception variables as `private static final`
-* They should always be translated
+* Use descriptive variable names everywhere
+* Loop indices can be an exception to the above instruction
+   * Never use `j`. If you find yourself wanting to use `j`, it's a sign that you should rename your loop variables to something more descriptive. You can use `i` but no more than that
+   * Loops with small bodies (not more than a few lines) may use `i` as the loop variable, unless there is something obvious that's more descriptive
+   * Loops with large bodies may only use `i` if the loop variable is unused within the loop body
+#### Immutable constants
+* Immutable constants should use UPPER_SNAKE_CASE
+* Mark immutable constants as `private static final`
 ### Statements
 #### `if`, `for` and `while` statements
 * `if`, `for` and `while` statements should always use braces
 * There should be a space between the keyword and the statement-bracket
 #### `import` statements
-* `import static`s should normally use wildcard imports
+* `import static`s should always use wildcard imports
    * They should be placed after the other imports
    * Don't use `import static` for anything else than commands
 * Use import statements rather than fully qualified class names
 ### Command registry
+#### General
 * Execute a command's code mostly in a dedicated method, rather than in the `register` method
 * If the command was successful and there isn't something sensible to return, it should `return 0`. If the command was not successful, an exception should be thrown
+* Any feedback the player may receive should be translated
+   * Except for debugging (log messages, debug HUD)
+#### Exceptions
+* Exception variables are [immutable constants](#immutable-constants)
 ### Miscellaneous
 * Only use up to Java 8 in your code
-* Java classes should have a newline at the end of the file
+* All files should have a newline at the end of the file
 * Do not use AWT at all
