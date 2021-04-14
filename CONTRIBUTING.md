@@ -30,6 +30,8 @@ That said, commands which are only needed in very specific circumstances are als
 ## Code style
 Please adhere to these styling instructions when contributing. If you don't do this initially you will be requested to change your commits accordingly.
 These instructions are not foundational. You're expected to have an understanding of what is clean Java code and what isn't. These instructions build on general consensus.
+
+You may see old code that doesn't adhere to these guidelines, but all new code must do. If you are working nearby old code, you can update it to fit the guidelines if you want to.
 ### Variables
 #### Naming
 * Use descriptive variable names everywhere
