@@ -42,7 +42,7 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class KitCommand {
 
-    private static final Logger logger = LogManager.getLogger("clientcommands");
+    private static final Logger LOGGER = LogManager.getLogger("clientcommands");
 
     private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.saveFile.failed"));
 
@@ -61,7 +61,7 @@ public class KitCommand {
         try {
             loadFile();
         } catch (IOException e) {
-            logger.info("Could not load kits file, hence /ckit will not work!");
+            LOGGER.info("Could not load kits file, hence /ckit will not work!");
         }
     }
 
@@ -169,6 +169,12 @@ public class KitCommand {
 
         PlayerInventory tempInv = new PlayerInventory(client.player);
         tempInv.deserialize(kit);
+        /*
+            After executing a command, the current screen will be closed (the chat hud).
+            And if you open a new screen in a command, that new screen will be closed
+            instantly along with the chat hud. Slightly delaying the opening of the
+            screen fixes this issue.
+         */
         client.send(() -> client.openScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, client.player), tempInv, name)));
         return 0;
     }
@@ -218,17 +224,13 @@ public class KitCommand {
 class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
 
     public PreviewScreen(PlayerScreenHandler playerScreenHandler, PlayerInventory inventory, String name) {
-        super(playerScreenHandler, inventory, new LiteralText("kit: " + name).styled(style -> style.withColor(Formatting.RED)));
+        super(playerScreenHandler, inventory, new LiteralText(name).styled(style -> style.withColor(Formatting.RED)));
         this.passEvents = true;
         this.titleX = 80;
     }
 
-    protected void init() {
-        super.init();
-    }
-
     protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-        this.textRenderer.draw(matrices, this.title, (float) this.titleX, (float) this.titleY, 4210752);
+        this.textRenderer.draw(matrices, this.title, (float) this.titleX, (float) this.titleY, 0x404040);
     }
 
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -243,9 +245,5 @@ class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.client.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
         this.drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
-    }
-
-    public void removed() {
-        super.removed();
     }
 }
