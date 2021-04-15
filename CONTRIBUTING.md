@@ -55,11 +55,11 @@ You may see old code that doesn't adhere to these guidelines, but all new code m
 #### General
 * Execute a command's code mostly in a dedicated method, rather than in the `register` method
 * If the command was successful and there isn't something sensible to return, it should `return 0`. If the command was not successful, an exception should be thrown
-* Any feedback the player may receive should be translated
-   * Except for debugging (log messages, debug HUD)
 #### Exceptions
 * Exception variables are [immutable constants](#immutable-constants)
 ### Miscellaneous
+* Any message the player may receive should be translated
+    * Except for debugging (log messages, debug HUD)
 * Only use up to Java 8 in your code
 * All files should have a newline at the end of the file
 * Do not use AWT at all
