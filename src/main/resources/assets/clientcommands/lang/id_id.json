@@ -52,7 +52,7 @@
 
   "commands.cfish.addGoal.success": "Berhasil menambahkan tujuan %s",
   "commands.cfish.correctLoot": "Mendapatkan loot yang benar denagn koreksi %dms",
-  "commands.cfish.error.crackFailed": "Gagal untuk memecahkan RNG fishing bobber, apakah server bukan vanilla?",
+  "commands.cfish.error.crackFailed": "Gagal untuk memecahkan RNG fishing bobber, apakah server dimondifikasi (bukan vanilla)?",
   "commands.cfish.error.failed": "Konfigurasi fishing bobber salah",
   "commands.cfish.error.outOfWater": "Fishing bobber keluar dari air, manipulasi tidak bekerja",
   "commands.cfish.listGoals.noGoals": "Tidak ada tujuan memancing",
@@ -186,7 +186,7 @@
   "playerManip.reset.enchanting": "Pesona item",
   "playerManip.reset.recreated": "Pemain Dibuat kembali",
 
-  "playerManip.serverBrandWarning": "Peringatan: server yang sedang kamu mainkan adalah bukan vanilla. Fitur RNG disini tidak akan dijamin untuk bekerja!",
+  "playerManip.serverBrandWarning": "Peringatan: server yang sedang kamu mainkan adalah dimondifikasi (bukan vanilla). Fitur RNG disini tidak akan dijamin untuk bekerja!",
   "playerManip.toolBreakWarning": "Peringatan: Alat mempunyai sisa %d ketahanan",
   "playerManip.throwError": "Kondisi tidak bisa atau akan membutuhkan lebih dari %d benda yang dilempar",
   "playerManip.notEnoughItems": "Tidak cukup item(%d dari %d) untuk memanipulasi seed",
