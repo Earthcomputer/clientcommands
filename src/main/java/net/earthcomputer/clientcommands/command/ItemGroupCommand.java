@@ -27,21 +27,15 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
-import static net.minecraft.command.CommandSource.suggestMatching;
-import static net.minecraft.command.argument.ItemStackArgumentType.getItemStackArgument;
-import static net.minecraft.command.argument.ItemStackArgumentType.itemStack;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.minecraft.command.CommandSource.*;
+import static net.minecraft.command.argument.ItemStackArgumentType.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class ItemGroupCommand {
 
@@ -57,7 +51,7 @@ public class ItemGroupCommand {
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    private static final SortedMap<String, Group> groups = new TreeMap<>();
+    private static final Map<String, Group> groups = new HashMap<>();
 
     static {
         try {
