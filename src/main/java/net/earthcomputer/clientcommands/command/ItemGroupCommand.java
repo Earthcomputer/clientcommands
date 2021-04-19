@@ -20,6 +20,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,6 +46,7 @@ public class ItemGroupCommand {
     private static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.outOfBounds", arg));
 
     private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.citemgroup.saveFile.failed"));
+    private static final DynamicCommandExceptionType ILLEGAL_CHARACTER_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.illegalCharacter", arg));
     private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.alreadyExists", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
@@ -98,14 +100,18 @@ public class ItemGroupCommand {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
 
-        ItemGroup itemGroup = FabricItemGroupBuilder.create(
-                new Identifier("clientcommands", name))
-                .icon(() -> icon)
-                .build();
+        try {
+            ItemGroup itemGroup = FabricItemGroupBuilder.create(
+                    new Identifier("clientcommands", name))
+                    .icon(() -> icon)
+                    .build();
 
-        groups.put(name, new Group(itemGroup, icon, new ListTag()));
-        saveFile();
-        sendFeedback("commands.citemgroup.addGroup.success", name);
+            groups.put(name, new Group(itemGroup, icon, new ListTag()));
+            saveFile();
+            sendFeedback("commands.citemgroup.addGroup.success", name);
+        } catch (InvalidIdentifierException e) {
+            throw ILLEGAL_CHARACTER_EXCEPTION.create(name);
+        }
         return 0;
     }
 
