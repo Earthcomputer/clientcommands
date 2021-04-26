@@ -20,15 +20,11 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
-import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.getList;
-import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.list;
-import static net.earthcomputer.clientcommands.command.arguments.SimpleBlockPredicateArgumentType.blockPredicate;
-import static net.minecraft.command.argument.BlockPosArgumentType.blockPos;
-import static net.minecraft.command.argument.BlockPosArgumentType.getBlockPos;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.SimpleBlockPredicateArgumentType.*;
+import static net.minecraft.command.argument.BlockPosArgumentType.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class AreaStatsCommand {
 
