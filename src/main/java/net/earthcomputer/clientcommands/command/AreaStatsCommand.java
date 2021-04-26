@@ -73,18 +73,18 @@ public class AreaStatsCommand {
             maxX = pos1.getX();
         }
         if (pos1.getZ() <= pos2.getZ()) {
-            minZ = pos1.getX();
-            maxZ = pos2.getX();
+            minZ = pos1.getZ();
+            maxZ = pos2.getZ();
         } else {
-            minZ = pos2.getX();
-            maxZ = pos1.getX();
+            minZ = pos2.getZ();
+            maxZ = pos1.getZ();
         }
         if (pos1.getY() <= pos2.getY()) {
-            minY = pos1.getX();
-            maxY = pos2.getX();
+            minY = pos1.getY();
+            maxY = pos2.getY();
         } else {
-            minY = pos2.getX();
-            maxY = pos1.getX();
+            minY = pos2.getY();
+            maxY = pos1.getY();
         }
 
         final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
