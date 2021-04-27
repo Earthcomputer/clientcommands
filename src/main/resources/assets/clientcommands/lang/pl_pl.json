@@ -4,6 +4,18 @@
 
   "commands.ccalc.expected": "Spodziewane %s",
   "commands.ccalc.invalidArgumentCount": "Funkcja \"%s\" nie może mieć %d argumentów",
+  "commands.ccalc.parse": "Przeanalizowane wyrażenie: %s",
+  "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
+  "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
+  "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
+  "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
+  "commands.ccalc.parse.constant": "(stała '%s')",
+  "commands.ccalc.parse.function": "(funkcja '%s' z argumentami: %s)",
+  "commands.ccalc.parse.literal": "(dosłowna: %s)",
+  "commands.ccalc.parse.negate": "(zanegowane: %s)",
+  "commands.ccalc.tooDeeplyNested": "Wyrażenie jest zbyt głęboko zagnieżdżone",
 
   "commands.ccalcstack.success": "%d %s to %d staki i %d dodatkowe",
   "commands.ccalcstack.success.empty": "%d przedmiotow to %d staki i %d dodatkowe",
@@ -49,6 +61,8 @@
   "commands.cfish.removeGoal.success": "Pomyślnie usunięto cel %s",
   "commands.cfish.wrongLoot": "Nie mogłem otrzymać łupu z dokładnością do %dms, mogłem wyprzedzić %s ticków w przód",
 
+  "commands.cfov.success": "Ustawiono pole widzenia na %f",
+
   "commands.cgamma.success": "Ustawiono gamma na %f",
 
   "commands.cghostblock.fill.success": "Zapełniono %d \"ghost blocks\"",
@@ -61,6 +75,20 @@
   "commands.cglow.entity.failed": "Brak obiektów do podświetlenia",
   "commands.cglow.entity.success": "Podświetlono %d obiekty",
   "commands.cglow.area.success": "Podświetlono %d terenow",
+
+  "commands.chotbar.notCreative": "Gracz musi byc w trybie kreatywnym aby przywrócić przedmioty pasek roboczy",
+  "commands.chotbar.restoredHotbar": "Przywrócono pasek roboczy %d",
+
+  "commands.ckit.notFound": "Zestaw \"%s\" nie istnieje",
+  "commands.ckit.saveFile.failed": "Nie można zapisać pliku zestawów",
+  "commands.ckit.load.success": "Pomyślnie wręczono zestaw \"%s\"",
+  "commands.ckit.load.notCreative": "Gracz musi być w trybie kreatywnym aby wręczyć sobie przedmioty",
+  "commands.ckit.create.success": "Pomyślnie stworzono zestaw \"%s\"",
+  "commands.ckit.create.alreadyExists": "Zestaw \"%s\" już istnieje",
+  "commands.ckit.delete.success": "Pomyślnie usunięto zestaw \"%s\"",
+  "commands.ckit.edit.success": "Pomyślnie zedytowano zestaw \"%s\"",
+  "commands.ckit.list": "Dostępne zestawy: %s",
+  "commands.ckit.list.empty": "Brak dostępnych zestawów",
 
   "commands.cplaysound.success": "Odtworzono dzwięk %s",
 
@@ -165,5 +193,4 @@
   "playerManip.uncracked": "Ziarno gracza musi być złamane.",
 
   "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: zbyt mało przedmiotów w ekwipunku"
-
 }
