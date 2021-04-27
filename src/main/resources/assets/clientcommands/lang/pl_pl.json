@@ -76,8 +76,8 @@
   "commands.cglow.entity.success": "Podświetlono %d obiekty",
   "commands.cglow.area.success": "Podświetlono %d terenow",
 
-  "commands.chotbar.notCreative": "Gracz musi byc w trybie kreatywnym aby przywrócić przedmioty pasek roboczy",
-  "commands.chotbar.restoredHotbar": "Przywrócono pasek roboczy %d",
+  "commands.chotbar.notCreative": "Gracz musi byc w trybie kreatywnym aby przywrócić przedmioty pasek dostępu",
+  "commands.chotbar.restoredHotbar": "Przywrócono pasek dostępu %d",
 
   "commands.ckit.notFound": "Zestaw \"%s\" nie istnieje",
   "commands.ckit.saveFile.failed": "Nie można zapisać pliku zestawów",
