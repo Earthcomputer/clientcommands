@@ -134,7 +134,29 @@ public class GlowCommand {
                 boundingBoxes.replaceAll((box) -> box.offset(pos1));
             }
         } else {
-            boundingBoxes.add(new Box(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX() + 1, pos2.getY() + 1, pos2.getZ() + 1));
+            final int minX, maxX, minZ, maxZ, minY, maxY;
+            if (pos1.getX() <= pos2.getX()) {
+                minX = pos1.getX();
+                maxX = pos2.getX();
+            } else {
+                minX = pos2.getX();
+                maxX = pos1.getX();
+            }
+            if (pos1.getZ() <= pos2.getZ()) {
+                minZ = pos1.getZ();
+                maxZ = pos2.getZ();
+            } else {
+                minZ = pos2.getZ();
+                maxZ = pos1.getZ();
+            }
+            if (pos1.getY() <= pos2.getY()) {
+                minY = pos1.getY();
+                maxY = pos2.getY();
+            } else {
+                minY = pos2.getY();
+                maxY = pos1.getY();
+            }
+            boundingBoxes.add(new Box(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1));
         }
 
         for (Box box : boundingBoxes) {
