@@ -98,7 +98,11 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
                 List<String> arguments = new ArrayList<>();
                 if (reader.canRead()) {
                     if (reader.peek() != '}') {
-                        literalText = parse();
+                        if (StringReader.isQuotedStringStart(reader.peek())) {
+                            literalText = new LiteralText(reader.readQuotedString());
+                        } else {
+                            literalText = parse();
+                        }
                         reader.skipWhitespace();
                         while (reader.canRead() && reader.peek() != '}') {
                             if (arguments.isEmpty()) {
