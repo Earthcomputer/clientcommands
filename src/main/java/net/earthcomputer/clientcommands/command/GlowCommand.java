@@ -134,7 +134,7 @@ public class GlowCommand {
                 boundingBoxes.replaceAll((box) -> box.offset(pos1));
             }
         } else {
-            boundingBoxes.add(new Box(pos1, pos2));
+            boundingBoxes.add(new Box(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX() + 1, pos2.getY() + 1, pos2.getZ() + 1));
         }
 
         for (Box box : boundingBoxes) {
