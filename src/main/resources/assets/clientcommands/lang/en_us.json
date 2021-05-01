@@ -151,7 +151,7 @@
   "enchCrack.insn.itemThrows.noDummy": "No dummy enchantment",
   "enchCrack.insn.enchantments": "Enchantments on item:",
 
-  "paginator.display.page": "Page number %d of %d",
+  "paginator.display.page": "Page number: %d of %d",
   "paginator.incorrect.page": "Specified page is out of bounds",
 
   "playerManip.state": "Player Crack State: %s",
