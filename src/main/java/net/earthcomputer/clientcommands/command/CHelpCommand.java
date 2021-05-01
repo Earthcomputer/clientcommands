@@ -5,10 +5,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
+import net.earthcomputer.clientcommands.Page;
+import net.earthcomputer.clientcommands.Paginator;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
@@ -25,39 +29,92 @@ public class CHelpCommand {
         dispatcher.register(literal("chelp")
             .executes(ctx -> {
                 int cmdCount = 0;
-                for (CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren()) {
-                    String cmdName = command.getName();
-                    if (isClientSideCommand(cmdName)) {
-                        Map<CommandNode<ServerCommandSource>, String> usage = dispatcher.getSmartUsage(command, ctx.getSource());
-                        for (String u : usage.values()) {
-                            sendFeedback(new LiteralText("/" + cmdName + " " + u));
-                        }
-                        cmdCount += usage.size();
-                        if (usage.size() == 0) {
-                            sendFeedback(new LiteralText("/" + cmdName));
-                            cmdCount++;
-                        }
+
+                List<String> commandNames = new ArrayList<String>();
+                for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren())
+                {
+                    String commandName = command.getName();
+                    if(isClientSideCommand(commandName))
+                    {
+                        commandNames.add('/' + commandName);
+                        cmdCount++;
                     }
                 }
+
+                Paginator<String> paginator = new Paginator<String>(commandNames, 9);
+                Page<String> page = paginator.getPage(1);
+                for (int i = 0; i < page.Items.size(); i++)
+                {
+                    sendFeedback(page.Items.get(i));
+                }
+                sendFeedback(new TranslatableText("paginator.display.page", page.PageNumber, paginator.getPageCount()));
+
                 return cmdCount;
+
             })
-            .then(argument("command", greedyString())
+            .then(argument("page | command", greedyString())
                 .executes(ctx -> {
-                    String cmdName = getString(ctx, "command");
-                    if (!isClientSideCommand(cmdName))
-                        throw FAILED_EXCEPTION.create();
 
-                    ParseResults<ServerCommandSource> parseResults = dispatcher.parse(cmdName, ctx.getSource());
-                    if (parseResults.getContext().getNodes().isEmpty())
-                        throw FAILED_EXCEPTION.create();
+                    String userInput = getString(ctx, "page | command");
 
-                    Map<CommandNode<ServerCommandSource>, String> usage = dispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), ctx.getSource());
-                    for (String u : usage.values()) {
-                        sendFeedback(new LiteralText("/" + cmdName + " " + u));
+                    if(isInteger(userInput))
+                    {
+                        int userPage = Integer.parseInt(userInput);
+
+                        List<String> commandNames = new ArrayList<String>();
+                        for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren())
+                        {
+                            String commandName = command.getName();
+                            if(isClientSideCommand(commandName))
+                            {
+                                commandNames.add('/' + commandName);
+                            }
+                        }
+                        Paginator<String> paginator = new Paginator<String>(commandNames, 9);
+                        if(!paginator.isValidPage(userPage))
+                        {
+                            sendFeedback(new TranslatableText("paginator.incorrect.page"));
+                            return 0;
+                        }
+                        Page<String> page = paginator.getPage(userPage);
+                        for (int i = 0; i < page.Items.size(); i++)
+                        {
+                            sendFeedback(page.Items.get(i));
+                        }
+
+                        sendFeedback(new TranslatableText("paginator.display.page", page.PageNumber, paginator.getPageCount()));
+
+                        return page.Items.size();
+                    }
+                    else
+                    {
+                        if (!isClientSideCommand(userInput))
+                            throw FAILED_EXCEPTION.create();
+
+                        ParseResults<ServerCommandSource> parseResults = dispatcher.parse(userInput, ctx.getSource());
+                        if (parseResults.getContext().getNodes().isEmpty())
+                            throw FAILED_EXCEPTION.create();
+
+                        Map<CommandNode<ServerCommandSource>, String> usage = dispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), ctx.getSource());
+                        for (String u : usage.values()) {
+                            sendFeedback(new LiteralText("/" + userInput + " " + u));
+                        }
+
+                        return usage.size();
                     }
 
-                    return usage.size();
                 })));
+    }
+
+    public static boolean isInteger(String input)
+    {
+        try
+        {
+            Integer.parseInt(input);
+            return true;
+        }catch (NumberFormatException e){
+            return false;
+        }
     }
 
 }
