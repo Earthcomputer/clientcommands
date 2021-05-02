@@ -41,13 +41,17 @@ public class CHelpCommand {
                     }
                 }
 
-                Paginator<String> paginator = new Paginator<String>(commandNames, 9);
+                Paginator<String> paginator = new Paginator<String>(commandNames, 19);
                 Page<String> page = paginator.getPage(1);
                 for (int i = 0; i < page.Items.size(); i++)
                 {
                     sendFeedback(page.Items.get(i));
                 }
-                sendFeedback(new TranslatableText("paginator.display.page", page.PageNumber, paginator.getPageCount()));
+
+                sendFeedback(new LiteralText("")
+                        .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.left"), String.format("/chelp %d", page.PageNumber - 1)))
+                        .append(new TranslatableText("commands.chelp.paging.body", page.PageNumber, paginator.getPageCount()))
+                        .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.right"), String.format("/chelp %d", page.PageNumber + 1))));
 
                 return cmdCount;
 
@@ -70,10 +74,10 @@ public class CHelpCommand {
                                 commandNames.add('/' + commandName);
                             }
                         }
-                        Paginator<String> paginator = new Paginator<String>(commandNames, 9);
+                        Paginator<String> paginator = new Paginator<String>(commandNames, 19);
                         if(!paginator.isValidPage(userPage))
                         {
-                            sendFeedback(new TranslatableText("paginator.incorrect.page"));
+                            sendFeedback(new TranslatableText("commands.chelp.paging.incorrect", userPage));
                             return 0;
                         }
                         Page<String> page = paginator.getPage(userPage);
@@ -82,7 +86,10 @@ public class CHelpCommand {
                             sendFeedback(page.Items.get(i));
                         }
 
-                        sendFeedback(new TranslatableText("paginator.display.page", page.PageNumber, paginator.getPageCount()));
+                        sendFeedback(new LiteralText("")
+                                .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.left"), String.format("/chelp %d", page.PageNumber - 1)))
+                                .append(new TranslatableText("commands.chelp.paging.body", page.PageNumber, paginator.getPageCount()))
+                                .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.right"), String.format("/chelp %d", page.PageNumber + 1))));
 
                         return page.Items.size();
                     }

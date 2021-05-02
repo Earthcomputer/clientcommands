@@ -76,6 +76,11 @@
   "commands.cglow.entity.success": "Glowing %d entities",
   "commands.cglow.area.success": "Glowing %d area(s)",
 
+  "commands.chelp.paging.left": "<<",
+  "commands.chelp.paging.right": ">>",
+  "commands.chelp.paging.body": " | %d/%d | ",
+  "commands.chelp.paging.incorrect": "Page: %d does not exist",
+
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
 
@@ -150,9 +155,6 @@
   "enchCrack.insn.itemThrows": "Item throws needed: %d (about %f seconds)",
   "enchCrack.insn.itemThrows.noDummy": "No dummy enchantment",
   "enchCrack.insn.enchantments": "Enchantments on item:",
-
-  "paginator.display.page": "Page number: %d of %d",
-  "paginator.incorrect.page": "Specified page is out of bounds",
 
   "playerManip.state": "Player Crack State: %s",
   "playerManip.state.uncracked": "Uncracked",
