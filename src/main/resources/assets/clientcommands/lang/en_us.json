@@ -79,7 +79,7 @@
   "commands.chelp.paging.left": "<<",
   "commands.chelp.paging.right": ">>",
   "commands.chelp.paging.body": " | %d/%d | ",
-  "commands.chelp.paging.incorrect": "Page: %d does not exist",
+  "commands.chelp.paging.incorrect": "Page %d does not exist",
 
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
