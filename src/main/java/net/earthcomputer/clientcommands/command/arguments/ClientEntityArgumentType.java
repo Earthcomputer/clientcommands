@@ -89,7 +89,10 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 parser.parse();
             } catch (CommandSyntaxException ignore) {}
 
-            return parser.listSuggestions(builder, b -> CommandSource.suggestMatching(source.getPlayerNames(), b));
+            Collection<String> suggestions = source.getPlayerNames();
+            suggestions.addAll(source.getEntitySuggestions());
+
+            return parser.listSuggestions(builder, b -> CommandSource.suggestMatching(suggestions, b));
         } else {
             return Suggestions.empty();
         }
