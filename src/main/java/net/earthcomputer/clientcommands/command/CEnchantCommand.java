@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
@@ -17,20 +17,21 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class CEnchantCommand {
 
-    private static final int FLAG_SIMULATE = 1;
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cenchant");
 
-        LiteralCommandNode<ServerCommandSource> cenchant = dispatcher.register(literal("cenchant"));
         dispatcher.register(literal("cenchant")
+                .then(itemAndEnchantmentsPredicateArgument(false))
                 .then(literal("--simulate")
-                        .redirect(cenchant, ctx -> withFlags(ctx.getSource(), FLAG_SIMULATE, true)))
-                .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
-                        .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
+                        .then(itemAndEnchantmentsPredicateArgument(true))));
     }
 
-    private static int cenchant(ServerCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
+    public static RequiredArgumentBuilder<ServerCommandSource, ItemAndEnchantmentsPredicate> itemAndEnchantmentsPredicateArgument(boolean simulate) {
+        return argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(ench -> !ench.isTreasure()))
+                .executes(ctx -> cenchant(ctx.getSource(), simulate, getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")));
+    }
+
+    private static int cenchant(ServerCommandSource source, boolean simulate, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
         if (!TempRules.getEnchantingPrediction()) {
             Text text = new TranslatableText("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
@@ -47,9 +48,6 @@ public class CEnchantCommand {
             sendFeedback(text);
             return 0;
         }
-
-        boolean simulate = getFlag(source, FLAG_SIMULATE);
-
         EnchantmentCracker.ManipulateResult result = EnchantmentCracker.manipulateEnchantments(
                 itemAndEnchantmentsPredicate.item,
                 itemAndEnchantmentsPredicate.predicate,

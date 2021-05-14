@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
@@ -22,21 +21,18 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class FindCommand {
 
-    private static final int FLAG_KEEP_SEARCHING = 1;
-
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfind");
 
-        LiteralCommandNode<ServerCommandSource> cfind = dispatcher.register(literal("cfind"));
         dispatcher.register(literal("cfind")
             .then(literal("--keep-searching")
-                .redirect(cfind, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
+                .then(argument("filter", entities())
+                    .executes(ctx -> listEntities(ctx.getSource(), true, getEntitySelector(ctx, "filter")))))
             .then(argument("filter", entities())
-                .executes(ctx -> listEntities(ctx.getSource(), getEntitySelector(ctx, "filter")))));
+                .executes(ctx -> listEntities(ctx.getSource(), false, getEntitySelector(ctx, "filter")))));
     }
 
-    private static int listEntities(ServerCommandSource source, ClientEntitySelector selector) {
-        boolean keepSearching = getFlag(source, FLAG_KEEP_SEARCHING);
+    private static int listEntities(ServerCommandSource source, boolean keepSearching, ClientEntitySelector selector) {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(selector));
 
