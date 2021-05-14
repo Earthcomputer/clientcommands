@@ -31,27 +31,28 @@ public class CHelpCommand {
                 int cmdCount = 0;
 
                 List<String> commandNames = new ArrayList<String>();
-                for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren())
-                {
+                for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren()) {
+
                     String commandName = command.getName();
-                    if(isClientSideCommand(commandName))
-                    {
+
+                    if(isClientSideCommand(commandName)) {
                         commandNames.add('/' + commandName);
                         cmdCount++;
                     }
+
                 }
 
                 Paginator<String> paginator = new Paginator<String>(commandNames, 19);
                 Page<String> page = paginator.getPage(1);
-                for (int i = 0; i < page.Items.size(); i++)
-                {
-                    sendFeedback(page.Items.get(i));
+
+                for (int i = 0; i < page.items.size(); i++) {
+                    sendFeedback(page.items.get(i));
                 }
 
                 sendFeedback(new LiteralText("")
-                        .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.left"), String.format("/chelp %d", page.PageNumber - 1)))
-                        .append(new TranslatableText("commands.chelp.paging.body", page.PageNumber, paginator.getPageCount()))
-                        .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.right"), String.format("/chelp %d", page.PageNumber + 1))));
+                        .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.left"), String.format("/chelp %d", page.pageNumber - 1)))
+                        .append(new TranslatableText("commands.chelp.paging.body", page.pageNumber, paginator.getPageCount()))
+                        .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.right"), String.format("/chelp %d", page.pageNumber + 1))));
 
                 return cmdCount;
 
@@ -61,37 +62,38 @@ public class CHelpCommand {
 
                     String userInput = getString(ctx, "page | command");
 
-                    if(isInteger(userInput))
-                    {
-                        int userPage = Integer.parseInt(userInput);
+                    if(isInteger(userInput)) {
 
+                        int userPage = Integer.parseInt(userInput);
                         List<String> commandNames = new ArrayList<String>();
-                        for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren())
-                        {
+
+                        for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren()) {
                             String commandName = command.getName();
-                            if(isClientSideCommand(commandName))
-                            {
+
+                            if(isClientSideCommand(commandName)) {
                                 commandNames.add('/' + commandName);
                             }
                         }
+
                         Paginator<String> paginator = new Paginator<String>(commandNames, 19);
-                        if(!paginator.isValidPage(userPage))
-                        {
+
+                        if(!paginator.isValidPage(userPage)) {
                             sendFeedback(new TranslatableText("commands.chelp.paging.incorrect", userPage));
                             return 0;
                         }
+
                         Page<String> page = paginator.getPage(userPage);
-                        for (int i = 0; i < page.Items.size(); i++)
-                        {
-                            sendFeedback(page.Items.get(i));
+
+                        for (int i = 0; i < page.items.size(); i++) {
+                            sendFeedback(page.items.get(i));
                         }
 
                         sendFeedback(new LiteralText("")
-                                .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.left"), String.format("/chelp %d", page.PageNumber - 1)))
-                                .append(new TranslatableText("commands.chelp.paging.body", page.PageNumber, paginator.getPageCount()))
-                                .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.right"), String.format("/chelp %d", page.PageNumber + 1))));
+                                .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.left"), String.format("/chelp %d", page.pageNumber - 1)))
+                                .append(new TranslatableText("commands.chelp.paging.body", page.pageNumber, paginator.getPageCount()))
+                                .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.right"), String.format("/chelp %d", page.pageNumber + 1))));
 
-                        return page.Items.size();
+                        return page.items.size();
                     }
                     else
                     {
@@ -113,13 +115,11 @@ public class CHelpCommand {
                 })));
     }
 
-    public static boolean isInteger(String input)
-    {
-        try
-        {
+    public static boolean isInteger(String input) {
+        try {
             Integer.parseInt(input);
             return true;
-        }catch (NumberFormatException e){
+        }catch(NumberFormatException e) {
             return false;
         }
     }
