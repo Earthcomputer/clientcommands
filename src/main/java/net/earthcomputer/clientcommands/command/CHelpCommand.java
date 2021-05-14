@@ -8,7 +8,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.earthcomputer.clientcommands.Page;
 import net.earthcomputer.clientcommands.Paginator;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.MinecraftClientGame;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -32,13 +31,17 @@ public class CHelpCommand {
             .executes(ctx -> {
                 int cmdCount = 0;
 
-                List<String> commandNames = new ArrayList<String>();
+                List<String> simpleList = new ArrayList<String>();
+
+                simpleList.add(new TranslatableText("commands.chelp.paging.header1").getString());
+                simpleList.add(new TranslatableText("commands.chelp.paging.header2").getString());
+
                 for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren()) {
 
                     String commandName = command.getName();
 
                     if(isClientSideCommand(commandName)) {
-                        commandNames.add('/' + commandName);
+                        simpleList.add('/' + commandName);
                         cmdCount++;
                     }
 
@@ -46,7 +49,7 @@ public class CHelpCommand {
 
                 MinecraftClient.getInstance().inGameHud.getChatHud().clear(false);
 
-                Paginator<String> paginator = new Paginator<String>(commandNames, calculatePageSize());
+                Paginator<String> paginator = new Paginator<String>(simpleList, calculatePageSize());
                 Page<String> page = paginator.getPage(1);
 
                 for (int i = 0; i < page.items.size(); i++) {
@@ -69,19 +72,22 @@ public class CHelpCommand {
                     if(isInteger(userInput)) {
 
                         int userPage = Integer.parseInt(userInput);
-                        List<String> commandNames = new ArrayList<String>();
+                        List<String> simpleList = new ArrayList<String>();
+
+                        simpleList.add(new TranslatableText("commands.chelp.paging.header1").getString());
+                        simpleList.add(new TranslatableText("commands.chelp.paging.header2").getString());
 
                         for(CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren()) {
                             String commandName = command.getName();
 
                             if(isClientSideCommand(commandName)) {
-                                commandNames.add('/' + commandName);
+                                simpleList.add('/' + commandName);
                             }
                         }
 
                         MinecraftClient.getInstance().inGameHud.getChatHud().clear(false);
 
-                        Paginator<String> paginator = new Paginator<String>(commandNames, calculatePageSize());
+                        Paginator<String> paginator = new Paginator<String>(simpleList, calculatePageSize());
 
                         if(!paginator.isValidPage(userPage)) {
                             sendFeedback(new TranslatableText("commands.chelp.paging.incorrect", userPage));

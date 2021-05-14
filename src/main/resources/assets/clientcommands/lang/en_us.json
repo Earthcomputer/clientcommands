@@ -76,6 +76,8 @@
   "commands.cglow.entity.success": "Glowing %d entities",
   "commands.cglow.area.success": "Glowing %d area(s)",
 
+  "commands.chelp.paging.header1": "Usage \"/chelp 1\" or \"/chelp cmote\"",
+  "commands.chelp.paging.header2": "Arrows at the bottom are clickable",
   "commands.chelp.paging.left": "<<",
   "commands.chelp.paging.right": ">>",
   "commands.chelp.paging.body": " | %d/%d | ",
