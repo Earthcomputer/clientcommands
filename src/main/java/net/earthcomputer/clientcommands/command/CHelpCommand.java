@@ -7,6 +7,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import net.earthcomputer.clientcommands.Page;
 import net.earthcomputer.clientcommands.Paginator;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.MinecraftClientGame;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -42,7 +44,9 @@ public class CHelpCommand {
 
                 }
 
-                Paginator<String> paginator = new Paginator<String>(commandNames, 19);
+                MinecraftClient.getInstance().inGameHud.getChatHud().clear(false);
+
+                Paginator<String> paginator = new Paginator<String>(commandNames, calculatePageSize());
                 Page<String> page = paginator.getPage(1);
 
                 for (int i = 0; i < page.items.size(); i++) {
@@ -75,7 +79,9 @@ public class CHelpCommand {
                             }
                         }
 
-                        Paginator<String> paginator = new Paginator<String>(commandNames, 19);
+                        MinecraftClient.getInstance().inGameHud.getChatHud().clear(false);
+
+                        Paginator<String> paginator = new Paginator<String>(commandNames, calculatePageSize());
 
                         if(!paginator.isValidPage(userPage)) {
                             sendFeedback(new TranslatableText("commands.chelp.paging.incorrect", userPage));
@@ -92,7 +98,6 @@ public class CHelpCommand {
                                 .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.left"), String.format("/chelp %d", page.pageNumber - 1)))
                                 .append(new TranslatableText("commands.chelp.paging.body", page.pageNumber, paginator.getPageCount()))
                                 .append(getCommandTextComponent(new TranslatableText("commands.chelp.paging.right"), String.format("/chelp %d", page.pageNumber + 1))));
-
                         return page.items.size();
                     }
                     else
@@ -113,6 +118,24 @@ public class CHelpCommand {
                     }
 
                 })));
+    }
+
+    public static int calculatePageSize(){
+        int pageSize = 0;
+        int guiScale = MinecraftClient.getInstance().options.guiScale;
+        int visibleLines = MinecraftClient.getInstance().inGameHud.getChatHud().getVisibleLineCount();
+
+        if(guiScale == 0) { // Auto gui scale
+            guiScale = MinecraftClient.getInstance().getWindow().calculateScaleFactor(guiScale, true); // Calculate actual guiscale.
+        }
+
+        if(guiScale == 1 || guiScale == 2){
+            pageSize = visibleLines - 1; // Leave space for page navigation.
+        }else{
+            pageSize = (visibleLines / 2) - 1; // If guiscale is larger than 2, then split pagesize in half and subtract 1 line for page navigation
+        }
+
+        return pageSize;
     }
 
     public static boolean isInteger(String input) {
