@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.command.argument.IdentifierArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 

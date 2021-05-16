@@ -2,7 +2,7 @@ package net.cortex.clientAddon.cracker;
 
 import net.earthcomputer.clientcommands.Rand;
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.task.LongTask;
@@ -82,7 +82,7 @@ public class SeedCracker {
                 String taskName = TaskManager.addTask("ccrackrng", currentTask);
                 Text message = new TranslatableText("commands.ccrackrng.starting")
                         .append(" ")
-                        .append(ClientCommandManager.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName));
+                        .append(ClientCommandHelper.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName));
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
         }

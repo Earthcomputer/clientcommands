@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.script;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.earthcomputer.clientcommands.ClientCommands;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -121,12 +121,12 @@ public class ScriptManager {
             } catch (ScriptInterruptedException ignore) {
             } catch (ScriptException e) {
                 if (!(e.getCause() instanceof ScriptInterruptedException)) {
-                    ClientCommandManager.sendError(new LiteralText(e.getMessage() == null ? e.toString() : e.getMessage()));
+                    ClientCommandHelper.sendError(new LiteralText(e.getMessage() == null ? e.toString() : e.getMessage()));
                     e.getCause().printStackTrace();
                 }
             } catch (Throwable e) {
                 try {
-                    ClientCommandManager.sendError(new LiteralText(e.getMessage() == null ? e.toString() : e.getMessage()));
+                    ClientCommandHelper.sendError(new LiteralText(e.getMessage() == null ? e.toString() : e.getMessage()));
                 } catch (Throwable e1) {
                     LOGGER.error("Error sending error to chat", e1);
                 }

@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ClientCommandManager {
+public class ClientCommandHelper {
 
     private static final Set<String> clientSideCommands = new HashSet<>();
 
@@ -72,9 +72,9 @@ public class ClientCommandManager {
         try {
             return player.networkHandler.getCommandDispatcher().execute(reader, new FakeCommandSource(player));
         } catch (CommandException e) {
-            ClientCommandManager.sendError(e.getTextMessage());
+            ClientCommandHelper.sendError(e.getTextMessage());
         } catch (CommandSyntaxException e) {
-            ClientCommandManager.sendError(Texts.toText(e.getRawMessage()));
+            ClientCommandHelper.sendError(Texts.toText(e.getRawMessage()));
             if (e.getInput() != null && e.getCursor() >= 0) {
                 int cursor = Math.min(e.getCursor(), e.getInput().length());
                 MutableText text = new LiteralText("").formatted(Formatting.GRAY)
@@ -88,11 +88,11 @@ public class ClientCommandManager {
                 }
 
                 text.append(new TranslatableText("command.context.here").formatted(Formatting.RED, Formatting.ITALIC));
-                ClientCommandManager.sendError(text);
+                ClientCommandHelper.sendError(text);
             }
         } catch (Exception e) {
             LiteralText error = new LiteralText(e.getMessage() == null ? e.getClass().getName() : e.getMessage());
-            ClientCommandManager.sendError(new TranslatableText("command.failed")
+            ClientCommandHelper.sendError(new TranslatableText("command.failed")
                     .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, error))));
             e.printStackTrace();
         }

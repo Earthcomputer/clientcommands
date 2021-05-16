@@ -8,7 +8,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.command.argument.BlockPosArgumentType.*;
 import static net.minecraft.command.argument.RotationArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;

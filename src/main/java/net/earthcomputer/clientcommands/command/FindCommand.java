@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class FindCommand {

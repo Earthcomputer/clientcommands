@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
