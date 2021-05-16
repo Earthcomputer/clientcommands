@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class KitCommand {

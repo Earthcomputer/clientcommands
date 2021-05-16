@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.LongArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class BookCommand {

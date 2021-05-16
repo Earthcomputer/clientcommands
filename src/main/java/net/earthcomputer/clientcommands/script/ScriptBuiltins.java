@@ -4,7 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.earthcomputer.clientcommands.command.FakeCommandSource;
 import net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType;
@@ -54,11 +54,11 @@ class ScriptBuiltins {
             }
             String commandName = reader.readUnquotedString();
             reader.setCursor(0);
-            if (!ClientCommandManager.isClientSideCommand(commandName)) {
-                ClientCommandManager.sendError(new TranslatableText("commands.client.notClient"));
+            if (!ClientCommandHelper.isClientSideCommand(commandName)) {
+                ClientCommandHelper.sendError(new TranslatableText("commands.client.notClient"));
                 return 1;
             }
-            return ClientCommandManager.executeCommand(reader, command);
+            return ClientCommandHelper.executeCommand(reader, command);
         });
         engine.put("print", (Consumer<String>) message -> {
             if (MinecraftClient.getInstance().player == null) {

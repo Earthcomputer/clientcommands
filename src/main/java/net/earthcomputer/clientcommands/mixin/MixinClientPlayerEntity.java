@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.StringReader;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IKeyBinding;
 import net.earthcomputer.clientcommands.script.ScriptManager;
@@ -42,8 +42,8 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
             int cursor = reader.getCursor();
             String commandName = reader.canRead() ? reader.readUnquotedString() : "";
             reader.setCursor(cursor);
-            if (ClientCommandManager.isClientSideCommand(commandName)) {
-                ClientCommandManager.executeCommand(reader, message);
+            if (ClientCommandHelper.isClientSideCommand(commandName)) {
+                ClientCommandHelper.executeCommand(reader, message);
                 ci.cancel();
             } else if ("give".equals(commandName)) {
                 PlayerRandCracker.onGiveCommand();

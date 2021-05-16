@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 

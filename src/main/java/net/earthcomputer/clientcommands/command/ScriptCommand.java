@@ -7,7 +7,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class ScriptCommand {

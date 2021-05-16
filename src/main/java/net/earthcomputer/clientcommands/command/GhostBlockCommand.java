@@ -12,7 +12,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.command.argument.BlockPosArgumentType.*;
 import static net.minecraft.command.argument.BlockStateArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;

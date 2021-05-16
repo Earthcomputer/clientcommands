@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 import com.mojang.brigadier.CommandDispatcher;

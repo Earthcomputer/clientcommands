@@ -9,8 +9,8 @@ import net.minecraft.util.Formatting;
 
 import java.util.OptionalLong;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.addClientSideCommand;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.sendFeedback;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class CheatCrackRNGCommand {

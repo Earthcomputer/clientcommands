@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.minecraft.server.command.ServerCommandSource;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 

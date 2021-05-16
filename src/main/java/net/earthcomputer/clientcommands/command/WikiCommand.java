@@ -7,7 +7,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class WikiCommand {

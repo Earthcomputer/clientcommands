@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ITextFieldWidget;
 import net.minecraft.client.gui.screen.CommandSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -33,7 +33,7 @@ public class MixinCommandSuggestor {
             StringReader reader = new StringReader(parse.getReader().getString());
             reader.skip(); // /
             String command = reader.canRead() ? reader.readUnquotedString() : "";
-            isClientCommand = ClientCommandManager.isClientSideCommand(command);
+            isClientCommand = ClientCommandHelper.isClientSideCommand(command);
         }
 
         if (isClientCommand && !wasClientCommand) {

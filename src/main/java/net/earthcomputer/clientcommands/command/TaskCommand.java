@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class TaskCommand {

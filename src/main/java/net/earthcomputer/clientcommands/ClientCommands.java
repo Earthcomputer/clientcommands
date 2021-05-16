@@ -24,7 +24,7 @@ public class ClientCommands implements ClientModInitializer {
     }
 
     public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
-        ClientCommandManager.clearClientSideCommands();
+        ClientCommandHelper.clearClientSideCommands();
         BookCommand.register(dispatcher);
         LookCommand.register(dispatcher);
         NoteCommand.register(dispatcher);

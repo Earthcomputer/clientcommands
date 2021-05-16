@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.earthcomputer.clientcommands.Rand;
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.mixin.AlternativeLootConditionAccessor;
 import net.earthcomputer.clientcommands.mixin.LocationCheckLootConditionAccessor;
@@ -374,7 +374,7 @@ public class FishingCracker {
         OptionalLong optionalSeed = getSeed(fishingBobberUUID);
         if (!optionalSeed.isPresent()) {
             Text error = new TranslatableText("commands.cfish.error.crackFailed").styled(style -> style.withColor(Formatting.RED));
-            ClientCommandManager.addOverlayMessage(error, 100);
+            ClientCommandHelper.addOverlayMessage(error, 100);
             reset();
             return;
         }
@@ -392,7 +392,7 @@ public class FishingCracker {
             fishingBobber.tick();
             if (fishingBobber.failed) {
                 Text error = new TranslatableText("commands.cfish.error.failed").styled(style -> style.withColor(Formatting.RED));
-                ClientCommandManager.addOverlayMessage(error, 100);
+                ClientCommandHelper.addOverlayMessage(error, 100);
                 reset();
                 return;
             }
@@ -469,10 +469,10 @@ public class FishingCracker {
                 .collect(Collectors.toList());
 
         if (actualCatch.equals(expectedCatch)) {
-            ClientCommandManager.addOverlayMessage(new TranslatableText("commands.cfish.correctLoot", magicMillisecondsCorrection)
+            ClientCommandHelper.addOverlayMessage(new TranslatableText("commands.cfish.correctLoot", magicMillisecondsCorrection)
                     .styled(style -> style.withColor(Formatting.GREEN)), 100);
         } else {
-            ClientCommandManager.addOverlayMessage(new TranslatableText("commands.cfish.wrongLoot", magicMillisecondsCorrection, indices)
+            ClientCommandHelper.addOverlayMessage(new TranslatableText("commands.cfish.wrongLoot", magicMillisecondsCorrection, indices)
                     .styled(style -> style.withColor(Formatting.RED)), 100);
         }
 
@@ -602,7 +602,7 @@ public class FishingCracker {
 
     public static void onBobOutOfWater() {
         Text message = new TranslatableText("commands.cfish.error.outOfWater").styled(style -> style.withColor(Formatting.RED));
-        ClientCommandManager.addOverlayMessage(message, 100);
+        ClientCommandHelper.addOverlayMessage(message, 100);
     }
 
     // endregion
