@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -12,7 +13,7 @@ public interface CreativeInventoryScreenAccessor {
     }
 
     @SuppressWarnings("AccessorTarget")
-    @Accessor(value = "fabric_currentPage", remap = false)
+    @Dynamic @Accessor(value = "fabric_currentPage", remap = false)
     static void setFabricCurrentPage(int index) {
         throw new AssertionError();
     }
