@@ -51,11 +51,11 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         } else {
             Identifier tagId = itemReader.getId();
             return ctx -> {
-                @SuppressWarnings("ConstantConditions") Tag.Identified<Item> tag = (Tag.Identified<Item>) MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(tagId);
+                @SuppressWarnings("ConstantConditions") Tag<Item> tag = MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(tagId);
                 if (tag == null) {
                     throw UNKNOWN_TAG_EXCEPTION.create(tagId.toString());
                 } else {
-                    return new TagPredicate(tag, itemReader.getTag());
+                    return new TagPredicate(tag, tagId, itemReader.getTag());
                 }
             };
         }
@@ -73,11 +73,13 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
 
 
     static class TagPredicate implements ClientItemPredicate {
-        private final Tag.Identified<Item> tag;
+        private final Tag<Item> tag;
+        private final Identifier id;
         private final CompoundTag compound;
 
-        public TagPredicate(Tag.Identified<Item> tag, CompoundTag compound) {
+        public TagPredicate(Tag<Item> tag, Identifier id, CompoundTag compound) {
             this.tag = tag;
+            this.id = id;
             this.compound = compound;
         }
 
@@ -88,7 +90,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
 
         @Override
         public String getPrettyString() {
-            String ret = "#" + tag.getId();
+            String ret = "#" + this.id;
             if (compound != null) {
                 ret += compound;
             }
