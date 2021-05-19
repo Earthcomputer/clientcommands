@@ -128,6 +128,7 @@
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.notClient": "Not a client-side command",
   "commands.client.tooFewArguments": "Too few arguments",
+  "commands.client.invalidArgumentException": "Invalid argument '%s'",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",
