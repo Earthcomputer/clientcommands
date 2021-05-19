@@ -586,7 +586,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
     public boolean rightClick() {
         for (Hand hand : Hand.values()) {
             ActionResult result = MinecraftClient.getInstance().interactionManager.interactItem(getEntity(), getEntity().world, hand);
-            if (result == ActionResult.SUCCESS) {
+            if (result.isAccepted()) {
                 MinecraftClient.getInstance().gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
                 return true;
             }
@@ -628,7 +628,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
                     new BlockHitResult(closestPos,
                             dir == null ? Direction.getFacing((float) (closestPos.x - origin.x), (float) (closestPos.y - origin.y), (float) (closestPos.z - origin.z)) : dir,
                             new BlockPos(x, y, z), false));
-            if (result == ActionResult.SUCCESS) {
+            if (result.shouldSwingHand()) {
                 getEntity().swingHand(hand);
                 return true;
             }
@@ -654,7 +654,7 @@ public class ScriptPlayer extends ScriptLivingEntity {
 
         for (Hand hand : Hand.values()) {
             ActionResult result = MinecraftClient.getInstance().interactionManager.interactEntity(getEntity(), entity.getEntity(), hand);
-            if (result == ActionResult.SUCCESS) {
+            if (result.isAccepted()) {
                 lookAt(entity);
                 return true;
             }
