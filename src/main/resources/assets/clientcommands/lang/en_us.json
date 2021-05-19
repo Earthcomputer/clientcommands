@@ -89,6 +89,8 @@
   "commands.citemgroup.addStack.success": "Successfully added %s to \"%s\"",
   "commands.citemgroup.removeStack.success": "Successfully removed stack from \"%s\" at index %d",
   "commands.citemgroup.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
+  "commands.citemgroup.changeIcon.success": "Successfully changed the icon of \"%s\" from %s to %s",
+  "commands.citemgroup.renameGroup.success": "Successfully renamed item group \"%s\" to \"%s\"",
 
   "commands.ckit.notFound": "Kit \"%s\" not found",
   "commands.ckit.saveFile.failed": "Could not save kits file",

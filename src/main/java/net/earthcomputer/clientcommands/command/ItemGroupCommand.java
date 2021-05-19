@@ -84,7 +84,13 @@ public class ItemGroupCommand {
                             .then(argument("itemstack", itemStack())
                                 .then(argument("count", integer(1))
                                     .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
-                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(1, false))))))))
+                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(1, false))))))
+                    .then(literal("icon")
+                        .then(argument("icon", itemStack())
+                            .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "icon").createStack(1, false)))))
+                    .then(literal("rename")
+                        .then(argument("new", string())
+                            .executes(ctx -> renameGroup(ctx.getSource(), getString(ctx, "group"), getString(ctx, "new")))))))
             .then(literal("add")
                 .then(argument("group", string())
                     .then(argument("icon", itemStack())
@@ -142,7 +148,7 @@ public class ItemGroupCommand {
 
         reloadGroups(itemGroup.getIndex());
         saveFile();
-        sendFeedback("commands.citemgroup.addStack.success", itemStack.getItem().getName().getString(), name);
+        sendFeedback("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name);
         return 0;
     }
 
@@ -180,7 +186,55 @@ public class ItemGroupCommand {
 
         reloadGroups(itemGroup.getIndex());
         saveFile();
-        sendFeedback("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName().getString());
+        sendFeedback("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName());
+        return 0;
+    }
+
+    private static int changeIcon(ServerCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
+        if (!groups.containsKey(name)) {
+            throw NOT_FOUND_EXCEPTION.create(name);
+        }
+
+        Group group = groups.get(name);
+        ItemGroup itemGroup = group.getItemGroup();
+        ListTag items = group.getItems();
+        ItemStack old = itemGroup.getIcon();
+        itemGroup = FabricItemGroupBuilder.create(
+                new Identifier("clientcommands", name))
+                .icon(() -> icon)
+                .build();
+
+        groups.put(name, new Group(itemGroup, icon, items));
+
+        reloadGroups(group.getItemGroup().getIndex());
+        saveFile();
+        sendFeedback("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName());
+        return 0;
+    }
+
+    private static int renameGroup(ServerCommandSource source, String name, String _new) throws CommandSyntaxException {
+        if (!groups.containsKey(name)) {
+            throw NOT_FOUND_EXCEPTION.create(name);
+        }
+
+        Group group = groups.remove(name);
+        ItemGroup itemGroup = group.getItemGroup();
+        ListTag items = group.getItems();
+        ItemStack icon = itemGroup.getIcon();
+        try {
+            itemGroup = FabricItemGroupBuilder.create(
+                    new Identifier("clientcommands", _new))
+                    .icon(() -> icon)
+                    .build();
+
+            groups.put(_new, new Group(itemGroup, icon, items));
+        } catch (InvalidIdentifierException e) {
+            throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
+        }
+
+        reloadGroups(group.getItemGroup().getIndex());
+        saveFile();
+        sendFeedback("commands.citemgroup.renameGroup.success", name, _new);
         return 0;
     }
 
