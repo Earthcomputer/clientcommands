@@ -33,7 +33,7 @@ public abstract class MixinItemGroup implements IItemGroup {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void substring(int index, String id, CallbackInfo ci) {
-        if (id.contains("clientcommands.")) {
+        if (id.startsWith("clientcommands.")) {
             this.translationKey = new LiteralText(id.substring(15));
         }
     }
