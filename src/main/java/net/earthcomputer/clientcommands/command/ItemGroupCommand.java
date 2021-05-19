@@ -59,7 +59,7 @@ public class ItemGroupCommand {
         try {
             loadFile();
         } catch (IOException e) {
-            LOGGER.info("Could not load groups file, hence /citemgroup will not work!");
+            LOGGER.error("Could not load groups file, hence /citemgroup will not work!", e);
         }
     }
 
@@ -68,31 +68,31 @@ public class ItemGroupCommand {
 
         LiteralCommandNode<ServerCommandSource> citemgroup = dispatcher.register(literal("citemgroup"));
         dispatcher.register(literal("citemgroup")
-                .then(literal("modify")
-                        .then(argument("group", string())
-                                .suggests((ctx, builder) -> suggestMatching(groups.keySet(), builder))
-                                .then(literal("add")
-                                        .then(argument("itemstack", itemStack())
-                                                .then(argument("count", integer(1))
-                                                        .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
-                                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "itemstack").createStack(1, false)))))
-                                .then(literal("remove")
-                                        .then(argument("index", integer(0))
-                                                .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index")))))
-                                .then(literal("set")
-                                        .then(argument("index", integer(0))
-                                                .then(argument("itemstack", itemStack())
-                                                        .then(argument("count", integer(1))
-                                                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
-                                                        .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(1, false))))))))
-                .then(literal("add")
-                        .then(argument("group", string())
-                                .then(argument("icon", itemStack())
-                                        .executes(ctx -> addGroup(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "icon").createStack(1, false))))))
-                .then(literal("remove")
-                        .then(argument("group", string())
-                                .suggests((ctx, builder) -> suggestMatching(groups.keySet(), builder))
-                                .executes(ctx -> removeGroup(ctx.getSource(), getString(ctx, "group"))))));
+            .then(literal("modify")
+                .then(argument("group", string())
+                    .suggests((ctx, builder) -> suggestMatching(groups.keySet(), builder))
+                    .then(literal("add")
+                        .then(argument("itemstack", itemStack())
+                            .then(argument("count", integer(1))
+                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
+                            .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "itemstack").createStack(1, false)))))
+                    .then(literal("remove")
+                        .then(argument("index", integer(0))
+                            .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index")))))
+                    .then(literal("set")
+                        .then(argument("index", integer(0))
+                            .then(argument("itemstack", itemStack())
+                                .then(argument("count", integer(1))
+                                    .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
+                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(1, false))))))))
+            .then(literal("add")
+                .then(argument("group", string())
+                    .then(argument("icon", itemStack())
+                         .executes(ctx -> addGroup(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "icon").createStack(1, false))))))
+            .then(literal("remove")
+                .then(argument("group", string())
+                    .suggests((ctx, builder) -> suggestMatching(groups.keySet(), builder))
+                    .executes(ctx -> removeGroup(ctx.getSource(), getString(ctx, "group"))))));
     }
 
     private static int addGroup(ServerCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
