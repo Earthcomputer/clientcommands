@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemGroup.class)
 public abstract class MixinItemGroup implements IItemGroup {
 
-    @Shadow @Final @Mutable public static ItemGroup[] GROUPS;
+    @Shadow @Mutable @Final public static ItemGroup[] GROUPS;
 
-    @Mutable @Shadow @Final private Text translationKey;
+    @Shadow @Mutable @Final private Text translationKey;
 
     @Override
     public void shrink(int index) {
