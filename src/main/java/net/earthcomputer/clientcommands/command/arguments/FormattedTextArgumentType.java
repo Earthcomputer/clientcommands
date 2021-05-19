@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command.arguments;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -22,9 +21,9 @@ import java.util.function.Consumer;
 
 public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
 
-    private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold(xpple)", "bold(italic(red(nwex)))");
+    private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "bold{italic{red{nwex}}}");
 
-    private static final DynamicCommandExceptionType INVALID_ARGUMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> new LiteralMessage("Invalid argument '" + arg + "'"));
+    private static final DynamicCommandExceptionType INVALID_ARGUMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.client.invalidArgument", arg));
 
     private FormattedTextArgumentType() {
     }
@@ -178,12 +177,16 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
                 .put("white",  new Styler((s, o) -> s.withFormatting(Formatting.WHITE), 0))
                 .put("yellow", new Styler((s, o) -> s.withFormatting(Formatting.YELLOW), 0))
 
-                .put("font", new Styler((s, o) -> s.withFont(Identifier.tryParse(o.get(0))), 1, new String[]{"alt", "default"}))
+                .put("font", new Styler((s, o) -> s.withFont(Identifier.tryParse(o.get(0))), 1, "alt", "default"))
                 .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.get(0), 16))), 1))
                 .put("insert", new Styler((s, o) -> s.withInsertion(o.get(0)), 1))
 
-                .put("click", new Styler((s, o) -> s.withClickEvent(new ClickEvent(ClickEvent.Action.byName(o.get(0)), o.get(1))), 2, new String[]{"change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"}))
-                .put("hover", new Styler((s, o) -> s.withHoverEvent(HoverEvent.Action.byName(o.get(0)).buildHoverEvent(Text.of(o.get(1)))), 2, new String[]{"show_entity", "show_item", "show_text"}))
+                .put("click", new Styler((s, o) -> s.withClickEvent(new ClickEvent(ClickEvent.Action.byName(o.get(0)), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
+                .put("hover", new Styler((s, o) -> s.withHoverEvent(HoverEvent.Action.byName(o.get(0)).buildHoverEvent(Text.of(o.get(1)))), 2, "show_entity", "show_item", "show_text"))
+
+                // aliases
+                .put("strike", new Styler((s, o) -> s.withFormatting(Formatting.STRIKETHROUGH), 0))
+                .put("magic", new Styler((s, o) -> s.withFormatting(Formatting.OBFUSCATED), 0))
                 .build();
 
         private final BiFunction<Style, List<String>, Style> styler;
@@ -196,12 +199,8 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
             this.optional = optional;
         }
 
-        public LiteralText style() throws CommandSyntaxException {
-            try {
-                return (LiteralText) this.argument.setStyle(this.styler.apply(this.argument.getStyle(), this.optional));
-            } catch (Exception e) {
-                throw INVALID_ARGUMENT_EXCEPTION.create(this.optional);
-            }
+        public LiteralText style() {
+            return (LiteralText) this.argument.setStyle(this.styler.apply(this.argument.getStyle(), this.optional));
         }
 
         private static final class Styler {
@@ -210,13 +209,7 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
             private final int argumentCount;
             private final String[] suggestions;
 
-            private Styler(BiFunction<Style, List<String>, Style> operator, int argumentCount) {
-                this.operator = operator;
-                this.argumentCount = argumentCount;
-                this.suggestions = new String[]{};
-            }
-
-            private Styler(BiFunction<Style, List<String>, Style> operator, int argumentCount, String[] suggestions) {
+            private Styler(BiFunction<Style, List<String>, Style> operator, int argumentCount, String... suggestions) {
                 this.operator = operator;
                 this.argumentCount = argumentCount;
                 this.suggestions = suggestions;
