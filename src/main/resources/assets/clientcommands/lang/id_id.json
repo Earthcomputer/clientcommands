@@ -121,7 +121,8 @@
   "commands.client.crack": "Pecahkan",
   "commands.client.enable": "Nyalakan",
   "commands.client.expectedRegex": "Regex tidak valid %s",
-  "commands.client.notClient": "Bukan perintah sisi client",
+  "commands.client.notClient": "Bukan perintah sisi klien",
+  "commands.client.invalidArgumentException": "Argumen tidak valid '%s'",
 
   "chorusManip.landing.success": "Mendarat di: %d, %d, %d",
   "chorusManip.landing.failed": "Manipulasi mendarat tidak mungkin",
