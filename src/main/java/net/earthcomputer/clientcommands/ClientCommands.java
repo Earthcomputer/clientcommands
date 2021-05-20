@@ -56,6 +56,7 @@ public class ClientCommands implements ClientModInitializer {
         FovCommand.register(dispatcher);
         HotbarCommand.register(dispatcher);
         KitCommand.register(dispatcher);
+        NameHistory.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 
