@@ -7,9 +7,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 
-/**
- * Copyright (c) 2020 KaptainWutax
- */
 public class Line extends Shape {
     public final Vec3d start;
     public final Vec3d end;
