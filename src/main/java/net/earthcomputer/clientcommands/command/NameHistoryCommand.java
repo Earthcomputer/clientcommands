@@ -21,7 +21,7 @@ import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.command.CommandSource.suggestMatching;
 import static net.minecraft.server.command.CommandManager.*;
 
-public class NameHistory {
+public class NameHistoryCommand {
 
     private static final SimpleCommandExceptionType IO_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cnamehistory.ioException"));
 
