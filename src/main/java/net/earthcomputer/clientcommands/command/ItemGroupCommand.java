@@ -128,7 +128,7 @@ public class ItemGroupCommand {
 
         groups.remove(name);
 
-        reloadGroups(12);
+        reloadGroups();
         CreativeInventoryScreenAccessor.setSelectedTab(0);
         CreativeInventoryScreenAccessor.setFabricCurrentPage(0);
         saveFile();
@@ -143,10 +143,9 @@ public class ItemGroupCommand {
 
         Group group = groups.get(name);
         ListTag items = group.getItems();
-        ItemGroup itemGroup = group.getItemGroup();
         items.add(itemStack.toTag(new CompoundTag()));
 
-        reloadGroups(itemGroup.getIndex());
+        reloadGroups();
         saveFile();
         sendFeedback("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name);
         return 0;
@@ -159,13 +158,12 @@ public class ItemGroupCommand {
 
         Group group = groups.get(name);
         ListTag items = group.getItems();
-        if (index < 0 || index > items.size()) {
+        if (index < 0 || index >= items.size()) {
             throw OUT_OF_BOUNDS_EXCEPTION.create(index);
         }
-        ItemGroup itemGroup = group.getItemGroup();
         items.remove(index);
 
-        reloadGroups(itemGroup.getIndex());
+        reloadGroups();
         saveFile();
         sendFeedback("commands.citemgroup.removeStack.success", name, index);
         return 0;
@@ -178,13 +176,12 @@ public class ItemGroupCommand {
 
         Group group = groups.get(name);
         ListTag items = group.getItems();
-        if ((index < 0) || (index > items.size())) {
+        if ((index < 0) || (index >= items.size())) {
             throw OUT_OF_BOUNDS_EXCEPTION.create(index);
         }
-        ItemGroup itemGroup = group.getItemGroup();
         items.set(index, itemStack.toTag(new CompoundTag()));
 
-        reloadGroups(itemGroup.getIndex());
+        reloadGroups();
         saveFile();
         sendFeedback("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName());
         return 0;
@@ -206,7 +203,7 @@ public class ItemGroupCommand {
 
         groups.put(name, new Group(itemGroup, icon, items));
 
-        reloadGroups(group.getItemGroup().getIndex());
+        reloadGroups();
         saveFile();
         sendFeedback("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName());
         return 0;
@@ -232,7 +229,7 @@ public class ItemGroupCommand {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
         }
 
-        reloadGroups(group.getItemGroup().getIndex());
+        reloadGroups();
         saveFile();
         sendFeedback("commands.citemgroup.renameGroup.success", name, _new);
         return 0;
@@ -256,6 +253,7 @@ public class ItemGroupCommand {
             File currentFile = new File(configPath.toFile(), "groups.dat");
             Util.backupAndReplace(currentFile, newFile, backupFile);
         } catch (IOException e) {
+            e.printStackTrace();
             throw SAVE_FAILED_EXCEPTION.create();
         }
     }
@@ -312,21 +310,20 @@ public class ItemGroupCommand {
         }
     }
 
-    private static void reloadGroups(int groupIndex) {
-        ((IItemGroup) ItemGroup.BUILDING_BLOCKS).shrink(groupIndex);
+    private static void reloadGroups() {
+        ((IItemGroup) ItemGroup.BUILDING_BLOCKS).shrink();
 
         for (String key : groups.keySet()) {
-            if (groups.get(key).getItemGroup().getIndex() >= groupIndex) {
-                groups.get(key).setItemGroup(FabricItemGroupBuilder.create(
-                        new Identifier("clientcommands", key))
-                        .icon(() -> groups.get(key).getIcon())
-                        .appendItems(stacks -> {
-                            for (int i = 0; i < groups.get(key).getItems().size(); i++) {
-                                stacks.add(ItemStack.fromTag(groups.get(key).getItems().getCompound(i)));
-                            }
-                        })
-                        .build());
-            }
+            Group group = groups.get(key);
+            group.setItemGroup(FabricItemGroupBuilder.create(
+                    new Identifier("clientcommands", key))
+                    .icon(group::getIcon)
+                    .appendItems(stacks -> {
+                        for (int i = 0; i < group.getItems().size(); i++) {
+                            stacks.add(ItemStack.fromTag(group.getItems().getCompound(i)));
+                        }
+                    })
+                    .build());
         }
     }
 }

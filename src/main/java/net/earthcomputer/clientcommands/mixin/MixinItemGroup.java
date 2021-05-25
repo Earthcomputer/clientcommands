@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Arrays;
+
 @Mixin(ItemGroup.class)
 public abstract class MixinItemGroup implements IItemGroup {
 
@@ -20,9 +22,10 @@ public abstract class MixinItemGroup implements IItemGroup {
     @Shadow @Mutable @Final private Text translationKey;
 
     @Override
-    public void shrink(int index) {
+    public void shrink() {
         ItemGroup[] tempGroups = GROUPS;
-        GROUPS = new ItemGroup[index];
+        tempGroups = Arrays.stream(tempGroups).filter(itemGroup -> !itemGroup.getName().startsWith("clientcommands.")).toArray(ItemGroup[]::new);
+        GROUPS = new ItemGroup[tempGroups.length];
         System.arraycopy(tempGroups, 0, GROUPS, 0, GROUPS.length);
     }
 
