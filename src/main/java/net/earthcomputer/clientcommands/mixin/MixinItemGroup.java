@@ -23,15 +23,7 @@ public abstract class MixinItemGroup implements IItemGroup {
 
     @Override
     public void shrink() {
-        ItemGroup[] tempGroups = GROUPS;
-        tempGroups = Arrays.stream(tempGroups).filter(itemGroup -> !itemGroup.getName().startsWith("clientcommands.")).toArray(ItemGroup[]::new);
-        GROUPS = new ItemGroup[tempGroups.length];
-        System.arraycopy(tempGroups, 0, GROUPS, 0, GROUPS.length);
-    }
-
-    @Override
-    public int getLength() {
-        return GROUPS.length;
+        GROUPS = Arrays.stream(GROUPS).filter(itemGroup -> !itemGroup.getName().startsWith("clientcommands.")).toArray(ItemGroup[]::new);
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))

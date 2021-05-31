@@ -106,18 +106,17 @@ public class ItemGroupCommand {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
 
-        try {
-            ItemGroup itemGroup = FabricItemGroupBuilder.create(
-                    new Identifier("clientcommands", name))
-                    .icon(() -> icon)
-                    .build();
-
-            groups.put(name, new Group(itemGroup, icon, new ListTag()));
-            saveFile();
-            sendFeedback("commands.citemgroup.addGroup.success", name);
-        } catch (InvalidIdentifierException e) {
+        final Identifier identifier = Identifier.tryParse("clientcommands:" + name);
+        if (identifier == null) {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(name);
         }
+        ItemGroup itemGroup = FabricItemGroupBuilder.create(identifier)
+                .icon(() -> icon)
+                .build();
+
+        groups.put(name, new Group(itemGroup, icon, new ListTag()));
+        saveFile();
+        sendFeedback("commands.citemgroup.addGroup.success", name);
         return 0;
     }
 
