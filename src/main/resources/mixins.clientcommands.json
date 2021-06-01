@@ -68,7 +68,9 @@
     "MixinStonecutterContainer",
     "MixinTextFieldWidget",
     "ProjectileEntityAccessor",
-    "ScreenHandlerAccessor"
+    "ScreenHandlerAccessor",
+    "MixinItemGroup",
+    "CreativeInventoryScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
