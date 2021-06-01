@@ -278,8 +278,8 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
     public static abstract class Expression {
         public String strVal;
-        public abstract double eval();
-        public abstract Text getParsedTree();
+        public abstract double eval() throws StackOverflowError;
+        public abstract Text getParsedTree() throws StackOverflowError;
     }
 
     private static class BinaryOpExpression extends Expression {
