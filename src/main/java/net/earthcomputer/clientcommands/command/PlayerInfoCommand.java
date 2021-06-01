@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -12,6 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -62,7 +64,11 @@ public class PlayerInfoCommand {
             if (optional.isPresent()) {
                 uuid = optional.get();
             } else {
-                uuid = requestAsync("https://api.mojang.com/users/profiles/minecraft/" + player).getAsJsonObject().get("id").getAsString();
+                JsonElement result = requestAsync("https://api.mojang.com/users/profiles/minecraft/" + player);
+                if (result instanceof JsonNull) {
+                    throw IO_EXCEPTION.create();
+                }
+                uuid = result.getAsJsonObject().get("id").getAsString();
             }
         }
         JsonArray names = requestAsync("https://api.mojang.com/user/profiles/" + uuid + "/names").getAsJsonArray();
@@ -80,7 +86,11 @@ public class PlayerInfoCommand {
             try {
                 URLConnection request = new URL(url).openConnection();
                 request.connect();
-                return (new JsonParser().parse(new InputStreamReader(request.getInputStream())));
+                JsonElement result = (new JsonParser().parse(new InputStreamReader(request.getInputStream())));
+                if (result == null) {
+                    throw new IOException();
+                }
+                return result;
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
