@@ -17,6 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
@@ -65,9 +66,6 @@ public class PlayerInfoCommand {
             }
         }
         JsonArray names = requestAsync("https://api.mojang.com/user/profiles/" + uuid + "/names").getAsJsonArray();
-        if (names == null) {
-            throw IO_EXCEPTION.create();
-        }
 
         List<String> stringNames = new ArrayList<>();
         names.forEach(name -> stringNames.add(name.getAsJsonObject().get("name").getAsString()));
@@ -84,8 +82,7 @@ public class PlayerInfoCommand {
                 request.connect();
                 return (new JsonParser().parse(new InputStreamReader(request.getInputStream())));
             } catch (Exception e) {
-                e.printStackTrace();
-                return null;
+                throw new CompletionException(e);
             }
         });
         try {
