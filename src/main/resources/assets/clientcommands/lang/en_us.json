@@ -1,8 +1,8 @@
 {
   "commands.careastats.notLoaded": "A chunk in this area is not loaded",
-  "commands.careastats.output.1": "Scanned %d chunks in %dns ≈ %dms",
-  "commands.careastats.output.2": "Matched %d out of %d total blocks",
-  "commands.careastats.output.3": "Found %d entities in this area",
+  "commands.careastats.output.chunksScanned": "Scanned %d chunks in %dns ≈ %dms",
+  "commands.careastats.output.blocksMatched": "Matched %d out of %d total blocks",
+  "commands.careastats.output.entitiesFound": "Found %d entities in this area",
 
   "commands.cbook.success": "Successfully edited book",
   "commands.cbook.commandException": "You are not holding a book",
