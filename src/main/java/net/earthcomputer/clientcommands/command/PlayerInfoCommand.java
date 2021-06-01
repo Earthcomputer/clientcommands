@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -60,23 +61,11 @@ public class PlayerInfoCommand {
             if (optional.isPresent()) {
                 uuid = optional.get();
             } else {
-                try {
-                    URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + player);
-                    URLConnection request = url.openConnection();
-                    request.connect();
-                    uuid = (new JsonParser().parse(new InputStreamReader(request.getInputStream()))).getAsJsonObject().get("id").getAsString();
-                } catch (Exception e) {
-                    throw IO_EXCEPTION.create();
-                }
+                uuid = requestAsync("https://api.mojang.com/users/profiles/minecraft/" + player).getAsJsonObject().get("id").getAsString();
             }
         }
-        JsonArray names;
-        try {
-            URL url = new URL("https://api.mojang.com/user/profiles/" + uuid + "/names");
-            URLConnection request = url.openConnection();
-            request.connect();
-            names = (new JsonParser().parse(new InputStreamReader(request.getInputStream()))).getAsJsonArray();
-        } catch (Exception e) {
+        JsonArray names = requestAsync("https://api.mojang.com/user/profiles/" + uuid + "/names").getAsJsonArray();
+        if (names == null) {
             throw IO_EXCEPTION.create();
         }
 
@@ -86,5 +75,23 @@ public class PlayerInfoCommand {
         cacheByUuid.put(uuid, stringNames);
         sendFeedback(new TranslatableText("commands.cnamehistory.success", player, String.join(", ", stringNames)));
         return 0;
+    }
+
+    private static JsonElement requestAsync(String url) throws CommandSyntaxException {
+        CompletableFuture<JsonElement> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                URLConnection request = new URL(url).openConnection();
+                request.connect();
+                return (new JsonParser().parse(new InputStreamReader(request.getInputStream())));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        try {
+            return future.join();
+        } catch (Exception e) {
+            throw IO_EXCEPTION.create();
+        }
     }
 }
