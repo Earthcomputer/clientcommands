@@ -61,27 +61,12 @@ public class AreaStatsCommand {
         final WorldChunk chunk2 = world.getWorldChunk(pos2);
 
         final int minX, maxX, minZ, maxZ, minY, maxY;
-        if (pos1.getX() <= pos2.getX()) {
-            minX = pos1.getX();
-            maxX = pos2.getX();
-        } else {
-            minX = pos2.getX();
-            maxX = pos1.getX();
-        }
-        if (pos1.getZ() <= pos2.getZ()) {
-            minZ = pos1.getZ();
-            maxZ = pos2.getZ();
-        } else {
-            minZ = pos2.getZ();
-            maxZ = pos1.getZ();
-        }
-        if (pos1.getY() <= pos2.getY()) {
-            minY = pos1.getY();
-            maxY = pos2.getY();
-        } else {
-            minY = pos2.getY();
-            maxY = pos1.getY();
-        }
+        minX = Math.min(pos1.getX(), pos2.getX());
+        maxX = Math.max(pos1.getX(), pos2.getX());
+        minZ = Math.min(pos1.getZ(), pos2.getZ());
+        maxZ = Math.max(pos1.getZ(), pos2.getZ());
+        minY = Math.min(pos1.getY(), pos2.getY());
+        maxY = Math.max(pos1.getY(), pos2.getY());
 
         final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
 
