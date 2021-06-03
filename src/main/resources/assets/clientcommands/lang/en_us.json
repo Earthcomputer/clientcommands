@@ -90,6 +90,7 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
   "commands.cparticle.success": "Displaying particle %s",
 
   "commands.cplaysound.success": "Played sound %s to self",
