@@ -205,8 +205,4 @@ public class AreaStatsCommand {
         }
         throw NOT_LOADED_EXCEPTION.create();
     }
-
-    private static Predicate<Block> or(List<Predicate<Block>> predicates) {
-        return predicates.stream().reduce(t -> false, Predicate::or);
-    }
 }
