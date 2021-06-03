@@ -12,6 +12,8 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 
+import java.util.Random;
+
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
@@ -49,14 +51,21 @@ public class CParticleCommand {
     private static int spawnParticle(ServerCommandSource source, ParticleEffect parameters, Vec3d pos, Vec3d delta, float speed, int count, boolean force) throws CommandSyntaxException {
         switch (client.options.particles) {
             case MINIMAL:
-                throw UNSUITABLE_PARTICLE_OPTION_EXCEPTION.create();
+                if (!force) {
+                    throw UNSUITABLE_PARTICLE_OPTION_EXCEPTION.create();
+                }
             case DECREASED:
-                if (parameters.getType() == ParticleTypes.RAIN || parameters.getType() == ParticleTypes.SMOKE) {
+                if ((parameters.getType() == ParticleTypes.RAIN || parameters.getType() == ParticleTypes.SMOKE) && !force) {
                     throw UNSUITABLE_PARTICLE_OPTION_EXCEPTION.create();
                 }
             default:
-                for (int i = 0; i < count; i++) {
-                    client.world.addParticle(parameters, force, pos.x + delta.x, pos.y + delta.y, pos.z + delta.z, speed, speed, speed);
+                if (count == 0) {
+                    client.world.addParticle(parameters, force, pos.x, pos.y, pos.z, delta.x * speed, delta.y * speed, delta.z * speed);
+                } else {
+                    final Random random = client.getNetworkHandler().getWorld().random;
+                    for (int i = 0; i < count; i++) {
+                        client.world.addParticle(parameters, force, pos.x + delta.x * random.nextGaussian(), pos.y + delta.y * random.nextGaussian(), pos.z + delta.z * random.nextGaussian(), speed * random.nextGaussian(), speed * random.nextGaussian(), speed * random.nextGaussian());
+                    }
                 }
                 sendFeedback(new TranslatableText("commands.cparticle.success", Registry.PARTICLE_TYPE.getId(parameters.getType()).toString()));
                 return 0;
