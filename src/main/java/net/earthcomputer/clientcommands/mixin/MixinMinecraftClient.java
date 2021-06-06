@@ -8,7 +8,6 @@ import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.interfaces.IMinecraftClient;
 import net.earthcomputer.clientcommands.render.RenderQueue;
-import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
@@ -46,13 +45,6 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
         RenderQueue.tick();
         TaskManager.tick();
         GuiBlocker.tick();
-        ScriptManager.tick();
-    }
-
-    @Inject(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z", ordinal = 0), cancellable = true)
-    public void onHandleInputEvents(CallbackInfo ci) {
-        if (ScriptManager.blockingInput())
-            ci.cancel();
     }
 
     @Inject(method = "setWorld", at = @At("HEAD"))
