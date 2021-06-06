@@ -1,6 +1,8 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.earthcomputer.clientcommands.TempRules;
@@ -15,6 +17,8 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class CalcCommand {
 
+    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ccalc.tooDeeplyNested"));
+
     private static final int FLAG_PARSE = 1;
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -28,12 +32,23 @@ public class CalcCommand {
                 .executes(ctx -> evaluateExpression(ctx.getSource(), getExpression(ctx, "expr")))));
     }
 
-    private static int evaluateExpression(ServerCommandSource source, ExpressionArgumentType.Expression expression) {
+    private static int evaluateExpression(ServerCommandSource source, ExpressionArgumentType.Expression expression) throws CommandSyntaxException {
         if (getFlag(source, FLAG_PARSE)) {
-            sendFeedback(new TranslatableText("commands.ccalc.parse", expression.getParsedTree()));
+            Text parsedTree;
+            try {
+                parsedTree = expression.getParsedTree();
+            } catch (StackOverflowError e) {
+                throw TOO_DEEPLY_NESTED_EXCEPTION.create();
+            }
+            sendFeedback(new TranslatableText("commands.ccalc.parse", parsedTree));
         }
 
-        double result = expression.eval();
+        double result;
+        try {
+            result = expression.eval();
+        } catch (StackOverflowError e) {
+            throw TOO_DEEPLY_NESTED_EXCEPTION.create();
+        }
         TempRules.calcAnswer = result;
         int iresult = 0;
 
@@ -56,5 +71,4 @@ public class CalcCommand {
 
         return iresult;
     }
-
 }

@@ -246,4 +246,9 @@ class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
         this.client.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
         this.drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return false;
+    }
 }
