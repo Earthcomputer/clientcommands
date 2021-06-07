@@ -68,10 +68,6 @@
 
   "commands.crender.entities.success": "Reguła renderowania obiektu została zaktualizowana",
 
-  "commands.cscript.notFound": "Skrypt \"%s\" nie istnieje",
-  "commands.cscript.reload.success": "Przeładowano skrypty",
-  "commands.cscript.run.success": "Wykonano skrypt pomyślnie",
-
   "commands.cstopsound.success.sourceless.any": "Zatrzymano wszystkie dzwięki",
   "commands.cstopsound.success.sourceless.sound": "Zatrzymano dźwięk '%s'",
   "commands.cstopsound.success.source.any": "Zatrzymano wszystkie '%s' dźwięki",
