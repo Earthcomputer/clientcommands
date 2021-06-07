@@ -53,6 +53,7 @@ public class ClientCommands implements ClientModInitializer {
         HotbarCommand.register(dispatcher);
         KitCommand.register(dispatcher);
         ItemGroupCommand.register(dispatcher);
+        CParticleCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 
