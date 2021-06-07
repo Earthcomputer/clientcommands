@@ -103,6 +103,9 @@
   "commands.ckit.list": "Kit yang tersedia: %s",
   "commands.ckit.list.empty": "Tidak ada kit yang tersedia",
 
+  "commands.cparticle.unsuitableParticleOption": "Tidak akan menampilkan partikel karena pengaturan partikel tidak cocok",
+  "commands.cparticle.success": "Menampilkan partikel %s",
+
   "commands.cplaysound.success": "Memainkan suara %s ke diri sendiri",
 
   "commands.crelog.failed": "Gagal relog",
