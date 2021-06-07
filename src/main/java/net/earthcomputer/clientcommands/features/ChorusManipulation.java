@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.render.Cuboid;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -16,6 +15,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.earthcomputer.clientcommands.features.PlayerRandCracker.throwItemsUntil;
@@ -103,7 +103,8 @@ public class ChorusManipulation {
                     }
 
                     final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
-                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), 0.0D, (MinecraftClient.getInstance().world.getDimensionHeight() - 1));
+                    DimensionType dimension = MinecraftClient.getInstance().world.getDimension();
+                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), dimension.getMinimumY(), (dimension.getMinimumY() + dimension.getHeight() - 1));
                     final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
                     final Vec3d landingArea = canTeleport(area, new Vec3d(x, y, z));
 

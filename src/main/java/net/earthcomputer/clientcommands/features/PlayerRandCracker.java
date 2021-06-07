@@ -217,7 +217,7 @@ public class PlayerRandCracker {
 
     // TODO: update-sensitive: call hierarchy of ItemStack.damage
     public static void onItemDamage(int amount, LivingEntity holder, ItemStack stack) {
-        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).abilities.creativeMode) {
+        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).getAbilities().creativeMode) {
             if (stack.isDamageable()) {
                 if (amount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
@@ -254,7 +254,7 @@ public class PlayerRandCracker {
     }
 
     public static void onItemDamageUncertain(int minAmount, int maxAmount, LivingEntity holder, ItemStack stack) {
-        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).abilities.creativeMode) {
+        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).getAbilities().creativeMode) {
             if (stack.isDamageable()) {
                 if (maxAmount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);

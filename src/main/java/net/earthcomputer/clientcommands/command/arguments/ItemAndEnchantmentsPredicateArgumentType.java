@@ -9,7 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.ItemEnchantmentArgumentType;
+import net.minecraft.command.argument.EnchantmentArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -246,7 +246,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             Identifier identifier = Identifier.fromCommandInput(reader);
             Enchantment enchantment = Registry.ENCHANTMENT.getOrEmpty(identifier).orElseThrow(() -> {
                 reader.setCursor(start);
-                return ItemEnchantmentArgumentType.UNKNOWN_ENCHANTMENT_EXCEPTION.createWithContext(reader, identifier);
+                return EnchantmentArgumentType.UNKNOWN_ENCHANTMENT_EXCEPTION.createWithContext(reader, identifier);
             });
 
             if (!enchantment.isAcceptableItem(stack) && stack.getItem() != Items.BOOK) {

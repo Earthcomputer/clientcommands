@@ -349,9 +349,9 @@ public class EnchantmentCracker {
         LongTaskList taskList = new LongTaskList();
         if (timesNeeded != -1) {
             if (timesNeeded != 0) {
-                player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.yaw, 90);
+                player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), 90);
                 // sync rotation to server before we throw any items
-                player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(player.yaw, 90, player.isOnGround()));
+                player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(player.getYaw(), 90, player.isOnGround()));
                 TempRules.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
             }
             for (int i = 0; i < timesNeeded; i++) {

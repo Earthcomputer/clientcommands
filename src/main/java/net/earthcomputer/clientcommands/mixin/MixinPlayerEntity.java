@@ -49,18 +49,18 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 
         if (target instanceof ArmorStandEntity) {
             ArmorStandEntity armorStand = (ArmorStandEntity) target;
-            if (armorStand.removed) {
+            if (armorStand.isRemoved()) {
                 canAttack = false;
             } else if (armorStand.isInvulnerableTo(source) || ((IArmorStandEntity) armorStand).isArmorStandInvisible() || armorStand.isMarker()) {
                 canAttack = false;
-            } else if (!_this.abilities.allowModifyWorld) {
+            } else if (!_this.getAbilities().allowModifyWorld) {
                 canAttack = false;
             } else if (source.isSourceCreativePlayer()) {
                 canAttack = false;
             }
         } else if (target instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) target;
-            if (player.abilities.invulnerable) {
+            if (player.getAbilities().invulnerable) {
                 canAttack = false;
             }
         } else if (target instanceof SmallFireballEntity || target instanceof WitherSkullEntity) {

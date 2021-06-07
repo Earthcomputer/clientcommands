@@ -17,7 +17,7 @@ import java.util.Random;
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.argument.ParticleArgumentType.*;
+import static net.minecraft.command.argument.ParticleEffectArgumentType.*;
 import static net.minecraft.command.argument.Vec3ArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -32,7 +32,7 @@ public class CParticleCommand {
 
         LiteralCommandNode<ServerCommandSource> cparticle = dispatcher.register(literal("cparticle"));
         dispatcher.register(literal("cparticle")
-            .then(argument("name", particle())
+            .then(argument("name", particleEffect())
                 .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), client.player.getPos(), Vec3d.ZERO, 1, 1, false))
                 .then(argument("pos", vec3())
                     .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), Vec3d.ZERO, 1, 1, false))

@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.serialization.Dynamic;
-import net.earthcomputer.clientcommands.interfaces.ISlot;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
@@ -55,7 +54,7 @@ public class KitCommand {
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    private static final Map<String, ListTag> kits = new HashMap<>();
+    private static final Map<String, NbtList> kits = new HashMap<>();
 
     static {
         try {
@@ -99,7 +98,7 @@ public class KitCommand {
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.inventory.serialize(new ListTag()));
+        kits.put(name, client.player.getInventory().writeNbt(new NbtList()));
         saveFile();
         sendFeedback("commands.ckit.create.success", name);
         return 0;
@@ -118,28 +117,28 @@ public class KitCommand {
         if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.inventory.serialize(new ListTag()));
+        kits.put(name, client.player.getInventory().writeNbt(new NbtList()));
         saveFile();
         sendFeedback("commands.ckit.edit.success", name);
         return 0;
     }
 
     private static int load(ServerCommandSource source, String name, boolean override) throws CommandSyntaxException {
-        if (!client.player.abilities.creativeMode) {
+        if (!client.player.getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-        ListTag kit = kits.get(name);
+        NbtList kit = kits.get(name);
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
         PlayerInventory tempInv = new PlayerInventory(client.player);
-        tempInv.deserialize(kit);
+        tempInv.readNbt(kit);
         List<Slot> slots = client.player.playerScreenHandler.slots;
         for (int i = 0; i < slots.size(); i++) {
-            if (slots.get(i).inventory == client.player.inventory) {
-                ItemStack itemStack = tempInv.getStack(((ISlot) slots.get(i)).getIndex());
+            if (slots.get(i).inventory == client.player.getInventory()) {
+                ItemStack itemStack = tempInv.getStack(slots.get(i).getIndex());
                 if (!itemStack.isEmpty() || override) {
                     client.interactionManager.clickCreativeStack(itemStack, i);
                 }
@@ -162,13 +161,13 @@ public class KitCommand {
     }
 
     private static int preview(ServerCommandSource source, String name) throws CommandSyntaxException {
-        ListTag kit = kits.get(name);
+        NbtList kit = kits.get(name);
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
         PlayerInventory tempInv = new PlayerInventory(client.player);
-        tempInv.deserialize(kit);
+        tempInv.readNbt(kit);
         /*
             After executing a command, the current screen will be closed (the chat hud).
             And if you open a new screen in a command, that new screen will be closed
@@ -181,8 +180,8 @@ public class KitCommand {
 
     private static void saveFile() throws CommandSyntaxException {
         try {
-            CompoundTag rootTag = new CompoundTag();
-            CompoundTag compoundTag = new CompoundTag();
+            NbtCompound rootTag = new NbtCompound();
+            NbtCompound compoundTag = new NbtCompound();
             kits.forEach(compoundTag::put);
             rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
             rootTag.put("Kits", compoundTag);
@@ -198,21 +197,21 @@ public class KitCommand {
 
     private static void loadFile() throws IOException {
         kits.clear();
-        CompoundTag rootTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
+        NbtCompound rootTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
         if (rootTag == null) {
             return;
         }
         final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
         final int fileVersion = rootTag.getInt("DataVersion");
-        CompoundTag compoundTag = rootTag.getCompound("Kits");
+        NbtCompound compoundTag = rootTag.getCompound("Kits");
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
         } else {
             compoundTag.getKeys().forEach(key -> {
-                ListTag updatedListTag = new ListTag();
+                NbtList updatedListTag = new NbtList();
                 compoundTag.getList(key, NbtType.COMPOUND).forEach(tag -> {
-                    Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                    Dynamic<Tag> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+                    Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
+                    Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 kits.put(key, updatedListTag);
@@ -242,8 +241,8 @@ class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
     }
 
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.client.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
         this.drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 

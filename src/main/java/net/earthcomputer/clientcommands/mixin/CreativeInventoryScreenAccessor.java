@@ -12,7 +12,7 @@ public interface CreativeInventoryScreenAccessor {
         throw new AssertionError();
     }
 
-    @SuppressWarnings("AccessorTarget")
+    @SuppressWarnings({"AccessorTarget", "target"})
     @Dynamic @Accessor(value = "fabric_currentPage", remap = false)
     static void setFabricCurrentPage(int index) {
         throw new AssertionError();

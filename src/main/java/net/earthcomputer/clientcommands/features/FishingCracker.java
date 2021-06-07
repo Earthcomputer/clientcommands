@@ -849,7 +849,7 @@ public class FishingCracker {
             this.luckLevel = EnchantmentHelper.getLuckOfTheSea(tool);
             this.pos = pos;
             this.velocity = velocity;
-            this.boundingBox = FISHING_BOBBER_DIMENSIONS.method_30231(pos.x, pos.y, pos.z);
+            this.boundingBox = FISHING_BOBBER_DIMENSIONS.getBoxAt(pos.x, pos.y, pos.z);
         }
 
         public boolean canCatchFish() {
@@ -942,7 +942,7 @@ public class FishingCracker {
             double e = 0.92D;
             this.velocity = this.velocity.multiply(e);
 
-            boundingBox = FISHING_BOBBER_DIMENSIONS.method_30231(pos.x, pos.y, pos.z);
+            boundingBox = FISHING_BOBBER_DIMENSIONS.getBoxAt(pos.x, pos.y, pos.z);
         }
 
         private void onBaseTick() {
@@ -970,7 +970,7 @@ public class FishingCracker {
         private void onSwimmingStart() {
             float f = 0.2F;
             Vec3d vec3d = velocity;
-            float g = MathHelper.sqrt(vec3d.x * vec3d.x * 0.20000000298023224D + vec3d.y * vec3d.y + vec3d.z * vec3d.z * 0.20000000298023224D) * f;
+            float g = (float) Math.sqrt(vec3d.x * vec3d.x * 0.20000000298023224D + vec3d.y * vec3d.y + vec3d.z * vec3d.z * 0.20000000298023224D) * f;
             if (g > 1.0F) {
                 g = 1.0F;
             }
@@ -1061,7 +1061,7 @@ public class FishingCracker {
         private void checkForCollision() {
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
-            HitResult hitResult = ProjectileUtil.getCollision(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanCollideWith);
+            HitResult hitResult = ProjectileUtil.getCollision(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanHit);
             if (hitResult.getType() != HitResult.Type.MISS) {
                 failed = true;
             }
@@ -1102,7 +1102,7 @@ public class FishingCracker {
 
             float i = this.getVelocityMultiplier();
             this.velocity = this.velocity.multiply((double)i, 1.0D, (double)i);
-            if (this.world.method_29556(this.boundingBox.contract(0.001D)).anyMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
+            if (this.world.getStatesInBoxIfLoaded(this.boundingBox.contract(0.001D)).anyMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
                 failed = true;
             }
         }

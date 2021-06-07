@@ -17,6 +17,7 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,12 +56,8 @@ public class ClientBlockPredicateArgumentType extends BlockPredicateArgumentType
         } else {
             Identifier tagId = blockParser.getTagId();
             predicate = tagManager -> {
-                Tag<Block> tag = tagManager.getBlocks().getTag(tagId);
-                if (tag == null) {
-                    throw UNKNOWN_TAG_EXCEPTION.create(String.valueOf(tagId));
-                } else {
-                    return new BlockPredicateArgumentType.TagPredicate(tag, blockParser.getProperties(), blockParser.getNbtData());
-                }
+                Tag<Block> tag = tagManager.getTag(Registry.BLOCK_KEY, tagId, id -> UNKNOWN_TAG_EXCEPTION.create(id.toString()));
+                return new BlockPredicateArgumentType.TagPredicate(tag, blockParser.getProperties(), blockParser.getNbtData());
             };
         }
 

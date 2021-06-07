@@ -7,6 +7,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ProjectileEntity.class)
 public interface ProjectileEntityAccessor {
-    @Invoker("method_26958")
-    boolean callCanCollideWith(Entity entity);
+    @Invoker
+    boolean callCanHit(Entity entity);
 }

@@ -5,6 +5,7 @@ import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.function.Predicate;
@@ -49,7 +50,7 @@ public class SignSearchCommand {
             SignBlockEntity sign = (SignBlockEntity) be;
 
             for (int i = 0; i < 4; i++) {
-                String line = sign.getTextOnRow(i).getString();
+                String line = sign.getTextOnRow(i, MinecraftClient.getInstance().shouldFilterText()).getString();
                 if (linePredicate.test(line)) {
                     return true;
                 }

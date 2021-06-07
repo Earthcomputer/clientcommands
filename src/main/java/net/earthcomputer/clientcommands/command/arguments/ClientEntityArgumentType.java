@@ -17,12 +17,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.tag.EntityTypeTags;
+import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -453,9 +454,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         float min = range.getMin() == null ? 0 : range.getMin();
                         float max = range.getMax() == null ? 359 : range.getMax();
                         if (max < min)
-                            parser.addFilter((origin, entity) -> entity.pitch >= min || entity.pitch <= max);
+                            parser.addFilter((origin, entity) -> entity.getPitch() >= min || entity.getPitch() <= max);
                         else
-                            parser.addFilter((origin, entity) -> entity.pitch >= min && entity.pitch <= max);
+                            parser.addFilter((origin, entity) -> entity.getPitch() >= min && entity.getPitch() <= max);
                         parser.hasXRotation = true;
                     }
 
@@ -471,9 +472,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         float min = range.getMin() == null ? 0 : range.getMin();
                         float max = range.getMax() == null ? 359 : range.getMax();
                         if (max < min)
-                            parser.addFilter((origin, entity) -> entity.yaw >= min || entity.yaw <= max);
+                            parser.addFilter((origin, entity) -> entity.getYaw() >= min || entity.getYaw() <= max);
                         else
-                            parser.addFilter((origin, entity) -> entity.yaw >= min && entity.yaw <= max);
+                            parser.addFilter((origin, entity) -> entity.getYaw() >= min && entity.getYaw() <= max);
                         parser.hasYRotation = true;
                     }
 
@@ -549,7 +550,14 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         final Identifier typeId;
                         if (parser.readTagCharacter()) {
                             typeId = Identifier.fromCommandInput(parser.reader);
-                            parser.addFilter((origin, entity) -> entity.getEntityWorld().getTagManager().getEntityTypes().getTagOrEmpty(typeId).contains(entity.getType()) != neg);
+                            parser.addFilter((origin, entity) -> {
+                                try {
+                                    Tag<EntityType<?>> tag = entity.getEntityWorld().getTagManager().getTag(Registry.ENTITY_TYPE_KEY, typeId, id -> new IllegalArgumentException());
+                                    return tag.contains(entity.getType()) != neg;
+                                } catch (IllegalArgumentException e) {
+                                    return neg;
+                                }
+                            });
                         } else {
                             typeId = Identifier.fromCommandInput(parser.reader);
                             EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(typeId).orElseThrow(() -> {
@@ -576,13 +584,13 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                     @Override
                     void apply(Parser parser) throws CommandSyntaxException {
                         boolean neg = parser.readNegationCharacter();
-                        CompoundTag nbt = new StringNbtReader(parser.reader).parseCompoundTag();
+                        NbtCompound nbt = new StringNbtReader(parser.reader).parseCompound();
                         parser.addFilter((origin, entity) -> {
-                            CompoundTag entityNbt = entity.toTag(new CompoundTag());
+                            NbtCompound entityNbt = entity.writeNbt(new NbtCompound());
                             if (entity instanceof PlayerEntity) {
                                 ItemStack heldItem = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.MAINHAND);
                                 if (!heldItem.isEmpty())
-                                    entityNbt.put("SelectedItem", heldItem.toTag(new CompoundTag()));
+                                    entityNbt.put("SelectedItem", heldItem.writeNbt(new NbtCompound()));
                             }
                             return NbtHelper.matches(nbt, entityNbt, true) != neg;
                         });
