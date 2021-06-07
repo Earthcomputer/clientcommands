@@ -22,6 +22,7 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.tag.EntityTypeTags;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -297,6 +298,17 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
             }
         }
 
+        boolean readTagCharacter() {
+            this.reader.skipWhitespace();
+            if (this.reader.canRead() && this.reader.peek() == '#') {
+                this.reader.skip();
+                this.reader.skipWhitespace();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         void addFilter(BiPredicate<Vec3d, Entity> filter) {
             final BiPredicate<Vec3d, Entity> prevFilter = this.filter;
             this.filter = (origin, entity) -> filter.test(origin, entity) && prevFilter.test(origin, entity);
@@ -524,25 +536,35 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                     void apply(Parser parser) throws CommandSyntaxException {
                         parser.suggestor = (builder, playerNameSuggest) -> {
                             CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.getIds(), builder, "!");
-                            if (!parser.hasType)
+                            CommandSource.suggestIdentifiers(EntityTypeTags.getTagGroup().getTagIds(), builder, "!#");
+                            if (!parser.hasType) {
                                 CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.getIds(), builder);
+                                CommandSource.suggestIdentifiers(EntityTypeTags.getTagGroup().getTagIds(), builder, String.valueOf('#'));
+                            }
                             return builder.buildFuture();
                         };
 
                         int cursor = parser.reader.getCursor();
                         boolean neg = parser.readNegationCharacter();
-                        Identifier typeId = Identifier.fromCommandInput(parser.reader);
-                        EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(typeId).orElseThrow(() -> {
-                            parser.reader.setCursor(cursor);
-                            return EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(parser.reader, typeId);
-                        });
-                        parser.playersOnly = false;
-                        if (!neg) {
-                            parser.hasType = true;
-                            if (type == EntityType.PLAYER)
-                                parser.playersOnly = true;
+                        final Identifier typeId;
+                        if (parser.readTagCharacter()) {
+                            typeId = Identifier.fromCommandInput(parser.reader);
+                            parser.addFilter((origin, entity) -> entity.getEntityWorld().getTagManager().getEntityTypes().getTagOrEmpty(typeId).contains(entity.getType()) != neg);
+                        } else {
+                            typeId = Identifier.fromCommandInput(parser.reader);
+                            EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(typeId).orElseThrow(() -> {
+                                parser.reader.setCursor(cursor);
+                                return EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(parser.reader, typeId);
+                            });
+                            parser.playersOnly = false;
+                            if (!neg) {
+                                parser.hasType = true;
+                                if (type == EntityType.PLAYER) {
+                                    parser.playersOnly = true;
+                                }
+                            }
+                            parser.addFilter((origin, entity) -> (entity.getType() == type) != neg);
                         }
-                        parser.addFilter((origin, entity) -> (entity.getType() == type) != neg);
                     }
 
                     @Override
