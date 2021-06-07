@@ -79,6 +79,19 @@
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
 
+  "commands.citemgroup.notFound": "Item group \"%s\" not found",
+  "commands.citemgroup.outOfBounds": "Index %d is out of bounds",
+  "commands.citemgroup.saveFile.failed": "Could not save item groups file",
+  "commands.citemgroup.addGroup.success": "Successfully added item group \"%s\"",
+  "commands.citemgroup.addGroup.illegalCharacter": "Item groups can only contain [a-z0-9/._-] characters",
+  "commands.citemgroup.addGroup.alreadyExists": "Item group \"%s\" already exists",
+  "commands.citemgroup.removeGroup.success": "Successfully removed item group \"%s\"",
+  "commands.citemgroup.addStack.success": "Successfully added %s to \"%s\"",
+  "commands.citemgroup.removeStack.success": "Successfully removed stack from \"%s\" at index %d",
+  "commands.citemgroup.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
+  "commands.citemgroup.changeIcon.success": "Successfully changed the icon of \"%s\" from %s to %s",
+  "commands.citemgroup.renameGroup.success": "Successfully renamed item group \"%s\" to \"%s\"",
+
   "commands.ckit.notFound": "Kit \"%s\" not found",
   "commands.ckit.saveFile.failed": "Could not save kits file",
   "commands.ckit.load.success": "Successfully gave kit \"%s\" to self",
@@ -98,10 +111,6 @@
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
-
-  "commands.cscript.notFound": "Script \"%s\" not found",
-  "commands.cscript.reload.success": "Reloaded scripts",
-  "commands.cscript.run.success": "Script ran successfully",
 
   "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
   "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",
