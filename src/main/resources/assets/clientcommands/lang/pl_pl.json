@@ -103,6 +103,9 @@
   "commands.ckit.list": "Dostępne zestawy: %s",
   "commands.ckit.list.empty": "Brak dostępnych zestawów",
 
+  "commands.cparticle.unsuitableParticleOption": "Nie można wyświetlić cząsteczki ponieważ opcje cząsteczek są ustawione na \"minimalne\"",
+  "commands.cparticle.success": "Pokazuję cząsteczkę %s",
+
   "commands.cplaysound.success": "Odtworzono dzwięk %s",
 
   "commands.crelog.failed": "Nie udało się połączyć ponownie",
