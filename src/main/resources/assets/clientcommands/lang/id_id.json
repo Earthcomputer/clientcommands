@@ -109,10 +109,6 @@
 
   "commands.crender.entities.success": "Aturan entity rendering telah di update",
 
-  "commands.cscript.notFound": "Skrip \"%s\" tidak ketemu",
-  "commands.cscript.reload.success": "Skrip telah direload",
-  "commands.cscript.run.success": "Skrip telah berhasil jalan",
-
   "commands.cstopsound.success.sourceless.any": "Memberhentikan semua suara dari diri sendiri",
   "commands.cstopsound.success.sourceless.sound": "Memberhentikan suara '%s' dari diri sendiri",
   "commands.cstopsound.success.source.any": "Memberhentikan semua suara '%s' dari diri sendiri",
