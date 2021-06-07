@@ -62,7 +62,8 @@ public class FindBlockCommand {
         } else {
             double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
             sendFeedback(new TranslatableText("commands.cfindblock.success.left", foundRadius)
-                    .append(getGlowCoordsTextComponent(closestBlock))
+                    .append(getLookCoordsTextComponent(closestBlock))
+                    .append(getGlowCoordsTextComponent(new TranslatableText("commands.cfindblock.success.glow"), closestBlock))
                     .append(new TranslatableText("commands.cfindblock.success.right", foundRadius)));
             return 1;
         }
