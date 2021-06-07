@@ -1,5 +1,7 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
+	id 'fabric-loom' version '0.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -14,18 +16,40 @@ minecraft {
 	accessWidener 'src/main/resources/clientcommands.aw'
 }
 
+// TODO: better solution
+def clientcommandsScriptingExists = file('../clientcommands-scripting/build/libs').exists()
+if (clientcommandsScriptingExists) {
+	clientcommandsScriptingExists = Arrays.asList(file('../clientcommands-scripting/build/libs').list()).stream().anyMatch() {
+		it.endsWith("${project.scripting_version}.jar")
+	}
+}
+
+repositories {
+	if (clientcommandsScriptingExists) {
+		flatDir {
+			dirs '../clientcommands-scripting/build/libs'
+		}
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
-	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	modImplementation 'net.earthcomputer.multiconnect:multiconnect-api:1.3.36'
 	include 'net.earthcomputer.multiconnect:multiconnect-api:1.3.36'
+
+	if (clientcommandsScriptingExists) {
+		include "net.earthcomputer.clientcommands:clientcommands-scripting:${project.scripting_version}"
+	}
 }
 
 processResources {
 	inputs.property "version", project.version
+
+	duplicatesStrategy DuplicatesStrategy.WARN
 
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
@@ -48,6 +72,12 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 jar {
 	from "LICENSE"
+}
+
+task remapSlimJar(type: RemapJarTask, dependsOn: jar) {
+	input = jar.archiveFile
+	classifier = 'slim'
+	addNestedDependencies = false
 }
 
 publishing {
