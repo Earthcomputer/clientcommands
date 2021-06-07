@@ -109,10 +109,6 @@
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
-  "commands.cscript.notFound": "Script \"%s\" not found",
-  "commands.cscript.reload.success": "Reloaded scripts",
-  "commands.cscript.run.success": "Script ran successfully",
-
   "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
   "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",
   "commands.cstopsound.success.source.any": "Stopped all '%s' sounds for self",

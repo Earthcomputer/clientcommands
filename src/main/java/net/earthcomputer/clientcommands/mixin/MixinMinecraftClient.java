@@ -6,7 +6,6 @@ import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.interfaces.IMinecraftClient;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
@@ -22,7 +21,6 @@ import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.world.ClientWorld;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -34,11 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mixin(MinecraftClient.class)
-public abstract class MixinMinecraftClient implements IMinecraftClient {
-
-    @Shadow protected int attackCooldown;
-
-    @Shadow protected abstract void handleBlockBreaking(boolean boolean_1);
+public abstract class MixinMinecraftClient {
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void onTick(CallbackInfo ci) {
@@ -94,15 +88,5 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
         }
-    }
-
-    @Override
-    public void continueBreakingBlock() {
-        handleBlockBreaking(true);
-    }
-
-    @Override
-    public void resetAttackCooldown() {
-        attackCooldown = 0;
     }
 }
