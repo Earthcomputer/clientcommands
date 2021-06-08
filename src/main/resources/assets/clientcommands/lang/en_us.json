@@ -180,6 +180,7 @@
   "playerManip.reset.sprint": "Sprinted",
   "playerManip.reset.enterWater": "Entered Water",
   "playerManip.reset.swim": "Swum",
+  "playerManip.reset.amethystChime": "Walked on amethyst crystals",
   "playerManip.reset.potion": "Potion Effect Active",
   "playerManip.reset.mending": "Mended Item",
   "playerManip.reset.respiration": "Respiration Helmet Used",

@@ -150,6 +150,10 @@ public class PlayerRandCracker {
         resetCracker("enterWater");
     }
 
+    public static void onAmethystChime() {
+        resetCracker("amethystChime");
+    }
+
     public static void onDamage() {
         resetCracker("playerHurt");
     }
@@ -181,6 +185,13 @@ public class PlayerRandCracker {
 
     public static void onMending() {
         resetCracker("mending");
+    }
+
+    public static void onXpOrb() {
+        if (MultiConnectAPI.instance().getProtocolVersion() > Protocols.V1_16_4) {
+            // TODO: is there a way to be smarter about this?
+            resetCracker("xp");
+        }
     }
 
     public static void onFrostWalker() {
