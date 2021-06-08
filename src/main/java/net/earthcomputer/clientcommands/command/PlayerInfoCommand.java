@@ -28,7 +28,7 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class PlayerInfoCommand {
 
-    private static final SimpleCommandExceptionType IO_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cnamehistory.ioException"));
+    private static final SimpleCommandExceptionType IO_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cplayerinfo.ioException"));
 
     private static final Map<String, List<String>> cacheByName = new HashMap<>();
     private static final Map<String, List<String>> cacheByUuid = new HashMap<>();
@@ -49,12 +49,12 @@ public class PlayerInfoCommand {
         if (player.contains("-")) {
             uuid = player;
             if (cacheByUuid.containsKey(uuid)) {
-                sendFeedback(new TranslatableText("commands.cnamehistory.success", player, String.join(", ", cacheByUuid.get(uuid))));
+                sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(uuid))));
                 return 0;
             }
         } else {
             if (cacheByName.containsKey(player)) {
-                sendFeedback(new TranslatableText("commands.cnamehistory.success", player, String.join(", ", cacheByName.get(player))));
+                sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
                 return 0;
             }
             Optional<String> optional = MinecraftClient.getInstance().world.getPlayers().stream()
@@ -77,7 +77,7 @@ public class PlayerInfoCommand {
         names.forEach(name -> stringNames.add(name.getAsJsonObject().get("name").getAsString()));
         cacheByName.put(player, stringNames);
         cacheByUuid.put(uuid, stringNames);
-        sendFeedback(new TranslatableText("commands.cnamehistory.success", player, String.join(", ", stringNames)));
+        sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", stringNames)));
         return 0;
     }
 

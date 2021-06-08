@@ -103,8 +103,8 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
-  "commands.cnamehistory.ioException": "An error occurred",
-  "commands.cnamehistory.success": "%s has had the following names: %s",
+  "commands.cplayerinfo.ioException": "An error occurred",
+  "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 
   "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
   "commands.cparticle.success": "Displaying particle %s",
