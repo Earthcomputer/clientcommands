@@ -5,21 +5,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
@@ -28,10 +25,10 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class PlayerInfoCommand {
 
-    private static final SimpleCommandExceptionType IO_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cplayerinfo.ioException"));
-
     private static final Map<String, List<String>> cacheByName = new HashMap<>();
     private static final Map<String, List<String>> cacheByUuid = new HashMap<>();
+
+    private static final JsonParser parser = new JsonParser();
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cplayerinfo");
@@ -44,61 +41,66 @@ public class PlayerInfoCommand {
                                 .executes(ctx -> getNameHistory(ctx.getSource(), getString(ctx, "player"))))));
     }
 
-    private static int getNameHistory(ServerCommandSource source, String player) throws CommandSyntaxException {
-        String uuid;
-        if (player.contains("-")) {
-            uuid = player;
-            if (cacheByUuid.containsKey(uuid)) {
-                sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(uuid))));
-                return 0;
+    private static int getNameHistory(ServerCommandSource source, String player) {
+        if (player.length() >= 32) {
+            if (cacheByUuid.containsKey(player)) {
+                sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(player))));
+            } else {
+                fetchNameHistory(player);
             }
         } else {
             if (cacheByName.containsKey(player)) {
                 sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
-                return 0;
-            }
-            Optional<String> optional = MinecraftClient.getInstance().world.getPlayers().stream()
-                    .filter(abstractPlayer -> abstractPlayer.getName().getString().equals(player))
-                    .map(Entity::getUuidAsString)
-                    .findFirst();
-            if (optional.isPresent()) {
-                uuid = optional.get();
             } else {
-                JsonElement result = requestAsync("https://api.mojang.com/users/profiles/minecraft/" + player);
-                if (result instanceof JsonNull) {
-                    throw IO_EXCEPTION.create();
+                Optional<String> optional = MinecraftClient.getInstance().world.getPlayers().stream()
+                        .filter(abstractPlayer -> abstractPlayer.getName().getString().equals(player))
+                        .map(Entity::getUuidAsString)
+                        .findFirst();
+                if (optional.isPresent()) {
+                    fetchNameHistory(optional.get());
+                } else {
+                    HttpClient client = HttpClient.newHttpClient();
+                    HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/users/profiles/minecraft/" + player))
+                            .timeout(Duration.ofSeconds(5))
+                            .GET()
+                            .build();
+                    client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                            .thenApply(HttpResponse::body)
+                            .thenAccept(response -> {
+                                JsonElement result = parser.parse(response);
+                                if (result instanceof JsonNull) {
+                                    sendError(new TranslatableText("commands.cplayerinfo.ioException"));
+                                } else {
+                                    fetchNameHistory(result.getAsJsonObject().get("id").getAsString());
+                                }
+                            });
                 }
-                uuid = result.getAsJsonObject().get("id").getAsString();
             }
         }
-        JsonArray names = requestAsync("https://api.mojang.com/user/profiles/" + uuid + "/names").getAsJsonArray();
-
-        List<String> stringNames = new ArrayList<>();
-        names.forEach(name -> stringNames.add(name.getAsJsonObject().get("name").getAsString()));
-        cacheByName.put(player, stringNames);
-        cacheByUuid.put(uuid, stringNames);
-        sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", stringNames)));
         return 0;
     }
 
-    private static JsonElement requestAsync(String url) throws CommandSyntaxException {
-        CompletableFuture<JsonElement> future = CompletableFuture.supplyAsync(() -> {
-            try {
-                URLConnection request = new URL(url).openConnection();
-                request.connect();
-                JsonElement result = (new JsonParser().parse(new InputStreamReader(request.getInputStream())));
-                if (result == null) {
-                    throw new IOException();
-                }
-                return result;
-            } catch (Exception e) {
-                throw new CompletionException(e);
-            }
-        });
-        try {
-            return future.join();
-        } catch (Exception e) {
-            throw IO_EXCEPTION.create();
-        }
+    private static void fetchNameHistory(String uuid) {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/user/profiles/" + uuid + "/names"))
+                .timeout(Duration.ofSeconds(5))
+                .GET()
+                .build();
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(response -> {
+                    JsonElement result = parser.parse(response);
+                    if (result.isJsonArray()) {
+                        JsonArray array = result.getAsJsonArray();
+                        List<String> names = new ArrayList<>();
+                        array.forEach(name -> names.add(name.getAsJsonObject().get("name").getAsString()));
+                        String player = names.get(names.size() - 1);
+                        cacheByName.put(player, names);
+                        cacheByUuid.put(uuid, names);
+                        sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", names)));
+                    } else {
+                        sendError(new TranslatableText("commands.cplayerinfo.ioException"));
+                    }
+                });
     }
 }
