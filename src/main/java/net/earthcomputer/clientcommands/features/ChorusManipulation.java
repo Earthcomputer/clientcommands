@@ -18,7 +18,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.earthcomputer.clientcommands.features.PlayerRandCracker.throwItemsUntil;
+import static net.earthcomputer.clientcommands.features.PlayerRandCracker.*;
 
 public class ChorusManipulation {
     //If the goal is relative or not to the player

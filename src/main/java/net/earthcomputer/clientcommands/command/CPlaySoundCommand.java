@@ -8,7 +8,6 @@ import static net.minecraft.server.command.CommandManager.*;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.*;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.*;
