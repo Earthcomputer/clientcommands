@@ -6,7 +6,6 @@ import static net.minecraft.server.command.CommandManager.*;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.suggestion.SuggestionProviders;

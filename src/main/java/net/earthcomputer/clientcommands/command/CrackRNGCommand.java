@@ -8,9 +8,8 @@ import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class CrackRNGCommand {
 

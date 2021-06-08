@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
 import net.earthcomputer.clientcommands.mixin.CreativeInventoryScreenAccessor;
