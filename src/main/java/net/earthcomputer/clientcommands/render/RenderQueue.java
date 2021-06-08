@@ -34,15 +34,15 @@ public class RenderQueue {
     }
 
     private static void doAdd(AddQueueEntry entry) {
-        Map<Object, Shape> shapes = queue.computeIfAbsent(entry.layer, k -> new LinkedHashMap<>());
-        Shape oldShape = shapes.get(entry.key);
+        Map<Object, Shape> shapes = queue.computeIfAbsent(entry.layer(), k -> new LinkedHashMap<>());
+        Shape oldShape = shapes.get(entry.key());
         if (oldShape != null) {
-            entry.shape.prevPos = oldShape.prevPos;
+            entry.shape().prevPos = oldShape.prevPos;
         } else {
-            entry.shape.prevPos = entry.shape.getPos();
+            entry.shape().prevPos = entry.shape().getPos();
         }
-        entry.shape.deathTime = tickCounter + entry.life;
-        shapes.put(entry.key, entry.shape);
+        entry.shape().deathTime = tickCounter + entry.life();
+        shapes.put(entry.key(), entry.shape());
     }
 
     public static void tick() {
@@ -73,17 +73,5 @@ public class RenderQueue {
         ON_TOP
     }
 
-    private static class AddQueueEntry {
-        private final Layer layer;
-        private final Object key;
-        private final Shape shape;
-        private final int life;
-
-        private AddQueueEntry(Layer layer, Object key, Shape shape, int life) {
-            this.layer = layer;
-            this.key = key;
-            this.shape = shape;
-            this.life = life;
-        }
-    }
+    private record AddQueueEntry(Layer layer, Object key, Shape shape, int life) {}
 }

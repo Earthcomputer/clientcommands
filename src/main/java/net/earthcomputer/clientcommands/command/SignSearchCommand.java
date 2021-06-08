@@ -44,10 +44,9 @@ public class SignSearchCommand {
                 return false;
             }
             BlockEntity be = pos.getBlockEntity();
-            if (!(be instanceof SignBlockEntity)) {
+            if (!(be instanceof SignBlockEntity sign)) {
                 return false;
             }
-            SignBlockEntity sign = (SignBlockEntity) be;
 
             for (int i = 0; i < 4; i++) {
                 String line = sign.getTextOnRow(i, MinecraftClient.getInstance().shouldFilterText()).getString();

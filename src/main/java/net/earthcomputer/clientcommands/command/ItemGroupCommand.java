@@ -66,7 +66,6 @@ public class ItemGroupCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("citemgroup");
 
-        LiteralCommandNode<ServerCommandSource> citemgroup = dispatcher.register(literal("citemgroup"));
         dispatcher.register(literal("citemgroup")
             .then(literal("modify")
                 .then(argument("group", string())

@@ -27,7 +27,7 @@ public class FindCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfind");
 
-        LiteralCommandNode<ServerCommandSource> cfind = dispatcher.register(literal("cfind"));
+        var cfind = dispatcher.register(literal("cfind"));
         dispatcher.register(literal("cfind")
             .then(literal("--keep-searching")
                 .redirect(cfind, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))

@@ -67,7 +67,6 @@ public class KitCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("ckit");
 
-        LiteralCommandNode<ServerCommandSource> ckit = dispatcher.register(literal("ckit"));
         dispatcher.register(literal("ckit")
                 .then(literal("create")
                         .then(argument("name", StringArgumentType.string())

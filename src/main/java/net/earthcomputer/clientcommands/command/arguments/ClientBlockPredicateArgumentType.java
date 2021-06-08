@@ -51,7 +51,7 @@ public class ClientBlockPredicateArgumentType extends BlockPredicateArgumentType
         BlockArgumentParser blockParser = (new BlockArgumentParser(stringReader, allowTags)).parse(allowNbt);
         BlockPredicate predicate;
         if (blockParser.getBlockState() != null) {
-            BlockPredicateArgumentType.StatePredicate statePredicate = new BlockPredicateArgumentType.StatePredicate(blockParser.getBlockState(), blockParser.getBlockProperties().keySet(), blockParser.getNbtData());
+            var statePredicate = new BlockPredicateArgumentType.StatePredicate(blockParser.getBlockState(), blockParser.getBlockProperties().keySet(), blockParser.getNbtData());
             predicate = tagManager -> statePredicate;
         } else {
             Identifier tagId = blockParser.getTagId();
@@ -65,7 +65,7 @@ public class ClientBlockPredicateArgumentType extends BlockPredicateArgumentType
             // optimization: if there is no NBT data, we can cache the blockstate results
             return tagManager -> {
                 Predicate<CachedBlockPosition> oldPredicate = predicate.create(tagManager);
-                Map<BlockState, Boolean> cache = new HashMap<>();
+                var cache = new HashMap<BlockState, Boolean>();
                 return pos -> cache.computeIfAbsent(pos.getBlockState(), state -> oldPredicate.test(pos));
             };
         }

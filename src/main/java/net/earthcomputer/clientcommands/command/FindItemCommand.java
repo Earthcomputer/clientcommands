@@ -57,7 +57,7 @@ public class FindItemCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfinditem");
 
-        LiteralCommandNode<ServerCommandSource> cfinditem = dispatcher.register(literal("cfinditem"));
+        var cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
                 .then(literal("--no-search-shulker-box")
                         .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))

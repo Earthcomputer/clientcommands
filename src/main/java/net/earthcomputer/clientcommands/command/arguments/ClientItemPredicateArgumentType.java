@@ -70,17 +70,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
     }
 
 
-    static class TagPredicate implements ClientItemPredicate {
-        private final Tag<Item> tag;
-        private final Identifier id;
-        private final NbtCompound compound;
-
-        public TagPredicate(Tag<Item> tag, Identifier id, NbtCompound compound) {
-            this.tag = tag;
-            this.id = id;
-            this.compound = compound;
-        }
-
+    record TagPredicate(Tag<Item> tag, Identifier id, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
             return this.tag.contains(stack.getItem()) && NbtHelper.matches(this.compound, stack.getTag(), true);
@@ -96,15 +86,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         }
     }
 
-    static class ItemPredicate implements ClientItemPredicate {
-        private final Item item;
-        private final NbtCompound compound;
-
-        public ItemPredicate(Item item, NbtCompound compound) {
-            this.item = item;
-            this.compound = compound;
-        }
-
+    record ItemPredicate(Item item, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
             return stack.getItem() == this.item && NbtHelper.matches(this.compound, stack.getTag(), true);

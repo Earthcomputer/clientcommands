@@ -92,7 +92,7 @@ public class ChorusManipulation {
             return false;
         }
 
-        PlayerRandCracker.ThrowItemsResult throwItemsState =
+        var throwItemsState =
                 throwItemsUntil(rand -> {
 
                     if (particleCount != 16 && itemUseTimeLeft >= 0) {

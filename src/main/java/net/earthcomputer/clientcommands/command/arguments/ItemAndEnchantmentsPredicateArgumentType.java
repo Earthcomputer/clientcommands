@@ -112,15 +112,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         return EXAMPLES;
     }
 
-    public static class ItemAndEnchantmentsPredicate implements Predicate<ItemStack> {
-        public final Item item;
-        public final Predicate<List<EnchantmentLevelEntry>> predicate;
-
-        public ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) {
-            this.item = item;
-            this.predicate = predicate;
-        }
-
+    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) implements Predicate<ItemStack> {
         @Override
         public boolean test(ItemStack stack) {
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {

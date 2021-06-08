@@ -220,7 +220,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                     throw EXPECTED_EXCEPTION.createWithContext(reader, ")");
                 reader.skip();
 
-                FunctionExpression.IFunction function = FunctionExpression.FUNCTIONS.get(word);
+                var function = FunctionExpression.FUNCTIONS.get(word);
                 if (!function.isAcceptableInputCount(arguments.size())) {
                     reader.setCursor(cursor);
                     reader.readUnquotedString();

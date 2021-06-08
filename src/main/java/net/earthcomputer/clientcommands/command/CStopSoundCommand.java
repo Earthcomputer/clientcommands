@@ -20,7 +20,7 @@ public class CStopSoundCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cstopsound");
 
-        LiteralArgumentBuilder<ServerCommandSource> builder = literal("cstopsound");
+        var builder = literal("cstopsound");
 
         for (SoundCategory category : SoundCategory.values()) {
             builder.then(buildArguments(category, category.getName()));

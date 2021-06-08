@@ -30,7 +30,6 @@ public class CParticleCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cparticle");
 
-        LiteralCommandNode<ServerCommandSource> cparticle = dispatcher.register(literal("cparticle"));
         dispatcher.register(literal("cparticle")
             .then(argument("name", particleEffect())
                 .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), client.player.getPos(), Vec3d.ZERO, 1, 1, false))

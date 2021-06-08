@@ -495,35 +495,7 @@ public class EnchantmentCracker {
         }
     }
 
-    public static class ManipulateResult {
-        private final int itemThrows;
-        private final int bookshelves;
-        private final int slot;
-        private final List<EnchantmentLevelEntry> enchantments;
-
-        public ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentLevelEntry> enchantments) {
-            this.itemThrows = itemThrows;
-            this.bookshelves = bookshelves;
-            this.slot = slot;
-            this.enchantments = enchantments;
-        }
-
-        public int getItemThrows() {
-            return itemThrows;
-        }
-
-        public int getBookshelves() {
-            return bookshelves;
-        }
-
-        public int getSlot() {
-            return slot;
-        }
-
-        public List<EnchantmentLevelEntry> getEnchantments() {
-            return enchantments;
-        }
-    }
+    public record ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentLevelEntry> enchantments) {}
 
     public static enum CrackState implements StringIdentifiable {
         UNCRACKED("uncracked"), CRACKED("cracked"), CRACKING("cracking");

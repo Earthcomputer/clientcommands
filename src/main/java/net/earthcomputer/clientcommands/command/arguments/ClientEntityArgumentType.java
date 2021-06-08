@@ -81,10 +81,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSource) {
+        if (context.getSource() instanceof CommandSource source) {
             StringReader reader = new StringReader(builder.getInput());
             reader.setCursor(builder.getStart());
-            CommandSource source = (CommandSource) context.getSource();
             Parser parser = new Parser(reader);
 
             try {
@@ -197,37 +196,36 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 throw EntitySelectorReader.MISSING_EXCEPTION.createWithContext(reader);
             char type = reader.read();
             switch (type) {
-                case 'p':
+                case 'p' -> {
                     playersOnly = true;
                     sorter = NEAREST;
                     limit = 1;
                     hasType = true;
-                    break;
-                case 'a':
+                }
+                case 'a' -> {
                     playersOnly = true;
                     sorter = UNSORTED;
                     limit = Integer.MAX_VALUE;
                     hasType = true;
-                    break;
-                case 'r':
+                }
+                case 'r' -> {
                     playersOnly = true;
                     sorter = RANDOM;
                     limit = 1;
-                    break;
-                case 'e':
+                }
+                case 'e' -> {
                     playersOnly = false;
                     sorter = UNSORTED;
                     limit = Integer.MAX_VALUE;
-                    break;
-                case 's':
+                }
+                case 's' -> {
                     playersOnly = true;
                     sorter = UNSORTED;
                     limit = 1;
                     senderOnly = true;
                     addFilter((origin, entity) -> entity.isAlive());
-                    break;
-                default:
-                    throw EntitySelectorReader.UNKNOWN_SELECTOR_EXCEPTION.createWithContext(reader, "@" + type);
+                }
+                default -> throw EntitySelectorReader.UNKNOWN_SELECTOR_EXCEPTION.createWithContext(reader, "@" + type);
             }
 
             suggestor = (builder, playerNameSuggest) -> {
@@ -311,7 +309,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
         }
 
         void addFilter(BiPredicate<Vec3d, Entity> filter) {
-            final BiPredicate<Vec3d, Entity> prevFilter = this.filter;
+            final var prevFilter = this.filter;
             this.filter = (origin, entity) -> filter.test(origin, entity) && prevFilter.test(origin, entity);
         }
 
@@ -508,21 +506,14 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         String sort = parser.reader.readUnquotedString();
                         parser.suggestor = (builder, playerNameSuggest) -> CommandSource.suggestMatching(Arrays.asList("nearest", "furthest", "random", "arbitrary"), builder);
                         switch (sort) {
-                            case "nearest":
-                                parser.sorter = NEAREST;
-                                break;
-                            case "furthest":
-                                parser.sorter = FURTHEST;
-                                break;
-                            case "random":
-                                parser.sorter = RANDOM;
-                                break;
-                            case "arbitrary":
-                                parser.sorter = UNSORTED;
-                                break;
-                            default:
+                            case "nearest" -> parser.sorter = NEAREST;
+                            case "furthest" -> parser.sorter = FURTHEST;
+                            case "random" -> parser.sorter = RANDOM;
+                            case "arbitrary" -> parser.sorter = UNSORTED;
+                            default -> {
                                 parser.reader.setCursor(cursor);
                                 throw EntitySelectorOptions.IRREVERSIBLE_SORT_EXCEPTION.createWithContext(parser.reader, sort);
+                            }
                         }
                         parser.hasSort = true;
                     }
