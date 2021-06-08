@@ -30,12 +30,12 @@ public class CGiveCommand {
 
     private static int give(ServerCommandSource source, ItemStackArgument itemArgument, int count) throws CommandSyntaxException {
         final MinecraftClient client = MinecraftClient.getInstance();
-        if (!client.player.abilities.creativeMode) {
+        if (!client.player.getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
         ItemStack stack = itemArgument.createStack(Math.min(count, itemArgument.getItem().getMaxCount()), false);
-        client.interactionManager.clickCreativeStack(stack, 36 + client.player.inventory.selectedSlot);
+        client.interactionManager.clickCreativeStack(stack, 36 + client.player.getInventory().selectedSlot);
         client.player.playerScreenHandler.sendContentUpdates();
 
         sendFeedback(new TranslatableText("commands.cgive.success", count, stack.toHoverableText()));

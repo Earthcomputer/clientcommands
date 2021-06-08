@@ -154,7 +154,7 @@ public class WikiRetriever {
 
         if (result.query.pages.isEmpty())
             return null;
-        QueryResult.Query.Page page = result.query.pages.values().iterator().next();
+        var page = result.query.pages.values().iterator().next();
         if (page.missing != null || page.extract == null)
             return null;
         String html = page.extract;

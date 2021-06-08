@@ -150,6 +150,10 @@ public class PlayerRandCracker {
         resetCracker("enterWater");
     }
 
+    public static void onAmethystChime() {
+        resetCracker("amethystChime");
+    }
+
     public static void onDamage() {
         resetCracker("playerHurt");
     }
@@ -181,6 +185,13 @@ public class PlayerRandCracker {
 
     public static void onMending() {
         resetCracker("mending");
+    }
+
+    public static void onXpOrb() {
+        if (MultiConnectAPI.instance().getProtocolVersion() > Protocols.V1_16_4) {
+            // TODO: is there a way to be smarter about this?
+            resetCracker("xp");
+        }
     }
 
     public static void onFrostWalker() {
@@ -217,7 +228,7 @@ public class PlayerRandCracker {
 
     // TODO: update-sensitive: call hierarchy of ItemStack.damage
     public static void onItemDamage(int amount, LivingEntity holder, ItemStack stack) {
-        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).abilities.creativeMode) {
+        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).getAbilities().creativeMode) {
             if (stack.isDamageable()) {
                 if (amount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
@@ -254,7 +265,7 @@ public class PlayerRandCracker {
     }
 
     public static void onItemDamageUncertain(int minAmount, int maxAmount, LivingEntity holder, ItemStack stack) {
-        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).abilities.creativeMode) {
+        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).getAbilities().creativeMode) {
             if (stack.isDamageable()) {
                 if (maxAmount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);

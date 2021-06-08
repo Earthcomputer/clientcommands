@@ -24,7 +24,7 @@ public class CPlaySoundCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cplaysound");
 
-        RequiredArgumentBuilder<ServerCommandSource, Identifier> builder = argument("sound", identifier())
+        var builder = argument("sound", identifier())
             .suggests(SuggestionProviders.AVAILABLE_SOUNDS);
 
         for (SoundCategory category : SoundCategory.values()) {

@@ -5,8 +5,8 @@ import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.SaveLevelScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.realms.gui.screen.RealmsBridgeScreen;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.WorldSavePath;
@@ -43,9 +43,6 @@ public class Relogger {
 
         if (singleplayer) {
             mc.openScreen(new TitleScreen());
-        } else if (realms) {
-            RealmsBridgeScreen realmsBridgeScreen = new RealmsBridgeScreen();
-            realmsBridgeScreen.switchToRealms(new TitleScreen());
         } else {
             mc.openScreen(new MultiplayerScreen(new TitleScreen()));
         }
@@ -78,7 +75,7 @@ public class Relogger {
             if (!disconnect(true)) {
                 return false;
             }
-            mc.openScreen(new ConnectScreen(mc.currentScreen, mc, serverInfo));
+            ConnectScreen.connect(mc.currentScreen, mc, ServerAddress.parse(serverInfo.address), serverInfo);
             return true;
         }
     }

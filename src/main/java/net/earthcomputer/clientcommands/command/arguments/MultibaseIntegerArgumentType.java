@@ -105,9 +105,8 @@ public class MultibaseIntegerArgumentType implements ArgumentType<Integer> {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof MultibaseIntegerArgumentType)) return false;
+        if (!(o instanceof final MultibaseIntegerArgumentType that)) return false;
 
-        final MultibaseIntegerArgumentType that = (MultibaseIntegerArgumentType) o;
         return maximum == that.maximum && minimum == that.minimum;
     }
 

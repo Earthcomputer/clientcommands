@@ -26,7 +26,7 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
@@ -57,7 +57,7 @@ public class FindItemCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfinditem");
 
-        LiteralCommandNode<ServerCommandSource> cfinditem = dispatcher.register(literal("cfinditem"));
+        var cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
                 .then(literal("--no-search-shulker-box")
                         .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
@@ -212,10 +212,10 @@ public class FindItemCommand {
                                 if (searchingFor.test(stack))
                                     matchingItems += stack.getCount();
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    CompoundTag blockEntityTag = stack.getSubTag("BlockEntityTag");
+                                    NbtCompound blockEntityTag = stack.getSubTag("BlockEntityTag");
                                     if (blockEntityTag != null && blockEntityTag.contains("Items")) {
                                         DefaultedList<ItemStack> boxInv = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                                        Inventories.fromTag(blockEntityTag, boxInv);
+                                        Inventories.readNbt(blockEntityTag, boxInv);
                                         for (ItemStack stackInBox : boxInv) {
                                             if (searchingFor.test(stackInBox)) {
                                                 matchingItems += stackInBox.getCount();

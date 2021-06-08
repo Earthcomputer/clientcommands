@@ -43,7 +43,7 @@ public class GlowCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cglow");
 
-        LiteralCommandNode<ServerCommandSource> cglow = dispatcher.register(literal("cglow"));
+        var cglow = dispatcher.register(literal("cglow"));
         dispatcher.register(literal("cglow")
                 .then(literal("--keep-searching-entities")
                     .redirect(cglow, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))

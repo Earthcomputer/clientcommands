@@ -106,15 +106,14 @@
   "commands.cnamehistory.ioException": "An error occurred",
   "commands.cnamehistory.success": "%s has had the following names: %s",
 
+  "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
+  "commands.cparticle.success": "Displaying particle %s",
+
   "commands.cplaysound.success": "Played sound %s to self",
 
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
-
-  "commands.cscript.notFound": "Script \"%s\" not found",
-  "commands.cscript.reload.success": "Reloaded scripts",
-  "commands.cscript.run.success": "Script ran successfully",
 
   "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
   "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",
@@ -184,8 +183,10 @@
   "playerManip.reset.sprint": "Sprinted",
   "playerManip.reset.enterWater": "Entered Water",
   "playerManip.reset.swim": "Swum",
+  "playerManip.reset.amethystChime": "Walked on Amethyst Crystals",
   "playerManip.reset.potion": "Potion Effect Active",
   "playerManip.reset.mending": "Mended Item",
+  "playerManip.reset.xp": "XP Orb Collected",
   "playerManip.reset.respiration": "Respiration Helmet Used",
   "playerManip.reset.dropItem": "Dropped Item",
   "playerManip.reset.anvil": "Anvil Used",

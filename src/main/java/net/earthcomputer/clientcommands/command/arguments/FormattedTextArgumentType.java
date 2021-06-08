@@ -203,17 +203,6 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
             return (LiteralText) this.argument.setStyle(this.styler.apply(this.argument.getStyle(), this.optional));
         }
 
-        private static final class Styler {
-
-            private final BiFunction<Style, List<String>, Style> operator;
-            private final int argumentCount;
-            private final String[] suggestions;
-
-            private Styler(BiFunction<Style, List<String>, Style> operator, int argumentCount, String... suggestions) {
-                this.operator = operator;
-                this.argumentCount = argumentCount;
-                this.suggestions = suggestions;
-            }
-        }
+        private record Styler(BiFunction<Style, List<String>, Style> operator, int argumentCount, String... suggestions) {}
     }
 }

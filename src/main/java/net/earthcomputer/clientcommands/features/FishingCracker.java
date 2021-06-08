@@ -134,7 +134,7 @@ public class FishingCracker {
     private static final LootTable FISHING_LOOT_TABLE;
     private static final LootContextParameter<Boolean> IN_OPEN_WATER_PARAMETER = new LootContextParameter<>(new Identifier("clientcommands", "in_open_water"));
     static {
-        ImmutableMap.Builder<Identifier, LootTable> fishingLootTables = ImmutableMap.builder();
+        var fishingLootTables = ImmutableMap.<Identifier, LootTable>builder();
         new FishingLootTableGenerator().accept((id, builder) -> fishingLootTables.put(id, builder.build()));
         FISHING_LOOT_TABLES = fishingLootTables.build();
 
@@ -180,8 +180,8 @@ public class FishingCracker {
                             for (int i = 0; i < terms.length; i++) {
                                 LootCondition term = terms[i];
                                 if (term instanceof LocationCheckLootCondition) {
-                                    LocationCheckLootConditionAccessor accessor = (LocationCheckLootConditionAccessor) term;
-                                    LocationPredicateAccessor predicateAccessor = (LocationPredicateAccessor) accessor.getPredicate();
+                                    var accessor = (LocationCheckLootConditionAccessor) term;
+                                    var predicateAccessor = (LocationPredicateAccessor) accessor.getPredicate();
                                     terms[i] = new LocationCheckLootCondition(accessor.getPredicate(), accessor.getOffset()) {
                                         @Override
                                         public boolean test(LootContext lootContext) {
@@ -195,7 +195,7 @@ public class FishingCracker {
                                             if (!predicateAccessor.getX().test((float)origin.getX()) || !predicateAccessor.getY().test((float)origin.getY()) || !predicateAccessor.getZ().test((float)origin.getZ())) {
                                                 return false;
                                             }
-                                            Optional<RegistryKey<Biome>> biome = world.getRegistryManager().get(Registry.BIOME_KEY).getKey(world.getBiome(new BlockPos(origin)));
+                                            var biome = world.getRegistryManager().get(Registry.BIOME_KEY).getKey(world.getBiome(new BlockPos(origin)));
                                             return biome.isPresent() && biome.get() == predicateAccessor.getBiome();
                                         }
                                     };
@@ -620,15 +620,7 @@ public class FishingCracker {
         WAITING_FOR_RETRHOW,
     }
 
-    public static final class Catch {
-        private final ItemStack loot;
-        private final int experience;
-
-        public Catch(ItemStack loot, int experience) {
-            this.loot = loot;
-            this.experience = experience;
-        }
-
+    public record Catch(ItemStack loot, int experience) {
         @Override
         public int hashCode() {
             return 7 * (31 * Objects.hash(loot.getItem(), loot.getTag()) + loot.getCount()) + experience;
@@ -637,8 +629,7 @@ public class FishingCracker {
         @Override
         public boolean equals(Object other) {
             if (other == this) return true;
-            if (!(other instanceof Catch)) return false;
-            Catch that = (Catch) other;
+            if (!(other instanceof Catch that)) return false;
             return ItemStack.areEqual(loot, that.loot) && experience == that.experience;
         }
 
@@ -728,7 +719,7 @@ public class FishingCracker {
             for (int repeat = 0; repeat < 1; repeat++) {
                 // E step
                 // calculate weights (and classifications)
-                ArrayList<ArrayList<Double>> masses = new ArrayList<ArrayList<Double>>();
+                var masses = new ArrayList<ArrayList<Double>>();
                 for (int i = 0; i < data.size(); i++) {
 
                     ArrayList<Double> sample = data.get(i);
@@ -849,7 +840,7 @@ public class FishingCracker {
             this.luckLevel = EnchantmentHelper.getLuckOfTheSea(tool);
             this.pos = pos;
             this.velocity = velocity;
-            this.boundingBox = FISHING_BOBBER_DIMENSIONS.method_30231(pos.x, pos.y, pos.z);
+            this.boundingBox = FISHING_BOBBER_DIMENSIONS.getBoxAt(pos.x, pos.y, pos.z);
         }
 
         public boolean canCatchFish() {
@@ -861,7 +852,7 @@ public class FishingCracker {
             fakeEntity.setVelocity(velocity);
 
             Rand randomCopy = new Rand(random);
-            Map<LootContextParameter<?>, Object> parameters = ImmutableMap.of(
+            var parameters = ImmutableMap.of(
                     LootContextParameters.ORIGIN, pos,
                     LootContextParameters.TOOL, tool,
                     LootContextParameters.THIS_ENTITY, fakeEntity,
@@ -942,7 +933,7 @@ public class FishingCracker {
             double e = 0.92D;
             this.velocity = this.velocity.multiply(e);
 
-            boundingBox = FISHING_BOBBER_DIMENSIONS.method_30231(pos.x, pos.y, pos.z);
+            boundingBox = FISHING_BOBBER_DIMENSIONS.getBoxAt(pos.x, pos.y, pos.z);
         }
 
         private void onBaseTick() {
@@ -970,7 +961,7 @@ public class FishingCracker {
         private void onSwimmingStart() {
             float f = 0.2F;
             Vec3d vec3d = velocity;
-            float g = MathHelper.sqrt(vec3d.x * vec3d.x * 0.20000000298023224D + vec3d.y * vec3d.y + vec3d.z * vec3d.z * 0.20000000298023224D) * f;
+            float g = (float) Math.sqrt(vec3d.x * vec3d.x * 0.20000000298023224D + vec3d.y * vec3d.y + vec3d.z * vec3d.z * 0.20000000298023224D) * f;
             if (g > 1.0F) {
                 g = 1.0F;
             }
@@ -1061,7 +1052,7 @@ public class FishingCracker {
         private void checkForCollision() {
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
-            HitResult hitResult = ProjectileUtil.getCollision(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanCollideWith);
+            HitResult hitResult = ProjectileUtil.getCollision(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanHit);
             if (hitResult.getType() != HitResult.Type.MISS) {
                 failed = true;
             }
@@ -1102,7 +1093,7 @@ public class FishingCracker {
 
             float i = this.getVelocityMultiplier();
             this.velocity = this.velocity.multiply((double)i, 1.0D, (double)i);
-            if (this.world.method_29556(this.boundingBox.contract(0.001D)).anyMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
+            if (this.world.getStatesInBoxIfLoaded(this.boundingBox.contract(0.001D)).anyMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
                 failed = true;
             }
         }

@@ -17,11 +17,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.tag.EntityTypeTags;
+import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -79,10 +81,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSource) {
+        if (context.getSource() instanceof CommandSource source) {
             StringReader reader = new StringReader(builder.getInput());
             reader.setCursor(builder.getStart());
-            CommandSource source = (CommandSource) context.getSource();
             Parser parser = new Parser(reader);
 
             try {
@@ -195,37 +196,36 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                 throw EntitySelectorReader.MISSING_EXCEPTION.createWithContext(reader);
             char type = reader.read();
             switch (type) {
-                case 'p':
+                case 'p' -> {
                     playersOnly = true;
                     sorter = NEAREST;
                     limit = 1;
                     hasType = true;
-                    break;
-                case 'a':
+                }
+                case 'a' -> {
                     playersOnly = true;
                     sorter = UNSORTED;
                     limit = Integer.MAX_VALUE;
                     hasType = true;
-                    break;
-                case 'r':
+                }
+                case 'r' -> {
                     playersOnly = true;
                     sorter = RANDOM;
                     limit = 1;
-                    break;
-                case 'e':
+                }
+                case 'e' -> {
                     playersOnly = false;
                     sorter = UNSORTED;
                     limit = Integer.MAX_VALUE;
-                    break;
-                case 's':
+                }
+                case 's' -> {
                     playersOnly = true;
                     sorter = UNSORTED;
                     limit = 1;
                     senderOnly = true;
                     addFilter((origin, entity) -> entity.isAlive());
-                    break;
-                default:
-                    throw EntitySelectorReader.UNKNOWN_SELECTOR_EXCEPTION.createWithContext(reader, "@" + type);
+                }
+                default -> throw EntitySelectorReader.UNKNOWN_SELECTOR_EXCEPTION.createWithContext(reader, "@" + type);
             }
 
             suggestor = (builder, playerNameSuggest) -> {
@@ -297,8 +297,19 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
             }
         }
 
+        boolean readTagCharacter() {
+            this.reader.skipWhitespace();
+            if (this.reader.canRead() && this.reader.peek() == '#') {
+                this.reader.skip();
+                this.reader.skipWhitespace();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         void addFilter(BiPredicate<Vec3d, Entity> filter) {
-            final BiPredicate<Vec3d, Entity> prevFilter = this.filter;
+            final var prevFilter = this.filter;
             this.filter = (origin, entity) -> filter.test(origin, entity) && prevFilter.test(origin, entity);
         }
 
@@ -441,9 +452,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         float min = range.getMin() == null ? 0 : range.getMin();
                         float max = range.getMax() == null ? 359 : range.getMax();
                         if (max < min)
-                            parser.addFilter((origin, entity) -> entity.pitch >= min || entity.pitch <= max);
+                            parser.addFilter((origin, entity) -> entity.getPitch() >= min || entity.getPitch() <= max);
                         else
-                            parser.addFilter((origin, entity) -> entity.pitch >= min && entity.pitch <= max);
+                            parser.addFilter((origin, entity) -> entity.getPitch() >= min && entity.getPitch() <= max);
                         parser.hasXRotation = true;
                     }
 
@@ -459,9 +470,9 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         float min = range.getMin() == null ? 0 : range.getMin();
                         float max = range.getMax() == null ? 359 : range.getMax();
                         if (max < min)
-                            parser.addFilter((origin, entity) -> entity.yaw >= min || entity.yaw <= max);
+                            parser.addFilter((origin, entity) -> entity.getYaw() >= min || entity.getYaw() <= max);
                         else
-                            parser.addFilter((origin, entity) -> entity.yaw >= min && entity.yaw <= max);
+                            parser.addFilter((origin, entity) -> entity.getYaw() >= min && entity.getYaw() <= max);
                         parser.hasYRotation = true;
                     }
 
@@ -495,21 +506,14 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                         String sort = parser.reader.readUnquotedString();
                         parser.suggestor = (builder, playerNameSuggest) -> CommandSource.suggestMatching(Arrays.asList("nearest", "furthest", "random", "arbitrary"), builder);
                         switch (sort) {
-                            case "nearest":
-                                parser.sorter = NEAREST;
-                                break;
-                            case "furthest":
-                                parser.sorter = FURTHEST;
-                                break;
-                            case "random":
-                                parser.sorter = RANDOM;
-                                break;
-                            case "arbitrary":
-                                parser.sorter = UNSORTED;
-                                break;
-                            default:
+                            case "nearest" -> parser.sorter = NEAREST;
+                            case "furthest" -> parser.sorter = FURTHEST;
+                            case "random" -> parser.sorter = RANDOM;
+                            case "arbitrary" -> parser.sorter = UNSORTED;
+                            default -> {
                                 parser.reader.setCursor(cursor);
                                 throw EntitySelectorOptions.IRREVERSIBLE_SORT_EXCEPTION.createWithContext(parser.reader, sort);
+                            }
                         }
                         parser.hasSort = true;
                     }
@@ -524,25 +528,42 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                     void apply(Parser parser) throws CommandSyntaxException {
                         parser.suggestor = (builder, playerNameSuggest) -> {
                             CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.getIds(), builder, "!");
-                            if (!parser.hasType)
+                            CommandSource.suggestIdentifiers(EntityTypeTags.getTagGroup().getTagIds(), builder, "!#");
+                            if (!parser.hasType) {
                                 CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.getIds(), builder);
+                                CommandSource.suggestIdentifiers(EntityTypeTags.getTagGroup().getTagIds(), builder, String.valueOf('#'));
+                            }
                             return builder.buildFuture();
                         };
 
                         int cursor = parser.reader.getCursor();
                         boolean neg = parser.readNegationCharacter();
-                        Identifier typeId = Identifier.fromCommandInput(parser.reader);
-                        EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(typeId).orElseThrow(() -> {
-                            parser.reader.setCursor(cursor);
-                            return EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(parser.reader, typeId);
-                        });
-                        parser.playersOnly = false;
-                        if (!neg) {
-                            parser.hasType = true;
-                            if (type == EntityType.PLAYER)
-                                parser.playersOnly = true;
+                        final Identifier typeId;
+                        if (parser.readTagCharacter()) {
+                            typeId = Identifier.fromCommandInput(parser.reader);
+                            parser.addFilter((origin, entity) -> {
+                                try {
+                                    Tag<EntityType<?>> tag = entity.getEntityWorld().getTagManager().getTag(Registry.ENTITY_TYPE_KEY, typeId, id -> new IllegalArgumentException());
+                                    return tag.contains(entity.getType()) != neg;
+                                } catch (IllegalArgumentException e) {
+                                    return neg;
+                                }
+                            });
+                        } else {
+                            typeId = Identifier.fromCommandInput(parser.reader);
+                            EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(typeId).orElseThrow(() -> {
+                                parser.reader.setCursor(cursor);
+                                return EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(parser.reader, typeId);
+                            });
+                            parser.playersOnly = false;
+                            if (!neg) {
+                                parser.hasType = true;
+                                if (type == EntityType.PLAYER) {
+                                    parser.playersOnly = true;
+                                }
+                            }
+                            parser.addFilter((origin, entity) -> (entity.getType() == type) != neg);
                         }
-                        parser.addFilter((origin, entity) -> (entity.getType() == type) != neg);
                     }
 
                     @Override
@@ -554,13 +575,13 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                     @Override
                     void apply(Parser parser) throws CommandSyntaxException {
                         boolean neg = parser.readNegationCharacter();
-                        CompoundTag nbt = new StringNbtReader(parser.reader).parseCompoundTag();
+                        NbtCompound nbt = new StringNbtReader(parser.reader).parseCompound();
                         parser.addFilter((origin, entity) -> {
-                            CompoundTag entityNbt = entity.toTag(new CompoundTag());
+                            NbtCompound entityNbt = entity.writeNbt(new NbtCompound());
                             if (entity instanceof PlayerEntity) {
                                 ItemStack heldItem = ((PlayerEntity) entity).getEquippedStack(EquipmentSlot.MAINHAND);
                                 if (!heldItem.isEmpty())
-                                    entityNbt.put("SelectedItem", heldItem.toTag(new CompoundTag()));
+                                    entityNbt.put("SelectedItem", heldItem.writeNbt(new NbtCompound()));
                             }
                             return NbtHelper.matches(nbt, entityNbt, true) != neg;
                         });

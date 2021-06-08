@@ -119,19 +119,19 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x - 1, node.y, node.z - 1, maxYStep, feetY, Direction.NORTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidAdjacentSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x + 1, node.y, node.z - 1, maxYStep, feetY, Direction.NORTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidAdjacentSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x - 1, node.y, node.z + 1, maxYStep, feetY, Direction.SOUTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidAdjacentSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         successor = getPathNode(node.x + 1, node.y, node.z + 1, maxYStep, feetY, Direction.SOUTH);
-        if (((LandPathNodeMakerAccessor) this).callIsValidDiagonalSuccessor(node, successor)) {
+        if (((LandPathNodeMakerAccessor) this).callIsValidAdjacentSuccessor(node, successor)) {
             successors[successorCount++] = successor;
         }
         return successorCount;
