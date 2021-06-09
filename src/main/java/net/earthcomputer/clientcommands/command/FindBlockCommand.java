@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -137,6 +138,12 @@ public class FindBlockCommand {
 
     private static boolean searchChunkForBlockCandidates(Chunk chunk, int senderY, Predicate<CachedBlockPosition> blockMatcher,
                                                   List<BlockPos> blockCandidates) {
+        ClientWorld world = MinecraftClient.getInstance().world;
+        assert world != null;
+
+        int bottomY = world.getBottomY();
+        int topY = world.getTopY();
+
         boolean found = false;
         int maxY = chunk.getHighestNonEmptySectionYOffset() + 15;
 
@@ -144,14 +151,14 @@ public class FindBlockCommand {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 // search the column nearest to the sender first, and stop if we find the block
-                int maxDy = Math.max(senderY, maxY - senderY);
+                int maxDy = Math.max(senderY - bottomY, maxY - senderY);
                 for (int dy = 0; dy <= maxDy; dy = dy > 0 ? -dy : -dy + 1) {
-                    if (senderY + dy < 0 || senderY + dy >= 256) {
+                    if (senderY + dy < bottomY || senderY + dy > topY) {
                         continue;
                     }
                     int worldX = (chunk.getPos().x << 4) + x;
                     int worldZ = (chunk.getPos().z << 4) + z;
-                    if (blockMatcher.test(new CachedBlockPosition(MinecraftClient.getInstance().world, new BlockPos(worldX, senderY + dy, worldZ), false))) {
+                    if (blockMatcher.test(new CachedBlockPosition(world, new BlockPos(worldX, senderY + dy, worldZ), false))) {
                         blockCandidates.add(new BlockPos(worldX, senderY + dy, worldZ));
                         found = true;
                         break;

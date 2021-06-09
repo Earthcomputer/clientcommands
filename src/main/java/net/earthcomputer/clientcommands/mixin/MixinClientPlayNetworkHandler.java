@@ -21,6 +21,7 @@ import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Vec3d;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,8 +34,7 @@ public class MixinClientPlayNetworkHandler {
     @Shadow
     private CommandDispatcher<CommandSource> commandDispatcher;
 
-    @Shadow
-    private MinecraftClient client;
+    @Shadow @Final private MinecraftClient client;
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -63,7 +63,7 @@ public class MixinClientPlayNetworkHandler {
         SeedCracker.onEntityCreation(packet);
 
         if (FishingCracker.canManipulateFishing()) {
-            if (packet.getEntityData() == player.getEntityId() && packet.getEntityTypeId() == EntityType.FISHING_BOBBER) {
+            if (packet.getEntityData() == player.getId() && packet.getEntityTypeId() == EntityType.FISHING_BOBBER) {
                 FishingCracker.processBobberSpawn(packet.getUuid(), new Vec3d(packet.getX(), packet.getY(), packet.getZ()), new Vec3d(packet.getVelocityX(), packet.getVelocityY(), packet.getVelocityZ()));
             }
         }
@@ -78,7 +78,7 @@ public class MixinClientPlayNetworkHandler {
             return;
         }
 
-        if (!FishingCracker.canManipulateFishing() || packet.getEntityData() != player.getEntityId() || packet.getEntityTypeId() != EntityType.FISHING_BOBBER) {
+        if (!FishingCracker.canManipulateFishing() || packet.getEntityData() != player.getId() || packet.getEntityTypeId() != EntityType.FISHING_BOBBER) {
             return;
         }
 

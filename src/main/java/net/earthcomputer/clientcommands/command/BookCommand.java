@@ -10,8 +10,8 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
@@ -83,14 +83,14 @@ public class BookCommand {
                 throw NO_BOOK.create();
             }
         }
-        int slot = hand == Hand.MAIN_HAND ? player.inventory.selectedSlot : 40;
+        int slot = hand == Hand.MAIN_HAND ? player.getInventory().selectedSlot : 40;
 
         String joinedPages = characterGenerator.limit(MAX_LIMIT * 210).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
 
-        ListTag pages = new ListTag();
+        NbtList pages = new NbtList();
 
         for (int page = 0; page < limit; page++) {
-            pages.add(StringTag.of(joinedPages.substring(page * 210, (page + 1) * 210)));
+            pages.add(NbtString.of(joinedPages.substring(page * 210, (page + 1) * 210)));
         }
 
         heldItem.getOrCreateTag().put("pages", pages);

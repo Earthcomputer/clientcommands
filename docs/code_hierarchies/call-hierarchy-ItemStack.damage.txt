@@ -1,55 +1,53 @@
 Method
 damage(int, T, Consumer<T>)
 Found usages
-Unclassified usage
-Gradle: net.minecraft:minecraft:1.16.2-rc1-mapped-net.fabricmc.yarn-1.16.2-rc1+build.6-v2
+Unclassified
+Gradle: net.minecraft:minecraft:1.17-rc2-project-@-mapped-net.fabricmc.yarn-1.17-rc2+build.10-v2
 net.minecraft.block
 BeehiveBlock
 onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
             itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
 PumpkinBlock
 onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
-            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
 TntBlock
 onUse(BlockState, World, BlockPos, PlayerEntity, Hand, BlockHitResult)
-               itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+               itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
 net.minecraft.enchantment
 ThornsEnchantment
 onUserDamaged(LivingEntity, Entity, int)
-            ((ItemStack)entry.getValue()).damage(2, (LivingEntity)user, (Consumer)((livingEntity) -> {
+            ((ItemStack)entry.getValue()).damage(2, (LivingEntity)user, (Consumer)((entity) -> {
 net.minecraft.entity
 LivingEntity
 addSoulSpeedBoostIfNeeded()
-               itemStack.damage(1, (LivingEntity)this, (Consumer)((livingEntity) -> {
-damage(DamageSource, float)
-            this.getEquippedStack(EquipmentSlot.HEAD).damage((int)(amount * 4.0F + this.random.nextFloat() * amount * 2.0F), this, (livingEntityx) -> {
-initAi()
-               itemStack.damage(1, (LivingEntity)this, (Consumer)((livingEntity) -> {
+               itemStack.damage(1, (LivingEntity)this, (Consumer)((player) -> {
+tickFallFlying()
+                  itemStack.damage(1, (LivingEntity)this, (Consumer)((player) -> {
 net.minecraft.entity.mob
 CreeperEntity
 interactMob(PlayerEntity, Hand)
-            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
 net.minecraft.entity.passive
 MooshroomEntity
 interactMob(PlayerEntity, Hand)
-            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
 SheepEntity
 interactMob(PlayerEntity, Hand)
-            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
 SnowGolemEntity
 interactMob(PlayerEntity, Hand)
-            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerEntity) -> {
+            itemStack.damage(1, (LivingEntity)player, (Consumer)((playerx) -> {
 net.minecraft.entity.player
 PlayerEntity
 damageShield(float)
             this.activeItemStack.damage(i, (LivingEntity)this, (Consumer)((playerEntity) -> {
 PlayerInventory
-damageArmor(DamageSource, float)
-               itemStack.damage((int)f, (LivingEntity)this.player, (Consumer)((playerEntity) -> {
+damageArmor(DamageSource, float, int[])
+               itemStack.damage((int)amount, (LivingEntity)this.player, (Consumer)((player) -> {
 net.minecraft.item
 AxeItem
 useOnBlock(ItemUsageContext)
-               context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+            itemStack.damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
 BowItem
 onStoppedUsing(ItemStack, World, LivingEntity, int)
                   stack.damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
@@ -61,8 +59,8 @@ use(World, PlayerEntity, Hand)
             itemStack.damage(i, (LivingEntity)user, (Consumer)((p) -> {
 FlintAndSteelItem
 useOnBlock(ItemUsageContext)
-            context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
                itemStack.damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
+            context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
 HoeItem
 useOnBlock(ItemUsageContext)
                   context.getStack().damage(1, (LivingEntity)playerEntity, (Consumer)((p) -> {
@@ -92,9 +90,25 @@ postHit(ItemStack, LivingEntity, LivingEntity)
       stack.damage(1, (LivingEntity)attacker, (Consumer)((e) -> {
 postMine(ItemStack, World, BlockState, BlockPos, LivingEntity)
          stack.damage(2, (LivingEntity)miner, (Consumer)((e) -> {
+Usage in comments
+Gradle: net_fabricmc_yarn_1_17_rc2_1_17_rc2_build_10_v2.net.fabricmc.fabric-api:fabric-item-api-v1:1.2.4+a02b4463d5
+net.fabricmc.fabric.api.item.v1
+CustomDamageHandler
+damage(ItemStack, int, LivingEntity, Consumer<LivingEntity>)
+	 * @param breakCallback Callback when the stack reaches zero damage. See {@link ItemStack#damage(int, LivingEntity, Consumer)} and its callsites for more information.
+ * Allows an item to run custom logic when {@link ItemStack#damage(int, LivingEntity, Consumer)} is called.
 Usage in string constants
 clientcommands.main
 net.earthcomputer.clientcommands.mixin
 MixinItemStack
 onDamage(int, T, Consumer<T>, CallbackInfo)
     @Inject(method = "damage(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At("HEAD"))
+Gradle: net_fabricmc_yarn_1_17_rc2_1_17_rc2_build_10_v2.net.fabricmc.fabric-api:fabric-item-api-v1:1.2.4+a02b4463d5
+net.fabricmc.fabric.mixin.item
+ItemStackMixin
+saveDamager(int, LivingEntity, Consumer<LivingEntity>, CallbackInfo)
+	@Inject(method = "damage(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At("HEAD"))
+hookDamage(int)
+...	@ModifyArg(method = "damage(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At(value = "INVOK...
+clearDamager(int, T, Consumer<T>, CallbackInfo)
+	@Inject(method = "damage(ILnet/minecraft/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At("RETURN"))

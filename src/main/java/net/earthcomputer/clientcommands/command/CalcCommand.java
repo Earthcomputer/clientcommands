@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
@@ -24,7 +23,7 @@ public class CalcCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("ccalc");
 
-        LiteralCommandNode<ServerCommandSource> ccalc = dispatcher.register(literal("ccalc"));
+        var ccalc = dispatcher.register(literal("ccalc"));
         dispatcher.register(literal("ccalc")
             .then(literal("--parse")
                 .redirect(ccalc, ctx -> withFlags(ctx.getSource(), FLAG_PARSE, true)))

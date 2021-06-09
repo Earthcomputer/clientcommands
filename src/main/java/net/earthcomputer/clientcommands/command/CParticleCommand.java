@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -17,7 +16,7 @@ import java.util.Random;
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.argument.ParticleArgumentType.*;
+import static net.minecraft.command.argument.ParticleEffectArgumentType.*;
 import static net.minecraft.command.argument.Vec3ArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -30,9 +29,8 @@ public class CParticleCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cparticle");
 
-        LiteralCommandNode<ServerCommandSource> cparticle = dispatcher.register(literal("cparticle"));
         dispatcher.register(literal("cparticle")
-            .then(argument("name", particle())
+            .then(argument("name", particleEffect())
                 .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), client.player.getPos(), Vec3d.ZERO, 1, 1, false))
                 .then(argument("pos", vec3())
                     .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), Vec3d.ZERO, 1, 1, false))

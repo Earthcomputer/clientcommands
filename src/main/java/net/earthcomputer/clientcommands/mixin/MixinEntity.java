@@ -3,8 +3,10 @@ package net.earthcomputer.clientcommands.mixin;
 import net.earthcomputer.clientcommands.features.EntityGlowingTicket;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.tag.BlockTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +22,7 @@ import java.util.List;
 public class MixinEntity implements IEntity {
 
     @Unique
-    private List<EntityGlowingTicket> glowingTickets = new ArrayList<>(0);
+    private final List<EntityGlowingTicket> glowingTickets = new ArrayList<>(0);
 
     @Override
     public void addGlowingTicket(int ticks, int color) {
@@ -60,6 +62,13 @@ public class MixinEntity implements IEntity {
     public void onOnSwimmingStart(CallbackInfo ci) {
         if (isThePlayer())
             PlayerRandCracker.onSwimmingStart();
+    }
+
+    @Inject(method = "playAmethystChimeSound", at = @At("HEAD"))
+    private void onPlayAmethystChimeSound(BlockState state, CallbackInfo ci) {
+        if (isThePlayer() && state.isIn(BlockTags.CRYSTAL_SOUND_BLOCKS)) {
+            PlayerRandCracker.onAmethystChime();
+        }
     }
 
     @Inject(method = "spawnSprintingParticles", at = @At("HEAD"))
