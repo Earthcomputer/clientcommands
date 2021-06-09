@@ -2,14 +2,10 @@ package net.earthcomputer.clientcommands.command;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
-
-import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;

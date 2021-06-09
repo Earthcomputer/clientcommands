@@ -9,11 +9,9 @@ import net.minecraft.util.math.Direction;
 
 import java.util.EnumSet;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.minecraft.command.argument.Vec3ArgumentType.getVec3;
-import static net.minecraft.command.argument.Vec3ArgumentType.vec3;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.minecraft.command.argument.Vec3ArgumentType.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class ChorusCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
