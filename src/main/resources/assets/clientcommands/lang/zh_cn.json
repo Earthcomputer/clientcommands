@@ -4,6 +4,18 @@
 
   "commands.ccalc.expected": "期望值 %s",
   "commands.ccalc.invalidArgumentCount": "函数 \"%s\" 无法接受 %d 个自变量",
+  "commands.ccalc.parse": "表达式解析结果： %s",
+  "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
+  "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
+  "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
+  "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
+  "commands.ccalc.parse.constant": "(常数 '%s')",
+  "commands.ccalc.parse.function": "(函数 '%s'， 参数： %s)",
+  "commands.ccalc.parse.literal": "(字面量： %s)",
+  "commands.ccalc.parse.negate": "(否定： %s)",
+  "commands.ccalc.tooDeeplyNested": "表达式嵌套层数太多",
 
   "commands.ccalcstack.success": "%d 个 %s 是 %d 组余 %d 个",
   "commands.ccalcstack.success.empty": "%d 个物品是 %d 组余 %d 个",
@@ -13,6 +25,7 @@
   "commands.ccrackrng.starting": "正在破解玩家随机种子",
   "commands.ccrackrng.success": "玩家随机种子已破解： %d",
   "commands.ccheatcrackrng.success": "玩家随机种子已破解： %d -> %d",
+  "commands.ccheatcrackrng.java14": "在 Java 14 或更高版本， 这个命令无法工作！",
 
   "commands.cenchant.expectedWithWithout": "有效参数： \"with\" 或 \"without\"",
   "commands.cenchant.failed": "您请求的附魔无法获得或者需要太长时间",
@@ -23,6 +36,7 @@
 
   "commands.cfind.found.left": "在 ",
   "commands.cfind.found.right": " 找到 %1$s， 距离您 %2$.2f 格",
+  "commands.cfind.keepSearching.success": "正在寻找实体。",
   "commands.cfind.noMatch": "没有实体匹配您的查找条件",
   "commands.cfind.success": "%d 个实体匹配您的查找条件",
 
@@ -36,10 +50,73 @@
   "commands.cfinditem.starting.keepSearching": "正在持续搜索 %s。",
   "commands.cfinditem.total": "一共找到了 %d 个 %s 。",
 
+  "commands.cfish.addGoal.success": "成功添加目标 %s",
+  "commands.cfish.correctLoot": "获得了正确的掉落物， 修正值 %dms",
+  "commands.cfish.error.crackFailed": "破解钓鱼竿浮标随机数失败， 服务器是否安装了 Mods？",
+  "commands.cfish.error.failed": "钓鱼竿浮标配置不正确",
+  "commands.cfish.error.outOfWater": "钓鱼竿附表不在水中， 随机数操控无法工作",
+  "commands.cfish.listGoals.noGoals": "没有钓鱼目标",
+  "commands.cfish.listGoals.success": "设置了 %d 个钓鱼目标： ",
+  "commands.cfish.needFishingManipulation": "钓鱼操控未启用。",
+  "commands.cfish.removeGoal.success": "成功移除目标 %s",
+  "commands.cfish.wrongLoot": "用修正值 %dms 未能获得正确的掉落物， 可能超前 %s 刻",
+  
+  "commands.cfov.success": "将视野设为 %f",
+  
   "commands.cgamma.success": "将伽马值设为 %f",
+  
+  "commands.cghostblock.fill.success": "填充了 %d 个幽灵方块",
+  "commands.cghostblock.set.success": "摆放了幽灵方块",
+
+  "commands.cgive.success": "给予自己 %d 个 %s",
+  "commands.cgive.notCreative": "要给予自己道具，玩家必须处于创造模式",
+
+  "commands.cglow.entity.keepSearching.success": "正在令实体发光。",
+  "commands.cglow.entity.failed": "没有可发光的实体。",
+  "commands.cglow.entity.success": "正在令 %d 个实体发光",
+  "commands.cglow.area.success": "正在令 %d 个区域发光",
+
+  "commands.chotbar.notCreative": "要恢复快捷栏，玩家必须处于创造模式。",
+  "commands.chotbar.restoredHotbar": "已恢复快捷栏 %d",
+
+  "commands.citemgroup.notFound": "道具组 \"%s\" 未找到",
+  "commands.citemgroup.outOfBounds": "数组下标 %d 越界",
+  "commands.citemgroup.saveFile.failed": "无法保存道具组文件",
+  "commands.citemgroup.addGroup.success": "成功添加道具组 \"%s\"",
+  "commands.citemgroup.addGroup.illegalCharacter": "道具组只能包含以下字符： [a-z0-9/._-]",
+  "commands.citemgroup.addGroup.alreadyExists": "道具组 \"%s\" 已经存在",
+  "commands.citemgroup.removeGroup.success": "成功移除道具组 \"%s\"",
+  "commands.citemgroup.addStack.success": "成功将 %s 添加到 \"%s\"",
+  "commands.citemgroup.removeStack.success": "成功从 \"%s\" 移除下标为 %d 的道具",
+  "commands.citemgroup.setStack.success": "成功从 \"%s\" 将下表为 %d 的道具更改为 %s",
+  "commands.citemgroup.changeIcon.success": "成功将 \"%s\" 的图标从 %s 更改为 %s",
+  "commands.citemgroup.renameGroup.success": "成功将道具组 \"%s\" 改名为 \"%s\"",
+
+  "commands.ckit.notFound": "找不到预设物品栏 \"%s\"",
+  "commands.ckit.saveFile.failed": "无法保存预设物品栏文件",
+  "commands.ckit.load.success": "成功将预设物品栏 \"%s\" 给予自己",
+  "commands.ckit.load.notCreative": "要给予自己道具，玩家必须处于创造模式",
+  "commands.ckit.create.success": "成功创建预设物品栏 \"%s\"",
+  "commands.ckit.create.alreadyExists": "预设物品栏 \"%s\" 已经存在",
+  "commands.ckit.delete.success": "成功删除预设物品栏 \"%s\"",
+  "commands.ckit.edit.success": "成功编辑预设物品栏 \"%s\"",
+  "commands.ckit.list": "可用的预设物品栏： %s",
+  "commands.ckit.list.empty": "无可用的预设物品栏",
+
+  "commands.cparticle.unsuitableParticleOption": "不会显示粒子效果，因为当前的粒子效果设置不合适",
+  "commands.cparticle.success": "正在显示粒子效果 %s",
+
+  "commands.cplaysound.success": "对自己播放声音 %s",
+
+  "commands.crelog.failed": "重新登录失败",
 
   "commands.crender.entities.success": "实体渲染规则已被更新",
 
+  "commands.cstopsound.success.sourceless.any": "为自己停止了所有声音",
+  "commands.cstopsound.success.sourceless.sound": "为自己停止了声音 '%s'",
+  "commands.cstopsound.success.source.any": "为自己停止了所有 '%s' 声音",
+  "commands.cstopsound.success.source.sound": "为自己停止了来自 '%s$2' 的 '%s$1' 声音",
+  
   "commands.ctask.list.noTasks": "当前没有正在执行的任务",
   "commands.ctask.list.success": "%d 个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
@@ -57,7 +134,14 @@
   "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式 %s",
   "commands.client.notClient": "不是客户端指令",
+  "commands.client.invalidArgumentException": "无效参数 '%s'",
 
+  "chorusManip.landing.success": "成功操控落地位置： %d, %d, %d",
+  "chorusManip.landing.failed": "无法操控落地位置",
+  "chorusManip.goalTooFar": "目标太远了！",
+  "chorusManip.needChorusManipulation": "紫颂果操控未启用",
+  "chorusManip.setGoal": "设置 %s 目标区域从 %s 到 %s",
+  
   "enchCrack.state": "附魔破解状态： %s",
   "enchCrack.state.uncracked": "未破解",
   "enchCrack.state.cracking": "正在破解",
@@ -96,15 +180,17 @@
   "playerManip.reset.sprint": "疾跑",
   "playerManip.reset.enterWater": "进入水体",
   "playerManip.reset.swim": "游泳",
+  "playerManip.reset.amethystChime": "在紫水晶簇上行走",
   "playerManip.reset.potion": "活跃的药水状态效果",
   "playerManip.reset.mending": "修理了经验修补的物品",
+  "playerManip.reset.xp": "收集了经验球",
   "playerManip.reset.respiration": "使用了水下呼吸头盔",
   "playerManip.reset.dropItem": "扔出了物品",
   "playerManip.reset.anvil": "使用了铁砧",
   "playerManip.reset.food": "吃东西",
   "playerManip.reset.drink": "喝东西",
   "playerManip.reset.baneOfArthropods": "使用节肢杀手攻击了节肢生物",
-  "playerManip.reset.advancement": "获得了成就",
+  "playerManip.reset.advancement": "获得了进度",
   "playerManip.reset.shield": "用盾牌阻挡了攻击",
   "playerManip.reset.give": "使用了give命令",
   "playerManip.reset.unbreaking": "使用了耐久物品",
@@ -117,6 +203,9 @@
 
   "playerManip.serverBrandWarning": "警告： 您正在游玩的服务器包含Mod。随机数相关的功能并不保证能够正常工作！",
   "playerManip.toolBreakWarning": "警告： 工具还有 %d 耐久度。",
+  "playerManip.throwError": "目标条件无法达成，或者需要丢出道具超过 %d 次。",
+  "playerManip.notEnoughItems": "没有足够的道具 (现有 %d 个， 需要 %d 个) 以完成随机种子操控。",
+  "playerManip.uncracked": "需要破解玩家种子。",
 
   "itemCrack.notEnoughItems": "无法使用随机数种子破解： 玩家手中没有足够的物品"
 
