@@ -88,7 +88,7 @@
   "commands.citemgroup.removeGroup.success": "成功移除道具组 \"%s\"",
   "commands.citemgroup.addStack.success": "成功将 %s 添加到 \"%s\"",
   "commands.citemgroup.removeStack.success": "成功从 \"%s\" 移除下标为 %d 的道具",
-  "commands.citemgroup.setStack.success": "成功从 \"%s\" 将下表为 %d 的道具更改为 %s",
+  "commands.citemgroup.setStack.success": "成功从 \"%s\" 将下标为 %d 的道具更改为 %s",
   "commands.citemgroup.changeIcon.success": "成功将 \"%s\" 的图标从 %s 更改为 %s",
   "commands.citemgroup.renameGroup.success": "成功将道具组 \"%s\" 改名为 \"%s\"",
 
