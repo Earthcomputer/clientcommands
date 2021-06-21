@@ -115,7 +115,7 @@
   "commands.cstopsound.success.sourceless.any": "为自己停止了所有声音",
   "commands.cstopsound.success.sourceless.sound": "为自己停止了声音 '%s'",
   "commands.cstopsound.success.source.any": "为自己停止了所有 '%s' 声音",
-  "commands.cstopsound.success.source.sound": "为自己停止了来自 '%s$2' 的 '%s$1' 声音",
+  "commands.cstopsound.success.source.sound": "为自己停止了来自 '%2$s' 的 '%1$s' 声音",
   
   "commands.ctask.list.noTasks": "当前没有正在执行的任务",
   "commands.ctask.list.success": "%d 个任务正在执行",
