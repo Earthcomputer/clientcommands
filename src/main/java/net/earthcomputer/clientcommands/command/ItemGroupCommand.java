@@ -8,7 +8,6 @@ import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
 import net.earthcomputer.clientcommands.mixin.CreativeInventoryScreenAccessor;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
-import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -268,7 +267,7 @@ public class ItemGroupCommand {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
                 ItemStack icon = ItemStack.fromNbt(group.getCompound("icon"));
-                NbtList items = group.getList("items", NbtType.COMPOUND);
+                NbtList items = group.getList("items", NbtElement.COMPOUND_TYPE);
                 ItemGroup itemGroup = FabricItemGroupBuilder.create(
                         new Identifier("clientcommands", key))
                         .icon(() -> icon)
@@ -288,7 +287,7 @@ public class ItemGroupCommand {
                 ItemStack icon = ItemStack.fromNbt((NbtCompound) newStackDynamic.getValue());
 
                 NbtList updatedListTag = new NbtList();
-                group.getList("items", NbtType.COMPOUND).forEach(tag -> {
+                group.getList("items", NbtElement.COMPOUND_TYPE).forEach(tag -> {
                     Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
                     Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());

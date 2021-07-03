@@ -7,7 +7,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Dynamic;
-import net.fabricmc.fabric.api.util.NbtType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -203,11 +202,11 @@ public class KitCommand {
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Kits");
         if (fileVersion >= currentVersion) {
-            compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtType.COMPOUND)));
+            compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtElement.COMPOUND_TYPE)));
         } else {
             compoundTag.getKeys().forEach(key -> {
                 NbtList updatedListTag = new NbtList();
-                compoundTag.getList(key, NbtType.COMPOUND).forEach(tag -> {
+                compoundTag.getList(key, NbtElement.COMPOUND_TYPE).forEach(tag -> {
                     Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
                     Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());

@@ -29,7 +29,6 @@ public class Relogger {
         }
 
         boolean singleplayer = mc.isInSingleplayer();
-        boolean realms = mc.isConnectedToRealms();
         mc.world.disconnect();
         if (relogging) {
             isRelogging = true;
