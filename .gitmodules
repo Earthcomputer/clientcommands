@@ -1,0 +1,3 @@
+[submodule "clientcommands-scripting"]
+	path = clientcommands-scripting
+	url = ../clientcommands-scripting
