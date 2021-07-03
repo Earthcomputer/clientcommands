@@ -1,20 +1,13 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import org.spongepowered.asm.mixin.Dynamic;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(targets = "net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen")
+@Mixin(CreativeInventoryScreen.class)
 public interface CreativeInventoryScreenAccessor {
-
-    @Accessor("selectedTab")
+    @Accessor
     static void setSelectedTab(int selectedTab) {
-        throw new AssertionError();
-    }
-
-    @SuppressWarnings({"AccessorTarget", "target"})
-    @Dynamic @Accessor(value = "fabric_currentPage", remap = false)
-    static void setFabricCurrentPage(int index) {
         throw new AssertionError();
     }
 }

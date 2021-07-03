@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -25,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -117,6 +119,17 @@ public class ItemGroupCommand {
         return 0;
     }
 
+    private static final Field FABRIC_CURRENT_PAGE_FIELD;
+    static {
+        try {
+            //noinspection JavaReflectionMemberAccess
+            FABRIC_CURRENT_PAGE_FIELD = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
+            FABRIC_CURRENT_PAGE_FIELD.setAccessible(true);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static int removeGroup(ServerCommandSource source, String name) throws CommandSyntaxException {
         if (!groups.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
@@ -126,7 +139,11 @@ public class ItemGroupCommand {
 
         reloadGroups();
         CreativeInventoryScreenAccessor.setSelectedTab(0);
-        CreativeInventoryScreenAccessor.setFabricCurrentPage(0);
+        try {
+            FABRIC_CURRENT_PAGE_FIELD.set(null, 0);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
         saveFile();
         sendFeedback("commands.citemgroup.removeGroup.success", name);
         return 0;
