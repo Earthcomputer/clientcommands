@@ -29,6 +29,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation 'net.earthcomputer.multiconnect:multiconnect-api:1.4'
+	include 'net.earthcomputer.multiconnect:multiconnect-api:1.4'
 
 	if (clientcommandsScriptingExists) {
 		include project(':clientcommands-scripting')
