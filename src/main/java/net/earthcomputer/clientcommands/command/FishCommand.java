@@ -1,11 +1,16 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
+import net.earthcomputer.clientcommands.interfaces.IFishingBobberEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -30,6 +35,8 @@ public class FishCommand {
         addClientSideCommand("cfish");
 
         dispatcher.register(literal("cfish")
+            .then(literal("validate-open-water")
+                .executes(ctx -> validateOpenWater()))
             .then(literal("list-goals")
                 .executes(ctx -> listGoals()))
             .then(literal("add-goal")
@@ -41,6 +48,25 @@ public class FishCommand {
             .then(literal("remove-goal")
                 .then(argument("index", integer(1))
                     .executes(ctx -> removeGoal(getInteger(ctx, "index"))))));
+    }
+
+    private static int validateOpenWater() {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player.fishHook == null) {
+            sendFeedback(new TranslatableText("commands.cfish.validateOpenWater.noFishingBobber").styled(style -> style.withColor(Formatting.RED)));
+            return 0;
+        }
+
+        if (isInOpenWater(player.fishHook)) {
+            sendFeedback(new TranslatableText("commands.cfish.validateOpenWater.valid"));
+        } else {
+            sendFeedback(new TranslatableText("commands.cfish.validateOpenWater.invalid"));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static boolean isInOpenWater(FishingBobberEntity bobber) {
+        return ((IFishingBobberEntity) bobber).callIsOpenOrWaterAround(bobber.getBlockPos());
     }
 
     private static int listGoals() {
