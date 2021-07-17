@@ -143,7 +143,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
             if (reader.canRead() && reader.peek() == '@') {
                 parseAtSelector();
             } else {
-                parsePlayerName();
+                parsePlayerNameOrUuid();
             }
 
             if (boxX != null || boxY != null || boxZ != null) {
@@ -166,7 +166,7 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
             return new ClientEntitySelector(filter, sorter, limit, senderOnly, originX, originY, originZ);
         }
 
-        void parsePlayerName() throws CommandSyntaxException {
+        void parsePlayerNameOrUuid() throws CommandSyntaxException {
             if (reader.canRead()) {
                 int start = reader.getCursor();
                 suggestor = (builder, playerNameSuggestor) -> {
@@ -179,6 +179,15 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
 
             int start = reader.getCursor();
             String playerName = reader.readString();
+            try {
+                UUID uuid = UUID.fromString(playerName);
+                filter = (origin, entity) -> entity.getUuid().equals(uuid);
+                limit = 1;
+                return;
+            } catch (IllegalArgumentException ignore) {
+                // we don't have a uuid, check player names
+            }
+
             if (playerName.isEmpty() || playerName.length() > 16) {
                 reader.setCursor(start);
                 throw EntitySelectorReader.INVALID_ENTITY_EXCEPTION.createWithContext(reader);

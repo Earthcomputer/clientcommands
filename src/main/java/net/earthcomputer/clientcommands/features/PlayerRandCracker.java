@@ -188,7 +188,7 @@ public class PlayerRandCracker {
     }
 
     public static void onXpOrb() {
-        if (MultiConnectAPI.instance().getProtocolVersion() > Protocols.V1_16_4) {
+        if (MultiConnectAPI.instance().getProtocolVersion() >= Protocols.V1_17) {
             // TODO: is there a way to be smarter about this?
             resetCracker("xp");
         }

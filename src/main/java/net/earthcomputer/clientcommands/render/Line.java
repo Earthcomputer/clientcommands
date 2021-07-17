@@ -49,6 +49,8 @@ public class Line extends Shape {
                 ((color >> 8) & 0xFF) / 255.0F,
                 (color & 0xFF) / 255.0F,
                 1.0F
+        ).normal(
+                1, 0, 0
         ).next();
     }
 
