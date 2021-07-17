@@ -42,6 +42,7 @@
 
   "commands.cfindblock.notFound": "No such block found",
   "commands.cfindblock.success.left": "Closest match is at ",
+  "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$.2f blocks away",
 
   "commands.cfinditem.match.left": "%dx %s found at ",
