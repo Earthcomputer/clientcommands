@@ -28,7 +28,11 @@ public class PlayerInfoCommand {
     private static final Map<String, List<String>> cacheByName = new HashMap<>();
     private static final Map<String, List<String>> cacheByUuid = new HashMap<>();
 
+    private static final MinecraftClient client = MinecraftClient.getInstance();
     private static final JsonParser parser = new JsonParser();
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
+
+    private static final int DURATION = 5; // seconds
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cplayerinfo");
@@ -37,7 +41,7 @@ public class PlayerInfoCommand {
         dispatcher.register(literal("cplayerinfo")
                 .then(literal("namehistory")
                         .then(argument("player", string())
-                                .suggests(((context, builder) -> suggestMatching(MinecraftClient.getInstance().world.getPlayers().stream().map(abstractPlayer -> abstractPlayer.getName().getString()), builder)))
+                                .suggests(((context, builder) -> suggestMatching(client.world.getPlayers().stream().map(abstractPlayer -> abstractPlayer.getName().getString()), builder)))
                                 .executes(ctx -> getNameHistory(ctx.getSource(), getString(ctx, "player"))))));
     }
 
@@ -52,43 +56,45 @@ public class PlayerInfoCommand {
             if (cacheByName.containsKey(player)) {
                 sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
             } else {
-                Optional<String> optional = MinecraftClient.getInstance().world.getPlayers().stream()
+                Optional<String> optional = client.world.getPlayers().stream()
                         .filter(abstractPlayer -> abstractPlayer.getName().getString().equals(player))
                         .map(Entity::getUuidAsString)
                         .findFirst();
                 if (optional.isPresent()) {
                     fetchNameHistory(optional.get());
                 } else {
-                    HttpClient client = HttpClient.newHttpClient();
-                    HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/users/profiles/minecraft/" + player))
-                            .timeout(Duration.ofSeconds(5))
-                            .GET()
-                            .build();
-                    client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                            .thenApply(HttpResponse::body)
-                            .thenAccept(response -> {
-                                JsonElement result = parser.parse(response);
-                                if (result instanceof JsonNull) {
-                                    sendError(new TranslatableText("commands.cplayerinfo.ioException"));
-                                } else {
-                                    fetchNameHistory(result.getAsJsonObject().get("id").getAsString());
-                                }
-                            });
+                    getNameHistory(player);
                 }
             }
         }
         return 0;
     }
 
-    private static void fetchNameHistory(String uuid) {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/user/profiles/" + uuid + "/names"))
-                .timeout(Duration.ofSeconds(5))
+    private static void getNameHistory(String player) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/users/profiles/minecraft/" + player))
+                .timeout(Duration.ofSeconds(DURATION))
                 .GET()
                 .build();
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+        httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenAccept(response -> {
+                .thenAccept(response -> client.send(() -> {
+                    JsonElement result = parser.parse(response);
+                    if (result instanceof JsonNull) {
+                        sendError(new TranslatableText("commands.cplayerinfo.ioException"));
+                    } else {
+                        fetchNameHistory(result.getAsJsonObject().get("id").getAsString());
+                    }
+                }));
+    }
+
+    private static void fetchNameHistory(String uuid) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/user/profiles/" + uuid + "/names"))
+                .timeout(Duration.ofSeconds(DURATION))
+                .GET()
+                .build();
+        httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(response -> client.send(() -> {
                     JsonElement result = parser.parse(response);
                     if (result.isJsonArray()) {
                         JsonArray array = result.getAsJsonArray();
@@ -101,6 +107,6 @@ public class PlayerInfoCommand {
                     } else {
                         sendError(new TranslatableText("commands.cplayerinfo.ioException"));
                     }
-                });
+                }));
     }
 }
