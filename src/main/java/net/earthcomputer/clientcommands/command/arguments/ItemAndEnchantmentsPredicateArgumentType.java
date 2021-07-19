@@ -9,7 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.ItemEnchantmentArgumentType;
+import net.minecraft.command.argument.EnchantmentArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -112,15 +112,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         return EXAMPLES;
     }
 
-    public static class ItemAndEnchantmentsPredicate implements Predicate<ItemStack> {
-        public final Item item;
-        public final Predicate<List<EnchantmentLevelEntry>> predicate;
-
-        public ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) {
-            this.item = item;
-            this.predicate = predicate;
-        }
-
+    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) implements Predicate<ItemStack> {
         @Override
         public boolean test(ItemStack stack) {
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
@@ -246,7 +238,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             Identifier identifier = Identifier.fromCommandInput(reader);
             Enchantment enchantment = Registry.ENCHANTMENT.getOrEmpty(identifier).orElseThrow(() -> {
                 reader.setCursor(start);
-                return ItemEnchantmentArgumentType.UNKNOWN_ENCHANTMENT_EXCEPTION.createWithContext(reader, identifier);
+                return EnchantmentArgumentType.UNKNOWN_ENCHANTMENT_EXCEPTION.createWithContext(reader, identifier);
             });
 
             if (!enchantment.isAcceptableItem(stack) && stack.getItem() != Items.BOOK) {

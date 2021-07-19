@@ -59,9 +59,9 @@ public class GhostBlockCommand {
         checkLoaded(world, from);
         checkLoaded(world, to);
 
-        BlockBox range = new BlockBox(from, to);
+        BlockBox range = BlockBox.create(from, to);
         int successCount = 0;
-        for (BlockPos pos : BlockPos.iterate(range.minX, range.minY, range.minZ, range.maxX, range.maxY, range.maxZ)) {
+        for (BlockPos pos : BlockPos.iterate(range.getMinX(), range.getMinY(), range.getMinZ(), range.getMaxX(), range.getMaxY(), range.getMaxZ())) {
             if (world.setBlockState(pos, state, 18)) {
                 successCount++;
             }
@@ -79,7 +79,7 @@ public class GhostBlockCommand {
     private static void checkLoaded(ClientWorld world, BlockPos pos) throws CommandSyntaxException {
         if (!world.isChunkLoaded(pos)) {
             throw UNLOADED_EXCEPTION.create();
-        } else if (!World.method_24794(pos)) {
+        } else if (!MinecraftClient.getInstance().world.isInBuildLimit(pos)) {
             throw OUT_OF_WORLD_EXCEPTION.create();
         }
     }

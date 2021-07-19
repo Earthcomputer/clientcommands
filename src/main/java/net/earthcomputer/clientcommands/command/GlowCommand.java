@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
@@ -21,19 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.entities;
-import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.getEntitySelector;
-import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.getMultibaseInteger;
-import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.multibaseInteger;
-import static net.minecraft.command.argument.BlockPosArgumentType.blockPos;
-import static net.minecraft.command.argument.BlockPosArgumentType.getBlockPos;
-import static net.minecraft.command.argument.ColorArgumentType.color;
-import static net.minecraft.command.argument.ColorArgumentType.getColor;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.*;
+import static net.minecraft.command.argument.BlockPosArgumentType.*;
+import static net.minecraft.command.argument.ColorArgumentType.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class GlowCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cglow.entity.failed"));
@@ -43,7 +36,7 @@ public class GlowCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cglow");
 
-        LiteralCommandNode<ServerCommandSource> cglow = dispatcher.register(literal("cglow"));
+        var cglow = dispatcher.register(literal("cglow"));
         dispatcher.register(literal("cglow")
                 .then(literal("--keep-searching-entities")
                     .redirect(cglow, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
@@ -134,7 +127,14 @@ public class GlowCommand {
                 boundingBoxes.replaceAll((box) -> box.offset(pos1));
             }
         } else {
-            boundingBoxes.add(new Box(pos1, pos2));
+            final int minX, maxX, minZ, maxZ, minY, maxY;
+            minX = Math.min(pos1.getX(), pos2.getX());
+            maxX = Math.max(pos1.getX(), pos2.getX());
+            minZ = Math.min(pos1.getZ(), pos2.getZ());
+            maxZ = Math.max(pos1.getZ(), pos2.getZ());
+            minY = Math.min(pos1.getY(), pos2.getY());
+            maxY = Math.max(pos1.getY(), pos2.getY());
+            boundingBoxes.add(new Box(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1));
         }
 
         for (Box box : boundingBoxes) {

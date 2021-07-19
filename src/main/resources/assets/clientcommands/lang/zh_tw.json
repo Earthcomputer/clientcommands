@@ -61,10 +61,6 @@
 
   "commands.crender.entities.success": "實體渲染規則已被更新",
 
-  "commands.cscript.notFound": "未找到腳本 \"%s\"",
-  "commands.cscript.reload.success": "已重新加載腳本",
-  "commands.cscript.run.success": "成功運行腳本",
-
   "commands.ctask.list.noTasks": "當前沒有正在執行的任務",
   "commands.ctask.list.success": "%d 個任務正在執行",
   "commands.ctask.stop.noMatch": "沒有匹配的任務",

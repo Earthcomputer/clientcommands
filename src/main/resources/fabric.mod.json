@@ -5,7 +5,7 @@
   "description": "Useful client-side commands",
   "version": "${version}",
   "environment": "client",
-  "license": "MIT",
+  "license": "LGPL",
   "icon": "assets/clientcommands/icon.png",
   "contact": {
     "homepage": "https://earthcomputer.net/",

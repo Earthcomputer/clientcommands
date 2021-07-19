@@ -42,6 +42,7 @@
 
   "commands.cfindblock.notFound": "No such block found",
   "commands.cfindblock.success.left": "Closest match is at ",
+  "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$.2f blocks away",
 
   "commands.cfinditem.match.left": "%dx %s found at ",
@@ -79,6 +80,19 @@
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
 
+  "commands.citemgroup.notFound": "Item group \"%s\" not found",
+  "commands.citemgroup.outOfBounds": "Index %d is out of bounds",
+  "commands.citemgroup.saveFile.failed": "Could not save item groups file",
+  "commands.citemgroup.addGroup.success": "Successfully added item group \"%s\"",
+  "commands.citemgroup.addGroup.illegalCharacter": "Item groups can only contain [a-z0-9/._-] characters",
+  "commands.citemgroup.addGroup.alreadyExists": "Item group \"%s\" already exists",
+  "commands.citemgroup.removeGroup.success": "Successfully removed item group \"%s\"",
+  "commands.citemgroup.addStack.success": "Successfully added %s to \"%s\"",
+  "commands.citemgroup.removeStack.success": "Successfully removed stack from \"%s\" at index %d",
+  "commands.citemgroup.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
+  "commands.citemgroup.changeIcon.success": "Successfully changed the icon of \"%s\" from %s to %s",
+  "commands.citemgroup.renameGroup.success": "Successfully renamed item group \"%s\" to \"%s\"",
+
   "commands.ckit.notFound": "Kit \"%s\" not found",
   "commands.ckit.saveFile.failed": "Could not save kits file",
   "commands.ckit.load.success": "Successfully gave kit \"%s\" to self",
@@ -90,15 +104,14 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
+  "commands.cparticle.success": "Displaying particle %s",
+
   "commands.cplaysound.success": "Played sound %s to self",
 
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
-
-  "commands.cscript.notFound": "Script \"%s\" not found",
-  "commands.cscript.reload.success": "Reloaded scripts",
-  "commands.cscript.run.success": "Script ran successfully",
 
   "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
   "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",
@@ -122,6 +135,7 @@
   "commands.client.enable": "Enable",
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.notClient": "Not a client-side command",
+  "commands.client.invalidArgumentException": "Invalid argument '%s'",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",
@@ -167,8 +181,10 @@
   "playerManip.reset.sprint": "Sprinted",
   "playerManip.reset.enterWater": "Entered Water",
   "playerManip.reset.swim": "Swum",
+  "playerManip.reset.amethystChime": "Walked on Amethyst Crystals",
   "playerManip.reset.potion": "Potion Effect Active",
   "playerManip.reset.mending": "Mended Item",
+  "playerManip.reset.xp": "XP Orb Collected",
   "playerManip.reset.respiration": "Respiration Helmet Used",
   "playerManip.reset.dropItem": "Dropped Item",
   "playerManip.reset.anvil": "Anvil Used",

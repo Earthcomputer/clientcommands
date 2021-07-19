@@ -7,7 +7,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.GuiCloseC2SPacket;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.BeaconScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -16,23 +16,25 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(GuiCloseC2SPacket.class)
-public class MixinGuiClosePacket {
+@Mixin(CloseHandledScreenC2SPacket.class)
+public class MixinCloseHandledScreenPacket {
 
     @Inject(method = "<init>(I)V", at = @At("RETURN"))
     public void onCreate(int syncId, CallbackInfo ci) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         assert player != null;
 
-        PlayerInventory playerInv = player.inventory;
-        if (!playerInv.getCursorStack().isEmpty())
-            PlayerRandCracker.onDropItem();
+        PlayerInventory playerInv = player.getInventory();
+        ScreenHandler screenHandler = player.currentScreenHandler;
 
-        ScreenHandler container = player.currentScreenHandler;
-        if (container instanceof IDroppableInventoryContainer) {
+        if (!screenHandler.getCursorStack().isEmpty()) {
+            PlayerRandCracker.onDropItem();
+        }
+
+        if (screenHandler instanceof IDroppableInventoryContainer) {
             int[] itemCounts = playerInv.main.stream().mapToInt(ItemStack::getCount).toArray();
             ItemStack[] itemStacks = playerInv.main.toArray(new ItemStack[0]);
-            Inventory toDrop = ((IDroppableInventoryContainer) container).getDroppableInventory();
+            Inventory toDrop = ((IDroppableInventoryContainer) screenHandler).getDroppableInventory();
             for (int fromSlot = 0; fromSlot < toDrop.size(); fromSlot++) {
                 ItemStack stack = toDrop.getStack(fromSlot);
                 int stackSize = stack.getCount();
@@ -52,8 +54,8 @@ public class MixinGuiClosePacket {
             }
         }
 
-        if (container instanceof BeaconScreenHandler) {
-            Slot paymentSlot = container.getSlot(0);
+        if (screenHandler instanceof BeaconScreenHandler) {
+            Slot paymentSlot = screenHandler.getSlot(0);
             if (paymentSlot.getStack().getCount() > paymentSlot.getMaxItemCount())
                 PlayerRandCracker.onDropItem();
 

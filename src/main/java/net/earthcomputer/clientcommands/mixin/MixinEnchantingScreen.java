@@ -34,11 +34,10 @@ public abstract class MixinEnchantingScreen extends HandledScreen<EnchantmentScr
         EnchantmentCracker.onEnchantedItem();
     }
 
-    @Override
-    protected void init() {
-        super.init();
+    @Inject(method = "init", at = @At("TAIL"))
+    private void onInit(CallbackInfo ci) {
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
-            addButton(new ButtonWidget(width - 150, 0, 150, 20, new TranslatableText("enchCrack.addInfo"), button -> {
+            addDrawableChild(new ButtonWidget(width - 150, 0, 150, 20, new TranslatableText("enchCrack.addInfo"), button -> {
                 EnchantmentCracker.addEnchantmentSeedInfo(MinecraftClient.getInstance().world, getScreenHandler());
             }));
         }

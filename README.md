@@ -39,3 +39,4 @@ https://discord.gg/Jg7Bun7
    so that your changes can be integrated into clientcommands
    - Note: for large contributions, create an issue before doing all that
      work, to ask whether your pull request is likely to be accepted
+1. Note: by default, these steps will install a development environment for clientcommands only, and not its scripting submodule. If you want to work on the scripting submodule, follow the instructions in the [Clientcommands Scripting readme](https://github.com/Earthcomputer/clientcommands-scripting#readme).

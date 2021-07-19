@@ -1,16 +1,16 @@
 package net.earthcomputer.clientcommands.command.arguments;
 
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.command.argument.ItemPredicateArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.tag.Tag;
@@ -46,17 +46,15 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
     public ClientItemPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
         ItemStringReader itemReader = new ItemStringReader(reader, true).consume();
         if (itemReader.getItem() != null) {
-            ItemPredicate predicate = new ItemPredicate(itemReader.getItem(), itemReader.getTag());
+            ItemPredicate predicate = new ItemPredicate(itemReader.getItem(), itemReader.getNbt());
             return ctx -> predicate;
         } else {
             Identifier tagId = itemReader.getId();
             return ctx -> {
-                @SuppressWarnings("ConstantConditions") Tag.Identified<Item> tag = (Tag.Identified<Item>) MinecraftClient.getInstance().getNetworkHandler().getTagManager().getItems().getTag(tagId);
-                if (tag == null) {
-                    throw UNKNOWN_TAG_EXCEPTION.create(tagId.toString());
-                } else {
-                    return new TagPredicate(tag, itemReader.getTag());
-                }
+                ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+                assert networkHandler != null;
+                Tag<Item> tag = networkHandler.getTagManager().getTag(Registry.ITEM_KEY, tagId, id -> UNKNOWN_TAG_EXCEPTION.create(id.toString()));
+                return new TagPredicate(tag, tagId, itemReader.getNbt());
             };
         }
     }
@@ -72,15 +70,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
     }
 
 
-    static class TagPredicate implements ClientItemPredicate {
-        private final Tag.Identified<Item> tag;
-        private final CompoundTag compound;
-
-        public TagPredicate(Tag.Identified<Item> tag, CompoundTag compound) {
-            this.tag = tag;
-            this.compound = compound;
-        }
-
+    record TagPredicate(Tag<Item> tag, Identifier id, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
             return this.tag.contains(stack.getItem()) && NbtHelper.matches(this.compound, stack.getTag(), true);
@@ -88,7 +78,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
 
         @Override
         public String getPrettyString() {
-            String ret = "#" + tag.getId();
+            String ret = "#" + this.id;
             if (compound != null) {
                 ret += compound;
             }
@@ -96,15 +86,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         }
     }
 
-    static class ItemPredicate implements ClientItemPredicate {
-        private final Item item;
-        private final CompoundTag compound;
-
-        public ItemPredicate(Item item, CompoundTag compound) {
-            this.item = item;
-            this.compound = compound;
-        }
-
+    record ItemPredicate(Item item, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
             return stack.getItem() == this.item && NbtHelper.matches(this.compound, stack.getTag(), true);
