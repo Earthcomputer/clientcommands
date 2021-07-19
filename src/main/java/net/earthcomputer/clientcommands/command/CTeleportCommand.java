@@ -20,7 +20,7 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class CTeleportCommand {
 
-    private static final SimpleCommandExceptionType NOT_SPECTATOR_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("command.ctp.notSpectator"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ctp.notSpectator"));
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
@@ -37,10 +37,11 @@ public class CTeleportCommand {
     }
 
     private static int teleport(ServerCommandSource source, UUID uuid) throws CommandSyntaxException {
-        if (client.player.isSpectator()) {
+        if (!client.player.isSpectator()) {
             throw NOT_SPECTATOR_EXCEPTION.create();
         }
         client.getNetworkHandler().sendPacket(new SpectatorTeleportC2SPacket(uuid));
+        sendFeedback(new TranslatableText("commands.ctp.success", uuid.toString()));
         return 0;
     }
 }
