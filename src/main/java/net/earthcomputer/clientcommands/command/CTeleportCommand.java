@@ -12,14 +12,11 @@ import net.minecraft.text.TranslatableText;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.entity;
-import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.getEntity;
-import static net.minecraft.command.CommandSource.suggestMatching;
-import static net.minecraft.command.argument.UuidArgumentType.getUuid;
-import static net.minecraft.command.argument.UuidArgumentType.uuid;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
+import static net.minecraft.command.CommandSource.*;
+import static net.minecraft.command.argument.UuidArgumentType.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class CTeleportCommand {
 
