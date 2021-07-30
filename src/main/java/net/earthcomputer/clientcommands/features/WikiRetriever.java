@@ -182,25 +182,22 @@ public class WikiRetriever {
         try {
             String encodedPage = URLEncoder.encode(pageName, "UTF-8");
             url = new URL(String.format(PAGE_TOC_PARSE, encodedPage));
-            sendFeedback("TOCData url:" + url.toString());
+            // sendFeedback("TOCData url:" + url.toString());
         } catch (UnsupportedEncodingException | MalformedURLException e) {
             return null;
         }
-        sendFeedback("is this how to debug?v9");
+
         ParseTOCResult result;
         try (InputStream in = url.openConnection().getInputStream()) {
-            sendFeedback("is this how to debug?v10");
             result = GSON.fromJson(new InputStreamReader(in), ParseTOCResult.class);
-            sendFeedback("is this how to debug?v11");
         } catch (IOException e) {
-            sendFeedback("is this how to debug?v12");
             return null;
         }
-        sendFeedback("is this how to debug?v13");
+
         if (result.error != null || result.parse.sections.length == 0) {
             return null;
         }
-        sendFeedback("is this how to debug?v14");
+
         return result;
     }
 
@@ -238,16 +235,14 @@ public class WikiRetriever {
         try {
             String encodedPage = URLEncoder.encode(pageName, "UTF-8");
             url = new URL(String.format(PAGE_SECTION_PARSE, encodedPage, sectionIndex));
-            sendFeedback(url.toString());
+            // sendFeedback("Section URL:" + url.toString());
         } catch (UnsupportedEncodingException | MalformedURLException e) {
             return null;
         }
 
         ParseSectionResult result;
         try (InputStream in = url.openConnection().getInputStream()) {
-            sendFeedback("is this how to debug?");
             result = GSON.fromJson(new InputStreamReader(in), ParseSectionResult.class);
-            sendFeedback("is this how to debug? v2");
         } catch (IOException e) {
             return null;
         }
@@ -255,7 +250,6 @@ public class WikiRetriever {
         if (result.error != null || result.parse.text.section == null)
             return null;
         String html = result.parse.text.section;
-        sendFeedback("is this how to debug?v4");
         return decode(html);
     }
 
