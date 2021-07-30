@@ -128,6 +128,7 @@
   "commands.ctemprule.set.success": "TempRule %s has been updated to %s",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
+  "commands.cwiki.viewTOC": "[View Table of Contents]",
 
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "Cancel",

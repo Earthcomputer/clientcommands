@@ -126,5 +126,14 @@ public class ClientCommandManager {
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command))));
     }
+    public static Text getViewWikiTOCTextComponent(TranslatableText translatableText, String pageName) {
+        return getCommandTextComponent(translatableText, String.format("/cwiki %s TOC", pageName));
+    }
+    public static Text getWikiTOCTextComponent(String pageName, String number, String line) {
+        String command = String.format("/cwiki %s %s", pageName, number);
+        return new LiteralText(Formatting.BOLD + number + Formatting.RESET + ". " + line).styled(style -> style
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(command))));
+    }
 
 }

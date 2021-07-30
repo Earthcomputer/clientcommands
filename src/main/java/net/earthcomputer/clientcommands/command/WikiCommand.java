@@ -16,12 +16,25 @@ public class WikiCommand {
         addClientSideCommand("cwiki");
 
         dispatcher.register(literal("cwiki")
-            .then(argument("page", greedyString())
-                .executes(ctx -> displayWikiPage(ctx.getSource(), getString(ctx, "page")))));
+                .then(argument("page", string())
+                        .executes(ctx -> displayWikiContent(ctx.getSource(), getString(ctx, "page"), "summary"))
+                        .then(argument("section", string())
+                                .executes(ctx -> displayWikiContent(ctx.getSource(), getString(ctx, "page"), getString(ctx, "section"))))));
     }
 
-    private static int displayWikiPage(ServerCommandSource source, String page) {
-        String content = WikiRetriever.getWikiSummary(page);
+    private static int displayWikiContent(ServerCommandSource source, String page, String section) {
+
+        String content = null;
+        if (section.equalsIgnoreCase("toc")) {
+            WikiRetriever.displayWikiTOC(page); // TOC = table of contents
+            return 1;
+
+        } else if(section.equalsIgnoreCase("summary")) {
+            content = WikiRetriever.getWikiSummary(page);
+
+        } else {
+            content = WikiRetriever.getWikiSection(page, section);
+        }
 
         if (content == null) {
             sendError(new TranslatableText("commands.cwiki.failed"));
@@ -29,10 +42,10 @@ public class WikiCommand {
         }
 
         content = content.trim();
-        for (String line : content.split("\n")) {
+        for (String line : content.replaceAll("\n{2,}","\n\n").split("\n")) {
             sendFeedback(new LiteralText(line));
         }
-
+        sendFeedback(getViewWikiTOCTextComponent(new TranslatableText("commands.cwiki.viewTOC"), page));
         return content.length();
     }
 
