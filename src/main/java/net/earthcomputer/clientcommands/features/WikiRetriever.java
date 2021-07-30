@@ -6,6 +6,8 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,8 @@ import java.util.regex.Pattern;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 
 public class WikiRetriever {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String WIKI_HOST = "https://minecraft.gamepedia.com/";
     private static final String PAGE_SUMMARY_QUERY = WIKI_HOST + "api.php?action=query&prop=extracts&exintro=true&format=json&titles=%s";
@@ -146,8 +150,10 @@ public class WikiRetriever {
         rawStr = rawStr.replace("&lt;", "<");
         rawStr = rawStr.replace("&gt;", ">");
         rawStr = rawStr.replace("&amp;", "&");
+        rawStr = rawStr.replace("&#32;", " ");
+        rawStr = rawStr.replace("&#160;", " ");
         rawStr = rawStr.replaceAll("&#160;(or|\\+)\n", " $1 ");
-        rawStr = rawStr.replaceAll("\\n(§.)", "$1");
+        rawStr = rawStr.replaceAll("\\n\\s*?(§.)(?=\\n)", "$1");
 
         return rawStr;
     }
@@ -157,6 +163,7 @@ public class WikiRetriever {
         try {
             String encodedPage = URLEncoder.encode(pageName, "UTF-8");
             url = new URL(String.format(PAGE_SUMMARY_QUERY, encodedPage));
+            LOGGER.info("Summary url: " + url.toString());
         } catch (UnsupportedEncodingException | MalformedURLException e) {
             return null;
         }
@@ -168,11 +175,10 @@ public class WikiRetriever {
             return null;
         }
 
-        if (result.query.pages.isEmpty())
-            return null;
+        if (result.query.pages.isEmpty()) { return null; }
         var page = result.query.pages.values().iterator().next();
-        if (page.missing != null || page.extract == null)
-            return null;
+        if (page.missing != null || page.extract == null) { return null; }
+
         String html = page.extract;
         return decode(html);
     }
@@ -182,7 +188,7 @@ public class WikiRetriever {
         try {
             String encodedPage = URLEncoder.encode(pageName, "UTF-8");
             url = new URL(String.format(PAGE_TOC_PARSE, encodedPage));
-            // sendFeedback("TOCData url:" + url.toString());
+            LOGGER.info("TOCData url: " + url.toString());
         } catch (UnsupportedEncodingException | MalformedURLException e) {
             return null;
         }
@@ -219,7 +225,7 @@ public class WikiRetriever {
     }
     public static String getSectionIndex(String pageName, String section) {
         ParseTOCResult TOCData = getTOCData(pageName);
-        if (TOCData == null) return null;
+        if (TOCData == null) { return null; }
         for (ParseTOCResult.Parse.Section currentSection : TOCData.parse.sections) {
             if(currentSection.anchor.equals(section) || currentSection.number.equals(section)) {
                 return currentSection.index;
@@ -235,7 +241,7 @@ public class WikiRetriever {
         try {
             String encodedPage = URLEncoder.encode(pageName, "UTF-8");
             url = new URL(String.format(PAGE_SECTION_PARSE, encodedPage, sectionIndex));
-            // sendFeedback("Section URL:" + url.toString());
+            LOGGER.info("Section URL: " + url.toString());
         } catch (UnsupportedEncodingException | MalformedURLException e) {
             return null;
         }
@@ -247,8 +253,9 @@ public class WikiRetriever {
             return null;
         }
 
-        if (result.error != null || result.parse.text.section == null)
+        if (result.error != null || result.parse.text.section == null) {
             return null;
+        }
         String html = result.parse.text.section;
         return decode(html);
     }
