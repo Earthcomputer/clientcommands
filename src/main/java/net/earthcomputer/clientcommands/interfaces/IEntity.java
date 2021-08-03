@@ -8,4 +8,6 @@ public interface IEntity {
 
     void tickGlowingTickets();
 
+    int callGetPermissionLevel();
+
 }
