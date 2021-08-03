@@ -118,6 +118,8 @@
   "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
   "commands.cparticle.success": "Displaying particle %s",
 
+  "commands.cpermissionlevel.success": "Your permission level is %d",
+
   "commands.cplaysound.success": "Played sound %s to self",
 
   "commands.crelog.failed": "Failed to relog",
