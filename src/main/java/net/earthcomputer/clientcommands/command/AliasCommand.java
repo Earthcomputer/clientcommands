@@ -11,7 +11,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
@@ -33,30 +33,18 @@ public class AliasCommand {
 
     private static final SimpleCommandExceptionType FILE_READ_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.file.readError"));
     private static final SimpleCommandExceptionType FILE_WRITE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.file.writeError"));
+    private static final SimpleCommandExceptionType TOO_FEW_ARGUMENTS_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.tooFewArguments"));
 
     private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.alreadyExists", arg));
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.notFound", arg));
 
     private static HashMap<String, String> aliasMap = new HashMap<>();
-    private static CommandDispatcher<ServerCommandSource> dispatcher;
 
     static {
         try {
-            ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-            assert networkHandler != null;
-            dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
-
             getAliases();
-            if (!aliasMap.isEmpty()) {
-                for(String key: aliasMap.keySet()) {
-                    addClientSideCommand(key);
-                    dispatcher.register(literal(key)
-                            .executes(ctx -> executeAliasCommand(key, null))
-                            .then(argument("arguments", greedyString())
-                                    .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
-                }
-            }
         } catch (Exception e) {
+            e.printStackTrace();
             LOGGER.info("No alias file provided. A new one will be created upon registering an alias.");
         }
     }
@@ -74,18 +62,39 @@ public class AliasCommand {
                 .then(literal("remove")
                         .then(argument("key", string())
                                 .executes(ctx -> removeAlias(getString(ctx, "key"))))));
+
+        for (String key: aliasMap.keySet()) {
+            addClientSideCommand(key);
+            dispatcher.register(literal(key)
+                    .executes(ctx -> executeAliasCommand(key, null))
+                    .then(argument("arguments", greedyString())
+                            .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
+        }
     }
     private static int executeAliasCommand(String aliasKey, String arguments) throws CommandSyntaxException {
 
         String cmd;
-        if(aliasMap.containsKey(aliasKey)) {
+        if (aliasMap.containsKey(aliasKey)) {
             cmd = aliasMap.get(aliasKey);
         } else {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
         }
+        int inlineArgumentCount = (int) Pattern.compile("%[^%]").matcher(cmd).results().count();
+        if (inlineArgumentCount > 0) {
+            String[] argumentArray = arguments.split(" ", inlineArgumentCount+1);
 
-        if(arguments!=null) {
-            cmd = String.format(cmd, arguments.split(" "));
+            String trailingArguments = "";
+            if (argumentArray.length > inlineArgumentCount) {
+                trailingArguments = " " + argumentArray[inlineArgumentCount];
+            }
+            try {
+                cmd = String.format(cmd, (Object[]) argumentArray) + trailingArguments;
+            } catch (Exception e) {
+                LOGGER.error(e);
+                throw TOO_FEW_ARGUMENTS_EXCEPTION.create();
+            }
+        } else {
+            cmd += " " + arguments;
         }
         assert MinecraftClient.getInstance().player != null;
         MinecraftClient.getInstance().player.sendChatMessage(cmd);
@@ -94,10 +103,17 @@ public class AliasCommand {
     }
 
     private static int addAlias(String key, String command) throws CommandSyntaxException {
+        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+        assert networkHandler != null;
+        var dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
 
-        if(aliasMap.containsKey(key)) {
+        if (aliasMap.containsKey(key)) {
             throw ALREADY_EXISTS_EXCEPTION.create(key);
         }
+        if (command.charAt(0) != '/') {
+            command = "/" + command;
+        }
+
         addClientSideCommand(key);
 
         dispatcher.register(literal(key)
@@ -116,15 +132,18 @@ public class AliasCommand {
         } else {
             sendFeedback("commands.calias.listAliases.success", aliasMap.size());
 
-            for(String key: aliasMap.keySet()) {
+            for (String key: aliasMap.keySet()) {
                 sendFeedback(Formatting.BOLD + key + Formatting.RESET+ ": "+ aliasMap.get(key).replace("%","%%"));
             }
         }
         return 0;
     }
     private static int removeAlias(String key) throws CommandSyntaxException {
+        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+        assert networkHandler != null;
+        var dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
 
-        if(aliasMap.containsKey(key)) {
+        if (aliasMap.containsKey(key)) {
             BrigadierRemover.of(dispatcher).get(key).remove();
             aliasMap.remove(key);
         } else {
@@ -141,7 +160,7 @@ public class AliasCommand {
         LOGGER.info("Alias config path:" + aliasPath.toString());
 
         Gson gson = new Gson();
-        try (FileReader fileReader = new FileReader(String.valueOf(aliasPath))){
+        try (FileReader fileReader = new FileReader(String.valueOf(aliasPath))) {
             aliasMap = gson.fromJson(new JsonReader(fileReader), HashMap.class);
         } catch (Exception e) {
             throw FILE_READ_EXCEPTION.create();
