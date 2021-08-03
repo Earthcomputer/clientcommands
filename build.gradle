@@ -1,5 +1,3 @@
-import net.fabricmc.loom.task.RemapJarTask
-
 plugins {
 	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
@@ -16,23 +14,11 @@ minecraft {
 	accessWidener 'src/main/resources/clientcommands.aw'
 }
 
-// TODO: better solution
-def clientcommandsScriptingExists = file('../clientcommands-scripting/build/libs').exists()
-if (clientcommandsScriptingExists) {
-	clientcommandsScriptingExists = Arrays.asList(file('../clientcommands-scripting/build/libs').list()).stream().anyMatch() {
-		it.endsWith("${project.scripting_version}.jar")
-	}
-}
-
-configurations.include {
-	// Check for updates every build
-	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
-repositories {
-	if (clientcommandsScriptingExists) {
-		flatDir {
-			dirs '../clientcommands-scripting/build/libs'
+def clientcommandsScriptingExists = findProject(':clientcommands-scripting') != null
+subprojects {
+	afterEvaluate {
+		dependencies {
+			modImplementation project(':')
 		}
 	}
 }
@@ -42,14 +28,11 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
 	modImplementation 'net.earthcomputer.multiconnect:multiconnect-api:1.4'
 	include 'net.earthcomputer.multiconnect:multiconnect-api:1.4'
 
 	if (clientcommandsScriptingExists) {
-		include("net.earthcomputer.clientcommands:clientcommands-scripting:${project.scripting_version}") {
-			changing = true
-		}
+		include project(':clientcommands-scripting')
 	}
 }
 
@@ -79,19 +62,6 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 jar {
 	from "LICENSE"
-}
-
-remapJar {
-	inputs.property 'scriptingExists', clientcommandsScriptingExists
-	if (clientcommandsScriptingExists) {
-		inputs.dir '../clientcommands-scripting/build/libs'
-	}
-}
-
-task remapSlimJar(type: RemapJarTask, dependsOn: jar) {
-	input = jar.archiveFile
-	classifier = 'slim'
-	addNestedDependencies = false
 }
 
 publishing {
