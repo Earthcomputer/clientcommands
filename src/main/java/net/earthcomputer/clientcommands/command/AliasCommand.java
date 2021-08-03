@@ -6,6 +6,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.tree.CommandNode;
 import net.earthcomputer.clientcommands.features.BrigadierRemover;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -35,7 +36,8 @@ public class AliasCommand {
     private static final SimpleCommandExceptionType FILE_WRITE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.file.writeError"));
     private static final SimpleCommandExceptionType TOO_FEW_ARGUMENTS_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.tooFewArguments"));
 
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.alreadyExists", arg));
+    private static final DynamicCommandExceptionType ALIAS_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.aliasAlreadyExists", arg));
+    private static final DynamicCommandExceptionType COMMAND_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.commandAlreadyExists", arg));
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.notFound", arg));
 
     private static HashMap<String, String> aliasMap = new HashMap<>();
@@ -44,8 +46,7 @@ public class AliasCommand {
         try {
             getAliases();
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.info("No alias file provided. A new one will be created upon registering an alias.");
+            LOGGER.error(String.format("No alias file provided. A new one will be created upon registering an alias. Exception: %s", e));
         }
     }
 
@@ -64,11 +65,15 @@ public class AliasCommand {
                                 .executes(ctx -> removeAlias(getString(ctx, "key"))))));
 
         for (String key: aliasMap.keySet()) {
-            addClientSideCommand(key);
-            dispatcher.register(literal(key)
-                    .executes(ctx -> executeAliasCommand(key, null))
-                    .then(argument("arguments", greedyString())
-                            .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
+            if (dispatcher.getRoot().getChildren().stream().map(CommandNode::getName).noneMatch(literal -> literal.equals(key))) {
+                addClientSideCommand(key);
+                dispatcher.register(literal(key)
+                        .executes(ctx -> executeAliasCommand(key, null))
+                        .then(argument("arguments", greedyString())
+                                .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
+            } else {
+                LOGGER.error(String.format("Attempted to register alias /%s, but that command already exists", key));
+            }
         }
     }
     private static int executeAliasCommand(String aliasKey, String arguments) throws CommandSyntaxException {
@@ -81,7 +86,7 @@ public class AliasCommand {
         }
         int inlineArgumentCount = (int) Pattern.compile("%[^%]").matcher(cmd).results().count();
         if (inlineArgumentCount > 0) {
-            String[] argumentArray = arguments.split(" ", inlineArgumentCount+1);
+            String[] argumentArray = arguments.split(" ", inlineArgumentCount + 1);
 
             String trailingArguments = "";
             if (argumentArray.length > inlineArgumentCount) {
@@ -93,7 +98,7 @@ public class AliasCommand {
                 LOGGER.error(e);
                 throw TOO_FEW_ARGUMENTS_EXCEPTION.create();
             }
-        } else {
+        } else if (arguments != null){
             cmd += " " + arguments;
         }
         assert MinecraftClient.getInstance().player != null;
@@ -108,7 +113,10 @@ public class AliasCommand {
         var dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
 
         if (aliasMap.containsKey(key)) {
-            throw ALREADY_EXISTS_EXCEPTION.create(key);
+            throw ALIAS_EXISTS_EXCEPTION.create(key);
+        }
+        if (dispatcher.getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
+            throw COMMAND_EXISTS_EXCEPTION.create(key);
         }
         if (command.charAt(0) != '/') {
             command = "/" + command;
