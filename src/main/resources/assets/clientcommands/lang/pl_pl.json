@@ -42,6 +42,7 @@
 
   "commands.cfindblock.notFound": "Nie znaleziono takiego bloku",
   "commands.cfindblock.success.left": "Najbliższe trafienie jest na ",
+  "commands.cfindblock.success.glow": "[Podświetl]",
   "commands.cfindblock.success.right": ", %1$.2f bloków dalej",
 
   "commands.cfinditem.match.left": "%dx %s znaleziono na ",
@@ -105,6 +106,8 @@
 
   "commands.cparticle.unsuitableParticleOption": "Nie można wyświetlić cząsteczki ponieważ opcje cząsteczek są ustawione na \"minimalne\"",
   "commands.cparticle.success": "Pokazuję cząsteczkę %s",
+
+  "commands.cpermissionlevel.success": "Twój poziom uprawnień to %d",
 
   "commands.cplaysound.success": "Odtworzono dźwięk %s",
 
