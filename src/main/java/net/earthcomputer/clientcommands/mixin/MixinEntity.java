@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tag.BlockTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -19,7 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Mixin(Entity.class)
-public class MixinEntity implements IEntity {
+public abstract class MixinEntity implements IEntity {
 
     @Unique
     private final List<EntityGlowingTicket> glowingTickets = new ArrayList<>(0);
@@ -87,4 +88,8 @@ public class MixinEntity implements IEntity {
         //noinspection ConstantConditions
         return (Object) this instanceof ClientPlayerEntity;
     }
+
+    @Override
+    @Invoker
+    public abstract int callGetPermissionLevel();
 }
