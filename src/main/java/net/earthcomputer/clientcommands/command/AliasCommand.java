@@ -46,7 +46,7 @@ public class AliasCommand {
         try {
             getAliases();
         } catch (Exception e) {
-            LOGGER.error(String.format("No alias file provided. A new one will be created upon registering an alias. Exception: %s", e));
+            LOGGER.error("No alias file provided. A new one will be created upon registering an alias.", e);
         }
     }
 
@@ -72,7 +72,7 @@ public class AliasCommand {
                         .then(argument("arguments", greedyString())
                                 .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
             } else {
-                LOGGER.error(String.format("Attempted to register alias /%s, but that command already exists", key));
+                LOGGER.error("Attempted to register alias /{}, but that command already exists", key);
             }
         }
     }
