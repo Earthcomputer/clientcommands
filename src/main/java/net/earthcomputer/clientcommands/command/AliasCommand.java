@@ -27,7 +27,7 @@ import static net.minecraft.server.command.CommandManager.*;
 
 public class AliasCommand {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger("clientcommands");
 
     private static final Path aliasPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands").resolve("alias_list.json");
 
@@ -38,10 +38,24 @@ public class AliasCommand {
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.notFound", arg));
 
     private static HashMap<String, String> aliasMap = new HashMap<>();
+    private static CommandDispatcher<ServerCommandSource> dispatcher;
 
     static {
         try {
+            ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+            assert networkHandler != null;
+            dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
+
             getAliases();
+            if (!aliasMap.isEmpty()) {
+                for(String key: aliasMap.keySet()) {
+                    addClientSideCommand(key);
+                    dispatcher.register(literal(key)
+                            .executes(ctx -> executeAliasCommand(key, null))
+                            .then(argument("arguments", greedyString())
+                                    .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
+                }
+            }
         } catch (Exception e) {
             LOGGER.info("No alias file provided. A new one will be created upon registering an alias.");
         }
@@ -51,32 +65,20 @@ public class AliasCommand {
         addClientSideCommand("calias");
 
         dispatcher.register(literal("calias")
-            .then(literal("add")
-                    .then(argument("key", string())
-                            .then(argument("command", greedyString())
-                                    .executes(ctx -> addAlias(getString(ctx, "key"), getString(ctx, "command"))))))
-            .then(literal("list")
-                    .executes(ctx -> listAliases()))
-            .then(literal("remove")
-                    .then(argument("key", string())
-                            .executes(ctx -> removeAlias(getString(ctx, "key"))))));
-
-        if (aliasMap != null && !aliasMap.isEmpty()) {
-            for(String key: aliasMap.keySet()) {
-                addClientSideCommand(key);
-                dispatcher.register(literal(key)
-                        .executes(ctx -> executeAliasCommand(key, null))
-                        .then(argument("arguments", greedyString())
-                                .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
-            }
-        }
-
+                .then(literal("add")
+                        .then(argument("key", string())
+                                .then(argument("command", greedyString())
+                                        .executes(ctx -> addAlias(getString(ctx, "key"), getString(ctx, "command"))))))
+                .then(literal("list")
+                        .executes(ctx -> listAliases()))
+                .then(literal("remove")
+                        .then(argument("key", string())
+                                .executes(ctx -> removeAlias(getString(ctx, "key"))))));
     }
     private static int executeAliasCommand(String aliasKey, String arguments) throws CommandSyntaxException {
 
-        // TODO: add support for optional greedy text arguments(?)
         String cmd;
-        if(aliasMap != null && aliasMap.containsKey(aliasKey)) {
+        if(aliasMap.containsKey(aliasKey)) {
             cmd = aliasMap.get(aliasKey);
         } else {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
@@ -92,11 +94,7 @@ public class AliasCommand {
     }
 
     private static int addAlias(String key, String command) throws CommandSyntaxException {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        assert networkHandler != null;
-        var dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
 
-        assert aliasMap != null;
         if(aliasMap.containsKey(key)) {
             throw ALREADY_EXISTS_EXCEPTION.create(key);
         }
@@ -108,7 +106,8 @@ public class AliasCommand {
                         .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
         aliasMap.put(key, command);
 
-        saveAliases(new TranslatableText("commands.calias.addAlias.success", key));
+        saveAliases();
+        sendFeedback(new TranslatableText("commands.calias.addAlias.success", key));
         return 0;
     }
     private static int listAliases() {
@@ -124,18 +123,16 @@ public class AliasCommand {
         return 0;
     }
     private static int removeAlias(String key) throws CommandSyntaxException {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        assert networkHandler != null;
-        var dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
 
-        if(aliasMap != null && aliasMap.containsKey(key)) {
+        if(aliasMap.containsKey(key)) {
             BrigadierRemover.of(dispatcher).get(key).remove();
             aliasMap.remove(key);
         } else {
             throw NOT_FOUND_EXCEPTION.create(key);
         }
 
-        saveAliases(new TranslatableText("commands.calias.removeAlias.success", key));
+        saveAliases();
+        sendFeedback(new TranslatableText("commands.calias.removeAlias.success", key));
         return 0;
     }
 
@@ -151,12 +148,10 @@ public class AliasCommand {
         }
     }
 
-    private static void saveAliases(TranslatableText successMessage) throws CommandSyntaxException {
+    private static void saveAliases() throws CommandSyntaxException {
         try (Writer writer = new FileWriter(String.valueOf(aliasPath))) {
             Gson gson = new Gson();
             gson.toJson(aliasMap, writer);
-
-            sendFeedback(successMessage);
         } catch (Exception e) {
             throw FILE_WRITE_EXCEPTION.create();
         }
