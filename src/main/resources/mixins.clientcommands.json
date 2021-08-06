@@ -62,7 +62,8 @@
     "ProjectileEntityAccessor",
     "ScreenHandlerAccessor",
     "MixinItemGroup",
-    "CreativeInventoryScreenAccessor"
+    "CreativeInventoryScreenAccessor",
+    "CommandSuggestorAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
