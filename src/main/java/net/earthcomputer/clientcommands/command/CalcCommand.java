@@ -35,7 +35,7 @@ public class CalcCommand {
         if (getFlag(source, FLAG_PARSE)) {
             Text parsedTree;
             try {
-                parsedTree = expression.getParsedTree();
+                parsedTree = expression.getParsedTree(0);
             } catch (StackOverflowError e) {
                 throw TOO_DEEPLY_NESTED_EXCEPTION.create();
             }
