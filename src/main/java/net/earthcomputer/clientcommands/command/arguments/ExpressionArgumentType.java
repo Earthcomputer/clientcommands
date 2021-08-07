@@ -283,7 +283,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         public abstract Text getParsedTree(int depth) throws StackOverflowError;
 
         protected static Text getDepthStyled(int depth, MutableText text) {
-            List<Style> formattings = CommandSuggestorAccessor.getHIGHLIGHT_FORMATTINGS();
+            List<Style> formattings = CommandSuggestorAccessor.getHighlightFormattings();
             return text.setStyle(formattings.get(depth % formattings.size()));
         }
     }
