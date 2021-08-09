@@ -169,7 +169,7 @@ public class AliasCommand {
 
         Gson gson = new Gson();
         try (FileReader fileReader = new FileReader(String.valueOf(aliasPath))) {
-            aliasMap = gson.fromJson(new JsonReader(fileReader), HashMap.class);
+            aliasMap = gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
         } catch (Exception e) {
             throw FILE_READ_EXCEPTION.create();
         }
