@@ -118,7 +118,7 @@ public class AliasCommand {
         if (dispatcher.getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
             throw COMMAND_EXISTS_EXCEPTION.create(key);
         }
-        if (command.charAt(0) != '/') {
+        if (!command.startsWith("/")) {
             command = "/" + command;
         }
 
