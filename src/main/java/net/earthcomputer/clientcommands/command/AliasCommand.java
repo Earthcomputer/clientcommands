@@ -82,7 +82,7 @@ public class AliasCommand {
         if (cmd == null) {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
         }
-        int inlineArgumentCount = (int) Pattern.compile("%[^%]").matcher(cmd).results().count();
+        int inlineArgumentCount = (int) Pattern.compile("(?<!%)%(?:%%)*(?!%)").matcher(cmd).results().count();
         if (inlineArgumentCount > 0) {
             String[] argumentArray = arguments.split(" ", inlineArgumentCount + 1);
 
