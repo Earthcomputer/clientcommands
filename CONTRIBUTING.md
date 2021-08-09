@@ -60,6 +60,6 @@ You may see old code that doesn't adhere to these guidelines, but all new code m
 ### Miscellaneous
 * Any message the player may receive should be translated
     * Except for debugging (log messages, debug HUD)
-* Only use up to Java 8 in your code
+* Only use up to Java 16 in your code
 * All files should have a newline at the end of the file
 * Do not use AWT at all

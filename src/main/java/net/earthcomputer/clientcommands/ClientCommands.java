@@ -54,6 +54,8 @@ public class ClientCommands implements ClientModInitializer {
         KitCommand.register(dispatcher);
         ItemGroupCommand.register(dispatcher);
         CParticleCommand.register(dispatcher);
+        PermissionLevelCommand.register(dispatcher);
+        CTimeCommand.register(dispatcher);
         CTeleportCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
