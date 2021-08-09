@@ -78,10 +78,8 @@ public class AliasCommand {
     }
     private static int executeAliasCommand(String aliasKey, String arguments) throws CommandSyntaxException {
 
-        String cmd;
-        if (aliasMap.containsKey(aliasKey)) {
-            cmd = aliasMap.get(aliasKey);
-        } else {
+        String cmd = aliasMap.get(aliasKey);
+        if (cmd == null) {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
         }
         int inlineArgumentCount = (int) Pattern.compile("%[^%]").matcher(cmd).results().count();
