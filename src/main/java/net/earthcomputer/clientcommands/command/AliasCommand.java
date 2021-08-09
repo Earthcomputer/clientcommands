@@ -40,15 +40,7 @@ public class AliasCommand {
     private static final DynamicCommandExceptionType COMMAND_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.commandAlreadyExists", arg));
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.notFound", arg));
 
-    private static HashMap<String, String> aliasMap = new HashMap<>();
-
-    static {
-        try {
-            loadAliases();
-        } catch (Exception e) {
-            LOGGER.error("No alias file provided. A new one will be created upon registering an alias.", e);
-        }
-    }
+    private static final HashMap<String, String> aliasMap = getAliases();
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("calias");
@@ -158,12 +150,13 @@ public class AliasCommand {
         return 0;
     }
 
-    private static void loadAliases() {
+    private static HashMap<String, String> getAliases() {
         Gson gson = new Gson();
         try (FileReader fileReader = new FileReader(String.valueOf(ALIAS_PATH))) {
-            aliasMap = gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
+            return gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
         } catch (IOException e) {
-            LOGGER.error(e);
+            LOGGER.error("No alias file provided. A new one will be created upon registering an alias.", e);
+            return new HashMap<>();
         }
     }
 
