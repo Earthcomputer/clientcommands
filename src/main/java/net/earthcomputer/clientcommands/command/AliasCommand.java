@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
@@ -30,11 +32,9 @@ public class AliasCommand {
 
     private static final Logger LOGGER = LogManager.getLogger("clientcommands");
 
-    private static final Path aliasPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands").resolve("alias_list.json");
+    private static final Path ALIAS_PATH = FabricLoader.getInstance().getConfigDir().resolve("clientcommands").resolve("alias_list.json");
 
-    private static final SimpleCommandExceptionType FILE_READ_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.file.readError"));
-    private static final SimpleCommandExceptionType FILE_WRITE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.file.writeError"));
-    private static final SimpleCommandExceptionType TOO_FEW_ARGUMENTS_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.tooFewArguments"));
+    private static final SimpleCommandExceptionType ILLEGAL_FORMAT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.calias.illegalFormatException"));
 
     private static final DynamicCommandExceptionType ALIAS_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.aliasAlreadyExists", arg));
     private static final DynamicCommandExceptionType COMMAND_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.commandAlreadyExists", arg));
@@ -44,7 +44,7 @@ public class AliasCommand {
 
     static {
         try {
-            getAliases();
+            loadAliases();
         } catch (Exception e) {
             LOGGER.error("No alias file provided. A new one will be created upon registering an alias.", e);
         }
@@ -77,7 +77,6 @@ public class AliasCommand {
         }
     }
     private static int executeAliasCommand(String aliasKey, String arguments) throws CommandSyntaxException {
-
         String cmd = aliasMap.get(aliasKey);
         if (cmd == null) {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
@@ -92,9 +91,8 @@ public class AliasCommand {
             }
             try {
                 cmd = String.format(cmd, (Object[]) argumentArray) + trailingArguments;
-            } catch (Exception e) {
-                LOGGER.error(e);
-                throw TOO_FEW_ARGUMENTS_EXCEPTION.create();
+            } catch (IllegalFormatException e) {
+                throw ILLEGAL_FORMAT_EXCEPTION.create();
             }
         } else if (arguments != null){
             cmd += " " + arguments;
@@ -137,7 +135,6 @@ public class AliasCommand {
             sendFeedback(new TranslatableText("commands.calias.listAliases.noAliasesRegistered"));
         } else {
             sendFeedback("commands.calias.listAliases.success", aliasMap.size());
-
             for (String key: aliasMap.keySet()) {
                 sendFeedback(Formatting.BOLD + key + Formatting.RESET+ ": "+ aliasMap.get(key).replace("%","%%"));
             }
@@ -161,24 +158,21 @@ public class AliasCommand {
         return 0;
     }
 
-    private static void getAliases() throws CommandSyntaxException {
-
-        LOGGER.info("Alias config path:" + aliasPath.toString());
-
+    private static void loadAliases() {
         Gson gson = new Gson();
-        try (FileReader fileReader = new FileReader(String.valueOf(aliasPath))) {
+        try (FileReader fileReader = new FileReader(String.valueOf(ALIAS_PATH))) {
             aliasMap = gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
-        } catch (Exception e) {
-            throw FILE_READ_EXCEPTION.create();
+        } catch (IOException e) {
+            LOGGER.error(e);
         }
     }
 
-    private static void saveAliases() throws CommandSyntaxException {
-        try (Writer writer = new FileWriter(String.valueOf(aliasPath))) {
+    private static void saveAliases() {
+        try (Writer writer = new FileWriter(String.valueOf(ALIAS_PATH))) {
             Gson gson = new Gson();
             gson.toJson(aliasMap, writer);
-        } catch (Exception e) {
-            throw FILE_WRITE_EXCEPTION.create();
+        } catch (IOException e) {
+            LOGGER.error(e);
         }
     }
 }

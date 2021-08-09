@@ -1,6 +1,6 @@
 {
   "commands.calias.notFound": "Alias \"%s\" not found",
-  "commands.calias.tooFewArguments": "Too few arguments supplied",
+  "commands.calias.illegalFormatException": "The format string was either malformed or too few arguments were supplied",
   "commands.calias.file.readError": "Failed to read alias file",
   "commands.calias.file.writeError": "Failed to write to alias file",
   "commands.calias.addAlias.aliasAlreadyExists": "Alias \"%s\" already exists",
