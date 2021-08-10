@@ -48,8 +48,9 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/AbstractClientPlayerEntity;tick()V"))
     private void onTick(CallbackInfo ci) {
-        if (Enchantments.MENDING.getEquipment(this).values().stream().anyMatch(this::couldMendingRepair)) {
-            if (!world.getEntitiesByClass(ExperienceOrbEntity.class, getBoundingBox(), null).isEmpty()) {
+        if (!world.getEntitiesByClass(ExperienceOrbEntity.class, getBoundingBox(), entity -> true).isEmpty()) {
+            PlayerRandCracker.onXpOrb();
+            if (Enchantments.MENDING.getEquipment(this).values().stream().anyMatch(this::couldMendingRepair)) {
                 PlayerRandCracker.onMending();
             }
         }

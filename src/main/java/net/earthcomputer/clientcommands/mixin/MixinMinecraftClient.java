@@ -68,7 +68,7 @@ public abstract class MixinMinecraftClient {
     public void onDisconnect(Screen screen, CallbackInfo ci) {
         ServerBrandManager.onDisconnect();
         if (Relogger.isRelogging) {
-            List<Pair<String, Object>> oldRules = TempRules.getRules().stream().map(rule -> Pair.of(rule, TempRules.get(rule))).collect(Collectors.toList());
+            var oldRules = TempRules.getRules().stream().map(rule -> Pair.of(rule, TempRules.get(rule))).collect(Collectors.toList());
             Relogger.relogSuccessTasks.add(() -> oldRules.forEach(rule -> TempRules.set(rule.getLeft(), rule.getRight())));
         }
         for (String rule : TempRules.getRules())

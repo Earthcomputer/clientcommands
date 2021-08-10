@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
@@ -22,7 +21,7 @@ public class CEnchantCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cenchant");
 
-        LiteralCommandNode<ServerCommandSource> cenchant = dispatcher.register(literal("cenchant"));
+        var cenchant = dispatcher.register(literal("cenchant"));
         dispatcher.register(literal("cenchant")
                 .then(literal("--simulate")
                         .redirect(cenchant, ctx -> withFlags(ctx.getSource(), FLAG_SIMULATE, true)))
@@ -50,9 +49,9 @@ public class CEnchantCommand {
 
         boolean simulate = getFlag(source, FLAG_SIMULATE);
 
-        EnchantmentCracker.ManipulateResult result = EnchantmentCracker.manipulateEnchantments(
-                itemAndEnchantmentsPredicate.item,
-                itemAndEnchantmentsPredicate.predicate,
+        var result = EnchantmentCracker.manipulateEnchantments(
+                itemAndEnchantmentsPredicate.item(),
+                itemAndEnchantmentsPredicate.predicate(),
                 simulate
         );
         if (result == null) {
@@ -61,15 +60,15 @@ public class CEnchantCommand {
         } else {
 
             if (simulate) {
-                if (result.getItemThrows() < 0) {
+                if (result.itemThrows() < 0) {
                     sendFeedback("enchCrack.insn.itemThrows.noDummy");
                 } else {
-                    sendFeedback(new TranslatableText("enchCrack.insn.itemThrows", result.getItemThrows(), (float)result.getItemThrows() / 20f));
+                    sendFeedback(new TranslatableText("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / 20f));
                 }
-                sendFeedback(new TranslatableText("enchCrack.insn.bookshelves", result.getBookshelves()));
-                sendFeedback(new TranslatableText("enchCrack.insn.slot", result.getSlot() + 1));
+                sendFeedback(new TranslatableText("enchCrack.insn.bookshelves", result.bookshelves()));
+                sendFeedback(new TranslatableText("enchCrack.insn.slot", result.slot() + 1));
                 sendFeedback("enchCrack.insn.enchantments");
-                for (EnchantmentLevelEntry ench : result.getEnchantments()) {
+                for (EnchantmentLevelEntry ench : result.enchantments()) {
                     sendFeedback(new LiteralText("- ").append(ench.enchantment.getName(ench.level)));
                 }
                 return 0;

@@ -47,6 +47,7 @@
 
   "commands.cfindblock.notFound": "No such block found",
   "commands.cfindblock.success.left": "Closest match is at ",
+  "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$.2f blocks away",
 
   "commands.cfinditem.match.left": "%dx %s found at ",
@@ -110,6 +111,8 @@
 
   "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
   "commands.cparticle.success": "Displaying particle %s",
+
+  "commands.cpermissionlevel.success": "Your permission level is %d",
 
   "commands.cplaysound.success": "Played sound %s to self",
 
@@ -186,8 +189,10 @@
   "playerManip.reset.sprint": "Sprinted",
   "playerManip.reset.enterWater": "Entered Water",
   "playerManip.reset.swim": "Swum",
+  "playerManip.reset.amethystChime": "Walked on Amethyst Crystals",
   "playerManip.reset.potion": "Potion Effect Active",
   "playerManip.reset.mending": "Mended Item",
+  "playerManip.reset.xp": "XP Orb Collected",
   "playerManip.reset.respiration": "Respiration Helmet Used",
   "playerManip.reset.dropItem": "Dropped Item",
   "playerManip.reset.anvil": "Anvil Used",

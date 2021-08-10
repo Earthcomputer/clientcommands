@@ -17,9 +17,9 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.Tag;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -50,17 +50,13 @@ public class ClientBlockPredicateArgumentType extends BlockPredicateArgumentType
         BlockArgumentParser blockParser = (new BlockArgumentParser(stringReader, allowTags)).parse(allowNbt);
         BlockPredicate predicate;
         if (blockParser.getBlockState() != null) {
-            BlockPredicateArgumentType.StatePredicate statePredicate = new BlockPredicateArgumentType.StatePredicate(blockParser.getBlockState(), blockParser.getBlockProperties().keySet(), blockParser.getNbtData());
+            var statePredicate = new BlockPredicateArgumentType.StatePredicate(blockParser.getBlockState(), blockParser.getBlockProperties().keySet(), blockParser.getNbtData());
             predicate = tagManager -> statePredicate;
         } else {
             Identifier tagId = blockParser.getTagId();
             predicate = tagManager -> {
-                Tag<Block> tag = tagManager.getBlocks().getTag(tagId);
-                if (tag == null) {
-                    throw UNKNOWN_TAG_EXCEPTION.create(String.valueOf(tagId));
-                } else {
-                    return new BlockPredicateArgumentType.TagPredicate(tag, blockParser.getProperties(), blockParser.getNbtData());
-                }
+                Tag<Block> tag = tagManager.getTag(Registry.BLOCK_KEY, tagId, id -> UNKNOWN_TAG_EXCEPTION.create(id.toString()));
+                return new BlockPredicateArgumentType.TagPredicate(tag, blockParser.getProperties(), blockParser.getNbtData());
             };
         }
 
@@ -68,7 +64,7 @@ public class ClientBlockPredicateArgumentType extends BlockPredicateArgumentType
             // optimization: if there is no NBT data, we can cache the blockstate results
             return tagManager -> {
                 Predicate<CachedBlockPosition> oldPredicate = predicate.create(tagManager);
-                Map<BlockState, Boolean> cache = new HashMap<>();
+                var cache = new HashMap<BlockState, Boolean>();
                 return pos -> cache.computeIfAbsent(pos.getBlockState(), state -> oldPredicate.test(pos));
             };
         }

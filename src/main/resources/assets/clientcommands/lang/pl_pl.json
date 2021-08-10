@@ -4,9 +4,21 @@
 
   "commands.ccalc.expected": "Spodziewane %s",
   "commands.ccalc.invalidArgumentCount": "Funkcja \"%s\" nie może mieć %d argumentów",
+  "commands.ccalc.parse": "Przeanalizowane wyrażenie: %s",
+  "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
+  "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
+  "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
+  "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
+  "commands.ccalc.parse.constant": "(stała '%s')",
+  "commands.ccalc.parse.function": "(funkcja '%s' z argumentami: %s)",
+  "commands.ccalc.parse.literal": "(dosłowna: %s)",
+  "commands.ccalc.parse.negate": "(zanegowane: %s)",
+  "commands.ccalc.tooDeeplyNested": "Wyrażenie jest zbyt głęboko zagnieżdżone",
 
   "commands.ccalcstack.success": "%d %s to %d staki i %d dodatkowe",
-  "commands.ccalcstack.success.empty": "%d przedmiotow to %d staki i %d dodatkowe",
+  "commands.ccalcstack.success.empty": "%d przedmiotów to %d staki i %d dodatkowe",
   "commands.ccalcstack.success.empty.exact": "%d przedmiotów to dokładnie %d staki",
   "commands.ccalcstack.success.exact": "%d %s to dokładnie %d staki",
 
@@ -40,7 +52,7 @@
 
   "commands.cfish.addGoal.success": "Ustawiono cel %s",
   "commands.cfish.correctLoot": "Otrzymano prawidłowy łup z dokładnością do %dms",
-  "commands.cfish.error.crackFailed": "Nie udało się złamac RNG spławika, czy serwer jest zmodowany?",
+  "commands.cfish.error.crackFailed": "Nie udało się złamać RNG spławika, czy serwer jest zmodowany?",
   "commands.cfish.error.failed": "Nieprawidłowa konfiguracja spławika",
   "commands.cfish.error.outOfWater": "Spławik jest poza wodą, manipulacja się nie uda",
   "commands.cfish.listGoals.noGoals": "Nie mam żadnego celu",
@@ -48,6 +60,8 @@
   "commands.cfish.needFishingManipulation": "Manipulacja łowienia jest wyłączona.",
   "commands.cfish.removeGoal.success": "Pomyślnie usunięto cel %s",
   "commands.cfish.wrongLoot": "Nie mogłem otrzymać łupu z dokładnością do %dms, mogłem wyprzedzić %s ticków w przód",
+
+  "commands.cfov.success": "Ustawiono pole widzenia na %f",
 
   "commands.cgamma.success": "Ustawiono gamma na %f",
 
@@ -60,15 +74,45 @@
   "commands.cglow.entity.keepSearching.success": "Podświetlono obiekty.",
   "commands.cglow.entity.failed": "Brak obiektów do podświetlenia",
   "commands.cglow.entity.success": "Podświetlono %d obiekty",
-  "commands.cglow.area.success": "Podświetlono %d terenow",
+  "commands.cglow.area.success": "Podświetlono %d terenów",
 
-  "commands.cplaysound.success": "Odtworzono dzwięk %s",
+  "commands.chotbar.notCreative": "Gracz musi byc w trybie kreatywnym aby przywrócić pasek dostępu",
+  "commands.chotbar.restoredHotbar": "Przywrócono pasek dostępu %d",
+
+  "commands.citemgroup.notFound": "Nie znaleziono grupy \"%s\"",
+  "commands.citemgroup.outOfBounds": "Indeks %d wykroczył poza wyznaczone granice",
+  "commands.citemgroup.saveFile.failed": "Błąd zapisu do pliku grup",
+  "commands.citemgroup.addGroup.success": "Pomyślnie dodano grupę \"%s\"",
+  "commands.citemgroup.addGroup.illegalCharacter": "Nazwa może zawierać tylko taki zakres znaków [a-z0-9/._-]",
+  "commands.citemgroup.addGroup.alreadyExists": "Grupa \"%s\" już istnieje",
+  "commands.citemgroup.removeGroup.success": "Pomyślnie usunięto grupę \"%s\"",
+  "commands.citemgroup.addStack.success": "Pomyślnie dodano %s do \"%s\"",
+  "commands.citemgroup.removeStack.success": "Usunięto stos w \"%s\" o indeksie %d",
+  "commands.citemgroup.setStack.success": "Ustawiono stos w \"%s\" o indeksie %d na %s",
+  "commands.citemgroup.changeIcon.success": "Pomyślnie zmieniono ikonę grupy \"%s\" z %s na %s",
+  "commands.citemgroup.renameGroup.success": "Pomyślnie zmieniono nazwę grupy \"%s\" na \"%s\"",
+
+  "commands.ckit.notFound": "Zestaw \"%s\" nie istnieje",
+  "commands.ckit.saveFile.failed": "Nie można zapisać pliku zestawów",
+  "commands.ckit.load.success": "Pomyślnie wręczono zestaw \"%s\"",
+  "commands.ckit.load.notCreative": "Gracz musi być w trybie kreatywnym aby wręczyć sobie przedmioty",
+  "commands.ckit.create.success": "Pomyślnie stworzono zestaw \"%s\"",
+  "commands.ckit.create.alreadyExists": "Zestaw \"%s\" już istnieje",
+  "commands.ckit.delete.success": "Pomyślnie usunięto zestaw \"%s\"",
+  "commands.ckit.edit.success": "Pomyślnie zedytowano zestaw \"%s\"",
+  "commands.ckit.list": "Dostępne zestawy: %s",
+  "commands.ckit.list.empty": "Brak dostępnych zestawów",
+
+  "commands.cparticle.unsuitableParticleOption": "Nie można wyświetlić cząsteczki ponieważ opcje cząsteczek są ustawione na \"minimalne\"",
+  "commands.cparticle.success": "Pokazuję cząsteczkę %s",
+
+  "commands.cplaysound.success": "Odtworzono dźwięk %s",
 
   "commands.crelog.failed": "Nie udało się połączyć ponownie",
 
   "commands.crender.entities.success": "Reguła renderowania obiektu została zaktualizowana",
 
-  "commands.cstopsound.success.sourceless.any": "Zatrzymano wszystkie dzwięki",
+  "commands.cstopsound.success.sourceless.any": "Zatrzymano wszystkie dźwięki",
   "commands.cstopsound.success.sourceless.sound": "Zatrzymano dźwięk '%s'",
   "commands.cstopsound.success.source.any": "Zatrzymano wszystkie '%s' dźwięki",
   "commands.cstopsound.success.source.sound": "Zatrzymano dźwięk '%s' na źródle '%s'",
@@ -111,12 +155,12 @@
   "enchCrack.playerRNGSeed.many": "Liczba możliwych ziaren RNG gracza: %d",
   "enchCrack.addInfo": "Dodaj Informacje",
 
-  "enchCrack.insn.dummy": "Zaklnij zbędny przedmiot",
+  "enchCrack.insn.dummy": "Rzuć słabe zaklęcie na zbędny przedmiot",
   "enchCrack.insn.ready": "Twoje ziarno zaklęcia jest gotowe",
   "enchCrack.insn.bookshelves": "Półki na książki: %d",
   "enchCrack.insn.slot": "W Slocie: %d",
   "enchCrack.insn.itemThrows": "Ile musisz wyrzucić przedmiotów: %d (około %f sekund)",
-  "enchCrack.insn.itemThrows.noDummy": "Nie potrzebujesz zbędnego przedmiotu",
+  "enchCrack.insn.itemThrows.noDummy": "Nie rzucaj zaklęcia na zbędny przedmiot",
   "enchCrack.insn.enchantments": "Zaklęcia na przedmiocie:",
 
   "playerManip.state": "Stan ziarna gracza: %s",
@@ -157,9 +201,8 @@
   "playerManip.serverBrandWarning": "Ostrzeżenie: Serwer na którym grasz jest zmodyfikowany. Nie ma gwarancji że funkcje RNG będą działać na tym serwerze",
   "playerManip.toolBreakWarning": "Ostrzeżenie: Narzędzie ma %d wytrzymałości",
   "playerManip.throwError": "Czynność jest niemożliwa lub wymagała by więcej niż %d rzutów przedmiotami",
-  "playerManip.notEnoughItems": "Nie wystarczająca ilosc (%d of %d) by manipulować ziarnem",
+  "playerManip.notEnoughItems": "Nie wystarczająca ilość przedmiotów (%d of %d) by manipulować ziarnem",
   "playerManip.uncracked": "Ziarno gracza musi być złamane.",
 
-  "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: zbyt mało przedmiotów w ekwipunku"
-
+  "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: niewystarczająca ilość przedmiotów w ekwipunku"
 }

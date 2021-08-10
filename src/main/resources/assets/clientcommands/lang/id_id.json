@@ -79,6 +79,19 @@
   "commands.chotbar.notCreative": "Pemain harus berada di mode kreatif untuk memulihkan benda yang ada di bilah benda",
   "commands.chotbar.restoredHotbar": "Telah di pulihkan benda bilah benda %d",
 
+  "commands.citemgroup.notFound": "Kelompok benda \"%s\" not found",
+  "commands.citemgroup.outOfBounds": "Index %d diluar jangkauan",
+  "commands.citemgroup.saveFile.failed": "Tidak bisa menyimpan file kelompok benda",
+  "commands.citemgroup.addGroup.success": "Berhasil menambahkan kelompok item \"%s\"",
+  "commands.citemgroup.addGroup.illegalCharacter": "Kelompok item hanya boleh mengadung karakter [a-z0-9/._-]",
+  "commands.citemgroup.addGroup.alreadyExists": "Kelompok item \"%s\" sudah ada",
+  "commands.citemgroup.removeGroup.success": "Berhasil menghapus kelompok item \"%s\"",
+  "commands.citemgroup.addStack.success": "Berhasil menambahkan %s ke \"%s\"",
+  "commands.citemgroup.removeStack.success": "Berhasil menghapus tumpukan dari \"%s\" di indeks %s",
+  "commands.citemgroup.setStack.success": "Berhasil setel tumpukan dari \"%s\" di indeks %d",
+  "commands.citemgroup.changeIcon.success": "Berhasil mengubah ikon \"%s\" dari %s menjadi %s",
+  "commands.citemgroup.renameGroup.success": "Berhasil mengubah nama kelompok benda \"%s\" menjadi \"%s\"",
+
   "commands.ckit.notFound": "Kit \"%s\" tidak ketemu",
   "commands.ckit.saveFile.failed": "Tidak bisa menyimpan kits",
   "commands.ckit.load.success": "Berhasil memakai kit \"%s\" ke diri sendiri",
@@ -89,6 +102,9 @@
   "commands.ckit.edit.success": "Berhasil mengubah kit \"%s\"",
   "commands.ckit.list": "Kit yang tersedia: %s",
   "commands.ckit.list.empty": "Tidak ada kit yang tersedia",
+
+  "commands.cparticle.unsuitableParticleOption": "Tidak akan menampilkan partikel karena pengaturan partikel tidak cocok",
+  "commands.cparticle.success": "Menampilkan partikel %s",
 
   "commands.cplaysound.success": "Memainkan suara %s ke diri sendiri",
 
@@ -117,7 +133,8 @@
   "commands.client.crack": "Pecahkan",
   "commands.client.enable": "Nyalakan",
   "commands.client.expectedRegex": "Regex tidak valid %s",
-  "commands.client.notClient": "Bukan perintah sisi client",
+  "commands.client.notClient": "Bukan perintah sisi klien",
+  "commands.client.invalidArgumentException": "Argumen tidak valid '%s'",
 
   "chorusManip.landing.success": "Mendarat di: %d, %d, %d",
   "chorusManip.landing.failed": "Manipulasi mendarat tidak mungkin",
@@ -163,8 +180,10 @@
   "playerManip.reset.sprint": "Lari",
   "playerManip.reset.enterWater": "Masuk air",
   "playerManip.reset.swim": "Berenang",
+  "playerManip.reset.amethystChime": "Jalan di Gugus Kecubung",
   "playerManip.reset.potion": "Efek Ramuan sedang Aktif",
   "playerManip.reset.mending": "Membenarkan benda mengunakkan Perbaikan",
+  "playerManip.reset.xp": "Memperoleh Pengalaman",
   "playerManip.reset.respiration": "Helm Pernapasan digunakkan",
   "playerManip.reset.dropItem": "Melemparkan item",
   "playerManip.reset.anvil": "Menggunakkan Paron",

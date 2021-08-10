@@ -39,7 +39,7 @@
     "MixinForgingScreenHandler",
     "MixinGameRenderer",
     "MixinGrindstoneContainer",
-    "MixinGuiClosePacket",
+    "MixinCloseHandledScreenPacket",
     "MixinItemEntity",
     "MixinItemStack",
     "MixinLivingEntity",
@@ -57,15 +57,18 @@
     "MixinPumpkinBlock",
     "MixinServerCommandSource",
     "MixinShearsItem",
-    "MixinSlot",
     "MixinStonecutterContainer",
     "MixinTextFieldWidget",
     "ProjectileEntityAccessor",
     "ScreenHandlerAccessor",
     "MixinItemGroup",
-    "CreativeInventoryScreenAccessor"
+    "CreativeInventoryScreenAccessor",
+    "CommandSuggestorAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
   }
 }
