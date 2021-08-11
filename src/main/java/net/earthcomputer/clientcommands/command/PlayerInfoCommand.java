@@ -20,7 +20,7 @@ import java.util.*;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.CommandSource.suggestMatching;
+import static net.minecraft.command.CommandSource.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class PlayerInfoCommand {
