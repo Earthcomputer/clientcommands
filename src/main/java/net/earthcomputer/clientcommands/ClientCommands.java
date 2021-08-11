@@ -58,7 +58,6 @@ public class ClientCommands implements ClientModInitializer {
         CTimeCommand.register(dispatcher);
         AliasCommand.register(dispatcher);
 
-
         CrackRNGCommand.register(dispatcher);
 
         if (MinecraftClient.getInstance().isIntegratedServerRunning()) {
