@@ -11,6 +11,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.Arrays;
@@ -36,18 +37,19 @@ public class SimpleBlockPredicateArgumentType implements ArgumentType<Predicate<
 
     @Override
     public Predicate<Block> parse(StringReader stringReader) throws CommandSyntaxException {
-        BlockArgumentParser blockArgumentParser = (new BlockArgumentParser(stringReader, false)).parse(false);
+        BlockArgumentParser blockArgumentParser = (new BlockArgumentParser(stringReader, true)).parse(false);
         BlockState parsedBlockState = blockArgumentParser.getBlockState();
         if (parsedBlockState == null) {
-            if (Registry.BLOCK.getOrEmpty(blockArgumentParser.getTagId()).isPresent()) {
-                Block parsedBlock = Registry.BLOCK.getOrEmpty(blockArgumentParser.getTagId()).get();
-                return block -> block.is(parsedBlock);
+            Identifier tagId = blockArgumentParser.getTagId();
+            if (Registry.BLOCK.getOrEmpty(tagId).isPresent()) {
+                Block parsedBlock = Registry.BLOCK.getOrEmpty(tagId).get();
+                return block -> block.equals(parsedBlock);
             } else {
-                throw BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.create(blockArgumentParser.getTagId().toString());
+                throw BlockArgumentParser.DISALLOWED_TAG_EXCEPTION.create();
             }
         } else {
             Block parsedBlock = parsedBlockState.getBlock();
-            return block -> block.is(parsedBlock);
+            return block -> block.equals(parsedBlock);
         }
     }
 
@@ -55,7 +57,7 @@ public class SimpleBlockPredicateArgumentType implements ArgumentType<Predicate<
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         StringReader stringReader = new StringReader(builder.getInput());
         stringReader.setCursor(builder.getStart());
-        BlockArgumentParser blockArgumentParser = new BlockArgumentParser(stringReader, false);
+        BlockArgumentParser blockArgumentParser = new BlockArgumentParser(stringReader, true);
 
         try {
             blockArgumentParser.parse(false);
