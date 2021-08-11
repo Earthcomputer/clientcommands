@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.command;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -55,7 +54,7 @@ public class AreaStatsCommand {
         assertChunkIsLoaded(pos1.getX() >> 4, pos1.getZ() >> 4);
         assertChunkIsLoaded(pos2.getX() >> 4, pos2.getZ() >> 4);
 
-        final Predicate<Block> blockPredicate = Predicates.or(blockPredicates.toArray(new com.google.common.base.Predicate[0]))::apply;
+        final Predicate<Block> blockPredicate = or(blockPredicates);
 
         final long startTime = System.nanoTime();
 
@@ -204,5 +203,9 @@ public class AreaStatsCommand {
             return;
         }
         throw NOT_LOADED_EXCEPTION.create();
+    }
+
+    private static Predicate<Block> or(List<Predicate<Block>> predicates) {
+        return predicates.stream().reduce(t -> false, Predicate::or);
     }
 }
