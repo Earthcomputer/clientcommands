@@ -7,7 +7,8 @@ import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 
@@ -41,7 +42,7 @@ public class PlayerInfoCommand {
         dispatcher.register(literal("cplayerinfo")
                 .then(literal("namehistory")
                         .then(argument("player", string())
-                                .suggests(((context, builder) -> suggestMatching(client.world.getPlayers().stream().map(abstractPlayer -> abstractPlayer.getName().getString()), builder)))
+                                .suggests((context, builder) -> suggestMatching(((CommandSource) context.getSource()).getPlayerNames(), builder))
                                 .executes(ctx -> getNameHistory(ctx.getSource(), getString(ctx, "player"))))));
     }
 
@@ -56,14 +57,11 @@ public class PlayerInfoCommand {
             if (cacheByName.containsKey(player)) {
                 sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
             } else {
-                Optional<String> optional = client.world.getPlayers().stream()
-                        .filter(abstractPlayer -> abstractPlayer.getName().getString().equals(player))
-                        .map(Entity::getUuidAsString)
-                        .findFirst();
-                if (optional.isPresent()) {
-                    fetchNameHistory(optional.get());
-                } else {
+                PlayerListEntry playerListEntry = client.getNetworkHandler().getPlayerListEntry(player);
+                if (playerListEntry == null) {
                     getNameHistory(player);
+                } else {
+                    fetchNameHistory(playerListEntry.getProfile().getId().toString());
                 }
             }
         }
