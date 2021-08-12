@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
 import java.net.URI;
@@ -57,11 +58,20 @@ public class PlayerInfoCommand {
             if (cacheByName.containsKey(player)) {
                 sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
             } else {
-                PlayerListEntry playerListEntry = client.getNetworkHandler().getPlayerListEntry(player);
-                if (playerListEntry == null) {
-                    getNameHistory(player);
+                if (client.isInSingleplayer()) {
+                    ServerPlayerEntity playerEntity = client.getServer().getPlayerManager().getPlayer(player);
+                    if (playerEntity == null) {
+                        getNameHistory(player);
+                    } else {
+                        fetchNameHistory(playerEntity.getUuidAsString());
+                    }
                 } else {
-                    fetchNameHistory(playerListEntry.getProfile().getId().toString());
+                    PlayerListEntry playerListEntry = client.getNetworkHandler().getPlayerListEntry(player);
+                    if (playerListEntry == null) {
+                        getNameHistory(player);
+                    } else {
+                        fetchNameHistory(playerListEntry.getProfile().getId().toString());
+                    }
                 }
             }
         }
