@@ -1,4 +1,15 @@
 {
+  "commands.calias.notFound": "Nie znaleziono aliasu \"%s\"",
+  "commands.calias.illegalFormatException": "Format ciągu wyrazów był nieprawidłowy lub podano zbyt mało argumentów",
+  "commands.calias.file.readError": "Nie udało się wczytać pliku aliasów",
+  "commands.calias.file.writeError": "Nie udało się zapisać do plików aliasów",
+  "commands.calias.addAlias.aliasAlreadyExists": "Alias \"%s\" już istnieje",
+  "commands.calias.addAlias.commandAlreadyExists": "Komenda \"/%s\" już istnieje",
+  "commands.calias.addAlias.success": "Pomyślnie dodano alias \"%s\"",
+  "commands.calias.listAliases.noAliasesRegistered": "Nie zarejestrowano aliasów",
+  "commands.calias.listAliases.success": "%s aliasów zarejestrowano:",
+  "commands.calias.removeAlias.success": "Pomyślnie usunięto alias \"%s\"",
+
   "commands.cbook.success": "Pomyślnie nadpisano książkę",
   "commands.cbook.commandException": "Nie trzymasz książki",
 
@@ -30,13 +41,13 @@
   "commands.cenchant.expectedWithWithout": "Spodziewane \"with\"/\"without\"",
   "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otrzymać te zaklęcia",
   "commands.cenchant.incompatible": "Niekompatybilne zaklęcia",
-  "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączonego \"Enchanting prediction\".",
+  "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączonego \"Enchanting prediction\"",
   "commands.cenchant.success": "Rozpoczynam manipulowanie zaklęciami",
   "commands.cenchant.uncracked": "Ziarno musi być złamane",
 
   "commands.cfind.found.left": "Znaleziono %1$s na ",
   "commands.cfind.found.right": ", %2$.2f bloków dalej",
-  "commands.cfind.keepSearching.success": "Szukam obiektów.",
+  "commands.cfind.keepSearching.success": "Szukam obiektów",
   "commands.cfind.noMatch": "Żadne obiekty nie pasują twoim wymaganiom",
   "commands.cfind.success": "%d obiektów pasuje twoim wymaganiom",
 
@@ -48,7 +59,7 @@
   "commands.cfinditem.match.left": "%dx %s znaleziono na ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Szukam %s",
-  "commands.cfinditem.starting.keepSearching": "Będę szukać %s.",
+  "commands.cfinditem.starting.keepSearching": "Będę szukać %s",
   "commands.cfinditem.total": "Znaleziono %dx %s",
 
   "commands.cfish.addGoal.success": "Ustawiono cel %s",
@@ -58,7 +69,7 @@
   "commands.cfish.error.outOfWater": "Spławik jest poza wodą, manipulacja się nie uda",
   "commands.cfish.listGoals.noGoals": "Nie mam żadnego celu",
   "commands.cfish.listGoals.success": "Są %d cele:",
-  "commands.cfish.needFishingManipulation": "Manipulacja łowienia jest wyłączona.",
+  "commands.cfish.needFishingManipulation": "Manipulacja łowienia jest wyłączona",
   "commands.cfish.removeGoal.success": "Pomyślnie usunięto cel %s",
   "commands.cfish.wrongLoot": "Nie mogłem otrzymać łupu z dokładnością do %dms, mogłem wyprzedzić %s ticków w przód",
 
@@ -72,7 +83,7 @@
   "commands.cgive.success": "Wręczono %d %s",
   "commands.cgive.notCreative": "Gracz musi być w trybie kreatywnym aby użyć tej komendy",
 
-  "commands.cglow.entity.keepSearching.success": "Podświetlono obiekty.",
+  "commands.cglow.entity.keepSearching.success": "Podświetlono obiekty",
   "commands.cglow.entity.failed": "Brak obiektów do podświetlenia",
   "commands.cglow.entity.success": "Podświetlono %d obiekty",
   "commands.cglow.area.success": "Podświetlono %d terenów",
@@ -141,7 +152,7 @@
   "chorusManip.landing.success": "Ląduję na: %d, %d, %d",
   "chorusManip.landing.failed": "Manipulacja pozycjonowania jest niemożliwa",
   "chorusManip.goalTooFar": "Cel jest zbyt daleko!",
-  "chorusManip.needChorusManipulation": "Manipulacja kwiatu Chorus'a jest wyłączona.",
+  "chorusManip.needChorusManipulation": "Manipulacja kwiatu Chorus'a jest wyłączona",
   "chorusManip.setGoal": "Ustawiono %s cel z %s na %s",
 
   "enchCrack.state": "Stan złamania zaklęcia: %s",
@@ -205,7 +216,7 @@
   "playerManip.toolBreakWarning": "Ostrzeżenie: Narzędzie ma %d wytrzymałości",
   "playerManip.throwError": "Czynność jest niemożliwa lub wymagała by więcej niż %d rzutów przedmiotami",
   "playerManip.notEnoughItems": "Nie wystarczająca ilość przedmiotów (%d of %d) by manipulować ziarnem",
-  "playerManip.uncracked": "Ziarno gracza musi być złamane.",
+  "playerManip.uncracked": "Ziarno gracza musi być złamane",
 
   "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: niewystarczająca ilość przedmiotów w ekwipunku"
 }
