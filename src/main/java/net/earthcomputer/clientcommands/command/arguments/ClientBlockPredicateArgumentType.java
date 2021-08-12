@@ -27,9 +27,9 @@ import net.minecraft.world.BlockView;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -158,16 +158,19 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
             predicates.add(getPredicateWithoutNbt(tagManager, parser));
         }
 
-        Map<BlockState, Boolean> cache = new IdentityHashMap<>();
-
-        return (blockView, pos) -> cache.computeIfAbsent(blockView.getBlockState(pos), state -> {
+        // slower than lazy computation but thread safe
+        BitSet mask = new BitSet();
+        BlockState state;
+        for (int id = 0; (state = Block.STATE_IDS.get(id)) != null; id++) {
             for (Predicate<BlockState> predicate : predicates) {
                 if (predicate.test(state)) {
-                    return true;
+                    mask.set(id);
+                    break;
                 }
             }
-            return false;
-        });
+        }
+
+        return (blockView, pos) -> mask.get(Block.STATE_IDS.getRawId(blockView.getBlockState(pos)));
     }
 
     private static Predicate<BlockState> getPredicateWithoutNbt(TagManager tagManager, BlockArgumentParser parser) throws CommandSyntaxException {
