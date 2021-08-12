@@ -1,4 +1,15 @@
 {
+  "commands.calias.notFound": "Alias \"%s\" tidak ditemukan",
+  "commands.calias.illegalFormatException": "Format kata antara salah atau terlalu sedikit argumen yang diberikan",
+  "commands.calias.file.readError": "Gagal membaca file alias",
+  "commands.calias.file.writeError": "Gagal menulis file alias",
+  "commands.calias.addAlias.aliasAlreadyExists": "Alias \"%s\" sudah ada",
+  "commands.calias.addAlias.commandAlreadyExists": "Perintah \"%s\" sudah ada",
+  "commands.calias.addAlias.success": "Berhasil menambahkan alias \"%s\"",
+  "commands.calias.listAliases.noAliasesRegistered": "Tidak ada alias yang didaftar",
+  "commands.calias.listAliases.success": "Ada %s alias yang didaftar:",
+  "commands.calias.removeAlias.success": "Berhasil menghapus alias \"%s\"",
+
   "commands.cbook.success": "Berhasil mengubah buku",
   "commands.cbook.commandException": "Anda tidak memegang buku",
 
