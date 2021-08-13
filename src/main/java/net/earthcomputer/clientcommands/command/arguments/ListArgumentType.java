@@ -113,7 +113,7 @@ public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentT
         String[] ret = new String[3];
         for (int i = 0; i < 3; i++) {
             StringBuilder sb = new StringBuilder();
-            int times = min + rand.nextInt(max - min + 1);
+            int times = min + rand.nextInt(Math.min(min + 10, max) - min + 1);
             for (int j = 0; j < times; j++) {
                 if (j != 0) {
                     sb.append(' ');
