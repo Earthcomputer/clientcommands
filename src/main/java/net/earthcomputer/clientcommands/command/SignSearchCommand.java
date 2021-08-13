@@ -1,10 +1,10 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType;
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -30,20 +30,20 @@ public class SignSearchCommand {
                     .executes(ctx -> FindBlockCommand.findBlock(ctx.getSource(), predicate(getRegex(ctx, "query")), FindBlockCommand.MAX_RADIUS, FindBlockCommand.RadiusType.CARTESIAN)))));
     }
 
-    private static Predicate<CachedBlockPosition> predicate(String query) {
+    private static ClientBlockPredicateArgumentType.ClientBlockPredicate predicate(String query) {
         return signPredicateFromLinePredicate(line -> line.contains(query));
     }
 
-    private static Predicate<CachedBlockPosition> predicate(Pattern query) {
+    private static ClientBlockPredicateArgumentType.ClientBlockPredicate predicate(Pattern query) {
         return signPredicateFromLinePredicate(line -> query.matcher(line).find());
     }
 
-    private static Predicate<CachedBlockPosition> signPredicateFromLinePredicate(Predicate<String> linePredicate) {
-        return pos -> {
-            if (!(pos.getBlockState().getBlock() instanceof AbstractSignBlock)) {
+    private static ClientBlockPredicateArgumentType.ClientBlockPredicate signPredicateFromLinePredicate(Predicate<String> linePredicate) {
+        return (blockView, pos) -> {
+            if (!(blockView.getBlockState(pos).getBlock() instanceof AbstractSignBlock)) {
                 return false;
             }
-            BlockEntity be = pos.getBlockEntity();
+            BlockEntity be = blockView.getBlockEntity(pos);
             if (!(be instanceof SignBlockEntity sign)) {
                 return false;
             }
