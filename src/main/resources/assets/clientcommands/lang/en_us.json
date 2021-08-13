@@ -10,6 +10,11 @@
   "commands.calias.listAliases.success": "%s aliases registered:",
   "commands.calias.removeAlias.success": "Successfully removed alias \"%s\"",
 
+  "commands.careastats.notLoaded": "A chunk in this area is not loaded",
+  "commands.careastats.output.chunksScanned": "Scanned %d chunks in %dns ≈ %dms",
+  "commands.careastats.output.blocksMatched": "Matched %d out of %d total blocks",
+  "commands.careastats.output.entitiesFound": "Found %d entities in this area",
+
   "commands.cbook.success": "Successfully edited book",
   "commands.cbook.commandException": "You are not holding a book",
 
@@ -148,6 +153,7 @@
   "commands.client.enable": "Enable",
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.notClient": "Not a client-side command",
+  "commands.client.tooFewArguments": "Too few arguments",
   "commands.client.invalidArgumentException": "Invalid argument '%s'",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
