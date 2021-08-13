@@ -10,8 +10,11 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.text.TranslatableText;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentType<List<T>> {
@@ -45,9 +48,6 @@ public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentT
         return (List<T>) context.getArgument(name, List.class);
     }
 
-    /**
-     * @author CreepyCre
-     */
     @Override
     public List<T> parse(StringReader reader) throws CommandSyntaxException {
         List<T> parsedArguments = new ArrayList<>();
@@ -59,9 +59,8 @@ public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentT
                 parsedArguments.add(this.argumentType.parse(reader));
                 readAmount++;
                 // read in the separator
-                // TODO: 25-4-2021 implement better separator reading
                 if (reader.canRead()) {
-                    reader.read();
+                    reader.expect(' ');
                 }
             }
         } catch (CommandSyntaxException e) {
@@ -76,9 +75,6 @@ public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentT
         return parsedArguments;
     }
 
-    /**
-     * @author CreepyCre
-     */
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         StringReader reader = new StringReader(builder.getInput());
@@ -90,23 +86,42 @@ public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentT
                 this.argumentType.parse(reader);
                 readAmount++;
                 // read in the separator
-                // TODO: 25-4-2021 implement better separator reading
                 if (reader.canRead()) {
-                    reader.read();
+                    reader.expect(' ');
                     cursor = reader.getCursor();
                 }
             }
         } catch (CommandSyntaxException ignored) {
         }
-        // TODO: 25-4-2021 implement better separators
         return this.argumentType.listSuggestions(context, builder.createOffset(cursor));
     }
 
-    /**
-     * @author CreepyCre
-     */
     @Override
     public Collection<String> getExamples() {
-        return this.argumentType.getExamples();
+        Collection<String> elementExamples = argumentType.getExamples();
+        if (elementExamples.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> elementExamplesList;
+        if (elementExamples instanceof List<String> lst) {
+            elementExamplesList = lst;
+        } else {
+            elementExamplesList = new ArrayList<>(elementExamples);
+        }
+
+        Random rand = new Random(0);
+        String[] ret = new String[3];
+        for (int i = 0; i < 3; i++) {
+            StringBuilder sb = new StringBuilder();
+            int times = min + rand.nextInt(Math.min(min + 10, max) - min + 1);
+            for (int j = 0; j < times; j++) {
+                if (j != 0) {
+                    sb.append(' ');
+                }
+                sb.append(elementExamplesList.get(rand.nextInt(elementExamples.size())));
+            }
+            ret[i] = sb.toString();
+        }
+        return Arrays.asList(ret);
     }
 }

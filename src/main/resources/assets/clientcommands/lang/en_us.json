@@ -1,4 +1,15 @@
 {
+  "commands.calias.notFound": "Alias \"%s\" not found",
+  "commands.calias.illegalFormatException": "The format string was either malformed or too few arguments were supplied",
+  "commands.calias.file.readError": "Failed to read alias file",
+  "commands.calias.file.writeError": "Failed to write to alias file",
+  "commands.calias.addAlias.aliasAlreadyExists": "Alias \"%s\" already exists",
+  "commands.calias.addAlias.commandAlreadyExists": "The command \"/%s\" already exists",
+  "commands.calias.addAlias.success": "Successfully added alias \"%s\"",
+  "commands.calias.listAliases.noAliasesRegistered": "No aliases registered",
+  "commands.calias.listAliases.success": "%s aliases registered:",
+  "commands.calias.removeAlias.success": "Successfully removed alias \"%s\"",
+
   "commands.careastats.notLoaded": "A chunk in this area is not loaded",
   "commands.careastats.output.chunksScanned": "Scanned %d chunks in %dns ≈ %dms",
   "commands.careastats.output.blocksMatched": "Matched %d out of %d total blocks",
@@ -35,13 +46,13 @@
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.incompatible": "Incompatible enchantments",
-  "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled.",
+  "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
   "commands.cenchant.success": "Starting enchantment manipulation",
-  "commands.cenchant.uncracked": "Seed needs to be cracked.",
+  "commands.cenchant.uncracked": "Seed needs to be cracked",
 
   "commands.cfind.found.left": "Found %1$s at ",
   "commands.cfind.found.right": ", %2$.2f blocks away",
-  "commands.cfind.keepSearching.success": "Finding entities.",
+  "commands.cfind.keepSearching.success": "Finding entities",
   "commands.cfind.noMatch": "No entities matched your query",
   "commands.cfind.success": "%d entities matched your query",
 
@@ -53,7 +64,7 @@
   "commands.cfinditem.match.left": "%dx %s found at ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Searching for %s",
-  "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s.",
+  "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s",
   "commands.cfinditem.total": "Found %dx %s total",
 
   "commands.cfish.addGoal.success": "Successfully added goal %s",
@@ -63,7 +74,7 @@
   "commands.cfish.error.outOfWater": "Fishing bobber out of water, manipulation won't work",
   "commands.cfish.listGoals.noGoals": "There are no fishing goals",
   "commands.cfish.listGoals.success": "There are %d fishing goals:",
-  "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled.",
+  "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled",
   "commands.cfish.removeGoal.success": "Successfully removed goal %s",
   "commands.cfish.wrongLoot": "Didn't get the correct loot with correction of %dms, could have been %s ticks ahead",
 
@@ -77,7 +88,7 @@
   "commands.cgive.success": "Gave %d %s to self",
   "commands.cgive.notCreative": "Player must be in creative mode to give items to self",
 
-  "commands.cglow.entity.keepSearching.success": "Glowing entities.",
+  "commands.cglow.entity.keepSearching.success": "Glowing entities",
   "commands.cglow.entity.failed": "No entities to glow",
   "commands.cglow.entity.success": "Glowing %d entities",
   "commands.cglow.area.success": "Glowing %d area(s)",
@@ -148,7 +159,7 @@
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",
   "chorusManip.goalTooFar": "Goal is too far away!",
-  "chorusManip.needChorusManipulation": "Chorus Fruit manipulation is not enabled.",
+  "chorusManip.needChorusManipulation": "Chorus Fruit manipulation is not enabled",
   "chorusManip.setGoal": "Set %s goal area from %s to %s",
 
   "enchCrack.state": "Enchantment Crack State: %s",
@@ -214,7 +225,7 @@
   "playerManip.toolBreakWarning": "Warning: tool has %d durability left",
   "playerManip.throwError": "Condition not possible or would require more than %d item throws",
   "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
-  "playerManip.uncracked": "Player-Seed needs to be cracked.",
+  "playerManip.uncracked": "Player-Seed needs to be cracked",
 
   "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
 }
