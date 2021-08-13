@@ -58,6 +58,7 @@ public class ClientCommands implements ClientModInitializer {
         CTimeCommand.register(dispatcher);
         AliasCommand.register(dispatcher);
         AreaStatsCommand.register(dispatcher);
+        CTitleCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 
