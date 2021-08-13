@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -40,7 +41,7 @@ public class AliasCommand {
     private static final DynamicCommandExceptionType COMMAND_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.addAlias.commandAlreadyExists", arg));
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.calias.notFound", arg));
 
-    private static final HashMap<String, String> aliasMap = getAliases();
+    private static final HashMap<String, String> aliasMap = loadAliases();
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("calias");
@@ -68,6 +69,7 @@ public class AliasCommand {
             }
         }
     }
+
     private static int executeAliasCommand(String aliasKey, String arguments) throws CommandSyntaxException {
         String cmd = aliasMap.get(aliasKey);
         if (cmd == null) {
@@ -95,6 +97,7 @@ public class AliasCommand {
         return 0;
     }
 
+    @SuppressWarnings("unchecked")
     private static int addAlias(String key, String command) throws CommandSyntaxException {
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
         assert networkHandler != null;
@@ -122,6 +125,7 @@ public class AliasCommand {
         sendFeedback(new TranslatableText("commands.calias.addAlias.success", key));
         return 0;
     }
+
     private static int listAliases() {
         if (aliasMap.isEmpty()) {
             sendFeedback(new TranslatableText("commands.calias.listAliases.noAliasesRegistered"));
@@ -133,6 +137,8 @@ public class AliasCommand {
         }
         return 0;
     }
+
+    @SuppressWarnings("unchecked")
     private static int removeAlias(String key) throws CommandSyntaxException {
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
         assert networkHandler != null;
@@ -150,20 +156,24 @@ public class AliasCommand {
         return 0;
     }
 
-    private static HashMap<String, String> getAliases() {
+    private static HashMap<String, String> loadAliases() {
+        if (!Files.exists(ALIAS_PATH)) {
+            return new HashMap<>();
+        }
         Gson gson = new Gson();
-        try (FileReader fileReader = new FileReader(String.valueOf(ALIAS_PATH))) {
+        try (Reader fileReader = Files.newBufferedReader(ALIAS_PATH)) {
             return gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
         } catch (IOException e) {
-            LOGGER.error("No alias file provided. A new one will be created upon registering an alias.", e);
+            LOGGER.error("Error reading aliases file", e);
             return new HashMap<>();
         }
     }
 
     private static void saveAliases() {
-        try (Writer writer = new FileWriter(String.valueOf(ALIAS_PATH))) {
+        try (Writer writer = Files.newBufferedWriter(ALIAS_PATH)) {
             Gson gson = new Gson();
             gson.toJson(aliasMap, writer);
+            writer.flush();
         } catch (IOException e) {
             LOGGER.error(e);
         }
