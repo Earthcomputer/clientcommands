@@ -176,9 +176,12 @@ public class AreaStatsCommand {
     private static int loop(int start1, int end1, int start2, int end2, int start3, int end3, ClientBlockPredicate predicate, WorldChunk chunk, BlockPos.Mutable mutablePos) {
         int counter = 0;
         for (int x = start1; x <= end1; x++) {
+            mutablePos.setX(x);
             for (int z = start2; z <= end2; z++) {
+                mutablePos.setZ(z);
                 for (int y = start3; y <= end3; y++) {
-                    if (predicate.test(chunk, mutablePos.set(x, y, z))) {
+                    mutablePos.setY(y);
+                    if (predicate.test(chunk, mutablePos)) {
                         counter++;
                     }
                 }
