@@ -10,6 +10,11 @@
   "commands.calias.listAliases.success": "Ada %s alias yang didaftar:",
   "commands.calias.removeAlias.success": "Berhasil menghapus alias \"%s\"",
 
+  "commands.careastats.notLoaded": "Bingkah di area tersebut tidak termuat",
+  "commands.careastats.output.chunksScanned": "Mencari %d bingkah dalam waktu %dns ≈ %dms",
+  "commands.careastats.output.blocksMatched": "Menemukan %d dari %d total blok",
+  "commands.careastats.output.entitiesFound": "Menemukan %d entitas di area tersebut",
+
   "commands.cbook.success": "Berhasil mengubah buku",
   "commands.cbook.commandException": "Anda tidak memegang buku",
 
@@ -148,6 +153,7 @@
   "commands.client.enable": "Nyalakan",
   "commands.client.expectedRegex": "Regex tidak valid %s",
   "commands.client.notClient": "Bukan perintah sisi klien",
+  "commands.client.tooFewArguments": "Argumen terlalu sedikit",
   "commands.client.invalidArgumentException": "Argumen tidak valid '%s'",
 
   "chorusManip.landing.success": "Mendarat di: %d, %d, %d",
