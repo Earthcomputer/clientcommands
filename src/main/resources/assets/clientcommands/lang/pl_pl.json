@@ -10,6 +10,11 @@
   "commands.calias.listAliases.success": "%s aliasów zarejestrowano:",
   "commands.calias.removeAlias.success": "Pomyślnie usunięto alias \"%s\"",
 
+  "commands.careastats.notLoaded": "Chunk w tym obszarze nie jest załadowany",
+  "commands.careastats.output.chunksScanned": "Przeskanowano %d chunków w %dns ≈ %dms",
+  "commands.careastats.output.blocksMatched": "Dopasowano %d z %d bloków łącznie",
+  "commands.careastats.output.entitiesFound": "Znaleziono %d obiektów w tym obszarze",
+
   "commands.cbook.success": "Pomyślnie nadpisano książkę",
   "commands.cbook.commandException": "Nie trzymasz książki",
 
@@ -148,6 +153,8 @@
   "commands.client.enable": "Włącz",
   "commands.client.expectedRegex": "Nieprawidłowe wyrażenie regularne %s",
   "commands.client.notClient": "To nie jest polecenie klienta.",
+  "commands.client.tooFewArguments": "Zbyt mało argumentów",
+  "commands.client.invalidArgumentException": "Nieprawidłowy argument '%s'",
 
   "chorusManip.landing.success": "Ląduję na: %d, %d, %d",
   "chorusManip.landing.failed": "Manipulacja pozycjonowania jest niemożliwa",
