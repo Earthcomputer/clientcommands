@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.render.RenderQueue;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.command.ServerCommandSource;
@@ -16,13 +15,9 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.chunk.WorldChunk;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Predicate;
-
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.*;
-import static net.earthcomputer.clientcommands.command.arguments.SimpleBlockPredicateArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
 import static net.minecraft.command.argument.BlockPosArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -39,22 +34,16 @@ public class AreaStatsCommand {
         dispatcher.register(literal("careastats")
                 .then(argument("pos1", blockPos())
                         .then(argument("pos2", blockPos())
-                                .then(argument("predicates", list(blockPredicate(), 1))
-                                        .executes(ctx -> areaStats(ctx.getSource(), getBlockPos(ctx, "pos1"), getBlockPos(ctx, "pos2"), getList(ctx, "predicates"))))
-                                .executes(ctx -> areaStats(ctx.getSource(), getBlockPos(ctx, "pos1"), getBlockPos(ctx, "pos2"), block -> !block.getDefaultState().isAir())))));
+                                .then(argument("predicates", list(blockPredicate().disallowNbt(), 1))
+                                        .executes(ctx -> areaStats(ctx.getSource(), getBlockPos(ctx, "pos1"), getBlockPos(ctx, "pos2"), getBlockPredicateList(ctx, "predicates"))))
+                                .executes(ctx -> areaStats(ctx.getSource(), getBlockPos(ctx, "pos1"), getBlockPos(ctx, "pos2"), (chunk, pos) -> !chunk.getBlockState(pos).isAir())))));
     }
 
-    private static int areaStats(ServerCommandSource source, BlockPos pos1, BlockPos pos2, Predicate<Block> blockPredicate) throws CommandSyntaxException {
-        return areaStats(source, pos1, pos2, Collections.singletonList(blockPredicate));
-    }
-
-    private static int areaStats(ServerCommandSource source, BlockPos pos1, BlockPos pos2, List<Predicate<Block>> blockPredicates) throws CommandSyntaxException {
+    private static int areaStats(ServerCommandSource source, BlockPos pos1, BlockPos pos2, ClientBlockPredicate blockPredicate) throws CommandSyntaxException {
         final ClientWorld world = MinecraftClient.getInstance().world;
         chunkManager = world.getChunkManager();
         assertChunkIsLoaded(pos1.getX() >> 4, pos1.getZ() >> 4);
         assertChunkIsLoaded(pos2.getX() >> 4, pos2.getZ() >> 4);
-
-        final Predicate<Block> blockPredicate = or(blockPredicates);
 
         final long startTime = System.nanoTime();
 
@@ -184,12 +173,12 @@ public class AreaStatsCommand {
         return blocks;
     }
 
-    private static int loop(int start1, int end1, int start2, int end2, int start3, int end3, Predicate<Block> predicate, WorldChunk chunk, BlockPos.Mutable mutablePos) {
+    private static int loop(int start1, int end1, int start2, int end2, int start3, int end3, ClientBlockPredicate predicate, WorldChunk chunk, BlockPos.Mutable mutablePos) {
         int counter = 0;
         for (int x = start1; x <= end1; x++) {
             for (int z = start2; z <= end2; z++) {
                 for (int y = start3; y <= end3; y++) {
-                    if (predicate.test(chunk.getBlockState(mutablePos.set(x, y, z)).getBlock())) {
+                    if (predicate.test(chunk, mutablePos.set(x, y, z))) {
                         counter++;
                     }
                 }
@@ -203,9 +192,5 @@ public class AreaStatsCommand {
             return;
         }
         throw NOT_LOADED_EXCEPTION.create();
-    }
-
-    private static Predicate<Block> or(List<Predicate<Block>> predicates) {
-        return predicates.stream().reduce(t -> false, Predicate::or);
     }
 }
