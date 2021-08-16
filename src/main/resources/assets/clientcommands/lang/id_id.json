@@ -38,7 +38,7 @@
   "commands.ccalcstack.success.empty.exact": "%d benda adalah %d tumpukan persis",
   "commands.ccalcstack.success.exact": "%d %s adalah %d tumpukan persis",
 
-  "commands.ccrackrng.starting": "Memecahkan player seed",
+  "commands.ccrackrng.starting": "Memecahkan pemain seed",
   "commands.ccrackrng.success": "Pemain RNG telah di pecahkan: %d",
   "commands.ccheatcrackrng.success": "Pemain RNG telah di pecahkan: %d -> %d",
   "commands.ccheatcrackrng.java14": "Perintah ini tidak lagi bekerja di Java 14 keatas!",
@@ -120,6 +120,9 @@
   "commands.ckit.list": "Kit yang tersedia: %s",
   "commands.ckit.list.empty": "Tidak ada kit yang tersedia",
 
+  "commands.cplayerinfo.ioException": "Terjadi sebuah kesalahan",
+  "commands.cplayerinfo.getNameHistory.success": "%s memiliki nama nama berikut: %s",
+
   "commands.cparticle.unsuitableParticleOption": "Tidak akan menampilkan partikel karena pengaturan partikel tidak cocok",
   "commands.cparticle.success": "Menampilkan partikel %s",
 
@@ -144,6 +147,9 @@
   "commands.ctemprule.list.header": "Mendaftarkan %d TempRules:",
   "commands.ctemprule.reset.success": "TempRule %s telah di reset menjadi %s",
   "commands.ctemprule.set.success": "TempRule %s telah di update menjadi %s",
+
+  "commands.ctp.notSpectator": "Pemain harus ada di mode penonton untuk teleportasi",
+  "commands.ctp.success": "Menelportasi pemain ke %s",
 
   "commands.cwiki.failed": "Tidak bisa mendapatkan konten di wiki",
 
@@ -173,7 +179,7 @@
 
   "enchCrack.xpSeed.one": "Seed XP: %08X",
   "enchCrack.xpSeed.many": "Kemungkinan Seed XP: %d",
-  "enchCrack.playerRNGSeed.many": "Kemungkinan player RNG seed: %d",
+  "enchCrack.playerRNGSeed.many": "Kemungkinan pemain RNG seed: %d",
   "enchCrack.addInfo": "Tambahkan Info",
 
   "enchCrack.insn.dummy": "Lakukan pesona asal",
