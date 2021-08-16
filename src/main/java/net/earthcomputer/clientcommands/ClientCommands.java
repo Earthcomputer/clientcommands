@@ -59,6 +59,7 @@ public class ClientCommands implements ClientModInitializer {
         AliasCommand.register(dispatcher);
         AreaStatsCommand.register(dispatcher);
         CTeleportCommand.register(dispatcher);
+        PlayerInfoCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 
