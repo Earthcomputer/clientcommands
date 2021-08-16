@@ -38,9 +38,9 @@
   "commands.ccalcstack.success.empty.exact": "%d benda adalah %d tumpukan persis",
   "commands.ccalcstack.success.exact": "%d %s adalah %d tumpukan persis",
 
-  "commands.ccrackrng.starting": "Memecahkan pemain seed",
-  "commands.ccrackrng.success": "Pemain RNG telah di pecahkan: %d",
-  "commands.ccheatcrackrng.success": "Pemain RNG telah di pecahkan: %d -> %d",
+  "commands.ccrackrng.starting": "Memecahkan benih pemain",
+  "commands.ccrackrng.success": "RNG Pemain telah di pecahkan: %d",
+  "commands.ccheatcrackrng.success": "RNG Pemain telah di pecahkan: %d -> %d",
   "commands.ccheatcrackrng.java14": "Perintah ini tidak lagi bekerja di Java 14 keatas!",
 
   "commands.cenchant.expectedWithWithout": "Diharapkan \"with (dengan)\"/\"without (tanpa)\"",
@@ -112,7 +112,7 @@
   "commands.ckit.notFound": "Kit \"%s\" tidak ketemu",
   "commands.ckit.saveFile.failed": "Tidak bisa menyimpan kits",
   "commands.ckit.load.success": "Berhasil memakai kit \"%s\" ke diri sendiri",
-  "commands.ckit.load.notCreative": "Pemain harus ada di mode kreatif untuk memakai kit ke diri sendiri",
+  "commands.ckit.load.notCreative": "Pemain harus berada di mode kreatif untuk memakai kit ke diri sendiri",
   "commands.ckit.create.success": "Berhasil membuat kit \"%s\"",
   "commands.ckit.create.alreadyExists": "Kit \"%s\" sudah ada",
   "commands.ckit.delete.success": "Berhasil membuang kit \"%s\"",
@@ -148,7 +148,7 @@
   "commands.ctemprule.reset.success": "TempRule %s telah di reset menjadi %s",
   "commands.ctemprule.set.success": "TempRule %s telah di update menjadi %s",
 
-  "commands.ctp.notSpectator": "Pemain harus ada di mode penonton untuk teleportasi",
+  "commands.ctp.notSpectator": "Pemain harus berada di mode penonton untuk teleportasi",
   "commands.ctp.success": "Menelportasi pemain ke %s",
 
   "commands.cwiki.failed": "Tidak bisa mendapatkan konten di wiki",
@@ -179,7 +179,7 @@
 
   "enchCrack.xpSeed.one": "Seed XP: %08X",
   "enchCrack.xpSeed.many": "Kemungkinan Seed XP: %d",
-  "enchCrack.playerRNGSeed.many": "Kemungkinan pemain RNG seed: %d",
+  "enchCrack.playerRNGSeed.many": "Kemungkinan benih RNG pemain: %d",
   "enchCrack.addInfo": "Tambahkan Info",
 
   "enchCrack.insn.dummy": "Lakukan pesona asal",
@@ -201,7 +201,7 @@
   "playerManip.state.manipulating_pesonas": "Memanipulasi Pesonas",
   "playerManip.state.waiting_dummy_enchant": "Sedang menunggu pesona asal",
 
-  "playerManip.reset": "Manipulasi RNG pemain telah di reset. Alasan: %s",
+  "playerManip.reset": "Manipulasi pemain RNG telah di reset. Alasan: %s",
   "playerManip.reset.playerHurt": "Disakiti",
   "playerManip.reset.sprint": "Lari",
   "playerManip.reset.enterWater": "Masuk air",
@@ -231,7 +231,7 @@
   "playerManip.toolBreakWarning": "Peringatan: Alat mempunyai sisa %d ketahanan",
   "playerManip.throwError": "Kondisi tidak bisa atau akan membutuhkan lebih dari %d benda yang dilempar",
   "playerManip.notEnoughItems": "Tidak cukup item(%d dari %d) untuk memanipulasi seed",
-  "playerManip.uncracked": "Seed Pemain butuh dipecahkan.",
+  "playerManip.uncracked": "Benih Pemain butuh dipecahkan.",
 
   "itemCrack.notEnoughItems": "Tidak bisa menggunakkan SeedCracker RNG: Tidak cukup benda di Tangan Pemain"
 }
