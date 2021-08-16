@@ -120,6 +120,9 @@
   "commands.ckit.list": "Dostępne zestawy: %s",
   "commands.ckit.list.empty": "Brak dostępnych zestawów",
 
+  "commands.cplayerinfo.ioException": "Wystąpił błąd",
+  "commands.cplayerinfo.getNameHistory.success": "%s był znany również jako: %s",
+
   "commands.cparticle.unsuitableParticleOption": "Nie można wyświetlić cząsteczki ponieważ opcje cząsteczek są ustawione na \"minimalne\"",
   "commands.cparticle.success": "Pokazuję cząsteczkę %s",
 
@@ -144,6 +147,9 @@
   "commands.ctemprule.list.header": "Listowanie %d tymczasowych reguł:",
   "commands.ctemprule.reset.success": "Zresetowano tymczasową regułę %s do %s",
   "commands.ctemprule.set.success": "Zaktualizowano tymczasową regułę %s do %s",
+
+  "commands.ctp.notSpectator": "Gracz musi być w trybie obserwatora by się przeteleportować",
+  "commands.ctp.success": "Przeteleportowano gracza do %s",
 
   "commands.cwiki.failed": "Nie można było otrzymać zawartości z wiki",
 
