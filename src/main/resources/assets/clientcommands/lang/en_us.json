@@ -120,6 +120,9 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.cplayerinfo.ioException": "An error occurred",
+  "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
+
   "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
   "commands.cparticle.success": "Displaying particle %s",
 
@@ -144,6 +147,9 @@
   "commands.ctemprule.list.header": "Listing %d TempRules:",
   "commands.ctemprule.reset.success": "TempRule %s has been reset to %s",
   "commands.ctemprule.set.success": "TempRule %s has been updated to %s",
+
+  "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
+  "commands.ctp.success": "Teleported player to %s",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
