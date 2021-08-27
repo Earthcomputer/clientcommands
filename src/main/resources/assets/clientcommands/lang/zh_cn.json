@@ -1,6 +1,6 @@
 {
   "commands.calias.notFound": "未找到别名 \"%s\"",
-  "commands.calias.illegalFormatException": "The format string was either malformed or too few arguments were supplied",
+  "commands.calias.illegalFormatException": "指令格式或参数错误",
   "commands.calias.file.readError": "别名文件读取失败",
   "commands.calias.file.writeError": "别名文件写入失败",
   "commands.calias.addAlias.aliasAlreadyExists": "别名 \"%s\" 已经存在",
@@ -27,10 +27,10 @@
   "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
   "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
   "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
-  "commands.ccalc.parse.constant": "(constant '%s')",
-  "commands.ccalc.parse.function": "(function '%s' with arguments: %s)",
-  "commands.ccalc.parse.literal": "(literal: %s)",
-  "commands.ccalc.parse.negate": "(negated: %s)",
+  "commands.ccalc.parse.constant": "(常量 '%s')",
+  "commands.ccalc.parse.function": "(函数 '%s' 带有参数: %s)",
+  "commands.ccalc.parse.literal": "(字面量: %s)",
+  "commands.ccalc.parse.negate": "(负值: %s)",
   "commands.ccalc.tooDeeplyNested": "表达式嵌套过深",
 
   "commands.ccalcstack.success": "%d 个 %s 是 %d 组余 %d 个",
@@ -123,7 +123,7 @@
   "commands.cplayerinfo.ioException": "出现错误",
   "commands.cplayerinfo.getNameHistory.success": "%s 有如下名字: %s",
 
-  "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
+  "commands.cparticle.unsuitableParticleOption": "无法在视频设置粒子效果为最少时播放粒子效果",
   "commands.cparticle.success": "显示粒子效果 %s",
 
   "commands.cpermissionlevel.success": "你的权限等级为 %d",
