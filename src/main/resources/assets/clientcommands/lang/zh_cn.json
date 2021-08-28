@@ -58,7 +58,7 @@
 
   "commands.cfindblock.notFound": "没有发现此方块",
   "commands.cfindblock.success.left": "离您最近的匹配方块在 ",
-  "commands.cfindblock.success.glow": "[Glow]",
+  "commands.cfindblock.success.glow": "[发光]",
   "commands.cfindblock.success.right": "， 距离您 %1$.2f 格",
 
   "commands.cfinditem.match.left": "在 ",
