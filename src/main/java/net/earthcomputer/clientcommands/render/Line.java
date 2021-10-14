@@ -1,9 +1,7 @@
 package net.earthcomputer.clientcommands.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 
@@ -25,10 +23,11 @@ public class Line extends Shape {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumerProvider, float delta) {
-        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getLines());
-        renderLine(matrixStack, vertexConsumer, delta, prevPos.subtract(getPos()));
-        vertexConsumerProvider.draw(RenderLayer.getLines());
+    public void render(MatrixStack matrixStack, float delta) {
+        BufferBuilder buff = Tessellator.getInstance().getBuffer();
+        buff.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+        renderLine(matrixStack, buff, delta, prevPos.subtract(getPos()));
+        Tessellator.getInstance().draw();
     }
 
     public void renderLine(MatrixStack matrixStack, VertexConsumer vertexConsumer, float delta, Vec3d prevPosOffset) {
@@ -49,8 +48,6 @@ public class Line extends Shape {
                 ((color >> 8) & 0xFF) / 255.0F,
                 (color & 0xFF) / 255.0F,
                 1.0F
-        ).normal(
-                1, 0, 0
         ).next();
     }
 
