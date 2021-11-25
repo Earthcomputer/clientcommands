@@ -41,9 +41,9 @@ public class Relogger {
         isRelogging = false;
 
         if (singleplayer) {
-            mc.openScreen(new TitleScreen());
+            mc.setScreen(new TitleScreen());
         } else {
-            mc.openScreen(new MultiplayerScreen(new TitleScreen()));
+            mc.setScreen(new MultiplayerScreen(new TitleScreen()));
         }
 
         return true;
@@ -63,7 +63,7 @@ public class Relogger {
             if (!mc.getLevelStorage().levelExists(levelName)) {
                 return false;
             }
-            mc.method_29970(new SaveLevelScreen(new TranslatableText("selectWorld.data_read")));
+            mc.setScreenAndRender(new SaveLevelScreen(new TranslatableText("selectWorld.data_read")));
             mc.startIntegratedServer(levelName);
             return true;
         } else {

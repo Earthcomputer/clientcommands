@@ -47,7 +47,7 @@ public abstract class MixinMinecraftClient {
         TaskManager.onWorldUnload(world == null);
     }
 
-    @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void onOpenScreen(Screen screen, CallbackInfo ci) {
         if (screen != null
                 && !(screen instanceof SaveLevelScreen)

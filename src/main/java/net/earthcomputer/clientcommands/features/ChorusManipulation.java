@@ -105,7 +105,7 @@ public class ChorusManipulation {
                     final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
                     ClientWorld world = MinecraftClient.getInstance().world;
                     assert world != null;
-                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), world.getBottomY(), (world.getBottomY() + world.getLogicalHeight() - 1));
+                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), world.getBottomY(), (world.getBottomY() + world.getHeight() - 1));
                     final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
                     final Vec3d landingArea = canTeleport(area, new Vec3d(x, y, z));
 

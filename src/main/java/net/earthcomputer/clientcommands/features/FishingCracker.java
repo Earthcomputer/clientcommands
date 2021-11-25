@@ -19,7 +19,6 @@ import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -59,7 +58,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.collection.ReusableStream;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -88,7 +86,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class FishingCracker {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -620,7 +617,7 @@ public class FishingCracker {
     public record Catch(ItemStack loot, int experience) {
         @Override
         public int hashCode() {
-            return 7 * (31 * Objects.hash(loot.getItem(), loot.getTag()) + loot.getCount()) + experience;
+            return 7 * (31 * Objects.hash(loot.getItem(), loot.getNbt()) + loot.getCount()) + experience;
         }
 
         @Override
@@ -1101,13 +1098,14 @@ public class FishingCracker {
             fakeEntity.setVelocity(velocity);
             assert world != null;
 
-            ShapeContext shapeContext = ShapeContext.of(fakeEntity);
             VoxelShape voxelShape = this.world.getWorldBorder().asVoxelShape();
-            Stream<VoxelShape> stream = VoxelShapes.matchesAnywhere(voxelShape, VoxelShapes.cuboid(box.contract(1.0E-7D)), BooleanBiFunction.AND) ? Stream.empty() : Stream.of(voxelShape);
-            Stream<VoxelShape> stream2 = this.world.getEntityCollisions(fakeEntity, box.stretch(movement), (entity) -> true);
-            ReusableStream<VoxelShape> reusableStream = new ReusableStream<>(Stream.concat(stream2, stream));
+            List<VoxelShape> voxelShapes = new ArrayList<>();
+            if (!VoxelShapes.matchesAnywhere(voxelShape, VoxelShapes.cuboid(box.contract(1.0E-7D)), BooleanBiFunction.AND)) {
+                voxelShapes.add(voxelShape);
+            }
+            voxelShapes.addAll(this.world.getEntityCollisions(fakeEntity, box.stretch(movement)));
 
-            return movement.lengthSquared() == 0.0D ? movement : Entity.adjustMovementForCollisions(fakeEntity, movement, box, this.world, shapeContext, reusableStream);
+            return movement.lengthSquared() == 0.0D ? movement : Entity.adjustMovementForCollisions(fakeEntity, movement, box, this.world, voxelShapes);
         }
 
         private float getVelocityMultiplier() {

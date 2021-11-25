@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CommandSuggestor.class)
 public interface CommandSuggestorAccessor {
 
-    @Accessor("HIGHLIGHT_FORMATTINGS")
-    static List<Style> getHighlightFormattings() {
+    @Accessor("HIGHLIGHT_STYLES")
+    static List<Style> getHighlightStyles() {
         throw new AssertionError();
     }
 

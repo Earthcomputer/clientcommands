@@ -39,7 +39,7 @@ public class Line extends Shape {
 
     private void putVertex(MatrixStack matrixStack, VertexConsumer vertexConsumer, Vec3d pos) {
         vertexConsumer.vertex(
-                matrixStack.peek().getModel(),
+                matrixStack.peek().getPositionMatrix(),
                 (float) pos.getX(),
                 (float) pos.getY(),
                 (float) pos.getZ()

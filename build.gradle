@@ -1,24 +1,24 @@
 plugins {
-	id 'fabric-loom' version '0.8-SNAPSHOT'
+	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-minecraft {
-	accessWidener 'src/main/resources/clientcommands.aw'
+loom {
+	accessWidenerPath = file('src/main/resources/clientcommands.aw')
 }
 
 def clientcommandsScriptingExists = findProject(':clientcommands-scripting') != null
 subprojects {
 	afterEvaluate {
 		dependencies {
-			modImplementation project(':')
+			implementation project(':')
 		}
 	}
 }

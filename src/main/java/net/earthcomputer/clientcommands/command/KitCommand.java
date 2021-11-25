@@ -171,7 +171,7 @@ public class KitCommand {
             instantly along with the chat hud. Slightly delaying the opening of the
             screen fixes this issue.
          */
-        client.send(() -> client.openScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, client.player), tempInv, name)));
+        client.send(() -> client.setScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, client.player), tempInv, name)));
         return 0;
     }
 
@@ -225,18 +225,25 @@ class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
         this.titleX = 80;
     }
 
+    @Override
     protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
         this.textRenderer.draw(matrices, this.title, (float) this.titleX, (float) this.titleY, 0x404040);
     }
 
+    @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.drawStatusEffects = false;
         this.renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
 
         this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
 
+    @Override
+    protected void drawStatusEffects(MatrixStack matrices, int mouseX, int mouseY) {
+        // nop
+    }
+
+    @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);

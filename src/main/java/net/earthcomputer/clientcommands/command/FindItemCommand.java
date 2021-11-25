@@ -218,7 +218,7 @@ public class FindItemCommand {
                                 if (searchingFor.test(stack))
                                     matchingItems += stack.getCount();
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    NbtCompound blockEntityTag = stack.getSubTag("BlockEntityTag");
+                                    NbtCompound blockEntityTag = stack.getSubNbt("BlockEntityTag");
                                     if (blockEntityTag != null && blockEntityTag.contains("Items")) {
                                         DefaultedList<ItemStack> boxInv = DefaultedList.ofSize(27, ItemStack.EMPTY);
                                         Inventories.readNbt(blockEntityTag, boxInv);

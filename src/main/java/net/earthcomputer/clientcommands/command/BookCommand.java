@@ -101,7 +101,7 @@ public class BookCommand {
             pagesNbt.add(NbtString.of(page));
         }
 
-        heldItem.putSubTag("pages", pagesNbt);
+        heldItem.setSubNbt("pages", pagesNbt);
         player.networkHandler.sendPacket(new BookUpdateC2SPacket(slot, pages, Optional.empty()));
 
         sendFeedback("commands.cbook.success");

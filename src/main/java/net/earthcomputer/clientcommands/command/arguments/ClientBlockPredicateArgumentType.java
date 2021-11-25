@@ -92,7 +92,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
                 return false;
             }
             BlockEntity be = blockView.getBlockEntity(pos);
-            return be != null && NbtHelper.matches(nbtData, be.writeNbt(new NbtCompound()), true);
+            return be != null && NbtHelper.matches(nbtData, be.createNbt(), true);
         };
     }
 
@@ -140,7 +140,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
                             // from this point we would always require a block entity
                             return false;
                         }
-                        actualNbt = be.writeNbt(new NbtCompound());
+                        actualNbt = be.createNbt();
                     }
                     if (NbtHelper.matches(nbt, actualNbt, true)) {
                         return true;
