@@ -1,340 +1,347 @@
 Method
 getRandom()
-Found usages
+Usages in All Places
 Unclassified
 clientcommands.main
 net.earthcomputer.clientcommands.features
 PlayerRandCracker
 singlePlayerCrackRNG()
         OptionalLong seed = getSeed(serverPlayer.getRandom());
-Gradle: net.minecraft:minecraft:1.17-rc2-project-@-mapped-net.fabricmc.yarn-1.17-rc2+build.10-v2
+Gradle: net.minecraft:minecraft-project-@-mapped:1.18-rc1/net.fabricmc.yarn.1_18_rc1.1.18-rc1+build.1-v2
 net.minecraft.advancement
 AdvancementRewards
 apply(ServerPlayerEntity)
 ....ORIGIN, player.getPos()).random(player.getRandom()).build(LootContextTypes.ADVANCEMENT_REWARD);...
-..., SoundCategory.PLAYERS, 0.2F, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);...
+..., SoundCategory.PLAYERS, 0.2f, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);...
+...player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);...
 net.minecraft.enchantment
 DamageEnchantment
 onTargetDamaged(LivingEntity, Entity, int)
-            int i = 20 + user.getRandom().nextInt(10 * level);
+                int i = 20 + user.getRandom().nextInt(10 * level);
 EnchantmentHelper
 chooseEquipmentWith(Enchantment, LivingEntity, Predicate<ItemStack>)
-         return list.isEmpty() ? null : (Entry)list.get(entity.getRandom().nextInt(list.size()));
+        return list.isEmpty() ? null : (Map.Entry)list.get(entity.getRandom().nextInt(list.size()));
 FrostWalkerEnchantment
 freezeWater(LivingEntity, World, BlockPos, int)
-                     world.getBlockTickScheduler().schedule(blockPos2, Blocks.FROSTED_ICE, MathHelper.nextInt(entity.getRandom(), 60, 120));
+            world.createAndScheduleBlockTick(blockPos2, Blocks.FROSTED_ICE, MathHelper.nextInt(entity.getRandom(), 60, 120));
 ThornsEnchantment
 onUserDamaged(LivingEntity, Entity, int)
-      Random random = user.getRandom();
+        Random random = user.getRandom();
 net.minecraft.entity
 CrossbowUser
 shoot(LivingEntity, LivingEntity, ProjectileEntity, float, float)
-      entity.playSound(SoundEvents.ITEM_CROSSBOW_SHOOT, 1.0F, 1.0F / (entity.getRandom().nextFloat() * 0.4F + 0.8F));
+        entity.playSound(SoundEvents.ITEM_CROSSBOW_SHOOT, 1.0f, 1.0f / (entity.getRandom().nextFloat() * 0.4f + 0.8f));
 LivingEntity
 addSoulSpeedBoostIfNeeded()
-            if (this.getRandom().nextFloat() < 0.04F) {
+            if (this.getRandom().nextFloat() < 0.04f) {
 net.minecraft.entity.ai
 AboveGroundTargeting
 find(PathAwareEntity, int, int, double, double, float, int, ...)
-         BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, x, z, (double)angle);
-               blockPos2 = FuzzyPositions.upWhile(blockPos2, entity.getRandom().nextInt(maxAboveSolid - minAboveSolid + 1) + minAboveSolid, entity.world.getTopY(), (pos) -> {
+            BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, x, z, angle);
+...uzzyPositions.upWhile(blockPos2, entity.getRandom().nextInt(maxAboveSolid - minAboveSolid + 1) + minAboveSolid, pathAwareEntity.world.getTop...
 FuzzyTargeting
 find(PathAwareEntity, int, int, ToDoubleFunction<BlockPos>)
-         BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange);
+            BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange);
 findValid(PathAwareEntity, int, int, Vec3d, boolean)
-         BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, direction.x, direction.z, 1.5707963705062866D);
-tryMake(PathAwareEntity, int, boolean, BlockPos)
-      BlockPos blockPos = FuzzyPositions.towardTarget(entity, horizontalRange, entity.getRandom(), relativeInRangePos);
+            BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, vec3d.x, vec3d.z, 1.5707963705062866);
+towardTarget(PathAwareEntity, int, boolean, BlockPos)
+        BlockPos blockPos = FuzzyPositions.towardTarget(entity, horizontalRange, entity.getRandom(), relativeInRangePos);
 NoPenaltySolidTargeting
 tryMake(PathAwareEntity, int, int, int, double, double, double, ...)
-      BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, startHeight, directionX, directionZ, rangeAngle);
-         BlockPos blockPos2 = FuzzyPositions.towardTarget(entity, horizontalRange, entity.getRandom(), blockPos);
+        BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, startHeight, directionX, directionZ, rangeAngle);
+        BlockPos blockPos2 = FuzzyPositions.towardTarget(entity, horizontalRange, entity.getRandom(), blockPos);
 NoPenaltyTargeting
 find(PathAwareEntity, int, int)
-         BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange);
-find(PathAwareEntity, int, int, Vec3d, double)
-         BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, vec3d.x, vec3d.z, angleRange);
-find(PathAwareEntity, int, int, Vec3d)
-         BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, vec3d.x, vec3d.z, 1.5707963705062866D);
+            BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange);
+findTo(PathAwareEntity, int, int, Vec3d, double)
+            BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, vec3d.x, vec3d.z, angleRange);
+findFrom(PathAwareEntity, int, int, Vec3d)
+            BlockPos blockPos = FuzzyPositions.localFuzz(entity.getRandom(), horizontalRange, verticalRange, 0, vec3d.x, vec3d.z, 1.5707963705062866);
 tryMake(PathAwareEntity, int, boolean, BlockPos)
-      BlockPos blockPos = FuzzyPositions.towardTarget(entity, horizontalRange, entity.getRandom(), fuzz);
+        BlockPos blockPos = FuzzyPositions.towardTarget(entity, horizontalRange, entity.getRandom(), fuzz);
 net.minecraft.entity.ai.brain.task
 BreedTask
 run(ServerWorld, AnimalEntity, long)
-      int i = 60 + animalEntity.getRandom().nextInt(50);
+        int i = 60 + animalEntity.getRandom().nextInt(50);
 CelebrateRaidWinTask
 keepRunning(ServerWorld, VillagerEntity, long)
-      Random random = villagerEntity.getRandom();
+        Random random = villagerEntity.getRandom();
 CrossbowAttackTask
 tickState(E, LivingEntity)
-            this.chargingCooldown = 20 + entity.getRandom().nextInt(20);
+                this.chargingCooldown = 20 + ((LivingEntity)entity).getRandom().nextInt(20);
 GiveGiftsToHeroTask
 getGifts(VillagerEntity)
 ....THIS_ENTITY, villager).random(villager.getRandom());...
 HideInHomeTask
 run(ServerWorld, LivingEntity, long)
-         }, PointOfInterestStorage.OccupationStatus.ANY, entity.getBlockPos(), this.maxDistance, entity.getRandom());
+...getBlockPos(), this.maxDistance, entity.getRandom())).isPresent() && (optional2 = brain.getOptionalMemory(MemoryModuleType.HOME)).isPresent(...
 SeekSkyTask
 findNearbySky(ServerWorld, LivingEntity)
-      Random random = entity.getRandom();
+        Random random = entity.getRandom();
 StayAboveWaterTask
 keepRunning(ServerWorld, MobEntity, long)
-      if (mobEntity.getRandom().nextFloat() < this.chance) {
+        if (mobEntity.getRandom().nextFloat() < this.chance) {
 VillagerBreedTask
 run(ServerWorld, VillagerEntity, long)
-      int i = 275 + villagerEntity.getRandom().nextInt(50);
+        int i = 275 + villagerEntity.getRandom().nextInt(50);
 keepRunning(ServerWorld, VillagerEntity, long)
-         } else if (villagerEntity.getRandom().nextInt(35) == 0) {
+        } else if (villagerEntity.getRandom().nextInt(35) == 0) {
 net.minecraft.entity.ai.goal
+ActiveTargetGoal
+canStart()
+        if (this.reciprocalChance > 0 && this.mob.getRandom().nextInt(this.reciprocalChance) != 0) {
 BowAttackGoal
 tick()
-            if ((double)this.actor.getRandom().nextFloat() < 0.3D) {
-            if ((double)this.actor.getRandom().nextFloat() < 0.3D) {
+            if ((double)((LivingEntity)this.actor).getRandom().nextFloat() < 0.3) {
+            if ((double)((LivingEntity)this.actor).getRandom().nextFloat() < 0.3) {
 BreakDoorGoal
 tick()
-      if (this.mob.getRandom().nextInt(20) == 0) {
+        if (this.mob.getRandom().nextInt(20) == 0) {
 CrossbowAttackGoal
 tick()
-               this.cooldown = COOLDOWN_RANGE.get(this.actor.getRandom());
-               this.chargedTicksLeft = 20 + this.actor.getRandom().nextInt(20);
+                this.cooldown = COOLDOWN_RANGE.get(((LivingEntity)this.actor).getRandom());
+                this.chargedTicksLeft = 20 + ((LivingEntity)this.actor).getRandom().nextInt(20);
 DolphinJumpGoal
 canStart()
-      if (this.dolphin.getRandom().nextInt(this.chance) != 0) {
+        if (this.dolphin.getRandom().nextInt(this.chance) != 0) {
 EatGrassGoal
 canStart()
-      if (this.mob.getRandom().nextInt(this.mob.isBaby() ? 50 : 1000) != 0) {
+        if (this.mob.getRandom().nextInt(this.mob.isBaby() ? 50 : 1000) != 0) {
 EscapeSunlightGoal
 locateShadedPos()
-      Random random = this.mob.getRandom();
-FlyOntoTreeGoal
-getWanderTarget()
-      if (this.mob.getRandom().nextFloat() >= this.probability) {
+        Random random = this.mob.getRandom();
 FollowGroupLeaderGoal
 getSurroundingSearchDelay(SchoolingFishEntity)
-      return 200 + fish.getRandom().nextInt(200) % 20;
+        return FollowGroupLeaderGoal.toGoalTicks(200 + fish.getRandom().nextInt(200) % 20);
 FollowOwnerGoal
 getRandomInt(int, int)
-      return this.tameable.getRandom().nextInt(max - min + 1) + min;
-FollowTargetGoal
-canStart()
-      if (this.reciprocalChance > 0 && this.mob.getRandom().nextInt(this.reciprocalChance) != 0) {
+        return this.tameable.getRandom().nextInt(max - min + 1) + min;
 GoToVillageGoal
 canStart()
-      } else if (this.mob.getRandom().nextInt(this.searchRange) != 0) {
+        if (this.mob.getRandom().nextInt(this.searchRange) != 0) {
 findOtherWaypoint()
-      Random random = this.mob.getRandom();
+        Random random = this.mob.getRandom();
 HoldInHandsGoal
 stop()
-         this.actor.playSound(this.sound, 1.0F, this.actor.getRandom().nextFloat() * 0.2F + 0.9F);
+            ((Entity)this.actor).playSound(this.sound, 1.0f, ((LivingEntity)this.actor).getRandom().nextFloat() * 0.2f + 0.9f);
 HorseBondWithPlayerGoal
 tick()
-      if (!this.horse.isTame() && this.horse.getRandom().nextInt(50) == 0) {
-            if (j > 0 && this.horse.getRandom().nextInt(j) < i) {
+        if (!this.horse.isTame() && this.horse.getRandom().nextInt(this.getTickCount(50)) == 0) {
+                if (j > 0 && this.horse.getRandom().nextInt(j) < i) {
 IronGolemLookGoal
 canStart()
-      } else if (this.golem.getRandom().nextInt(8000) != 0) {
+        if (this.golem.getRandom().nextInt(8000) != 0) {
 LookAroundGoal
 canStart()
-      return this.mob.getRandom().nextFloat() < 0.02F;
+        return this.mob.getRandom().nextFloat() < 0.02f;
 start()
-      double d = 6.283185307179586D * this.mob.getRandom().nextDouble();
-      this.lookTime = 20 + this.mob.getRandom().nextInt(20);
+        double d = Math.PI * 2 * this.mob.getRandom().nextDouble();
+        this.lookTime = 20 + this.mob.getRandom().nextInt(20);
 LookAtEntityGoal
 canStart()
-      if (this.mob.getRandom().nextFloat() >= this.chance) {
+        if (this.mob.getRandom().nextFloat() >= this.chance) {
 start()
-      this.lookTime = 40 + this.mob.getRandom().nextInt(40);
+        this.lookTime = this.getTickCount(40 + this.mob.getRandom().nextInt(40));
 MeleeAttackGoal
 tick()
-...getY, this.targetZ) >= 1.0D || this.mob.getRandom().nextFloat() < 0.05F)) {...
-         this.updateCountdownTicks = 4 + this.mob.getRandom().nextInt(7);
+...rgetY, this.targetZ) >= 1.0 || this.mob.getRandom().nextFloat() < 0.05f)) {...
+            this.updateCountdownTicks = 4 + this.mob.getRandom().nextInt(7);
 MoveToTargetPosGoal
 getInterval(PathAwareEntity)
-      return 200 + mob.getRandom().nextInt(200);
+        return MoveToTargetPosGoal.toGoalTicks(200 + mob.getRandom().nextInt(200));
 start()
-      this.safeWaitingTime = this.mob.getRandom().nextInt(this.mob.getRandom().nextInt(1200) + 1200) + 1200;
+        this.safeWaitingTime = this.mob.getRandom().nextInt(this.mob.getRandom().nextInt(1200) + 1200) + 1200;
+        this.safeWaitingTime = this.mob.getRandom().nextInt(this.mob.getRandom().nextInt(1200) + 1200) + 1200;
 PounceAtTargetGoal
 canStart()
-                  return this.mob.getRandom().nextInt(5) == 0;
+        return this.mob.getRandom().nextInt(PounceAtTargetGoal.toGoalTicks(5)) == 0;
 RaidGoal
 canStart()
-      if (this.cooldown <= 0 && this.mob.getRandom().nextBoolean()) {
+        if (this.cooldown > 0 || !this.mob.getRandom().nextBoolean()) {
 SkeletonHorseTrapTriggerGoal
 tick()
-         horseBaseEntity.addVelocity(this.skeletonHorse.getRandom().nextGaussian() * 0.5D, 0.0D, this.skeletonHorse.getRandom().nextGaussian() * 0.5D);
+            horseBaseEntity.addVelocity(this.skeletonHorse.getRandom().nextGaussian() * 0.5, 0.0, this.skeletonHorse.getRandom().nextGaussian() * 0.5);
+            horseBaseEntity.addVelocity(this.skeletonHorse.getRandom().nextGaussian() * 0.5, 0.0, this.skeletonHorse.getRandom().nextGaussian() * 0.5);
 getSkeleton(LocalDifficulty, HorseBaseEntity)
-...nchantmentHelper.enchant(skeletonEntity.getRandom(), this.removeEnchantments(skeletonEntity.getMainHandStack()), (int)(5.0F + localDifficult...
+...nchantmentHelper.enchant(skeletonEntity.getRandom(), this.removeEnchantments(skeletonEntity.getMainHandStack()), (int)(5.0f + localDifficult...
+...calDifficulty() * (float)skeletonEntity.getRandom().nextInt(18)), false));...
 ...nchantmentHelper.enchant(skeletonEntity.getRandom(), this.removeEnchantments(skeletonEntity.getEquippedStack(EquipmentSlot.HEAD)), (int)(5.0...
+...calDifficulty() * (float)skeletonEntity.getRandom().nextInt(18)), false));...
 StepAndDestroyBlockGoal
 tick()
-      Random random = this.stepAndDestroyMob.getRandom();
+        Random random = this.stepAndDestroyMob.getRandom();
 SwimGoal
 tick()
-      if (this.mob.getRandom().nextFloat() < 0.8F) {
+        if (this.mob.getRandom().nextFloat() < 0.8f) {
 TrackTargetGoal
 canNavigateToEntity(LivingEntity)
-      this.checkCanNavigateCooldown = 10 + this.mob.getRandom().nextInt(5);
+        this.checkCanNavigateCooldown = TrackTargetGoal.toGoalTicks(10 + this.mob.getRandom().nextInt(5));
 WanderAroundFarGoal
 getWanderTarget()
-         return this.mob.getRandom().nextFloat() >= this.probability ? FuzzyTargeting.find(this.mob, 10, 7) : super.getWanderTarget();
+        if (this.mob.getRandom().nextFloat() >= this.probability) {
 WanderAroundGoal
 canStart()
-            if (this.mob.getRandom().nextInt(this.chance) != 0) {
+            if (this.mob.getRandom().nextInt(WanderAroundGoal.toGoalTicks(this.chance)) != 0) {
 WolfBegGoal
 start()
-      this.timer = 40 + this.wolf.getRandom().nextInt(40);
+        this.timer = this.getTickCount(40 + this.wolf.getRandom().nextInt(40));
 net.minecraft.entity.boss.dragon.phase
 DyingPhase
 clientTick()
-         float f = (this.dragon.getRandom().nextFloat() - 0.5F) * 8.0F;
-         float g = (this.dragon.getRandom().nextFloat() - 0.5F) * 4.0F;
-         float h = (this.dragon.getRandom().nextFloat() - 0.5F) * 8.0F;
+            float f = (this.dragon.getRandom().nextFloat() - 0.5f) * 8.0f;
+            float g = (this.dragon.getRandom().nextFloat() - 0.5f) * 4.0f;
+            float h = (this.dragon.getRandom().nextFloat() - 0.5f) * 8.0f;
 HoldingPatternPhase
 tickInRange()
-         if (this.dragon.getRandom().nextInt(k + 3) == 0) {
-         if (playerEntity != null && (this.dragon.getRandom().nextInt(MathHelper.abs((int)d) + 2) == 0 || this.dragon.getRandom().nextInt(k + 2) == 0)) {
-         if (this.dragon.getRandom().nextInt(8) == 0) {
+            if (this.dragon.getRandom().nextInt(i + 3) == 0) {
+            if (playerEntity != null && (this.dragon.getRandom().nextInt(MathHelper.abs((int)d) + 2) == 0 || this.dragon.getRandom().nextInt(i + 2) == 0)) {
+            if (playerEntity != null && (this.dragon.getRandom().nextInt(MathHelper.abs((int)d) + 2) == 0 || this.dragon.getRandom().nextInt(i + 2) == 0)) {
+            if (this.dragon.getRandom().nextInt(8) == 0) {
 followPath()
-            f = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+            while ((f = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0f)) < (double)vec3i.getY()) {
 LandingApproachPhase
 followPath()
-            f = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+            while ((f = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0f)) < (double)vec3i.getY()) {
 LandingPhase
 clientTick()
-         Random random = this.dragon.getRandom();
+            Random random = this.dragon.getRandom();
 SittingAttackingPhase
 clientTick()
-...undCategory(), 2.5F, 0.8F + this.dragon.getRandom().nextFloat() * 0.3F, false);...
+...undCategory(), 2.5f, 0.8f + this.dragon.getRandom().nextFloat() * 0.3f, false);...
 SittingFlamingPhase
 clientTick()
-            double g = d + this.dragon.getRandom().nextGaussian() / 2.0D;
-            double h = e + this.dragon.getRandom().nextGaussian() / 2.0D;
-            double j = f + this.dragon.getRandom().nextGaussian() / 2.0D;
+                double g = d + this.dragon.getRandom().nextGaussian() / 2.0;
+                double h = e + this.dragon.getRandom().nextGaussian() / 2.0;
+                double j = f + this.dragon.getRandom().nextGaussian() / 2.0;
 StrafePlayerPhase
 updatePath()
-         if (this.dragon.getRandom().nextInt(8) == 0) {
+            if (this.dragon.getRandom().nextInt(8) == 0) {
 followPath()
-            f = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+            while ((f = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0f)) < (double)vec3i.getY()) {
 TakeoffPhase
 followPath()
-               d = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+                while ((d = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0f)) < (double)vec3i.getY()) {
 net.minecraft.entity.mob
 AbstractSkeletonEntity
 attack(LivingEntity, float)
-      this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
 BlazeEntity.ShootFireballGoal
 tick()
 ...blaze.world, this.blaze, e + this.blaze.getRandom().nextGaussian() * h, f, g + this.blaze.getRandom().nextGaussian() * h);...
+...).nextGaussian() * h, f, g + this.blaze.getRandom().nextGaussian() * h);...
 DrownedEntity
 attack(LivingEntity, float)
-      this.playSound(SoundEvents.ENTITY_DROWNED_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.ENTITY_DROWNED_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
 DrownedEntity.WanderAroundOnSurfaceGoal
 getWanderTarget()
-         Random random = this.mob.getRandom();
+            Random random = this.mob.getRandom();
 EndermanEntity.PickUpBlockGoal
 canStart()
-            return this.enderman.getRandom().nextInt(20) == 0;
+            return this.enderman.getRandom().nextInt(PickUpBlockGoal.toGoalTicks(20)) == 0;
 tick()
-         Random random = this.enderman.getRandom();
+            Random random = this.enderman.getRandom();
 EndermanEntity.PlaceBlockGoal
 canStart()
-            return this.enderman.getRandom().nextInt(2000) == 0;
+            return this.enderman.getRandom().nextInt(PlaceBlockGoal.toGoalTicks(2000)) == 0;
 tick()
-         Random random = this.enderman.getRandom();
+            Random random = this.enderman.getRandom();
 GhastEntity.FlyRandomlyGoal
 start()
-         Random random = this.ghast.getRandom();
+            Random random = this.ghast.getRandom();
 GhastEntity.GhastMoveControl
 tick()
-               this.collisionCheckCooldown += this.ghast.getRandom().nextInt(5) + 2;
+                this.collisionCheckCooldown += this.ghast.getRandom().nextInt(5) + 2;
 IllusionerEntity
 attack(LivingEntity, float)
-      this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.ENTITY_SKELETON_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
 PatrolEntity.PatrolGoal
 wander()
-         Random random = this.entity.getRandom();
+            Random random = ((LivingEntity)this.entity).getRandom();
 SilverfishEntity.CallForHelpGoal
 tick()
-            Random random = this.silverfish.getRandom();
+                Random random = this.silverfish.getRandom();
 SilverfishEntity.WanderAndInfestGoal
 canStart()
             Random random = this.mob.getRandom();
 SlimeEntity.RandomLookGoal
 tick()
-            this.timer = 40 + this.slime.getRandom().nextInt(60);
-            this.targetYaw = (float)this.slime.getRandom().nextInt(360);
+                this.timer = this.getTickCount(40 + this.slime.getRandom().nextInt(60));
+                this.targetYaw = this.slime.getRandom().nextInt(360);
 SlimeEntity.SwimmingGoal
 tick()
-         if (this.slime.getRandom().nextFloat() < 0.8F) {
+            if (this.slime.getRandom().nextFloat() < 0.8f) {
 SpiderEntity.AttackGoal
 shouldContinue()
-         if (f >= 0.5F && this.mob.getRandom().nextInt(100) == 0) {
+            if (f >= 0.5f && this.mob.getRandom().nextInt(100) == 0) {
 net.minecraft.entity.passive
 AnimalEntity
 breed(ServerWorld, AnimalEntity)
             world.spawnEntity(new ExperienceOrbEntity(world, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
 CatEntity.SleepWithOwnerGoal
 dropMorningGifts()
-         Random random = this.cat.getRandom();
+            Random random = this.cat.getRandom();
 CatEntity.TemptGoal
 tick()
-         if (this.player == null && this.mob.getRandom().nextInt(600) == 0) {
-         } else if (this.mob.getRandom().nextInt(500) == 0) {
+            if (this.player == null && this.mob.getRandom().nextInt(this.getTickCount(600)) == 0) {
+            } else if (this.mob.getRandom().nextInt(this.getTickCount(500)) == 0) {
 FoxEntity.DefendFriendGoal
 canStart()
-         if (this.reciprocalChance > 0 && this.mob.getRandom().nextInt(this.reciprocalChance) != 0) {
+            if (this.reciprocalChance > 0 && this.mob.getRandom().nextInt(this.reciprocalChance) != 0) {
 FoxEntity.MateGoal
 breed()
-               this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));
+                this.world.spawnEntity(new ExperienceOrbEntity(this.world, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));
 FoxEntity.PickupItemGoal
 canStart()
-            } else if (FoxEntity.this.getRandom().nextInt(10) != 0) {
+            if (FoxEntity.this.getRandom().nextInt(PickupItemGoal.toGoalTicks(10)) != 0) {
 FoxEntity.SitDownAndLookAroundGoal
 canStart()
-...getAttacker() == null && FoxEntity.this.getRandom().nextFloat() < 0.02F && !FoxEntity.this.isSleeping() && FoxEntity.this.getTarget() == nul...
+...getAttacker() == null && FoxEntity.this.getRandom().nextFloat() < 0.02f && !FoxEntity.this.isSleeping() && FoxEntity.this.getTarget() == nul...
 start()
-         this.counter = 2 + FoxEntity.this.getRandom().nextInt(3);
+            this.counter = 2 + FoxEntity.this.getRandom().nextInt(3);
 chooseNewAngle()
-         double d = 6.283185307179586D * FoxEntity.this.getRandom().nextDouble();
-         this.timer = 80 + FoxEntity.this.getRandom().nextInt(20);
+            double d = Math.PI * 2 * FoxEntity.this.getRandom().nextDouble();
+            this.timer = this.getTickCount(80 + FoxEntity.this.getRandom().nextInt(20));
 IronGolemEntity
 pushAway(Entity)
-      if (entity instanceof Monster && !(entity instanceof CreeperEntity) && this.getRandom().nextInt(20) == 0) {
+        if (entity instanceof Monster && !(entity instanceof CreeperEntity) && this.getRandom().nextInt(20) == 0) {
 PandaEntity.LookAtEntityGoal
 canStart()
-         if (this.mob.getRandom().nextFloat() >= this.chance) {
+            if (this.mob.getRandom().nextFloat() >= this.chance) {
+ParrotEntity.FlyOntoTreeGoal
+getWanderTarget()
+            if (this.mob.getRandom().nextFloat() >= this.probability) {
 PigEntity
 consumeOnAStickItem()
-      return this.saddledComponent.boost(this.getRandom());
+        return this.saddledComponent.boost(this.getRandom());
 SnowGolemEntity
 attack(LivingEntity, float)
-      this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.ENTITY_SNOW_GOLEM_SHOOT, 1.0f, 0.4f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
 SquidEntity.SwimGoal
 tick()
-         } else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.touchingWater || !this.squid.hasSwimmingVector()) {
-            float f = this.squid.getRandom().nextFloat() * 6.2831855F;
-            float h = -0.1F + this.squid.getRandom().nextFloat() * 0.2F;
+            } else if (this.squid.getRandom().nextInt(SwimGoal.toGoalTicks(50)) == 0 || !this.squid.touchingWater || !this.squid.hasSwimmingVector()) {
+                float f = this.squid.getRandom().nextFloat() * ((float)Math.PI * 2);
+                float h = -0.1f + this.squid.getRandom().nextFloat() * 0.2f;
 StriderEntity
 consumeOnAStickItem()
-      return this.saddledComponent.boost(this.getRandom());
+        return this.saddledComponent.boost(this.getRandom());
 TurtleEntity.GoHomeGoal
 canStart()
-         } else if (this.turtle.getRandom().nextInt(700) != 0) {
+            if (this.turtle.getRandom().nextInt(GoHomeGoal.toGoalTicks(700)) != 0) {
 TurtleEntity.MateGoal
 breed()
-         Random random = this.animal.getRandom();
+            Random random = this.animal.getRandom();
 net.minecraft.item
 ChorusFruitItem
 finishUsing(ItemStack, World, LivingEntity)
-            double g = user.getX() + (user.getRandom().nextDouble() - 0.5D) * 16.0D;
+                double g = user.getX() + (user.getRandom().nextDouble() - 0.5) * 16.0;
 ...elper.clamp(user.getY() + (double)(user.getRandom().nextInt(16) - 8), (double)world.getBottomY(), (double)(world.getBottomY() + ((ServerWorl...
-            double j = user.getZ() + (user.getRandom().nextDouble() - 0.5D) * 16.0D;
+                double j = user.getZ() + (user.getRandom().nextDouble() - 0.5) * 16.0;
 CrossbowItem
 shootAll(World, LivingEntity, Hand, ItemStack, float, float)
-      float[] fs = getSoundPitches(entity.getRandom());
+        float[] fs = CrossbowItem.getSoundPitches(entity.getRandom());
 ItemStack
 damage(int, T, Consumer<T>)
-            if (this.damage(amount, entity.getRandom(), entity instanceof ServerPlayerEntity ? (ServerPlayerEntity)entity : null)) {
+        if (this.damage(amount, entity.getRandom(), entity instanceof ServerPlayerEntity ? (ServerPlayerEntity)entity : null)) {
 net.minecraft.predicate.entity
 EntityPredicate
 createAdvancementEntityLootContext(ServerPlayerEntity, Entity)
@@ -342,8 +349,9 @@ createAdvancementEntityLootContext(ServerPlayerEntity, Entity)
 net.minecraft.screen
 AnvilScreenHandler
 onTakeOutput(PlayerEntity, ItemStack)
-         if (!player.getAbilities().creativeMode && blockState.isIn(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
+            if (!playerEntity.getAbilities().creativeMode && blockState.isIn(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12f) {
 net.minecraft.server.command
 GiveCommand
 execute(ServerCommandSource, ItemStackArgument, Collection<ServerPlayerEntity>, int)
-...ory.PLAYERS, 0.2F, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);...
+...ory.PLAYERS, 0.2f, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);...
+...ndom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);...
