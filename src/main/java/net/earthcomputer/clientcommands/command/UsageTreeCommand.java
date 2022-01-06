@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -34,11 +35,9 @@ public class UsageTreeCommand {
                     return content.size() + 1;
                 })
                 .then(argument("command", greedyString())
+                    .suggests((ctx, builder) -> CommandSource.suggestMatching(dispatcher.getRoot().getChildren().stream().map(CommandNode::getUsageText).toList(), builder))
                     .executes(ctx -> {
                         String cmdName = getString(ctx, "command");
-                        if (!isClientSideCommand(cmdName)) {
-                            throw FAILED_EXCEPTION.create();
-                        }
                         var parseResults = dispatcher.parse(cmdName, ctx.getSource());
                         if (parseResults.getContext().getNodes().isEmpty()) {
                             throw FAILED_EXCEPTION.create();
