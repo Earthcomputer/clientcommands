@@ -7,7 +7,9 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class UsageTreeCommand {
                     var content = tree(dispatcher.getRoot());
                     sendFeedback(new LiteralText("/"));
                     for (var line : content) {
-                        sendFeedback(new LiteralText(line));
+                        sendFeedback(line);
                     }
                     return content.size() + 1;
                 })
@@ -45,7 +47,7 @@ public class UsageTreeCommand {
                         var content = tree(Iterables.getLast(parseResults.getContext().getNodes()).getNode());
                         sendFeedback(new LiteralText("/" + cmdName));
                         for (var line : content) {
-                            sendFeedback(new LiteralText(line));
+                            sendFeedback(line);
                         }
                         return content.size() + 1;
                     })
@@ -53,19 +55,19 @@ public class UsageTreeCommand {
         );
     }
 
-    public static List<String> tree(CommandNode<?> root) {
-        List<String> lines = new ArrayList<>();
+    public static List<Text> tree(CommandNode<?> root) {
+        List<Text> lines = new ArrayList<>();
         var children = List.copyOf(root.getChildren());
         for (int i = 0; i < children.size(); i++) {
             var child = children.get(i);
-            var childName = child.getUsageText();
+            var childName = new LiteralText(child.getUsageText()).styled(s -> s.withColor(child.getCommand() != null ? Formatting.GREEN : Formatting.WHITE));
             var childLines = tree(child);
             if (i + 1 < children.size()) {
-                lines.add("├── " + childName);
-                lines.addAll(childLines.stream().map(line -> "│   " + line).toList());
+                lines.add(new LiteralText("├─ ").styled(s -> s.withColor(Formatting.GRAY)).append(childName));
+                lines.addAll(childLines.stream().map(line -> new LiteralText("│  ").styled(s -> s.withColor(Formatting.GRAY)).append(line)).toList());
             } else {
-                lines.add("└── " + childName);
-                lines.addAll(childLines.stream().map(line -> "    " + line).toList());
+                lines.add(new LiteralText("└─ ").styled(s -> s.withColor(Formatting.GRAY)).append(childName));
+                lines.addAll(childLines.stream().map(line -> new LiteralText("   ").append(line)).toList());
             }
         }
         return lines;
