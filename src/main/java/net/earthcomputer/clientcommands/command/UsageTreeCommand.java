@@ -58,8 +58,9 @@ public class UsageTreeCommand {
         if (parseResults.getContext().getNodes().isEmpty()) {
             throw FAILED_EXCEPTION.create();
         }
-        var content = tree(Iterables.getLast(parseResults.getContext().getNodes()).getNode());
-        sendFeedback(new LiteralText("/" + cmdName));
+        var node = Iterables.getLast(parseResults.getContext().getNodes()).getNode();
+        var content = tree(node);
+        sendFeedback(new LiteralText("/" + cmdName).styled(s -> s.withColor(node.getCommand() != null ? Formatting.GREEN : Formatting.WHITE)));
         for (var line : content) {
             sendFeedback(line);
         }
@@ -71,9 +72,9 @@ public class UsageTreeCommand {
         var children = List.copyOf(root.getChildren());
         for (int i = 0; i < children.size(); i++) {
             var child = children.get(i);
-            var childName = new LiteralText(child.getUsageText()).styled(s -> s.withColor(
-                child.getCommand() != null ? Formatting.GREEN : Formatting.WHITE
-            ));
+            var childName = new LiteralText(child.getUsageText()).styled(s ->
+                s.withColor(child.getCommand() != null ? Formatting.GREEN : Formatting.WHITE)
+            );
             var childLines = tree(child);
             if (i + 1 < children.size()) {
                 lines.add(new LiteralText("├─ ").styled(s -> s.withColor(Formatting.GRAY)).append(childName));
