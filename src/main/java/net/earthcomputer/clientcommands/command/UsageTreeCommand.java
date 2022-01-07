@@ -16,12 +16,14 @@ import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class UsageTreeCommand {
-    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.helptree.failed"));
+    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText(
+        "commands.helptree.failed"));
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cusagetree");
@@ -37,7 +39,11 @@ public class UsageTreeCommand {
                     return content.size() + 1;
                 })
                 .then(argument("command", greedyString())
-                    .suggests((ctx, builder) -> CommandSource.suggestMatching(dispatcher.getRoot().getChildren().stream().map(CommandNode::getUsageText).toList(), builder))
+                    .suggests((ctx, builder) -> CommandSource.suggestMatching(dispatcher.getRoot()
+                        .getChildren()
+                        .stream()
+                        .map(CommandNode::getUsageText)
+                        .toList(), builder))
                     .executes(ctx -> {
                         String cmdName = getString(ctx, "command");
                         var parseResults = dispatcher.parse(cmdName, ctx.getSource());
@@ -60,11 +66,15 @@ public class UsageTreeCommand {
         var children = List.copyOf(root.getChildren());
         for (int i = 0; i < children.size(); i++) {
             var child = children.get(i);
-            var childName = new LiteralText(child.getUsageText()).styled(s -> s.withColor(child.getCommand() != null ? Formatting.GREEN : Formatting.WHITE));
+            var childName = new LiteralText(child.getUsageText()).styled(s -> s.withColor(
+                child.getCommand() != null ? Formatting.GREEN : Formatting.WHITE
+            ));
             var childLines = tree(child);
             if (i + 1 < children.size()) {
                 lines.add(new LiteralText("├─ ").styled(s -> s.withColor(Formatting.GRAY)).append(childName));
-                lines.addAll(childLines.stream().map(line -> new LiteralText("│  ").styled(s -> s.withColor(Formatting.GRAY)).append(line)).toList());
+                lines.addAll(childLines.stream()
+                    .map(line -> new LiteralText("│  ").styled(s -> s.withColor(Formatting.GRAY)).append(line))
+                    .toList());
             } else {
                 lines.add(new LiteralText("└─ ").styled(s -> s.withColor(Formatting.GRAY)).append(childName));
                 lines.addAll(childLines.stream().map(line -> new LiteralText("   ").append(line)).toList());
@@ -72,4 +82,5 @@ public class UsageTreeCommand {
         }
         return lines;
     }
+
 }
