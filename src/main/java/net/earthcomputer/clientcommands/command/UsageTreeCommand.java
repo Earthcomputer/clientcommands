@@ -2,6 +2,8 @@ package net.earthcomputer.clientcommands.command;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
@@ -14,54 +16,57 @@ import net.minecraft.util.Formatting;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.addClientSideCommand;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.minecraft.server.command.CommandManager.*;
 
 public class UsageTreeCommand {
-    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText(
-        "commands.helptree.failed"));
+    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.help.failed"));
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cusagetree");
-
+        
         dispatcher.register(
             literal("cusagetree")
-                .executes(ctx -> {
-                    var content = tree(dispatcher.getRoot());
-                    sendFeedback(new LiteralText("/"));
-                    for (var line : content) {
-                        sendFeedback(line);
-                    }
-                    return content.size() + 1;
-                })
-                .then(argument("command", greedyString())
-                    .suggests((ctx, builder) -> CommandSource.suggestMatching(dispatcher.getRoot()
-                        .getChildren()
-                        .stream()
-                        .map(CommandNode::getUsageText)
-                        .toList(), builder))
-                    .executes(ctx -> {
-                        String cmdName = getString(ctx, "command");
-                        var parseResults = dispatcher.parse(cmdName, ctx.getSource());
-                        if (parseResults.getContext().getNodes().isEmpty()) {
-                            throw FAILED_EXCEPTION.create();
-                        }
-                        var content = tree(Iterables.getLast(parseResults.getContext().getNodes()).getNode());
-                        sendFeedback(new LiteralText("/" + cmdName));
-                        for (var line : content) {
-                            sendFeedback(line);
-                        }
-                        return content.size() + 1;
-                    })
+                .executes(ctx -> usage(ctx, dispatcher))
+                .then(
+                    argument("command", greedyString())
+                        .suggests((ctx, builder) ->
+                            CommandSource.suggestMatching(dispatcher.getRoot()
+                                .getChildren()
+                                .stream()
+                                .map(CommandNode::getUsageText)
+                                .toList(), builder)
+                        )
+                        .executes(ctx -> usageCommand(ctx, dispatcher))
                 )
         );
     }
 
-    public static List<Text> tree(CommandNode<?> root) {
+    private static int usage(CommandContext<ServerCommandSource> ctx, CommandDispatcher<ServerCommandSource> dispatcher) {
+        var content = tree(dispatcher.getRoot());
+        sendFeedback(new LiteralText("/"));
+        for (var line : content) {
+            sendFeedback(line);
+        }
+        return content.size() + 1;
+    }
+
+    private static int usageCommand(CommandContext<ServerCommandSource> ctx, CommandDispatcher<ServerCommandSource> dispatcher) throws CommandSyntaxException {
+        String cmdName = getString(ctx, "command");
+        var parseResults = dispatcher.parse(cmdName, ctx.getSource());
+        if (parseResults.getContext().getNodes().isEmpty()) {
+            throw FAILED_EXCEPTION.create();
+        }
+        var content = tree(Iterables.getLast(parseResults.getContext().getNodes()).getNode());
+        sendFeedback(new LiteralText("/" + cmdName));
+        for (var line : content) {
+            sendFeedback(line);
+        }
+        return content.size() + 1;
+    }
+
+    private static List<Text> tree(CommandNode<ServerCommandSource> root) {
         List<Text> lines = new ArrayList<>();
         var children = List.copyOf(root.getChildren());
         for (int i = 0; i < children.size(); i++) {
