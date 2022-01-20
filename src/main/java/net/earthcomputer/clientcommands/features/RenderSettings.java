@@ -36,6 +36,7 @@ public class RenderSettings {
 
     public static void preRenderEntities() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        // prevent crash from other mods trying to load entity rendering without a world (usually a fake world and no client player)
         if (player == null) return;
         ServerCommandSource source = new FakeCommandSource(player);
 
