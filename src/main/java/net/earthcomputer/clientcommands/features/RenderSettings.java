@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.earthcomputer.clientcommands.command.FakeCommandSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Pair;
@@ -34,7 +35,9 @@ public class RenderSettings {
     }
 
     public static void preRenderEntities() {
-        ServerCommandSource source = new FakeCommandSource(MinecraftClient.getInstance().player);
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) return;
+        ServerCommandSource source = new FakeCommandSource(player);
 
         disabledEntities.clear();
         for (var filter : entityRenderSelectors) {
