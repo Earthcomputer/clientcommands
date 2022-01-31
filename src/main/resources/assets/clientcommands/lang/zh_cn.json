@@ -1,9 +1,37 @@
 {
+  "commands.calias.notFound": "未找到别名 \"%s\"",
+  "commands.calias.illegalFormatException": "指令格式或参数错误",
+  "commands.calias.file.readError": "别名文件读取失败",
+  "commands.calias.file.writeError": "别名文件写入失败",
+  "commands.calias.addAlias.aliasAlreadyExists": "别名 \"%s\" 已经存在",
+  "commands.calias.addAlias.commandAlreadyExists": "指令 \"/%s\" 已经存在",
+  "commands.calias.addAlias.success": "成功加入别名 \"%s\"",
+  "commands.calias.listAliases.noAliasesRegistered": "没有已注册的别名",
+  "commands.calias.listAliases.success": "%s 已注册的别名:",
+  "commands.calias.removeAlias.success": "成功移除别名 \"%s\"",
+  
+  "commands.careastats.notLoaded": "该区域的区块未加载",
+  "commands.careastats.output.chunksScanned": "扫描 %d 个区块，用时 %dns ≈ %dms",
+  "commands.careastats.output.blocksMatched": "在一共 %2$d 个方块中匹配到 %1$d 个方块",
+  "commands.careastats.output.entitiesFound": "在此区域中找到 %d 个实体",
+  
   "commands.cbook.success": "成功编辑书本",
   "commands.cbook.commandException": "您没有手握书本",
 
   "commands.ccalc.expected": "期望值 %s",
   "commands.ccalc.invalidArgumentCount": "函数 \"%s\" 无法接受 %d 个自变量",
+  "commands.ccalc.parse": "解析表达式: %s",
+  "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
+  "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
+  "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
+  "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
+  "commands.ccalc.parse.constant": "(常量 '%s')",
+  "commands.ccalc.parse.function": "(函数 '%s' 带有参数: %s)",
+  "commands.ccalc.parse.literal": "(字面量: %s)",
+  "commands.ccalc.parse.negate": "(负值: %s)",
+  "commands.ccalc.tooDeeplyNested": "表达式嵌套过深",
 
   "commands.ccalcstack.success": "%d 个 %s 是 %d 组余 %d 个",
   "commands.ccalcstack.success.empty": "%d 个物品是 %d 组余 %d 个",
@@ -13,6 +41,7 @@
   "commands.ccrackrng.starting": "正在破解玩家随机种子",
   "commands.ccrackrng.success": "玩家随机种子已破解： %d",
   "commands.ccheatcrackrng.success": "玩家随机种子已破解： %d -> %d",
+  "commands.ccheatcrackrng.java14": "本指令在 Java 14 以上版本无法运行！",
 
   "commands.cenchant.expectedWithWithout": "有效参数： \"with\" 或 \"without\"",
   "commands.cenchant.failed": "您请求的附魔无法获得或者需要太长时间",
@@ -23,11 +52,13 @@
 
   "commands.cfind.found.left": "在 ",
   "commands.cfind.found.right": " 找到 %1$s， 距离您 %2$.2f 格",
+  "commands.cfind.keepSearching.success": "Finding entities",
   "commands.cfind.noMatch": "没有实体匹配您的查找条件",
   "commands.cfind.success": "%d 个实体匹配您的查找条件",
 
   "commands.cfindblock.notFound": "没有发现此方块",
   "commands.cfindblock.success.left": "离您最近的匹配方块在 ",
+  "commands.cfindblock.success.glow": "[发光]",
   "commands.cfindblock.success.right": "， 距离您 %1$.2f 格",
 
   "commands.cfinditem.match.left": "在 ",
@@ -35,23 +66,85 @@
   "commands.cfinditem.starting": "正在搜索 %s",
   "commands.cfinditem.starting.keepSearching": "正在持续搜索 %s。",
   "commands.cfinditem.total": "一共找到了 %d 个 %s 。",
+  
+  "commands.cfish.addGoal.success": "成功添加目标 %s",
+  "commands.cfish.correctLoot": "使用 %dms 得到目标物品",
+  "commands.cfish.error.crackFailed": "无法破解浮标随机种子，服务器是不是安装了模组？",
+  "commands.cfish.error.failed": "浮标配置错误",
+  "commands.cfish.error.outOfWater": "浮标不在水中，自动控制无法工作",
+  "commands.cfish.listGoals.noGoals": "没有钓鱼目标",
+  "commands.cfish.listGoals.success": "有 %d 个钓鱼目标: ",
+  "commands.cfish.needFishingManipulation": "本命令需要启用钓鱼控制",
+  "commands.cfish.removeGoal.success": "成功移除目标 %s",
+  "commands.cfish.wrongLoot": "使用 %dms 校正后未获得目标物品，可能游戏超前了 %s 刻",
 
+  "commands.cfov.success": "将视广角设为 %f",
+  
   "commands.cgamma.success": "将伽马值设为 %f",
+  
+  "commands.cghostblock.fill.success": "%d 个幽灵方块被填充",
+  "commands.cghostblock.set.success": "幽灵方块已放置",
+  
+  "commands.cgive.success": "给予 %d 个 %s 给自己",
+  "commands.cgive.notCreative": "仅创造模式玩家可以将物品给予自己",
+  
+  "commands.cglow.entity.keepSearching.success": "使实体发光",
+  "commands.cglow.entity.failed": "没有实体发光",
+  "commands.cglow.entity.success": "成功使 %d 个实体发光",
+  "commands.cglow.area.success": "成功使 %d 个区域发光",
+  
+  "commands.chotbar.notCreative": "仅创造模式玩家可以恢复物品栏",
+  "commands.chotbar.restoredHotbar": "成功恢复物品栏 %d",
+  
+  "commands.citemgroup.notFound": "没找到创造模式物品栏 \"%s\"",
+  "commands.citemgroup.outOfBounds": "指正 %d 越界",
+  "commands.citemgroup.saveFile.failed": "无法保存创造模式物品栏文件",
+  "commands.citemgroup.addGroup.success": "成功添加创造模式物品栏 \"%s\"",
+  "commands.citemgroup.addGroup.illegalCharacter": "创造模式物品栏只能拥有匹配 [a-z0-9/._-] 的字符",
+  "commands.citemgroup.addGroup.alreadyExists": "创造模式物品栏 \"%s\" 已经存在",
+  "commands.citemgroup.removeGroup.success": "成功移除创造模式物品栏 \"%s\"",
+  "commands.citemgroup.addStack.success": "成功将 %s 添加到 \"%s\"",
+  "commands.citemgroup.removeStack.success": "成功将 \"%s\" 中第 %d 个物品移除",
+  "commands.citemgroup.setStack.success": "成功将 \"%s\" 中第 %d 个物品设为 %s",
+  "commands.citemgroup.changeIcon.success": "成功将 \"%s\" 的图标由 %s 替换为 %s",
+  "commands.citemgroup.renameGroup.success": "成功将 \"%s\" 重命名为 \"%s\"",
+
+  "commands.ckit.notFound": "未找到礼包 \"%s\"",
+  "commands.ckit.saveFile.failed": "无法保存礼包文件",
+  "commands.ckit.load.success": "成功将礼包 \"%s\" 给予自己",
+  "commands.ckit.load.notCreative": "仅创造模式玩家可以将礼包给予自己",
+  "commands.ckit.create.success": "成功创建礼包 \"%s\"",
+  "commands.ckit.create.alreadyExists": "礼包 \"%s\" 已经存在",
+  "commands.ckit.delete.success": "成功删除礼包 \"%s\"",
+  "commands.ckit.edit.success": "成功修改礼包 \"%s\"",
+  "commands.ckit.list": "可用礼包: %s",
+  "commands.ckit.list.empty": "无可用礼包",
+
+  "commands.cplayerinfo.ioException": "出现错误",
+  "commands.cplayerinfo.getNameHistory.success": "%s 有如下名字: %s",
+
+  "commands.cparticle.unsuitableParticleOption": "无法在视频设置粒子效果为最少时播放粒子效果",
+  "commands.cparticle.success": "显示粒子效果 %s",
+
+  "commands.cpermissionlevel.success": "你的权限等级为 %d",
+
+  "commands.cplaysound.success": "播放音效 %s 给自己",
+
+  "commands.crelog.failed": "无法重新登录",
 
   "commands.crender.entities.success": "实体渲染规则已被更新",
-
-  "commands.cscript.notFound": "未找到脚本 \"%s\"",
-  "commands.cscript.reload.success": "已重新加载脚本",
-  "commands.cscript.run.success": "成功运行脚本",
 
   "commands.ctask.list.noTasks": "当前没有正在执行的任务",
   "commands.ctask.list.success": "%d 个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
   "commands.ctask.stop.success": "已停止 %d 个任务",
 
-  "commands.ctemprule.list.header": "正在显示 %d 个 TempRules：",
-  "commands.ctemprule.reset.success": "TempRule %s 已被重置为 %s",
-  "commands.ctemprule.set.success": "TempRule %s 已被更新为 %s",
+  "commands.ctemprule.list.header": "正在显示 %d 个 临时规则：",
+  "commands.ctemprule.reset.success": "临时规则 %s 已被重置为 %s",
+  "commands.ctemprule.set.success": "临时规则 %s 已被更新为 %s",
+  
+  "commands.ctp.notSpectator": "仅观察者模式玩家可以使用传送",
+  "commands.ctp.success": "成功将玩家传送到 %s",
 
   "commands.cwiki.failed": "无法获得 Wiki 内容",
 
@@ -61,6 +154,14 @@
   "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式 %s",
   "commands.client.notClient": "不是客户端指令",
+  "commands.client.tooFewArguments": "过少参数",
+  "commands.client.invalidArgumentException": "无效参数 '%s'",
+  
+  "chorusManip.landing.success": "降落在: %d, %d, %d",
+  "chorusManip.landing.failed": "降落操作不可用",
+  "chorusManip.goalTooFar": "目标过远！",
+  "chorusManip.needChorusManipulation": "本命令取药启用紫颂果操作",
+  "chorusManip.setGoal": "Set %s goal area from %s to %s",
 
   "enchCrack.state": "附魔破解状态： %s",
   "enchCrack.state.uncracked": "未破解",
@@ -121,7 +222,9 @@
 
   "playerManip.serverBrandWarning": "警告： 您正在游玩的服务器包含Mod。随机数相关的功能并不保证能够正常工作！",
   "playerManip.toolBreakWarning": "警告： 工具还有 %d 耐久度。",
+  "playerManip.throwError": "不可能的情况，或者需要丢出大于 %d 个物品。",
+  "playerManip.notEnoughItems": "物品数量(%d ，共%d)不足以破解玩家种子。",
+  "playerManip.uncracked": "需要破解玩家种子。",
 
   "itemCrack.notEnoughItems": "无法使用随机数种子破解： 玩家手中没有足够的物品"
-
 }

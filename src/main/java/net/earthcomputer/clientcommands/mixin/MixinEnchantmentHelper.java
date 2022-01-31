@@ -9,7 +9,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.WeightedPicker;
+import net.minecraft.util.collection.Weighting;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Mixin(EnchantmentHelper.class)
@@ -45,7 +46,8 @@ public class MixinEnchantmentHelper {
 
         List<EnchantmentLevelEntry> applicableEnchantments = EnchantmentHelper.getPossibleEntries(level, stack, allowTreasure);
         if (!applicableEnchantments.isEmpty()) {
-            enchantments.add(WeightedPicker.getRandom(rand, applicableEnchantments));
+            Optional<EnchantmentLevelEntry> optEnch = Weighting.getRandom(rand, applicableEnchantments);
+            optEnch.ifPresent(enchantments::add);
 
             while (rand.nextInt(50) <= level) {
                 level = level * 4 / 5 + 1;
@@ -57,7 +59,8 @@ public class MixinEnchantmentHelper {
                 if (applicableEnchantments.isEmpty())
                     break;
 
-                enchantments.add(WeightedPicker.getRandom(rand, applicableEnchantments));
+                optEnch = Weighting.getRandom(rand, applicableEnchantments);
+                optEnch.ifPresent(enchantments::add);
 
                 level /= 2;
             }

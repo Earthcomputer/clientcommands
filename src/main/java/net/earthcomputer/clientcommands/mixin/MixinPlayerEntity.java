@@ -47,33 +47,29 @@ public abstract class MixinPlayerEntity extends LivingEntity {
         // Oh God this took ages to write
         boolean canAttack = true;
 
-        if (target instanceof ArmorStandEntity) {
-            ArmorStandEntity armorStand = (ArmorStandEntity) target;
-            if (armorStand.removed) {
+        if (target instanceof ArmorStandEntity armorStand) {
+            if (armorStand.isRemoved()) {
                 canAttack = false;
             } else if (armorStand.isInvulnerableTo(source) || ((IArmorStandEntity) armorStand).isArmorStandInvisible() || armorStand.isMarker()) {
                 canAttack = false;
-            } else if (!_this.abilities.allowModifyWorld) {
+            } else if (!_this.getAbilities().allowModifyWorld) {
                 canAttack = false;
             } else if (source.isSourceCreativePlayer()) {
                 canAttack = false;
             }
-        } else if (target instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) target;
-            if (player.abilities.invulnerable) {
+        } else if (target instanceof PlayerEntity player) {
+            if (player.getAbilities().invulnerable) {
                 canAttack = false;
             }
         } else if (target instanceof SmallFireballEntity || target instanceof WitherSkullEntity) {
             canAttack = false;
-        } else if (target instanceof WitherEntity) {
-            WitherEntity wither = (WitherEntity) target;
+        } else if (target instanceof WitherEntity wither) {
             if (wither.getInvulnerableTimer() > 0) {
                 canAttack = false;
             }
         }
 
-        if (target instanceof LivingEntity) {
-            LivingEntity living = (LivingEntity) target;
+        if (target instanceof LivingEntity living) {
             if (living.getHealth() <= 0) {
                 canAttack = false;
             }

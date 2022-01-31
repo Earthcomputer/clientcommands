@@ -6,9 +6,7 @@ import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.interfaces.IMinecraftClient;
 import net.earthcomputer.clientcommands.render.RenderQueue;
-import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
@@ -23,7 +21,6 @@ import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.world.ClientWorld;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -35,24 +32,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mixin(MinecraftClient.class)
-public abstract class MixinMinecraftClient implements IMinecraftClient {
-
-    @Shadow protected int attackCooldown;
-
-    @Shadow protected abstract void handleBlockBreaking(boolean boolean_1);
+public abstract class MixinMinecraftClient {
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void onTick(CallbackInfo ci) {
         RenderQueue.tick();
         TaskManager.tick();
         GuiBlocker.tick();
-        ScriptManager.tick();
-    }
-
-    @Inject(method = "handleInputEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z", ordinal = 0), cancellable = true)
-    public void onHandleInputEvents(CallbackInfo ci) {
-        if (ScriptManager.blockingInput())
-            ci.cancel();
     }
 
     @Inject(method = "setWorld", at = @At("HEAD"))
@@ -61,7 +47,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
         TaskManager.onWorldUnload(world == null);
     }
 
-    @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void onOpenScreen(Screen screen, CallbackInfo ci) {
         if (screen != null
                 && !(screen instanceof SaveLevelScreen)
@@ -82,7 +68,7 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
     public void onDisconnect(Screen screen, CallbackInfo ci) {
         ServerBrandManager.onDisconnect();
         if (Relogger.isRelogging) {
-            List<Pair<String, Object>> oldRules = TempRules.getRules().stream().map(rule -> Pair.of(rule, TempRules.get(rule))).collect(Collectors.toList());
+            var oldRules = TempRules.getRules().stream().map(rule -> Pair.of(rule, TempRules.get(rule))).collect(Collectors.toList());
             Relogger.relogSuccessTasks.add(() -> oldRules.forEach(rule -> TempRules.set(rule.getLeft(), rule.getRight())));
         }
         for (String rule : TempRules.getRules())
@@ -102,15 +88,5 @@ public abstract class MixinMinecraftClient implements IMinecraftClient {
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
         }
-    }
-
-    @Override
-    public void continueBreakingBlock() {
-        handleBlockBreaking(true);
-    }
-
-    @Override
-    public void resetAttackCooldown() {
-        attackCooldown = 0;
     }
 }

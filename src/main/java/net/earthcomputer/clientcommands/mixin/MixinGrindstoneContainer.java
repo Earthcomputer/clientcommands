@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(GrindstoneScreenHandler.class)
 public class MixinGrindstoneContainer implements IDroppableInventoryContainer {
 
-    @Shadow @Final private Inventory input;
+    @Shadow @Final Inventory input;
 
     @Override
     public Inventory getDroppableInventory() {

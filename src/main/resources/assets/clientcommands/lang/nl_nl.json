@@ -67,10 +67,6 @@
 
   "commands.crender.entities.success": "Entiteitsweergaveregels zijn geupdatet",
 
-  "commands.cscript.notFound": "Script \"%s\" niet gevonden",
-  "commands.cscript.reload.success": "scripten herladen",
-  "commands.cscript.run.success": "Script succesvol uitgevoerd",
-
   "commands.cstopsound.success.sourceless.any": "Alle geluiden gestopt",
   "commands.cstopsound.success.sourceless.sound": "Geluid '%s' gestopt",
   "commands.cstopsound.success.source.any": "Alle '%s' geluiden gestopt",

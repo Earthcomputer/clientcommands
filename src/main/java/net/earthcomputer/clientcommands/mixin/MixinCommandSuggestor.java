@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinCommandSuggestor {
 
     @Shadow private ParseResults<CommandSource> parse;
-    @Shadow @Final private TextFieldWidget textField;
+    @Shadow @Final TextFieldWidget textField;
 
     @Unique private int oldMaxLength;
     @Unique private boolean wasClientCommand = false;

@@ -4,11 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.StringReader;
 import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.interfaces.IKeyBinding;
-import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
@@ -27,8 +24,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
-
-    @Unique private boolean wasSprintPressed = false;
 
     public MixinClientPlayerEntity(ClientWorld world, GameProfile profile) {
         super(world, profile);
@@ -53,8 +48,9 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/AbstractClientPlayerEntity;tick()V"))
     private void onTick(CallbackInfo ci) {
-        if (Enchantments.MENDING.getEquipment(this).values().stream().anyMatch(this::couldMendingRepair)) {
-            if (!world.getEntitiesByClass(ExperienceOrbEntity.class, getBoundingBox(), null).isEmpty()) {
+        if (!world.getEntitiesByClass(ExperienceOrbEntity.class, getBoundingBox(), entity -> true).isEmpty()) {
+            PlayerRandCracker.onXpOrb();
+            if (Enchantments.MENDING.getEquipment(this).values().stream().anyMatch(this::couldMendingRepair)) {
                 PlayerRandCracker.onMending();
             }
         }
@@ -80,17 +76,4 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     public void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci) {
         PlayerRandCracker.onDamage();
     }
-
-    @Inject(method = "tickMovement", at = @At("HEAD"))
-    public void onStartTickMovement(CallbackInfo ci) {
-        wasSprintPressed = MinecraftClient.getInstance().options.keySprint.isPressed();
-        boolean shouldBeSprinting = (wasSprintPressed && !ScriptManager.blockingInput()) || ScriptManager.isSprinting();
-        ((IKeyBinding) MinecraftClient.getInstance().options.keySprint).setPressed(shouldBeSprinting);
-    }
-
-    @Inject(method = "tickMovement", at = @At("RETURN"))
-    public void onEndTickMovement(CallbackInfo ci) {
-        ((IKeyBinding) MinecraftClient.getInstance().options.keySprint).setPressed(wasSprintPressed);
-    }
-
 }

@@ -8,15 +8,20 @@ import net.earthcomputer.multiconnect.api.Protocols;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.item.WrittenBookItem;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -27,10 +32,9 @@ import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class BookCommand {
-
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(new TranslatableText("commands.cbook.commandException"));
 
-    private static final int MAX_LIMIT = 100;
+    private static final int MAX_LIMIT = WrittenBookItem.field_30933;
     private static final int DEFAULT_LIMIT = 50;
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -73,6 +77,7 @@ public class BookCommand {
 
     private static int fillBook(CommandSource source, IntStream characterGenerator, int limit) throws CommandSyntaxException {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        assert player != null;
 
         ItemStack heldItem = player.getMainHandStack();
         Hand hand = Hand.MAIN_HAND;
@@ -83,22 +88,24 @@ public class BookCommand {
                 throw NO_BOOK.create();
             }
         }
-        int slot = hand == Hand.MAIN_HAND ? player.inventory.selectedSlot : 40;
+        int slot = hand == Hand.MAIN_HAND ? player.getInventory().selectedSlot : PlayerInventory.OFF_HAND_SLOT;
 
         String joinedPages = characterGenerator.limit(MAX_LIMIT * 210).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
 
-        ListTag pages = new ListTag();
+        List<String> pages = new ArrayList<>(limit);
+        NbtList pagesNbt = new NbtList();
 
-        for (int page = 0; page < limit; page++) {
-            pages.add(StringTag.of(joinedPages.substring(page * 210, (page + 1) * 210)));
+        for (int pageIndex = 0; pageIndex < limit; pageIndex++) {
+            String page = joinedPages.substring(pageIndex * 210, (pageIndex + 1) * 210);
+            pages.add(page);
+            pagesNbt.add(NbtString.of(page));
         }
 
-        heldItem.getOrCreateTag().put("pages", pages);
-        player.networkHandler.sendPacket(new BookUpdateC2SPacket(heldItem, false, slot));
+        heldItem.setSubNbt("pages", pagesNbt);
+        player.networkHandler.sendPacket(new BookUpdateC2SPacket(slot, pages, Optional.empty()));
 
         sendFeedback("commands.cbook.success");
 
         return 0;
     }
-
 }

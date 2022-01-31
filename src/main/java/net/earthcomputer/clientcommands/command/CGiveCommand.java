@@ -1,20 +1,18 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.argument.ItemStackArgument;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.TranslatableText;
+
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
 import static net.minecraft.command.argument.ItemStackArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
-
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.*;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.argument.ItemStackArgument;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
 
 public class CGiveCommand {
 
@@ -31,20 +29,16 @@ public class CGiveCommand {
     }
 
     private static int give(ServerCommandSource source, ItemStackArgument itemArgument, int count) throws CommandSyntaxException {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (!player.abilities.creativeMode) {
+        final MinecraftClient client = MinecraftClient.getInstance();
+        if (!client.player.getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
         ItemStack stack = itemArgument.createStack(Math.min(count, itemArgument.getItem().getMaxCount()), false);
-
-        PlayerInventory inventory = player.inventory;
-        inventory.setStack(inventory.selectedSlot, stack);
-        MinecraftClient.getInstance().interactionManager.clickCreativeStack(stack, 36 + inventory.selectedSlot);
-        player.playerScreenHandler.sendContentUpdates();
+        client.interactionManager.clickCreativeStack(stack, 36 + client.player.getInventory().selectedSlot);
+        client.player.playerScreenHandler.sendContentUpdates();
 
         sendFeedback(new TranslatableText("commands.cgive.success", count, stack.toHoverableText()));
         return 0;
     }
-
 }
