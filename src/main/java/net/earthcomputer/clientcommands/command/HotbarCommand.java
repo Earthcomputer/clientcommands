@@ -45,8 +45,8 @@ public class HotbarCommand {
         }
         storage.save();
 
-        Text loadKey = client.options.keyLoadToolbarActivator.getBoundKeyLocalizedText();
-        Text hotbarKey = client.options.keysHotbar[index - 1].getBoundKeyLocalizedText();
+        Text loadKey = client.options.loadToolbarActivatorKey.getBoundKeyLocalizedText();
+        Text hotbarKey = client.options.hotbarKeys[index - 1].getBoundKeyLocalizedText();
 
         sendFeedback(new TranslatableText("inventory.hotbarSaved", loadKey, hotbarKey));
         return 0;

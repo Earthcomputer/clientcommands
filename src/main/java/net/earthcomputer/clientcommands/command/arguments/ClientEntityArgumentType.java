@@ -22,8 +22,7 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.tag.EntityTypeTags;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -537,29 +536,22 @@ public class ClientEntityArgumentType implements ArgumentType<ClientEntitySelect
                     void apply(Parser parser) throws CommandSyntaxException {
                         parser.suggestor = (builder, playerNameSuggest) -> {
                             CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.getIds(), builder, "!");
-                            CommandSource.suggestIdentifiers(EntityTypeTags.getTagGroup().getTagIds(), builder, "!#");
+                            CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.streamTags().map(TagKey::id), builder, "!#");
                             if (!parser.hasType) {
                                 CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.getIds(), builder);
-                                CommandSource.suggestIdentifiers(EntityTypeTags.getTagGroup().getTagIds(), builder, String.valueOf('#'));
+                                CommandSource.suggestIdentifiers(Registry.ENTITY_TYPE.streamTags().map(TagKey::id), builder, String.valueOf('#'));
                             }
                             return builder.buildFuture();
                         };
 
                         int cursor = parser.reader.getCursor();
                         boolean neg = parser.readNegationCharacter();
-                        final Identifier typeId;
+
                         if (parser.readTagCharacter()) {
-                            typeId = Identifier.fromCommandInput(parser.reader);
-                            parser.addFilter((origin, entity) -> {
-                                try {
-                                    Tag<EntityType<?>> tag = entity.getEntityWorld().getTagManager().getTag(Registry.ENTITY_TYPE_KEY, typeId, id -> new IllegalArgumentException());
-                                    return tag.contains(entity.getType()) != neg;
-                                } catch (IllegalArgumentException e) {
-                                    return neg;
-                                }
-                            });
+                            TagKey<EntityType<?>> tagKey = TagKey.of(Registry.ENTITY_TYPE_KEY, Identifier.fromCommandInput(parser.reader));
+                            parser.addFilter((origin, entity) -> entity.getType().isIn(tagKey) != neg);
                         } else {
-                            typeId = Identifier.fromCommandInput(parser.reader);
+                            Identifier typeId = Identifier.fromCommandInput(parser.reader);
                             EntityType<?> type = Registry.ENTITY_TYPE.getOrEmpty(typeId).orElseThrow(() -> {
                                 parser.reader.setCursor(cursor);
                                 return EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(parser.reader, typeId);
