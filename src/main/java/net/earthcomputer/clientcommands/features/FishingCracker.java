@@ -51,7 +51,7 @@ import net.minecraft.loot.entry.LootPoolEntry;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -189,8 +189,8 @@ public class FishingCracker {
                                             if (!predicateAccessor.getX().test((float)origin.getX()) || !predicateAccessor.getY().test((float)origin.getY()) || !predicateAccessor.getZ().test((float)origin.getZ())) {
                                                 return false;
                                             }
-                                            var biome = world.getRegistryManager().get(Registry.BIOME_KEY).getKey(world.getBiome(new BlockPos(origin)));
-                                            return biome.isPresent() && biome.get() == predicateAccessor.getBiome();
+                                            var biome = world.getBiome(new BlockPos(origin));
+                                            return biome.getKey().isPresent() && biome.getKey().get() == predicateAccessor.getBiome();
                                         }
                                     };
                                 }
@@ -989,7 +989,7 @@ public class FishingCracker {
             }
         }
 
-        private boolean updateMovementInFluid(Tag<Fluid> tag, double d) {
+        private boolean updateMovementInFluid(TagKey<Fluid> tag, double d) {
             Box box = this.boundingBox.contract(0.001D);
             int i = MathHelper.floor(box.minX);
             int j = MathHelper.ceil(box.maxX);

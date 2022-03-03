@@ -4,8 +4,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.command.argument.ItemPredicateArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.item.Item;
@@ -13,9 +11,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.function.Predicate;
@@ -49,12 +46,12 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
             ItemPredicate predicate = new ItemPredicate(itemReader.getItem(), itemReader.getNbt());
             return ctx -> predicate;
         } else {
-            Identifier tagId = itemReader.getId();
+            TagKey<Item> tag = itemReader.getId();
             return ctx -> {
-                ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-                assert networkHandler != null;
-                Tag<Item> tag = networkHandler.getTagManager().getTag(Registry.ITEM_KEY, tagId, id -> UNKNOWN_TAG_EXCEPTION.create(id.toString()));
-                return new TagPredicate(tag, tagId, itemReader.getNbt());
+                if (!Registry.ITEM.containsTag(tag)) {
+                    throw UNKNOWN_TAG_EXCEPTION.create(tag);
+                }
+                return new TagPredicate(tag, itemReader.getNbt());
             };
         }
     }
@@ -70,15 +67,15 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
     }
 
 
-    record TagPredicate(Tag<Item> tag, Identifier id, NbtCompound compound) implements ClientItemPredicate {
+    record TagPredicate(TagKey<Item> tag, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
-            return this.tag.contains(stack.getItem()) && NbtHelper.matches(this.compound, stack.getNbt(), true);
+            return stack.isIn(this.tag) && NbtHelper.matches(this.compound, stack.getNbt(), true);
         }
 
         @Override
         public String getPrettyString() {
-            String ret = "#" + this.id;
+            String ret = "#" + this.tag.id();
             if (compound != null) {
                 ret += compound;
             }
