@@ -3,5 +3,5 @@ extendable method net/minecraft/loot/condition/EntityPropertiesLootCondition <in
 extendable method net/minecraft/loot/condition/LocationCheckLootCondition <init> (Lnet/minecraft/predicate/entity/LocationPredicate;Lnet/minecraft/util/math/BlockPos;)V
 accessible class net/minecraft/command/argument/BlockPredicateArgumentType$StatePredicate
 accessible class net/minecraft/command/argument/BlockPredicateArgumentType$TagPredicate
-accessible method net/minecraft/command/argument/BlockPredicateArgumentType$TagPredicate <init> (Lnet/minecraft/tag/Tag;Ljava/util/Map;Lnet/minecraft/nbt/NbtCompound;)V
+accessible method net/minecraft/command/argument/BlockPredicateArgumentType$TagPredicate <init> (Lnet/minecraft/tag/TagKey;Ljava/util/Map;Lnet/minecraft/nbt/NbtCompound;)V
 extendable method net/minecraft/client/gui/screen/ingame/AbstractInventoryScreen drawStatusEffects (Lnet/minecraft/client/util/math/MatrixStack;II)V
