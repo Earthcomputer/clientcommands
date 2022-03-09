@@ -227,7 +227,7 @@
   "playerManip.reset.enchanting": "附魔了物品",
   "playerManip.reset.recreated": "重新创建了玩家",
 
-  "playerManip.serverBrandWarning": "警告: 你正在游玩的服务器受到修改. 随机数相关功能不保证工作正常! ",
+  "playerManip.serverBrandWarning": "警告: 你所在的服务器受到修改. 随机数相关功能不保证正常可用! ",
   "playerManip.toolBreakWarning": "警告: 工具还有 %d 耐久度",
   "playerManip.throwError": "条件不可达成, 或者需要丢出大于 %d 个物品",
   "playerManip.notEnoughItems": "物品数量(%d , 共%d)不足以破解玩家种子",
