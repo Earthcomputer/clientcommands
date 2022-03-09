@@ -51,7 +51,7 @@
   "commands.cenchant.uncracked": "你需要先破解随机种子",
 
   "commands.cfind.found.left": "在 ",
-  "commands.cfind.found.right": " 找到 %1$s,  距离你 %2$.2f 格",
+  "commands.cfind.found.right": " 找到 %1$s, 距离你 %2$.2f 格",
   "commands.cfind.keepSearching.success": "正在搜寻实体",
   "commands.cfind.noMatch": "未找到匹配查找条件的实体",
   "commands.cfind.success": "找到 %d 个匹配查找条件的实体",
@@ -59,7 +59,7 @@
   "commands.cfindblock.notFound": "未发现此方块",
   "commands.cfindblock.success.left": "离你最近的匹配方块在 ",
   "commands.cfindblock.success.glow": "[发光]",
-  "commands.cfindblock.success.right": ",  距离你 %1$.2f 格",
+  "commands.cfindblock.success.right": ", 距离你 %1$.2f 格",
 
   "commands.cfinditem.match.left": "在 ",
   "commands.cfinditem.match.right": " 找到 %dx %s",
@@ -186,7 +186,7 @@
   "enchCrack.insn.ready": "你的附魔已就绪",
   "enchCrack.insn.bookshelves": "需要的书架数： %d",
   "enchCrack.insn.slot": "在附魔台的第 %d 行",
-  "enchCrack.insn.itemThrows": "需要扔出物品： %d 次  (大约 %f 秒)",
+  "enchCrack.insn.itemThrows": "需要扔出物品： %d 次 (大约 %f 秒)",
   "enchCrack.insn.itemThrows.noDummy": "无需附魔其他物品",
   "enchCrack.insn.enchantments": "最终获得的附魔：",
 
