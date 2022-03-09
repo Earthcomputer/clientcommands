@@ -123,7 +123,7 @@
   "commands.cplayerinfo.ioException": "出现错误",
   "commands.cplayerinfo.getNameHistory.success": "%s 有如下名称: %s",
 
-  "commands.cparticle.unsuitableParticleOption": "无法播放粒子效果, 视频设置中\"粒子效果\"一项设置不当",
+  "commands.cparticle.unsuitableParticleOption": "无法在视频设置中\"粒子效果\"一项为\"最少\"时播放粒子效果,",
   "commands.cparticle.success": "成功显示粒子效果 %s",
 
   "commands.cpermissionlevel.success": "你的权限等级为 %d",
