@@ -18,7 +18,7 @@
   "commands.cbook.success": "成功编辑书本",
   "commands.cbook.commandException": "你没有手握书本",
 
-  "commands.ccalc.expected": "期望的值 %s",
+  "commands.ccalc.expected": "期望的标识符 %s",
   "commands.ccalc.invalidArgumentCount": "函数 \"%s\" 无法接受 %d 个自变量",
   "commands.ccalc.parse": "表达式解析结果: %s",
   "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
