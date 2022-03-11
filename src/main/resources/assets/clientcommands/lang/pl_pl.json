@@ -70,7 +70,6 @@
   "commands.cfish.addGoal.success": "Ustawiono cel %s",
   "commands.cfish.correctLoot": "Otrzymano prawidłowy łup z dokładnością do %dms",
   "commands.cfish.error.crackFailed": "Nie udało się złamać RNG spławika, czy serwer jest zmodowany?",
-  "commands.cfish.error.failed": "Nieprawidłowa konfiguracja spławika",
   "commands.cfish.error.outOfWater": "Spławik jest poza wodą, manipulacja się nie uda",
   "commands.cfish.listGoals.noGoals": "Nie mam żadnego celu",
   "commands.cfish.listGoals.success": "Są %d cele:",

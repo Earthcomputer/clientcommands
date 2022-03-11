@@ -70,7 +70,6 @@
   "commands.cfish.addGoal.success": "Berhasil menambahkan tujuan %s",
   "commands.cfish.correctLoot": "Mendapatkan loot yang benar denagn koreksi %dms",
   "commands.cfish.error.crackFailed": "Gagal untuk memecahkan RNG fishing bobber, apakah server dimondifikasi (bukan vanilla)?",
-  "commands.cfish.error.failed": "Konfigurasi fishing bobber salah",
   "commands.cfish.error.outOfWater": "Fishing bobber keluar dari air, manipulasi tidak bekerja",
   "commands.cfish.listGoals.noGoals": "Tidak ada tujuan memancing",
   "commands.cfish.listGoals.success": "Ada %d tujuan memancing:",

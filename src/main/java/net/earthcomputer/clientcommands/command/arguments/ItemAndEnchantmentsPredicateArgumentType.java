@@ -87,7 +87,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             return true;
         };
 
-        return new ItemAndEnchantmentsPredicate(parser.item, predicate);
+        return new ItemAndEnchantmentsPredicate(parser.item, predicate, parser.with.size());
     }
 
     @Override
@@ -112,7 +112,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         return EXAMPLES;
     }
 
-    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) implements Predicate<ItemStack> {
+    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate, int numEnchantments) implements Predicate<ItemStack> {
         @Override
         public boolean test(ItemStack stack) {
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {

@@ -8,13 +8,18 @@ import net.minecraft.command.argument.ItemPredicateArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Predicate;
 
 public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
@@ -62,15 +67,22 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         ClientItemPredicate create(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException;
     }
 
-    public interface ClientItemPredicate extends Predicate<ItemStack> {
+    public sealed interface ClientItemPredicate extends Predicate<ItemStack> {
         String getPrettyString();
+        Collection<Item> getPossibleItems();
     }
-
 
     record TagPredicate(TagKey<Item> tag, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
             return stack.isIn(this.tag) && NbtHelper.matches(this.compound, stack.getNbt(), true);
+        }
+
+        @Override
+        public Collection<Item> getPossibleItems() {
+            return Registry.ITEM.getEntryList(tag)
+                    .map(list -> list.stream().map(RegistryEntry::value).toList())
+                    .orElse(Collections.emptyList());
         }
 
         @Override
@@ -90,12 +102,38 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         }
 
         @Override
+        public Collection<Item> getPossibleItems() {
+            return Collections.singletonList(item);
+        }
+
+        @Override
         public String getPrettyString() {
             String ret = String.valueOf(Registry.ITEM.getId(item));
             if (compound != null) {
                 ret += compound;
             }
             return ret;
+        }
+    }
+
+    public record EnchantedItemPredicate(String prettyString, ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate predicate) implements ClientItemPredicate {
+        @Override
+        public boolean test(ItemStack stack) {
+            return predicate.test(stack);
+        }
+
+        @Override
+        public Collection<Item> getPossibleItems() {
+            if (predicate.item() == Items.BOOK || predicate.item() == Items.ENCHANTED_BOOK) {
+                return Arrays.asList(Items.BOOK, Items.ENCHANTED_BOOK);
+            } else {
+                return Collections.singletonList(predicate.item());
+            }
+        }
+
+        @Override
+        public String getPrettyString() {
+            return prettyString;
         }
     }
 }
