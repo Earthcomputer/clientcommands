@@ -165,6 +165,13 @@ public class FishingCracker {
     private static final Map<Item, LootConditionType> LOOT_CONDITIONS = new IdentityHashMap<>();
     private static final LootContextParameter<Boolean> IN_OPEN_WATER_PARAMETER = new LootContextParameter<>(new Identifier("clientcommands", "in_open_water"));
     static {
+        // fix for class load order issue
+        try {
+            Class.forName(EntityPredicate.class.getName(), true, FishingCracker.class.getClassLoader());
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError(e);
+        }
+
         var fishingLootTables = ImmutableMap.<Identifier, LootTable>builder();
         new FishingLootTableGenerator().accept((id, builder) -> fishingLootTables.put(id, builder.build()));
         FISHING_LOOT_TABLES = fishingLootTables.build();
@@ -509,7 +516,7 @@ public class FishingCracker {
                 field.setAccessible(true);
                 try {
                     if (field.get(predicate) != field.get(EntityPredicate.ANY)) {
-                        throw new IllegalArgumentException("Cannot convert condition");
+                        throw new IllegalArgumentException("Cannot convert condition " + field.getName() + ", " + field.get(predicate) + " != " + field.get(EntityPredicate.ANY));
                     }
                 } catch (ReflectiveOperationException e) {
                     throw new AssertionError(e);
