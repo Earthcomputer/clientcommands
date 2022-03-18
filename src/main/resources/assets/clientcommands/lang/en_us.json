@@ -43,7 +43,7 @@
   "commands.ccheatcrackrng.success": "Player RNG cracked: %d -> %d",
   "commands.ccheatcrackrng.java14": "This command no longer works on Java 14+!",
 
-  "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
+  "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.incompatible": "Incompatible enchantments",
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
