@@ -240,5 +240,8 @@
   "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
   "playerManip.uncracked": "Player-Seed needs to be cracked",
 
-  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
+  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
+
+  "tntFinder.parallelVectors": "Unable to triangulate the location: Vectors are (nearly) parallel",
+  "tntFinder.triangulatedLocation": "Triangulated the location: %d, %d"
 }

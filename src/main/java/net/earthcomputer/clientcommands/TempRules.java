@@ -104,6 +104,16 @@ public class TempRules {
     @Rule
     public static boolean infiniteTools = false;
 
+    @Rule
+    private static boolean tntFinder = false;
+    public static boolean getTntFinder() {
+        return tntFinder;
+    }
+    public static void setTntFinder(boolean tntFinder) {
+        TempRules.tntFinder = tntFinder;
+        TntFinderManager.reset();
+    }
+
     public static String asString(Object value) {
         if (value instanceof StringIdentifiable) {
             return ((StringIdentifiable) value).asString();

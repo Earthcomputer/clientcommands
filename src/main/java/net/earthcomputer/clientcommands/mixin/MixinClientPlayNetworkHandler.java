@@ -6,6 +6,7 @@ import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.TntFinderManager;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.client.MinecraftClient;
@@ -16,11 +17,9 @@ import net.minecraft.client.util.telemetry.TelemetrySender;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -107,4 +106,20 @@ public class MixinClientPlayNetworkHandler {
         }
     }
 
+    @Inject(method = "onExplosion", at = @At("TAIL"))
+    public void onExplosion(ExplosionS2CPacket packet, CallbackInfo ci) {
+        System.out.println(packet.getX() + ", " + packet.getY() + ", " + packet.getZ());
+        System.out.println(packet.getPlayerVelocityX() + ", " + packet.getPlayerVelocityY() + ", " + packet.getPlayerVelocityZ());
+        if (TempRules.getTntFinder()) {
+            boolean isReady = TntFinderManager.set(new Vec3d(packet.getX(), 0, packet.getZ()), new Vec3d(packet.getPlayerVelocityX(), 0, packet.getPlayerVelocityZ()));
+            if (isReady) {
+                Vec3d loc = TntFinderManager.triangulate();
+                if (loc == null) {
+                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.parallelVectors"));
+                } else {
+                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
+                }
+            }
+        }
+    }
 }
