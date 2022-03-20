@@ -15,6 +15,7 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.telemetry.TelemetrySender;
 import net.minecraft.command.CommandSource;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.s2c.play.*;
@@ -106,12 +107,15 @@ public class MixinClientPlayNetworkHandler {
         }
     }
 
-    @Inject(method = "onExplosion", at = @At("TAIL"))
-    public void onExplosion(ExplosionS2CPacket packet, CallbackInfo ci) {
-        System.out.println(this.client.player.getX() + ", " + this.client.player.getY() + ", " + this.client.player.getZ());
-        System.out.println(packet.getPlayerVelocityX() + ", " + packet.getPlayerVelocityY() + ", " + packet.getPlayerVelocityZ());
-        if (TempRules.getTntFinder()) {
-            boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(packet.getPlayerVelocityX(), 0, packet.getPlayerVelocityZ()));
+    @Inject(method = "onEntityVelocityUpdate", at = @At("TAIL"))
+    private void onEntityVelocityUpdate(EntityVelocityUpdateS2CPacket packet, CallbackInfo ci) {
+        if (!TempRules.getTntFinder()) {
+            return;
+        }
+        if (packet.getId() == this.client.player.getId()) {
+            System.out.println(this.client.player.getX() + ", " + this.client.player.getY() + ", " + this.client.player.getZ());
+            System.out.println(packet.getVelocityX() + ", " + packet.getVelocityY() + ", " + packet.getVelocityZ());
+            boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(packet.getVelocityX(), 0, packet.getVelocityZ()));
             if (isReady) {
                 Vec3d loc = TntFinderManager.triangulate();
                 if (loc == null) {
