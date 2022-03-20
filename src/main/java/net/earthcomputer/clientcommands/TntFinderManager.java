@@ -64,7 +64,7 @@ public class TntFinderManager {
     private static String html() {
         return """
                 <script src="https://www.desmos.com/api/v1.6/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
-                <div id="calculator" style="width: 1vw; height: 1vh;"></div>
+                <div id="calculator" style="width: 100%%; height: 100%%;"></div>
                 <script>
                   var elt = document.getElementById('calculator');
                   var calculator = Desmos.GraphingCalculator(elt);
