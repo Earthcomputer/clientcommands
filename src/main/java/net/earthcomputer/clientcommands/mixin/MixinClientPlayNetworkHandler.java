@@ -111,7 +111,7 @@ public class MixinClientPlayNetworkHandler {
         System.out.println(packet.getX() + ", " + packet.getY() + ", " + packet.getZ());
         System.out.println(packet.getPlayerVelocityX() + ", " + packet.getPlayerVelocityY() + ", " + packet.getPlayerVelocityZ());
         if (TempRules.getTntFinder()) {
-            boolean isReady = TntFinderManager.set(new Vec3d(client.player.getX(), 0, client.player.getZ()), new Vec3d(packet.getPlayerVelocityX(), 0, packet.getPlayerVelocityZ()));
+            boolean isReady = TntFinderManager.set(new Vec3d(packet.getX() -  this.client.player.getX(), 0, packet.getZ() - this.client.player.getZ()), new Vec3d(packet.getPlayerVelocityX(), 0, packet.getPlayerVelocityZ()));
             if (isReady) {
                 Vec3d loc = TntFinderManager.triangulate();
                 if (loc == null) {
