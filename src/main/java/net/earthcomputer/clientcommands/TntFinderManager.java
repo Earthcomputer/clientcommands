@@ -42,6 +42,7 @@ public class TntFinderManager {
             reset();
             return null;
         }
+        System.out.println(html());
         reset();
         return est1.add(est2).add(est3).multiply(1.0 / 3.0);
     }
@@ -58,5 +59,24 @@ public class TntFinderManager {
 
     public static void reset() {
         x1 = x2 = v1 = v2 = x3 = v3 = null;
+    }
+
+    private static String html() {
+        return """
+                <script src="https://www.desmos.com/api/v1.6/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+                <div id="calculator" style="width: 1vw; height: 1vh;"></div>
+                <script>
+                  var elt = document.getElementById('calculator');
+                  var calculator = Desmos.GraphingCalculator(elt);
+                  calculator.setExpression({ id: 'A', latex: 'A=(%s,%s)' });
+                  calculator.setExpression({ id: 'B', latex: 'B=(A.x+%s,A.y+%s)' });
+                  calculator.setExpression({ id: 'graph1', latex: 'y=\\\\frac{B.y-A.y}{B.x-A.x}\\\\left(x-A.x\\\\right)+A.y' });
+                  calculator.setExpression({ id: 'C', latex: 'C=(%s,%s)' });
+                  calculator.setExpression({ id: 'D', latex: 'D=(C.x+%s,C.y+%s)' });
+                  calculator.setExpression({ id: 'graph2', latex: 'y=\\\\frac{D.y-C.y}{D.x-C.x}\\\\left(x-C.x\\\\right)+C.y' });
+                  calculator.setExpression({ id: 'E', latex: 'E=(%s,%s)' });
+                  calculator.setExpression({ id: 'F', latex: 'F=(E.x+%s,E.y+%s)' });
+                  calculator.setExpression({ id: 'graph3', latex: 'y=\\\\frac{F.y-E.y}{F.x-E.x}\\\\left(x-E.x\\\\right)+E.y' });
+                </script>""".formatted(x1.x, x1.z, v1.x, v1.z, x2.x, x2.z, v2.x, v2.z, x3.x, x3.z, v3.x, v3.z);
     }
 }
