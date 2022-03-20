@@ -108,7 +108,7 @@ public class MixinClientPlayNetworkHandler {
 
     @Inject(method = "onExplosion", at = @At("TAIL"))
     public void onExplosion(ExplosionS2CPacket packet, CallbackInfo ci) {
-        System.out.println(packet.getX() + ", " + packet.getY() + ", " + packet.getZ());
+        System.out.println(this.client.player.getX() + ", " + this.client.player.getY() + ", " + this.client.player.getZ());
         System.out.println(packet.getPlayerVelocityX() + ", " + packet.getPlayerVelocityY() + ", " + packet.getPlayerVelocityZ());
         if (TempRules.getTntFinder()) {
             boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(packet.getPlayerVelocityX(), 0, packet.getPlayerVelocityZ()));
