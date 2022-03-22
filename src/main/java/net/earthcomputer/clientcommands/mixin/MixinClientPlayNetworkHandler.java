@@ -107,23 +107,41 @@ public class MixinClientPlayNetworkHandler {
         }
     }
 
+    @Inject(method = "onExplosion", at = @At("TAIL"))
+    private void onExplosion(ExplosionS2CPacket packet, CallbackInfo ci) {
+        if (!TempRules.getTntFinder()) {
+            return;
+        }
+        System.out.println("onExplosion: " + this.client.player.getX() + ", " + this.client.player.getZ());
+        System.out.println("onExplosion: " + packet.getPlayerVelocityX() + ", " + packet.getPlayerVelocityZ());
+        boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(this.client.player.getVelocity().getX(), 0, this.client.player.getVelocity().getZ()));
+        if (isReady) {
+            Vec3d loc = TntFinderManager.triangulate();
+            if (loc == null) {
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.parallelVectors"));
+            } else {
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
+            }
+        }
+    }
+
     @Inject(method = "onEntityVelocityUpdate", at = @At("TAIL"))
     private void onEntityVelocityUpdate(EntityVelocityUpdateS2CPacket packet, CallbackInfo ci) {
         if (!TempRules.getTntFinder()) {
             return;
         }
         if (packet.getId() == this.client.player.getId()) {
-            System.out.println(this.client.player.getX() + ", " + this.client.player.getZ());
-            System.out.println(packet.getVelocityX() + ", " + packet.getVelocityZ());
-            boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(packet.getVelocityX(), 0, packet.getVelocityZ()));
-            if (isReady) {
-                Vec3d loc = TntFinderManager.triangulate();
-                if (loc == null) {
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.parallelVectors"));
-                } else {
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
-                }
-            }
+            System.out.println("onEntityVelocityUpdate: " + this.client.player.getX() + ", " + this.client.player.getZ());
+            System.out.println("onEntityVelocityUpdate: " + packet.getVelocityX() + ", " + packet.getVelocityZ());
+            //boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(packet.getVelocityX(), 0, packet.getVelocityZ()));
+            //if (isReady) {
+            //    Vec3d loc = TntFinderManager.triangulate();
+            //    if (loc == null) {
+            //        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.parallelVectors"));
+            //    } else {
+            //        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
+            //    }
+            //}
         }
     }
 }
