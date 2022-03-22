@@ -50,7 +50,7 @@ public class TntFinderManager {
     private static Vec3d intersect(Vec3d x1, Vec3d v1, Vec3d x2, Vec3d v2) {
         final double slopeDiff = v1.x * v2.z - v1.z * v2.x;
         if (-10e-20 <= slopeDiff && slopeDiff <= 10e-20) {
-            return null;
+            // return null;
         }
         double x = (x1.z * v1.x * v2.x - x1.x * v1.z * v2.x - x2.z * v1.x * v2.x + x2.x * v1.x * v2.z) / slopeDiff;
         double z = (v1.z / v1.x) * (x - x1.x) + x1.z;
