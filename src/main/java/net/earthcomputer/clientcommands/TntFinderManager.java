@@ -77,6 +77,7 @@ public class TntFinderManager {
                   calculator.setExpression({ id: 'E', latex: 'E=(%s,%s)' });
                   calculator.setExpression({ id: 'F', latex: 'F=(E.x+%s,E.y+%s)' });
                   calculator.setExpression({ id: 'graph3', latex: 'y=\\\\frac{F.y-E.y}{F.x-E.x}\\\\left(x-E.x\\\\right)+E.y' });
-                </script>""".formatted(x1.x, x1.z, v1.x, v1.z, x2.x, x2.z, v2.x, v2.z, x3.x, x3.z, v3.x, v3.z);
+                </script>
+                """.formatted(x1.x, x1.z, v1.x, v1.z, x2.x, x2.z, v2.x, v2.z, x3.x, x3.z, v3.x, v3.z);
     }
 }
