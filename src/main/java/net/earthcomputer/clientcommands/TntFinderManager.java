@@ -53,7 +53,7 @@ public class TntFinderManager {
         return new Vec3d(x, 0, z);
     }
 
-    public static void reset() {
+    static void reset() {
         x1 = x2 = v1 = v2 = x3 = v3 = null;
     }
 
