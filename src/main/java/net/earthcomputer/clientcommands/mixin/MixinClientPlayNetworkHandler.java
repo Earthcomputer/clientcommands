@@ -15,7 +15,6 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.telemetry.TelemetrySender;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.s2c.play.*;
@@ -28,6 +27,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendError;
+import static net.earthcomputer.clientcommands.command.ClientCommandManager.sendFeedback;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
@@ -112,17 +114,11 @@ public class MixinClientPlayNetworkHandler {
         if (!TempRules.getTntFinder()) {
             return;
         }
-        System.out.println("onExplosion: " + this.client.player.getX() + ", " + this.client.player.getZ());
-        System.out.println("onExplosion: " + packet.getPlayerVelocityX() + ", " + packet.getPlayerVelocityZ());
-        //boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(this.client.player.getVelocity().getX(), 0, this.client.player.getVelocity().getZ()));
-        //if (isReady) {
-        //    Vec3d loc = TntFinderManager.triangulate();
-        //    if (loc == null) {
-        //        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.parallelVectors"));
-        //    } else {
-        //        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
-        //    }
-        //}
+        final float velX = packet.getPlayerVelocityX();
+        final float velZ = packet.getPlayerVelocityZ();
+        if (velX != 0.0 || velZ != 0.0) {
+            sendError(new TranslatableText("tntFinder.explosionInterferenceWarning"));
+        }
     }
 
     @Inject(method = "onEntityVelocityUpdate", at = @At("TAIL"))
@@ -131,16 +127,13 @@ public class MixinClientPlayNetworkHandler {
             return;
         }
         if (packet.getId() == this.client.player.getId()) {
-            System.out.println("onEntityVelocityUpdate: " + this.client.player.getX() + ", " + this.client.player.getZ());
-            System.out.println("onEntityVelocityUpdate: " + packet.getVelocityX() + ", " + packet.getVelocityZ());
             boolean isReady = TntFinderManager.set(new Vec3d(this.client.player.getX(), 0, this.client.player.getZ()), new Vec3d(packet.getVelocityX(), 0, packet.getVelocityZ()));
             if (isReady) {
                 Vec3d loc = TntFinderManager.triangulate();
-                if (loc == null) {
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.parallelVectors"));
-                } else {
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
+                if (loc.y == -1184951860) {
+                    sendError(new TranslatableText("tntFinder.parallelVectorsWarning"));
                 }
+                sendFeedback(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
             }
         }
     }

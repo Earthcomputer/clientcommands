@@ -242,6 +242,7 @@
 
   "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
 
-  "tntFinder.parallelVectors": "Unable to triangulate the location: Vectors are (nearly) parallel",
-  "tntFinder.triangulatedLocation": "Triangulated the location: %d, %d"
+  "tntFinder.triangulatedLocation": "Triangulated the location: %d, %d",
+  "tntFinder.parallelVectorsWarning": "Warning: the calculated coordinate is not finite. This indicates that you didn't reposition or that the player is very far away!",
+  "tntFinder.explosionInterferenceWarning": "Warning: your knockback was influenced by the tnt. Please reset and try again!"
 }
