@@ -31,7 +31,7 @@ public class TempRuleCommand {
     }
 
     private static ArgumentBuilder<ServerCommandSource, ?> createGetSubcommand() {
-        ArgumentBuilder<ServerCommandSource, ?> subcmd = literal("get");
+        var subcmd = literal("get");
         for (String rule : TempRules.getRules()) {
             subcmd.then(literal(rule)
                 .executes(ctx -> getRule(ctx.getSource(), rule)));
@@ -40,7 +40,7 @@ public class TempRuleCommand {
     }
 
     private static ArgumentBuilder<ServerCommandSource, ?> createSetSubcommand() {
-        ArgumentBuilder<ServerCommandSource, ?> subcmd = literal("set");
+        var subcmd = literal("set");
         for (String rule : TempRules.getWritableRules()) {
             Class<?> type = TempRules.getType(rule);
             if (type == boolean.class) {
@@ -56,7 +56,7 @@ public class TempRuleCommand {
                     .then(argument("value", doubleArg())
                         .executes(ctx -> setRule(ctx.getSource(), rule, getDouble(ctx, "value")))));
             } else if (type.isEnum() && StringIdentifiable.class.isAssignableFrom(type)) {
-                ArgumentBuilder<ServerCommandSource, ?> subsubcmd = literal(rule);
+                var subsubcmd = literal(rule);
                 for (Object val : type.getEnumConstants()) {
                     subsubcmd.then(literal(((StringIdentifiable) val).asString())
                         .executes(ctx -> setRule(ctx.getSource(), rule, val)));
@@ -70,7 +70,7 @@ public class TempRuleCommand {
     }
 
     private static ArgumentBuilder<ServerCommandSource, ?> createResetSubcommand() {
-        ArgumentBuilder<ServerCommandSource, ?> subcmd = literal("reset");
+        var subcmd = literal("reset");
         for (String rule : TempRules.getWritableRules()) {
             subcmd.then(literal(rule)
                 .executes(ctx -> resetRule(ctx.getSource(), rule)));

@@ -104,9 +104,17 @@ public class ClientCommandHelper {
                 String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
     }
 
+    public static Text getLookCoordsTextComponent(TranslatableText translatableText, BlockPos pos) {
+        return getCommandTextComponent(translatableText, String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
+    }
+
     public static Text getGlowCoordsTextComponent(BlockPos pos) {
         return getCommandTextComponent(new TranslatableText("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
                 String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
+    }
+
+    public static Text getGlowCoordsTextComponent(TranslatableText translatableText, BlockPos pos) {
+        return getCommandTextComponent(translatableText, String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static Text getCommandTextComponent(String translationKey, String command) {

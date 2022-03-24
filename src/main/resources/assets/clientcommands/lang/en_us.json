@@ -1,4 +1,20 @@
 {
+  "commands.calias.notFound": "Alias \"%s\" not found",
+  "commands.calias.illegalFormatException": "The format string was either malformed or too few arguments were supplied",
+  "commands.calias.file.readError": "Failed to read alias file",
+  "commands.calias.file.writeError": "Failed to write to alias file",
+  "commands.calias.addAlias.aliasAlreadyExists": "Alias \"%s\" already exists",
+  "commands.calias.addAlias.commandAlreadyExists": "The command \"/%s\" already exists",
+  "commands.calias.addAlias.success": "Successfully added alias \"%s\"",
+  "commands.calias.listAliases.noAliasesRegistered": "No aliases registered",
+  "commands.calias.listAliases.success": "%s aliases registered:",
+  "commands.calias.removeAlias.success": "Successfully removed alias \"%s\"",
+
+  "commands.careastats.notLoaded": "A chunk in this area is not loaded",
+  "commands.careastats.output.chunksScanned": "Scanned %d chunks in %dns ≈ %dms",
+  "commands.careastats.output.blocksMatched": "Matched %d out of %d total blocks",
+  "commands.careastats.output.entitiesFound": "Found %d entities in this area",
+
   "commands.cbook.success": "Successfully edited book",
   "commands.cbook.commandException": "You are not holding a book",
 
@@ -30,34 +46,42 @@
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.incompatible": "Incompatible enchantments",
-  "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled.",
+  "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
   "commands.cenchant.success": "Starting enchantment manipulation",
-  "commands.cenchant.uncracked": "Seed needs to be cracked.",
+  "commands.cenchant.uncracked": "Seed needs to be cracked",
 
   "commands.cfind.found.left": "Found %1$s at ",
   "commands.cfind.found.right": ", %2$.2f blocks away",
-  "commands.cfind.keepSearching.success": "Finding entities.",
+  "commands.cfind.keepSearching.success": "Finding entities",
   "commands.cfind.noMatch": "No entities matched your query",
   "commands.cfind.success": "%d entities matched your query",
 
   "commands.cfindblock.notFound": "No such block found",
   "commands.cfindblock.success.left": "Closest match is at ",
+  "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$.2f blocks away",
 
   "commands.cfinditem.match.left": "%dx %s found at ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Searching for %s",
-  "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s.",
+  "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s",
   "commands.cfinditem.total": "Found %dx %s total",
 
   "commands.cfish.addGoal.success": "Successfully added goal %s",
   "commands.cfish.correctLoot": "Got the correct loot with correction of %dms",
+  "commands.cfish.error.biome": "Loot cannot be obtained in this biome, %s needed",
   "commands.cfish.error.crackFailed": "Failed to crack the fishing bobber RNG, is the server modded?",
-  "commands.cfish.error.failed": "Fishing bobber configuration incorrect",
+  "commands.cfish.error.collision": "Fishing bobber collided with something",
+  "commands.cfish.error.fire": "Fishing bobber caught fire",
+  "commands.cfish.error.impossibleLoot": "That loot cannot be obtained with fishing",
+  "commands.cfish.error.onGround": "Fishing bobber hit the ground",
+  "commands.cfish.error.openWater": "Fishing bobber needs to be in open water for treasure loot",
+  "commands.cfish.error.openWater.lilyPad": "Help: try trapping the bobber under a lily pad",
   "commands.cfish.error.outOfWater": "Fishing bobber out of water, manipulation won't work",
+  "commands.cfish.help.tooManyEnchants": "Help: multiple enchantments at once are unlikely and may take a long time to obtain",
   "commands.cfish.listGoals.noGoals": "There are no fishing goals",
   "commands.cfish.listGoals.success": "There are %d fishing goals:",
-  "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled.",
+  "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled",
   "commands.cfish.removeGoal.success": "Successfully removed goal %s",
   "commands.cfish.wrongLoot": "Didn't get the correct loot with correction of %dms, could have been %s ticks ahead",
 
@@ -71,13 +95,26 @@
   "commands.cgive.success": "Gave %d %s to self",
   "commands.cgive.notCreative": "Player must be in creative mode to give items to self",
 
-  "commands.cglow.entity.keepSearching.success": "Glowing entities.",
+  "commands.cglow.entity.keepSearching.success": "Glowing entities",
   "commands.cglow.entity.failed": "No entities to glow",
   "commands.cglow.entity.success": "Glowing %d entities",
   "commands.cglow.area.success": "Glowing %d area(s)",
 
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
+
+  "commands.citemgroup.notFound": "Item group \"%s\" not found",
+  "commands.citemgroup.outOfBounds": "Index %d is out of bounds",
+  "commands.citemgroup.saveFile.failed": "Could not save item groups file",
+  "commands.citemgroup.addGroup.success": "Successfully added item group \"%s\"",
+  "commands.citemgroup.addGroup.illegalCharacter": "Item groups can only contain [a-z0-9/._-] characters",
+  "commands.citemgroup.addGroup.alreadyExists": "Item group \"%s\" already exists",
+  "commands.citemgroup.removeGroup.success": "Successfully removed item group \"%s\"",
+  "commands.citemgroup.addStack.success": "Successfully added %s to \"%s\"",
+  "commands.citemgroup.removeStack.success": "Successfully removed stack from \"%s\" at index %d",
+  "commands.citemgroup.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
+  "commands.citemgroup.changeIcon.success": "Successfully changed the icon of \"%s\" from %s to %s",
+  "commands.citemgroup.renameGroup.success": "Successfully renamed item group \"%s\" to \"%s\"",
 
   "commands.ckit.notFound": "Kit \"%s\" not found",
   "commands.ckit.saveFile.failed": "Could not save kits file",
@@ -90,15 +127,19 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.cplayerinfo.ioException": "An error occurred",
+  "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
+
+  "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
+  "commands.cparticle.success": "Displaying particle %s",
+
+  "commands.cpermissionlevel.success": "Your permission level is %d",
+
   "commands.cplaysound.success": "Played sound %s to self",
 
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
-
-  "commands.cscript.notFound": "Script \"%s\" not found",
-  "commands.cscript.reload.success": "Reloaded scripts",
-  "commands.cscript.run.success": "Script ran successfully",
 
   "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
   "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",
@@ -114,6 +155,9 @@
   "commands.ctemprule.reset.success": "TempRule %s has been reset to %s",
   "commands.ctemprule.set.success": "TempRule %s has been updated to %s",
 
+  "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
+  "commands.ctp.success": "Teleported player to %s",
+
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
   "commands.client.blockpos": "(%d, %d, %d)",
@@ -122,11 +166,13 @@
   "commands.client.enable": "Enable",
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.notClient": "Not a client-side command",
+  "commands.client.tooFewArguments": "Too few arguments",
+  "commands.client.invalidArgumentException": "Invalid argument '%s'",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",
   "chorusManip.goalTooFar": "Goal is too far away!",
-  "chorusManip.needChorusManipulation": "Chorus Fruit manipulation is not enabled.",
+  "chorusManip.needChorusManipulation": "Chorus Fruit manipulation is not enabled",
   "chorusManip.setGoal": "Set %s goal area from %s to %s",
 
   "enchCrack.state": "Enchantment Crack State: %s",
@@ -167,8 +213,10 @@
   "playerManip.reset.sprint": "Sprinted",
   "playerManip.reset.enterWater": "Entered Water",
   "playerManip.reset.swim": "Swum",
+  "playerManip.reset.amethystChime": "Walked on Amethyst Crystals",
   "playerManip.reset.potion": "Potion Effect Active",
   "playerManip.reset.mending": "Mended Item",
+  "playerManip.reset.xp": "XP Orb Collected",
   "playerManip.reset.respiration": "Respiration Helmet Used",
   "playerManip.reset.dropItem": "Dropped Item",
   "playerManip.reset.anvil": "Anvil Used",
@@ -190,7 +238,7 @@
   "playerManip.toolBreakWarning": "Warning: tool has %d durability left",
   "playerManip.throwError": "Condition not possible or would require more than %d item throws",
   "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
-  "playerManip.uncracked": "Player-Seed needs to be cracked.",
+  "playerManip.uncracked": "Player-Seed needs to be cracked",
 
   "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
 }

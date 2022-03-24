@@ -40,7 +40,6 @@
   "commands.cfish.addGoal.success": "成功添加目標 %s",
   "commands.cfish.correctLoot": "使用 %dms 校正得到目標戰利品",
   "commands.cfish.error.crackFailed": "無法破譯釣魚氣泡隨機數，這是個模組伺服器?",
-  "commands.cfish.error.failed": "釣魚氣泡配置不正確",
   "commands.cfish.error.outOfWater": "釣魚氣泡在水域外，操控將無法工作",
   "commands.cfish.listGoals.noGoals": "沒有設置釣魚目標",
   "commands.cfish.listGoals.success": "已設置 %d 釣魚目標:",
@@ -60,10 +59,6 @@
   "commands.crelog.failed": "重啟失敗",
 
   "commands.crender.entities.success": "實體渲染規則已被更新",
-
-  "commands.cscript.notFound": "未找到腳本 \"%s\"",
-  "commands.cscript.reload.success": "已重新加載腳本",
-  "commands.cscript.run.success": "成功運行腳本",
 
   "commands.ctask.list.noTasks": "當前沒有正在執行的任務",
   "commands.ctask.list.success": "%d 個任務正在執行",

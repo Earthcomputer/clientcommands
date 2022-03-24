@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.command.*;
-import net.earthcomputer.clientcommands.script.ScriptManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -19,8 +18,6 @@ public class ClientCommands implements ClientModInitializer {
         configDir = new File(FabricLoader.getInstance().getConfigDirectory(), "clientcommands");
         //noinspection ResultOfMethodCallIgnored
         configDir.mkdirs();
-
-        ScriptManager.reloadScripts();
     }
 
     public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -37,11 +34,11 @@ public class ClientCommands implements ClientModInitializer {
         TempRuleCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
         CHelpCommand.register(dispatcher);
+        UsageTreeCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher);
         GlowCommand.register(dispatcher);
         GetDataCommand.register(dispatcher);
-        ScriptCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher);
         GammaCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
@@ -56,6 +53,15 @@ public class ClientCommands implements ClientModInitializer {
         FovCommand.register(dispatcher);
         HotbarCommand.register(dispatcher);
         KitCommand.register(dispatcher);
+        ItemGroupCommand.register(dispatcher);
+        CParticleCommand.register(dispatcher);
+        PermissionLevelCommand.register(dispatcher);
+        CTellRawCommand.register(dispatcher);
+        CTimeCommand.register(dispatcher);
+        AliasCommand.register(dispatcher);
+        AreaStatsCommand.register(dispatcher);
+        CTeleportCommand.register(dispatcher);
+        PlayerInfoCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
 

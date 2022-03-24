@@ -6,7 +6,6 @@ import static net.minecraft.server.command.CommandManager.*;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.suggestion.SuggestionProviders;
@@ -20,7 +19,7 @@ public class CStopSoundCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cstopsound");
 
-        LiteralArgumentBuilder<ServerCommandSource> builder = literal("cstopsound");
+        var builder = literal("cstopsound");
 
         for (SoundCategory category : SoundCategory.values()) {
             builder.then(buildArguments(category, category.getName()));

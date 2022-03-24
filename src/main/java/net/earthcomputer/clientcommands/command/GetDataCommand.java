@@ -83,20 +83,20 @@ public class GetDataCommand {
     }
 
     private static int getData(ServerCommandSource source, DataCommandObject dataObj) throws CommandSyntaxException {
-        sendFeedback(dataObj.feedbackQuery(dataObj.getTag()));
+        sendFeedback(dataObj.feedbackQuery(dataObj.getNbt()));
         return 1;
     }
 
     private static int getData(ServerCommandSource source, DataCommandObject dataObj, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
-        Tag tag = getTag(path, dataObj);
+        NbtElement tag = getNbt(path, dataObj);
         int ret;
-        if (tag instanceof AbstractNumberTag) {
-            ret = MathHelper.floor(((AbstractNumberTag) tag).getDouble());
-        } else if (tag instanceof AbstractListTag) {
-            ret = ((AbstractListTag) tag).size();
-        } else if (tag instanceof CompoundTag) {
-            ret = ((CompoundTag) tag).getSize();
-        } else if (tag instanceof StringTag) {
+        if (tag instanceof AbstractNbtNumber) {
+            ret = MathHelper.floor(((AbstractNbtNumber) tag).doubleValue());
+        } else if (tag instanceof AbstractNbtList) {
+            ret = ((AbstractNbtList<?>) tag).size();
+        } else if (tag instanceof NbtCompound) {
+            ret = ((NbtCompound) tag).getSize();
+        } else if (tag instanceof NbtString) {
             ret = tag.asString().length();
         } else {
             throw GET_UNKNOWN_EXCEPTION.create(path.toString());
@@ -106,10 +106,10 @@ public class GetDataCommand {
         return ret;
     }
 
-    private static Tag getTag(NbtPathArgumentType.NbtPath path, DataCommandObject dataObj) throws CommandSyntaxException {
-        Collection<Tag> tags = path.get(dataObj.getTag());
-        Iterator<Tag> tagItr = tags.iterator();
-        Tag firstTag = tagItr.next();
+    private static NbtElement getNbt(NbtPathArgumentType.NbtPath path, DataCommandObject dataObj) throws CommandSyntaxException {
+        Collection<NbtElement> tags = path.get(dataObj.getNbt());
+        Iterator<NbtElement> tagItr = tags.iterator();
+        NbtElement firstTag = tagItr.next();
         if (tagItr.hasNext()) {
             throw GET_MULTIPLE_EXCEPTION.create();
         } else {

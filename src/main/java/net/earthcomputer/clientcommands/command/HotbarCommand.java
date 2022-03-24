@@ -9,8 +9,8 @@ import com.mojang.brigadier.exceptions.*;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.options.HotbarStorage;
-import net.minecraft.client.options.HotbarStorageEntry;
+import net.minecraft.client.option.HotbarStorage;
+import net.minecraft.client.option.HotbarStorageEntry;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
@@ -41,12 +41,12 @@ public class HotbarCommand {
         HotbarStorageEntry entry = storage.getSavedHotbar(index - 1);
 
         for (int slot = 0; slot < PlayerInventory.getHotbarSize(); slot++) {
-            entry.set(slot, client.player.inventory.getStack(slot).copy());
+            entry.set(slot, client.player.getInventory().getStack(slot).copy());
         }
         storage.save();
 
-        Text loadKey = client.options.keyLoadToolbarActivator.getBoundKeyLocalizedText();
-        Text hotbarKey = client.options.keysHotbar[index - 1].getBoundKeyLocalizedText();
+        Text loadKey = client.options.loadToolbarActivatorKey.getBoundKeyLocalizedText();
+        Text hotbarKey = client.options.hotbarKeys[index - 1].getBoundKeyLocalizedText();
 
         sendFeedback(new TranslatableText("inventory.hotbarSaved", loadKey, hotbarKey));
         return 0;
@@ -56,7 +56,7 @@ public class HotbarCommand {
         MinecraftClient client = MinecraftClient.getInstance();
 
         ClientPlayerEntity player = client.player;
-        if (!player.abilities.creativeMode) {
+        if (!player.getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
@@ -66,7 +66,7 @@ public class HotbarCommand {
         for (int slot = 0; slot < PlayerInventory.getHotbarSize(); slot++) {
             ItemStack stack = entry.get(slot).copy();
 
-            player.inventory.setStack(slot, stack);
+            player.getInventory().setStack(slot, stack);
             client.interactionManager.clickCreativeStack(stack, 36 + slot);
         }
 

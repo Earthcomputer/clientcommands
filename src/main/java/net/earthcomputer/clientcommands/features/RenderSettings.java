@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import net.earthcomputer.clientcommands.command.ClientEntitySelector;
 import net.earthcomputer.clientcommands.command.FakeCommandSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Pair;
@@ -21,7 +22,7 @@ public class RenderSettings {
 
     public static void clearEntityRenderSelectors() {
         if (Relogger.isRelogging) {
-            ArrayList<Pair<ClientEntitySelector, Boolean>> oldSelectors = new ArrayList<>(entityRenderSelectors);
+            var oldSelectors = new ArrayList<>(entityRenderSelectors);
             Relogger.relogSuccessTasks.add(() -> entityRenderSelectors.addAll(oldSelectors));
         }
         entityRenderSelectors.clear();
@@ -34,13 +35,16 @@ public class RenderSettings {
     }
 
     public static void preRenderEntities() {
-        ServerCommandSource source = new FakeCommandSource(MinecraftClient.getInstance().player);
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        // prevent crash from other mods trying to load entity rendering without a world (usually a fake world and no client player)
+        if (player == null) return;
+        ServerCommandSource source = new FakeCommandSource(player);
 
         disabledEntities.clear();
-        for (Pair<ClientEntitySelector, Boolean> filter : entityRenderSelectors) {
+        for (var filter : entityRenderSelectors) {
             List<UUID> entities = filter.getLeft().getEntities(source).stream().map(Entity::getUuid).collect(Collectors.toList());
             if (filter.getRight()) {
-                disabledEntities.removeAll(entities);
+                entities.forEach(disabledEntities::remove);
             } else {
                 disabledEntities.addAll(entities);
             }

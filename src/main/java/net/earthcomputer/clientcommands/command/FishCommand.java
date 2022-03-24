@@ -7,7 +7,6 @@ import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
@@ -80,17 +79,7 @@ public class FishCommand {
         String string = stringAndItemAndEnchantments.getLeft();
         ItemAndEnchantmentsPredicate itemAndEnchantments = stringAndItemAndEnchantments.getRight();
 
-        ClientItemPredicate goal = new ClientItemPredicate() {
-            @Override
-            public String getPrettyString() {
-                return string;
-            }
-
-            @Override
-            public boolean test(ItemStack itemStack) {
-                return itemAndEnchantments.test(itemStack);
-            }
-        };
+        ClientItemPredicate goal = new EnchantedItemPredicate(string, itemAndEnchantments);
 
         FishingCracker.goals.add(goal);
 

@@ -7,19 +7,29 @@ import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.mixin.AlternativeLootConditionAccessor;
+import net.earthcomputer.clientcommands.mixin.AndConditionAccessor;
+import net.earthcomputer.clientcommands.mixin.CombinedEntryAccessor;
+import net.earthcomputer.clientcommands.mixin.EntityPredicateAccessor;
+import net.earthcomputer.clientcommands.mixin.EntityPropertiesLootConditionAccessor;
+import net.earthcomputer.clientcommands.mixin.FishingHookPredicateAccessor;
+import net.earthcomputer.clientcommands.mixin.InvertedLootConditionAccessor;
+import net.earthcomputer.clientcommands.mixin.ItemEntryAccessor;
 import net.earthcomputer.clientcommands.mixin.LocationCheckLootConditionAccessor;
 import net.earthcomputer.clientcommands.mixin.LocationPredicateAccessor;
 import net.earthcomputer.clientcommands.mixin.LootContextAccessor;
 import net.earthcomputer.clientcommands.mixin.LootPoolAccessor;
 import net.earthcomputer.clientcommands.mixin.LootPoolEntryAccessor;
 import net.earthcomputer.clientcommands.mixin.LootTableAccessor;
+import net.earthcomputer.clientcommands.mixin.LootTableEntryAccessor;
 import net.earthcomputer.clientcommands.mixin.ProjectileEntityAccessor;
+import net.earthcomputer.clientcommands.mixin.TagEntryAccessor;
+import net.earthcomputer.clientcommands.mixin.WeatherCheckLootConditionAccessor;
+import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -35,6 +45,7 @@ import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootPool;
@@ -42,24 +53,36 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTables;
 import net.minecraft.loot.condition.AlternativeLootCondition;
 import net.minecraft.loot.condition.EntityPropertiesLootCondition;
+import net.minecraft.loot.condition.InvertedLootCondition;
 import net.minecraft.loot.condition.LocationCheckLootCondition;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.condition.LootConditionTypes;
+import net.minecraft.loot.condition.WeatherCheckLootCondition;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameter;
 import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.entry.CombinedEntry;
+import net.minecraft.loot.entry.EmptyEntry;
+import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.entry.LootPoolEntry;
+import net.minecraft.loot.entry.LootTableEntry;
+import net.minecraft.loot.entry.TagEntry;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
+import net.minecraft.predicate.BlockPredicate;
+import net.minecraft.predicate.FluidPredicate;
+import net.minecraft.predicate.LightPredicate;
+import net.minecraft.predicate.NumberRange;
+import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.FishingHookPredicate;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.collection.ReusableStream;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -67,21 +90,27 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.Set;
@@ -91,21 +120,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class FishingCracker {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // goals
     public static final List<ClientItemPredicateArgumentType.ClientItemPredicate> goals = new ArrayList<>();
+    private static boolean hasWarnedMultipleEnchants = false;
 
     // loot state
     private static ItemStack actualLoot;
-    private static Catch[] expectedCatches = new Catch[21]; // must be an odd number
+    private static final Catch[] expectedCatches = new Catch[21]; // must be an odd number
 
     // bobber state
     private static ItemStack tool;
     private static Vec3d bobberDestPos;
+    private static int bobberNumTicks;
 
     // rethrow bobber
     public static final int RETHROW_COOLDOWN = 20;
@@ -132,15 +162,25 @@ public class FishingCracker {
 
     private static final Map<Identifier, LootTable> FISHING_LOOT_TABLES;
     private static final LootTable FISHING_LOOT_TABLE;
+    private static final Map<Item, LootConditionType> LOOT_CONDITIONS = new IdentityHashMap<>();
     private static final LootContextParameter<Boolean> IN_OPEN_WATER_PARAMETER = new LootContextParameter<>(new Identifier("clientcommands", "in_open_water"));
     static {
-        ImmutableMap.Builder<Identifier, LootTable> fishingLootTables = ImmutableMap.builder();
+        // fix for class load order issue
+        try {
+            Class.forName(EntityPredicate.class.getName(), true, FishingCracker.class.getClassLoader());
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError(e);
+        }
+
+        var fishingLootTables = ImmutableMap.<Identifier, LootTable>builder();
         new FishingLootTableGenerator().accept((id, builder) -> fishingLootTables.put(id, builder.build()));
         FISHING_LOOT_TABLES = fishingLootTables.build();
 
         {
             LootTable lootTable = FISHING_LOOT_TABLES.get(LootTables.FISHING_GAMEPLAY);
+            walkLootTable(lootTable, new LootCondition[0]);
             FISHING_LOOT_TABLE = lootTable;
+            assert lootTable != null;
             LootPool[] pools = ((LootTableAccessor) lootTable).getPools();
             LootPoolEntry[] entries = ((LootPoolAccessor) pools[0]).getEntries();
             for (LootPoolEntry entry : entries) {
@@ -169,6 +209,7 @@ public class FishingCracker {
 
         {
             LootTable lootTable = FISHING_LOOT_TABLES.get(LootTables.FISHING_JUNK_GAMEPLAY);
+            assert lootTable != null;
             LootPool[] pools = ((LootTableAccessor) lootTable).getPools();
             for (LootPool pool : pools) {
                 LootPoolEntry[] entries = ((LootPoolAccessor) pool).getEntries();
@@ -180,8 +221,8 @@ public class FishingCracker {
                             for (int i = 0; i < terms.length; i++) {
                                 LootCondition term = terms[i];
                                 if (term instanceof LocationCheckLootCondition) {
-                                    LocationCheckLootConditionAccessor accessor = (LocationCheckLootConditionAccessor) term;
-                                    LocationPredicateAccessor predicateAccessor = (LocationPredicateAccessor) accessor.getPredicate();
+                                    var accessor = (LocationCheckLootConditionAccessor) term;
+                                    var predicateAccessor = (LocationPredicateAccessor) accessor.getPredicate();
                                     terms[i] = new LocationCheckLootCondition(accessor.getPredicate(), accessor.getOffset()) {
                                         @Override
                                         public boolean test(LootContext lootContext) {
@@ -195,8 +236,8 @@ public class FishingCracker {
                                             if (!predicateAccessor.getX().test((float)origin.getX()) || !predicateAccessor.getY().test((float)origin.getY()) || !predicateAccessor.getZ().test((float)origin.getZ())) {
                                                 return false;
                                             }
-                                            Optional<RegistryKey<Biome>> biome = world.getRegistryManager().get(Registry.BIOME_KEY).getKey(world.getBiome(new BlockPos(origin)));
-                                            return biome.isPresent() && biome.get() == predicateAccessor.getBiome();
+                                            var biome = world.getBiome(new BlockPos(origin));
+                                            return biome.getKey().isPresent() && biome.getKey().get() == predicateAccessor.getBiome();
                                         }
                                     };
                                 }
@@ -205,6 +246,295 @@ public class FishingCracker {
                     }
                 }
             }
+        }
+    }
+
+    private static void walkLootTable(LootTable lootTable, LootCondition[] parentConditions) {
+        for (LootPool pool : ((LootTableAccessor) lootTable).getPools()) {
+            for (LootPoolEntry entry : ((LootPoolAccessor) pool).getEntries()) {
+                walkLootEntry(entry, parentConditions);
+            }
+        }
+    }
+
+    private static void walkLootEntry(LootPoolEntry entry, LootCondition[] parentConditions) {
+        LootCondition[] conditions = ArrayUtils.addAll(parentConditions, ((LootPoolEntryAccessor) entry).getConditions());
+        if (entry instanceof CombinedEntry) {
+            for (LootPoolEntry child : ((CombinedEntryAccessor) entry).getChildren()) {
+                walkLootEntry(child, conditions);
+            }
+        } else if (entry instanceof ItemEntry) {
+            addCondition(((ItemEntryAccessor) entry).getItem(), conditions);
+        } else if (entry instanceof TagEntry) {
+            TagKey<Item> tag = ((TagEntryAccessor) entry).getName();
+            Registry.ITEM.getEntryList(tag).ifPresent(list -> {
+                for (RegistryEntry<Item> item : list) {
+                    addCondition(item.value(), conditions);
+                }
+            });
+        } else if (entry instanceof LootTableEntry) {
+            walkLootTable(FISHING_LOOT_TABLES.get(((LootTableEntryAccessor) entry).getId()), conditions);
+        } else if (!(entry instanceof EmptyEntry)) {
+            throw new IllegalArgumentException("Cannot convert loot entry");
+        }
+    }
+
+    private static abstract sealed class LootConditionType {
+        @Nullable
+        abstract LootConditionType getFailedCondition(LootContext context, boolean inverted);
+
+        int getPriority() {
+            return 0;
+        }
+    }
+    private static final class AlwaysTrueCondition extends LootConditionType {
+        public static final AlwaysTrueCondition INSTANCE = new AlwaysTrueCondition();
+
+        @Override
+        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
+            return inverted ? this : null;
+        }
+    }
+    private static final class AndCondition extends LootConditionType {
+        private final LootConditionType[] children;
+
+        private AndCondition(LootConditionType[] children) {
+            this.children = children;
+        }
+
+        @Override
+        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
+            LootConditionType result = null;
+            for (LootConditionType child : children) {
+                LootConditionType failure = child.getFailedCondition(context, inverted);
+                if (failure == null) {
+                    if (inverted) {
+                        return null;
+                    }
+                } else {
+                    if (result == null) {
+                        result = failure;
+                    } else if ((result.getPriority() < failure.getPriority()) != inverted) {
+                        result = failure;
+                    }
+                }
+            }
+            return result;
+        }
+    }
+    private static final class OrCondition extends LootConditionType {
+        private final LootConditionType[] children;
+
+        private OrCondition(LootConditionType[] children) {
+            this.children = children;
+        }
+
+        @Override
+        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
+            LootConditionType result = null;
+            for (LootConditionType child : children) {
+                LootConditionType failure = child.getFailedCondition(context, inverted);
+                if (failure == null) {
+                    if (!inverted) {
+                        return null;
+                    }
+                } else {
+                    if (result == null) {
+                        result = failure;
+                    } else if ((result.getPriority() < failure.getPriority()) == inverted) {
+                        result = failure;
+                    }
+                }
+            }
+            return result;
+        }
+    }
+    private static final class NotCondition extends LootConditionType {
+        private final LootConditionType operand;
+
+        private NotCondition(LootConditionType operand) {
+            this.operand = operand;
+        }
+
+        @Override
+        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
+            return operand.getFailedCondition(context, !inverted);
+        }
+    }
+    private static final class OpenWaterCondition extends LootConditionType {
+        public static final OpenWaterCondition INSTANCE = new OpenWaterCondition();
+
+        @Override
+        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
+            Boolean inOpenWater = context.get(IN_OPEN_WATER_PARAMETER);
+            assert inOpenWater != null;
+            return inOpenWater == inverted ? this : null;
+        }
+
+        @Override
+        int getPriority() {
+            return 2;
+        }
+    }
+    private static final class BiomeCondition extends LootConditionType {
+        private final BlockPos offset;
+        private final NumberRange.FloatRange xRange;
+        private final NumberRange.FloatRange yRange;
+        private final NumberRange.FloatRange zRange;
+        private final RegistryKey<Biome> biome;
+
+        private BiomeCondition(BlockPos offset, NumberRange.FloatRange xRange, NumberRange.FloatRange yRange, NumberRange.FloatRange zRange, RegistryKey<Biome> biome) {
+            this.offset = offset;
+            this.xRange = xRange;
+            this.yRange = yRange;
+            this.zRange = zRange;
+            this.biome = biome;
+        }
+
+        @Override
+        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
+            ClientWorld world = MinecraftClient.getInstance().world;
+            assert world != null;
+            Vec3d origin = context.get(LootContextParameters.ORIGIN);
+            if (origin == null) {
+                return this;
+            }
+            origin = origin.add(offset.getX(), offset.getY(), offset.getZ());
+            if (!xRange.test((float)origin.getX()) || !yRange.test((float)origin.getY()) || !zRange.test((float)origin.getZ())) {
+                return inverted ? null : this;
+            }
+            var biome = world.getBiome(new BlockPos(origin));
+            return (biome.getKey().isPresent() && biome.getKey().get() == this.biome) == inverted ? this : null;
+        }
+
+        @Override
+        int getPriority() {
+            return 1;
+        }
+    }
+    private static final class WeatherCheckCondition extends LootConditionType {
+        @Nullable final Boolean raining;
+        @Nullable final Boolean thundering;
+
+        private WeatherCheckCondition(@Nullable Boolean raining, @Nullable Boolean thundering) {
+            this.raining = raining;
+            this.thundering = thundering;
+        }
+
+        @Override
+        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
+            ClientWorld world = MinecraftClient.getInstance().world;
+            assert world != null;
+            if (this.raining != null && world.isRaining() != this.raining) {
+                return inverted ? null : this;
+            }
+            if (this.thundering != null && world.isThundering() != this.thundering) {
+                return inverted ? null : this;
+            }
+            return inverted ? this : null;
+        }
+    }
+
+    private static void addCondition(Item item, LootCondition[] conditions) {
+        LootConditionType condition = convertAndCondition(conditions);
+        LootConditionType existingCondition = LOOT_CONDITIONS.get(item);
+        if (existingCondition == null) {
+            LOOT_CONDITIONS.put(item, condition);
+            return;
+        }
+        if (existingCondition instanceof AlwaysTrueCondition) {
+            return;
+        }
+        if (condition instanceof AlwaysTrueCondition) {
+            LOOT_CONDITIONS.put(item, condition);
+            return;
+        }
+        if (existingCondition instanceof OrCondition existingOr) {
+            if (condition instanceof OrCondition or) {
+                LOOT_CONDITIONS.put(item, new OrCondition(ArrayUtils.addAll(existingOr.children, or.children)));
+            } else {
+                LOOT_CONDITIONS.put(item, new OrCondition(ArrayUtils.add(existingOr.children, condition)));
+            }
+        } else if (condition instanceof OrCondition or) {
+            LOOT_CONDITIONS.put(item, new OrCondition(ArrayUtils.add(or.children, existingCondition)));
+        } else {
+            LOOT_CONDITIONS.put(item, new OrCondition(new LootConditionType[]{existingCondition, condition}));
+        }
+    }
+
+    private static LootConditionType convertAndCondition(LootCondition[] conditions) {
+        if (conditions.length == 0) {
+            return AlwaysTrueCondition.INSTANCE;
+        } else if (conditions.length == 1) {
+            return convertCondition(conditions[0]);
+        } else {
+            return new AndCondition(convertConditions(conditions));
+        }
+    }
+
+    private static LootConditionType[] convertConditions(LootCondition[] conditions) {
+        LootConditionType[] result = new LootConditionType[conditions.length];
+        for (int i = 0; i < conditions.length; i++) {
+            result[i] = convertCondition(conditions[i]);
+        }
+        return result;
+    }
+
+    private static LootConditionType convertCondition(LootCondition condition) {
+        if (condition instanceof AlternativeLootCondition) {
+            return new OrCondition(convertConditions(((AlternativeLootConditionAccessor) condition).getTerms()));
+        } else if (condition instanceof AndConditionAccessor andCondition) {
+            return new AndCondition(convertConditions(andCondition.getTerms()));
+        } else if (condition instanceof InvertedLootCondition) {
+            return new NotCondition(convertCondition(((InvertedLootConditionAccessor) condition).getTerm()));
+        } else if (condition instanceof LocationCheckLootCondition) {
+            var accessor = (LocationCheckLootConditionAccessor) condition;
+            var predicate = (LocationPredicateAccessor) accessor.getPredicate();
+            if (predicate.getSmokey() != null
+                    || predicate.getDimension() != null
+                    || predicate.getFeature() != null
+                    || predicate.getFluid() != FluidPredicate.ANY
+                    || predicate.getBlock() != BlockPredicate.ANY
+                    || predicate.getLight() != LightPredicate.ANY
+                    || predicate.getBiome() == null) {
+                throw new IllegalArgumentException("Cannot convert condition");
+            }
+            return new BiomeCondition(accessor.getOffset(), predicate.getX(), predicate.getY(), predicate.getZ(), predicate.getBiome());
+        } else if (condition instanceof EntityPropertiesLootCondition) {
+            var accessor = (EntityPropertiesLootConditionAccessor) condition;
+            if (accessor.getEntity() != LootContext.EntityTarget.THIS) {
+                throw new IllegalArgumentException("Cannot convert condition");
+            }
+            EntityPredicate predicate = accessor.getPredicate();
+            for (Field field : EntityPredicate.class.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+                if (field.getType() == FishingHookPredicate.class) {
+                    continue;
+                }
+                field.setAccessible(true);
+                try {
+                    if (field.get(predicate) != field.get(EntityPredicate.ANY)) {
+                        throw new IllegalArgumentException("Cannot convert condition " + field.getName() + ", " + field.get(predicate) + " != " + field.get(EntityPredicate.ANY));
+                    }
+                } catch (ReflectiveOperationException e) {
+                    throw new AssertionError(e);
+                }
+            }
+            FishingHookPredicate fishingHook = ((EntityPredicateAccessor) predicate).getFishingHook();
+            if (fishingHook == FishingHookPredicate.ANY) {
+                return AlwaysTrueCondition.INSTANCE;
+            } else if (((FishingHookPredicateAccessor) fishingHook).isInOpenWater()) {
+                return OpenWaterCondition.INSTANCE;
+            } else {
+                return new NotCondition(OpenWaterCondition.INSTANCE);
+            }
+        } else if (condition instanceof WeatherCheckLootCondition) {
+            var accessor = (WeatherCheckLootConditionAccessor) condition;
+            return new WeatherCheckCondition(accessor.getRaining(), accessor.getThundering());
+        } else {
+            throw new IllegalArgumentException("Cannot convert condition");
         }
     }
 
@@ -257,7 +587,7 @@ public class FishingCracker {
 
     // region UTILITY
 
-    private static boolean interanlInteractFishingBobber(){
+    private static boolean internalInteractFishingBobber(){
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
         if (player != null && interactionManager != null) {
@@ -272,11 +602,11 @@ public class FishingCracker {
     }
 
     public static boolean retractFishingBobber(){
-        return interanlInteractFishingBobber();
+        return internalInteractFishingBobber();
     }
 
     public static boolean throwFishingBobber() {
-        if (interanlInteractFishingBobber()){
+        if (internalInteractFishingBobber()){
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             assert player != null;
             ItemStack stack = player.getMainHandStack();
@@ -299,9 +629,7 @@ public class FishingCracker {
         if (localPlayer == null)
             return -1;
 
-        int ping = localPlayer.getLatency();
-
-        return ping;
+        return localPlayer.getLatency();
     }
 
     private static void handleFishingRodThrow(ItemStack stack) {
@@ -372,12 +700,20 @@ public class FishingCracker {
         }
 
         OptionalLong optionalSeed = getSeed(fishingBobberUUID);
-        if (!optionalSeed.isPresent()) {
+        if (optionalSeed.isEmpty()) {
             Text error = new TranslatableText("commands.cfish.error.crackFailed").styled(style -> style.withColor(Formatting.RED));
             ClientCommandHelper.addOverlayMessage(error, 100);
             reset();
             return;
         }
+
+        record ErrorEntry(int tick, boolean isBox) {}
+        // clear last error
+        for (int tick = 0; tick <= bobberNumTicks; tick++) {
+            RenderQueue.remove(RenderQueue.Layer.ON_TOP, new ErrorEntry(tick, false));
+            RenderQueue.remove(RenderQueue.Layer.ON_TOP, new ErrorEntry(tick, true));
+        }
+        bobberNumTicks = 0;
 
         long seed = optionalSeed.getAsLong();
         SimulatedFishingBobber fishingBobber = new SimulatedFishingBobber(seed, tool, pos, velocity);
@@ -387,11 +723,22 @@ public class FishingCracker {
         List<Catch> possibleExpectedCatches = new ArrayList<>();
         int ourExpectedCatchIndex = -1;
 
+        List<Vec3d> bobberPositions = new ArrayList<>();
+        bobberPositions.add(pos);
         // TODO: get a smarter number of max ticks based on the rarity of the item
         for (int ticks = 0; ticks < 10000; ticks++) {
             fishingBobber.tick();
-            if (fishingBobber.failed) {
-                Text error = new TranslatableText("commands.cfish.error.failed").styled(style -> style.withColor(Formatting.RED));
+            bobberPositions.add(fishingBobber.pos);
+            if (fishingBobber.failedReason != null) {
+                bobberNumTicks = ticks;
+                for (int i = 0; i < bobberPositions.size(); i++) {
+                    int color = i == bobberPositions.size() - 1 ? 0xff0000 : 0x00ff00;
+                    RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, new ErrorEntry(i, true), SimulatedFishingBobber.FISHING_BOBBER_DIMENSIONS.getBoxAt(bobberPositions.get(i)), color, 100);
+                    if (i != 0) {
+                        RenderQueue.addLine(RenderQueue.Layer.ON_TOP, new ErrorEntry(i, false), bobberPositions.get(i - 1), bobberPositions.get(i), color, 100);
+                    }
+                }
+                Text error = new TranslatableText("commands.cfish.error." + fishingBobber.failedReason).styled(style -> style.withColor(Formatting.RED));
                 ClientCommandHelper.addOverlayMessage(error, 100);
                 reset();
                 return;
@@ -408,11 +755,78 @@ public class FishingCracker {
                 possibleExpectedCatches.add(catches.get(0));
                 wasCatchingFish = true;
             } else if (wasCatchingFish) {
+                bobberNumTicks = ticks;
                 break;
             }
         }
 
         if (ticksUntilOurItem == -1) {
+            // diagnose issue
+            LootConditionType failedCondition = null;
+            boolean impossible = true;
+            for (var goal : goals) {
+                if (goal instanceof ClientItemPredicateArgumentType.EnchantedItemPredicate predicate) {
+                    if (goal.getPossibleItems().contains(Items.ENCHANTED_BOOK)
+                            && predicate.predicate().numEnchantments() >= 2) {
+                        if (!hasWarnedMultipleEnchants) {
+                            Text help = new TranslatableText("commands.cfish.help.tooManyEnchants").styled(style -> style.withColor(Formatting.AQUA));
+                            ClientCommandHelper.sendFeedback(help);
+                            hasWarnedMultipleEnchants = true;
+                        }
+                    }
+                }
+                for (Item item : goal.getPossibleItems()) {
+                    LootConditionType conditionType = LOOT_CONDITIONS.get(item);
+                    if (conditionType != null) {
+                        impossible = false;
+                        LootConditionType failed = conditionType.getFailedCondition(fishingBobber.getLootContext(new Rand(fishingBobber.random)), false);
+                        if (failed != null) {
+                            if (failedCondition == null || failed.getPriority() > failedCondition.getPriority()) {
+                                failedCondition = failed;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (impossible) {
+                Text error = new TranslatableText("commands.cfish.error.impossibleLoot").styled(style -> style.withColor(Formatting.RED));
+                ClientCommandHelper.addOverlayMessage(error, 100);
+                reset();
+                return;
+            }
+            if (failedCondition != null) {
+                if (failedCondition instanceof OpenWaterCondition) {
+                    Text error = new TranslatableText("commands.cfish.error.openWater").styled(style -> style.withColor(Formatting.RED));
+                    ClientCommandHelper.addOverlayMessage(error, 100);
+                    if (!fishingBobber.world.getBlockState(new BlockPos(fishingBobber.pos).up()).isOf(Blocks.LILY_PAD)) {
+                        Text help = new TranslatableText("commands.cfish.error.openWater.lilyPad").styled(style -> style.withColor(Formatting.AQUA));
+                        ClientCommandHelper.sendFeedback(help);
+                    }
+                    for (BlockPos openWaterViolation : fishingBobber.openWaterViolations) {
+                        RenderQueue.addCuboid(
+                                RenderQueue.Layer.ON_TOP,
+                                UUID.randomUUID(),
+                                Vec3d.of(openWaterViolation),
+                                Vec3d.of(openWaterViolation.add(1, 1, 1)),
+                                0xff0000,
+                                100
+                        );
+                    }
+                    reset();
+                    return;
+                }
+                if (failedCondition instanceof BiomeCondition biomeCondition) {
+                    Text error = new TranslatableText(
+                            "commands.cfish.error.biome",
+                            new TranslatableText("biome." + biomeCondition.biome.getValue().getNamespace() + "." + biomeCondition.biome.getValue().getPath())
+                    );
+                    ClientCommandHelper.addOverlayMessage(error, 100);
+                    reset();
+                    return;
+                }
+            }
+
             if (retractFishingBobber()) {
                 if (!throwFishingBobber()) {
                     reset();
@@ -486,18 +900,17 @@ public class FishingCracker {
             }
             CombinedMedianEM.data.add(sample);
 
-            if (!CombinedMedianEM.data.isEmpty()) {
-                CombinedMedianEM.begintime = magicMillisecondsCorrection - serverMspt / 2 - (expectedCatches.length / 2) * serverMspt;
-                CombinedMedianEM.endtime = magicMillisecondsCorrection + serverMspt / 2 + (expectedCatches.length / 2) * serverMspt;
-                CombinedMedianEM.width = serverMspt;
-                CombinedMedianEM.run();
-                magicMillisecondsCorrection = (int) Math.round(CombinedMedianEM.mu);
-            }
+            CombinedMedianEM.begintime = magicMillisecondsCorrection - serverMspt / 2 - (expectedCatches.length / 2) * serverMspt;
+            CombinedMedianEM.endtime = magicMillisecondsCorrection + serverMspt / 2 + (expectedCatches.length / 2) * serverMspt;
+            CombinedMedianEM.width = serverMspt;
+            CombinedMedianEM.run();
+            magicMillisecondsCorrection = (int) Math.round(CombinedMedianEM.mu);
         }
     }
 
     public static void onTimeSync() {
         long time = System.nanoTime();
+        //noinspection SuspiciousSystemArraycopy
         System.arraycopy(timeSyncTimes, 1, timeSyncTimes, 0, timeSyncTimes.length - 1);
         timeSyncTimes[timeSyncTimes.length - 1] = time;
         if (timeSyncTimes[0] != 0) {
@@ -572,7 +985,7 @@ public class FishingCracker {
         handleFishingRodThrow(stack);
     }
 
-    public static void onRetractedFishingRod(ItemStack stack) {
+    public static void onRetractedFishingRod() {
         if (expectedFishingRodUses > 0) {
             expectedFishingRodUses--;
             return;
@@ -620,25 +1033,16 @@ public class FishingCracker {
         WAITING_FOR_RETRHOW,
     }
 
-    public static final class Catch {
-        private final ItemStack loot;
-        private final int experience;
-
-        public Catch(ItemStack loot, int experience) {
-            this.loot = loot;
-            this.experience = experience;
-        }
-
+    public record Catch(ItemStack loot, int experience) {
         @Override
         public int hashCode() {
-            return 7 * (31 * Objects.hash(loot.getItem(), loot.getTag()) + loot.getCount()) + experience;
+            return 7 * (31 * Objects.hash(loot.getItem(), loot.getNbt()) + loot.getCount()) + experience;
         }
 
         @Override
         public boolean equals(Object other) {
             if (other == this) return true;
-            if (!(other instanceof Catch)) return false;
-            Catch that = (Catch) other;
+            if (!(other instanceof Catch that)) return false;
             return ItemStack.areEqual(loot, that.loot) && experience == that.experience;
         }
 
@@ -663,7 +1067,7 @@ public class FishingCracker {
         // each sample is actually a list of points
         // for each interval, convert it to a point by taking the median value
         // or... break the 50ms intervals into 2 25ms intervals for better accuracy
-        static ArrayList<ArrayList<Double>> data = new ArrayList<ArrayList<Double>>();
+        static ArrayList<ArrayList<Double>> data = new ArrayList<>();
 
         // width of the intervals
         static double width = 50;
@@ -683,14 +1087,13 @@ public class FishingCracker {
         static double minsigma = 10;
 
         public static void run() {
-            ArrayList<Double> droprate = new ArrayList<Double>();
+            ArrayList<Double> droprate = new ArrayList<>();
 
-            for (int i = 0; i < data.size(); i++) {
-                ArrayList<Double> sample = data.get(i);
+            for (ArrayList<Double> sample : data) {
                 droprate.add(sample.size() * width / (endtime - begintime));
             }
 
-            ArrayList<Double> times = new ArrayList<Double>();
+            ArrayList<Double> times = new ArrayList<>();
             for (int i = begintime; i <= endtime; i += 10) {
                 times.add(i * 1.0);
             }
@@ -728,7 +1131,7 @@ public class FishingCracker {
             for (int repeat = 0; repeat < 1; repeat++) {
                 // E step
                 // calculate weights (and classifications)
-                ArrayList<ArrayList<Double>> masses = new ArrayList<ArrayList<Double>>();
+                var masses = new ArrayList<ArrayList<Double>>();
                 for (int i = 0; i < data.size(); i++) {
 
                     ArrayList<Double> sample = data.get(i);
@@ -744,7 +1147,7 @@ public class FishingCracker {
 
                     double pNorm = pXandNorm / (pXandNorm + pXandUnif);
 
-                    ArrayList<Double> mass = new ArrayList<Double>();
+                    ArrayList<Double> mass = new ArrayList<>();
                     for (double x : sample) {
                         mass.add(mass(x) / sum * pNorm);
                     }
@@ -802,12 +1205,11 @@ public class FishingCracker {
     private static class SimulatedFishingBobber {
         private static final EntityDimensions FISHING_BOBBER_DIMENSIONS = EntityType.FISHING_BOBBER.getDimensions();
 
-        private final World world = MinecraftClient.getInstance().world;
+        private final World world = Objects.requireNonNull(MinecraftClient.getInstance().world);
 
         private final FishingBobberEntity fakeEntity = new FishingBobberEntity(Objects.requireNonNull(MinecraftClient.getInstance().player), world, 0, 0);
 
         // state variables
-        private UUID uuid;
         private Vec3d pos;
         private Box boundingBox;
         private Vec3d velocity;
@@ -816,6 +1218,7 @@ public class FishingCracker {
         private int hookCountdown;
         private int fishTravelCountdown;
         private boolean inOpenWater = true;
+        private Set<BlockPos> openWaterViolations = new LinkedHashSet<>(0);
         private int outOfOpenWaterTicks;
         private boolean caughtFish;
         private boolean horizontalCollision;
@@ -832,12 +1235,13 @@ public class FishingCracker {
         private final int luckLevel;
 
         // output variables
-        private boolean failed;
+        @Nullable
+        private String failedReason;
 
         public SimulatedFishingBobber(long seed, ItemStack tool, Vec3d pos, Vec3d velocity) {
             this.random = new Rand(seed);
             // entity UUID
-            this.uuid = MathHelper.randomUuid(random);
+            MathHelper.randomUuid(random);
 
             // entity yaw and pitch
             random.nextGaussian();
@@ -849,7 +1253,7 @@ public class FishingCracker {
             this.luckLevel = EnchantmentHelper.getLuckOfTheSea(tool);
             this.pos = pos;
             this.velocity = velocity;
-            this.boundingBox = FISHING_BOBBER_DIMENSIONS.method_30231(pos.x, pos.y, pos.z);
+            this.boundingBox = FISHING_BOBBER_DIMENSIONS.getBoxAt(pos.x, pos.y, pos.z);
         }
 
         public boolean canCatchFish() {
@@ -861,13 +1265,7 @@ public class FishingCracker {
             fakeEntity.setVelocity(velocity);
 
             Rand randomCopy = new Rand(random);
-            Map<LootContextParameter<?>, Object> parameters = ImmutableMap.of(
-                    LootContextParameters.ORIGIN, pos,
-                    LootContextParameters.TOOL, tool,
-                    LootContextParameters.THIS_ENTITY, fakeEntity,
-                    IN_OPEN_WATER_PARAMETER, inOpenWater
-            );
-            LootContext lootContext = createLootContext(randomCopy, luckLevel, parameters);
+            LootContext lootContext = getLootContext(randomCopy);
 
             List<Catch> catches = new ArrayList<>();
             for (ItemStack loot : FISHING_LOOT_TABLE.generateLoot(lootContext)) {
@@ -876,13 +1274,21 @@ public class FishingCracker {
             return catches;
         }
 
-        public void tick() {
-            assert world != null;
+        private LootContext getLootContext(Rand randomCopy) {
+            var parameters = ImmutableMap.of(
+                    LootContextParameters.ORIGIN, pos,
+                    LootContextParameters.TOOL, tool,
+                    LootContextParameters.THIS_ENTITY, fakeEntity,
+                    IN_OPEN_WATER_PARAMETER, inOpenWater
+            );
+            return createLootContext(randomCopy, luckLevel, parameters);
+        }
 
+        public void tick() {
             onBaseTick();
 
             if (this.onGround) {
-                failed = true;
+                failedReason = "onGround";
             }
 
             float f = 0.0F;
@@ -913,7 +1319,7 @@ public class FishingCracker {
                     if (this.hookCountdown <= 0 && this.fishTravelCountdown <= 0) {
                         this.inOpenWater = true;
                     } else {
-                        this.inOpenWater = this.inOpenWater && this.outOfOpenWaterTicks < 10 && this.isOpenOrWaterAround(blockPos);
+                        this.inOpenWater &= this.outOfOpenWaterTicks < 10 & this.isOpenOrWaterAround(blockPos);
                     }
 
                     if (bl) {
@@ -942,7 +1348,7 @@ public class FishingCracker {
             double e = 0.92D;
             this.velocity = this.velocity.multiply(e);
 
-            boundingBox = FISHING_BOBBER_DIMENSIONS.method_30231(pos.x, pos.y, pos.z);
+            boundingBox = FISHING_BOBBER_DIMENSIONS.getBoxAt(pos.x, pos.y, pos.z);
         }
 
         private void onBaseTick() {
@@ -963,6 +1369,9 @@ public class FishingCracker {
 
                 this.touchingWater = true;
             } else {
+                if (this.touchingWater) {
+                    failedReason = "outOfWater";
+                }
                 this.touchingWater = false;
             }
         }
@@ -970,7 +1379,7 @@ public class FishingCracker {
         private void onSwimmingStart() {
             float f = 0.2F;
             Vec3d vec3d = velocity;
-            float g = MathHelper.sqrt(vec3d.x * vec3d.x * 0.20000000298023224D + vec3d.y * vec3d.y + vec3d.z * vec3d.z * 0.20000000298023224D) * f;
+            float g = (float) Math.sqrt(vec3d.x * vec3d.x * 0.20000000298023224D + vec3d.y * vec3d.y + vec3d.z * vec3d.z * 0.20000000298023224D) * f;
             if (g > 1.0F) {
                 g = 1.0F;
             }
@@ -1004,7 +1413,7 @@ public class FishingCracker {
             }
         }
 
-        private boolean updateMovementInFluid(Tag<Fluid> tag, double d) {
+        private boolean updateMovementInFluid(TagKey<Fluid> tag, double d) {
             Box box = this.boundingBox.contract(0.001D);
             int i = MathHelper.floor(box.minX);
             int j = MathHelper.ceil(box.maxX);
@@ -1061,9 +1470,9 @@ public class FishingCracker {
         private void checkForCollision() {
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
-            HitResult hitResult = ProjectileUtil.getCollision(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanCollideWith);
+            HitResult hitResult = ProjectileUtil.getCollision(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanHit);
             if (hitResult.getType() != HitResult.Type.MISS) {
-                failed = true;
+                failedReason = "collision";
             }
         }
 
@@ -1102,8 +1511,8 @@ public class FishingCracker {
 
             float i = this.getVelocityMultiplier();
             this.velocity = this.velocity.multiply((double)i, 1.0D, (double)i);
-            if (this.world.method_29556(this.boundingBox.contract(0.001D)).anyMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
-                failed = true;
+            if (this.world.getStatesInBoxIfLoaded(this.boundingBox.contract(0.001D)).anyMatch((blockStatex) -> blockStatex.isIn(BlockTags.FIRE) || blockStatex.isOf(Blocks.LAVA))) {
+                failedReason = "fire";
             }
         }
 
@@ -1113,13 +1522,14 @@ public class FishingCracker {
             fakeEntity.setVelocity(velocity);
             assert world != null;
 
-            ShapeContext shapeContext = ShapeContext.of(fakeEntity);
             VoxelShape voxelShape = this.world.getWorldBorder().asVoxelShape();
-            Stream<VoxelShape> stream = VoxelShapes.matchesAnywhere(voxelShape, VoxelShapes.cuboid(box.contract(1.0E-7D)), BooleanBiFunction.AND) ? Stream.empty() : Stream.of(voxelShape);
-            Stream<VoxelShape> stream2 = this.world.getEntityCollisions(fakeEntity, box.stretch(movement), (entity) -> true);
-            ReusableStream<VoxelShape> reusableStream = new ReusableStream<>(Stream.concat(stream2, stream));
+            List<VoxelShape> voxelShapes = new ArrayList<>();
+            if (!VoxelShapes.matchesAnywhere(voxelShape, VoxelShapes.cuboid(box.contract(1.0E-7D)), BooleanBiFunction.AND)) {
+                voxelShapes.add(voxelShape);
+            }
+            voxelShapes.addAll(this.world.getEntityCollisions(fakeEntity, box.stretch(movement)));
 
-            return movement.lengthSquared() == 0.0D ? movement : Entity.adjustMovementForCollisions(fakeEntity, movement, box, this.world, shapeContext, reusableStream);
+            return movement.lengthSquared() == 0.0D ? movement : Entity.adjustMovementForCollisions(fakeEntity, movement, box, this.world, voxelShapes);
         }
 
         private float getVelocityMultiplier() {
@@ -1136,26 +1546,51 @@ public class FishingCracker {
         private boolean isOpenOrWaterAround(BlockPos pos) {
             PositionType positionType = PositionType.INVALID;
 
-            for(int i = -1; i <= 2; ++i) {
+            boolean valid = true;
+
+            for (int i = -1; i <= 2; ++i) {
                 PositionType positionType2 = this.getPositionType(pos.add(-2, i, -2), pos.add(2, i, 2));
-                switch(positionType2) {
+                switch (positionType2) {
                     case INVALID:
-                        return false;
+                        valid = false;
+                        break;
                     case ABOVE_WATER:
                         if (positionType == PositionType.INVALID) {
-                            return false;
+                            valid = false;
                         }
                         break;
                     case INSIDE_WATER:
                         if (positionType == PositionType.ABOVE_WATER) {
-                            return false;
+                            valid = false;
                         }
+                        break;
+                }
+
+                if (!valid) {
+                    List<BlockPos> aboveWaterBlocks = new ArrayList<>(0);
+                    boolean foundWater = false;
+                    for (int dx = -2; dx <= 2; dx++) {
+                        for (int dz = -2; dz <= 2; dz++) {
+                            BlockPos pos2 = pos.add(dx, i, dz);
+                            PositionType positionType3 = getPositionType(pos2);
+                            if (positionType3 == PositionType.INVALID) {
+                                openWaterViolations.add(pos2);
+                            } else if (positionType3 == PositionType.ABOVE_WATER) {
+                                aboveWaterBlocks.add(pos2);
+                            } else if (positionType3 == PositionType.INSIDE_WATER) {
+                                foundWater = true;
+                            }
+                        }
+                    }
+                    if (foundWater) {
+                        openWaterViolations.addAll(aboveWaterBlocks);
+                    }
                 }
 
                 positionType = positionType2;
             }
 
-            return true;
+            return valid;
         }
 
         private PositionType getPositionType(BlockPos start, BlockPos end) {

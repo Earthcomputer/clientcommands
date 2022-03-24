@@ -40,7 +40,6 @@
   "commands.cfish.addGoal.success": "doel %s succesvol toegevoegd",
   "commands.cfish.correctLoot": "De correcte buit is verkregen met een correctie van %dms",
   "commands.cfish.error.crackFailed": "Gefaald om de dobber RNG te kraken, is de server gemodificeerd?",
-  "commands.cfish.error.failed": "Dobberconfiguratie niet correct",
   "commands.cfish.error.outOfWater": "Dobber uit het water, de manipulatie zal niet werken",
   "commands.cfish.listGoals.noGoals": "Er zijn geen visdoelen",
   "commands.cfish.listGoals.success": "Er zijn %d visdoelen:",
@@ -66,10 +65,6 @@
   "commands.crelog.failed": "Niet gelukt om opnieuw in te loggen",
 
   "commands.crender.entities.success": "Entiteitsweergaveregels zijn geupdatet",
-
-  "commands.cscript.notFound": "Script \"%s\" niet gevonden",
-  "commands.cscript.reload.success": "scripten herladen",
-  "commands.cscript.run.success": "Script succesvol uitgevoerd",
 
   "commands.cstopsound.success.sourceless.any": "Alle geluiden gestopt",
   "commands.cstopsound.success.sourceless.sound": "Geluid '%s' gestopt",

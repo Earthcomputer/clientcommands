@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
@@ -18,6 +17,8 @@ import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.command.argument.ItemPredicateArgumentType.ItemPredicateArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,7 +27,7 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.command.ServerCommandSource;
@@ -50,14 +51,13 @@ import static net.earthcomputer.clientcommands.command.arguments.WithStringArgum
 import static net.minecraft.server.command.CommandManager.*;
 
 public class FindItemCommand {
-
     private static final int FLAG_NO_SEARCH_SHULKER_BOX = 1;
     private static final int FLAG_KEEP_SEARCHING = 2;
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cfinditem");
 
-        LiteralCommandNode<ServerCommandSource> cfinditem = dispatcher.register(literal("cfinditem"));
+        var cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
                 .then(literal("--no-search-shulker-box")
                         .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
@@ -91,7 +91,7 @@ public class FindItemCommand {
         private final boolean keepSearching;
 
         private int totalFound = 0;
-        private Set<BlockPos> searchedBlocks = new HashSet<>();
+        private final Set<BlockPos> searchedBlocks = new HashSet<>();
         private BlockPos currentlySearching = null;
         private int currentlySearchingTimeout;
         private boolean hasSearchedEnderChest = false;
@@ -110,21 +110,26 @@ public class FindItemCommand {
 
         @Override
         protected void onTick() {
-            World world = MinecraftClient.getInstance().world;
             Entity entity = MinecraftClient.getInstance().cameraEntity;
             if (entity == null) {
                 _break();
                 return;
             }
+            World world = MinecraftClient.getInstance().world;
+            assert world != null;
+            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+            assert player != null;
+            ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
+            assert interactionManager != null;
             if (currentlySearchingTimeout > 0) {
                 currentlySearchingTimeout--;
                 return;
             }
-            if (MinecraftClient.getInstance().player.isSneaking()) {
+            if (player.isSneaking()) {
                 return;
             }
             Vec3d origin = entity.getCameraPosVec(0);
-            float reachDistance = MinecraftClient.getInstance().interactionManager.getReachDistance();
+            float reachDistance = interactionManager.getReachDistance();
             int minX = MathHelper.floor(origin.x - reachDistance);
             int minY = MathHelper.floor(origin.y - reachDistance);
             int minZ = MathHelper.floor(origin.z - reachDistance);
@@ -191,6 +196,7 @@ public class FindItemCommand {
                 public boolean accept(Screen screen) {
                     if (!(screen instanceof ScreenHandlerProvider))
                         return true;
+                    assert mc.player != null;
                     ScreenHandler container = ((ScreenHandlerProvider<?>) screen).getScreenHandler();
                     Set<Integer> playerInvSlots = new HashSet<>();
                     for (Slot slot : container.slots)
@@ -203,7 +209,7 @@ public class FindItemCommand {
                         }
 
                         @Override
-                        public void updateSlotStacks(List<ItemStack> stacks) {
+                        public void updateSlotStacks(int revision, List<ItemStack> stacks, ItemStack cursorStack) {
                             int matchingItems = 0;
                             for (int slot = 0; slot < stacks.size(); slot++) {
                                 if (playerInvSlots.contains(slot))
@@ -212,10 +218,10 @@ public class FindItemCommand {
                                 if (searchingFor.test(stack))
                                     matchingItems += stack.getCount();
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    CompoundTag blockEntityTag = stack.getSubTag("BlockEntityTag");
+                                    NbtCompound blockEntityTag = stack.getSubNbt("BlockEntityTag");
                                     if (blockEntityTag != null && blockEntityTag.contains("Items")) {
                                         DefaultedList<ItemStack> boxInv = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                                        Inventories.fromTag(blockEntityTag, boxInv);
+                                        Inventories.readNbt(blockEntityTag, boxInv);
                                         for (ItemStack stackInBox : boxInv) {
                                             if (searchingFor.test(stackInBox)) {
                                                 matchingItems += stackInBox.getCount();
@@ -238,6 +244,7 @@ public class FindItemCommand {
                     return false;
                 }
             });
+            assert mc.interactionManager != null;
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND,
                     new BlockHitResult(clickPos,
                             Direction.getFacing((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),

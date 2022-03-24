@@ -1,13 +1,13 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.render.Cuboid;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -18,7 +18,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.features.PlayerRandCracker.throwItemsUntil;
+import static net.earthcomputer.clientcommands.features.PlayerRandCracker.*;
 
 public class ChorusManipulation {
     //If the goal is relative or not to the player
@@ -92,7 +92,7 @@ public class ChorusManipulation {
             return false;
         }
 
-        PlayerRandCracker.ThrowItemsResult throwItemsState =
+        var throwItemsState =
                 throwItemsUntil(rand -> {
 
                     if (particleCount != 16 && itemUseTimeLeft >= 0) {
@@ -103,7 +103,9 @@ public class ChorusManipulation {
                     }
 
                     final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
-                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), 0.0D, (MinecraftClient.getInstance().world.getDimensionHeight() - 1));
+                    ClientWorld world = MinecraftClient.getInstance().world;
+                    assert world != null;
+                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), world.getBottomY(), (world.getBottomY() + world.getHeight() - 1));
                     final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
                     final Vec3d landingArea = canTeleport(area, new Vec3d(x, y, z));
 

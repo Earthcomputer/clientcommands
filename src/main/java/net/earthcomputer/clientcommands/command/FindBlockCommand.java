@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -14,7 +14,6 @@ import net.minecraft.world.chunk.Chunk;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
@@ -42,7 +41,7 @@ public class FindBlockCommand {
                         .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), getInteger(ctx, "radius"), RadiusType.TAXICAB))))));
     }
 
-    public static int findBlock(ServerCommandSource source, Predicate<CachedBlockPosition> block, int radius, RadiusType radiusType) {
+    public static int findBlock(ServerCommandSource source, ClientBlockPredicate block, int radius, RadiusType radiusType) {
         List<BlockPos> candidates;
         if (radiusType == RadiusType.TAXICAB) {
             candidates = findBlockCandidatesInTaxicabArea(source, block, radius);
@@ -62,14 +61,17 @@ public class FindBlockCommand {
         } else {
             double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
             sendFeedback(new TranslatableText("commands.cfindblock.success.left", foundRadius)
-                    .append(getGlowCoordsTextComponent(closestBlock))
+                    .append(getLookCoordsTextComponent(closestBlock))
+                    .append(" ")
+                    .append(getGlowCoordsTextComponent(new TranslatableText("commands.cfindblock.success.glow"), closestBlock))
                     .append(new TranslatableText("commands.cfindblock.success.right", foundRadius)));
             return 1;
         }
     }
 
-    private static List<BlockPos> findBlockCandidatesInSquareArea(ServerCommandSource source, Predicate<CachedBlockPosition> blockMatcher, int radius, RadiusType radiusType) {
+    private static List<BlockPos> findBlockCandidatesInSquareArea(ServerCommandSource source, ClientBlockPredicate blockMatcher, int radius, RadiusType radiusType) {
         World world = MinecraftClient.getInstance().world;
+        assert world != null;
         BlockPos senderPos = new BlockPos(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
@@ -104,8 +106,9 @@ public class FindBlockCommand {
         return blockCandidates;
     }
 
-    private static List<BlockPos> findBlockCandidatesInTaxicabArea(ServerCommandSource source, Predicate<CachedBlockPosition> blockMatcher, int radius) {
+    private static List<BlockPos> findBlockCandidatesInTaxicabArea(ServerCommandSource source, ClientBlockPredicate blockMatcher, int radius) {
         World world = MinecraftClient.getInstance().world;
+        assert world != null;
         BlockPos senderPos = new BlockPos(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
@@ -135,24 +138,31 @@ public class FindBlockCommand {
         return blockCandidates;
     }
 
-    private static boolean searchChunkForBlockCandidates(Chunk chunk, int senderY, Predicate<CachedBlockPosition> blockMatcher,
-                                                  List<BlockPos> blockCandidates) {
+    private static boolean searchChunkForBlockCandidates(Chunk chunk, int senderY, ClientBlockPredicate blockMatcher, List<BlockPos> blockCandidates) {
+        ClientWorld world = MinecraftClient.getInstance().world;
+        assert world != null;
+
+        int bottomY = world.getBottomY();
+        int topY = world.getTopY();
+
         boolean found = false;
         int maxY = chunk.getHighestNonEmptySectionYOffset() + 15;
+
+        BlockPos.Mutable mutablePos = new BlockPos.Mutable();
 
         // search every column for the block
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 // search the column nearest to the sender first, and stop if we find the block
-                int maxDy = Math.max(senderY, maxY - senderY);
+                int maxDy = Math.max(senderY - bottomY, maxY - senderY);
                 for (int dy = 0; dy <= maxDy; dy = dy > 0 ? -dy : -dy + 1) {
-                    if (senderY + dy < 0 || senderY + dy >= 256) {
+                    if (senderY + dy < bottomY || senderY + dy > topY) {
                         continue;
                     }
                     int worldX = (chunk.getPos().x << 4) + x;
                     int worldZ = (chunk.getPos().z << 4) + z;
-                    if (blockMatcher.test(new CachedBlockPosition(MinecraftClient.getInstance().world, new BlockPos(worldX, senderY + dy, worldZ), false))) {
-                        blockCandidates.add(new BlockPos(worldX, senderY + dy, worldZ));
+                    if (blockMatcher.test(world, mutablePos.set(worldX, senderY + dy, worldZ))) {
+                        blockCandidates.add(mutablePos.toImmutable());
                         found = true;
                         break;
                     }
@@ -163,7 +173,7 @@ public class FindBlockCommand {
         return found;
     }
 
-    public static enum RadiusType {
+    public enum RadiusType {
         CARTESIAN(pos -> Math.sqrt(pos.getSquaredDistance(BlockPos.ORIGIN))),
         RECTANGULAR(pos -> Math.max(Math.max(Math.abs(pos.getX()), Math.abs(pos.getY())), Math.abs(pos.getZ()))),
         TAXICAB(pos -> pos.getManhattanDistance(BlockPos.ORIGIN));

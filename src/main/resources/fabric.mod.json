@@ -5,7 +5,7 @@
   "description": "Useful client-side commands",
   "version": "${version}",
   "environment": "client",
-  "license": "MIT",
+  "license": "LGPL",
   "icon": "assets/clientcommands/icon.png",
   "contact": {
     "homepage": "https://earthcomputer.net/",
@@ -23,6 +23,7 @@
     ]
   },
   "depends": {
+    "minecraft": "1.18.2",
     "fabricloader": ">=0.4.0",
     "fabric": "*"
   },

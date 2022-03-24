@@ -1,10 +1,11 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,10 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinPlayerInventory {
 
     @Shadow @Final public DefaultedList<ItemStack> main;
+    @Shadow @Final public PlayerEntity player;
 
-    @Inject(method = "offerOrDrop", at = @At("HEAD"))
-    public void onOfferOrDrop(World world, ItemStack stack, CallbackInfo ci) {
-        if (world.isClient) {
+    @Inject(method = "offer", at = @At("HEAD"))
+    public void onOfferOrDrop(ItemStack stack, boolean notifiesClient, CallbackInfo ci) {
+        if (!(player instanceof ServerPlayerEntity)) {
             int stackSize = stack.getCount();
             for (ItemStack item : main) {
                 if (item.isEmpty())

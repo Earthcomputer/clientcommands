@@ -17,11 +17,11 @@ public class TaskManager {
         if (tasks.isEmpty())
             return;
 
-        List<Map.Entry<String, LongTask>> iteratingTasks = new ArrayList<>(tasks.entrySet());
+        var iteratingTasks = new ArrayList<>(tasks.entrySet());
         while (!iteratingTasks.isEmpty()) {
-            Iterator<Map.Entry<String, LongTask>> itr = iteratingTasks.iterator();
+            var itr = iteratingTasks.iterator();
             while (itr.hasNext()) {
-                Map.Entry<String, LongTask> taskEntry = itr.next();
+                var taskEntry = itr.next();
                 LongTask task = taskEntry.getValue();
                 if (task.isCompleted()) {
                     task.onCompleted();
@@ -41,11 +41,11 @@ public class TaskManager {
     }
 
     public static void onWorldUnload(boolean isDisconnect) {
-        List<Map.Entry<String, LongTask>> oldTasks = new ArrayList<>();
+        var oldTasks = new ArrayList<Map.Entry<String, LongTask>>();
         {
-            Iterator<Map.Entry<String, LongTask>> itr = tasks.entrySet().iterator();
+            var itr = tasks.entrySet().iterator();
             while (itr.hasNext()) {
-                Map.Entry<String, LongTask> entry = itr.next();
+                var entry = itr.next();
                 if (entry.getValue().stopOnWorldUnload(isDisconnect)) {
                     itr.remove();
                     oldTasks.add(entry);
@@ -66,7 +66,7 @@ public class TaskManager {
 
         if (isDisconnect && Relogger.isRelogging) {
             Relogger.relogSuccessTasks.add(() -> {
-                for (Map.Entry<String, LongTask> oldTask : oldTasks) {
+                for (var oldTask : oldTasks) {
                     tasks.put(oldTask.getKey(), oldTask.getValue());
                 }
                 newTasks.addAll(oldNewTasks);

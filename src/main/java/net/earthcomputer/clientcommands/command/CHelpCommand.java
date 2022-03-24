@@ -2,14 +2,10 @@ package net.earthcomputer.clientcommands.command;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
-
-import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
@@ -25,10 +21,10 @@ public class CHelpCommand {
         dispatcher.register(literal("chelp")
             .executes(ctx -> {
                 int cmdCount = 0;
-                for (CommandNode<ServerCommandSource> command : dispatcher.getRoot().getChildren()) {
+                for (var command : dispatcher.getRoot().getChildren()) {
                     String cmdName = command.getName();
                     if (isClientSideCommand(cmdName)) {
-                        Map<CommandNode<ServerCommandSource>, String> usage = dispatcher.getSmartUsage(command, ctx.getSource());
+                        var usage = dispatcher.getSmartUsage(command, ctx.getSource());
                         for (String u : usage.values()) {
                             sendFeedback(new LiteralText("/" + cmdName + " " + u));
                         }
@@ -47,11 +43,11 @@ public class CHelpCommand {
                     if (!isClientSideCommand(cmdName))
                         throw FAILED_EXCEPTION.create();
 
-                    ParseResults<ServerCommandSource> parseResults = dispatcher.parse(cmdName, ctx.getSource());
+                    var parseResults = dispatcher.parse(cmdName, ctx.getSource());
                     if (parseResults.getContext().getNodes().isEmpty())
                         throw FAILED_EXCEPTION.create();
 
-                    Map<CommandNode<ServerCommandSource>, String> usage = dispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), ctx.getSource());
+                    var usage = dispatcher.getSmartUsage(Iterables.getLast(parseResults.getContext().getNodes()).getNode(), ctx.getSource());
                     for (String u : usage.values()) {
                         sendFeedback(new LiteralText("/" + cmdName + " " + u));
                     }

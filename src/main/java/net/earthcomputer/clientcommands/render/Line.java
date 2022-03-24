@@ -1,9 +1,7 @@
 package net.earthcomputer.clientcommands.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 
@@ -25,14 +23,15 @@ public class Line extends Shape {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumerProvider, float delta) {
-        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getLines());
-        renderLine(matrixStack, vertexConsumer, delta, prevPos.subtract(getPos()));
-        vertexConsumerProvider.draw(RenderLayer.getLines());
+    public void render(MatrixStack matrixStack, float delta) {
+        BufferBuilder buff = Tessellator.getInstance().getBuffer();
+        buff.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+        renderLine(matrixStack, buff, delta, prevPos.subtract(getPos()));
+        Tessellator.getInstance().draw();
     }
 
     public void renderLine(MatrixStack matrixStack, VertexConsumer vertexConsumer, float delta, Vec3d prevPosOffset) {
-        GlStateManager.lineWidth(thickness);
+        RenderSystem.lineWidth(thickness);
 
         putVertex(matrixStack, vertexConsumer, this.start.add(prevPosOffset.multiply(1 - delta)));
         putVertex(matrixStack, vertexConsumer, this.end.add(prevPosOffset.multiply(1 - delta)));
@@ -40,7 +39,7 @@ public class Line extends Shape {
 
     private void putVertex(MatrixStack matrixStack, VertexConsumer vertexConsumer, Vec3d pos) {
         vertexConsumer.vertex(
-                matrixStack.peek().getModel(),
+                matrixStack.peek().getPositionMatrix(),
                 (float) pos.getX(),
                 (float) pos.getY(),
                 (float) pos.getZ()

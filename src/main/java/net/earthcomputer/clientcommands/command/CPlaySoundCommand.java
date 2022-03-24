@@ -8,7 +8,6 @@ import static net.minecraft.server.command.CommandManager.*;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.*;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.*;
@@ -24,7 +23,7 @@ public class CPlaySoundCommand {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         addClientSideCommand("cplaysound");
 
-        RequiredArgumentBuilder<ServerCommandSource, Identifier> builder = argument("sound", identifier())
+        var builder = argument("sound", identifier())
             .suggests(SuggestionProviders.AVAILABLE_SOUNDS);
 
         for (SoundCategory category : SoundCategory.values()) {

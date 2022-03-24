@@ -5,8 +5,8 @@ import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.SaveLevelScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.realms.gui.screen.RealmsBridgeScreen;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.WorldSavePath;
@@ -29,7 +29,6 @@ public class Relogger {
         }
 
         boolean singleplayer = mc.isInSingleplayer();
-        boolean realms = mc.isConnectedToRealms();
         mc.world.disconnect();
         if (relogging) {
             isRelogging = true;
@@ -42,12 +41,9 @@ public class Relogger {
         isRelogging = false;
 
         if (singleplayer) {
-            mc.openScreen(new TitleScreen());
-        } else if (realms) {
-            RealmsBridgeScreen realmsBridgeScreen = new RealmsBridgeScreen();
-            realmsBridgeScreen.switchToRealms(new TitleScreen());
+            mc.setScreen(new TitleScreen());
         } else {
-            mc.openScreen(new MultiplayerScreen(new TitleScreen()));
+            mc.setScreen(new MultiplayerScreen(new TitleScreen()));
         }
 
         return true;
@@ -67,7 +63,7 @@ public class Relogger {
             if (!mc.getLevelStorage().levelExists(levelName)) {
                 return false;
             }
-            mc.method_29970(new SaveLevelScreen(new TranslatableText("selectWorld.data_read")));
+            mc.setScreenAndRender(new SaveLevelScreen(new TranslatableText("selectWorld.data_read")));
             mc.startIntegratedServer(levelName);
             return true;
         } else {
@@ -78,7 +74,7 @@ public class Relogger {
             if (!disconnect(true)) {
                 return false;
             }
-            mc.openScreen(new ConnectScreen(mc.currentScreen, mc, serverInfo));
+            ConnectScreen.connect(mc.currentScreen, mc, ServerAddress.parse(serverInfo.address), serverInfo);
             return true;
         }
     }

@@ -45,7 +45,7 @@ public class MathUtil {
     }
 
     public static Vec3d getClosestVisiblePoint(World world, BlockPos targetPos, Vec3d sourcePos, Entity excludingEntity, Direction dir) {
-        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z, false) > 7 * 7)
+        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z) > 7 * 7)
             return null;
 
         Box totalArea = new Box(sourcePos, Vec3d.of(targetPos));
@@ -72,7 +72,8 @@ public class MathUtil {
                 Box faceBox = getFace(box.expand(-EPSILON), face);
                 if (sourcePos.subtract(faceBox.minX, faceBox.minY, faceBox.minZ)
                         .dotProduct(new Vec3d(face.getOffsetX(), face.getOffsetY(), face.getOffsetZ())) > 0) {
-                    @SuppressWarnings("ConstantConditions") Vec3d val = getClosestVisiblePoint(world,
+                    //noinspection StaticPseudoFunctionalStyleMethod
+                    Vec3d val = getClosestVisiblePoint(world,
                             Iterables.concat(obscurers,
                                     Iterables.transform(Iterables.filter(targetBoxes, it -> it != box),
                                             b -> b.expand(EPSILON))),
@@ -94,20 +95,19 @@ public class MathUtil {
     private static Vec3d getClosestVisiblePoint(BlockView world, Iterable<Box> obscurers, Box face, Vec3d sourcePos, Direction dir) {
         Direction.Axis xAxis, yAxis;
         switch (dir.getAxis()) {
-            case X:
+            case X -> {
                 xAxis = Direction.Axis.Z;
                 yAxis = Direction.Axis.Y;
-                break;
-            case Y:
+            }
+            case Y -> {
                 xAxis = Direction.Axis.X;
                 yAxis = Direction.Axis.Z;
-                break;
-            case Z:
+            }
+            case Z -> {
                 xAxis = Direction.Axis.X;
                 yAxis = Direction.Axis.Y;
-                break;
-            default:
-                throw new AssertionError();
+            }
+            default -> throw new AssertionError();
         }
 
         double minX = getComponent(face.minX, face.minY, face.minZ, xAxis);
@@ -382,114 +382,87 @@ public class MathUtil {
     }
 
     private static double getComponent(double x, double y, double z, Direction.Axis axis) {
-        switch (axis) {
-            case X:
-                return x;
-            case Y:
-                return y;
-            case Z:
-                return z;
-            default:
-                throw new AssertionError();
-        }
+        return switch (axis) {
+            case X -> x;
+            case Y -> y;
+            case Z -> z;
+        };
     }
 
     /** @noinspection DuplicatedCode */
     private static Vec3d createFromComponents(double a, Direction.Axis aAxis, double b, Direction.Axis bAxis, double c, Direction.Axis cAxis) {
         double x = 0, y = 0, z = 0;
         switch (aAxis) {
-            case X: x = a; break;
-            case Y: y = a; break;
-            case Z: z = a; break;
+            case X -> x = a;
+            case Y -> y = a;
+            case Z -> z = a;
         }
         switch (bAxis) {
-            case X: x = b; break;
-            case Y: y = b; break;
-            case Z: z = b; break;
+            case X -> x = b;
+            case Y -> y = b;
+            case Z -> z = b;
         }
         switch (cAxis) {
-            case X: x = c; break;
-            case Y: y = c; break;
-            case Z: z = c; break;
+            case X -> x = c;
+            case Y -> y = c;
+            case Z -> z = c;
         }
         return new Vec3d(x, y, z);
     }
 
     private static Box getFace(Box box, Direction dir) {
-        switch (dir) {
-            case WEST:
-                return new Box(box.minX, box.minY, box.minZ, box.minX, box.maxY, box.maxZ);
-            case EAST:
-                return new Box(box.maxX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
-            case DOWN:
-                return new Box(box.minX, box.minY, box.minZ, box.maxX, box.minY, box.maxZ);
-            case UP:
-                return new Box(box.minX, box.maxY, box.minZ, box.maxX, box.maxY, box.maxZ);
-            case NORTH:
-                return new Box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ);
-            case SOUTH:
-                return new Box(box.minX, box.minY, box.maxZ, box.maxX, box.maxY, box.maxZ);
-            default:
-                throw new AssertionError();
-        }
+        return switch (dir) {
+            case WEST -> new Box(box.minX, box.minY, box.minZ, box.minX, box.maxY, box.maxZ);
+            case EAST -> new Box(box.maxX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+            case DOWN -> new Box(box.minX, box.minY, box.minZ, box.maxX, box.minY, box.maxZ);
+            case UP -> new Box(box.minX, box.maxY, box.minZ, box.maxX, box.maxY, box.maxZ);
+            case NORTH -> new Box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ);
+            case SOUTH -> new Box(box.minX, box.minY, box.maxZ, box.maxX, box.maxY, box.maxZ);
+        };
     }
 
     public static Direction rotateClockwise(Direction dir, Direction.Axis axis) {
-        switch(axis) {
-            case X:
+        switch (axis) {
+            case X -> {
                 if (dir != Direction.WEST && dir != Direction.EAST) {
                     return rotateXClockwise(dir);
                 }
-
                 return dir;
-            case Y:
+            }
+            case Y -> {
                 if (dir != Direction.UP && dir != Direction.DOWN) {
                     return dir.rotateYClockwise();
                 }
-
                 return dir;
-            case Z:
+            }
+            case Z -> {
                 if (dir != Direction.NORTH && dir != Direction.SOUTH) {
                     return rotateZClockwise(dir);
                 }
-
                 return dir;
-            default:
-                throw new IllegalStateException("Unable to get CW facing for axis " + axis);
+            }
+            default -> throw new IllegalStateException("Unable to get CW facing for axis " + axis);
         }
     }
 
     public static Direction rotateXClockwise(Direction dir) {
-        switch(dir) {
-            case NORTH:
-                return Direction.DOWN;
-            case EAST:
-            case WEST:
-            default:
-                throw new IllegalStateException("Unable to get X-rotated facing of " + dir);
-            case SOUTH:
-                return Direction.UP;
-            case UP:
-                return Direction.NORTH;
-            case DOWN:
-                return Direction.SOUTH;
-        }
+        return switch (dir) {
+            case NORTH -> Direction.DOWN;
+            case SOUTH -> Direction.UP;
+            case UP -> Direction.NORTH;
+            case DOWN -> Direction.SOUTH;
+            default -> throw new IllegalStateException("Unable to get X-rotated facing of " + dir);
+        };
     }
 
     public static Direction rotateZClockwise(Direction dir) {
-        switch(dir) {
-            case EAST:
-                return Direction.DOWN;
-            case SOUTH:
-            default:
-                throw new IllegalStateException("Unable to get Z-rotated facing of " + dir);
-            case WEST:
-                return Direction.UP;
-            case UP:
-                return Direction.EAST;
-            case DOWN:
-                return Direction.WEST;
-        }
+        return switch (dir) {
+            case EAST -> Direction.DOWN;
+            case WEST -> Direction.UP;
+            case UP -> Direction.EAST;
+            case DOWN -> Direction.WEST;
+            default -> throw new IllegalStateException("Unable to get Z-rotated facing of " + dir);
+        };
     }
 
     private static class ClosestPosResult {
