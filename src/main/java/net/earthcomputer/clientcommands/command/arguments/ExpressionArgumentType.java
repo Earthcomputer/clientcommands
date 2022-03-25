@@ -12,8 +12,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.mixin.CommandSuggestorAccessor;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         return new ExpressionArgumentType();
     }
 
-    public static Expression getExpression(CommandContext<ServerCommandSource> context, String arg) {
+    public static Expression getExpression(CommandContext<FabricClientCommandSource> context, String arg) {
         return context.getArgument(arg, Expression.class);
     }
 

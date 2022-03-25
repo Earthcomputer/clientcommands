@@ -6,13 +6,13 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CalcCommand {
 
@@ -20,9 +20,7 @@ public class CalcCommand {
 
     private static final int FLAG_PARSE = 1;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ccalc");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var ccalc = dispatcher.register(literal("ccalc"));
         dispatcher.register(literal("ccalc")
             .then(literal("--parse")
@@ -31,7 +29,7 @@ public class CalcCommand {
                 .executes(ctx -> evaluateExpression(ctx.getSource(), getExpression(ctx, "expr")))));
     }
 
-    private static int evaluateExpression(ServerCommandSource source, ExpressionArgumentType.Expression expression) throws CommandSyntaxException {
+    private static int evaluateExpression(FabricClientCommandSource source, ExpressionArgumentType.Expression expression) throws CommandSyntaxException {
         if (getFlag(source, FLAG_PARSE)) {
             Text parsedTree;
             try {

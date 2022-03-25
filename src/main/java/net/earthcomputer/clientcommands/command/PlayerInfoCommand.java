@@ -6,10 +6,10 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
@@ -23,7 +23,7 @@ import java.util.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.command.CommandSource.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class PlayerInfoCommand {
 
@@ -36,10 +36,8 @@ public class PlayerInfoCommand {
 
     private static final int DURATION = 5; // seconds
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cplayerinfo");
-
-        LiteralCommandNode<ServerCommandSource> cplayerinfo = dispatcher.register(literal("cplayerinfo"));
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        LiteralCommandNode<FabricClientCommandSource> cplayerinfo = dispatcher.register(literal("cplayerinfo"));
         dispatcher.register(literal("cplayerinfo")
                 .then(literal("namehistory")
                         .then(argument("player", string())
@@ -47,7 +45,7 @@ public class PlayerInfoCommand {
                                 .executes(ctx -> getNameHistory(ctx.getSource(), getString(ctx, "player"))))));
     }
 
-    private static int getNameHistory(ServerCommandSource source, String player) {
+    private static int getNameHistory(FabricClientCommandSource source, String player) {
         if (player.length() >= 32) {
             if (cacheByUuid.containsKey(player)) {
                 sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(player))));

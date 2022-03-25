@@ -6,8 +6,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -18,14 +18,12 @@ import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class UsageTreeCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.help.failed"));
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cusagetree");
-        
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(
             literal("cusagetree")
                 .executes(ctx -> usage(ctx, dispatcher))
@@ -43,7 +41,7 @@ public class UsageTreeCommand {
         );
     }
 
-    private static int usage(CommandContext<ServerCommandSource> ctx, CommandDispatcher<ServerCommandSource> dispatcher) {
+    private static int usage(CommandContext<FabricClientCommandSource> ctx, CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var content = tree(dispatcher.getRoot());
         sendFeedback(new LiteralText("/"));
         for (var line : content) {
@@ -52,7 +50,7 @@ public class UsageTreeCommand {
         return content.size() + 1;
     }
 
-    private static int usageCommand(CommandContext<ServerCommandSource> ctx, CommandDispatcher<ServerCommandSource> dispatcher) throws CommandSyntaxException {
+    private static int usageCommand(CommandContext<FabricClientCommandSource> ctx, CommandDispatcher<FabricClientCommandSource> dispatcher) throws CommandSyntaxException {
         String cmdName = getString(ctx, "command");
         var parseResults = dispatcher.parse(cmdName, ctx.getSource());
         if (parseResults.getContext().getNodes().isEmpty()) {
@@ -67,7 +65,7 @@ public class UsageTreeCommand {
         return content.size() + 1;
     }
 
-    private static List<Text> tree(CommandNode<ServerCommandSource> root) {
+    private static List<Text> tree(CommandNode<FabricClientCommandSource> root) {
         List<Text> lines = new ArrayList<>();
         var children = List.copyOf(root.getChildren());
         for (int i = 0; i < children.size(); i++) {

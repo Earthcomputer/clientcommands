@@ -3,10 +3,10 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
@@ -15,10 +15,10 @@ import java.util.Random;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CParticleEffectArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.minecraft.command.argument.ParticleEffectArgumentType.*;
-import static net.minecraft.command.argument.Vec3ArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CParticleCommand {
 
@@ -26,27 +26,25 @@ public class CParticleCommand {
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cparticle");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cparticle")
             .then(argument("name", particleEffect())
-                .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), client.player.getPos(), Vec3d.ZERO, 1, 1, false))
+                .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), client.player.getPos(), Vec3d.ZERO, 1, 1, false))
                 .then(argument("pos", vec3())
-                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), Vec3d.ZERO, 1, 1, false))
+                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), Vec3d.ZERO, 1, 1, false))
                     .then(argument("delta", vec3(false))
-                        .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), 1, 1, false))
+                        .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), 1, 1, false))
                         .then(argument("speed", floatArg(0))
-                            .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), 1, false))
+                            .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), 1, false))
                             .then(argument("count", integer(0))
-                                .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false))
+                                .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false))
                                 .then(literal("normal")
-                                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false)))
+                                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false)))
                                 .then(literal("force")
-                                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), true)))))))));
+                                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), true)))))))));
     }
 
-    private static int spawnParticle(ServerCommandSource source, ParticleEffect parameters, Vec3d pos, Vec3d delta, float speed, int count, boolean force) throws CommandSyntaxException {
+    private static int spawnParticle(FabricClientCommandSource source, ParticleEffect parameters, Vec3d pos, Vec3d delta, float speed, int count, boolean force) throws CommandSyntaxException {
         switch (client.options.particles) {
             case MINIMAL:
                 if (!force) {

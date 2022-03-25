@@ -8,15 +8,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.BlockDataObject;
 import net.minecraft.command.DataCommandObject;
 import net.minecraft.command.EntityDataObject;
-import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.*;
-import net.minecraft.server.command.DataCommand;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -26,11 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CNbtPathArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
-import static net.minecraft.command.argument.BlockPosArgumentType.*;
-import static net.minecraft.command.argument.NbtPathArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class GetDataCommand {
 
@@ -38,21 +36,21 @@ public class GetDataCommand {
     private static final SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.data.get.multiple"));
     private static final SimpleCommandExceptionType INVALID_BLOCK_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.data.block.invalid"));
 
-    public static final Function<String, DataCommand.ObjectType> CLIENT_ENTITY_DATA_OBJECT = argName -> new DataCommand.ObjectType() {
+    public static final Function<String, ObjectType> CLIENT_ENTITY_DATA_OBJECT = argName -> new ObjectType() {
         @Override
-        public DataCommandObject getObject(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-            return new EntityDataObject(getEntity(ctx, argName));
+        public DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+            return new EntityDataObject(getCEntity(ctx, argName));
         }
 
         @Override
-        public ArgumentBuilder<ServerCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<ServerCommandSource, ?> builder, Function<ArgumentBuilder<ServerCommandSource, ?>, ArgumentBuilder<ServerCommandSource, ?>> subcommandAdder) {
+        public ArgumentBuilder<FabricClientCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<FabricClientCommandSource, ?> builder, Function<ArgumentBuilder<FabricClientCommandSource, ?>, ArgumentBuilder<FabricClientCommandSource, ?>> subcommandAdder) {
             return builder.then(literal("entity").then(subcommandAdder.apply(argument(argName, entity()))));
         }
     };
 
-    public static final Function<String, DataCommand.ObjectType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new DataCommand.ObjectType() {
-        public DataCommandObject getObject(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-            BlockPos pos = getBlockPos(ctx, argName + "Pos");
+    public static final Function<String, ObjectType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new ObjectType() {
+        public DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+            BlockPos pos = getCBlockPos(ctx, argName + "Pos");
             BlockEntity blockEntity = MinecraftClient.getInstance().world.getBlockEntity(pos);
             if (blockEntity == null) {
                 throw INVALID_BLOCK_EXCEPTION.create();
@@ -61,33 +59,31 @@ public class GetDataCommand {
             }
         }
 
-        public ArgumentBuilder<ServerCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<ServerCommandSource, ?> builder, Function<ArgumentBuilder<ServerCommandSource, ?>, ArgumentBuilder<ServerCommandSource, ?>> subcommandAdder) {
+        public ArgumentBuilder<FabricClientCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<FabricClientCommandSource, ?> builder, Function<ArgumentBuilder<FabricClientCommandSource, ?>, ArgumentBuilder<FabricClientCommandSource, ?>> subcommandAdder) {
             return builder.then(literal("block").then(subcommandAdder.apply(argument(argName + "Pos", blockPos()))));
         }
     };
 
-    public static List<Function<String, DataCommand.ObjectType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_OBJECT, CLIENT_TILE_ENTITY_DATA_OBJECT);
+    public static List<Function<String, ObjectType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_OBJECT, CLIENT_TILE_ENTITY_DATA_OBJECT);
     @SuppressWarnings("UnstableApiUsage")
-    public static List<DataCommand.ObjectType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
+    public static List<ObjectType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cgetdata");
-
-        for (DataCommand.ObjectType objType : TARGET_OBJECT_TYPES) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        for (ObjectType objType : TARGET_OBJECT_TYPES) {
             //noinspection unchecked
-            dispatcher.register((LiteralArgumentBuilder<ServerCommandSource>) objType.addArgumentsToBuilder(literal("cgetdata"), builder ->
+            dispatcher.register((LiteralArgumentBuilder<FabricClientCommandSource>) objType.addArgumentsToBuilder(literal("cgetdata"), builder ->
                     builder.executes(ctx -> getData(ctx.getSource(), objType.getObject(ctx)))
                     .then(argument("path", nbtPath())
-                        .executes(ctx -> getData(ctx.getSource(), objType.getObject(ctx), getNbtPath(ctx, "path"))))));
+                        .executes(ctx -> getData(ctx.getSource(), objType.getObject(ctx), getCNbtPath(ctx, "path"))))));
         }
     }
 
-    private static int getData(ServerCommandSource source, DataCommandObject dataObj) throws CommandSyntaxException {
+    private static int getData(FabricClientCommandSource source, DataCommandObject dataObj) throws CommandSyntaxException {
         sendFeedback(dataObj.feedbackQuery(dataObj.getNbt()));
         return 1;
     }
 
-    private static int getData(ServerCommandSource source, DataCommandObject dataObj, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
+    private static int getData(FabricClientCommandSource source, DataCommandObject dataObj, NbtPath path) throws CommandSyntaxException {
         NbtElement tag = getNbt(path, dataObj);
         int ret;
         if (tag instanceof AbstractNbtNumber) {
@@ -106,7 +102,7 @@ public class GetDataCommand {
         return ret;
     }
 
-    private static NbtElement getNbt(NbtPathArgumentType.NbtPath path, DataCommandObject dataObj) throws CommandSyntaxException {
+    private static NbtElement getNbt(NbtPath path, DataCommandObject dataObj) throws CommandSyntaxException {
         Collection<NbtElement> tags = path.get(dataObj.getNbt());
         Iterator<NbtElement> tagItr = tags.iterator();
         NbtElement firstTag = tagItr.next();
@@ -115,6 +111,11 @@ public class GetDataCommand {
         } else {
             return firstTag;
         }
+    }
+
+    private static interface ObjectType {
+        public DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException;
+        public ArgumentBuilder<FabricClientCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<FabricClientCommandSource, ?> builder, Function<ArgumentBuilder<FabricClientCommandSource, ?>, ArgumentBuilder<FabricClientCommandSource, ?>> subcommandAdder);
     }
 
 }

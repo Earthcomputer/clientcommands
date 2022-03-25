@@ -1,26 +1,19 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import net.cortex.clientAddon.cracker.SeedCracker;
-import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.util.telemetry.TelemetrySender;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,21 +30,9 @@ public class MixinClientPlayNetworkHandler {
 
     @Shadow @Final private MinecraftClient client;
 
-    @SuppressWarnings("unchecked")
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(MinecraftClient mc, Screen screen, ClientConnection connection, GameProfile profile, TelemetrySender telemetrySender, CallbackInfo ci) {
-        ClientCommands.registerCommands((CommandDispatcher<ServerCommandSource>) (Object) commandDispatcher);
-    }
-
     @Inject(method = "onGameJoin", at = @At("RETURN"))
     private void postGameJoin(CallbackInfo ci) {
         Relogger.onRelogSuccess();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Inject(method = "onCommandTree", at = @At("TAIL"))
-    public void onOnCommandTree(CommandTreeS2CPacket packet, CallbackInfo ci) {
-        ClientCommands.registerCommands((CommandDispatcher<ServerCommandSource>) (Object) commandDispatcher);
     }
 
     @Inject(method = "onEntitySpawn", at = @At("TAIL"))

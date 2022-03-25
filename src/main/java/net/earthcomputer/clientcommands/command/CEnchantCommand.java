@@ -4,23 +4,21 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.command.CommandException;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CEnchantCommand {
 
     private static final int FLAG_SIMULATE = 1;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cenchant");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var cenchant = dispatcher.register(literal("cenchant"));
         dispatcher.register(literal("cenchant")
                 .then(literal("--simulate")
@@ -29,7 +27,7 @@ public class CEnchantCommand {
                         .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
     }
 
-    private static int cenchant(ServerCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
+    private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
         if (!TempRules.getEnchantingPrediction()) {
             Text text = new TranslatableText("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
