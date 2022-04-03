@@ -3,25 +3,23 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.minecraft.server.command.ServerCommandSource;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 import java.util.OptionalLong;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CheatCrackRNGCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ccheatcrackrng");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ccheatcrackrng")
             .executes(ctx -> crackPlayerRNG(ctx.getSource())));
     }
 
-    private static int crackPlayerRNG(ServerCommandSource source) {
+    private static int crackPlayerRNG(FabricClientCommandSource source) {
         OptionalLong seed = PlayerRandCracker.singlePlayerCrackRNG();
         if (!seed.isPresent()) {
             sendFeedback(new TranslatableText("commands.ccheatcrackrng.java14").formatted(Formatting.RED));

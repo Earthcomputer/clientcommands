@@ -1,9 +1,11 @@
 package net.earthcomputer.clientcommands.command.arguments;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.command.argument.ItemPredicateArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.item.Item;
@@ -11,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.registry.Registry;
@@ -22,7 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Predicate;
 
-public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
+public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemPredicateArgumentType.ClientItemPredicateArgument> {
 
     private static final DynamicCommandExceptionType UNKNOWN_TAG_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("arguments.item.tag.unknown", arg));
 
@@ -40,7 +41,7 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
         return new ClientItemPredicateArgumentType();
     }
 
-    public static ClientItemPredicate getClientItemPredicate(CommandContext<ServerCommandSource> ctx, String name) throws CommandSyntaxException {
+    public static ClientItemPredicate getClientItemPredicate(CommandContext<FabricClientCommandSource> ctx, String name) throws CommandSyntaxException {
         return ctx.getArgument(name, ClientItemPredicateArgument.class).create(ctx);
     }
 
@@ -62,9 +63,8 @@ public class ClientItemPredicateArgumentType extends ItemPredicateArgumentType {
     }
 
     @FunctionalInterface
-    public interface ClientItemPredicateArgument extends ItemPredicateArgument {
-        @Override
-        ClientItemPredicate create(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException;
+    public interface ClientItemPredicateArgument {
+        ClientItemPredicate create(CommandContext<FabricClientCommandSource> commandContext) throws CommandSyntaxException;
     }
 
     public sealed interface ClientItemPredicate extends Predicate<ItemStack> {

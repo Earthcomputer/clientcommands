@@ -10,6 +10,12 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+repositories {
+	maven {
+		url = 'https://maven.xpple.dev/maven2'
+	}
+}
+
 loom {
 	accessWidenerPath = file('src/main/resources/clientcommands.aw')
 }
@@ -34,6 +40,9 @@ dependencies {
 	include('net.earthcomputer.multiconnect:multiconnect-api:1.5.10') {
 		transitive = false
 	}
+
+	modImplementation 'dev.xpple:clientarguments:1.3.0'
+	include 'dev.xpple:clientarguments:1.3.0'
 
 	if (clientcommandsScriptingExists) {
 		include project(':clientcommands-scripting')

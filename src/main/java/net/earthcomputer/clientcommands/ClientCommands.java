@@ -3,9 +3,10 @@ package net.earthcomputer.clientcommands;
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.command.*;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.ServerCommandSource;
 
 import java.io.File;
 
@@ -15,13 +16,14 @@ public class ClientCommands implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        registerCommands(ClientCommandManager.DISPATCHER);
+
         configDir = new File(FabricLoader.getInstance().getConfigDirectory(), "clientcommands");
         //noinspection ResultOfMethodCallIgnored
         configDir.mkdirs();
     }
 
-    public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
-        ClientCommandManager.clearClientSideCommands();
+    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         BookCommand.register(dispatcher);
         LookCommand.register(dispatcher);
         NoteCommand.register(dispatcher);
@@ -33,7 +35,6 @@ public class ClientCommands implements ClientModInitializer {
         CalcCommand.register(dispatcher);
         TempRuleCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
-        CHelpCommand.register(dispatcher);
         UsageTreeCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher);

@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Dynamic;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -19,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class KitCommand {
 
@@ -62,9 +62,7 @@ public class KitCommand {
         }
     }
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ckit");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ckit")
                 .then(literal("create")
                         .then(argument("name", StringArgumentType.string())
@@ -91,7 +89,7 @@ public class KitCommand {
                                 .executes(ctx -> preview(ctx.getSource(), StringArgumentType.getString(ctx, "name"))))));
     }
 
-    private static int create(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int create(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
@@ -101,7 +99,7 @@ public class KitCommand {
         return 0;
     }
 
-    private static int delete(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int delete(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         if (kits.remove(name) == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -110,7 +108,7 @@ public class KitCommand {
         return 0;
     }
 
-    private static int edit(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int edit(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -120,7 +118,7 @@ public class KitCommand {
         return 0;
     }
 
-    private static int load(ServerCommandSource source, String name, boolean override) throws CommandSyntaxException {
+    private static int load(FabricClientCommandSource source, String name, boolean override) throws CommandSyntaxException {
         if (!client.player.getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
@@ -147,7 +145,7 @@ public class KitCommand {
         return 0;
     }
 
-    private static int list(ServerCommandSource source) {
+    private static int list(FabricClientCommandSource source) {
         if (kits.isEmpty()) {
             sendFeedback("commands.ckit.list.empty");
         } else {
@@ -157,7 +155,7 @@ public class KitCommand {
         return kits.size();
     }
 
-    private static int preview(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int preview(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         NbtList kit = kits.get(name);
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);

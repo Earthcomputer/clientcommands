@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
 import net.earthcomputer.clientcommands.mixin.CreativeInventoryScreenAccessor;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
@@ -16,7 +17,6 @@ import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
@@ -33,10 +33,10 @@ import java.util.Map;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.minecraft.command.CommandSource.*;
-import static net.minecraft.command.argument.ItemStackArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class ItemGroupCommand {
 
@@ -63,9 +63,7 @@ public class ItemGroupCommand {
         }
     }
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("citemgroup");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("citemgroup")
             .then(literal("modify")
                 .then(argument("group", string())
@@ -73,8 +71,8 @@ public class ItemGroupCommand {
                     .then(literal("add")
                         .then(argument("itemstack", itemStack())
                             .then(argument("count", integer(1))
-                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
-                            .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "itemstack").createStack(1, false)))))
+                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
+                            .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createStack(1, false)))))
                     .then(literal("remove")
                         .then(argument("index", integer(0))
                             .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index")))))
@@ -82,25 +80,25 @@ public class ItemGroupCommand {
                         .then(argument("index", integer(0))
                             .then(argument("itemstack", itemStack())
                                 .then(argument("count", integer(1))
-                                    .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
-                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createStack(1, false))))))
+                                    .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
+                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createStack(1, false))))))
                     .then(literal("icon")
                         .then(argument("icon", itemStack())
-                            .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "icon").createStack(1, false)))))
+                            .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createStack(1, false)))))
                     .then(literal("rename")
                         .then(argument("new", string())
                             .executes(ctx -> renameGroup(ctx.getSource(), getString(ctx, "group"), getString(ctx, "new")))))))
             .then(literal("add")
                 .then(argument("group", string())
                     .then(argument("icon", itemStack())
-                         .executes(ctx -> addGroup(ctx.getSource(), getString(ctx, "group"), getItemStackArgument(ctx, "icon").createStack(1, false))))))
+                         .executes(ctx -> addGroup(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createStack(1, false))))))
             .then(literal("remove")
                 .then(argument("group", string())
                     .suggests((ctx, builder) -> suggestMatching(groups.keySet(), builder))
                     .executes(ctx -> removeGroup(ctx.getSource(), getString(ctx, "group"))))));
     }
 
-    private static int addGroup(ServerCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
+    private static int addGroup(FabricClientCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
         if (groups.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
@@ -130,7 +128,7 @@ public class ItemGroupCommand {
         }
     }
 
-    private static int removeGroup(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int removeGroup(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         if (!groups.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -149,7 +147,7 @@ public class ItemGroupCommand {
         return 0;
     }
 
-    private static int addStack(ServerCommandSource source, String name, ItemStack itemStack) throws CommandSyntaxException {
+    private static int addStack(FabricClientCommandSource source, String name, ItemStack itemStack) throws CommandSyntaxException {
         if (!groups.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -164,7 +162,7 @@ public class ItemGroupCommand {
         return 0;
     }
 
-    private static int removeStack(ServerCommandSource source, String name, int index) throws CommandSyntaxException {
+    private static int removeStack(FabricClientCommandSource source, String name, int index) throws CommandSyntaxException {
         if (!groups.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -182,7 +180,7 @@ public class ItemGroupCommand {
         return 0;
     }
 
-    private static int setStack(ServerCommandSource source, String name, int index, ItemStack itemStack) throws CommandSyntaxException {
+    private static int setStack(FabricClientCommandSource source, String name, int index, ItemStack itemStack) throws CommandSyntaxException {
         if (!groups.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -200,7 +198,7 @@ public class ItemGroupCommand {
         return 0;
     }
 
-    private static int changeIcon(ServerCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
+    private static int changeIcon(FabricClientCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
         if (!groups.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
@@ -222,7 +220,7 @@ public class ItemGroupCommand {
         return 0;
     }
 
-    private static int renameGroup(ServerCommandSource source, String name, String _new) throws CommandSyntaxException {
+    private static int renameGroup(FabricClientCommandSource source, String name, String _new) throws CommandSyntaxException {
         if (!groups.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }

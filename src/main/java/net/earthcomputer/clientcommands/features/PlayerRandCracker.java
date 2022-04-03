@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
@@ -89,7 +89,7 @@ public class PlayerRandCracker {
 
     public static void resetCracker(String reason) {
         if (TempRules.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
-            ClientCommandManager.sendFeedback(new LiteralText(Formatting.RED + I18n.translate(
+            ClientCommandHelper.sendFeedback(new LiteralText(Formatting.RED + I18n.translate(
                     "playerManip.reset", I18n.translate("playerManip.reset." + reason))));
         }
         resetCracker();

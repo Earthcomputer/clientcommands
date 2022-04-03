@@ -7,13 +7,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.state.property.Property;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.TranslatableText;
@@ -72,7 +72,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
         return blockParser.getSuggestions(builder, Registry.BLOCK);
     }
 
-    public static ClientBlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String arg) throws CommandSyntaxException {
+    public static ClientBlockPredicate getBlockPredicate(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
         Registry<Block> blockRegistry = context.getSource().getRegistryManager().get(Registry.BLOCK_KEY);
 
         BlockArgumentParser argParser = context.getArgument(arg, BlockArgumentParser.class);
@@ -91,7 +91,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
         };
     }
 
-    public static ClientBlockPredicate getBlockPredicateList(CommandContext<ServerCommandSource> context, String arg) throws CommandSyntaxException {
+    public static ClientBlockPredicate getBlockPredicateList(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
         Registry<Block> blockRegistry = context.getSource().getRegistryManager().get(Registry.BLOCK_KEY);
 
         List<BlockArgumentParser> argParsers = ListArgumentType.getList(context, arg);
