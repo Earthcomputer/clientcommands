@@ -41,7 +41,6 @@
   "commands.ccrackrng.starting": "Łamanie ziarna gracza",
   "commands.ccrackrng.success": "RNG gracza złamane: %d",
 
-  "commands.cenchant.expectedWithWithout": "Spodziewane \"with\"/\"without\"",
   "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otrzymać te zaklęcia",
   "commands.cenchant.incompatible": "Niekompatybilne zaklęcia",
   "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączonego \"Enchanting prediction\"",

@@ -7,7 +7,6 @@
   "commands.ccrackrng.starting": "Spielerseed knacken",
   "commands.ccrackrng.success": "Spieler-RNG geknackt: %d",
 
-  "commands.cenchant.expectedWithWithout": "\"with\"/\"without\" erwartet",
   "commands.cenchant.failed": "Es ist unmöglich oder würde zu lange brauchen, diese Verzauberungen zu bekommen",
   "commands.cenchant.incompatible": "Unvereinbare Verzauberungen",
   "commands.cenchant.needEnchantingPrediction": "Zauberprognose muss aktiviert sein, um dieser Befehl zu führen.",
