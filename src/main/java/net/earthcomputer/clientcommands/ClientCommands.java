@@ -1,26 +1,32 @@
 package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.command.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
+import org.slf4j.Logger;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ClientCommands implements ClientModInitializer {
-
-    public static File configDir;
+    private static final Logger LOGGER = LogUtils.getLogger();
+    public static Path configDir;
 
     @Override
     public void onInitializeClient() {
         registerCommands(ClientCommandManager.DISPATCHER);
 
-        configDir = new File(FabricLoader.getInstance().getConfigDirectory(), "clientcommands");
-        //noinspection ResultOfMethodCallIgnored
-        configDir.mkdirs();
+        configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
+        try {
+            Files.createDirectories(configDir);
+        } catch (IOException e) {
+            LOGGER.error("Failed to crate config dir", e);
+        }
     }
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {

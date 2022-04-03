@@ -8,14 +8,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.BrigadierRemover;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -30,7 +30,7 @@ import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class AliasCommand {
 
-    private static final Logger LOGGER = LogManager.getLogger("clientcommands");
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Path ALIAS_PATH = FabricLoader.getInstance().getConfigDir().resolve("clientcommands").resolve("alias_list.json");
 
@@ -159,7 +159,7 @@ public class AliasCommand {
             gson.toJson(aliasMap, writer);
             writer.flush();
         } catch (IOException e) {
-            LOGGER.error(e);
+            LOGGER.error("Failed to save aliases", e);
         }
     }
 }
