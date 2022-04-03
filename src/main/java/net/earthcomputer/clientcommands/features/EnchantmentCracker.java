@@ -268,6 +268,9 @@ public class EnchantmentCracker {
     }
 
     public static void onEnchantedItem() {
+        if (TempRules.playerCrackState == PlayerRandCracker.CrackState.UNCRACKED && !isEnchantingPredictionEnabled()) {
+            return;
+        }
         if (TempRules.playerCrackState.knowsSeed()) {
             possibleXPSeeds.clear();
             possibleXPSeeds.add(PlayerRandCracker.nextInt());
