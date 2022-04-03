@@ -25,6 +25,8 @@ public class SeedCracker {
     public static long[] bits=new long[20];
     public static int expectedItems=0;
     public static LongTask currentTask;
+    private static int attemptCount = 0;
+    private static final int MAX_ATTEMPTS = 5;
 
     //returns True on success or false on failer
     private static boolean throwItems()
@@ -48,7 +50,13 @@ public class SeedCracker {
 
         if(seed==0)//Basicaly if seed is zero it means it failed to try to crack again
         {
-            SeedCracker.crack(SeedCracker.callback);
+            attemptCount++;
+            if (attemptCount > MAX_ATTEMPTS) {
+                ClientCommandHelper.sendError(new TranslatableText("commands.ccrackrng.failed"));
+                ClientCommandHelper.sendFeedback(new TranslatableText("commands.ccrackrng.failed.help").styled(style -> style.withColor(Formatting.AQUA)));
+            } else {
+                SeedCracker.doCrack(SeedCracker.callback);
+            }
             return;
         }
         //Else, got a seed
@@ -71,8 +79,15 @@ public class SeedCracker {
 
         callback.callback(rand.getSeed());//extract seed and call callback
     }
-    public static void crack(OnCrack Callback){
+
+    public static void crack(OnCrack callback) {
+        attemptCount = 1;
+        doCrack(callback);
+    }
+
+    private static void doCrack(OnCrack Callback){
         callback=Callback;
+        ClientCommandHelper.addOverlayMessage(new TranslatableText("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         if(throwItems())
         {
             TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
@@ -85,6 +100,8 @@ public class SeedCracker {
                         .append(ClientCommandHelper.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName));
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
+        } else {
+            TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
         }
     }
 
