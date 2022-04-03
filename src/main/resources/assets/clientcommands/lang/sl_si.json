@@ -7,7 +7,6 @@
     "commands.ccrackrng.starting": "Ugotavljanje semena igralca",
     "commands.ccrackrng.success": "RNG seme igralca uspešno ugotovljeno: %d",
 
-    "commands.cenchant.expectedWithWithout": "Pričakovano \"z\"/\"brez\"",
     "commands.cenchant.failed": "Nemogoče je ali bi trajalo pre dolgo, da bi dobile te čare",
     "commands.cenchant.incompatible": "Nezdružljivi čari",
     "commands.cenchant.needEnchantingPrediction": "Ta ukaz zahteva, da je omogočeno predvidevanje čaranja.",
