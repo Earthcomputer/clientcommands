@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
@@ -89,7 +89,7 @@ public class PlayerRandCracker {
 
     public static void resetCracker(String reason) {
         if (TempRules.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
-            ClientCommandManager.sendFeedback(new LiteralText(Formatting.RED + I18n.translate(
+            ClientCommandHelper.sendFeedback(new LiteralText(Formatting.RED + I18n.translate(
                     "playerManip.reset", I18n.translate("playerManip.reset." + reason))));
         }
         resetCracker();
@@ -361,22 +361,6 @@ public class PlayerRandCracker {
         Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getMaxCount).thenComparing(itemCounts::get)).get();
         //noinspection OptionalGetWithoutIsPresent
         return slots.stream().filter(slot -> slot.getStack().getItem() == preferredItem).findFirst().get();
-    }
-
-    public static OptionalLong singlePlayerCrackRNG() {
-        ServerPlayerEntity serverPlayer = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayer(MinecraftClient.getInstance().player.getUuid());
-        OptionalLong seed = getSeed(serverPlayer.getRandom());
-        if (!seed.isPresent()) {
-            return seed;
-        }
-        setSeed(seed.getAsLong());
-
-        EnchantmentCracker.possibleXPSeeds.clear();
-        EnchantmentCracker.possibleXPSeeds.add(serverPlayer.getEnchantmentTableSeed());
-
-        TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
-        TempRules.enchCrackState = EnchantmentCracker.CrackState.CRACKED;
-        return seed;
     }
 
     private static final Field RANDOM_SEED;

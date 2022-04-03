@@ -2,20 +2,18 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class FovCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cfov");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfov")
             .then(argument("fov", doubleArg())
                 .executes(ctx -> setFov(ctx.getSource(), getDouble(ctx, "fov"))))
@@ -25,7 +23,7 @@ public class FovCommand {
                 .executes(ctx -> setFov(ctx.getSource(), 110))));
     }
 
-    private static int setFov(ServerCommandSource source, double fov) {
+    private static int setFov(FabricClientCommandSource source, double fov) {
         MinecraftClient.getInstance().options.fov = fov;
 
         Text feedback = new TranslatableText("commands.cfov.success", fov);

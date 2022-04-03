@@ -2,9 +2,10 @@ package net.earthcomputer.clientcommands.features;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.Rand;
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.mixin.AlternativeLootConditionAccessor;
 import net.earthcomputer.clientcommands.mixin.AndConditionAccessor;
@@ -97,9 +98,8 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -122,7 +122,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class FishingCracker {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     // goals
     public static final List<ClientItemPredicateArgumentType.ClientItemPredicate> goals = new ArrayList<>();
@@ -702,7 +702,7 @@ public class FishingCracker {
         OptionalLong optionalSeed = getSeed(fishingBobberUUID);
         if (optionalSeed.isEmpty()) {
             Text error = new TranslatableText("commands.cfish.error.crackFailed").styled(style -> style.withColor(Formatting.RED));
-            ClientCommandManager.addOverlayMessage(error, 100);
+            ClientCommandHelper.addOverlayMessage(error, 100);
             reset();
             return;
         }
@@ -739,7 +739,7 @@ public class FishingCracker {
                     }
                 }
                 Text error = new TranslatableText("commands.cfish.error." + fishingBobber.failedReason).styled(style -> style.withColor(Formatting.RED));
-                ClientCommandManager.addOverlayMessage(error, 100);
+                ClientCommandHelper.addOverlayMessage(error, 100);
                 reset();
                 return;
             }
@@ -770,7 +770,7 @@ public class FishingCracker {
                             && predicate.predicate().numEnchantments() >= 2) {
                         if (!hasWarnedMultipleEnchants) {
                             Text help = new TranslatableText("commands.cfish.help.tooManyEnchants").styled(style -> style.withColor(Formatting.AQUA));
-                            ClientCommandManager.sendFeedback(help);
+                            ClientCommandHelper.sendFeedback(help);
                             hasWarnedMultipleEnchants = true;
                         }
                     }
@@ -791,17 +791,17 @@ public class FishingCracker {
 
             if (impossible) {
                 Text error = new TranslatableText("commands.cfish.error.impossibleLoot").styled(style -> style.withColor(Formatting.RED));
-                ClientCommandManager.addOverlayMessage(error, 100);
+                ClientCommandHelper.addOverlayMessage(error, 100);
                 reset();
                 return;
             }
             if (failedCondition != null) {
                 if (failedCondition instanceof OpenWaterCondition) {
                     Text error = new TranslatableText("commands.cfish.error.openWater").styled(style -> style.withColor(Formatting.RED));
-                    ClientCommandManager.addOverlayMessage(error, 100);
+                    ClientCommandHelper.addOverlayMessage(error, 100);
                     if (!fishingBobber.world.getBlockState(new BlockPos(fishingBobber.pos).up()).isOf(Blocks.LILY_PAD)) {
                         Text help = new TranslatableText("commands.cfish.error.openWater.lilyPad").styled(style -> style.withColor(Formatting.AQUA));
-                        ClientCommandManager.sendFeedback(help);
+                        ClientCommandHelper.sendFeedback(help);
                     }
                     for (BlockPos openWaterViolation : fishingBobber.openWaterViolations) {
                         RenderQueue.addCuboid(
@@ -821,7 +821,7 @@ public class FishingCracker {
                             "commands.cfish.error.biome",
                             new TranslatableText("biome." + biomeCondition.biome.getValue().getNamespace() + "." + biomeCondition.biome.getValue().getPath())
                     );
-                    ClientCommandManager.addOverlayMessage(error, 100);
+                    ClientCommandHelper.addOverlayMessage(error, 100);
                     reset();
                     return;
                 }
@@ -883,10 +883,10 @@ public class FishingCracker {
                 .collect(Collectors.toList());
 
         if (actualCatch.equals(expectedCatch)) {
-            ClientCommandManager.addOverlayMessage(new TranslatableText("commands.cfish.correctLoot", magicMillisecondsCorrection)
+            ClientCommandHelper.addOverlayMessage(new TranslatableText("commands.cfish.correctLoot", magicMillisecondsCorrection)
                     .styled(style -> style.withColor(Formatting.GREEN)), 100);
         } else {
-            ClientCommandManager.addOverlayMessage(new TranslatableText("commands.cfish.wrongLoot", magicMillisecondsCorrection, indices)
+            ClientCommandHelper.addOverlayMessage(new TranslatableText("commands.cfish.wrongLoot", magicMillisecondsCorrection, indices)
                     .styled(style -> style.withColor(Formatting.RED)), 100);
         }
 
@@ -1015,7 +1015,7 @@ public class FishingCracker {
 
     public static void onBobOutOfWater() {
         Text message = new TranslatableText("commands.cfish.error.outOfWater").styled(style -> style.withColor(Formatting.RED));
-        ClientCommandManager.addOverlayMessage(message, 100);
+        ClientCommandHelper.addOverlayMessage(message, 100);
     }
 
     // endregion

@@ -8,15 +8,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.BrigadierRemover;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -26,12 +25,12 @@ import java.util.IllegalFormatException;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class AliasCommand {
 
-    private static final Logger LOGGER = LogManager.getLogger("clientcommands");
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Path ALIAS_PATH = FabricLoader.getInstance().getConfigDir().resolve("clientcommands").resolve("alias_list.json");
 
@@ -43,9 +42,7 @@ public class AliasCommand {
 
     private static final HashMap<String, String> aliasMap = loadAliases();
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("calias");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("calias")
                 .then(literal("add")
                         .then(argument("key", string())
@@ -59,7 +56,6 @@ public class AliasCommand {
 
         for (String key: aliasMap.keySet()) {
             if (dispatcher.getRoot().getChildren().stream().map(CommandNode::getName).noneMatch(literal -> literal.equals(key))) {
-                addClientSideCommand(key);
                 dispatcher.register(literal(key)
                         .executes(ctx -> executeAliasCommand(key, null))
                         .then(argument("arguments", greedyString())
@@ -97,25 +93,18 @@ public class AliasCommand {
         return 0;
     }
 
-    @SuppressWarnings("unchecked")
     private static int addAlias(String key, String command) throws CommandSyntaxException {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        assert networkHandler != null;
-        var dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
-
         if (aliasMap.containsKey(key)) {
             throw ALIAS_EXISTS_EXCEPTION.create(key);
         }
-        if (dispatcher.getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
+        if (DISPATCHER.getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
             throw COMMAND_EXISTS_EXCEPTION.create(key);
         }
         if (!command.startsWith("/")) {
             command = "/" + command;
         }
 
-        addClientSideCommand(key);
-
-        dispatcher.register(literal(key)
+        DISPATCHER.register(literal(key)
                 .executes(ctx -> executeAliasCommand(key, null))
                 .then(argument("arguments", greedyString())
                         .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
@@ -138,14 +127,9 @@ public class AliasCommand {
         return 0;
     }
 
-    @SuppressWarnings("unchecked")
     private static int removeAlias(String key) throws CommandSyntaxException {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        assert networkHandler != null;
-        var dispatcher = (CommandDispatcher<ServerCommandSource>) (CommandDispatcher<?>) networkHandler.getCommandDispatcher();
-
         if (aliasMap.containsKey(key)) {
-            BrigadierRemover.of(dispatcher).get(key).remove();
+            BrigadierRemover.of(DISPATCHER).get(key).remove();
             aliasMap.remove(key);
         } else {
             throw NOT_FOUND_EXCEPTION.create(key);
@@ -175,7 +159,7 @@ public class AliasCommand {
             gson.toJson(aliasMap, writer);
             writer.flush();
         } catch (IOException e) {
-            LOGGER.error(e);
+            LOGGER.error("Failed to save aliases", e);
         }
     }
 }

@@ -40,8 +40,6 @@
 
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
-  "commands.ccheatcrackrng.success": "Player RNG cracked: %d -> %d",
-  "commands.ccheatcrackrng.java14": "This command no longer works on Java 14+!",
 
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",

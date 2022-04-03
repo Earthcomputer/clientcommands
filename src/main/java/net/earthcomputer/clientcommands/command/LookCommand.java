@@ -1,30 +1,27 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import dev.xpple.clientarguments.arguments.CPosArgument;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.argument.BlockPosArgumentType.*;
-import static net.minecraft.command.argument.RotationArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CRotationArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class LookCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("clook");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("clook")
             .then(literal("block")
                 .then(argument("pos", blockPos())
-                    .executes(ctx -> lookBlock(getBlockPos(ctx, "pos")))))
+                    .executes(ctx -> lookBlock(getCBlockPos(ctx, "pos")))))
             .then(literal("angles")
                 .then(argument("rotation", rotation())
-                    .executes(ctx -> lookAngles(ctx.getSource(), getRotation(ctx, "rotation")))))
+                    .executes(ctx -> lookAngles(ctx.getSource(), getCRotation(ctx, "rotation")))))
             .then(literal("cardinal")
                 .then(literal("down")
                     .executes(ctx -> lookCardinal(ctx.getSource().getRotation().y, 90)))
@@ -51,7 +48,7 @@ public class LookCommand {
         return doLook(player, yaw, pitch);
     }
 
-    private static int lookAngles(ServerCommandSource source, PosArgument rotation) {
+    private static int lookAngles(FabricClientCommandSource source, CPosArgument rotation) {
         Vec2f rot = rotation.toAbsoluteRotation(source);
         return doLook(MinecraftClient.getInstance().player, rot.y, rot.x);
     }
