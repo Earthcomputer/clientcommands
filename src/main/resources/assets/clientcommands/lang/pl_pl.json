@@ -40,8 +40,6 @@
 
   "commands.ccrackrng.starting": "Łamanie ziarna gracza",
   "commands.ccrackrng.success": "RNG gracza złamane: %d",
-  "commands.ccheatcrackrng.success": "RNG gracza złamane: %d -> %d",
-  "commands.ccheatcrackrng.java14": "Te polecenie nie działa na Java 14+!",
 
   "commands.cenchant.expectedWithWithout": "Spodziewane \"with\"/\"without\"",
   "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otrzymać te zaklęcia",

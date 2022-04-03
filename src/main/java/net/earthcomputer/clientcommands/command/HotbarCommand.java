@@ -1,19 +1,19 @@
 package net.earthcomputer.clientcommands.command;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.*;
 
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.HotbarStorage;
 import net.minecraft.client.option.HotbarStorageEntry;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
@@ -21,9 +21,7 @@ public class HotbarCommand {
 
     private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.chotbar.notCreative"));
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("chotbar");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("chotbar")
             .then(literal("save")
                 // Intentionally one-indexed to match keybindings and creative inventory display
@@ -34,7 +32,7 @@ public class HotbarCommand {
                 .executes(ctx -> restore(ctx.getSource(), getInteger(ctx, "index"))))));
     }
 
-    private static int save(ServerCommandSource source, int index) throws CommandSyntaxException {
+    private static int save(FabricClientCommandSource source, int index) throws CommandSyntaxException {
         MinecraftClient client = MinecraftClient.getInstance();
 
         HotbarStorage storage = client.getCreativeHotbarStorage();
@@ -52,7 +50,7 @@ public class HotbarCommand {
         return 0;
     }
 
-    private static int restore(ServerCommandSource source, int index) throws CommandSyntaxException {
+    private static int restore(FabricClientCommandSource source, int index) throws CommandSyntaxException {
         MinecraftClient client = MinecraftClient.getInstance();
 
         ClientPlayerEntity player = client.player;

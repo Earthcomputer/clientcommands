@@ -8,8 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -32,7 +32,7 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
         return new FormattedTextArgumentType();
     }
 
-    public static LiteralText getFormattedText(CommandContext<ServerCommandSource> context, String arg) {
+    public static LiteralText getFormattedText(CommandContext<FabricClientCommandSource> context, String arg) {
         return context.getArgument(arg, LiteralText.class);
     }
 
