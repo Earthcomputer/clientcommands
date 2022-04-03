@@ -65,9 +65,5 @@ public class ClientCommands implements ClientModInitializer {
         PlayerInfoCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
-
-        if (MinecraftClient.getInstance().isIntegratedServerRunning()) {
-            CheatCrackRNGCommand.register(dispatcher);
-        }
     }
 }

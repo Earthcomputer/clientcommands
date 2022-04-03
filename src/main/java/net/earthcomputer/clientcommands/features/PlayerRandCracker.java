@@ -363,22 +363,6 @@ public class PlayerRandCracker {
         return slots.stream().filter(slot -> slot.getStack().getItem() == preferredItem).findFirst().get();
     }
 
-    public static OptionalLong singlePlayerCrackRNG() {
-        ServerPlayerEntity serverPlayer = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayer(MinecraftClient.getInstance().player.getUuid());
-        OptionalLong seed = getSeed(serverPlayer.getRandom());
-        if (!seed.isPresent()) {
-            return seed;
-        }
-        setSeed(seed.getAsLong());
-
-        EnchantmentCracker.possibleXPSeeds.clear();
-        EnchantmentCracker.possibleXPSeeds.add(serverPlayer.getEnchantmentTableSeed());
-
-        TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
-        TempRules.enchCrackState = EnchantmentCracker.CrackState.CRACKED;
-        return seed;
-    }
-
     private static final Field RANDOM_SEED;
     static {
         Field randomSeedField;
