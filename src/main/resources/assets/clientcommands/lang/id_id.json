@@ -40,8 +40,6 @@
 
   "commands.ccrackrng.starting": "Memecahkan benih pemain",
   "commands.ccrackrng.success": "RNG Pemain telah di pecahkan: %d",
-  "commands.ccheatcrackrng.success": "RNG Pemain telah di pecahkan: %d -> %d",
-  "commands.ccheatcrackrng.java14": "Perintah ini tidak lagi bekerja di Java 14 keatas!",
 
   "commands.cenchant.expectedWithWithout": "Diharapkan \"with (dengan)\"/\"without (tanpa)\"",
   "commands.cenchant.failed": "Tidak mungkin atau akan memakan waktu yang lama untuk mendapatkan pesona tersebut",
@@ -172,7 +170,6 @@
   "enchCrack.state.cracking": "Sedang memecahkan",
   "enchCrack.state.cracked": "Sudah pecah",
 
-  "enchCrack.pesonas": "Pesona:",
   "enchCrack.clues": "Petunjuk:",
   "enchCrack.slot": "Slot %d:",
 
@@ -187,7 +184,6 @@
   "enchCrack.insn.slot": "Di slot: %d",
   "enchCrack.insn.itemThrows": "Butuh %d benda untuk dilempar (kira kira memakan waktu %f detik)",
   "enchCrack.insn.itemThrows.noDummy": "Tidak usah melakukan pesona asal",
-  "enchCrack.insn.pesonas": "Pesona di item:",
 
   "playerManip.state": "Status Memecahkan Pemain: %s",
   "playerManip.state.uncracked": "Belum pecah",
@@ -197,7 +193,6 @@
   "playerManip.state.ench_cracking_2": "Sedang memecahkan Seed Pesona ke 2",
   "playerManip.state.cracking": "Sedang memecahkan",
   "playerManip.state.eating": "Sedang Makan",
-  "playerManip.state.manipulating_pesonas": "Memanipulasi Pesonas",
   "playerManip.state.waiting_dummy_enchant": "Sedang menunggu pesona asal",
 
   "playerManip.reset": "Manipulasi pemain RNG telah di reset. Alasan: %s",
