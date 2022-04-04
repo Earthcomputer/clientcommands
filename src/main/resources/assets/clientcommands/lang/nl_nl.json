@@ -12,9 +12,7 @@
 
   "commands.ccrackrng.starting": "Spelersseed aan het kraken",
   "commands.ccrackrng.success": "Spelers RNG gekraakt: %d",
-  "commands.ccheatcrackrng.success": "Spelers RNG gekraakt: %d -> %d",
 
-  "commands.cenchant.expectedWithWithout": "Verwachtte \"with\"/\"without\"",
   "commands.cenchant.failed": "Het is onmogelijk of het zou te lang duren om deze betoveringen te krijgen",
   "commands.cenchant.incompatible": "Onverenigbare betoveringen",
   "commands.cenchant.needEnchantingPrediction": "Dit commando vereist betoveringspredictie om gebruikt te worden.",

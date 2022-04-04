@@ -12,9 +12,7 @@
 
   "commands.ccrackrng.starting": "正在破譯玩家隨機種子",
   "commands.ccrackrng.success": "玩家隨機種子已破譯： %d",
-  "commands.ccheatcrackrng.success": "玩家隨機種子已破譯： %d -> %d",
 
-  "commands.cenchant.expectedWithWithout": "有效參數： \"with\" 或 \"without\"",
   "commands.cenchant.failed": "您請求的附魔無法獲得或者需要太長時間",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本指令需要啟用附魔預測。",
@@ -51,10 +49,6 @@
 
   "commands.cghostblock.fill.success": "%d 個幽靈方塊被填充",
   "commands.cghostblock.set.success": "幽靈方塊已放置",
-
-  "commands.cglow.keepSearching.success": "使實體發光。",
-  "commands.cglow.failed": "沒有實體發光",
-  "commands.cglow.success": "成功使 %d 實體發光",
 
   "commands.crelog.failed": "重啟失敗",
 
@@ -143,7 +137,5 @@
   "itemCrack.notEnoughItems": "無法使用隨機數種子破譯： 玩家手中沒有足夠的物品",
 
   "chorusManip.setGoal": "設置 %s 目標區域從 %s 至 %s",
-  "chorusManip.goalTooFar": "目標距離過遠!",
-  "chorusManip.landing": "落點在: %d, %d, %d",
-  "chorusManip.landingNotPossible": "落點操控為不可能的"
+  "chorusManip.goalTooFar": "目標距離過遠!"
 }

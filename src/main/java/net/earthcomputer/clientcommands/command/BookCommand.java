@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
@@ -15,7 +16,6 @@ import net.minecraft.item.WrittenBookItem;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
 
@@ -28,8 +28,8 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.LongArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class BookCommand {
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(new TranslatableText("commands.cbook.commandException"));
@@ -37,12 +37,10 @@ public class BookCommand {
     private static final int MAX_LIMIT = WrittenBookItem.field_30933;
     private static final int DEFAULT_LIMIT = 50;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         if (MultiConnectAPI.instance().getProtocolVersion() >= Protocols.V1_15) {
             return; // chunk savestate fixed in 1.15
         }
-
-        addClientSideCommand("cbook");
 
         dispatcher.register(literal("cbook")
                 .then(literal("fill")

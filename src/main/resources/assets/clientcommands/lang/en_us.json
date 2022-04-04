@@ -38,12 +38,13 @@
   "commands.ccalcstack.success.empty.exact": "%d items is exactly %d stacks",
   "commands.ccalcstack.success.exact": "%d %s is exactly %d stacks",
 
+  "commands.ccrackrng.failed": "Failed to crack player seed",
+  "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper.",
+  "commands.ccrackrng.retries": "Cracking player seed, attempt %d/%d",
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
-  "commands.ccheatcrackrng.success": "Player RNG cracked: %d -> %d",
-  "commands.ccheatcrackrng.java14": "This command no longer works on Java 14+!",
 
-  "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
+  "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.incompatible": "Incompatible enchantments",
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
