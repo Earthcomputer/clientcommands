@@ -620,7 +620,7 @@ public class FishingCracker {
         return TempRules.getFishingManipulation().isEnabled() && !goals.isEmpty();
     }
 
-    private static int getLocalPing() {
+    public static int getLocalPing() {
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
         if (networkHandler == null)
             return -1;
