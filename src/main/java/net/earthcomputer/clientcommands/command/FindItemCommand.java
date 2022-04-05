@@ -8,6 +8,7 @@ import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
@@ -19,7 +20,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.command.argument.ItemPredicateArgumentType.ItemPredicateArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -30,7 +30,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -45,25 +44,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemPredicateArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class FindItemCommand {
     private static final int FLAG_NO_SEARCH_SHULKER_BOX = 1;
     private static final int FLAG_KEEP_SEARCHING = 2;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cfinditem");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
                 .then(literal("--no-search-shulker-box")
                         .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
                 .then(literal("--keep-searching")
                         .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
-                .then(argument("item", withString(clientItemPredicate()))
+                .then(argument("item", withString(itemPredicate()))
                         .executes(ctx ->
                                 findItem(ctx,
                                         getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
@@ -71,7 +68,7 @@ public class FindItemCommand {
                                         getWithString(ctx, "item", ItemPredicateArgument.class)))));
     }
 
-    private static int findItem(CommandContext<ServerCommandSource> source, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, ItemPredicateArgument> item) throws CommandSyntaxException {
+    private static int findItem(CommandContext<FabricClientCommandSource> source, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, ItemPredicateArgument> item) throws CommandSyntaxException {
         String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item.getLeft(), item.getRight().create(source), !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
             sendFeedback(new TranslatableText("commands.cfinditem.starting.keepSearching", item.getLeft())
@@ -218,7 +215,7 @@ public class FindItemCommand {
                                 if (searchingFor.test(stack))
                                     matchingItems += stack.getCount();
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    NbtCompound blockEntityTag = stack.getSubTag("BlockEntityTag");
+                                    NbtCompound blockEntityTag = stack.getSubNbt("BlockEntityTag");
                                     if (blockEntityTag != null && blockEntityTag.contains("Items")) {
                                         DefaultedList<ItemStack> boxInv = DefaultedList.ofSize(27, ItemStack.EMPTY);
                                         Inventories.readNbt(blockEntityTag, boxInv);

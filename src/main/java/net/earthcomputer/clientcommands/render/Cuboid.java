@@ -1,9 +1,7 @@
 package net.earthcomputer.clientcommands.render;
 
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -36,12 +34,13 @@ public class Cuboid extends Shape {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, VertexConsumerProvider.Immediate vertexConsumerProvider, float delta) {
-        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getLines());
+    public void render(MatrixStack matrixStack, float delta) {
+        BufferBuilder buff = Tessellator.getInstance().getBuffer();
+        buff.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
         for (Line edge : this.edges) {
-            edge.renderLine(matrixStack, vertexConsumer, delta, prevPos.subtract(getPos()));
+            edge.renderLine(matrixStack, buff, delta, prevPos.subtract(getPos()));
         }
-        vertexConsumerProvider.draw(RenderLayer.getLines());
+        Tessellator.getInstance().draw();
     }
 
     @Override

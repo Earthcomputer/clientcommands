@@ -1,23 +1,21 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.argument.TextArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static dev.xpple.clientarguments.arguments.CTextArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CTitleCommand {
 
     private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ctitle");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctitle")
             .then(literal("clear")
                 .executes(ctx -> executeClear()))
@@ -25,13 +23,13 @@ public class CTitleCommand {
                 .executes(ctx -> executeReset()))
             .then(literal("title")
                 .then(argument("title", text())
-                    .executes(ctx -> executeTitle(getTextArgument(ctx, "title")))))
+                    .executes(ctx -> executeTitle(getCTextArgument(ctx, "title")))))
             .then(literal("subtitle")
                 .then(argument("title", text())
-                    .executes(ctx -> executeSubtitle(getTextArgument(ctx, "title")))))
+                    .executes(ctx -> executeSubtitle(getCTextArgument(ctx, "title")))))
             .then(literal("actionbar")
                 .then(argument("title", text())
-                    .executes(ctx -> executeActionBar(getTextArgument(ctx, "title")))))
+                    .executes(ctx -> executeActionBar(getCTextArgument(ctx, "title")))))
             .then(literal("times")
                 .then(argument("fadeIn", integer(0))
                     .then(argument("stay", integer(0))

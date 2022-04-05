@@ -12,7 +12,6 @@
 
   "commands.ccrackrng.starting": "Spelersseed aan het kraken",
   "commands.ccrackrng.success": "Spelers RNG gekraakt: %d",
-  "commands.ccheatcrackrng.success": "Spelers RNG gekraakt: %d -> %d",
 
   "commands.cenchant.expectedWithWithout": "Verwachtte \"with\"/\"without\"",
   "commands.cenchant.failed": "Het is onmogelijk of het zou te lang duren om deze betoveringen te krijgen",
@@ -40,7 +39,6 @@
   "commands.cfish.addGoal.success": "doel %s succesvol toegevoegd",
   "commands.cfish.correctLoot": "De correcte buit is verkregen met een correctie van %dms",
   "commands.cfish.error.crackFailed": "Gefaald om de dobber RNG te kraken, is de server gemodificeerd?",
-  "commands.cfish.error.failed": "Dobberconfiguratie niet correct",
   "commands.cfish.error.outOfWater": "Dobber uit het water, de manipulatie zal niet werken",
   "commands.cfish.listGoals.noGoals": "Er zijn geen visdoelen",
   "commands.cfish.listGoals.success": "Er zijn %d visdoelen:",

@@ -12,7 +12,6 @@
 
   "commands.ccrackrng.starting": "正在破譯玩家隨機種子",
   "commands.ccrackrng.success": "玩家隨機種子已破譯： %d",
-  "commands.ccheatcrackrng.success": "玩家隨機種子已破譯： %d -> %d",
 
   "commands.cenchant.expectedWithWithout": "有效參數： \"with\" 或 \"without\"",
   "commands.cenchant.failed": "您請求的附魔無法獲得或者需要太長時間",
@@ -40,7 +39,6 @@
   "commands.cfish.addGoal.success": "成功添加目標 %s",
   "commands.cfish.correctLoot": "使用 %dms 校正得到目標戰利品",
   "commands.cfish.error.crackFailed": "無法破譯釣魚氣泡隨機數，這是個模組伺服器?",
-  "commands.cfish.error.failed": "釣魚氣泡配置不正確",
   "commands.cfish.error.outOfWater": "釣魚氣泡在水域外，操控將無法工作",
   "commands.cfish.listGoals.noGoals": "沒有設置釣魚目標",
   "commands.cfish.listGoals.success": "已設置 %d 釣魚目標:",
@@ -52,10 +50,6 @@
 
   "commands.cghostblock.fill.success": "%d 個幽靈方塊被填充",
   "commands.cghostblock.set.success": "幽靈方塊已放置",
-
-  "commands.cglow.keepSearching.success": "使實體發光。",
-  "commands.cglow.failed": "沒有實體發光",
-  "commands.cglow.success": "成功使 %d 實體發光",
 
   "commands.crelog.failed": "重啟失敗",
 
@@ -144,7 +138,5 @@
   "itemCrack.notEnoughItems": "無法使用隨機數種子破譯： 玩家手中沒有足夠的物品",
 
   "chorusManip.setGoal": "設置 %s 目標區域從 %s 至 %s",
-  "chorusManip.goalTooFar": "目標距離過遠!",
-  "chorusManip.landing": "落點在: %d, %d, %d",
-  "chorusManip.landingNotPossible": "落點操控為不可能的"
+  "chorusManip.goalTooFar": "目標距離過遠!"
 }

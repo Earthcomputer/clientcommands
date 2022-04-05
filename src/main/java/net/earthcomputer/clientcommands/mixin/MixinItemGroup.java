@@ -19,7 +19,7 @@ public abstract class MixinItemGroup implements IItemGroup {
 
     @Shadow @Mutable @Final public static ItemGroup[] GROUPS;
 
-    @Shadow @Mutable @Final private Text translationKey;
+    @Shadow @Mutable @Final private Text displayName;
 
     @Override
     public void shrink() {
@@ -29,7 +29,7 @@ public abstract class MixinItemGroup implements IItemGroup {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void substring(int index, String id, CallbackInfo ci) {
         if (id.startsWith("clientcommands.")) {
-            this.translationKey = new LiteralText(id.substring(15));
+            this.displayName = new LiteralText(id.substring(15));
         }
     }
 }

@@ -6,10 +6,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,15 +19,13 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class FishCommand {
     private static final Set<Item> ENCHANTABLE_ITEMS = ImmutableSet.of(Items.BOOK, Items.FISHING_ROD, Items.BOW);
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cfish");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfish")
             .then(literal("list-goals")
                 .executes(ctx -> listGoals()))
@@ -80,17 +77,7 @@ public class FishCommand {
         String string = stringAndItemAndEnchantments.getLeft();
         ItemAndEnchantmentsPredicate itemAndEnchantments = stringAndItemAndEnchantments.getRight();
 
-        ClientItemPredicate goal = new ClientItemPredicate() {
-            @Override
-            public String getPrettyString() {
-                return string;
-            }
-
-            @Override
-            public boolean test(ItemStack itemStack) {
-                return itemAndEnchantments.test(itemStack);
-            }
-        };
+        ClientItemPredicate goal = new EnchantedItemPredicate(string, itemAndEnchantments);
 
         FishingCracker.goals.add(goal);
 

@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -17,17 +17,15 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class FindBlockCommand {
 
     public static final int MAX_RADIUS = 16 * 8;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cfindblock");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfindblock")
             .then(argument("block", blockPredicate())
                 .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), MAX_RADIUS, RadiusType.CARTESIAN))
@@ -41,7 +39,7 @@ public class FindBlockCommand {
                         .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), getInteger(ctx, "radius"), RadiusType.TAXICAB))))));
     }
 
-    public static int findBlock(ServerCommandSource source, ClientBlockPredicate block, int radius, RadiusType radiusType) {
+    public static int findBlock(FabricClientCommandSource source, ClientBlockPredicate block, int radius, RadiusType radiusType) {
         List<BlockPos> candidates;
         if (radiusType == RadiusType.TAXICAB) {
             candidates = findBlockCandidatesInTaxicabArea(source, block, radius);
@@ -69,7 +67,7 @@ public class FindBlockCommand {
         }
     }
 
-    private static List<BlockPos> findBlockCandidatesInSquareArea(ServerCommandSource source, ClientBlockPredicate blockMatcher, int radius, RadiusType radiusType) {
+    private static List<BlockPos> findBlockCandidatesInSquareArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius, RadiusType radiusType) {
         World world = MinecraftClient.getInstance().world;
         assert world != null;
         BlockPos senderPos = new BlockPos(source.getPosition());
@@ -106,7 +104,7 @@ public class FindBlockCommand {
         return blockCandidates;
     }
 
-    private static List<BlockPos> findBlockCandidatesInTaxicabArea(ServerCommandSource source, ClientBlockPredicate blockMatcher, int radius) {
+    private static List<BlockPos> findBlockCandidatesInTaxicabArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius) {
         World world = MinecraftClient.getInstance().world;
         assert world != null;
         BlockPos senderPos = new BlockPos(source.getPosition());

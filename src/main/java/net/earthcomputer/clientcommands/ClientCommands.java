@@ -1,27 +1,35 @@
 package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.command.*;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.ServerCommandSource;
+import org.slf4j.Logger;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ClientCommands implements ClientModInitializer {
-
-    public static File configDir;
+    private static final Logger LOGGER = LogUtils.getLogger();
+    public static Path configDir;
 
     @Override
     public void onInitializeClient() {
-        configDir = new File(FabricLoader.getInstance().getConfigDirectory(), "clientcommands");
-        //noinspection ResultOfMethodCallIgnored
-        configDir.mkdirs();
+        registerCommands(ClientCommandManager.DISPATCHER);
+
+        configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
+        try {
+            Files.createDirectories(configDir);
+        } catch (IOException e) {
+            LOGGER.error("Failed to crate config dir", e);
+        }
     }
 
-    public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
-        ClientCommandManager.clearClientSideCommands();
+    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         BookCommand.register(dispatcher);
         LookCommand.register(dispatcher);
         NoteCommand.register(dispatcher);
@@ -33,7 +41,7 @@ public class ClientCommands implements ClientModInitializer {
         CalcCommand.register(dispatcher);
         TempRuleCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
-        CHelpCommand.register(dispatcher);
+        UsageTreeCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher);
         GlowCommand.register(dispatcher);
@@ -55,15 +63,14 @@ public class ClientCommands implements ClientModInitializer {
         ItemGroupCommand.register(dispatcher);
         CParticleCommand.register(dispatcher);
         PermissionLevelCommand.register(dispatcher);
+        CTellRawCommand.register(dispatcher);
         CTimeCommand.register(dispatcher);
         AliasCommand.register(dispatcher);
         AreaStatsCommand.register(dispatcher);
+        CTeleportCommand.register(dispatcher);
+        PlayerInfoCommand.register(dispatcher);
         CTitleCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
-
-        if (MinecraftClient.getInstance().isIntegratedServerRunning()) {
-            CheatCrackRNGCommand.register(dispatcher);
-        }
     }
 }

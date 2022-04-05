@@ -7,19 +7,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.state.property.Property;
-import net.minecraft.tag.BlockTags;
-import net.minecraft.tag.Tag;
-import net.minecraft.tag.TagManager;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -73,15 +69,14 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
         } catch (CommandSyntaxException ignore) {
         }
 
-        return blockParser.getSuggestions(builder, BlockTags.getTagGroup());
+        return blockParser.getSuggestions(builder, Registry.BLOCK);
     }
 
-    public static ClientBlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String arg) throws CommandSyntaxException {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        assert networkHandler != null;
+    public static ClientBlockPredicate getBlockPredicate(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
+        Registry<Block> blockRegistry = context.getSource().getRegistryManager().get(Registry.BLOCK_KEY);
 
         BlockArgumentParser argParser = context.getArgument(arg, BlockArgumentParser.class);
-        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(networkHandler.getTagManager(), Collections.singletonList(argParser));
+        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(blockRegistry, Collections.singletonList(argParser));
         NbtCompound nbtData = argParser.getNbtData();
         if (nbtData == null) {
             return predicate;
@@ -92,17 +87,15 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
                 return false;
             }
             BlockEntity be = blockView.getBlockEntity(pos);
-            return be != null && NbtHelper.matches(nbtData, be.writeNbt(new NbtCompound()), true);
+            return be != null && NbtHelper.matches(nbtData, be.createNbt(), true);
         };
     }
 
-    public static ClientBlockPredicate getBlockPredicateList(CommandContext<ServerCommandSource> context, String arg) throws CommandSyntaxException {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        assert networkHandler != null;
-        TagManager tagManager = networkHandler.getTagManager();
+    public static ClientBlockPredicate getBlockPredicateList(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
+        Registry<Block> blockRegistry = context.getSource().getRegistryManager().get(Registry.BLOCK_KEY);
 
         List<BlockArgumentParser> argParsers = ListArgumentType.getList(context, arg);
-        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(tagManager, argParsers);
+        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(blockRegistry, argParsers);
 
         List<Pair<Predicate<BlockState>, NbtCompound>> nbtPredicates = new ArrayList<>(argParsers.size());
         boolean nbtSensitive = false;
@@ -111,7 +104,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
             if (nbtData != null) {
                 nbtSensitive = true;
             }
-            nbtPredicates.add(Pair.of(getPredicateWithoutNbt(tagManager, parser), nbtData));
+            nbtPredicates.add(Pair.of(getPredicateWithoutNbt(blockRegistry, parser), nbtData));
         }
 
         if (!nbtSensitive) {
@@ -140,7 +133,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
                             // from this point we would always require a block entity
                             return false;
                         }
-                        actualNbt = be.writeNbt(new NbtCompound());
+                        actualNbt = be.createNbt();
                     }
                     if (NbtHelper.matches(nbt, actualNbt, true)) {
                         return true;
@@ -152,10 +145,10 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
         };
     }
 
-    private static ClientBlockPredicate getPredicateForListWithoutNbt(TagManager tagManager, List<BlockArgumentParser> parsers) throws CommandSyntaxException {
+    private static ClientBlockPredicate getPredicateForListWithoutNbt(Registry<Block> blockRegistry, List<BlockArgumentParser> parsers) throws CommandSyntaxException {
         List<Predicate<BlockState>> predicates = new ArrayList<>(parsers.size());
         for (BlockArgumentParser parser : parsers) {
-            predicates.add(getPredicateWithoutNbt(tagManager, parser));
+            predicates.add(getPredicateWithoutNbt(blockRegistry, parser));
         }
 
         // slower than lazy computation but thread safe
@@ -173,7 +166,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
         return (blockView, pos) -> mask.get(Block.STATE_IDS.getRawId(blockView.getBlockState(pos)));
     }
 
-    private static Predicate<BlockState> getPredicateWithoutNbt(TagManager tagManager, BlockArgumentParser parser) throws CommandSyntaxException {
+    private static Predicate<BlockState> getPredicateWithoutNbt(Registry<Block> blockRegistry, BlockArgumentParser parser) throws CommandSyntaxException {
         BlockState myState = parser.getBlockState();
         if (myState != null) {
             Map<Property<?>, Comparable<?>> props = parser.getBlockProperties();
@@ -189,7 +182,11 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
                 return true;
             };
         } else {
-            Tag<Block> myTag = tagManager.getTag(Registry.BLOCK_KEY, parser.getTagId(), id -> UNKNOWN_TAG_EXCEPTION.create(id.toString()));
+            TagKey<Block> myTag = parser.getTagId();
+            if (!blockRegistry.containsTag(myTag)) {
+                throw UNKNOWN_TAG_EXCEPTION.create(myTag);
+            }
+
             Map<String, String> props = parser.getProperties();
             return state -> {
                 if (!state.isIn(myTag)) {

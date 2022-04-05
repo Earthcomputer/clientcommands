@@ -40,8 +40,6 @@
 
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
-  "commands.ccheatcrackrng.success": "Player RNG cracked: %d -> %d",
-  "commands.ccheatcrackrng.java14": "This command no longer works on Java 14+!",
 
   "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
@@ -69,9 +67,16 @@
 
   "commands.cfish.addGoal.success": "Successfully added goal %s",
   "commands.cfish.correctLoot": "Got the correct loot with correction of %dms",
+  "commands.cfish.error.biome": "Loot cannot be obtained in this biome, %s needed",
   "commands.cfish.error.crackFailed": "Failed to crack the fishing bobber RNG, is the server modded?",
-  "commands.cfish.error.failed": "Fishing bobber configuration incorrect",
+  "commands.cfish.error.collision": "Fishing bobber collided with something",
+  "commands.cfish.error.fire": "Fishing bobber caught fire",
+  "commands.cfish.error.impossibleLoot": "That loot cannot be obtained with fishing",
+  "commands.cfish.error.onGround": "Fishing bobber hit the ground",
+  "commands.cfish.error.openWater": "Fishing bobber needs to be in open water for treasure loot",
+  "commands.cfish.error.openWater.lilyPad": "Help: try trapping the bobber under a lily pad",
   "commands.cfish.error.outOfWater": "Fishing bobber out of water, manipulation won't work",
+  "commands.cfish.help.tooManyEnchants": "Help: multiple enchantments at once are unlikely and may take a long time to obtain",
   "commands.cfish.listGoals.noGoals": "There are no fishing goals",
   "commands.cfish.listGoals.success": "There are %d fishing goals:",
   "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled",
@@ -120,6 +125,9 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.cplayerinfo.ioException": "An error occurred",
+  "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
+
   "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
   "commands.cparticle.success": "Displaying particle %s",
 
@@ -151,6 +159,9 @@
   "commands.ctitle.show.subtitle": "Showing new subtitle",
   "commands.ctitle.show.actionbar": "Showing new actionbar title",
   "commands.ctitle.times": "Changed title display times",
+
+  "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
+  "commands.ctp.success": "Teleported player to %s",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 

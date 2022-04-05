@@ -1,6 +1,22 @@
 {
+  "commands.calias.notFound": "Alias \"%s\" tidak ditemukan",
+  "commands.calias.illegalFormatException": "Format kata antara salah atau terlalu sedikit argumen yang diberikan",
+  "commands.calias.file.readError": "Gagal membaca file alias",
+  "commands.calias.file.writeError": "Gagal menulis file alias",
+  "commands.calias.addAlias.aliasAlreadyExists": "Alias \"%s\" sudah ada",
+  "commands.calias.addAlias.commandAlreadyExists": "Perintah \"%s\" sudah ada",
+  "commands.calias.addAlias.success": "Berhasil menambahkan alias \"%s\"",
+  "commands.calias.listAliases.noAliasesRegistered": "Tidak ada alias yang didaftar",
+  "commands.calias.listAliases.success": "Ada %s alias yang didaftar:",
+  "commands.calias.removeAlias.success": "Berhasil menghapus alias \"%s\"",
+
+  "commands.careastats.notLoaded": "Bingkah di area tersebut tidak termuat",
+  "commands.careastats.output.chunksScanned": "Mencari %d bingkah dalam waktu %dns ≈ %dms",
+  "commands.careastats.output.blocksMatched": "Menemukan %d dari %d total blok",
+  "commands.careastats.output.entitiesFound": "Menemukan %d entitas di area tersebut",
+
   "commands.cbook.success": "Berhasil mengubah buku",
-  "commands.cbook.commandException": "Kamu tidak memegang buku",
+  "commands.cbook.commandException": "Anda tidak memegang buku",
 
   "commands.ccalc.expected": "Diharapkan %s",
   "commands.ccalc.invalidArgumentCount": "Fungsi \"%s\" tidak bisa menerima %d argumen",
@@ -22,10 +38,8 @@
   "commands.ccalcstack.success.empty.exact": "%d benda adalah %d tumpukan persis",
   "commands.ccalcstack.success.exact": "%d %s adalah %d tumpukan persis",
 
-  "commands.ccrackrng.starting": "Memecahkan player seed",
-  "commands.ccrackrng.success": "Pemain RNG telah di pecahkan: %d",
-  "commands.ccheatcrackrng.success": "Pemain RNG telah di pecahkan: %d -> %d",
-  "commands.ccheatcrackrng.java14": "Perintah ini tidak lagi bekerja di Java 14 keatas!",
+  "commands.ccrackrng.starting": "Memecahkan benih pemain",
+  "commands.ccrackrng.success": "RNG Pemain telah di pecahkan: %d",
 
   "commands.cenchant.expectedWithWithout": "Diharapkan \"with (dengan)\"/\"without (tanpa)\"",
   "commands.cenchant.failed": "Tidak mungkin atau akan memakan waktu yang lama untuk mendapatkan pesona tersebut",
@@ -42,6 +56,7 @@
 
   "commands.cfindblock.notFound": "Blok tidak dapat ditemukan",
   "commands.cfindblock.success.left": "Hasil paling dekat adalah di ",
+  "commands.cfindblock.success.glow": "[Sinar]",
   "commands.cfindblock.success.right": ", %1$.2f block",
 
   "commands.cfinditem.match.left": "%dx %s ketemu di ",
@@ -53,7 +68,6 @@
   "commands.cfish.addGoal.success": "Berhasil menambahkan tujuan %s",
   "commands.cfish.correctLoot": "Mendapatkan loot yang benar denagn koreksi %dms",
   "commands.cfish.error.crackFailed": "Gagal untuk memecahkan RNG fishing bobber, apakah server dimondifikasi (bukan vanilla)?",
-  "commands.cfish.error.failed": "Konfigurasi fishing bobber salah",
   "commands.cfish.error.outOfWater": "Fishing bobber keluar dari air, manipulasi tidak bekerja",
   "commands.cfish.listGoals.noGoals": "Tidak ada tujuan memancing",
   "commands.cfish.listGoals.success": "Ada %d tujuan memancing:",
@@ -95,7 +109,7 @@
   "commands.ckit.notFound": "Kit \"%s\" tidak ketemu",
   "commands.ckit.saveFile.failed": "Tidak bisa menyimpan kits",
   "commands.ckit.load.success": "Berhasil memakai kit \"%s\" ke diri sendiri",
-  "commands.ckit.load.notCreative": "Pemain harus ada di mode kreatif untuk memakai kit ke diri sendiri",
+  "commands.ckit.load.notCreative": "Pemain harus berada di mode kreatif untuk memakai kit ke diri sendiri",
   "commands.ckit.create.success": "Berhasil membuat kit \"%s\"",
   "commands.ckit.create.alreadyExists": "Kit \"%s\" sudah ada",
   "commands.ckit.delete.success": "Berhasil membuang kit \"%s\"",
@@ -103,8 +117,13 @@
   "commands.ckit.list": "Kit yang tersedia: %s",
   "commands.ckit.list.empty": "Tidak ada kit yang tersedia",
 
+  "commands.cplayerinfo.ioException": "Terjadi sebuah kesalahan",
+  "commands.cplayerinfo.getNameHistory.success": "%s memiliki nama nama berikut: %s",
+
   "commands.cparticle.unsuitableParticleOption": "Tidak akan menampilkan partikel karena pengaturan partikel tidak cocok",
   "commands.cparticle.success": "Menampilkan partikel %s",
+
+  "commands.cpermissionlevel.success": "Tingkat izin anda adalah %s",
 
   "commands.cplaysound.success": "Memainkan suara %s ke diri sendiri",
 
@@ -126,6 +145,9 @@
   "commands.ctemprule.reset.success": "TempRule %s telah di reset menjadi %s",
   "commands.ctemprule.set.success": "TempRule %s telah di update menjadi %s",
 
+  "commands.ctp.notSpectator": "Pemain harus berada di mode penonton untuk teleportasi",
+  "commands.ctp.success": "Menelportasi pemain ke %s",
+
   "commands.cwiki.failed": "Tidak bisa mendapatkan konten di wiki",
 
   "commands.client.blockpos": "(%d, %d, %d)",
@@ -134,6 +156,7 @@
   "commands.client.enable": "Nyalakan",
   "commands.client.expectedRegex": "Regex tidak valid %s",
   "commands.client.notClient": "Bukan perintah sisi klien",
+  "commands.client.tooFewArguments": "Argumen terlalu sedikit",
   "commands.client.invalidArgumentException": "Argumen tidak valid '%s'",
 
   "chorusManip.landing.success": "Mendarat di: %d, %d, %d",
@@ -147,22 +170,20 @@
   "enchCrack.state.cracking": "Sedang memecahkan",
   "enchCrack.state.cracked": "Sudah pecah",
 
-  "enchCrack.pesonas": "Pesona:",
   "enchCrack.clues": "Petunjuk:",
   "enchCrack.slot": "Slot %d:",
 
   "enchCrack.xpSeed.one": "Seed XP: %08X",
   "enchCrack.xpSeed.many": "Kemungkinan Seed XP: %d",
-  "enchCrack.playerRNGSeed.many": "Kemungkinan player RNG seed: %d",
+  "enchCrack.playerRNGSeed.many": "Kemungkinan benih RNG pemain: %d",
   "enchCrack.addInfo": "Tambahkan Info",
 
   "enchCrack.insn.dummy": "Lakukan pesona asal",
-  "enchCrack.insn.ready": "Seed Pesona kamu telah siap",
+  "enchCrack.insn.ready": "Seed Pesona anda telah siap",
   "enchCrack.insn.bookshelves": "Bookshelf yang dibutuhkan: %d",
   "enchCrack.insn.slot": "Di slot: %d",
   "enchCrack.insn.itemThrows": "Butuh %d benda untuk dilempar (kira kira memakan waktu %f detik)",
   "enchCrack.insn.itemThrows.noDummy": "Tidak usah melakukan pesona asal",
-  "enchCrack.insn.pesonas": "Pesona di item:",
 
   "playerManip.state": "Status Memecahkan Pemain: %s",
   "playerManip.state.uncracked": "Belum pecah",
@@ -172,10 +193,9 @@
   "playerManip.state.ench_cracking_2": "Sedang memecahkan Seed Pesona ke 2",
   "playerManip.state.cracking": "Sedang memecahkan",
   "playerManip.state.eating": "Sedang Makan",
-  "playerManip.state.manipulating_pesonas": "Memanipulasi Pesonas",
   "playerManip.state.waiting_dummy_enchant": "Sedang menunggu pesona asal",
 
-  "playerManip.reset": "Manipulasi RNG pemain telah di reset. Alasan: %s",
+  "playerManip.reset": "Manipulasi pemain RNG telah di reset. Alasan: %s",
   "playerManip.reset.playerHurt": "Disakiti",
   "playerManip.reset.sprint": "Lari",
   "playerManip.reset.enterWater": "Masuk air",
@@ -201,11 +221,11 @@
   "playerManip.reset.enchanting": "Pesona item",
   "playerManip.reset.recreated": "Pemain Dibuat kembali",
 
-  "playerManip.serverBrandWarning": "Peringatan: server yang sedang kamu mainkan adalah dimondifikasi (bukan vanilla). Fitur RNG disini tidak akan dijamin untuk bekerja!",
+  "playerManip.serverBrandWarning": "Peringatan: server yang sedang anda mainkan adalah dimondifikasi (bukan vanilla). Fitur RNG disini tidak akan dijamin untuk bekerja!",
   "playerManip.toolBreakWarning": "Peringatan: Alat mempunyai sisa %d ketahanan",
   "playerManip.throwError": "Kondisi tidak bisa atau akan membutuhkan lebih dari %d benda yang dilempar",
   "playerManip.notEnoughItems": "Tidak cukup item(%d dari %d) untuk memanipulasi seed",
-  "playerManip.uncracked": "Seed Pemain butuh dipecahkan.",
+  "playerManip.uncracked": "Benih Pemain butuh dipecahkan.",
 
   "itemCrack.notEnoughItems": "Tidak bisa menggunakkan SeedCracker RNG: Tidak cukup benda di Tangan Pemain"
 }
