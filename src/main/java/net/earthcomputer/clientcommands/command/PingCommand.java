@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.TranslatableText;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
@@ -17,7 +19,7 @@ public class PingCommand {
 
     private static int printPing() {
         MinecraftClient instance = MinecraftClient.getInstance();
-        int ping = FishingCracker.getLocalPing();
+        int ping = getLocalPing();
 
         if (ping == -1 || instance.isInSingleplayer()) {
             sendFeedback(new TranslatableText("commands.cping.local"));
@@ -26,5 +28,17 @@ public class PingCommand {
         }
 
         return 0;
+    }
+
+    public static int getLocalPing() {
+        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+        if (networkHandler == null)
+            return -1;
+
+        PlayerListEntry localPlayer = networkHandler.getPlayerListEntry(networkHandler.getProfile().getId());
+        if (localPlayer == null)
+            return -1;
+
+        return localPlayer.getLatency();
     }
 }

@@ -6,6 +6,7 @@ import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.Rand;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.mixin.AlternativeLootConditionAccessor;
 import net.earthcomputer.clientcommands.mixin.AndConditionAccessor;
@@ -620,18 +621,6 @@ public class FishingCracker {
         return TempRules.getFishingManipulation().isEnabled() && !goals.isEmpty();
     }
 
-    public static int getLocalPing() {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        if (networkHandler == null)
-            return -1;
-
-        PlayerListEntry localPlayer = networkHandler.getPlayerListEntry(networkHandler.getProfile().getId());
-        if (localPlayer == null)
-            return -1;
-
-        return localPlayer.getLatency();
-    }
-
     private static void handleFishingRodThrow(ItemStack stack) {
         long time = System.nanoTime();
         synchronized (STATE_LOCK) {
@@ -924,11 +913,11 @@ public class FishingCracker {
                 estimatedTicksElapsed += 20;
             }
 
-            int latestReasonableArriveTick = estimatedTicksElapsed + 20 + getLocalPing() / serverMspt;
+            int latestReasonableArriveTick = estimatedTicksElapsed + 20 + PingCommand.getLocalPing() / serverMspt;
             if (latestReasonableArriveTick >= totalTicksToWait) {
                 state = State.ASYNC_WAITING_FOR_FISH;
                 int timeToStartOfTick = serverMspt - averageTimeToEndOfTick;
-                int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - magicMillisecondsCorrection - getLocalPing() - timeToStartOfTick + serverMspt / 2;
+                int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - magicMillisecondsCorrection - PingCommand.getLocalPing() - timeToStartOfTick + serverMspt / 2;
                 long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
                     if (!TempRules.getFishingManipulation().isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
@@ -1004,7 +993,7 @@ public class FishingCracker {
             state = State.WAITING_FOR_FIRST_BOBBER_TICK;
 
             int thrownItemDeltaMillis = (int) ((bobberStartTime - throwTime) / 1000000);
-            int localPingMillis = getLocalPing();
+            int localPingMillis = PingCommand.getLocalPing();
 
             //The 1000 divided by 20 is the number milliseconds per tick there are
             int timeFromEndOfTick = thrownItemDeltaMillis - localPingMillis;
