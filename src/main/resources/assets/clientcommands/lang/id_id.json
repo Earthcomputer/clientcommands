@@ -38,9 +38,13 @@
   "commands.ccalcstack.success.empty.exact": "%d benda adalah %d tumpukan persis",
   "commands.ccalcstack.success.exact": "%d %s adalah %d tumpukan persis",
 
+  "commands.ccrackrng.failed": "Gagal untuk memecahkan benih pemain",
+  "commands.ccrackrng.failed.help": "Banutan: Manipulasi RNG tidak bekerja di beberapa server yang dimodifikasi, terutapa Paper.",
+  "commands.ccrackrng.retries": "Memecahkan benih pemain, attempt %d/%d",
   "commands.ccrackrng.starting": "Memecahkan benih pemain",
   "commands.ccrackrng.success": "RNG Pemain telah di pecahkan: %d",
 
+  "commands.cenchant.expectedWithWithoutExactly": "Diharapkan \"with (dengan)\"/\"without (tanpa)\"/\"exactly (tepat)\"",
   "commands.cenchant.failed": "Tidak mungkin atau akan memakan waktu yang lama untuk mendapatkan pesona tersebut",
   "commands.cenchant.incompatible": "Pesona tidak kompatibel",
   "commands.cenchant.needEnchantingPrediction": "Perintah ini memerlukan prediksi pesona aktif.",
@@ -66,8 +70,16 @@
 
   "commands.cfish.addGoal.success": "Berhasil menambahkan tujuan %s",
   "commands.cfish.correctLoot": "Mendapatkan loot yang benar denagn koreksi %dms",
+  "commands.cfish.error.biome": "Loot tidak bisa didapat di bioma ini, %s diperlukan",
   "commands.cfish.error.crackFailed": "Gagal untuk memecahkan RNG fishing bobber, apakah server dimondifikasi (bukan vanilla)?",
+  "commands.cfish.error.collision": "Fishing bobber bertabrakan dengan sesuatu",
+  "commands.cfish.error.fire": "Fishing bobber kena api",
+  "commands.cfish.error.impossibleLoot": "Loot itu tidak bisa didapat dengan memancing",
+  "commands.cfish.error.onGround": "Fishing bobber menyentuh tanah",
+  "commands.cfish.error.openWater": "Fishing bobber butuh di air terbuka untuk mendapat loot harta karun",
+  "commands.cfish.error.openWater.lilyPad": "Bantuan: coba jebak bobber di bawah daun teratai",
   "commands.cfish.error.outOfWater": "Fishing bobber keluar dari air, manipulasi tidak bekerja",
+  "commands.cfish.help.tooManyEnchants": "Bantuan: beberapa pesona sekaligus tidak mungkin dan mungkin butuh waktu lama untuk mendapatkannya",
   "commands.cfish.listGoals.noGoals": "Tidak ada tujuan memancing",
   "commands.cfish.listGoals.success": "Ada %d tujuan memancing:",
   "commands.cfish.needFishingManipulation": "Manipulasi fishing tidak dinyalakan.",
@@ -169,6 +181,7 @@
   "enchCrack.state.cracking": "Sedang memecahkan",
   "enchCrack.state.cracked": "Sudah pecah",
 
+  "enchCrack.enchantments": "Pesona:",
   "enchCrack.clues": "Petunjuk:",
   "enchCrack.slot": "Slot %d:",
 
@@ -183,6 +196,7 @@
   "enchCrack.insn.slot": "Di slot: %d",
   "enchCrack.insn.itemThrows": "Butuh %d benda untuk dilempar (kira kira memakan waktu %f detik)",
   "enchCrack.insn.itemThrows.noDummy": "Tidak usah melakukan pesona asal",
+  "enchCrack.insn.enchantments": "Pesona di benda:",
 
   "playerManip.state": "Status Memecahkan Pemain: %s",
   "playerManip.state.uncracked": "Belum pecah",
@@ -192,6 +206,7 @@
   "playerManip.state.ench_cracking_2": "Sedang memecahkan Seed Pesona ke 2",
   "playerManip.state.cracking": "Sedang memecahkan",
   "playerManip.state.eating": "Sedang Makan",
+  "playerManip.state.manipulating_enchantments": "Sedang Memanipulasi Pesona",
   "playerManip.state.waiting_dummy_enchant": "Sedang menunggu pesona asal",
 
   "playerManip.reset": "Manipulasi pemain RNG telah di reset. Alasan: %s",
