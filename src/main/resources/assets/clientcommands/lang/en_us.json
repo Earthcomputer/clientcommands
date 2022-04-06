@@ -138,6 +138,9 @@
 
   "commands.cplaysound.success": "Played sound %s to self",
 
+  "commands.cping.local": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
+  "commands.cping.multiplayer": "Your average ping is %dms",
+
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
