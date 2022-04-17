@@ -10,8 +10,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.TimeArgumentType;
 import net.minecraft.text.TranslatableText;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.minecraft.command.argument.TimeArgumentType.time;
 
 public class CTimeCommand {
 
@@ -35,8 +37,8 @@ public class CTimeCommand {
                     .executes(ctx -> executeSetTime(13000)))
                 .then(literal("midnight")
                     .executes(ctx -> executeSetTime(18000)))
-                .then(argument("time", TimeArgumentType.time())
-                    .executes(ctx -> executeSetTime(IntegerArgumentType.getInteger(ctx, "time")))))
+                .then(argument("time", time())
+                    .executes(ctx -> executeSetTime(getInteger(ctx, "time")))))
              .then(literal("reset")
                      .executes(ctx -> executeResetTime())) 
         );
