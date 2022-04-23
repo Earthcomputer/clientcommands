@@ -25,7 +25,7 @@ public class ClientCommands implements ClientModInitializer {
         try {
             Files.createDirectories(configDir);
         } catch (IOException e) {
-            LOGGER.error("Failed to crate config dir", e);
+            LOGGER.error("Failed to create config dir", e);
         }
     }
 
