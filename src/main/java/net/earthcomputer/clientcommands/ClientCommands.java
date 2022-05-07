@@ -70,6 +70,8 @@ public class ClientCommands implements ClientModInitializer {
         CTeleportCommand.register(dispatcher);
         PlayerInfoCommand.register(dispatcher);
         PingCommand.register(dispatcher);
+        UuidCommand.register(dispatcher);
+
         CrackRNGCommand.register(dispatcher);
     }
 }
