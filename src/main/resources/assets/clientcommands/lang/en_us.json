@@ -162,6 +162,8 @@
   "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
   "commands.ctp.success": "Teleported player to %s",
 
+  "commands.cuuid.success": "The UUID of %s is %s",
+
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
   "commands.client.blockpos": "(%d, %d, %d)",
