@@ -1,9 +1,23 @@
 package net.earthcomputer.clientcommands.features;
 
+import java.util.function.Function;
+
 public class ClientTimeModifier {
 
-    public static enum Type {
-        NONE, OFFSET, LOCK;
+    public enum Type {
+        NONE(time -> time),
+        OFFSET(time -> time + value),
+        LOCK(time -> value);
+
+        private final Function<Long, Long> timeMappingFunction;
+
+        Type(Function<Long, Long> timeMappingFunction) {
+            this.timeMappingFunction = timeMappingFunction;
+        }
+
+        public long getModifiedTime(long timeOfDay) {
+            return timeMappingFunction.apply(timeOfDay);
+        }
     }
 
     private static Type type = Type.NONE;
@@ -24,11 +38,6 @@ public class ClientTimeModifier {
     }
 
     public static long getModifiedTime(long timeOfDay) {
-        return switch (type) {
-            case NONE -> timeOfDay;
-            case LOCK -> value;
-            case OFFSET -> timeOfDay < 0 ? timeOfDay - value : timeOfDay + value;
-            default -> throw new IllegalStateException("Not implemented for type " + type);
-        };
+        return type.getModifiedTime(timeOfDay);
     }
 }
