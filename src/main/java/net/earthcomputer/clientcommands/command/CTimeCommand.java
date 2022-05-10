@@ -1,19 +1,17 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-
 import net.earthcomputer.clientcommands.features.ClientTimeModifier;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.argument.TimeArgumentType;
 import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
-import static net.minecraft.command.argument.TimeArgumentType.time;
+import static dev.xpple.clientarguments.arguments.CTimeArgumentType.time;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.sendFeedback;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 
 public class CTimeCommand {
 
