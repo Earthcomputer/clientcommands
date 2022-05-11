@@ -33,6 +33,7 @@
     "MixinClientPlayerInteractionManager",
     "MixinClientPlayNetworkHandler",
     "MixinClientWorld",
+    "MixinClientWorldProperties",
     "MixinCloseHandledScreenPacket",
     "MixinCraftingTableContainer",
     "MixinCreeperMooshroomSheepAndSnowGolemEntity",
