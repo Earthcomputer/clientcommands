@@ -11,7 +11,6 @@ import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CGiveCommand {
@@ -27,7 +26,7 @@ public class CGiveCommand {
     }
 
     private static int give(FabricClientCommandSource source, ItemStackArgument itemArgument, int count) throws CommandSyntaxException {
-        final MinecraftClient client = MinecraftClient.getInstance();
+        final MinecraftClient client = source.getClient();
         if (!client.player.getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
@@ -36,7 +35,7 @@ public class CGiveCommand {
         client.interactionManager.clickCreativeStack(stack, 36 + client.player.getInventory().selectedSlot);
         client.player.playerScreenHandler.sendContentUpdates();
 
-        sendFeedback(new TranslatableText("commands.cgive.success", count, stack.toHoverableText()));
+        source.sendFeedback(new TranslatableText("commands.cgive.success", count, stack.toHoverableText()));
         return 0;
     }
 }

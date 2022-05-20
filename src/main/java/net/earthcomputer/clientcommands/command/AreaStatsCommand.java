@@ -7,7 +7,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -16,7 +15,6 @@ import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.chunk.WorldChunk;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
@@ -38,7 +36,7 @@ public class AreaStatsCommand {
     }
 
     private static int areaStats(FabricClientCommandSource source, BlockPos pos1, BlockPos pos2, ClientBlockPredicate blockPredicate) throws CommandSyntaxException {
-        final ClientWorld world = MinecraftClient.getInstance().world;
+        final ClientWorld world = source.getWorld();
         chunkManager = world.getChunkManager();
         assertChunkIsLoaded(pos1.getX() >> 4, pos1.getZ() >> 4);
         assertChunkIsLoaded(pos2.getX() >> 4, pos2.getZ() >> 4);
@@ -164,9 +162,9 @@ public class AreaStatsCommand {
 
         long endTime = System.nanoTime();
 
-        sendFeedback("commands.careastats.output.chunksScanned", chunks, endTime - startTime, (endTime - startTime) / 1000000);
-        sendFeedback("commands.careastats.output.blocksMatched", blocks, (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1));
-        sendFeedback("commands.careastats.output.entitiesFound", entities);
+        source.sendFeedback(new TranslatableText("commands.careastats.output.chunksScanned", chunks, endTime - startTime, (endTime - startTime) / 1000000));
+        source.sendFeedback(new TranslatableText("commands.careastats.output.blocksMatched", blocks, (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1)));
+        source.sendFeedback(new TranslatableText("commands.careastats.output.entitiesFound", entities));
 
         return blocks;
     }

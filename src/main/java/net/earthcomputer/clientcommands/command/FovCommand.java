@@ -3,12 +3,10 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class FovCommand {
@@ -24,10 +22,10 @@ public class FovCommand {
     }
 
     private static int setFov(FabricClientCommandSource source, double fov) {
-        MinecraftClient.getInstance().options.fov = fov;
+        source.getClient().options.fov = fov;
 
         Text feedback = new TranslatableText("commands.cfov.success", fov);
-        sendFeedback(feedback);
+        source.sendFeedback(feedback);
 
         return 0;
     }

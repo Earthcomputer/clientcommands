@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.command;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class UsageTreeCommand {
@@ -26,7 +24,7 @@ public class UsageTreeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(
             literal("cusagetree")
-                .executes(ctx -> usage(ctx, dispatcher))
+                .executes(ctx -> usage(ctx.getSource(), dispatcher))
                 .then(
                     argument("command", greedyString())
                         .suggests((ctx, builder) ->
@@ -36,31 +34,30 @@ public class UsageTreeCommand {
                                 .map(CommandNode::getUsageText)
                                 .toList(), builder)
                         )
-                        .executes(ctx -> usageCommand(ctx, dispatcher))
+                        .executes(ctx -> usageCommand(ctx.getSource(), getString(ctx, "command"), dispatcher))
                 )
         );
     }
 
-    private static int usage(CommandContext<FabricClientCommandSource> ctx, CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    private static int usage(FabricClientCommandSource source, CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var content = tree(dispatcher.getRoot());
-        sendFeedback(new LiteralText("/"));
+        source.sendFeedback(new LiteralText("/"));
         for (var line : content) {
-            sendFeedback(line);
+            source.sendFeedback(line);
         }
         return content.size() + 1;
     }
 
-    private static int usageCommand(CommandContext<FabricClientCommandSource> ctx, CommandDispatcher<FabricClientCommandSource> dispatcher) throws CommandSyntaxException {
-        String cmdName = getString(ctx, "command");
-        var parseResults = dispatcher.parse(cmdName, ctx.getSource());
+    private static int usageCommand(FabricClientCommandSource source, String cmdName, CommandDispatcher<FabricClientCommandSource> dispatcher) throws CommandSyntaxException {
+        var parseResults = dispatcher.parse(cmdName, source);
         if (parseResults.getContext().getNodes().isEmpty()) {
             throw FAILED_EXCEPTION.create();
         }
         var node = Iterables.getLast(parseResults.getContext().getNodes()).getNode();
         var content = tree(node);
-        sendFeedback(new LiteralText("/" + cmdName).styled(s -> s.withColor(node.getCommand() != null ? Formatting.GREEN : Formatting.WHITE)));
+        source.sendFeedback(new LiteralText("/" + cmdName).styled(s -> s.withColor(node.getCommand() != null ? Formatting.GREEN : Formatting.WHITE)));
         for (var line : content) {
-            sendFeedback(line);
+            source.sendFeedback(line);
         }
         return content.size() + 1;
     }

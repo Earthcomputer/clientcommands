@@ -7,7 +7,6 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class WikiCommand {
@@ -22,13 +21,13 @@ public class WikiCommand {
         String content = WikiRetriever.getWikiSummary(page);
 
         if (content == null) {
-            sendError(new TranslatableText("commands.cwiki.failed"));
+            source.sendError(new TranslatableText("commands.cwiki.failed"));
             return 0;
         }
 
         content = content.trim();
         for (String line : content.split("\n")) {
-            sendFeedback(new LiteralText(line));
+            source.sendFeedback(new LiteralText(line));
         }
 
         return content.length();

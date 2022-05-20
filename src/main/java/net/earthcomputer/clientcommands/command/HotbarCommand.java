@@ -1,12 +1,8 @@
 package net.earthcomputer.clientcommands.command;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
-
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.exceptions.*;
-
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -16,6 +12,9 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class HotbarCommand {
 
@@ -33,7 +32,7 @@ public class HotbarCommand {
     }
 
     private static int save(FabricClientCommandSource source, int index) throws CommandSyntaxException {
-        MinecraftClient client = MinecraftClient.getInstance();
+        MinecraftClient client = source.getClient();
 
         HotbarStorage storage = client.getCreativeHotbarStorage();
         HotbarStorageEntry entry = storage.getSavedHotbar(index - 1);
@@ -46,12 +45,12 @@ public class HotbarCommand {
         Text loadKey = client.options.loadToolbarActivatorKey.getBoundKeyLocalizedText();
         Text hotbarKey = client.options.hotbarKeys[index - 1].getBoundKeyLocalizedText();
 
-        sendFeedback(new TranslatableText("inventory.hotbarSaved", loadKey, hotbarKey));
+        source.sendFeedback(new TranslatableText("inventory.hotbarSaved", loadKey, hotbarKey));
         return 0;
     }
 
     private static int restore(FabricClientCommandSource source, int index) throws CommandSyntaxException {
-        MinecraftClient client = MinecraftClient.getInstance();
+        MinecraftClient client = source.getClient();
 
         ClientPlayerEntity player = client.player;
         if (!player.getAbilities().creativeMode) {
@@ -70,7 +69,7 @@ public class HotbarCommand {
 
         player.playerScreenHandler.sendContentUpdates();
 
-        sendFeedback(new TranslatableText("commands.chotbar.restoredHotbar", index));
+        source.sendFeedback(new TranslatableText("commands.chotbar.restoredHotbar", index));
         return 0;
     }
 

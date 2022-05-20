@@ -34,9 +34,8 @@ import java.util.Map;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.minecraft.command.CommandSource.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.minecraft.command.CommandSource.*;
 
 public class ItemGroupCommand {
 
@@ -113,7 +112,7 @@ public class ItemGroupCommand {
 
         groups.put(name, new Group(itemGroup, icon, new NbtList()));
         saveFile();
-        sendFeedback("commands.citemgroup.addGroup.success", name);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.addGroup.success", name));
         return 0;
     }
 
@@ -143,7 +142,7 @@ public class ItemGroupCommand {
             throw new RuntimeException(e);
         }
         saveFile();
-        sendFeedback("commands.citemgroup.removeGroup.success", name);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.removeGroup.success", name));
         return 0;
     }
 
@@ -158,7 +157,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name));
         return 0;
     }
 
@@ -176,7 +175,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.removeStack.success", name, index);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.removeStack.success", name, index));
         return 0;
     }
 
@@ -194,7 +193,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName());
+        source.sendFeedback(new TranslatableText("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName()));
         return 0;
     }
 
@@ -216,7 +215,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName());
+        source.sendFeedback(new TranslatableText("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName()));
         return 0;
     }
 
@@ -242,7 +241,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.renameGroup.success", name, _new);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.renameGroup.success", name, _new));
         return 0;
     }
 

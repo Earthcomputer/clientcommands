@@ -30,18 +30,6 @@ public class ClientCommandHelper {
         }
     }
 
-    public static void sendError(Text error) {
-        sendFeedback(new LiteralText("").append(error).formatted(Formatting.RED));
-    }
-
-    public static void sendFeedback(String message, Object... args) {
-        sendFeedback(new TranslatableText(message, args));
-    }
-
-    public static void sendFeedback(Text message) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
-    }
-
     public static void addOverlayMessage(Text message, int time) {
         InGameHud inGameHud = MinecraftClient.getInstance().inGameHud;
         inGameHud.setOverlayMessage(message, false);

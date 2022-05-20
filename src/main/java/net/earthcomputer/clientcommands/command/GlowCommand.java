@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.earthcomputer.clientcommands.render.RenderQueue;
@@ -99,7 +98,7 @@ public class GlowCommand {
                 }
             });
 
-            sendFeedback(new TranslatableText("commands.cglow.entity.keepSearching.success")
+            source.sendFeedback(new TranslatableText("commands.cglow.entity.keepSearching.success")
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
@@ -114,7 +113,7 @@ public class GlowCommand {
                 ((IEntity) entity).addGlowingTicket(seconds * 20, color);
             }
 
-            sendFeedback("commands.cglow.entity.success", entities.size());
+            source.sendFeedback(new TranslatableText("commands.cglow.entity.success", entities.size()));
 
             return entities.size();
         }
@@ -145,7 +144,7 @@ public class GlowCommand {
             RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, color, seconds * 20);
         }
 
-        sendFeedback("commands.cglow.area.success", boundingBoxes.size());
+        source.sendFeedback(new TranslatableText("commands.cglow.area.success", boundingBoxes.size()));
 
         return boundingBoxes.size();
     }

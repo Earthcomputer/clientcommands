@@ -4,9 +4,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.minecraft.text.TranslatableText;
 
 import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class RenderCommand {
@@ -25,7 +25,7 @@ public class RenderCommand {
 
     private static int enableEntityRendering(FabricClientCommandSource source, CEntitySelector selector, boolean enable) {
         RenderSettings.addEntityRenderSelector(selector, enable);
-        sendFeedback("commands.crender.entities.success");
+        source.sendFeedback(new TranslatableText("commands.crender.entities.success"));
         return 0;
     }
 

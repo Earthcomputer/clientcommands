@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class KitCommand {
@@ -93,9 +92,9 @@ public class KitCommand {
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.getInventory().writeNbt(new NbtList()));
+        kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
-        sendFeedback("commands.ckit.create.success", name);
+        source.sendFeedback(new TranslatableText("commands.ckit.create.success", name));
         return 0;
     }
 
@@ -104,7 +103,7 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
         saveFile();
-        sendFeedback("commands.ckit.delete.success", name);
+        source.sendFeedback(new TranslatableText("commands.ckit.delete.success", name));
         return 0;
     }
 
@@ -112,14 +111,14 @@ public class KitCommand {
         if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.getInventory().writeNbt(new NbtList()));
+        kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
-        sendFeedback("commands.ckit.edit.success", name);
+        source.sendFeedback(new TranslatableText("commands.ckit.edit.success", name));
         return 0;
     }
 
     private static int load(FabricClientCommandSource source, String name, boolean override) throws CommandSyntaxException {
-        if (!client.player.getAbilities().creativeMode) {
+        if (!source.getPlayer().getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
@@ -128,29 +127,29 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        PlayerInventory tempInv = new PlayerInventory(client.player);
+        PlayerInventory tempInv = new PlayerInventory(source.getPlayer());
         tempInv.readNbt(kit);
-        List<Slot> slots = client.player.playerScreenHandler.slots;
+        List<Slot> slots = source.getPlayer().playerScreenHandler.slots;
         for (int i = 0; i < slots.size(); i++) {
-            if (slots.get(i).inventory == client.player.getInventory()) {
+            if (slots.get(i).inventory == source.getPlayer().getInventory()) {
                 ItemStack itemStack = tempInv.getStack(slots.get(i).getIndex());
                 if (!itemStack.isEmpty() || override) {
-                    client.interactionManager.clickCreativeStack(itemStack, i);
+                    source.getClient().interactionManager.clickCreativeStack(itemStack, i);
                 }
             }
         }
 
-        client.player.playerScreenHandler.sendContentUpdates();
-        sendFeedback("commands.ckit.load.success", name);
+        source.getPlayer().playerScreenHandler.sendContentUpdates();
+        source.sendFeedback(new TranslatableText("commands.ckit.load.success", name));
         return 0;
     }
 
     private static int list(FabricClientCommandSource source) {
         if (kits.isEmpty()) {
-            sendFeedback("commands.ckit.list.empty");
+            source.sendFeedback(new TranslatableText("commands.ckit.list.empty"));
         } else {
             String list = String.join(", ", kits.keySet());
-            sendFeedback("commands.ckit.list", list);
+            source.sendFeedback(new TranslatableText("commands.ckit.list", list));
         }
         return kits.size();
     }
@@ -161,7 +160,7 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        PlayerInventory tempInv = new PlayerInventory(client.player);
+        PlayerInventory tempInv = new PlayerInventory(source.getPlayer());
         tempInv.readNbt(kit);
         /*
             After executing a command, the current screen will be closed (the chat hud).
@@ -169,7 +168,7 @@ public class KitCommand {
             instantly along with the chat hud. Slightly delaying the opening of the
             screen fixes this issue.
          */
-        client.send(() -> client.setScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, client.player), tempInv, name)));
+        source.getClient().send(() -> source.getClient().setScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, source.getPlayer()), tempInv, name)));
         return 0;
     }
 

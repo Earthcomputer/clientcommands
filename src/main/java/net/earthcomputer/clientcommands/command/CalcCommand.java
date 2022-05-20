@@ -37,7 +37,7 @@ public class CalcCommand {
             } catch (StackOverflowError e) {
                 throw TOO_DEEPLY_NESTED_EXCEPTION.create();
             }
-            sendFeedback(new TranslatableText("commands.ccalc.parse", parsedTree));
+            source.sendFeedback(new TranslatableText("commands.ccalc.parse", parsedTree));
         }
 
         double result;
@@ -64,7 +64,7 @@ public class CalcCommand {
             feedback.append(new LiteralText(String.valueOf(result)).formatted(Formatting.BOLD));
         }
 
-        sendFeedback(feedback);
+        source.sendFeedback(feedback);
 
         return iresult;
     }

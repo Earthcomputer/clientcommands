@@ -27,7 +27,6 @@ import java.util.function.Function;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CNbtPathArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class GetDataCommand {
@@ -79,7 +78,7 @@ public class GetDataCommand {
     }
 
     private static int getData(FabricClientCommandSource source, DataCommandObject dataObj) throws CommandSyntaxException {
-        sendFeedback(dataObj.feedbackQuery(dataObj.getNbt()));
+        source.sendFeedback(dataObj.feedbackQuery(dataObj.getNbt()));
         return 1;
     }
 
@@ -98,7 +97,7 @@ public class GetDataCommand {
             throw GET_UNKNOWN_EXCEPTION.create(path.toString());
         }
 
-        sendFeedback(dataObj.feedbackQuery(tag));
+        source.sendFeedback(dataObj.feedbackQuery(tag));
         return ret;
     }
 
@@ -113,9 +112,9 @@ public class GetDataCommand {
         }
     }
 
-    private static interface ObjectType {
-        public DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException;
-        public ArgumentBuilder<FabricClientCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<FabricClientCommandSource, ?> builder, Function<ArgumentBuilder<FabricClientCommandSource, ?>, ArgumentBuilder<FabricClientCommandSource, ?>> subcommandAdder);
+    private interface ObjectType {
+        DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException;
+        ArgumentBuilder<FabricClientCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<FabricClientCommandSource, ?> builder, Function<ArgumentBuilder<FabricClientCommandSource, ?>, ArgumentBuilder<FabricClientCommandSource, ?>> subcommandAdder);
     }
 
 }

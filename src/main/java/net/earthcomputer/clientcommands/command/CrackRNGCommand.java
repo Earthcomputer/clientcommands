@@ -8,7 +8,6 @@ import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.text.TranslatableText;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CrackRNGCommand {
@@ -21,7 +20,7 @@ public class CrackRNGCommand {
     private static int crackPlayerRNG(FabricClientCommandSource source) {
         ServerBrandManager.rngWarning();
         SeedCracker.crack(seed -> {
-            sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
+            source.sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
             PlayerRandCracker.setSeed(seed);
             TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
         });
