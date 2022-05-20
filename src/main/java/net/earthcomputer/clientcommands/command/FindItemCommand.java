@@ -239,7 +239,7 @@ public class FindItemCommand {
                                 }
                             }
                             if (matchingItems > 0) {
-                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("commands.cfinditem.match.left", matchingItems, searchingForName)
+                                sendFeedback(new TranslatableText("commands.cfinditem.match.left", matchingItems, searchingForName)
                                         .append(getLookCoordsTextComponent(currentlySearching))
                                         .append(new TranslatableText("commands.cfinditem.match.right", matchingItems, searchingForName)));
                                 totalFound += matchingItems;
@@ -261,7 +261,7 @@ public class FindItemCommand {
 
         @Override
         public void onCompleted() {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(new TranslatableText("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
+            sendFeedback(new TranslatableText("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
         }
     }
 }
