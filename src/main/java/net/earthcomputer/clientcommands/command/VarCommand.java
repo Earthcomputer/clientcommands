@@ -43,7 +43,7 @@ public class VarCommand {
         try {
             loadFile();
         } catch (IOException e) {
-            LOGGER.error("Could not load vars file, hence /cvar will not work!");
+            LOGGER.error("Could not load vars file, hence /cvar will not work!", e);
         }
     }
 
