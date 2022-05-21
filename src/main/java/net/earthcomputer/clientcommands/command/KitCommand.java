@@ -58,7 +58,7 @@ public class KitCommand {
         try {
             loadFile();
         } catch (IOException e) {
-            LOGGER.info("Could not load kits file, hence /ckit will not work!");
+            LOGGER.error("Could not load kits file, hence /ckit will not work!", e);
         }
     }
 
