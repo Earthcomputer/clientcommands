@@ -63,8 +63,7 @@ class SnakeGameScreen extends Screen {
 
     @Override
     public void tick() {
-        this.tickCounter--;
-        if (this.tickCounter < 0) {
+        if (--this.tickCounter < 0) {
             this.tickCounter = 3;
             this.move();
         }
