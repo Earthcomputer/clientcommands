@@ -249,5 +249,5 @@
   "playerManip.uncracked": "Player-Seed needs to be cracked",
 
   "snakeGame.title": "Snake",
-  "snakeGame.score": "Score"
+  "snakeGame.score": "Score: %d"
 }

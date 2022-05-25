@@ -83,8 +83,7 @@ class SnakeGameScreen extends Screen {
         int startY = (this.height - 289) / 2;
 
         drawTextWithShadow(matrices, client.textRenderer, this.title, startX, startY - 10, 0xff_ffffff);
-        TranslatableText score = new TranslatableText("snakeGame.score");
-        score.append(": ").append(String.valueOf(this.snake.size()));
+        TranslatableText score = new TranslatableText("snakeGame.score", this.snake.size());
         drawCenteredText(matrices, client.textRenderer, score, this.width / 2, startY - 10, 0xff_ffffff);
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
