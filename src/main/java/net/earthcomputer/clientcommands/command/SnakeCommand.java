@@ -13,7 +13,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.LinkedList;
@@ -29,6 +28,12 @@ public class SnakeCommand {
     }
 
     private static int snake(FabricClientCommandSource source) {
+        /*
+            After executing a command, the current screen will be closed (the chat hud).
+            And if you open a new screen in a command, that new screen will be closed
+            instantly along with the chat hud. Slightly delaying the opening of the
+            screen fixes this issue.
+         */
         source.getClient().send(() -> source.getClient().setScreen(new SnakeGameScreen()));
         return 0;
     }
@@ -48,16 +53,16 @@ class SnakeGameScreen extends Screen {
     private int tickCounter = 10;
     private Direction direction = Direction.EAST;
     private Direction lastMoved = Direction.EAST;
-    private final LinkedList<Vec3i> snake = new LinkedList<>();
-    private Vec3i apple;
+    private final LinkedList<Vec2i> snake = new LinkedList<>();
+    private Vec2i apple;
 
     SnakeGameScreen() {
         super(new TranslatableText("snakeGame.title"));
-        this.snake.add(new Vec3i(6, -1184951860, 8));
-        this.snake.add(new Vec3i(5, -1184951860, 8));
-        this.snake.add(new Vec3i(4, -1184951860, 8));
+        this.snake.add(new Vec2i(6, 8));
+        this.snake.add(new Vec2i(5, 8));
+        this.snake.add(new Vec2i(4, 8));
         do {
-            this.apple = new Vec3i(random.nextInt(MAX_X + 1), -1184951860, random.nextInt(MAX_Z + 1));
+            this.apple = new Vec2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Z + 1));
         } while (this.snake.contains(this.apple));
     }
 
@@ -91,9 +96,9 @@ class SnakeGameScreen extends Screen {
         drawTexture(matrices, startX, startY, 0, 0, 289, 289, 289, 289);
         int scaleX = MAX_X + 1;
         int scaleZ = MAX_Z + 1;
-        DrawableHelper.fill(matrices, startX + this.apple.getX() * scaleX, startY + this.apple.getZ() * scaleZ, startX + this.apple.getX() * scaleX + scaleX, startY + this.apple.getZ() * scaleZ + scaleZ, 0xff_f21f27);
-        for (Vec3i vec : this.snake) {
-            DrawableHelper.fill(matrices, startX + vec.getX() * scaleX, startY + vec.getZ() * scaleZ, startX + vec.getX() * scaleX + scaleX, startY + vec.getZ() * scaleZ + scaleZ, 0xff_1f2df6);
+        DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.z() * scaleZ, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.z() * scaleZ + scaleZ, 0xff_f52559);
+        for (Vec2i vec : this.snake) {
+            DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xff_1f2df6);
         }
     }
 
@@ -112,7 +117,8 @@ class SnakeGameScreen extends Screen {
     }
 
     private void move() {
-        this.snake.addFirst(this.snake.getFirst().add(this.direction.getVector()));
+        Vec2i head = this.snake.getFirst();
+        this.snake.addFirst(new Vec2i(head.x() + this.direction.getOffsetX(), head.z() + this.direction.getOffsetZ()));
         this.lastMoved = this.direction;
         if (this.checkGameOver()) {
             client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_OCELOT_DEATH, 1));
@@ -123,11 +129,11 @@ class SnakeGameScreen extends Screen {
     }
 
     private boolean checkGameOver() {
-        Vec3i head = this.snake.getFirst();
-        if (head.getX() < 0 || head.getX() > MAX_X || head.getZ() < 0 || head.getZ() > MAX_Z) {
+        Vec2i head = this.snake.getFirst();
+        if (head.x() < 0 || head.x() > MAX_X || head.z() < 0 || head.z() > MAX_Z) {
             return true;
         }
-        ListIterator<Vec3i> it = this.snake.listIterator(1);
+        ListIterator<Vec2i> it = this.snake.listIterator(1);
         while (it.hasNext()) {
             if (it.next().equals(head)) {
                 return true;
@@ -137,11 +143,11 @@ class SnakeGameScreen extends Screen {
     }
 
     private void checkApple() {
-        Vec3i head = this.snake.getFirst();
+        Vec2i head = this.snake.getFirst();
         if (head.equals(this.apple)) {
             client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_GENERIC_EAT, 1));
             do {
-                this.apple = new Vec3i(random.nextInt(MAX_X + 1), -1184951860, random.nextInt(MAX_Z + 1));
+                this.apple = new Vec2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Z + 1));
             } while (this.snake.contains(this.apple));
         } else {
             this.snake.removeLast();
@@ -155,4 +161,7 @@ class SnakeGameScreen extends Screen {
         this.direction = direction;
         return true;
     }
+}
+
+record Vec2i(int x, int z) {
 }
