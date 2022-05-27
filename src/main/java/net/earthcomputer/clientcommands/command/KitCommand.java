@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -14,7 +13,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.command.CommandSource;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -34,8 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.minecraft.command.CommandSource.*;
 
 public class KitCommand {
 
@@ -65,28 +65,28 @@ public class KitCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ckit")
                 .then(literal("create")
-                        .then(argument("name", StringArgumentType.string())
-                                .executes(ctx -> create(ctx.getSource(), StringArgumentType.getString(ctx, "name")))))
+                        .then(argument("name", string())
+                                .executes(ctx -> create(ctx.getSource(), getString(ctx, "name")))))
                 .then(literal("delete")
-                        .then(argument("name", StringArgumentType.string())
-                                .suggests((ctx, builder) -> CommandSource.suggestMatching(kits.keySet(), builder))
-                                .executes(ctx -> delete(ctx.getSource(), StringArgumentType.getString(ctx, "name")))))
+                        .then(argument("name", string())
+                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
+                                .executes(ctx -> delete(ctx.getSource(), getString(ctx, "name")))))
                 .then(literal("edit")
-                        .then(argument("name", StringArgumentType.string())
-                                .suggests((ctx, builder) -> CommandSource.suggestMatching(kits.keySet(), builder))
-                                .executes(ctx -> edit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))))
+                        .then(argument("name", string())
+                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
+                                .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name")))))
                 .then(literal("load")
-                        .then(argument("name", StringArgumentType.string())
-                                .suggests((ctx, builder) -> CommandSource.suggestMatching(kits.keySet(), builder))
+                        .then(argument("name", string())
+                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
                                 .then(literal("--override")
-                                        .executes(ctx -> load(ctx.getSource(), StringArgumentType.getString(ctx, "name"), true)))
-                                .executes(ctx -> load(ctx.getSource(), StringArgumentType.getString(ctx, "name"), false))))
+                                        .executes(ctx -> load(ctx.getSource(), getString(ctx, "name"), true)))
+                                .executes(ctx -> load(ctx.getSource(), getString(ctx, "name"), false))))
                 .then(literal("list")
                         .executes(ctx -> list(ctx.getSource())))
                 .then(literal("preview")
-                        .then(argument("name", StringArgumentType.string())
-                                .suggests((ctx, builder) -> CommandSource.suggestMatching(kits.keySet(), builder))
-                                .executes(ctx -> preview(ctx.getSource(), StringArgumentType.getString(ctx, "name"))))));
+                        .then(argument("name", string())
+                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
+                                .executes(ctx -> preview(ctx.getSource(), getString(ctx, "name"))))));
     }
 
     private static int create(FabricClientCommandSource source, String name) throws CommandSyntaxException {
