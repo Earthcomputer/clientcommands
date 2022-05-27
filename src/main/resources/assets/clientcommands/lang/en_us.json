@@ -203,6 +203,8 @@
   "enchCrack.insn.itemThrows.noDummy": "No dummy enchantment",
   "enchCrack.insn.enchantments": "Enchantments on item:",
 
+  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
+
   "playerManip.state": "Player Crack State: %s",
   "playerManip.state.uncracked": "Uncracked",
   "playerManip.state.cracked": "Cracked",
@@ -246,5 +248,6 @@
   "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
   "playerManip.uncracked": "Player-Seed needs to be cracked",
 
-  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
+  "snakeGame.title": "Snake",
+  "snakeGame.score": "Score: %d"
 }
