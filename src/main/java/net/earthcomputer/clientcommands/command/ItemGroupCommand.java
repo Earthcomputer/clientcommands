@@ -232,7 +232,7 @@ public class ItemGroupCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        Identifier identifier = Identifier.tryParse(_new);
+        Identifier identifier = Identifier.tryParse("clientcommands:" + _new);
         if (identifier == null) {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
         }
