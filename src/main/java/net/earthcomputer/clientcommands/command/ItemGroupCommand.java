@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
@@ -49,8 +50,6 @@ public class ItemGroupCommand {
     private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.alreadyExists", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
-
-    private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Map<String, Group> groups = new HashMap<>();
 
@@ -277,6 +276,7 @@ public class ItemGroupCommand {
         final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Groups");
+        DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
@@ -297,13 +297,13 @@ public class ItemGroupCommand {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
                 Dynamic<NbtElement> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, group.getCompound("icon"));
-                Dynamic<NbtElement> newStackDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
+                Dynamic<NbtElement> newStackDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
                 ItemStack icon = ItemStack.fromNbt((NbtCompound) newStackDynamic.getValue());
 
                 NbtList updatedListTag = new NbtList();
                 group.getList("items", NbtElement.COMPOUND_TYPE).forEach(tag -> {
                     Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                    Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+                    Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 ItemGroup itemGroup = FabricItemGroupBuilder.create(

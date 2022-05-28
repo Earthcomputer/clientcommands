@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
@@ -48,8 +49,6 @@ public class KitCommand {
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.notFound", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
-
-    private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Map<String, NbtList> kits = new HashMap<>();
 
@@ -198,6 +197,7 @@ public class KitCommand {
         final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Kits");
+        DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtElement.COMPOUND_TYPE)));
         } else {
@@ -205,7 +205,7 @@ public class KitCommand {
                 NbtList updatedListTag = new NbtList();
                 compoundTag.getList(key, NbtElement.COMPOUND_TYPE).forEach(tag -> {
                     Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                    Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+                    Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 kits.put(key, updatedListTag);

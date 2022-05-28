@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.TranslatableText;
@@ -26,14 +25,13 @@ public class CGiveCommand {
     }
 
     private static int give(FabricClientCommandSource source, ItemStackArgument itemArgument, int count) throws CommandSyntaxException {
-        final MinecraftClient client = source.getClient();
-        if (!client.player.getAbilities().creativeMode) {
+        if (!source.getPlayer().getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
         ItemStack stack = itemArgument.createStack(Math.min(count, itemArgument.getItem().getMaxCount()), false);
-        client.interactionManager.clickCreativeStack(stack, 36 + client.player.getInventory().selectedSlot);
-        client.player.playerScreenHandler.sendContentUpdates();
+        source.getClient().interactionManager.clickCreativeStack(stack, 36 + source.getPlayer().getInventory().selectedSlot);
+        source.getPlayer().playerScreenHandler.sendContentUpdates();
 
         source.sendFeedback(new TranslatableText("commands.cgive.success", count, stack.toHoverableText()));
         return 0;

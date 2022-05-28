@@ -31,14 +31,14 @@ public class HotbarCommand {
                 .executes(ctx -> restore(ctx.getSource(), getInteger(ctx, "index"))))));
     }
 
-    private static int save(FabricClientCommandSource source, int index) throws CommandSyntaxException {
+    private static int save(FabricClientCommandSource source, int index) {
         MinecraftClient client = source.getClient();
 
         HotbarStorage storage = client.getCreativeHotbarStorage();
         HotbarStorageEntry entry = storage.getSavedHotbar(index - 1);
 
         for (int slot = 0; slot < PlayerInventory.getHotbarSize(); slot++) {
-            entry.set(slot, client.player.getInventory().getStack(slot).copy());
+            entry.set(slot, source.getPlayer().getInventory().getStack(slot).copy());
         }
         storage.save();
 
@@ -52,7 +52,7 @@ public class HotbarCommand {
     private static int restore(FabricClientCommandSource source, int index) throws CommandSyntaxException {
         MinecraftClient client = source.getClient();
 
-        ClientPlayerEntity player = client.player;
+        ClientPlayerEntity player = source.getPlayer();
         if (!player.getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
@@ -72,5 +72,4 @@ public class HotbarCommand {
         source.sendFeedback(new TranslatableText("commands.chotbar.restoredHotbar", index));
         return 0;
     }
-
 }
