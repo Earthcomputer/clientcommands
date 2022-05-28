@@ -35,8 +35,8 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.minecraft.command.CommandSource.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.minecraft.command.CommandSource.*;
 
 public class ItemGroupCommand {
 
@@ -117,15 +117,23 @@ public class ItemGroupCommand {
         return 0;
     }
 
-    private static final Field FABRIC_CURRENT_PAGE_FIELD;
+    private static final Field CURRENT_PAGE_FIELD;
     static {
+        Field temp;
         try {
             //noinspection JavaReflectionMemberAccess
-            FABRIC_CURRENT_PAGE_FIELD = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
-            FABRIC_CURRENT_PAGE_FIELD.setAccessible(true);
+            temp = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
+            temp.setAccessible(true);
         } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+            try {
+                //noinspection JavaReflectionMemberAccess
+                temp = CreativeInventoryScreen.class.getDeclaredField("quilt$currentPage");
+                temp.setAccessible(true);
+            } catch (ReflectiveOperationException ex) {
+                throw new RuntimeException(ex);
+            }
         }
+        CURRENT_PAGE_FIELD = temp;
     }
 
     private static int removeGroup(FabricClientCommandSource source, String name) throws CommandSyntaxException {
@@ -138,7 +146,7 @@ public class ItemGroupCommand {
         reloadGroups();
         CreativeInventoryScreenAccessor.setSelectedTab(0);
         try {
-            FABRIC_CURRENT_PAGE_FIELD.set(null, 0);
+            CURRENT_PAGE_FIELD.set(null, 0);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
