@@ -25,7 +25,7 @@ public class ClientCommands implements ClientModInitializer {
         try {
             Files.createDirectories(configDir);
         } catch (IOException e) {
-            LOGGER.error("Failed to crate config dir", e);
+            LOGGER.error("Failed to create config dir", e);
         }
     }
 
@@ -69,6 +69,9 @@ public class ClientCommands implements ClientModInitializer {
         AreaStatsCommand.register(dispatcher);
         CTeleportCommand.register(dispatcher);
         PlayerInfoCommand.register(dispatcher);
+        PingCommand.register(dispatcher);
+        UuidCommand.register(dispatcher);
+        SnakeCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
     }

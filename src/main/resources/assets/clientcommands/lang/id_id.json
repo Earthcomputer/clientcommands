@@ -41,7 +41,6 @@
   "commands.ccrackrng.starting": "Memecahkan benih pemain",
   "commands.ccrackrng.success": "RNG Pemain telah di pecahkan: %d",
 
-  "commands.cenchant.expectedWithWithout": "Diharapkan \"with (dengan)\"/\"without (tanpa)\"",
   "commands.cenchant.failed": "Tidak mungkin atau akan memakan waktu yang lama untuk mendapatkan pesona tersebut",
   "commands.cenchant.incompatible": "Pesona tidak kompatibel",
   "commands.cenchant.needEnchantingPrediction": "Perintah ini memerlukan prediksi pesona aktif.",

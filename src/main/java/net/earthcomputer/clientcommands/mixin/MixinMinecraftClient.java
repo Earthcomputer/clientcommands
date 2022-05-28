@@ -83,7 +83,9 @@ public abstract class MixinMinecraftClient {
         if ("Earthcomputer".equals(playerName)
                 || "Azteched".equals(playerName)
                 || "samnrad".equals(playerName)
-                || "allocator".equals(playerName)) {
+                || "allocator".equals(playerName)
+                || "Rybot666".equals(playerName)
+                || "Kerbaras".equals(playerName)) {
             List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
