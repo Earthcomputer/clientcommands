@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
 
@@ -233,20 +232,18 @@ public class ItemGroupCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
+        Identifier identifier = Identifier.tryParse(_new);
+        if (identifier == null) {
+            throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
+        }
         Group group = groups.remove(name);
         ItemGroup itemGroup = group.getItemGroup();
         NbtList items = group.getItems();
         ItemStack icon = itemGroup.getIcon();
-        try {
-            itemGroup = FabricItemGroupBuilder.create(
-                    new Identifier("clientcommands", _new))
-                    .icon(() -> icon)
-                    .build();
-
-            groups.put(_new, new Group(itemGroup, icon, items));
-        } catch (InvalidIdentifierException e) {
-            throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
-        }
+        itemGroup = FabricItemGroupBuilder.create(identifier)
+                .icon(() -> icon)
+                .build();
+        groups.put(_new, new Group(itemGroup, icon, items));
 
         reloadGroups();
         saveFile();
