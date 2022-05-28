@@ -71,6 +71,7 @@ public class ClientCommands implements ClientModInitializer {
         PlayerInfoCommand.register(dispatcher);
         PingCommand.register(dispatcher);
         UuidCommand.register(dispatcher);
+        SnakeCommand.register(dispatcher);
         VarCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
