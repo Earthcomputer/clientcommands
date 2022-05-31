@@ -21,7 +21,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
 
@@ -115,15 +114,23 @@ public class ItemGroupCommand {
         return 0;
     }
 
-    private static final Field FABRIC_CURRENT_PAGE_FIELD;
+    private static final Field CURRENT_PAGE_FIELD;
     static {
+        Field temp;
         try {
             //noinspection JavaReflectionMemberAccess
-            FABRIC_CURRENT_PAGE_FIELD = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
-            FABRIC_CURRENT_PAGE_FIELD.setAccessible(true);
+            temp = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
+            temp.setAccessible(true);
         } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+            try {
+                //noinspection JavaReflectionMemberAccess
+                temp = CreativeInventoryScreen.class.getDeclaredField("quilt$currentPage");
+                temp.setAccessible(true);
+            } catch (ReflectiveOperationException ex) {
+                throw new RuntimeException(ex);
+            }
         }
+        CURRENT_PAGE_FIELD = temp;
     }
 
     private static int removeGroup(FabricClientCommandSource source, String name) throws CommandSyntaxException {
@@ -136,7 +143,7 @@ public class ItemGroupCommand {
         reloadGroups();
         CreativeInventoryScreenAccessor.setSelectedTab(0);
         try {
-            FABRIC_CURRENT_PAGE_FIELD.set(null, 0);
+            CURRENT_PAGE_FIELD.set(null, 0);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -223,20 +230,18 @@ public class ItemGroupCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
+        Identifier identifier = Identifier.tryParse("clientcommands:" + _new);
+        if (identifier == null) {
+            throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
+        }
         Group group = groups.remove(name);
         ItemGroup itemGroup = group.getItemGroup();
         NbtList items = group.getItems();
         ItemStack icon = itemGroup.getIcon();
-        try {
-            itemGroup = FabricItemGroupBuilder.create(
-                    new Identifier("clientcommands", _new))
-                    .icon(() -> icon)
-                    .build();
-
-            groups.put(_new, new Group(itemGroup, icon, items));
-        } catch (InvalidIdentifierException e) {
-            throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
-        }
+        itemGroup = FabricItemGroupBuilder.create(identifier)
+                .icon(() -> icon)
+                .build();
+        groups.put(_new, new Group(itemGroup, icon, items));
 
         reloadGroups();
         saveFile();
