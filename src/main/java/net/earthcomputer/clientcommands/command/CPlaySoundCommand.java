@@ -3,18 +3,19 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.xpple.clientarguments.arguments.CSuggestionProviders;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CPlaySoundCommand {
 
@@ -41,10 +42,10 @@ public class CPlaySoundCommand {
     }
 
     private static int playSound(FabricClientCommandSource source, Identifier sound, SoundCategory category, Vec3d pos, float volume, float pitch) {
-        SoundInstance soundInstance = new PositionedSoundInstance(sound, category, volume, pitch, false, 0, SoundInstance.AttenuationType.LINEAR, pos.getX(), pos.getY(), pos.getZ(), false);
+        SoundInstance soundInstance = new PositionedSoundInstance(sound, category, volume, pitch, Random.create(), false, 0, SoundInstance.AttenuationType.LINEAR, pos.getX(), pos.getY(), pos.getZ(), false);
         source.getClient().getSoundManager().play(soundInstance);
 
-        source.sendFeedback(new TranslatableText("commands.cplaysound.success", sound));
+        source.sendFeedback(Text.translatable("commands.cplaysound.success", sound));
 
         return 0;
     }

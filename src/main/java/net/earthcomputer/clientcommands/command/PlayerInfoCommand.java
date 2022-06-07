@@ -6,10 +6,10 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 import static net.minecraft.command.CommandSource.*;
 
 public class PlayerInfoCommand {
@@ -46,13 +46,13 @@ public class PlayerInfoCommand {
     private static int getNameHistory(FabricClientCommandSource source, String player) {
         if (player.length() >= 32) {
             if (cacheByUuid.containsKey(player)) {
-                source.sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(player))));
+                source.sendFeedback(Text.translatable("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(player))));
             } else {
                 fetchNameHistory(source, player);
             }
         } else {
             if (cacheByName.containsKey(player)) {
-                source.sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
+                source.sendFeedback(Text.translatable("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
             } else {
                 if (source.getClient().isInSingleplayer()) {
                     ServerPlayerEntity playerEntity = source.getClient().getServer().getPlayerManager().getPlayer(player);
@@ -84,7 +84,7 @@ public class PlayerInfoCommand {
                 .thenAccept(response -> source.getClient().send(() -> {
                     JsonElement result = JsonParser.parseString(response);
                     if (result instanceof JsonNull) {
-                        source.sendError(new TranslatableText("commands.cplayerinfo.ioException"));
+                        source.sendError(Text.translatable("commands.cplayerinfo.ioException"));
                     } else {
                         fetchNameHistory(source, result.getAsJsonObject().get("id").getAsString());
                     }
@@ -107,9 +107,9 @@ public class PlayerInfoCommand {
                         String player = names.get(names.size() - 1);
                         cacheByName.put(player, names);
                         cacheByUuid.put(uuid, names);
-                        source.sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", names)));
+                        source.sendFeedback(Text.translatable("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", names)));
                     } else {
-                        source.sendError(new TranslatableText("commands.cplayerinfo.ioException"));
+                        source.sendError(Text.translatable("commands.cplayerinfo.ioException"));
                     }
                 }));
     }

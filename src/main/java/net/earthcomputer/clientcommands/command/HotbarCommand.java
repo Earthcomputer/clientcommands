@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.HotbarStorage;
@@ -11,14 +11,13 @@ import net.minecraft.client.option.HotbarStorageEntry;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class HotbarCommand {
 
-    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.chotbar.notCreative"));
+    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.chotbar.notCreative"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("chotbar")
@@ -45,7 +44,7 @@ public class HotbarCommand {
         Text loadKey = client.options.loadToolbarActivatorKey.getBoundKeyLocalizedText();
         Text hotbarKey = client.options.hotbarKeys[index - 1].getBoundKeyLocalizedText();
 
-        source.sendFeedback(new TranslatableText("inventory.hotbarSaved", loadKey, hotbarKey));
+        source.sendFeedback(Text.translatable("inventory.hotbarSaved", loadKey, hotbarKey));
         return 0;
     }
 
@@ -69,7 +68,7 @@ public class HotbarCommand {
 
         player.playerScreenHandler.sendContentUpdates();
 
-        source.sendFeedback(new TranslatableText("commands.chotbar.restoredHotbar", index));
+        source.sendFeedback(Text.translatable("commands.chotbar.restoredHotbar", index));
         return 0;
     }
 }

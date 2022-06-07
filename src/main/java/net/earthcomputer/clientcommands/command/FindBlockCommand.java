@@ -1,9 +1,10 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
@@ -18,15 +19,15 @@ import java.util.function.ToDoubleFunction;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindBlockCommand {
 
     public static final int MAX_RADIUS = 16 * 8;
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cfindblock")
-            .then(argument("block", blockPredicate())
+            .then(argument("block", blockPredicate(registryAccess))
                 .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), MAX_RADIUS, RadiusType.CARTESIAN))
                 .then(argument("radius", integer(0, MAX_RADIUS))
                     .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), getInteger(ctx, "radius"), RadiusType.CARTESIAN))
@@ -53,15 +54,15 @@ public class FindBlockCommand {
                 .orElse(null);
 
         if (closestBlock == null) {
-            source.sendError(new TranslatableText("commands.cfindblock.notFound"));
+            source.sendError(Text.translatable("commands.cfindblock.notFound"));
             return 0;
         } else {
             double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
-            source.sendFeedback(new TranslatableText("commands.cfindblock.success.left", foundRadius)
+            source.sendFeedback(Text.translatable("commands.cfindblock.success.left", foundRadius)
                     .append(getLookCoordsTextComponent(closestBlock))
                     .append(" ")
-                    .append(getGlowCoordsTextComponent(new TranslatableText("commands.cfindblock.success.glow"), closestBlock))
-                    .append(new TranslatableText("commands.cfindblock.success.right", foundRadius)));
+                    .append(getGlowCoordsTextComponent(Text.translatable("commands.cfindblock.success.glow"), closestBlock))
+                    .append(Text.translatable("commands.cfindblock.success.right", foundRadius)));
             return 1;
         }
     }

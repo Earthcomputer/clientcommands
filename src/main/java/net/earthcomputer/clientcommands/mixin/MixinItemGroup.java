@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,7 +28,7 @@ public abstract class MixinItemGroup implements IItemGroup {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void substring(int index, String id, CallbackInfo ci) {
         if (id.startsWith("clientcommands.")) {
-            this.displayName = new LiteralText(id.substring(15));
+            this.displayName = Text.literal(id.substring(15));
         }
     }
 }

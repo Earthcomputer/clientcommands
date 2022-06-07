@@ -6,9 +6,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.render.RenderQueue;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.chunk.ChunkManager;
@@ -17,20 +18,20 @@ import net.minecraft.world.chunk.WorldChunk;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class AreaStatsCommand {
 
-    private static final SimpleCommandExceptionType NOT_LOADED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.careastats.notLoaded"));
+    private static final SimpleCommandExceptionType NOT_LOADED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.careastats.notLoaded"));
 
     private static ChunkManager chunkManager;
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         LiteralCommandNode<FabricClientCommandSource> careastats = dispatcher.register(literal("careastats"));
         dispatcher.register(literal("careastats")
                 .then(argument("pos1", blockPos())
                         .then(argument("pos2", blockPos())
-                                .then(argument("predicates", list(blockPredicate().disallowNbt(), 1))
+                                .then(argument("predicates", list(blockPredicate(registryAccess).disallowNbt(), 1))
                                         .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), getBlockPredicateList(ctx, "predicates"))))
                                 .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), (chunk, pos) -> !chunk.getBlockState(pos).isAir())))));
     }
@@ -162,9 +163,9 @@ public class AreaStatsCommand {
 
         long endTime = System.nanoTime();
 
-        source.sendFeedback(new TranslatableText("commands.careastats.output.chunksScanned", chunks, endTime - startTime, (endTime - startTime) / 1000000));
-        source.sendFeedback(new TranslatableText("commands.careastats.output.blocksMatched", blocks, (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1)));
-        source.sendFeedback(new TranslatableText("commands.careastats.output.entitiesFound", entities));
+        source.sendFeedback(Text.translatable("commands.careastats.output.chunksScanned", chunks, endTime - startTime, (endTime - startTime) / 1000000));
+        source.sendFeedback(Text.translatable("commands.careastats.output.blocksMatched", blocks, (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1)));
+        source.sendFeedback(Text.translatable("commands.careastats.output.entitiesFound", entities));
 
         return blocks;
     }

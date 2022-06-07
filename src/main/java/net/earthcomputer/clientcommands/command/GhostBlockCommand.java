@@ -3,32 +3,33 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CBlockStateArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GhostBlockCommand {
 
-    private static final SimpleCommandExceptionType SET_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.setblock.failed"));
-    private static final SimpleCommandExceptionType FILL_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.fill.failed"));
+    private static final SimpleCommandExceptionType SET_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.setblock.failed"));
+    private static final SimpleCommandExceptionType FILL_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.fill.failed"));
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cghostblock")
             .then(literal("set")
                 .then(argument("pos", blockPos())
-                    .then(argument("block", blockState())
+                    .then(argument("block", blockState(registryAccess))
                         .executes(ctx -> setGhostBlock(ctx.getSource(), getCBlockPos(ctx, "pos"), getCBlockState(ctx, "block").getBlockState())))))
             .then(literal("fill")
                 .then(argument("from", blockPos())
                     .then(argument("to", blockPos())
-                        .then(argument("block", blockState())
+                        .then(argument("block", blockState(registryAccess))
                             .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState())))))));
     }
 
@@ -40,7 +41,7 @@ public class GhostBlockCommand {
 
         boolean result = world.setBlockState(pos, state, 18);
         if (result) {
-            source.sendFeedback(new TranslatableText("commands.cghostblock.set.success"));
+            source.sendFeedback(Text.translatable("commands.cghostblock.set.success"));
             return 1;
         } else {
             throw SET_FAILED_EXCEPTION.create();
@@ -66,7 +67,7 @@ public class GhostBlockCommand {
             throw FILL_FAILED_EXCEPTION.create();
         }
 
-        source.sendFeedback(new TranslatableText("commands.cghostblock.fill.success", successCount));
+        source.sendFeedback(Text.translatable("commands.cghostblock.fill.success", successCount));
 
         return successCount;
     }

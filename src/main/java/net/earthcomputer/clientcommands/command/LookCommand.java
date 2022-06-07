@@ -2,14 +2,14 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CPosArgument;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CRotationArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class LookCommand {
 

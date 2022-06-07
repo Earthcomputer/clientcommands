@@ -9,7 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -22,8 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
@@ -35,18 +34,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class KitCommand {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.saveFile.failed"));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ckit.saveFile.failed"));
 
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.create.alreadyExists", arg));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ckit.create.alreadyExists", arg));
 
-    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.load.notCreative"));
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.notFound", arg));
+    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ckit.load.notCreative"));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ckit.notFound", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
 
@@ -93,7 +92,7 @@ public class KitCommand {
         }
         kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.ckit.create.success", name));
+        source.sendFeedback(Text.translatable("commands.ckit.create.success", name));
         return 0;
     }
 
@@ -102,7 +101,7 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.ckit.delete.success", name));
+        source.sendFeedback(Text.translatable("commands.ckit.delete.success", name));
         return 0;
     }
 
@@ -112,7 +111,7 @@ public class KitCommand {
         }
         kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.ckit.edit.success", name));
+        source.sendFeedback(Text.translatable("commands.ckit.edit.success", name));
         return 0;
     }
 
@@ -139,16 +138,16 @@ public class KitCommand {
         }
 
         source.getPlayer().playerScreenHandler.sendContentUpdates();
-        source.sendFeedback(new TranslatableText("commands.ckit.load.success", name));
+        source.sendFeedback(Text.translatable("commands.ckit.load.success", name));
         return 0;
     }
 
     private static int list(FabricClientCommandSource source) {
         if (kits.isEmpty()) {
-            source.sendFeedback(new TranslatableText("commands.ckit.list.empty"));
+            source.sendFeedback(Text.translatable("commands.ckit.list.empty"));
         } else {
             String list = String.join(", ", kits.keySet());
-            source.sendFeedback(new TranslatableText("commands.ckit.list", list));
+            source.sendFeedback(Text.translatable("commands.ckit.list", list));
         }
         return kits.size();
     }
@@ -176,7 +175,7 @@ public class KitCommand {
             NbtCompound rootTag = new NbtCompound();
             NbtCompound compoundTag = new NbtCompound();
             kits.forEach(compoundTag::put);
-            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
             rootTag.put("Kits", compoundTag);
             File newFile = File.createTempFile("kits", ".dat", configPath.toFile());
             NbtIo.write(rootTag, newFile);
@@ -194,7 +193,7 @@ public class KitCommand {
         if (rootTag == null) {
             return;
         }
-        final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
+        final int currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Kits");
         DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
@@ -217,7 +216,7 @@ public class KitCommand {
 class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
 
     public PreviewScreen(PlayerScreenHandler playerScreenHandler, PlayerInventory inventory, String name) {
-        super(playerScreenHandler, inventory, new LiteralText(name).styled(style -> style.withColor(Formatting.RED)));
+        super(playerScreenHandler, inventory, Text.literal(name).styled(style -> style.withColor(Formatting.RED)));
         this.passEvents = true;
         this.titleX = 80;
     }

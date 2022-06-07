@@ -4,13 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import dev.xpple.clientarguments.arguments.CPosArgument;
 import net.earthcomputer.clientcommands.features.ChorusManipulation;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.util.math.Direction;
 
 import java.util.EnumSet;
 
 import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class ChorusCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

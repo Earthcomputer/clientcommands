@@ -8,14 +8,14 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.BlockDataObject;
 import net.minecraft.command.DataCommandObject;
 import net.minecraft.command.EntityDataObject;
 import net.minecraft.nbt.*;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
@@ -27,13 +27,13 @@ import java.util.function.Function;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CNbtPathArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GetDataCommand {
 
-    private static final DynamicCommandExceptionType GET_UNKNOWN_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.data.get.unknown", arg));
-    private static final SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.data.get.multiple"));
-    private static final SimpleCommandExceptionType INVALID_BLOCK_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.data.block.invalid"));
+    private static final DynamicCommandExceptionType GET_UNKNOWN_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.data.get.unknown", arg));
+    private static final SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.data.get.multiple"));
+    private static final SimpleCommandExceptionType INVALID_BLOCK_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.data.block.invalid"));
 
     public static final Function<String, ObjectType> CLIENT_ENTITY_DATA_OBJECT = argName -> new ObjectType() {
         @Override
@@ -64,7 +64,6 @@ public class GetDataCommand {
     };
 
     public static List<Function<String, ObjectType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_OBJECT, CLIENT_TILE_ENTITY_DATA_OBJECT);
-    @SuppressWarnings("UnstableApiUsage")
     public static List<ObjectType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

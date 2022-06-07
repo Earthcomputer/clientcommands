@@ -6,11 +6,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -21,17 +21,17 @@ import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FishCommand {
     private static final Set<Item> ENCHANTABLE_ITEMS = ImmutableSet.of(Items.BOOK, Items.FISHING_ROD, Items.BOW);
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cfish")
             .then(literal("list-goals")
                 .executes(ctx -> listGoals(ctx.getSource())))
             .then(literal("add-goal")
-                .then(argument("goal", clientItemPredicate())
+                .then(argument("goal", clientItemPredicate(registryAccess))
                     .executes(ctx -> addGoal(ctx.getSource(), getClientItemPredicate(ctx, "goal")))))
             .then(literal("add-enchanted-goal")
                 .then(argument("goal", withString(itemAndEnchantmentsPredicate().withItemPredicate(ENCHANTABLE_ITEMS::contains)))
@@ -47,9 +47,9 @@ public class FishCommand {
         }
 
         if (FishingCracker.goals.isEmpty()) {
-            source.sendFeedback(new TranslatableText("commands.cfish.listGoals.noGoals").styled(style -> style.withColor(Formatting.RED)));
+            source.sendFeedback(Text.translatable("commands.cfish.listGoals.noGoals").styled(style -> style.withColor(Formatting.RED)));
         } else {
-            source.sendFeedback(new TranslatableText("commands.cfish.listGoals.success", FishingCracker.goals.size()));
+            source.sendFeedback(Text.translatable("commands.cfish.listGoals.success", FishingCracker.goals.size()));
             for (int i = 0; i < FishingCracker.goals.size(); i++) {
                 source.sendFeedback(Text.of((i + 1) + ": " + FishingCracker.goals.get(i).getPrettyString()));
             }
@@ -65,7 +65,7 @@ public class FishCommand {
 
         FishingCracker.goals.add(goal);
 
-        source.sendFeedback(new TranslatableText("commands.cfish.addGoal.success", goal.getPrettyString()));
+        source.sendFeedback(Text.translatable("commands.cfish.addGoal.success", goal.getPrettyString()));
 
         return FishingCracker.goals.size();
     }
@@ -82,7 +82,7 @@ public class FishCommand {
 
         FishingCracker.goals.add(goal);
 
-        source.sendFeedback(new TranslatableText("commands.cfish.addGoal.success", string));
+        source.sendFeedback(Text.translatable("commands.cfish.addGoal.success", string));
 
         return FishingCracker.goals.size();
     }
@@ -97,14 +97,14 @@ public class FishCommand {
         }
         ClientItemPredicate goal = FishingCracker.goals.remove(index - 1);
 
-        source.sendFeedback(new TranslatableText("commands.cfish.removeGoal.success", goal.getPrettyString()));
+        source.sendFeedback(Text.translatable("commands.cfish.removeGoal.success", goal.getPrettyString()));
 
         return FishingCracker.goals.size();
     }
 
     private static boolean checkFishingManipulationEnabled(FabricClientCommandSource source) {
         if (!TempRules.getFishingManipulation().isEnabled()) {
-            source.sendFeedback(new TranslatableText("commands.cfish.needFishingManipulation")
+            source.sendFeedback(Text.translatable("commands.cfish.needFishingManipulation")
                     .styled(style -> style.withColor(Formatting.RED))
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/ctemprule set fishingManipulation manual")));

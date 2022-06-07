@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(DamageEnchantment.class)
 public class MixinDamageEnchantment {
 
-    @Inject(method = "onTargetDamaged", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", remap = false))
+    @Inject(method = "onTargetDamaged", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/random/Random;nextInt(I)I"))
     public void onAttackArthropod(LivingEntity attacker, Entity attacked, int level, CallbackInfo ci) {
         if (attacker instanceof ClientPlayerEntity) {
             PlayerRandCracker.onBaneOfArthropods();

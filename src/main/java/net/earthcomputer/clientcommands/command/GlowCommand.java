@@ -8,11 +8,11 @@ import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
@@ -26,10 +26,10 @@ import static dev.xpple.clientarguments.arguments.CColorArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GlowCommand {
-    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cglow.entity.failed"));
+    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cglow.entity.failed"));
 
     private static final int FLAG_KEEP_SEARCHING = 1;
 
@@ -98,7 +98,7 @@ public class GlowCommand {
                 }
             });
 
-            source.sendFeedback(new TranslatableText("commands.cglow.entity.keepSearching.success")
+            source.sendFeedback(Text.translatable("commands.cglow.entity.keepSearching.success")
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
@@ -113,7 +113,7 @@ public class GlowCommand {
                 ((IEntity) entity).addGlowingTicket(seconds * 20, color);
             }
 
-            source.sendFeedback(new TranslatableText("commands.cglow.entity.success", entities.size()));
+            source.sendFeedback(Text.translatable("commands.cglow.entity.success", entities.size()));
 
             return entities.size();
         }
@@ -144,7 +144,7 @@ public class GlowCommand {
             RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, color, seconds * 20);
         }
 
-        source.sendFeedback(new TranslatableText("commands.cglow.area.success", boundingBoxes.size()));
+        source.sendFeedback(Text.translatable("commands.cglow.area.success", boundingBoxes.size()));
 
         return boundingBoxes.size();
     }

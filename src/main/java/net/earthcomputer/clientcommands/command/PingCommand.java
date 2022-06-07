@@ -1,13 +1,13 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class PingCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -19,9 +19,9 @@ public class PingCommand {
         int ping = getLocalPing();
 
         if (ping == -1 || source.getClient().isInSingleplayer()) {
-            source.sendFeedback(new TranslatableText("commands.cping.local"));
+            source.sendFeedback(Text.translatable("commands.cping.local"));
         } else {
-            source.sendFeedback(new TranslatableText("commands.cping.multiplayer", ping));
+            source.sendFeedback(Text.translatable("commands.cping.multiplayer", ping));
         }
 
         return 0;

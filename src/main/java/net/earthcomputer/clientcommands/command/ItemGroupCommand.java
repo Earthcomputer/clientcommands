@@ -9,17 +9,18 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
 import net.earthcomputer.clientcommands.mixin.CreativeInventoryScreenAccessor;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
@@ -34,19 +35,19 @@ import java.util.Map;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 import static net.minecraft.command.CommandSource.*;
 
 public class ItemGroupCommand {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.notFound", arg));
-    private static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.outOfBounds", arg));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.notFound", arg));
+    private static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.outOfBounds", arg));
 
-    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.citemgroup.saveFile.failed"));
-    private static final DynamicCommandExceptionType ILLEGAL_CHARACTER_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.illegalCharacter", arg));
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.alreadyExists", arg));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.citemgroup.saveFile.failed"));
+    private static final DynamicCommandExceptionType ILLEGAL_CHARACTER_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.addGroup.illegalCharacter", arg));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.addGroup.alreadyExists", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
 
@@ -60,13 +61,13 @@ public class ItemGroupCommand {
         }
     }
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("citemgroup")
             .then(literal("modify")
                 .then(argument("group", string())
                     .suggests((ctx, builder) -> suggestMatching(groups.keySet(), builder))
                     .then(literal("add")
-                        .then(argument("itemstack", itemStack())
+                        .then(argument("itemstack", itemStack(registryAccess))
                             .then(argument("count", integer(1))
                                 .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
                             .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createStack(1, false)))))
@@ -75,19 +76,19 @@ public class ItemGroupCommand {
                             .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index")))))
                     .then(literal("set")
                         .then(argument("index", integer(0))
-                            .then(argument("itemstack", itemStack())
+                            .then(argument("itemstack", itemStack(registryAccess))
                                 .then(argument("count", integer(1))
                                     .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
                                 .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createStack(1, false))))))
                     .then(literal("icon")
-                        .then(argument("icon", itemStack())
+                        .then(argument("icon", itemStack(registryAccess))
                             .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createStack(1, false)))))
                     .then(literal("rename")
                         .then(argument("new", string())
                             .executes(ctx -> renameGroup(ctx.getSource(), getString(ctx, "group"), getString(ctx, "new")))))))
             .then(literal("add")
                 .then(argument("group", string())
-                    .then(argument("icon", itemStack())
+                    .then(argument("icon", itemStack(registryAccess))
                          .executes(ctx -> addGroup(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createStack(1, false))))))
             .then(literal("remove")
                 .then(argument("group", string())
@@ -110,7 +111,7 @@ public class ItemGroupCommand {
 
         groups.put(name, new Group(itemGroup, icon, new NbtList()));
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.citemgroup.addGroup.success", name));
+        source.sendFeedback(Text.translatable("commands.citemgroup.addGroup.success", name));
         return 0;
     }
 
@@ -148,7 +149,7 @@ public class ItemGroupCommand {
             throw new RuntimeException(e);
         }
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.citemgroup.removeGroup.success", name));
+        source.sendFeedback(Text.translatable("commands.citemgroup.removeGroup.success", name));
         return 0;
     }
 
@@ -163,7 +164,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name));
+        source.sendFeedback(Text.translatable("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name));
         return 0;
     }
 
@@ -181,7 +182,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.citemgroup.removeStack.success", name, index));
+        source.sendFeedback(Text.translatable("commands.citemgroup.removeStack.success", name, index));
         return 0;
     }
 
@@ -199,7 +200,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName()));
+        source.sendFeedback(Text.translatable("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName()));
         return 0;
     }
 
@@ -221,7 +222,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName()));
+        source.sendFeedback(Text.translatable("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName()));
         return 0;
     }
 
@@ -245,7 +246,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.citemgroup.renameGroup.success", name, _new));
+        source.sendFeedback(Text.translatable("commands.citemgroup.renameGroup.success", name, _new));
         return 0;
     }
 
@@ -259,7 +260,7 @@ public class ItemGroupCommand {
                 group.put("items", value.getItems());
                 compoundTag.put(key, group);
             });
-            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
             rootTag.put("Groups", compoundTag);
             File newFile = File.createTempFile("groups", ".dat", configPath.toFile());
             NbtIo.write(rootTag, newFile);
@@ -278,7 +279,7 @@ public class ItemGroupCommand {
         if (rootTag == null) {
             return;
         }
-        final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
+        final int currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Groups");
         DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();

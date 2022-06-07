@@ -2,13 +2,13 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.features.ClientTimeModifier;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.SharedConstants;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 import static dev.xpple.clientarguments.arguments.CTimeArgumentType.getCTime;
 import static dev.xpple.clientarguments.arguments.CTimeArgumentType.time;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTimeCommand {
 
@@ -50,7 +50,7 @@ public class CTimeCommand {
     }
 
     private static int executeQuery(FabricClientCommandSource source, int time) {
-        source.sendFeedback(new TranslatableText("commands.time.query", time));
+        source.sendFeedback(Text.translatable("commands.time.query", time));
         return time;
     }
     

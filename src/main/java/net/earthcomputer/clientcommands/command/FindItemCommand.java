@@ -2,13 +2,12 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
@@ -20,6 +19,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -30,7 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
@@ -50,35 +50,36 @@ import java.util.function.Predicate;
 import static dev.xpple.clientarguments.arguments.CItemPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindItemCommand {
     private static final int FLAG_NO_SEARCH_SHULKER_BOX = 1;
     private static final int FLAG_KEEP_SEARCHING = 2;
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    @SuppressWarnings("unchecked")
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         var cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
                 .then(literal("--no-search-shulker-box")
                         .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
                 .then(literal("--keep-searching")
                         .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
-                .then(argument("item", withString(itemPredicate()))
+                .then(argument("item", withString(itemPredicate(registryAccess)))
                         .executes(ctx ->
                                 findItem(ctx,
                                         getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
                                         getFlag(ctx, FLAG_KEEP_SEARCHING),
-                                        getWithString(ctx, "item", ItemPredicateArgument.class)))));
+                                        getWithString(ctx, "item", (Class<Predicate<ItemStack>>) (Class<?>) Predicate.class)))));
     }
 
-    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, ItemPredicateArgument> item) throws CommandSyntaxException {
-        String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item.getLeft(), item.getRight().create(ctx), !noSearchShulkerBox, keepSearching));
+    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, Predicate<ItemStack>> item) {
+        String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item.getLeft(), item.getRight(), !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
-            ctx.getSource().sendFeedback(new TranslatableText("commands.cfinditem.starting.keepSearching", item.getLeft())
+            ctx.getSource().sendFeedback(Text.translatable("commands.cfinditem.starting.keepSearching", item.getLeft())
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
         } else {
-            ctx.getSource().sendFeedback(new TranslatableText("commands.cfinditem.starting", item.getLeft()));
+            ctx.getSource().sendFeedback(Text.translatable("commands.cfinditem.starting", item.getLeft()));
         }
 
         return 0;
@@ -197,11 +198,11 @@ public class FindItemCommand {
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
                 public boolean accept(Screen screen) {
-                    if (!(screen instanceof ScreenHandlerProvider)) {
+                    if (!(screen instanceof ScreenHandlerProvider handlerProvider)) {
                         return true;
                     }
                     assert mc.player != null;
-                    ScreenHandler container = ((ScreenHandlerProvider<?>) screen).getScreenHandler();
+                    ScreenHandler container = handlerProvider.getScreenHandler();
                     Set<Integer> playerInvSlots = new HashSet<>();
                     for (Slot slot : container.slots) {
                         if (slot.inventory instanceof PlayerInventory) {
@@ -212,6 +213,11 @@ public class FindItemCommand {
                         @Override
                         public boolean canUse(PlayerEntity var1) {
                             return true;
+                        }
+
+                        @Override
+                        public ItemStack transferSlot(PlayerEntity player, int index) {
+                            return ItemStack.EMPTY;
                         }
 
                         @Override
@@ -239,9 +245,9 @@ public class FindItemCommand {
                                 }
                             }
                             if (matchingItems > 0) {
-                                sendFeedback(new TranslatableText("commands.cfinditem.match.left", matchingItems, searchingForName)
+                                sendFeedback(Text.translatable("commands.cfinditem.match.left", matchingItems, searchingForName)
                                         .append(getLookCoordsTextComponent(currentlySearching))
-                                        .append(new TranslatableText("commands.cfinditem.match.right", matchingItems, searchingForName)));
+                                        .append(Text.translatable("commands.cfinditem.match.right", matchingItems, searchingForName)));
                                 totalFound += matchingItems;
                             }
                             currentlySearching = null;
@@ -253,7 +259,7 @@ public class FindItemCommand {
                 }
             });
             assert mc.interactionManager != null;
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND,
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
                     new BlockHitResult(clickPos,
                             Direction.getFacing((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
                             pos, false));
@@ -261,7 +267,7 @@ public class FindItemCommand {
 
         @Override
         public void onCompleted() {
-            sendFeedback(new TranslatableText("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
+            sendFeedback(Text.translatable("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
         }
     }
 }

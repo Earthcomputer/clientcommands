@@ -2,16 +2,15 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TaskCommand {
 
@@ -31,11 +30,11 @@ public class TaskCommand {
         int taskCount = TaskManager.getTaskCount();
 
         if (taskCount == 0) {
-            source.sendError(new TranslatableText("commands.ctask.list.noTasks"));
+            source.sendError(Text.translatable("commands.ctask.list.noTasks"));
         } else {
-            source.sendFeedback(new TranslatableText("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
+            source.sendFeedback(Text.translatable("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
             for (String task : tasks) {
-                source.sendFeedback(new LiteralText("- " + task));
+                source.sendFeedback(Text.literal("- " + task));
             }
         }
 
@@ -53,12 +52,12 @@ public class TaskCommand {
 
         if (tasksToStop.isEmpty()) {
             if (pattern.isEmpty()) {
-                source.sendError(new TranslatableText("commands.ctask.list.noTasks"));
+                source.sendError(Text.translatable("commands.ctask.list.noTasks"));
             } else {
-                source.sendError(new TranslatableText("commands.ctask.stop.noMatch"));
+                source.sendError(Text.translatable("commands.ctask.stop.noMatch"));
             }
         } else {
-            source.sendFeedback(new TranslatableText("commands.ctask.stop.success", tasksToStop.size()));
+            source.sendFeedback(Text.translatable("commands.ctask.stop.success", tasksToStop.size()));
         }
         return tasksToStop.size();
     }

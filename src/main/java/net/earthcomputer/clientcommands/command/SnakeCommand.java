@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -10,7 +10,8 @@ import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
@@ -19,7 +20,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
 
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class SnakeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -57,7 +58,7 @@ class SnakeGameScreen extends Screen {
     private Vec2i apple;
 
     SnakeGameScreen() {
-        super(new TranslatableText("snakeGame.title"));
+        super(Text.translatable("snakeGame.title"));
         this.snake.add(new Vec2i(6, 8));
         this.snake.add(new Vec2i(5, 8));
         this.snake.add(new Vec2i(4, 8));
@@ -87,7 +88,7 @@ class SnakeGameScreen extends Screen {
         int startY = (this.height - 289) / 2;
 
         drawTextWithShadow(matrices, client.textRenderer, this.title, startX, startY - 10, 0xff_ffffff);
-        TranslatableText score = new TranslatableText("snakeGame.score", this.snake.size());
+        MutableText score = Text.translatable("snakeGame.score", this.snake.size());
         drawCenteredText(matrices, client.textRenderer, score, this.width / 2, startY - 10, 0xff_ffffff);
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);

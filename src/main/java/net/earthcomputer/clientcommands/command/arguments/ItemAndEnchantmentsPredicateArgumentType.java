@@ -5,19 +5,19 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EnchantmentArgumentType;
-import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -30,8 +30,9 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
     private static final Collection<String> EXAMPLES = Arrays.asList("stick with sharpness 4 without sweeping *", "minecraft:diamond_sword with sharpness *");
 
-    private static final SimpleCommandExceptionType EXPECTED_WITH_WITHOUT_EXACTLY_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cenchant.expectedWithWithoutExactly"));
-    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cenchant.incompatible"));
+    private static final SimpleCommandExceptionType EXPECTED_WITH_WITHOUT_EXACTLY_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cenchant.expectedWithWithoutExactly"));
+    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cenchant.incompatible"));
+    private static final DynamicCommandExceptionType ID_INVALID_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("argument.item.id.invalid", id));
 
     private Predicate<Item> itemPredicate = item -> true;
     private Predicate<Enchantment> enchantmentPredicate = ench -> true;
@@ -162,7 +163,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             Identifier identifier = Identifier.fromCommandInput(reader);
             Item item = Registry.ITEM.getOrEmpty(identifier).orElseThrow(() -> {
                 reader.setCursor(start);
-                return ItemStringReader.ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
+                return ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
             });
             if ((item.getEnchantability() <= 0 || !itemPredicate.test(item)) && (item != Items.ENCHANTED_BOOK || !itemPredicate.test(Items.BOOK))) {
                 reader.setCursor(start);
