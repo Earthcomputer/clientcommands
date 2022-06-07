@@ -33,7 +33,7 @@ public class CEnchantCommand {
                     .formatted(Formatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/ctemprule set enchantingPrediction true"));
-            sendFeedback(text);
+            source.sendFeedback(text);
             return 0;
         }
         if (!TempRules.playerCrackState.knowsSeed() && TempRules.enchCrackState != EnchantmentCracker.CrackState.CRACKED) {
@@ -41,7 +41,7 @@ public class CEnchantCommand {
                     .formatted(Formatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
-            sendFeedback(text);
+            source.sendFeedback(text);
             return 0;
         }
 
@@ -53,29 +53,25 @@ public class CEnchantCommand {
                 simulate
         );
         if (result == null) {
-            sendFeedback("commands.cenchant.failed");
-            return 0;
+            source.sendFeedback(new TranslatableText("commands.cenchant.failed"));
         } else {
-
             if (simulate) {
                 if (result.itemThrows() < 0) {
-                    sendFeedback("enchCrack.insn.itemThrows.noDummy");
+                    source.sendFeedback(new TranslatableText("enchCrack.insn.itemThrows.noDummy"));
                 } else {
-                    sendFeedback(new TranslatableText("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / 20f));
+                    source.sendFeedback(new TranslatableText("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / 20f));
                 }
-                sendFeedback(new TranslatableText("enchCrack.insn.bookshelves", result.bookshelves()));
-                sendFeedback(new TranslatableText("enchCrack.insn.slot", result.slot() + 1));
-                sendFeedback("enchCrack.insn.enchantments");
+                source.sendFeedback(new TranslatableText("enchCrack.insn.bookshelves", result.bookshelves()));
+                source.sendFeedback(new TranslatableText("enchCrack.insn.slot", result.slot() + 1));
+                source.sendFeedback(new TranslatableText("enchCrack.insn.enchantments"));
                 for (EnchantmentLevelEntry ench : result.enchantments()) {
-                    sendFeedback(new LiteralText("- ").append(ench.enchantment.getName(ench.level)));
+                    source.sendFeedback(new LiteralText("- ").append(ench.enchantment.getName(ench.level)));
                 }
-                return 0;
-
             } else {
-                sendFeedback("commands.cenchant.success");
-                return 0;
+                source.sendFeedback(new TranslatableText("commands.cenchant.success"));
             }
         }
+        return 0;
     }
 
 }

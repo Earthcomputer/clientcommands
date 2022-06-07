@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
@@ -54,11 +53,11 @@ public class FindBlockCommand {
                 .orElse(null);
 
         if (closestBlock == null) {
-            sendError(new TranslatableText("commands.cfindblock.notFound"));
+            source.sendError(new TranslatableText("commands.cfindblock.notFound"));
             return 0;
         } else {
             double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
-            sendFeedback(new TranslatableText("commands.cfindblock.success.left", foundRadius)
+            source.sendFeedback(new TranslatableText("commands.cfindblock.success.left", foundRadius)
                     .append(getLookCoordsTextComponent(closestBlock))
                     .append(" ")
                     .append(getGlowCoordsTextComponent(new TranslatableText("commands.cfindblock.success.glow"), closestBlock))
@@ -68,8 +67,7 @@ public class FindBlockCommand {
     }
 
     private static List<BlockPos> findBlockCandidatesInSquareArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius, RadiusType radiusType) {
-        World world = MinecraftClient.getInstance().world;
-        assert world != null;
+        World world = source.getWorld();
         BlockPos senderPos = new BlockPos(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
@@ -83,7 +81,7 @@ public class FindBlockCommand {
                 for (int chunkZ = chunkPos.z - r; chunkZ <= chunkPos.z
                         + r; chunkZ += chunkX == chunkPos.x - r || chunkX == chunkPos.x + r ? 1 : r + r) {
                     Chunk chunk = world.getChunk(chunkX, chunkZ);
-                    if (searchChunkForBlockCandidates(chunk, senderPos.getY(), blockMatcher, blockCandidates)) {
+                    if (searchChunkForBlockCandidates(source, chunk, senderPos.getY(), blockMatcher, blockCandidates)) {
                         // update new, potentially shortened, radius
                         int dx = chunkPos.x - chunkX;
                         int dz = chunkPos.z - chunkZ;
@@ -105,8 +103,7 @@ public class FindBlockCommand {
     }
 
     private static List<BlockPos> findBlockCandidatesInTaxicabArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius) {
-        World world = MinecraftClient.getInstance().world;
-        assert world != null;
+        World world = source.getWorld();
         BlockPos senderPos = new BlockPos(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
@@ -120,7 +117,7 @@ public class FindBlockCommand {
                 int chunkZ = chunkPos.z - (r - Math.abs(chunkPos.x - chunkX));
                 for (int i = 0; i < 2; i++) {
                     Chunk chunk = world.getChunk(chunkX, chunkZ);
-                    if (searchChunkForBlockCandidates(chunk, senderPos.getY(), blockMatcher, blockCandidates)) {
+                    if (searchChunkForBlockCandidates(source, chunk, senderPos.getY(), blockMatcher, blockCandidates)) {
                         // update new, potentially shortened, radius
                         int newChunkRadius = Math.abs(chunkPos.x - chunkX) + Math.abs(chunkPos.z - chunkZ) + 1;
                         if (newChunkRadius < chunkRadius) {
@@ -136,9 +133,8 @@ public class FindBlockCommand {
         return blockCandidates;
     }
 
-    private static boolean searchChunkForBlockCandidates(Chunk chunk, int senderY, ClientBlockPredicate blockMatcher, List<BlockPos> blockCandidates) {
-        ClientWorld world = MinecraftClient.getInstance().world;
-        assert world != null;
+    private static boolean searchChunkForBlockCandidates(FabricClientCommandSource source, Chunk chunk, int senderY, ClientBlockPredicate blockMatcher, List<BlockPos> blockCandidates) {
+        ClientWorld world = source.getWorld();
 
         int bottomY = world.getBottomY();
         int topY = world.getTopY();

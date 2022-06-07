@@ -7,9 +7,7 @@ import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.command.CommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 
@@ -18,20 +16,20 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.minecraft.command.CommandSource.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.minecraft.command.CommandSource.*;
 
 public class PlayerInfoCommand {
 
     private static final Map<String, List<String>> cacheByName = new HashMap<>();
     private static final Map<String, List<String>> cacheByUuid = new HashMap<>();
 
-    private static final MinecraftClient client = MinecraftClient.getInstance();
-    private static final JsonParser parser = new JsonParser();
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     private static final int DURATION = 5; // seconds
@@ -41,34 +39,34 @@ public class PlayerInfoCommand {
         dispatcher.register(literal("cplayerinfo")
                 .then(literal("namehistory")
                         .then(argument("player", string())
-                                .suggests((context, builder) -> suggestMatching(((CommandSource) context.getSource()).getPlayerNames(), builder))
+                                .suggests((context, builder) -> suggestMatching(context.getSource().getPlayerNames(), builder))
                                 .executes(ctx -> getNameHistory(ctx.getSource(), getString(ctx, "player"))))));
     }
 
     private static int getNameHistory(FabricClientCommandSource source, String player) {
         if (player.length() >= 32) {
             if (cacheByUuid.containsKey(player)) {
-                sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(player))));
+                source.sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByUuid.get(player))));
             } else {
-                fetchNameHistory(player);
+                fetchNameHistory(source, player);
             }
         } else {
             if (cacheByName.containsKey(player)) {
-                sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
+                source.sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", cacheByName.get(player))));
             } else {
-                if (client.isInSingleplayer()) {
-                    ServerPlayerEntity playerEntity = client.getServer().getPlayerManager().getPlayer(player);
+                if (source.getClient().isInSingleplayer()) {
+                    ServerPlayerEntity playerEntity = source.getClient().getServer().getPlayerManager().getPlayer(player);
                     if (playerEntity == null) {
-                        getNameHistory(player);
+                        getNameHistoryByName(source, player);
                     } else {
-                        fetchNameHistory(playerEntity.getUuidAsString());
+                        fetchNameHistory(source, playerEntity.getUuidAsString());
                     }
                 } else {
-                    PlayerListEntry playerListEntry = client.getNetworkHandler().getPlayerListEntry(player);
+                    PlayerListEntry playerListEntry = source.getClient().getNetworkHandler().getPlayerListEntry(player);
                     if (playerListEntry == null) {
-                        getNameHistory(player);
+                        getNameHistoryByName(source, player);
                     } else {
-                        fetchNameHistory(playerListEntry.getProfile().getId().toString());
+                        fetchNameHistory(source, playerListEntry.getProfile().getId().toString());
                     }
                 }
             }
@@ -76,32 +74,32 @@ public class PlayerInfoCommand {
         return 0;
     }
 
-    private static void getNameHistory(String player) {
+    private static void getNameHistoryByName(FabricClientCommandSource source, String player) {
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/users/profiles/minecraft/" + player))
                 .timeout(Duration.ofSeconds(DURATION))
                 .GET()
                 .build();
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenAccept(response -> client.send(() -> {
-                    JsonElement result = parser.parse(response);
+                .thenAccept(response -> source.getClient().send(() -> {
+                    JsonElement result = JsonParser.parseString(response);
                     if (result instanceof JsonNull) {
-                        sendError(new TranslatableText("commands.cplayerinfo.ioException"));
+                        source.sendError(new TranslatableText("commands.cplayerinfo.ioException"));
                     } else {
-                        fetchNameHistory(result.getAsJsonObject().get("id").getAsString());
+                        fetchNameHistory(source, result.getAsJsonObject().get("id").getAsString());
                     }
                 }));
     }
 
-    private static void fetchNameHistory(String uuid) {
+    private static void fetchNameHistory(FabricClientCommandSource source, String uuid) {
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/user/profiles/" + uuid + "/names"))
                 .timeout(Duration.ofSeconds(DURATION))
                 .GET()
                 .build();
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenAccept(response -> client.send(() -> {
-                    JsonElement result = parser.parse(response);
+                .thenAccept(response -> source.getClient().send(() -> {
+                    JsonElement result = JsonParser.parseString(response);
                     if (result.isJsonArray()) {
                         JsonArray array = result.getAsJsonArray();
                         List<String> names = new ArrayList<>();
@@ -109,9 +107,9 @@ public class PlayerInfoCommand {
                         String player = names.get(names.size() - 1);
                         cacheByName.put(player, names);
                         cacheByUuid.put(uuid, names);
-                        sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", names)));
+                        source.sendFeedback(new TranslatableText("commands.cplayerinfo.getNameHistory.success", player, String.join(", ", names)));
                     } else {
-                        sendError(new TranslatableText("commands.cplayerinfo.ioException"));
+                        source.sendError(new TranslatableText("commands.cplayerinfo.ioException"));
                     }
                 }));
     }

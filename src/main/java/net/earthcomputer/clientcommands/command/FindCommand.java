@@ -39,7 +39,7 @@ public class FindCommand {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(source, selector));
 
-            sendFeedback(new TranslatableText("commands.cfind.keepSearching.success")
+            source.sendFeedback(new TranslatableText("commands.cfind.keepSearching.success")
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
@@ -48,11 +48,11 @@ public class FindCommand {
             List<? extends Entity> entities = selector.getEntities(source);
 
             if (entities.isEmpty()) {
-                sendError(new TranslatableText("commands.cfind.noMatch"));
+                source.sendError(new TranslatableText("commands.cfind.noMatch"));
                 return 0;
             }
 
-            sendFeedback(new TranslatableText("commands.cfind.success", entities.size()).formatted(Formatting.BOLD));
+            source.sendFeedback(new TranslatableText("commands.cfind.success", entities.size()).formatted(Formatting.BOLD));
             for (Entity entity : entities) {
                 sendEntityFoundMessage(source, entity);
             }
@@ -63,7 +63,7 @@ public class FindCommand {
 
     private static void sendEntityFoundMessage(FabricClientCommandSource source, Entity entity) {
         double distance = Math.sqrt(entity.squaredDistanceTo(source.getPosition()));
-        sendFeedback(new TranslatableText("commands.cfind.found.left", entity.getName(), distance)
+        source.sendFeedback(new TranslatableText("commands.cfind.found.left", entity.getName(), distance)
                 .append(getLookCoordsTextComponent(entity.getBlockPos()))
                 .append(new TranslatableText("commands.cfind.found.right", entity.getName(), distance)));
     }

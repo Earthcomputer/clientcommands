@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
@@ -33,7 +34,6 @@ import java.util.Map;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 import static net.minecraft.command.CommandSource.*;
 
@@ -49,8 +49,6 @@ public class ItemGroupCommand {
     private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.alreadyExists", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
-
-    private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Map<String, Group> groups = new HashMap<>();
 
@@ -112,7 +110,7 @@ public class ItemGroupCommand {
 
         groups.put(name, new Group(itemGroup, icon, new NbtList()));
         saveFile();
-        sendFeedback("commands.citemgroup.addGroup.success", name);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.addGroup.success", name));
         return 0;
     }
 
@@ -150,7 +148,7 @@ public class ItemGroupCommand {
             throw new RuntimeException(e);
         }
         saveFile();
-        sendFeedback("commands.citemgroup.removeGroup.success", name);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.removeGroup.success", name));
         return 0;
     }
 
@@ -165,7 +163,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name));
         return 0;
     }
 
@@ -183,7 +181,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.removeStack.success", name, index);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.removeStack.success", name, index));
         return 0;
     }
 
@@ -201,7 +199,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName());
+        source.sendFeedback(new TranslatableText("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName()));
         return 0;
     }
 
@@ -223,7 +221,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName());
+        source.sendFeedback(new TranslatableText("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName()));
         return 0;
     }
 
@@ -247,7 +245,7 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.renameGroup.success", name, _new);
+        source.sendFeedback(new TranslatableText("commands.citemgroup.renameGroup.success", name, _new));
         return 0;
     }
 
@@ -283,6 +281,7 @@ public class ItemGroupCommand {
         final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Groups");
+        DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
@@ -303,13 +302,13 @@ public class ItemGroupCommand {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
                 Dynamic<NbtElement> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, group.getCompound("icon"));
-                Dynamic<NbtElement> newStackDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
+                Dynamic<NbtElement> newStackDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
                 ItemStack icon = ItemStack.fromNbt((NbtCompound) newStackDynamic.getValue());
 
                 NbtList updatedListTag = new NbtList();
                 group.getList("items", NbtElement.COMPOUND_TYPE).forEach(tag -> {
                     Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                    Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+                    Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 ItemGroup itemGroup = FabricItemGroupBuilder.create(

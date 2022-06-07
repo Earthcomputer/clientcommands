@@ -12,7 +12,7 @@ import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.BrigadierRemover;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
@@ -25,7 +25,6 @@ import java.util.IllegalFormatException;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class AliasCommand {
@@ -47,26 +46,26 @@ public class AliasCommand {
                 .then(literal("add")
                         .then(argument("key", string())
                                 .then(argument("command", greedyString())
-                                        .executes(ctx -> addAlias(getString(ctx, "key"), getString(ctx, "command"))))))
+                                        .executes(ctx -> addAlias(ctx.getSource(), getString(ctx, "key"), getString(ctx, "command"))))))
                 .then(literal("list")
-                        .executes(ctx -> listAliases()))
+                        .executes(ctx -> listAliases(ctx.getSource())))
                 .then(literal("remove")
                         .then(argument("key", string())
-                                .executes(ctx -> removeAlias(getString(ctx, "key"))))));
+                                .executes(ctx -> removeAlias(ctx.getSource(), getString(ctx, "key"))))));
 
-        for (String key: aliasMap.keySet()) {
+        for (String key : aliasMap.keySet()) {
             if (dispatcher.getRoot().getChildren().stream().map(CommandNode::getName).noneMatch(literal -> literal.equals(key))) {
                 dispatcher.register(literal(key)
-                        .executes(ctx -> executeAliasCommand(key, null))
+                        .executes(ctx -> executeAliasCommand(ctx.getSource(), key, null))
                         .then(argument("arguments", greedyString())
-                                .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
+                                .executes(ctx -> executeAliasCommand(ctx.getSource(), key, getString(ctx, "arguments")))));
             } else {
                 LOGGER.error("Attempted to register alias /{}, but that command already exists", key);
             }
         }
     }
 
-    private static int executeAliasCommand(String aliasKey, String arguments) throws CommandSyntaxException {
+    private static int executeAliasCommand(FabricClientCommandSource source, String aliasKey, String arguments) throws CommandSyntaxException {
         String cmd = aliasMap.get(aliasKey);
         if (cmd == null) {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
@@ -87,13 +86,12 @@ public class AliasCommand {
         } else if (arguments != null){
             cmd += " " + arguments;
         }
-        assert MinecraftClient.getInstance().player != null;
-        MinecraftClient.getInstance().player.sendChatMessage(cmd);
+        source.getPlayer().sendChatMessage(cmd);
 
         return 0;
     }
 
-    private static int addAlias(String key, String command) throws CommandSyntaxException {
+    private static int addAlias(FabricClientCommandSource source, String key, String command) throws CommandSyntaxException {
         if (aliasMap.containsKey(key)) {
             throw ALIAS_EXISTS_EXCEPTION.create(key);
         }
@@ -105,29 +103,29 @@ public class AliasCommand {
         }
 
         DISPATCHER.register(literal(key)
-                .executes(ctx -> executeAliasCommand(key, null))
+                .executes(ctx -> executeAliasCommand(source, key, null))
                 .then(argument("arguments", greedyString())
-                        .executes(ctx -> executeAliasCommand(key, getString(ctx, "arguments")))));
+                        .executes(ctx -> executeAliasCommand(source, key, getString(ctx, "arguments")))));
         aliasMap.put(key, command);
 
         saveAliases();
-        sendFeedback(new TranslatableText("commands.calias.addAlias.success", key));
+        source.sendFeedback(new TranslatableText("commands.calias.addAlias.success", key));
         return 0;
     }
 
-    private static int listAliases() {
+    private static int listAliases(FabricClientCommandSource source) {
         if (aliasMap.isEmpty()) {
-            sendFeedback(new TranslatableText("commands.calias.listAliases.noAliasesRegistered"));
+            source.sendFeedback(new TranslatableText("commands.calias.listAliases.noAliasesRegistered"));
         } else {
-            sendFeedback("commands.calias.listAliases.success", aliasMap.size());
-            for (String key: aliasMap.keySet()) {
-                sendFeedback(Formatting.BOLD + key + Formatting.RESET+ ": "+ aliasMap.get(key).replace("%","%%"));
+            source.sendFeedback(new TranslatableText("commands.calias.listAliases.success", aliasMap.size()));
+            for (String key : aliasMap.keySet()) {
+                source.sendFeedback(Text.of(Formatting.BOLD + key + Formatting.RESET + ": " + aliasMap.get(key).replace("%","%%")));
             }
         }
         return 0;
     }
 
-    private static int removeAlias(String key) throws CommandSyntaxException {
+    private static int removeAlias(FabricClientCommandSource source, String key) throws CommandSyntaxException {
         if (aliasMap.containsKey(key)) {
             BrigadierRemover.of(DISPATCHER).get(key).remove();
             aliasMap.remove(key);
@@ -136,7 +134,7 @@ public class AliasCommand {
         }
 
         saveAliases();
-        sendFeedback(new TranslatableText("commands.calias.removeAlias.success", key));
+        source.sendFeedback(new TranslatableText("commands.calias.removeAlias.success", key));
         return 0;
     }
 

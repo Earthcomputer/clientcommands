@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class TaskCommand {
@@ -32,11 +31,11 @@ public class TaskCommand {
         int taskCount = TaskManager.getTaskCount();
 
         if (taskCount == 0) {
-            sendError(new TranslatableText("commands.ctask.list.noTasks"));
+            source.sendError(new TranslatableText("commands.ctask.list.noTasks"));
         } else {
-            sendFeedback(new TranslatableText("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
+            source.sendFeedback(new TranslatableText("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
             for (String task : tasks) {
-                sendFeedback(new LiteralText("- " + task));
+                source.sendFeedback(new LiteralText("- " + task));
             }
         }
 
@@ -52,13 +51,15 @@ public class TaskCommand {
         for (String task : tasksToStop)
             TaskManager.removeTask(task);
 
-        if (tasksToStop.isEmpty())
-            if (pattern.isEmpty())
-                sendError(new TranslatableText("commands.ctask.list.noTasks"));
-            else
-                sendError(new TranslatableText("commands.ctask.stop.noMatch"));
-        else
-            sendFeedback(new TranslatableText("commands.ctask.stop.success", tasksToStop.size()));
+        if (tasksToStop.isEmpty()) {
+            if (pattern.isEmpty()) {
+                source.sendError(new TranslatableText("commands.ctask.list.noTasks"));
+            } else {
+                source.sendError(new TranslatableText("commands.ctask.stop.noMatch"));
+            }
+        } else {
+            source.sendFeedback(new TranslatableText("commands.ctask.stop.success", tasksToStop.size()));
+        }
         return tasksToStop.size();
     }
 

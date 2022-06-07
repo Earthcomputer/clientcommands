@@ -1,18 +1,15 @@
 package net.earthcomputer.clientcommands.command;
 
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
 import dev.xpple.clientarguments.arguments.CSuggestionProviders;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+
+import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CStopSoundCommand {
 
@@ -36,16 +33,16 @@ public class CStopSoundCommand {
     }
 
     private static int stopSound(FabricClientCommandSource source, SoundCategory category, Identifier sound) {
-        MinecraftClient.getInstance().getSoundManager().stopSounds(sound, category);
+        source.getClient().getSoundManager().stopSounds(sound, category);
 
         if (category == null && sound == null) {
-            sendFeedback(new TranslatableText("commands.cstopsound.success.sourceless.any"));
+            source.sendFeedback(new TranslatableText("commands.cstopsound.success.sourceless.any"));
         } else if (category == null) {
-            sendFeedback(new TranslatableText("commands.cstopsound.success.sourceless.sound", sound));
+            source.sendFeedback(new TranslatableText("commands.cstopsound.success.sourceless.sound", sound));
         } else if (sound == null) {
-            sendFeedback(new TranslatableText("commands.cstopsound.success.source.any", category.getName()));
+            source.sendFeedback(new TranslatableText("commands.cstopsound.success.source.any", category.getName()));
         } else {
-            sendFeedback(new TranslatableText("commands.cstopsound.success.source.sound", sound, category.getName()));
+            source.sendFeedback(new TranslatableText("commands.cstopsound.success.source.sound", sound, category.getName()));
         }
         return 0;
     }

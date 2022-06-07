@@ -6,9 +6,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -28,7 +26,6 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.LongArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class BookCommand {
@@ -73,8 +70,8 @@ public class BookCommand {
         return rand.ints(0x20, 0x7f);
     }
 
-    private static int fillBook(CommandSource source, IntStream characterGenerator, int limit) throws CommandSyntaxException {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+    private static int fillBook(FabricClientCommandSource source, IntStream characterGenerator, int limit) throws CommandSyntaxException {
+        ClientPlayerEntity player = source.getPlayer();
         assert player != null;
 
         ItemStack heldItem = player.getMainHandStack();
@@ -102,7 +99,7 @@ public class BookCommand {
         heldItem.setSubNbt("pages", pagesNbt);
         player.networkHandler.sendPacket(new BookUpdateC2SPacket(slot, pages, Optional.empty()));
 
-        sendFeedback("commands.cbook.success");
+        source.sendFeedback(new TranslatableText("commands.cbook.success"));
 
         return 0;
     }

@@ -14,7 +14,6 @@ import java.util.List;
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class TempRuleCommand {
@@ -80,9 +79,9 @@ public class TempRuleCommand {
         List<String> rules = TempRules.getRules();
         rules.sort(Comparator.naturalOrder());
 
-        sendFeedback(new TranslatableText("commands.ctemprule.list.header", rules.size()));
+        source.sendFeedback(new TranslatableText("commands.ctemprule.list.header", rules.size()));
         for (String rule : rules) {
-            sendFeedback(new LiteralText("- " + rule));
+            source.sendFeedback(new LiteralText("- " + rule));
         }
 
         return rules.size();
@@ -91,21 +90,21 @@ public class TempRuleCommand {
     private static int getRule(FabricClientCommandSource source, String rule) {
         Object val = TempRules.get(rule);
         String str = TempRules.asString(val);
-        sendFeedback(new LiteralText(rule + " = " + str));
+        source.sendFeedback(new LiteralText(rule + " = " + str));
         return 0;
     }
 
     private static int setRule(FabricClientCommandSource source, String rule, Object value) {
         TempRules.set(rule, value);
         String str = TempRules.asString(value);
-        sendFeedback(new TranslatableText("commands.ctemprule.set.success", rule, str));
+        source.sendFeedback(new TranslatableText("commands.ctemprule.set.success", rule, str));
         return 0;
     }
 
     private static int resetRule(FabricClientCommandSource source, String rule) {
         TempRules.reset(rule);
         String str = TempRules.asString(TempRules.get(rule));
-        sendFeedback(new TranslatableText("commands.ctemprule.reset.success", rule, str));
+        source.sendFeedback(new TranslatableText("commands.ctemprule.reset.success", rule, str));
         return 0;
     }
 

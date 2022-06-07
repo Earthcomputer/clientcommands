@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -11,7 +10,6 @@ import net.minecraft.util.Hand;
 
 import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class CalcStackCommand {
@@ -24,9 +22,7 @@ public class CalcStackCommand {
                     ItemStack stack = getCItemStackArgument(ctx, "item").createStack(1, false);
                     return getStackSize(ctx.getSource(), stack, getInteger(ctx, "count"));
                 }))
-            .executes(ctx -> {
-                return getStackSize(ctx.getSource(), getInteger(ctx, "count"));
-            })));
+            .executes(ctx -> getStackSize(ctx.getSource(), getInteger(ctx, "count")))));
     }
 
     private static int getStackSize(FabricClientCommandSource source, ItemStack stack, int count) {
@@ -35,16 +31,16 @@ public class CalcStackCommand {
 
         if (stack.isEmpty()) {
             if (remainder == 0) {
-                sendFeedback(new TranslatableText("commands.ccalcstack.success.empty.exact", count, stacks));
+                source.sendFeedback(new TranslatableText("commands.ccalcstack.success.empty.exact", count, stacks));
             } else {
-                sendFeedback(new TranslatableText("commands.ccalcstack.success.empty", count, stacks, remainder));
+                source.sendFeedback(new TranslatableText("commands.ccalcstack.success.empty", count, stacks, remainder));
             }
         } else {
             Text itemText = stack.toHoverableText();
             if (remainder == 0) {
-                sendFeedback(new TranslatableText("commands.ccalcstack.success.exact", count, itemText, stacks));
+                source.sendFeedback(new TranslatableText("commands.ccalcstack.success.exact", count, itemText, stacks));
             } else {
-                sendFeedback(new TranslatableText("commands.ccalcstack.success", count, itemText, stacks, remainder));
+                source.sendFeedback(new TranslatableText("commands.ccalcstack.success", count, itemText, stacks, remainder));
             }
         }
 
@@ -52,8 +48,7 @@ public class CalcStackCommand {
     }
 
     private static int getStackSize(FabricClientCommandSource source, int count) {
-        assert MinecraftClient.getInstance().player != null;
-        ItemStack heldStack = MinecraftClient.getInstance().player.getStackInHand(Hand.MAIN_HAND).copy();
+        ItemStack heldStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND).copy();
         return getStackSize(source, heldStack, count);
     }
 
