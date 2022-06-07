@@ -1231,10 +1231,10 @@ public class FishingCracker {
             // entity UUID
             MathHelper.randomUuid(random);
 
-            // entity yaw and pitch
-            random.nextGaussian();
-            random.nextGaussian();
-            random.nextGaussian();
+            // entity yaw and pitch (ProjectileEntity.setVelocity)
+            random.nextTriangular(0, 1);
+            random.nextTriangular(0, 1);
+            random.nextTriangular(0, 1);
 
             this.tool = tool;
             this.lureLevel = EnchantmentHelper.getLure(tool);
@@ -1626,7 +1626,7 @@ public class FishingCracker {
                 if (this.fishTravelCountdown > 0) {
                     this.fishTravelCountdown -= i;
                     if (this.fishTravelCountdown > 0) {
-                        this.fishAngle = (float)((double)this.fishAngle + this.random.nextGaussian() * 4.0D);
+                        this.fishAngle += random.nextTriangular(0, 9.188);
                         n = this.fishAngle * 0.017453292F;
                         o = MathHelper.sin(n);
                         p = MathHelper.cos(n);
