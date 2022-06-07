@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.MutableText;
@@ -17,6 +18,6 @@ public class NoteCommand {
 
     private static int note(FabricClientCommandSource source, MutableText message) {
         source.getClient().inGameHud.getChatHud().addMessage(message);
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 }

@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
@@ -24,7 +25,7 @@ public class CrackRNGCommand {
             PlayerRandCracker.setSeed(seed);
             TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
         });
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

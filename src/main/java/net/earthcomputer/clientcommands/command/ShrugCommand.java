@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
@@ -14,7 +15,7 @@ public class ShrugCommand {
 
     private static int shrug(FabricClientCommandSource source) {
         source.getPlayer().sendChatMessage("¯\\_(ツ)_/¯");
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

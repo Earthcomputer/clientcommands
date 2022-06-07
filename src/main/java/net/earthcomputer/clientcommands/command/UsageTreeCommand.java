@@ -43,7 +43,7 @@ public class UsageTreeCommand {
         for (var line : content) {
             source.sendFeedback(line);
         }
-        return content.size() + 1;
+        return content.size();
     }
 
     private static int usageCommand(FabricClientCommandSource source, String cmdName, CommandDispatcher<FabricClientCommandSource> dispatcher) throws CommandSyntaxException {
@@ -57,7 +57,7 @@ public class UsageTreeCommand {
         for (var line : content) {
             source.sendFeedback(line);
         }
-        return content.size() + 1;
+        return content.size();
     }
 
     private static List<Text> tree(CommandNode<FabricClientCommandSource> root) {

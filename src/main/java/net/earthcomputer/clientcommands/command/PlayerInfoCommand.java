@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -71,7 +72,7 @@ public class PlayerInfoCommand {
                 }
             }
         }
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static void getNameHistoryByName(FabricClientCommandSource source, String player) {

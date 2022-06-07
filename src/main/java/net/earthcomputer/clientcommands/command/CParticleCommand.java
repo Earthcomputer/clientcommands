@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -60,7 +61,7 @@ public class CParticleCommand {
                 }
                 source.sendFeedback(Text.translatable("commands.cparticle.success",
                         Registry.PARTICLE_TYPE.getId(parameters.getType()).toString()));
-                return 0;
+                return Command.SINGLE_SUCCESS;
         }
     }
 }

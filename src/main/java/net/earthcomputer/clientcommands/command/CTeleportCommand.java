@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -28,6 +29,6 @@ public class CTeleportCommand {
         }
         source.getClient().getNetworkHandler().sendPacket(new SpectatorTeleportC2SPacket(uuid));
         source.sendFeedback(Text.translatable("commands.ctp.success", uuid.toString()));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 }

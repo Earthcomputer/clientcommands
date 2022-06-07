@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -45,7 +46,7 @@ public class HotbarCommand {
         Text hotbarKey = client.options.hotbarKeys[index - 1].getBoundKeyLocalizedText();
 
         source.sendFeedback(Text.translatable("inventory.hotbarSaved", loadKey, hotbarKey));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int restore(FabricClientCommandSource source, int index) throws CommandSyntaxException {
@@ -69,6 +70,6 @@ public class HotbarCommand {
         player.playerScreenHandler.sendContentUpdates();
 
         source.sendFeedback(Text.translatable("commands.chotbar.restoredHotbar", index));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 }

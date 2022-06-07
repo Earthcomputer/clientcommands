@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.xpple.clientarguments.arguments.CSuggestionProviders;
@@ -47,7 +48,7 @@ public class CPlaySoundCommand {
 
         source.sendFeedback(Text.translatable("commands.cplaysound.success", sound));
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

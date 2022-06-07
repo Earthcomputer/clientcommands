@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -112,7 +113,7 @@ public class ItemGroupCommand {
         groups.put(name, new Group(itemGroup, icon, new NbtList()));
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.addGroup.success", name));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static final Field CURRENT_PAGE_FIELD;
@@ -150,7 +151,7 @@ public class ItemGroupCommand {
         }
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.removeGroup.success", name));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int addStack(FabricClientCommandSource source, String name, ItemStack itemStack) throws CommandSyntaxException {
@@ -165,7 +166,7 @@ public class ItemGroupCommand {
         reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int removeStack(FabricClientCommandSource source, String name, int index) throws CommandSyntaxException {
@@ -183,7 +184,7 @@ public class ItemGroupCommand {
         reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.removeStack.success", name, index));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int setStack(FabricClientCommandSource source, String name, int index, ItemStack itemStack) throws CommandSyntaxException {
@@ -201,7 +202,7 @@ public class ItemGroupCommand {
         reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName()));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int changeIcon(FabricClientCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
@@ -223,7 +224,7 @@ public class ItemGroupCommand {
         reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName()));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int renameGroup(FabricClientCommandSource source, String name, String _new) throws CommandSyntaxException {
@@ -247,7 +248,7 @@ public class ItemGroupCommand {
         reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.renameGroup.success", name, _new));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static void saveFile() throws CommandSyntaxException {

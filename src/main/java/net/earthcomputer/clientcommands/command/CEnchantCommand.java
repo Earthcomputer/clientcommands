@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
@@ -42,7 +43,7 @@ public class CEnchantCommand {
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
             source.sendFeedback(text);
-            return 0;
+            return Command.SINGLE_SUCCESS;
         }
 
         boolean simulate = getFlag(source, FLAG_SIMULATE);
@@ -71,7 +72,7 @@ public class CEnchantCommand {
                 source.sendFeedback(Text.translatable("commands.cenchant.success"));
             }
         }
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

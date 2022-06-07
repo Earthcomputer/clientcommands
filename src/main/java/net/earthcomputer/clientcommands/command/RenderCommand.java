@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.features.RenderSettings;
@@ -26,7 +27,7 @@ public class RenderCommand {
     private static int enableEntityRendering(FabricClientCommandSource source, CEntitySelector selector, boolean enable) {
         RenderSettings.addEntityRenderSelector(selector, enable);
         source.sendFeedback(Text.translatable("commands.crender.entities.success"));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

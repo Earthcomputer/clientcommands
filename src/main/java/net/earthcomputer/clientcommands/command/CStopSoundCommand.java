@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.xpple.clientarguments.arguments.CSuggestionProviders;
@@ -44,7 +45,7 @@ public class CStopSoundCommand {
         } else {
             source.sendFeedback(Text.translatable("commands.cstopsound.success.source.sound", sound, category.getName()));
         }
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

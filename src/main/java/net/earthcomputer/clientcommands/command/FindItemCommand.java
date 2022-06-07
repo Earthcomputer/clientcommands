@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.earthcomputer.clientcommands.GuiBlocker;
@@ -82,7 +83,7 @@ public class FindItemCommand {
             ctx.getSource().sendFeedback(Text.translatable("commands.cfinditem.starting", item.getLeft()));
         }
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static class FindItemsTask extends SimpleTask {

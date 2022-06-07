@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -42,7 +43,7 @@ public class GhostBlockCommand {
         boolean result = world.setBlockState(pos, state, 18);
         if (result) {
             source.sendFeedback(Text.translatable("commands.cghostblock.set.success"));
-            return 1;
+            return Command.SINGLE_SUCCESS;
         } else {
             throw SET_FAILED_EXCEPTION.create();
         }

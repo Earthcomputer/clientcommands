@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -36,7 +37,7 @@ public class SnakeCommand {
             screen fixes this issue.
          */
         source.getClient().send(() -> source.getClient().setScreen(new SnakeGameScreen()));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 }
 

@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.world.ClientWorld;
@@ -63,7 +64,7 @@ public class FindBlockCommand {
                     .append(" ")
                     .append(getGlowCoordsTextComponent(Text.translatable("commands.cfindblock.success.glow"), closestBlock))
                     .append(Text.translatable("commands.cfindblock.success.right", foundRadius)));
-            return 1;
+            return Command.SINGLE_SUCCESS;
         }
     }
 

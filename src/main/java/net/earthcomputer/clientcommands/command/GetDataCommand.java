@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -78,7 +79,7 @@ public class GetDataCommand {
 
     private static int getData(FabricClientCommandSource source, DataCommandObject dataObj) throws CommandSyntaxException {
         source.sendFeedback(dataObj.feedbackQuery(dataObj.getNbt()));
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int getData(FabricClientCommandSource source, DataCommandObject dataObj, NbtPath path) throws CommandSyntaxException {

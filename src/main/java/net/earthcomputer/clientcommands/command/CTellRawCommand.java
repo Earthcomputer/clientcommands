@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.MutableText;
@@ -16,7 +17,7 @@ public class CTellRawCommand {
                 .executes(ctx -> {
                     MutableText text = Texts.parse(new FakeCommandSource(ctx.getSource().getPlayer()), getCTextArgument(ctx, "message"), ctx.getSource().getPlayer(), 0);
                     ctx.getSource().getClient().inGameHud.getChatHud().addMessage(text);
-                    return 0;
+                    return Command.SINGLE_SUCCESS;
                 })
             )
         );

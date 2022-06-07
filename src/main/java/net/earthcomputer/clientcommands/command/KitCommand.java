@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -93,7 +94,7 @@ public class KitCommand {
         kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
         source.sendFeedback(Text.translatable("commands.ckit.create.success", name));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int delete(FabricClientCommandSource source, String name) throws CommandSyntaxException {
@@ -102,7 +103,7 @@ public class KitCommand {
         }
         saveFile();
         source.sendFeedback(Text.translatable("commands.ckit.delete.success", name));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int edit(FabricClientCommandSource source, String name) throws CommandSyntaxException {
@@ -112,7 +113,7 @@ public class KitCommand {
         kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
         source.sendFeedback(Text.translatable("commands.ckit.edit.success", name));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int load(FabricClientCommandSource source, String name, boolean override) throws CommandSyntaxException {
@@ -139,7 +140,7 @@ public class KitCommand {
 
         source.getPlayer().playerScreenHandler.sendContentUpdates();
         source.sendFeedback(Text.translatable("commands.ckit.load.success", name));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int list(FabricClientCommandSource source) {
@@ -167,7 +168,7 @@ public class KitCommand {
             screen fixes this issue.
          */
         source.getClient().send(() -> source.getClient().setScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, source.getPlayer()), tempInv, name)));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static void saveFile() throws CommandSyntaxException {

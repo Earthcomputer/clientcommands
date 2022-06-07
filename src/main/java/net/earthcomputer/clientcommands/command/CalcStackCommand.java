@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -44,7 +45,7 @@ public class CalcStackCommand {
             }
         }
 
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int getStackSize(FabricClientCommandSource source, int count) {

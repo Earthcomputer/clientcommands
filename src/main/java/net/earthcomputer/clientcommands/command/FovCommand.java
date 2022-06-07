@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -26,7 +27,7 @@ public class FovCommand {
         Text feedback = Text.translatable("commands.cfov.success", fov);
         source.sendFeedback(feedback);
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

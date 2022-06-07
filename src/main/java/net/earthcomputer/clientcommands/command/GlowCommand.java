@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -102,7 +103,7 @@ public class GlowCommand {
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
-            return 0;
+            return Command.SINGLE_SUCCESS;
         } else {
             List<? extends Entity> entities = entitySelector.getEntities(source);
             if (entities.isEmpty()) {

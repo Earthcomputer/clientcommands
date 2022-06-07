@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CPosArgument;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -62,7 +63,7 @@ public class LookCommand {
 
     private static int doLook(ClientPlayerEntity player, float yaw, float pitch) {
         player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), yaw, pitch);
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

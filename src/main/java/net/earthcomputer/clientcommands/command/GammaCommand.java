@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -22,7 +23,7 @@ public class GammaCommand {
         Text feedback = Text.translatable("commands.cgamma.success", gamma);
         source.sendFeedback(feedback);
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

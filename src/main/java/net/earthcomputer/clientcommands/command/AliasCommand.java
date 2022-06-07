@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -101,7 +102,7 @@ public class AliasCommand {
             source.getPlayer().sendChatMessage(cmd);
         }
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     @SuppressWarnings("unchecked")
@@ -127,7 +128,7 @@ public class AliasCommand {
 
         saveAliases();
         source.sendFeedback(Text.translatable("commands.calias.addAlias.success", key));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int listAliases(FabricClientCommandSource source) {
@@ -139,7 +140,7 @@ public class AliasCommand {
                 source.sendFeedback(Text.of(Formatting.BOLD + key + Formatting.RESET + ": " + aliasMap.get(key).replace("%","%%")));
             }
         }
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int removeAlias(FabricClientCommandSource source, String key) throws CommandSyntaxException {
@@ -153,7 +154,7 @@ public class AliasCommand {
 
         saveAliases();
         source.sendFeedback(Text.translatable("commands.calias.removeAlias.success", key));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static HashMap<String, String> loadAliases() {

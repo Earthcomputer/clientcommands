@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -101,6 +102,6 @@ public class BookCommand {
 
         source.sendFeedback(Text.translatable("commands.cbook.success"));
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 }
