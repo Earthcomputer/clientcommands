@@ -1,53 +1,47 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
-
-import java.util.Random;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.argument.ParticleEffectArgumentType.*;
-import static net.minecraft.command.argument.Vec3ArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static dev.xpple.clientarguments.arguments.CParticleEffectArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CParticleCommand {
 
-    private static final SimpleCommandExceptionType UNSUITABLE_PARTICLE_OPTION_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cparticle.unsuitableParticleOption"));
+    private static final SimpleCommandExceptionType UNSUITABLE_PARTICLE_OPTION_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cparticle.unsuitableParticleOption"));
 
-    private static final MinecraftClient client = MinecraftClient.getInstance();
-
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cparticle");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cparticle")
             .then(argument("name", particleEffect())
-                .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), client.player.getPos(), Vec3d.ZERO, 1, 1, false))
+                .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), ctx.getSource().getPlayer().getPos(), Vec3d.ZERO, 1, 1, false))
                 .then(argument("pos", vec3())
-                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), Vec3d.ZERO, 1, 1, false))
+                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), Vec3d.ZERO, 1, 1, false))
                     .then(argument("delta", vec3(false))
-                        .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), 1, 1, false))
+                        .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), 1, 1, false))
                         .then(argument("speed", floatArg(0))
-                            .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), 1, false))
+                            .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), 1, false))
                             .then(argument("count", integer(0))
-                                .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false))
+                                .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false))
                                 .then(literal("normal")
-                                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false)))
+                                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false)))
                                 .then(literal("force")
-                                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), true)))))))));
+                                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), true)))))))));
     }
 
-    private static int spawnParticle(ServerCommandSource source, ParticleEffect parameters, Vec3d pos, Vec3d delta, float speed, int count, boolean force) throws CommandSyntaxException {
-        switch (client.options.particles) {
+    private static int spawnParticle(FabricClientCommandSource source, ParticleEffect parameters, Vec3d pos, Vec3d delta, float speed, int count, boolean force) throws CommandSyntaxException {
+        switch (source.getClient().options.getParticles().getValue()) {
             case MINIMAL:
                 if (!force) {
                     throw UNSUITABLE_PARTICLE_OPTION_EXCEPTION.create();
@@ -58,15 +52,16 @@ public class CParticleCommand {
                 }
             default:
                 if (count == 0) {
-                    client.world.addParticle(parameters, force, pos.x, pos.y, pos.z, delta.x * speed, delta.y * speed, delta.z * speed);
+                    source.getWorld().addParticle(parameters, force, pos.x, pos.y, pos.z, delta.x * speed, delta.y * speed, delta.z * speed);
                 } else {
-                    final Random random = client.getNetworkHandler().getWorld().random;
+                    final Random random = source.getClient().getNetworkHandler().getWorld().random;
                     for (int i = 0; i < count; i++) {
-                        client.world.addParticle(parameters, force, pos.x + delta.x * random.nextGaussian(), pos.y + delta.y * random.nextGaussian(), pos.z + delta.z * random.nextGaussian(), speed * random.nextGaussian(), speed * random.nextGaussian(), speed * random.nextGaussian());
+                        source.getWorld().addParticle(parameters, force, pos.x + delta.x * random.nextGaussian(), pos.y + delta.y * random.nextGaussian(), pos.z + delta.z * random.nextGaussian(), speed * random.nextGaussian(), speed * random.nextGaussian(), speed * random.nextGaussian());
                     }
                 }
-                sendFeedback(new TranslatableText("commands.cparticle.success", Registry.PARTICLE_TYPE.getId(parameters.getType()).toString()));
-                return 0;
+                source.sendFeedback(Text.translatable("commands.cparticle.success",
+                        Registry.PARTICLE_TYPE.getId(parameters.getType()).toString()));
+                return Command.SINGLE_SUCCESS;
         }
     }
 }

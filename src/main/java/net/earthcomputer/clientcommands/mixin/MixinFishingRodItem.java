@@ -22,7 +22,7 @@ public class MixinFishingRodItem {
             ItemStack stack = player.getStackInHand(hand);
             PlayerRandCracker.onItemDamageUncertain(1, 5, player, stack);
             if (FishingCracker.canManipulateFishing()) {
-                FishingCracker.onRetractedFishingRod(stack);
+                FishingCracker.onRetractedFishingRod();
             }
         }
     }

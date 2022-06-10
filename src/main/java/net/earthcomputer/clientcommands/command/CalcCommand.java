@@ -6,23 +6,21 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CalcCommand {
 
-    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ccalc.tooDeeplyNested"));
+    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ccalc.tooDeeplyNested"));
 
     private static final int FLAG_PARSE = 1;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ccalc");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var ccalc = dispatcher.register(literal("ccalc"));
         dispatcher.register(literal("ccalc")
             .then(literal("--parse")
@@ -31,7 +29,7 @@ public class CalcCommand {
                 .executes(ctx -> evaluateExpression(ctx.getSource(), getExpression(ctx, "expr")))));
     }
 
-    private static int evaluateExpression(ServerCommandSource source, ExpressionArgumentType.Expression expression) throws CommandSyntaxException {
+    private static int evaluateExpression(FabricClientCommandSource source, ExpressionArgumentType.Expression expression) throws CommandSyntaxException {
         if (getFlag(source, FLAG_PARSE)) {
             Text parsedTree;
             try {
@@ -39,7 +37,7 @@ public class CalcCommand {
             } catch (StackOverflowError e) {
                 throw TOO_DEEPLY_NESTED_EXCEPTION.create();
             }
-            sendFeedback(new TranslatableText("commands.ccalc.parse", parsedTree));
+            source.sendFeedback(Text.translatable("commands.ccalc.parse", parsedTree));
         }
 
         double result;
@@ -51,11 +49,11 @@ public class CalcCommand {
         TempRules.calcAnswer = result;
         int iresult = 0;
 
-        MutableText feedback = new LiteralText(expression.strVal + " = ");
+        MutableText feedback = Text.literal(expression.strVal + " = ");
 
         if (Math.round(result) == result) {
             String strResult = String.valueOf(result);
-            feedback.append(new LiteralText(strResult.contains("E") ? strResult : strResult.substring(0, strResult.length() - 2)).formatted(Formatting.BOLD));
+            feedback.append(Text.literal(strResult.contains("E") ? strResult : strResult.substring(0, strResult.length() - 2)).formatted(Formatting.BOLD));
             iresult = (int) result;
             if (iresult == result && iresult > 0) {
                 int stacks = iresult / 64;
@@ -63,10 +61,10 @@ public class CalcCommand {
                 feedback.append(" = " + stacks + " * 64 + " + remainder);
             }
         } else {
-            feedback.append(new LiteralText(String.valueOf(result)).formatted(Formatting.BOLD));
+            feedback.append(Text.literal(String.valueOf(result)).formatted(Formatting.BOLD));
         }
 
-        sendFeedback(feedback);
+        source.sendFeedback(feedback);
 
         return iresult;
     }

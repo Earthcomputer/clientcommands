@@ -12,8 +12,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.mixin.CommandSuggestorAccessor;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 
 import java.util.*;
@@ -26,9 +26,9 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
     private static final Collection<String> EXAMPLES = Arrays.asList("123", "ans", "(1+2)", "1*3");
 
-    private static final DynamicCommandExceptionType EXPECTED_EXCEPTION = new DynamicCommandExceptionType(obj -> new TranslatableText("commands.ccalc.expected", obj));
-    private static final Dynamic2CommandExceptionType INVALID_ARGUMENT_COUNT = new Dynamic2CommandExceptionType((func, count) -> new TranslatableText("commands.ccalc.invalidArgumentCount", func, count));
-    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED = new SimpleCommandExceptionType(new TranslatableText("commands.ccalc.tooDeeplyNested"));
+    private static final DynamicCommandExceptionType EXPECTED_EXCEPTION = new DynamicCommandExceptionType(obj -> Text.translatable("commands.ccalc.expected", obj));
+    private static final Dynamic2CommandExceptionType INVALID_ARGUMENT_COUNT = new Dynamic2CommandExceptionType((func, count) -> Text.translatable("commands.ccalc.invalidArgumentCount", func, count));
+    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED = new SimpleCommandExceptionType(Text.translatable("commands.ccalc.tooDeeplyNested"));
 
     private ExpressionArgumentType() {}
 
@@ -36,7 +36,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         return new ExpressionArgumentType();
     }
 
-    public static Expression getExpression(CommandContext<ServerCommandSource> context, String arg) {
+    public static Expression getExpression(CommandContext<FabricClientCommandSource> context, String arg) {
         return context.getArgument(arg, Expression.class);
     }
 
@@ -283,7 +283,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         public abstract Text getParsedTree(int depth) throws StackOverflowError;
 
         protected static Text getDepthStyled(int depth, MutableText text) {
-            List<Style> formattings = CommandSuggestorAccessor.getHighlightFormattings();
+            List<Style> formattings = CommandSuggestorAccessor.getHighlightStyles();
             return text.setStyle(formattings.get(depth % formattings.size()));
         }
     }
@@ -308,7 +308,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
         @Override
         public Text getParsedTree(int depth) {
-            return getDepthStyled(depth, new TranslatableText("commands.ccalc.parse.binaryOperator." + type, left.getParsedTree(depth + 1), right.getParsedTree(depth + 1)));
+            return getDepthStyled(depth, Text.translatable("commands.ccalc.parse.binaryOperator." + type, left.getParsedTree(depth + 1), right.getParsedTree(depth + 1)));
         }
     }
 
@@ -326,7 +326,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
         @Override
         public Text getParsedTree(int depth) {
-            return getDepthStyled(depth, new TranslatableText("commands.ccalc.parse.negate", this.right.getParsedTree(depth + 1)));
+            return getDepthStyled(depth, Text.translatable("commands.ccalc.parse.negate", this.right.getParsedTree(depth + 1)));
         }
     }
 
@@ -353,7 +353,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
         @Override
         public Text getParsedTree(int depth) {
-            return getDepthStyled(depth, new TranslatableText("commands.ccalc.parse.constant", this.type));
+            return getDepthStyled(depth, Text.translatable("commands.ccalc.parse.constant", this.type));
         }
     }
 
@@ -447,7 +447,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
         @Override
         public Text getParsedTree(int depth) {
-            MutableText argumentsText = new LiteralText("");
+            MutableText argumentsText = Text.literal("");
             boolean first = true;
             for (Expression argument : this.arguments) {
                 if (first) {
@@ -459,7 +459,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 argumentsText.append(argument.getParsedTree(depth + 1));
             }
 
-            return getDepthStyled(depth, new TranslatableText("commands.ccalc.parse.function", this.type, argumentsText));
+            return getDepthStyled(depth, Text.translatable("commands.ccalc.parse.function", this.type, argumentsText));
         }
 
         private static interface IFunction {
@@ -521,7 +521,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
 
         @Override
         public Text getParsedTree(int depth) {
-            return getDepthStyled(depth, new TranslatableText("commands.ccalc.parse.literal", this.val));
+            return getDepthStyled(depth, Text.translatable("commands.ccalc.parse.literal", this.val));
         }
     }
 

@@ -5,27 +5,23 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EnchantmentArgumentType;
-import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -34,13 +30,15 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
     private static final Collection<String> EXAMPLES = Arrays.asList("stick with sharpness 4 without sweeping *", "minecraft:diamond_sword with sharpness *");
 
-    private static final SimpleCommandExceptionType EXPECTED_WITH_WITHOUT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cenchant.expectedWithWithout"));
-    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cenchant.incompatible"));
+    private static final SimpleCommandExceptionType EXPECTED_WITH_WITHOUT_EXACTLY_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cenchant.expectedWithWithoutExactly"));
+    private static final SimpleCommandExceptionType INCOMPATIBLE_ENCHANTMENT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cenchant.incompatible"));
+    private static final DynamicCommandExceptionType ID_INVALID_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("argument.item.id.invalid", id));
 
     private Predicate<Item> itemPredicate = item -> true;
     private Predicate<Enchantment> enchantmentPredicate = ench -> true;
 
-    private ItemAndEnchantmentsPredicateArgumentType() {}
+    private ItemAndEnchantmentsPredicateArgumentType() {
+    }
 
     public static ItemAndEnchantmentsPredicateArgumentType itemAndEnchantmentsPredicate() {
         return new ItemAndEnchantmentsPredicateArgumentType();
@@ -66,6 +64,9 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         parser.parse();
 
         Predicate<List<EnchantmentLevelEntry>> predicate = enchantments -> {
+            if (parser.exact && (parser.with.size() != enchantments.size())) {
+                return false;
+            }
             for (EnchantmentLevelEntry with : parser.with) {
                 boolean found = false;
                 for (EnchantmentLevelEntry ench : enchantments) {
@@ -74,8 +75,12 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                         break;
                     }
                 }
-                if (!found)
+                if (!found) {
                     return false;
+                }
+            }
+            if (parser.exact) {
+                return true;
             }
             for (EnchantmentLevelEntry without : parser.without) {
                 for (EnchantmentLevelEntry ench : enchantments) {
@@ -87,7 +92,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             return true;
         };
 
-        return new ItemAndEnchantmentsPredicate(parser.item, predicate);
+        return new ItemAndEnchantmentsPredicate(parser.item, predicate, parser.with.size());
     }
 
     @Override
@@ -98,7 +103,8 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         Parser parser = new Parser(reader);
         try {
             parser.parse();
-        } catch (CommandSyntaxException ignore) {}
+        } catch (CommandSyntaxException ignore) {
+        }
 
         if (parser.suggestor != null) {
             parser.suggestor.accept(builder);
@@ -112,7 +118,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         return EXAMPLES;
     }
 
-    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate) implements Predicate<ItemStack> {
+    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentLevelEntry>> predicate, int numEnchantments) implements Predicate<ItemStack> {
         @Override
         public boolean test(ItemStack stack) {
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
@@ -130,19 +136,13 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         private Consumer<SuggestionsBuilder> suggestor;
 
         private Item item;
-        private List<EnchantmentLevelEntry> with = new ArrayList<>();
-        private List<EnchantmentLevelEntry> without = new ArrayList<>();
+        private final List<EnchantmentLevelEntry> with = new ArrayList<>();
+        private final List<EnchantmentLevelEntry> without = new ArrayList<>();
+
+        private boolean exact = false;
 
         public Parser(StringReader reader) {
             this.reader = reader;
-        }
-
-        public List<EnchantmentLevelEntry> getWith() {
-            return with;
-        }
-
-        public List<EnchantmentLevelEntry> getWithout() {
-            return without;
         }
 
         public void parse() throws CommandSyntaxException {
@@ -151,6 +151,9 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             while (reader.canRead()) {
                 parseSpace();
                 parseInfoEnchantment();
+                if (exact) {
+                    return;
+                }
             }
         }
 
@@ -160,7 +163,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             Identifier identifier = Identifier.fromCommandInput(reader);
             Item item = Registry.ITEM.getOrEmpty(identifier).orElseThrow(() -> {
                 reader.setCursor(start);
-                return ItemStringReader.ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
+                return ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
             });
             if ((item.getEnchantability() <= 0 || !itemPredicate.test(item)) && (item != Items.ENCHANTED_BOOK || !itemPredicate.test(Items.BOOK))) {
                 reader.setCursor(start);
@@ -175,55 +178,73 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         private void parseInfoEnchantment() throws CommandSyntaxException {
             ItemStack stack = new ItemStack(item);
 
-            boolean negative = parseWithWithout();
+            Option option = parseWithWithoutExactly();
             boolean suggest = reader.canRead();
             parseSpace();
-            Enchantment enchantment = parseEnchantment(suggest, negative, stack);
+            if (option == Option.EXACT) {
+                exact = true;
+                return;
+            }
+            Enchantment enchantment = parseEnchantment(suggest, option, stack);
             suggest = reader.canRead();
             parseSpace();
-            int level = parseEnchantmentLevel(suggest, negative, stack, enchantment);
+            int level = parseEnchantmentLevel(suggest, option, stack, enchantment);
 
-            if (negative)
-                without.add(new EnchantmentLevelEntry(enchantment, level));
-            else
+            if (option == Option.WITH) {
                 with.add(new EnchantmentLevelEntry(enchantment, level));
-        }
-
-        private boolean parseWithWithout() throws CommandSyntaxException {
-            suggestWithWithout();
-            int start = reader.getCursor();
-            String option = reader.readUnquotedString();
-            if ("with".equals(option)) {
-                return false;
-            } else if ("without".equals(option)) {
-                return true;
             } else {
-                reader.setCursor(start);
-                throw EXPECTED_WITH_WITHOUT_EXCEPTION.createWithContext(reader);
+                without.add(new EnchantmentLevelEntry(enchantment, level));
             }
         }
 
-        private Enchantment parseEnchantment(boolean suggest, boolean negative, ItemStack stack) throws CommandSyntaxException {
+        private enum Option {
+            WITH,
+            WITHOUT,
+            EXACT
+        }
+
+        private Option parseWithWithoutExactly() throws CommandSyntaxException {
+            suggestWithWithoutExactly();
+            int start = reader.getCursor();
+            String option = reader.readUnquotedString();
+            return switch (option) {
+                case "with" -> Option.WITH;
+                case "without" -> Option.WITHOUT;
+                case "exactly" -> Option.EXACT;
+                default -> {
+                    reader.setCursor(start);
+                    throw EXPECTED_WITH_WITHOUT_EXACTLY_EXCEPTION.createWithContext(reader);
+                }
+            };
+        }
+
+        private Enchantment parseEnchantment(boolean suggest, Option option, ItemStack stack) throws CommandSyntaxException {
             List<Enchantment> allowedEnchantments = new ArrayList<>();
-            for (Enchantment ench : Registry.ENCHANTMENT) {
-                boolean allowed = (ench.isAcceptableItem(stack) || stack.getItem() == Items.BOOK) && enchantmentPredicate.test(ench);
-                if (negative) {
+            nextEnchantment: for (Enchantment ench : Registry.ENCHANTMENT) {
+                boolean skip = (!ench.isAcceptableItem(stack) && stack.getItem() != Items.BOOK) || !enchantmentPredicate.test(ench);
+                if (skip) {
+                    continue;
+                }
+                if (option == Option.WITH) {
                     for (EnchantmentLevelEntry ench2 : with)
-                        if (ench2.enchantment == ench && ench2.level == -1)
-                            allowed = false;
+                        if (ench2.enchantment == ench || !ench2.enchantment.canCombine(ench)) {
+                            continue nextEnchantment;
+                        }
                     for (EnchantmentLevelEntry ench2 : without)
-                        if (ench2.enchantment == ench && ench2.level == -1)
-                            allowed = false;
+                        if (ench2.enchantment == ench && ench2.level == -1) {
+                            continue nextEnchantment;
+                        }
                 } else {
                     for (EnchantmentLevelEntry ench2 : with)
-                        if (ench2.enchantment == ench || !ench2.enchantment.canCombine(ench))
-                            allowed = false;
+                        if (ench2.enchantment == ench && ench2.level == -1) {
+                            continue nextEnchantment;
+                        }
                     for (EnchantmentLevelEntry ench2 : without)
-                        if (ench2.enchantment == ench && ench2.level == -1)
-                            allowed = false;
+                        if (ench2.enchantment == ench && ench2.level == -1) {
+                            continue nextEnchantment;
+                        }
                 }
-                if (allowed)
-                    allowedEnchantments.add(ench);
+                allowedEnchantments.add(ench);
             }
 
             int start = reader.getCursor();
@@ -249,41 +270,44 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             return enchantment;
         }
 
-        private int parseEnchantmentLevel(boolean suggest, boolean negative, ItemStack stack, Enchantment enchantment) throws CommandSyntaxException {
+        private int parseEnchantmentLevel(boolean suggest, Option option, ItemStack stack, Enchantment enchantment) throws CommandSyntaxException {
             int maxLevel;
             {
                 int enchantability = stack.getItem().getEnchantability();
                 int level = 30 + 1 + enchantability / 4 + enchantability / 4;
                 level += Math.round(level * 0.15f);
                 for (maxLevel = enchantment.getMaxLevel(); maxLevel >= 1; maxLevel--) {
-                    if (level >= enchantment.getMinPower(maxLevel))
+                    if (level >= enchantment.getMinPower(maxLevel)) {
                         break;
+                    }
                 }
             }
 
             List<Integer> allowedLevels = new ArrayList<>();
-            for (int level = -1; level <= maxLevel; level++) {
-                if (level == 0) continue;
+            nextLevel: for (int level = -1; level <= maxLevel; level++) {
+                if (level == 0) {
+                    continue;
+                }
 
-                boolean allowed = true;
-
-                if (negative) {
-                    for (EnchantmentLevelEntry ench : with) {
-                        if (ench.enchantment == enchantment && (level == -1 || level == ench.level))
-                            allowed = false;
-                    }
+                if (option == Option.WITH) {
                     for (EnchantmentLevelEntry ench : without) {
-                        if (ench.enchantment == enchantment && (level == -1 || level == ench.level))
-                            allowed = false;
+                        if (ench.enchantment == enchantment && (level == -1 || level == ench.level)) {
+                            continue nextLevel;
+                        }
                     }
                 } else {
+                    for (EnchantmentLevelEntry ench : with) {
+                        if (ench.enchantment == enchantment && (level == -1 || level == ench.level)) {
+                            continue nextLevel;
+                        }
+                    }
                     for (EnchantmentLevelEntry ench : without) {
-                        if (ench.enchantment == enchantment && (level == -1 || level == ench.level))
-                            allowed = false;
+                        if (ench.enchantment == enchantment && (level == -1 || level == ench.level)) {
+                            continue nextLevel;
+                        }
                     }
                 }
-                if (allowed)
-                    allowedLevels.add(level);
+                allowedLevels.add(level);
             }
 
             int start = reader.getCursor();
@@ -292,17 +316,20 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                 suggestor = suggestions -> {
                     SuggestionsBuilder builder = suggestions.createOffset(start);
                     for (int allowed : allowedLevels) {
-                        if (allowed == -1)
+                        if (allowed == -1) {
                             builder.suggest("*");
-                        else
+                        }
+                        else {
                             builder.suggest(allowed);
+                        }
                     }
                     suggestions.add(builder);
                 };
             }
 
-            if (!reader.canRead())
+            if (!reader.canRead()) {
                 throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedInt().createWithContext(reader);
+            }
 
             if (reader.peek() == '*') {
                 reader.skip();
@@ -319,8 +346,9 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
         private void parseSpace() throws CommandSyntaxException {
             if (reader.canRead()) {
-                if (reader.peek() != CommandDispatcher.ARGUMENT_SEPARATOR_CHAR)
+                if (reader.peek() != CommandDispatcher.ARGUMENT_SEPARATOR_CHAR) {
                     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherExpectedArgumentSeparator().createWithContext(reader);
+                }
                 reader.skip();
             }
         }
@@ -342,11 +370,11 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             };
         }
 
-        private void suggestWithWithout() {
+        private void suggestWithWithoutExactly() {
             int start = reader.getCursor();
             suggestor = suggestions -> {
                 SuggestionsBuilder builder = suggestions.createOffset(start);
-                CommandSource.suggestMatching(new String[] {"with", "without"}, builder);
+                CommandSource.suggestMatching(new String[]{"with", "without", "exactly"}, builder);
                 suggestions.add(builder);
             };
         }

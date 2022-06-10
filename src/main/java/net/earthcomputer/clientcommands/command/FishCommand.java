@@ -6,101 +6,89 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Set;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FishCommand {
     private static final Set<Item> ENCHANTABLE_ITEMS = ImmutableSet.of(Items.BOOK, Items.FISHING_ROD, Items.BOW);
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cfish");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cfish")
             .then(literal("list-goals")
-                .executes(ctx -> listGoals()))
+                .executes(ctx -> listGoals(ctx.getSource())))
             .then(literal("add-goal")
-                .then(argument("goal", clientItemPredicate())
-                    .executes(ctx -> addGoal(getClientItemPredicate(ctx, "goal")))))
+                .then(argument("goal", clientItemPredicate(registryAccess))
+                    .executes(ctx -> addGoal(ctx.getSource(), getClientItemPredicate(ctx, "goal")))))
             .then(literal("add-enchanted-goal")
                 .then(argument("goal", withString(itemAndEnchantmentsPredicate().withItemPredicate(ENCHANTABLE_ITEMS::contains)))
-                    .executes(ctx -> addEnchantedGoal(getWithString(ctx, "goal", ItemAndEnchantmentsPredicate.class)))))
+                    .executes(ctx -> addEnchantedGoal(ctx.getSource(), getWithString(ctx, "goal", ItemAndEnchantmentsPredicate.class)))))
             .then(literal("remove-goal")
                 .then(argument("index", integer(1))
-                    .executes(ctx -> removeGoal(getInteger(ctx, "index"))))));
+                    .executes(ctx -> removeGoal(ctx.getSource(), getInteger(ctx, "index"))))));
     }
 
-    private static int listGoals() {
-        if (!checkFishingManipulationEnabled()) {
+    private static int listGoals(FabricClientCommandSource source) {
+        if (!checkFishingManipulationEnabled(source)) {
             return 0;
         }
 
         if (FishingCracker.goals.isEmpty()) {
-            sendFeedback(new TranslatableText("commands.cfish.listGoals.noGoals").styled(style -> style.withColor(Formatting.RED)));
+            source.sendFeedback(Text.translatable("commands.cfish.listGoals.noGoals").styled(style -> style.withColor(Formatting.RED)));
         } else {
-            sendFeedback("commands.cfish.listGoals.success", FishingCracker.goals.size());
+            source.sendFeedback(Text.translatable("commands.cfish.listGoals.success", FishingCracker.goals.size()));
             for (int i = 0; i < FishingCracker.goals.size(); i++) {
-                sendFeedback((i + 1) + ": " + FishingCracker.goals.get(i).getPrettyString());
+                source.sendFeedback(Text.of((i + 1) + ": " + FishingCracker.goals.get(i).getPrettyString()));
             }
         }
 
         return FishingCracker.goals.size();
     }
 
-    private static int addGoal(ClientItemPredicateArgumentType.ClientItemPredicate goal) {
-        if (!checkFishingManipulationEnabled()) {
+    private static int addGoal(FabricClientCommandSource source, ClientItemPredicateArgumentType.ClientItemPredicate goal) {
+        if (!checkFishingManipulationEnabled(source)) {
             return 0;
         }
 
         FishingCracker.goals.add(goal);
 
-        sendFeedback("commands.cfish.addGoal.success", goal.getPrettyString());
+        source.sendFeedback(Text.translatable("commands.cfish.addGoal.success", goal.getPrettyString()));
 
         return FishingCracker.goals.size();
     }
 
-    private static int addEnchantedGoal(Pair<String, ItemAndEnchantmentsPredicate> stringAndItemAndEnchantments) {
-        if (!checkFishingManipulationEnabled()) {
+    private static int addEnchantedGoal(FabricClientCommandSource source, Pair<String, ItemAndEnchantmentsPredicate> stringAndItemAndEnchantments) {
+        if (!checkFishingManipulationEnabled(source)) {
             return 0;
         }
 
         String string = stringAndItemAndEnchantments.getLeft();
         ItemAndEnchantmentsPredicate itemAndEnchantments = stringAndItemAndEnchantments.getRight();
 
-        ClientItemPredicate goal = new ClientItemPredicate() {
-            @Override
-            public String getPrettyString() {
-                return string;
-            }
-
-            @Override
-            public boolean test(ItemStack itemStack) {
-                return itemAndEnchantments.test(itemStack);
-            }
-        };
+        ClientItemPredicate goal = new EnchantedItemPredicate(string, itemAndEnchantments);
 
         FishingCracker.goals.add(goal);
 
-        sendFeedback("commands.cfish.addGoal.success", string);
+        source.sendFeedback(Text.translatable("commands.cfish.addGoal.success", string));
 
         return FishingCracker.goals.size();
     }
 
-    private static int removeGoal(int index) throws CommandSyntaxException {
-        if (!checkFishingManipulationEnabled()) {
+    private static int removeGoal(FabricClientCommandSource source, int index) throws CommandSyntaxException {
+        if (!checkFishingManipulationEnabled(source)) {
             return 0;
         }
 
@@ -109,14 +97,14 @@ public class FishCommand {
         }
         ClientItemPredicate goal = FishingCracker.goals.remove(index - 1);
 
-        sendFeedback("commands.cfish.removeGoal.success", goal.getPrettyString());
+        source.sendFeedback(Text.translatable("commands.cfish.removeGoal.success", goal.getPrettyString()));
 
         return FishingCracker.goals.size();
     }
 
-    private static boolean checkFishingManipulationEnabled() {
+    private static boolean checkFishingManipulationEnabled(FabricClientCommandSource source) {
         if (!TempRules.getFishingManipulation().isEnabled()) {
-            sendFeedback(new TranslatableText("commands.cfish.needFishingManipulation")
+            source.sendFeedback(Text.translatable("commands.cfish.needFishingManipulation")
                     .styled(style -> style.withColor(Formatting.RED))
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/ctemprule set fishingManipulation manual")));

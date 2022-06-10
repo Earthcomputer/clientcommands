@@ -9,7 +9,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -17,7 +16,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.features.PlayerRandCracker.*;
 
 public class ChorusManipulation {
@@ -47,7 +46,7 @@ public class ChorusManipulation {
 
     public static int setGoal(Vec3d v1, Vec3d v2, boolean relative) {
         if (!TempRules.getChorusManipulation()) {
-            Text text = new TranslatableText("chorusManip.needChorusManipulation")
+            Text text = Text.translatable("chorusManip.needChorusManipulation")
                     .formatted(Formatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/ctemprule set chorusManipulation true"));
@@ -56,7 +55,7 @@ public class ChorusManipulation {
         }
 
         if (!TempRules.playerCrackState.knowsSeed()) {
-            Text text = new TranslatableText("playerManip.uncracked")
+            Text text = Text.translatable("playerManip.uncracked")
                     .formatted(Formatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
@@ -67,7 +66,7 @@ public class ChorusManipulation {
         if (relative &&
                 (Math.abs(v1.getX()) > 8.0 || Math.abs(v1.getY()) > 8.0 || Math.abs(v1.getZ()) > 8.0) &&
                 (Math.abs(v2.getX()) > 8.0 || Math.abs(v2.getY()) > 8.0 || Math.abs(v2.getZ()) > 8.0)) {
-            sendError(new TranslatableText("chorusManip.goalTooFar"));
+            sendError(Text.translatable("chorusManip.goalTooFar"));
             return -1;
         }
 
@@ -79,7 +78,7 @@ public class ChorusManipulation {
         chorusGoalTo = v2;
         chorusRelativeTel = relative;
 
-        sendFeedback(new TranslatableText("chorusManip.setGoal",
+        sendFeedback(Text.translatable("chorusManip.setGoal",
                 (relative ? "relative" : "absolute"),
                 chorusGoalFrom.toString(), chorusGoalTo.toString()));
         return 0;
@@ -88,7 +87,7 @@ public class ChorusManipulation {
     public static boolean onEat(Vec3d pos, int particleCount, int itemUseTimeLeft) {
         Box area = getTargetArea(pos);
         if (!area.expand(8.0).contains(pos)) {
-            sendError(new TranslatableText("chorusManip.goalTooFar"));
+            sendError(Text.translatable("chorusManip.goalTooFar"));
             return false;
         }
 
@@ -105,13 +104,13 @@ public class ChorusManipulation {
                     final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.getX();
                     ClientWorld world = MinecraftClient.getInstance().world;
                     assert world != null;
-                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), world.getBottomY(), (world.getBottomY() + world.getLogicalHeight() - 1));
+                    final double y = MathHelper.clamp(pos.getY() + (double) (rand.nextInt(16) - 8), world.getBottomY(), (world.getBottomY() + world.getHeight() - 1));
                     final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.getZ();
                     final Vec3d landingArea = canTeleport(area, new Vec3d(x, y, z));
 
                     if (landingArea != null) {
                         if (itemUseTimeLeft == 24) { // || itemUseTimeLeft == 0
-                            sendFeedback(new TranslatableText("chorusManip.landing.success", Math.round(landingArea.getX() * 100) / 100.0,
+                            sendFeedback(Text.translatable("chorusManip.landing.success", Math.round(landingArea.getX() * 100) / 100.0,
                                     Math.round(landingArea.getY() * 100) / 100.0,
                                     Math.round(landingArea.getZ() * 100) / 100.0));
                         }
@@ -123,7 +122,7 @@ public class ChorusManipulation {
         if (!throwItemsState.getType().isSuccess()) {
             sendError(throwItemsState.getMessage());
             MinecraftClient.getInstance().inGameHud.setOverlayMessage(
-                    new TranslatableText("chorusManip.landing.failed").formatted(Formatting.RED), false);
+                    Text.translatable("chorusManip.landing.failed").formatted(Formatting.RED), false);
             return false;
         } else {
             return true;

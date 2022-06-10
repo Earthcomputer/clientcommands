@@ -45,7 +45,7 @@ public class MathUtil {
     }
 
     public static Vec3d getClosestVisiblePoint(World world, BlockPos targetPos, Vec3d sourcePos, Entity excludingEntity, Direction dir) {
-        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z, false) > 7 * 7)
+        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z) > 7 * 7)
             return null;
 
         Box totalArea = new Box(sourcePos, Vec3d.of(targetPos));

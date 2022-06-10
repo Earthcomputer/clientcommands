@@ -1,13 +1,12 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.TempRules;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
@@ -17,11 +16,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Vec3d;
@@ -89,8 +86,8 @@ public class PlayerRandCracker {
 
     public static void resetCracker(String reason) {
         if (TempRules.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
-            ClientCommandManager.sendFeedback(new LiteralText(Formatting.RED + I18n.translate(
-                    "playerManip.reset", I18n.translate("playerManip.reset." + reason))));
+            ClientCommandHelper.sendFeedback(Text.translatable("playerManip.reset", Text.translatable("playerManip.reset." + reason))
+                    .formatted(Formatting.RED));
         }
         resetCracker();
     }
@@ -241,10 +238,10 @@ public class PlayerRandCracker {
                             MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10,0.1f);
                         }
 
-                        MutableText durability = new LiteralText(String.valueOf(stack.getMaxDamage() - stack.getDamage() - 1)).formatted(Formatting.RED);
+                        MutableText durability = Text.literal(String.valueOf(stack.getMaxDamage() - stack.getDamage() - 1)).formatted(Formatting.RED);
 
                         MinecraftClient.getInstance().inGameHud.setOverlayMessage(
-                                new TranslatableText("playerManip.toolBreakWarning", durability).formatted(Formatting.GOLD),
+                                Text.translatable("playerManip.toolBreakWarning", durability).formatted(Formatting.GOLD),
                                 false);
                     }
 
@@ -363,22 +360,6 @@ public class PlayerRandCracker {
         return slots.stream().filter(slot -> slot.getStack().getItem() == preferredItem).findFirst().get();
     }
 
-    public static OptionalLong singlePlayerCrackRNG() {
-        ServerPlayerEntity serverPlayer = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayer(MinecraftClient.getInstance().player.getUuid());
-        OptionalLong seed = getSeed(serverPlayer.getRandom());
-        if (!seed.isPresent()) {
-            return seed;
-        }
-        setSeed(seed.getAsLong());
-
-        EnchantmentCracker.possibleXPSeeds.clear();
-        EnchantmentCracker.possibleXPSeeds.add(serverPlayer.getEnchantmentTableSeed());
-
-        TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
-        TempRules.enchCrackState = EnchantmentCracker.CrackState.CRACKED;
-        return seed;
-    }
-
     private static final Field RANDOM_SEED;
     static {
         Field randomSeedField;
@@ -408,18 +389,18 @@ public class PlayerRandCracker {
 
     public static class ThrowItemsResult {
         private final Type type;
-        private final TranslatableText message;
+        private final MutableText message;
 
         public ThrowItemsResult(Type type, Object... args) {
             this.type = type;
-            this.message = new TranslatableText(type.getTranslationKey(), args);
+            this.message = Text.translatable(type.getTranslationKey(), args);
         }
 
         public Type getType() {
             return type;
         }
 
-        public TranslatableText getMessage() {
+        public MutableText getMessage() {
             return message;
         }
 

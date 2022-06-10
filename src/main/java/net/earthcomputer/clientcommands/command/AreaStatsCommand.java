@@ -6,41 +6,38 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.earthcomputer.clientcommands.render.RenderQueue;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.chunk.WorldChunk;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
-import static net.minecraft.command.argument.BlockPosArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class AreaStatsCommand {
 
-    private static final SimpleCommandExceptionType NOT_LOADED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.careastats.notLoaded"));
+    private static final SimpleCommandExceptionType NOT_LOADED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.careastats.notLoaded"));
 
     private static ChunkManager chunkManager;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("careastats");
-
-        LiteralCommandNode<ServerCommandSource> careastats = dispatcher.register(literal("careastats"));
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        LiteralCommandNode<FabricClientCommandSource> careastats = dispatcher.register(literal("careastats"));
         dispatcher.register(literal("careastats")
                 .then(argument("pos1", blockPos())
                         .then(argument("pos2", blockPos())
-                                .then(argument("predicates", list(blockPredicate().disallowNbt(), 1))
-                                        .executes(ctx -> areaStats(ctx.getSource(), getBlockPos(ctx, "pos1"), getBlockPos(ctx, "pos2"), getBlockPredicateList(ctx, "predicates"))))
-                                .executes(ctx -> areaStats(ctx.getSource(), getBlockPos(ctx, "pos1"), getBlockPos(ctx, "pos2"), (chunk, pos) -> !chunk.getBlockState(pos).isAir())))));
+                                .then(argument("predicates", list(blockPredicate(registryAccess).disallowNbt(), 1))
+                                        .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), getBlockPredicateList(ctx, "predicates"))))
+                                .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), (chunk, pos) -> !chunk.getBlockState(pos).isAir())))));
     }
 
-    private static int areaStats(ServerCommandSource source, BlockPos pos1, BlockPos pos2, ClientBlockPredicate blockPredicate) throws CommandSyntaxException {
-        final ClientWorld world = MinecraftClient.getInstance().world;
+    private static int areaStats(FabricClientCommandSource source, BlockPos pos1, BlockPos pos2, ClientBlockPredicate blockPredicate) throws CommandSyntaxException {
+        final ClientWorld world = source.getWorld();
         chunkManager = world.getChunkManager();
         assertChunkIsLoaded(pos1.getX() >> 4, pos1.getZ() >> 4);
         assertChunkIsLoaded(pos2.getX() >> 4, pos2.getZ() >> 4);
@@ -166,9 +163,9 @@ public class AreaStatsCommand {
 
         long endTime = System.nanoTime();
 
-        sendFeedback("commands.careastats.output.chunksScanned", chunks, endTime - startTime, (endTime - startTime) / 1000000);
-        sendFeedback("commands.careastats.output.blocksMatched", blocks, (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1));
-        sendFeedback("commands.careastats.output.entitiesFound", entities);
+        source.sendFeedback(Text.translatable("commands.careastats.output.chunksScanned", chunks, endTime - startTime, (endTime - startTime) / 1000000));
+        source.sendFeedback(Text.translatable("commands.careastats.output.blocksMatched", blocks, (maxX - minX + 1) * (maxY - minY + 1) * (maxZ - minZ + 1)));
+        source.sendFeedback(Text.translatable("commands.careastats.output.entitiesFound", entities));
 
         return blocks;
     }

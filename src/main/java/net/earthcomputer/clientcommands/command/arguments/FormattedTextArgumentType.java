@@ -5,11 +5,10 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -19,11 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
+public class FormattedTextArgumentType implements ArgumentType<MutableText> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "bold{italic{red{nwex}}}");
-
-    private static final DynamicCommandExceptionType INVALID_ARGUMENT_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.client.invalidArgument", arg));
 
     private FormattedTextArgumentType() {
     }
@@ -32,12 +29,12 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
         return new FormattedTextArgumentType();
     }
 
-    public static LiteralText getFormattedText(CommandContext<ServerCommandSource> context, String arg) {
-        return context.getArgument(arg, LiteralText.class);
+    public static MutableText getFormattedText(CommandContext<FabricClientCommandSource> context, String arg) {
+        return context.getArgument(arg, MutableText.class);
     }
 
     @Override
-    public LiteralText parse(StringReader reader) throws CommandSyntaxException {
+    public MutableText parse(StringReader reader) throws CommandSyntaxException {
         return new Parser(reader).parse();
     }
 
@@ -73,7 +70,7 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
             this.reader = reader;
         }
 
-        public LiteralText parse() throws CommandSyntaxException {
+        public MutableText parse() throws CommandSyntaxException {
             int cursor = reader.getCursor();
             suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
@@ -93,12 +90,12 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
                 }
                 reader.skip();
                 reader.skipWhitespace();
-                LiteralText literalText;
+                MutableText literalText;
                 List<String> arguments = new ArrayList<>();
                 if (reader.canRead()) {
                     if (reader.peek() != '}') {
                         if (StringReader.isQuotedStringStart(reader.peek())) {
-                            literalText = new LiteralText(reader.readQuotedString());
+                            literalText = Text.literal(reader.readQuotedString());
                         } else {
                             literalText = parse();
                         }
@@ -120,7 +117,7 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
                             reader.skipWhitespace();
                         }
                     } else {
-                        literalText = new LiteralText("");
+                        literalText = Text.literal("");
                     }
                 } else {
                     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "}");
@@ -134,7 +131,7 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
                 }
                 return new FormattedText(styler.operator, literalText, arguments).style();
             } else {
-                return new LiteralText(word + readArgument());
+                return Text.literal(word + readArgument());
             }
         }
 
@@ -152,7 +149,6 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
     }
 
     static class FormattedText {
-
         private static final Map<String, Styler> FORMATTING = ImmutableMap.<String, Styler>builder()
                 .put("aqua", new Styler((s, o) -> s.withFormatting(Formatting.AQUA), 0))
                 .put("black", new Styler((s, o) -> s.withFormatting(Formatting.BLACK), 0))
@@ -190,17 +186,17 @@ public class FormattedTextArgumentType implements ArgumentType<LiteralText> {
                 .build();
 
         private final BiFunction<Style, List<String>, Style> styler;
-        private final LiteralText argument;
+        private final MutableText argument;
         private final List<String> optional;
 
-        public FormattedText(BiFunction<Style, List<String>, Style> styler, LiteralText argument, List<String> optional) {
+        public FormattedText(BiFunction<Style, List<String>, Style> styler, MutableText argument, List<String> optional) {
             this.styler = styler;
             this.argument = argument;
             this.optional = optional;
         }
 
-        public LiteralText style() {
-            return (LiteralText) this.argument.setStyle(this.styler.apply(this.argument.getStyle(), this.optional));
+        public MutableText style() {
+            return this.argument.setStyle(this.styler.apply(this.argument.getStyle(), this.optional));
         }
 
         private record Styler(BiFunction<Style, List<String>, Style> operator, int argumentCount, String... suggestions) {}

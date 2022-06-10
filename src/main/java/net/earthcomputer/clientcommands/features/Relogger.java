@@ -2,13 +2,13 @@ package net.earthcomputer.clientcommands.features;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
-import net.minecraft.client.gui.screen.SaveLevelScreen;
+import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
 
 import java.util.ArrayList;
@@ -34,16 +34,16 @@ public class Relogger {
             isRelogging = true;
         }
         if (singleplayer) {
-            mc.disconnect(new SaveLevelScreen(new TranslatableText("menu.savingLevel")));
+            mc.disconnect(new MessageScreen(Text.translatable("menu.savingLevel")));
         } else {
             mc.disconnect();
         }
         isRelogging = false;
 
         if (singleplayer) {
-            mc.openScreen(new TitleScreen());
+            mc.setScreen(new TitleScreen());
         } else {
-            mc.openScreen(new MultiplayerScreen(new TitleScreen()));
+            mc.setScreen(new MultiplayerScreen(new TitleScreen()));
         }
 
         return true;
@@ -63,8 +63,8 @@ public class Relogger {
             if (!mc.getLevelStorage().levelExists(levelName)) {
                 return false;
             }
-            mc.method_29970(new SaveLevelScreen(new TranslatableText("selectWorld.data_read")));
-            mc.startIntegratedServer(levelName);
+            mc.setScreenAndRender(new MessageScreen(Text.translatable("selectWorld.data_read")));
+            mc.createIntegratedServerLoader().start(mc.currentScreen, levelName);
             return true;
         } else {
             ServerInfo serverInfo = mc.getCurrentServerEntry();

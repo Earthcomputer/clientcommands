@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentType<List<T>> {
 
-    private static final SimpleCommandExceptionType TOO_FEW_ARGUMENTS_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.client.tooFewArguments"));
+    private static final SimpleCommandExceptionType TOO_FEW_ARGUMENTS_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.tooFewArguments"));
 
     private final U argumentType;
     private final int min;
