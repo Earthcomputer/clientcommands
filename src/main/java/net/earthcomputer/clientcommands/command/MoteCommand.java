@@ -1,18 +1,16 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.ServerCommandSource;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class MoteCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cmote");//cmote for c emoticon but shortened because it sounds better
-
-        dispatcher.register(literal("cmote")
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        dispatcher.register(literal("cmote")//cmote for c emoticon but shortened because it sounds better
             .then(literal("yay")
                 .executes(ctx -> sendEmoticon("╲(｡◕‿◕｡)╱")))
                 .then(literal("nice")
@@ -106,7 +104,7 @@ public class MoteCommand {
 
     private static int sendEmoticon(String emoticon) {
         MinecraftClient.getInstance().player.sendChatMessage(emoticon);
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

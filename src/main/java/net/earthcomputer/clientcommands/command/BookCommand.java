@@ -1,13 +1,13 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -15,8 +15,7 @@ import net.minecraft.item.WrittenBookItem;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 
 import java.util.ArrayList;
@@ -28,21 +27,18 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.LongArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class BookCommand {
-    private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(new TranslatableText("commands.cbook.commandException"));
+    private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Text.translatable("commands.cbook.commandException"));
 
     private static final int MAX_LIMIT = WrittenBookItem.field_30933;
     private static final int DEFAULT_LIMIT = 50;
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         if (MultiConnectAPI.instance().getProtocolVersion() >= Protocols.V1_15) {
             return; // chunk savestate fixed in 1.15
         }
-
-        addClientSideCommand("cbook");
 
         dispatcher.register(literal("cbook")
                 .then(literal("fill")
@@ -75,8 +71,8 @@ public class BookCommand {
         return rand.ints(0x20, 0x7f);
     }
 
-    private static int fillBook(CommandSource source, IntStream characterGenerator, int limit) throws CommandSyntaxException {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+    private static int fillBook(FabricClientCommandSource source, IntStream characterGenerator, int limit) throws CommandSyntaxException {
+        ClientPlayerEntity player = source.getPlayer();
         assert player != null;
 
         ItemStack heldItem = player.getMainHandStack();
@@ -101,11 +97,11 @@ public class BookCommand {
             pagesNbt.add(NbtString.of(page));
         }
 
-        heldItem.putSubTag("pages", pagesNbt);
+        heldItem.setSubNbt("pages", pagesNbt);
         player.networkHandler.sendPacket(new BookUpdateC2SPacket(slot, pages, Optional.empty()));
 
-        sendFeedback("commands.cbook.success");
+        source.sendFeedback(Text.translatable("commands.cbook.success"));
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 }

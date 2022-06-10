@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.StringReader;
-import net.earthcomputer.clientcommands.command.ClientCommandManager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.multiconnect.api.MultiConnectAPI;
 import net.earthcomputer.multiconnect.api.Protocols;
@@ -15,6 +14,9 @@ import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.encryption.PlayerPublicKey;
+import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,24 +27,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientPlayerEntity.class)
 public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
 
-    public MixinClientPlayerEntity(ClientWorld world, GameProfile profile) {
-        super(world, profile);
+    public MixinClientPlayerEntity(ClientWorld world, GameProfile profile, @Nullable PlayerPublicKey publicKey) {
+        super(world, profile, publicKey);
     }
 
-    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
-    private void onSendChatMessage(String message, CallbackInfo ci) {
-        if (message.startsWith("/")) {
-            StringReader reader = new StringReader(message);
-            reader.skip();
-            int cursor = reader.getCursor();
-            String commandName = reader.canRead() ? reader.readUnquotedString() : "";
-            reader.setCursor(cursor);
-            if (ClientCommandManager.isClientSideCommand(commandName)) {
-                ClientCommandManager.executeCommand(reader, message);
-                ci.cancel();
-            } else if ("give".equals(commandName)) {
-                PlayerRandCracker.onGiveCommand();
-            }
+    @Inject(method = "sendCommand(Ljava/lang/String;Lnet/minecraft/text/Text;)V", at = @At("HEAD"))
+    private void onSendCommand(String message, Text preview, CallbackInfo ci) {
+        StringReader reader = new StringReader(message);
+        reader.skip();
+        String commandName = reader.canRead() ? reader.readUnquotedString() : "";
+        if ("give".equals(commandName)) {
+            PlayerRandCracker.onGiveCommand();
         }
     }
 

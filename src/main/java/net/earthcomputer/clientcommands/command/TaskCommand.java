@@ -2,23 +2,19 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TaskCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ctask");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctask")
             .then(literal("list")
                 .executes(ctx -> listTasks(ctx.getSource())))
@@ -29,23 +25,23 @@ public class TaskCommand {
                     .executes(ctx -> stopTasks(ctx.getSource(), getString(ctx, "pattern"))))));
     }
 
-    private static int listTasks(ServerCommandSource source) {
+    private static int listTasks(FabricClientCommandSource source) {
         Iterable<String> tasks = TaskManager.getTaskNames();
         int taskCount = TaskManager.getTaskCount();
 
         if (taskCount == 0) {
-            sendError(new TranslatableText("commands.ctask.list.noTasks"));
+            source.sendError(Text.translatable("commands.ctask.list.noTasks"));
         } else {
-            sendFeedback(new TranslatableText("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
+            source.sendFeedback(Text.translatable("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
             for (String task : tasks) {
-                sendFeedback(new LiteralText("- " + task));
+                source.sendFeedback(Text.literal("- " + task));
             }
         }
 
         return taskCount;
     }
 
-    private static int stopTasks(ServerCommandSource source, String pattern) {
+    private static int stopTasks(FabricClientCommandSource source, String pattern) {
         List<String> tasksToStop = new ArrayList<>();
         for (String task : TaskManager.getTaskNames()) {
             if (task.contains(pattern))
@@ -54,13 +50,15 @@ public class TaskCommand {
         for (String task : tasksToStop)
             TaskManager.removeTask(task);
 
-        if (tasksToStop.isEmpty())
-            if (pattern.isEmpty())
-                sendError(new TranslatableText("commands.ctask.list.noTasks"));
-            else
-                sendError(new TranslatableText("commands.ctask.stop.noMatch"));
-        else
-            sendFeedback(new TranslatableText("commands.ctask.stop.success", tasksToStop.size()));
+        if (tasksToStop.isEmpty()) {
+            if (pattern.isEmpty()) {
+                source.sendError(Text.translatable("commands.ctask.list.noTasks"));
+            } else {
+                source.sendError(Text.translatable("commands.ctask.stop.noMatch"));
+            }
+        } else {
+            source.sendFeedback(Text.translatable("commands.ctask.stop.success", tasksToStop.size()));
+        }
         return tasksToStop.size();
     }
 

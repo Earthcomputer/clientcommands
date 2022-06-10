@@ -1,33 +1,31 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CrackRNGCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ccrackrng");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ccrackrng")
             .executes(ctx -> crackPlayerRNG(ctx.getSource())));
     }
 
-    private static int crackPlayerRNG(ServerCommandSource source) {
+    private static int crackPlayerRNG(FabricClientCommandSource source) {
         ServerBrandManager.rngWarning();
         SeedCracker.crack(seed -> {
-            sendFeedback(new TranslatableText("commands.ccrackrng.success", Long.toHexString(seed)));
+            source.sendFeedback(Text.translatable("commands.ccrackrng.success", Long.toHexString(seed)));
             PlayerRandCracker.setSeed(seed);
             TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
         });
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

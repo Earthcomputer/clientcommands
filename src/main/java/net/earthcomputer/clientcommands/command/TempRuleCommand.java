@@ -3,9 +3,8 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.earthcomputer.clientcommands.TempRules;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 
 import java.util.Comparator;
@@ -14,14 +13,11 @@ import java.util.List;
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TempRuleCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ctemprule");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctemprule")
             .then(literal("list")
                 .executes(ctx -> listRules(ctx.getSource())))
@@ -30,7 +26,7 @@ public class TempRuleCommand {
             .then(createResetSubcommand()));
     }
 
-    private static ArgumentBuilder<ServerCommandSource, ?> createGetSubcommand() {
+    private static ArgumentBuilder<FabricClientCommandSource, ?> createGetSubcommand() {
         var subcmd = literal("get");
         for (String rule : TempRules.getRules()) {
             subcmd.then(literal(rule)
@@ -39,7 +35,7 @@ public class TempRuleCommand {
         return subcmd;
     }
 
-    private static ArgumentBuilder<ServerCommandSource, ?> createSetSubcommand() {
+    private static ArgumentBuilder<FabricClientCommandSource, ?> createSetSubcommand() {
         var subcmd = literal("set");
         for (String rule : TempRules.getWritableRules()) {
             Class<?> type = TempRules.getType(rule);
@@ -69,7 +65,7 @@ public class TempRuleCommand {
         return subcmd;
     }
 
-    private static ArgumentBuilder<ServerCommandSource, ?> createResetSubcommand() {
+    private static ArgumentBuilder<FabricClientCommandSource, ?> createResetSubcommand() {
         var subcmd = literal("reset");
         for (String rule : TempRules.getWritableRules()) {
             subcmd.then(literal(rule)
@@ -78,36 +74,36 @@ public class TempRuleCommand {
         return subcmd;
     }
 
-    private static int listRules(ServerCommandSource source) {
+    private static int listRules(FabricClientCommandSource source) {
         List<String> rules = TempRules.getRules();
         rules.sort(Comparator.naturalOrder());
 
-        sendFeedback(new TranslatableText("commands.ctemprule.list.header", rules.size()));
+        source.sendFeedback(Text.translatable("commands.ctemprule.list.header", rules.size()));
         for (String rule : rules) {
-            sendFeedback(new LiteralText("- " + rule));
+            source.sendFeedback(Text.literal("- " + rule));
         }
 
         return rules.size();
     }
 
-    private static int getRule(ServerCommandSource source, String rule) {
+    private static int getRule(FabricClientCommandSource source, String rule) {
         Object val = TempRules.get(rule);
         String str = TempRules.asString(val);
-        sendFeedback(new LiteralText(rule + " = " + str));
+        source.sendFeedback(Text.literal(rule + " = " + str));
         return 0;
     }
 
-    private static int setRule(ServerCommandSource source, String rule, Object value) {
+    private static int setRule(FabricClientCommandSource source, String rule, Object value) {
         TempRules.set(rule, value);
         String str = TempRules.asString(value);
-        sendFeedback(new TranslatableText("commands.ctemprule.set.success", rule, str));
+        source.sendFeedback(Text.translatable("commands.ctemprule.set.success", rule, str));
         return 0;
     }
 
-    private static int resetRule(ServerCommandSource source, String rule) {
+    private static int resetRule(FabricClientCommandSource source, String rule) {
         TempRules.reset(rule);
         String str = TempRules.asString(TempRules.get(rule));
-        sendFeedback(new TranslatableText("commands.ctemprule.reset.success", rule, str));
+        source.sendFeedback(Text.translatable("commands.ctemprule.reset.success", rule, str));
         return 0;
     }
 

@@ -54,12 +54,12 @@ You may see old code that doesn't adhere to these guidelines, but all new code m
 ### Command registry
 #### General
 * Execute a command's code mostly in a dedicated method, rather than in the `register` method
-* If the command was successful and there isn't something sensible to return, it should `return 0`. If the command was not successful, an exception should be thrown
+* If the command was successful and there isn't something sensible to return, it should `return Command.SINGLE_SUCCESS`. If the command was not successful, an exception should be thrown
 #### Exceptions
 * Exception variables are [immutable constants](#immutable-constants)
 ### Miscellaneous
 * Any message the player may receive should be translated
     * Except for debugging (log messages, debug HUD)
-* Only use up to Java 16 in your code
+* Don't use Java features only available in Java versions newer than the one Minecraft uses, if applicable
 * All files should have a newline at the end of the file
 * Do not use AWT at all

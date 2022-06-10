@@ -14,6 +14,7 @@ import java.util.Map;
 public class RenderQueue {
     private static int tickCounter = 0;
     private static final List<AddQueueEntry> addQueue = new ArrayList<>();
+    private static final List<RemoveQueueEntry> removeQueue = new ArrayList<>();
     private static final EnumMap<Layer, Map<Object, Shape>> queue = new EnumMap<>(Layer.class);
 
     public static void add(Layer layer, Object key, Shape shape, int life) {
@@ -32,6 +33,10 @@ public class RenderQueue {
         add(layer, key, new Line(from, to, color), life);
     }
 
+    public static void remove(Layer layer, Object key) {
+        removeQueue.add(new RemoveQueueEntry(layer, key));
+    }
+
     private static void doAdd(AddQueueEntry entry) {
         Map<Object, Shape> shapes = queue.computeIfAbsent(entry.layer(), k -> new LinkedHashMap<>());
         Shape oldShape = shapes.get(entry.key());
@@ -45,6 +50,14 @@ public class RenderQueue {
     }
 
     public static void tick() {
+        for (RemoveQueueEntry entry : removeQueue) {
+            Map<Object, Shape> shapes = queue.get(entry.layer());
+            if (shapes != null) {
+                shapes.remove(entry.key());
+            }
+        }
+        removeQueue.clear();
+
         queue.values().forEach(shapes -> shapes.values().forEach(shape -> shape.prevPos = shape.getPos()));
         tickCounter++;
         for (AddQueueEntry entry : addQueue) {
@@ -73,4 +86,6 @@ public class RenderQueue {
     }
 
     private record AddQueueEntry(Layer layer, Object key, Shape shape, int life) {}
+
+    private record RemoveQueueEntry(Layer layer, Object key) {}
 }

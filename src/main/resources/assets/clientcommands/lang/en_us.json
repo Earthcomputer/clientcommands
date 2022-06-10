@@ -40,12 +40,13 @@
   "commands.ccalcstack.success.empty.exact": "%d items is exactly %d stacks",
   "commands.ccalcstack.success.exact": "%d %s is exactly %d stacks",
 
+  "commands.ccrackrng.failed": "Failed to crack player seed",
+  "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper.",
+  "commands.ccrackrng.retries": "Cracking player seed, attempt %d/%d",
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
-  "commands.ccheatcrackrng.success": "Player RNG cracked: %d -> %d",
-  "commands.ccheatcrackrng.java14": "This command no longer works on Java 14+!",
 
-  "commands.cenchant.expectedWithWithout": "Expected \"with\"/\"without\"",
+  "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.incompatible": "Incompatible enchantments",
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
@@ -71,9 +72,16 @@
 
   "commands.cfish.addGoal.success": "Successfully added goal %s",
   "commands.cfish.correctLoot": "Got the correct loot with correction of %dms",
+  "commands.cfish.error.biome": "Loot cannot be obtained in this biome, %s needed",
   "commands.cfish.error.crackFailed": "Failed to crack the fishing bobber RNG, is the server modded?",
-  "commands.cfish.error.failed": "Fishing bobber configuration incorrect",
+  "commands.cfish.error.collision": "Fishing bobber collided with something",
+  "commands.cfish.error.fire": "Fishing bobber caught fire",
+  "commands.cfish.error.impossibleLoot": "That loot cannot be obtained with fishing",
+  "commands.cfish.error.onGround": "Fishing bobber hit the ground",
+  "commands.cfish.error.openWater": "Fishing bobber needs to be in open water for treasure loot",
+  "commands.cfish.error.openWater.lilyPad": "Help: try trapping the bobber under a lily pad",
   "commands.cfish.error.outOfWater": "Fishing bobber out of water, manipulation won't work",
+  "commands.cfish.help.tooManyEnchants": "Help: multiple enchantments at once are unlikely and may take a long time to obtain",
   "commands.cfish.listGoals.noGoals": "There are no fishing goals",
   "commands.cfish.listGoals.success": "There are %d fishing goals:",
   "commands.cfish.needFishingManipulation": "Fishing manipulation is not enabled",
@@ -132,6 +140,9 @@
 
   "commands.cplaysound.success": "Played sound %s to self",
 
+  "commands.cping.local": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
+  "commands.cping.multiplayer": "Your average ping is %dms",
+
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
@@ -152,6 +163,8 @@
 
   "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
   "commands.ctp.success": "Teleported player to %s",
+
+  "commands.cuuid.success": "The UUID of %s is %s",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
@@ -191,6 +204,8 @@
   "enchCrack.insn.itemThrows": "Item throws needed: %d (about %f seconds)",
   "enchCrack.insn.itemThrows.noDummy": "No dummy enchantment",
   "enchCrack.insn.enchantments": "Enchantments on item:",
+
+  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
 
   "playerManip.state": "Player Crack State: %s",
   "playerManip.state.uncracked": "Uncracked",
@@ -235,5 +250,6 @@
   "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
   "playerManip.uncracked": "Player-Seed needs to be cracked",
 
-  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand"
+  "snakeGame.title": "Snake",
+  "snakeGame.score": "Score: %d"
 }

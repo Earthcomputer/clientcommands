@@ -1,15 +1,15 @@
 package net.earthcomputer.clientcommands.command;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.command.argument.BlockStateArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static dev.xpple.clientarguments.arguments.CBlockStateArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 import java.util.Map;
 
 import com.mojang.brigadier.CommandDispatcher;
 
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
-import net.minecraft.server.command.*;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -19,24 +19,22 @@ import net.minecraft.util.registry.Registry;
 
 public class BlockStateCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cblockstate");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cblockstate")
-            .then(argument("block", blockState())
-                .executes(ctx -> showBlockState(ctx.getSource(), getBlockState(ctx, "block").getBlockState()))));
+            .then(argument("block", blockState(registryAccess))
+                .executes(ctx -> showBlockState(ctx.getSource(), getCBlockState(ctx, "block").getBlockState()))));
     }
 
-    private static int showBlockState(ServerCommandSource source, BlockState state) {
+    private static int showBlockState(FabricClientCommandSource source, BlockState state) {
         Text name = state.getBlock().getName();
 
         Identifier id = Registry.BLOCK.getId(state.getBlock());
         String idStr = id == null ? "Unregistered" : id.toString();
 
-        sendFeedback(new TranslatableText("commands.cblockstate.header", name, idStr, state.getProperties().size()));
+        source.sendFeedback(Text.translatable("commands.cblockstate.header", name, idStr, state.getProperties().size()));
 
         for (Map.Entry<Property<?>, Comparable<?>> entry : state.getEntries().entrySet()) {
-            sendFeedback(getPropertyLine(entry));
+            source.sendFeedback(getPropertyLine(entry));
         }
 
         return 0;
@@ -46,14 +44,14 @@ public class BlockStateCommand {
         Property<?> property = entry.getKey();
         Comparable<?> value = entry.getValue();
 
-        MutableText valueText = new LiteralText(Util.getValueAsString(property, value));
+        MutableText valueText = Text.literal(Util.getValueAsString(property, value));
         if (Boolean.TRUE.equals(value)) {
             valueText.formatted(Formatting.GREEN);
         } else if (Boolean.FALSE.equals(value)) {
             valueText.formatted(Formatting.RED);
         }
 
-        return new LiteralText("- " + property.getName() + ": ").append(valueText);
+        return Text.literal("- " + property.getName() + ": ").append(valueText);
     }
 
 }

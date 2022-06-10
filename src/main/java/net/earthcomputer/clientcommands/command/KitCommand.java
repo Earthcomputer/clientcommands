@@ -1,12 +1,16 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.DataFixer;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -19,13 +23,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,23 +35,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class KitCommand {
 
-    private static final Logger LOGGER = LogManager.getLogger("clientcommands");
+    private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.saveFile.failed"));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ckit.saveFile.failed"));
 
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.create.alreadyExists", arg));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ckit.create.alreadyExists", arg));
 
-    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.ckit.load.notCreative"));
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.ckit.notFound", arg));
+    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ckit.load.notCreative"));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ckit.notFound", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
-
-    private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Map<String, NbtList> kits = new HashMap<>();
 
@@ -58,13 +56,11 @@ public class KitCommand {
         try {
             loadFile();
         } catch (IOException e) {
-            LOGGER.info("Could not load kits file, hence /ckit will not work!");
+            LOGGER.error("Could not load kits file, hence /ckit will not work!", e);
         }
     }
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("ckit");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ckit")
                 .then(literal("create")
                         .then(argument("name", StringArgumentType.string())
@@ -91,37 +87,37 @@ public class KitCommand {
                                 .executes(ctx -> preview(ctx.getSource(), StringArgumentType.getString(ctx, "name"))))));
     }
 
-    private static int create(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int create(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.getInventory().writeNbt(new NbtList()));
+        kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
-        sendFeedback("commands.ckit.create.success", name);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.ckit.create.success", name));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int delete(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int delete(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         if (kits.remove(name) == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
         saveFile();
-        sendFeedback("commands.ckit.delete.success", name);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.ckit.delete.success", name));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int edit(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int edit(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        kits.put(name, client.player.getInventory().writeNbt(new NbtList()));
+        kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
         saveFile();
-        sendFeedback("commands.ckit.edit.success", name);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.ckit.edit.success", name));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int load(ServerCommandSource source, String name, boolean override) throws CommandSyntaxException {
-        if (!client.player.getAbilities().creativeMode) {
+    private static int load(FabricClientCommandSource source, String name, boolean override) throws CommandSyntaxException {
+        if (!source.getPlayer().getAbilities().creativeMode) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
@@ -130,40 +126,40 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        PlayerInventory tempInv = new PlayerInventory(client.player);
+        PlayerInventory tempInv = new PlayerInventory(source.getPlayer());
         tempInv.readNbt(kit);
-        List<Slot> slots = client.player.playerScreenHandler.slots;
+        List<Slot> slots = source.getPlayer().playerScreenHandler.slots;
         for (int i = 0; i < slots.size(); i++) {
-            if (slots.get(i).inventory == client.player.getInventory()) {
+            if (slots.get(i).inventory == source.getPlayer().getInventory()) {
                 ItemStack itemStack = tempInv.getStack(slots.get(i).getIndex());
                 if (!itemStack.isEmpty() || override) {
-                    client.interactionManager.clickCreativeStack(itemStack, i);
+                    source.getClient().interactionManager.clickCreativeStack(itemStack, i);
                 }
             }
         }
 
-        client.player.playerScreenHandler.sendContentUpdates();
-        sendFeedback("commands.ckit.load.success", name);
-        return 0;
+        source.getPlayer().playerScreenHandler.sendContentUpdates();
+        source.sendFeedback(Text.translatable("commands.ckit.load.success", name));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int list(ServerCommandSource source) {
+    private static int list(FabricClientCommandSource source) {
         if (kits.isEmpty()) {
-            sendFeedback("commands.ckit.list.empty");
+            source.sendFeedback(Text.translatable("commands.ckit.list.empty"));
         } else {
             String list = String.join(", ", kits.keySet());
-            sendFeedback("commands.ckit.list", list);
+            source.sendFeedback(Text.translatable("commands.ckit.list", list));
         }
         return kits.size();
     }
 
-    private static int preview(ServerCommandSource source, String name) throws CommandSyntaxException {
+    private static int preview(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         NbtList kit = kits.get(name);
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        PlayerInventory tempInv = new PlayerInventory(client.player);
+        PlayerInventory tempInv = new PlayerInventory(source.getPlayer());
         tempInv.readNbt(kit);
         /*
             After executing a command, the current screen will be closed (the chat hud).
@@ -171,8 +167,8 @@ public class KitCommand {
             instantly along with the chat hud. Slightly delaying the opening of the
             screen fixes this issue.
          */
-        client.send(() -> client.openScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, client.player), tempInv, name)));
-        return 0;
+        source.getClient().send(() -> source.getClient().setScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, source.getPlayer()), tempInv, name)));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static void saveFile() throws CommandSyntaxException {
@@ -180,7 +176,7 @@ public class KitCommand {
             NbtCompound rootTag = new NbtCompound();
             NbtCompound compoundTag = new NbtCompound();
             kits.forEach(compoundTag::put);
-            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
             rootTag.put("Kits", compoundTag);
             File newFile = File.createTempFile("kits", ".dat", configPath.toFile());
             NbtIo.write(rootTag, newFile);
@@ -198,9 +194,10 @@ public class KitCommand {
         if (rootTag == null) {
             return;
         }
-        final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
+        final int currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Kits");
+        DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtElement.COMPOUND_TYPE)));
         } else {
@@ -208,7 +205,7 @@ public class KitCommand {
                 NbtList updatedListTag = new NbtList();
                 compoundTag.getList(key, NbtElement.COMPOUND_TYPE).forEach(tag -> {
                     Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                    Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+                    Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 kits.put(key, updatedListTag);
@@ -220,23 +217,30 @@ public class KitCommand {
 class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
 
     public PreviewScreen(PlayerScreenHandler playerScreenHandler, PlayerInventory inventory, String name) {
-        super(playerScreenHandler, inventory, new LiteralText(name).styled(style -> style.withColor(Formatting.RED)));
+        super(playerScreenHandler, inventory, Text.literal(name).styled(style -> style.withColor(Formatting.RED)));
         this.passEvents = true;
         this.titleX = 80;
     }
 
+    @Override
     protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
         this.textRenderer.draw(matrices, this.title, (float) this.titleX, (float) this.titleY, 0x404040);
     }
 
+    @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.drawStatusEffects = false;
         this.renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
 
         this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
 
+    @Override
+    protected void drawStatusEffects(MatrixStack matrices, int mouseX, int mouseY) {
+        // nop
+    }
+
+    @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);

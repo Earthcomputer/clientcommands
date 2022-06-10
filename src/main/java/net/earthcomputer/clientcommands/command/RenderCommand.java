@@ -1,33 +1,33 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.features.RenderSettings;
-import net.minecraft.server.command.ServerCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.earthcomputer.clientcommands.command.arguments.ClientEntityArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class RenderCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("crender");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("crender")
             .then(literal("enable")
                 .then(literal("entities")
                     .then(argument("filter", entities())
-                        .executes(ctx -> enableEntityRendering(ctx.getSource(), getEntitySelector(ctx, "filter"), true)))))
+                        .executes(ctx -> enableEntityRendering(ctx.getSource(), ctx.getArgument("filter", CEntitySelector.class), true)))))
             .then(literal("disable")
                 .then(literal("entities")
                     .then(argument("filter", entities())
-                        .executes(ctx -> enableEntityRendering(ctx.getSource(), getEntitySelector(ctx, "filter"), false))))));
+                        .executes(ctx -> enableEntityRendering(ctx.getSource(), ctx.getArgument("filter", CEntitySelector.class), false))))));
     }
 
-    private static int enableEntityRendering(ServerCommandSource source, ClientEntitySelector selector, boolean enable) {
+    private static int enableEntityRendering(FabricClientCommandSource source, CEntitySelector selector, boolean enable) {
         RenderSettings.addEntityRenderSelector(selector, enable);
-        sendFeedback("commands.crender.entities.success");
-        return 0;
+        source.sendFeedback(Text.translatable("commands.crender.entities.success"));
+        return Command.SINGLE_SUCCESS;
     }
 
 }

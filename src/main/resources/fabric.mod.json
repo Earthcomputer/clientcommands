@@ -23,8 +23,10 @@
     ]
   },
   "depends": {
+    "minecraft": "${mcversion}",
     "fabricloader": ">=0.4.0",
-    "fabric": "*"
+    "fabric": "*",
+    "clientarguments": ">=1.3.0"
   },
   "mixins": [
     "mixins.clientcommands.json"

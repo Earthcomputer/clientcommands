@@ -1,33 +1,29 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.command.ServerCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandManager.*;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GammaCommand {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        addClientSideCommand("cgamma");
-
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cgamma")
             .then(argument("gamma", doubleArg())
                 .executes(ctx -> setGamma(ctx.getSource(), getDouble(ctx, "gamma")))));
     }
 
-    private static int setGamma(ServerCommandSource source, double gamma) {
-        MinecraftClient.getInstance().options.gamma = gamma;
+    private static int setGamma(FabricClientCommandSource source, double gamma) {
+        source.getClient().options.getGamma().setValue(gamma);
 
-        Text feedback = new TranslatableText("commands.cgamma.success", gamma);
-        sendFeedback(feedback);
+        Text feedback = Text.translatable("commands.cgamma.success", gamma);
+        source.sendFeedback(feedback);
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }
