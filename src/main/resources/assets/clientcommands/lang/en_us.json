@@ -159,15 +159,13 @@
   "commands.ctemprule.reset.success": "TempRule %s has been reset to %s",
   "commands.ctemprule.set.success": "TempRule %s has been updated to %s",
 
-<<<<<<< HEAD
   "commands.ctooltip.header.held": "The tooltip of the held item is:",
   "commands.ctooltip.header.stack": "The tooltip of that item would be:",
-=======
+
   "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
   "commands.ctp.success": "Teleported player to %s",
 
   "commands.cuuid.success": "The UUID of %s is %s",
->>>>>>> fabric
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
