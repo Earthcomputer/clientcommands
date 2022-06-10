@@ -1,82 +1,79 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CTextArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTitleCommand {
-
-    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctitle")
             .then(literal("clear")
-                .executes(ctx -> executeClear()))
+                .executes(ctx -> executeClear(ctx.getSource())))
             .then(literal("reset")
-                .executes(ctx -> executeReset()))
+                .executes(ctx -> executeReset(ctx.getSource())))
             .then(literal("title")
                 .then(argument("title", text())
-                    .executes(ctx -> executeTitle(getCTextArgument(ctx, "title")))))
+                    .executes(ctx -> executeTitle(ctx.getSource(), getCTextArgument(ctx, "title")))))
             .then(literal("subtitle")
                 .then(argument("title", text())
-                    .executes(ctx -> executeSubtitle(getCTextArgument(ctx, "title")))))
+                    .executes(ctx -> executeSubtitle(ctx.getSource(), getCTextArgument(ctx, "title")))))
             .then(literal("actionbar")
                 .then(argument("title", text())
-                    .executes(ctx -> executeActionBar(getCTextArgument(ctx, "title")))))
+                    .executes(ctx -> executeActionBar(ctx.getSource(), getCTextArgument(ctx, "title")))))
             .then(literal("times")
                 .then(argument("fadeIn", integer(0))
                     .then(argument("stay", integer(0))
                         .then(argument("fadeOut", integer(0))
-                            .executes(ctx -> executeTimes(getInteger(ctx, "fadeIn"), getInteger(ctx, "stay"), getInteger(ctx, "fadeOut"))))))));
+                            .executes(ctx -> executeTimes(ctx.getSource(), getInteger(ctx, "fadeIn"), getInteger(ctx, "stay"), getInteger(ctx, "fadeOut"))))))));
     }
 
-    private static int executeClear() {
-        CLIENT.inGameHud.clearTitle();
+    private static int executeClear(FabricClientCommandSource source) {
+        source.getClient().inGameHud.clearTitle();
 
-        sendFeedback(new TranslatableText("commands.ctitle.cleared"));
-        return 1;
+        source.sendFeedback(Text.translatable("commands.ctitle.cleared"));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int executeReset() {
-        CLIENT.inGameHud.clearTitle();
-        CLIENT.inGameHud.setDefaultTitleFade();
+    private static int executeReset(FabricClientCommandSource source) {
+        source.getClient().inGameHud.clearTitle();
+        source.getClient().inGameHud.setDefaultTitleFade();
         
-        sendFeedback(new TranslatableText("commands.ctitle.reset"));
-        return 1;
+        source.sendFeedback(Text.translatable("commands.ctitle.reset"));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int executeTitle(Text title) {
-        CLIENT.inGameHud.setTitle(title);
+    private static int executeTitle(FabricClientCommandSource source, Text title) {
+        source.getClient().inGameHud.setTitle(title);
 
-        sendFeedback(new TranslatableText("commands.ctitle.show.title"));
-        return 1;
+        sendFeedback(Text.translatable("commands.ctitle.show.title"));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int executeSubtitle(Text title) {
-        CLIENT.inGameHud.setSubtitle(title);
+    private static int executeSubtitle(FabricClientCommandSource source, Text title) {
+        source.getClient().inGameHud.setSubtitle(title);
 
-        sendFeedback(new TranslatableText("commands.ctitle.show.subtitle"));
-        return 1;
+        sendFeedback(Text.translatable("commands.ctitle.show.subtitle"));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int executeActionBar(Text title) {
-        CLIENT.inGameHud.setOverlayMessage(title, false);
+    private static int executeActionBar(FabricClientCommandSource source, Text title) {
+        source.getClient().inGameHud.setOverlayMessage(title, false);
 
-        sendFeedback(new TranslatableText("commands.ctitle.show.actionbar"));
-        return 1;
+        sendFeedback(Text.translatable("commands.ctitle.show.actionbar"));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static int executeTimes(int fadeIn, int stay, int fadeOut) {
-        CLIENT.inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
+    private static int executeTimes(FabricClientCommandSource source, int fadeIn, int stay, int fadeOut) {
+        source.getClient().inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
 
-        sendFeedback(new TranslatableText("commands.ctitle.times"));
-        return 1;
+        sendFeedback(Text.translatable("commands.ctitle.times"));
+        return Command.SINGLE_SUCCESS;
     }
 }

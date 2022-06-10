@@ -1,21 +1,20 @@
 package net.cortex.clientAddon.cracker;
 
-import net.earthcomputer.clientcommands.Rand;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.mixin.CheckedRandomAccessor;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.network.MessageType;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
+import net.minecraft.util.math.random.Random;
 
 public class SeedCracker {
     public interface OnCrack {void callback(long seed); }
@@ -25,6 +24,8 @@ public class SeedCracker {
     public static long[] bits=new long[20];
     public static int expectedItems=0;
     public static LongTask currentTask;
+    private static int attemptCount = 0;
+    private static final int MAX_ATTEMPTS = 5;
 
     //returns True on success or false on failer
     private static boolean throwItems()
@@ -35,7 +36,7 @@ public class SeedCracker {
         for (int i = 0; i < 20; i++) {
             boolean success = PlayerRandCracker.throwItem();
             if (!success) {
-                MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.GAME_INFO, new TranslatableText("itemCrack.notEnoughItems").formatted(Formatting.RED), Util.NIL_UUID);
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("itemCrack.notEnoughItems").formatted(Formatting.RED));
                 EnchantmentCracker.LOGGER.info("Unable to use rng SeedCracker |not enough items|");
                 return false;
             }
@@ -48,14 +49,20 @@ public class SeedCracker {
 
         if(seed==0)//Basicaly if seed is zero it means it failed to try to crack again
         {
-            SeedCracker.crack(SeedCracker.callback);
+            attemptCount++;
+            if (attemptCount > MAX_ATTEMPTS) {
+                ClientCommandHelper.sendError(Text.translatable("commands.ccrackrng.failed"));
+                ClientCommandHelper.sendFeedback(Text.translatable("commands.ccrackrng.failed.help").styled(style -> style.withColor(Formatting.AQUA)));
+            } else {
+                SeedCracker.doCrack(SeedCracker.callback);
+            }
             return;
         }
         //Else, got a seed
 
         TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
 
-        Rand rand=new Rand(seed);
+        Random rand=Random.create(seed ^ 0x5deece66dL);
         rand.nextFloat();
         rand.nextFloat();
         //rand.nextFloat();
@@ -69,10 +76,17 @@ public class SeedCracker {
 			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" \n");
 		}*/
 
-        callback.callback(rand.getSeed());//extract seed and call callback
+        callback.callback(((CheckedRandomAccessor) rand).getSeed().get());//extract seed and call callback
     }
-    public static void crack(OnCrack Callback){
+
+    public static void crack(OnCrack callback) {
+        attemptCount = 1;
+        doCrack(callback);
+    }
+
+    private static void doCrack(OnCrack Callback){
         callback=Callback;
+        ClientCommandHelper.addOverlayMessage(Text.translatable("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         if(throwItems())
         {
             TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
@@ -80,11 +94,13 @@ public class SeedCracker {
             if (currentTask == null) {
                 currentTask = new SeedCrackTask();
                 String taskName = TaskManager.addTask("ccrackrng", currentTask);
-                Text message = new TranslatableText("commands.ccrackrng.starting")
+                Text message = Text.translatable("commands.ccrackrng.starting")
                         .append(" ")
                         .append(ClientCommandHelper.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName));
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
+        } else {
+            TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
         }
     }
 

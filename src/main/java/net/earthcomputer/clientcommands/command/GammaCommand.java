@@ -1,15 +1,13 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GammaCommand {
 
@@ -20,12 +18,12 @@ public class GammaCommand {
     }
 
     private static int setGamma(FabricClientCommandSource source, double gamma) {
-        MinecraftClient.getInstance().options.gamma = gamma;
+        source.getClient().options.getGamma().setValue(gamma);
 
-        Text feedback = new TranslatableText("commands.cgamma.success", gamma);
-        sendFeedback(feedback);
+        Text feedback = Text.translatable("commands.cgamma.success", gamma);
+        source.sendFeedback(feedback);
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

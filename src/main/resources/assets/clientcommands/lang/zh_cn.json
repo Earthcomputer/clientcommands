@@ -38,10 +38,13 @@
   "commands.ccalcstack.success.empty.exact": "%d 个物品是正好 %d 组",
   "commands.ccalcstack.success.exact": "%d 个 %s 是正好 %d 组",
 
+  "commands.ccrackrng.failed": "破解玩家随机种子失败",
+  "commands.ccrackrng.failed.help": "提示：RNG控制并不在一些被修改过的服务器有效，特别是Paper端。",
+  "commands.ccrackrng.retries": "正在破解玩家随机种子，尝试次数：%d/%d",
   "commands.ccrackrng.starting": "正在破解玩家随机种子",
   "commands.ccrackrng.success": "成功破解玩家随机种子: %d",
 
-  "commands.cenchant.expectedWithWithout": "有效参数: \"with\" 或 \"without\"",
+  "commands.cenchant.expectedWithWithoutExactly": "有效参数： \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "你请求的附魔无法获得或者需要太长时间",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测",

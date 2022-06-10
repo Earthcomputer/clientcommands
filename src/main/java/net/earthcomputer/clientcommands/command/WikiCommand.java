@@ -2,13 +2,11 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.features.WikiRetriever;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class WikiCommand {
 
@@ -22,13 +20,13 @@ public class WikiCommand {
         String content = WikiRetriever.getWikiSummary(page);
 
         if (content == null) {
-            sendError(new TranslatableText("commands.cwiki.failed"));
+            source.sendError(Text.translatable("commands.cwiki.failed"));
             return 0;
         }
 
         content = content.trim();
         for (String line : content.split("\n")) {
-            sendFeedback(new LiteralText(line));
+            source.sendFeedback(Text.literal(line));
         }
 
         return content.length();

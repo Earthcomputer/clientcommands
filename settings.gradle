@@ -9,8 +9,3 @@ pluginManagement {
 }
 
 rootProject.name = 'clientcommands'
-
-// Optionally depend on clientcommands-scripting
-if (new File(rootProject.projectDir, 'clientcommands-scripting/build.gradle').exists()) {
-    include 'clientcommands-scripting'
-}

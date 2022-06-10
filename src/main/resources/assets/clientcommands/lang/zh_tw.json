@@ -13,7 +13,6 @@
   "commands.ccrackrng.starting": "正在破譯玩家隨機種子",
   "commands.ccrackrng.success": "玩家隨機種子已破譯： %d",
 
-  "commands.cenchant.expectedWithWithout": "有效參數： \"with\" 或 \"without\"",
   "commands.cenchant.failed": "您請求的附魔無法獲得或者需要太長時間",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本指令需要啟用附魔預測。",
