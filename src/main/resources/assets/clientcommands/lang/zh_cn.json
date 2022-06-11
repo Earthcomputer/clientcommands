@@ -242,4 +242,7 @@
   "playerManip.uncracked": "需要破解玩家种子",
 
   "itemCrack.notEnoughItems": "无法使用随机数种子破解: 玩家手中物品不足"
+  
+  "snakeGame.title": "贪吃是",
+  "snakeGame.score": "分数: %d"
 }
