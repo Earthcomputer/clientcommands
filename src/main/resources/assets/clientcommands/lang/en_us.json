@@ -161,6 +161,16 @@
   "commands.ctemprule.reset.success": "TempRule %s has been reset to %s",
   "commands.ctemprule.set.success": "TempRule %s has been updated to %s",
 
+  "commands.ctitle.cleared": "Cleared titles",
+  "commands.ctitle.reset": "Reset title options",
+  "commands.ctitle.show.title": "Showing new title",
+  "commands.ctitle.show.subtitle": "Showing new subtitle",
+  "commands.ctitle.show.actionbar": "Showing new actionbar title",
+  "commands.ctitle.times": "Changed title display times",
+
+  "commands.ctooltip.header.held": "The tooltip of the held item is:",
+  "commands.ctooltip.header.stack": "The tooltip of that item would be:",
+
   "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
   "commands.ctp.success": "Teleported player to %s",
 

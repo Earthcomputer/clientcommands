@@ -73,6 +73,8 @@ public class ClientCommands implements ClientModInitializer {
         PingCommand.register(dispatcher);
         UuidCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
+        CTitleCommand.register(dispatcher);
+        TooltipCommand.register(dispatcher, registryAccess);
         BlockStateCommand.register(dispatcher, registryAccess);
 
         CrackRNGCommand.register(dispatcher);
