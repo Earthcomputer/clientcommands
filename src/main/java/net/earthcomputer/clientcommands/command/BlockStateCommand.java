@@ -45,9 +45,9 @@ public class BlockStateCommand {
         Comparable<?> value = entry.getValue();
 
         MutableText valueText = Text.literal(Util.getValueAsString(property, value));
-        if (Boolean.TRUE.equals(value)) {
+        if (value == Boolean.TRUE) {
             valueText.formatted(Formatting.GREEN);
-        } else if (Boolean.FALSE.equals(value)) {
+        } else if (value == Boolean.FALSE) {
             valueText.formatted(Formatting.RED);
         }
 
