@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public class TranslationQueryArgumentType implements ArgumentType<TranslationQueryArgumentType.TranslationQuery> {
 
-    private static final Collection<String> EXAMPLES = Arrays.asList("nl", "de", "en");
+    private static final Collection<String> EXAMPLES = Arrays.asList("\"Voorbeeld\" from nl to en", "\"Non numeranda, sed ponderanda sunt argumenta\" from la", "\"Cogito, ergo sum\"");
 
     private static final DynamicCommandExceptionType UNKNOWN_LANGUAGE_CODE_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ctranslate.unknownLanguageCode", arg));
     private static final SimpleCommandExceptionType EXPECTED_FROM_TO_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctranslate.expectedFromTo"));
