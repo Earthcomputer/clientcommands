@@ -4,8 +4,11 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandRegistryWrapper;
 import net.minecraft.command.argument.ItemPredicateArgumentType;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.item.Item;
@@ -13,58 +16,53 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.tag.TagKey;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryEntryList;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemPredicateArgumentType.ClientItemPredicateArgument> {
+public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemPredicateArgumentType.ClientItemPredicate> {
 
-    private static final DynamicCommandExceptionType UNKNOWN_TAG_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("arguments.item.tag.unknown", arg));
+    private final CommandRegistryWrapper<Item> registryWrapper;
 
-    private ClientItemPredicateArgumentType() {}
+    private ClientItemPredicateArgumentType(CommandRegistryAccess registryAccess) {
+        registryWrapper = registryAccess.createWrapper(Registry.ITEM_KEY);
+    }
 
     /**
-     * @deprecated Use {@link #clientItemPredicate()} instead
+     * @deprecated Use {@link #clientItemPredicate(CommandRegistryAccess)} instead
      */
     @Deprecated
-    public static ItemPredicateArgumentType itemPredicate() {
-        return ItemPredicateArgumentType.itemPredicate();
+    public static ItemPredicateArgumentType itemPredicate(CommandRegistryAccess registryAccess) {
+        return ItemPredicateArgumentType.itemPredicate(registryAccess);
     }
 
-    public static ClientItemPredicateArgumentType clientItemPredicate() {
-        return new ClientItemPredicateArgumentType();
+    public static ClientItemPredicateArgumentType clientItemPredicate(CommandRegistryAccess registryAccess) {
+        return new ClientItemPredicateArgumentType(registryAccess);
     }
 
-    public static ClientItemPredicate getClientItemPredicate(CommandContext<FabricClientCommandSource> ctx, String name) throws CommandSyntaxException {
-        return ctx.getArgument(name, ClientItemPredicateArgument.class).create(ctx);
+    public static ClientItemPredicate getClientItemPredicate(CommandContext<FabricClientCommandSource> ctx, String name) {
+        return ctx.getArgument(name, ClientItemPredicate.class);
     }
 
     @Override
-    public ClientItemPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
-        ItemStringReader itemReader = new ItemStringReader(reader, true).consume();
-        if (itemReader.getItem() != null) {
-            ItemPredicate predicate = new ItemPredicate(itemReader.getItem(), itemReader.getNbt());
-            return ctx -> predicate;
-        } else {
-            TagKey<Item> tag = itemReader.getId();
-            return ctx -> {
-                if (!Registry.ITEM.containsTag(tag)) {
-                    throw UNKNOWN_TAG_EXCEPTION.create(tag);
-                }
-                return new TagPredicate(tag, itemReader.getNbt());
-            };
-        }
+    public ClientItemPredicate parse(StringReader reader) throws CommandSyntaxException {
+        int start = reader.getCursor();
+        var result = ItemStringReader.itemOrTag(registryWrapper, reader);
+        return result.map(
+                itemResult -> new ItemPredicate(itemResult.item(), itemResult.nbt()),
+                tagResult -> new TagPredicate(reader.getString().substring(start, reader.getCursor()), tagResult.tag(), tagResult.nbt())
+        );
     }
 
-    @FunctionalInterface
-    public interface ClientItemPredicateArgument {
-        ClientItemPredicate create(CommandContext<FabricClientCommandSource> commandContext) throws CommandSyntaxException;
+    @Override
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        return ItemStringReader.getSuggestions(registryWrapper, builder, true);
     }
 
     public sealed interface ClientItemPredicate extends Predicate<ItemStack> {
@@ -72,22 +70,20 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
         Collection<Item> getPossibleItems();
     }
 
-    record TagPredicate(TagKey<Item> tag, NbtCompound compound) implements ClientItemPredicate {
+    record TagPredicate(String id, RegistryEntryList<Item> tag, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
-            return stack.isIn(this.tag) && NbtHelper.matches(this.compound, stack.getNbt(), true);
+            return tag.contains(stack.getRegistryEntry()) && NbtHelper.matches(this.compound, stack.getNbt(), true);
         }
 
         @Override
         public Collection<Item> getPossibleItems() {
-            return Registry.ITEM.getEntryList(tag)
-                    .map(list -> list.stream().map(RegistryEntry::value).toList())
-                    .orElse(Collections.emptyList());
+            return tag.stream().map(RegistryEntry::value).toList();
         }
 
         @Override
         public String getPrettyString() {
-            String ret = "#" + this.tag.id();
+            String ret = "#" + id;
             if (compound != null) {
                 ret += compound;
             }
@@ -95,20 +91,20 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
         }
     }
 
-    record ItemPredicate(Item item, NbtCompound compound) implements ClientItemPredicate {
+    record ItemPredicate(RegistryEntry<Item> item, NbtCompound compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
-            return stack.getItem() == this.item && NbtHelper.matches(this.compound, stack.getNbt(), true);
+            return stack.itemMatches(item) && NbtHelper.matches(this.compound, stack.getNbt(), true);
         }
 
         @Override
         public Collection<Item> getPossibleItems() {
-            return Collections.singletonList(item);
+            return Collections.singletonList(item.value());
         }
 
         @Override
         public String getPrettyString() {
-            String ret = String.valueOf(Registry.ITEM.getId(item));
+            String ret = String.valueOf(Registry.ITEM.getId(item.value()));
             if (compound != null) {
                 ret += compound;
             }

@@ -1,26 +1,28 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.interfaces.IItemGroup;
 import net.earthcomputer.clientcommands.mixin.CreativeInventoryScreenAccessor;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
 
@@ -34,24 +36,21 @@ import java.util.Map;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 import static net.minecraft.command.CommandSource.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
 
 public class ItemGroupCommand {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.notFound", arg));
-    private static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.outOfBounds", arg));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.notFound", arg));
+    private static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.outOfBounds", arg));
 
-    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.citemgroup.saveFile.failed"));
-    private static final DynamicCommandExceptionType ILLEGAL_CHARACTER_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.illegalCharacter", arg));
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.citemgroup.addGroup.alreadyExists", arg));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.citemgroup.saveFile.failed"));
+    private static final DynamicCommandExceptionType ILLEGAL_CHARACTER_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.addGroup.illegalCharacter", arg));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.citemgroup.addGroup.alreadyExists", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
-
-    private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Map<String, Group> groups = new HashMap<>();
 
@@ -63,13 +62,13 @@ public class ItemGroupCommand {
         }
     }
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("citemgroup")
             .then(literal("modify")
                 .then(argument("group", string())
                     .suggests((ctx, builder) -> suggestMatching(groups.keySet(), builder))
                     .then(literal("add")
-                        .then(argument("itemstack", itemStack())
+                        .then(argument("itemstack", itemStack(registryAccess))
                             .then(argument("count", integer(1))
                                 .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
                             .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createStack(1, false)))))
@@ -78,19 +77,19 @@ public class ItemGroupCommand {
                             .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index")))))
                     .then(literal("set")
                         .then(argument("index", integer(0))
-                            .then(argument("itemstack", itemStack())
+                            .then(argument("itemstack", itemStack(registryAccess))
                                 .then(argument("count", integer(1))
                                     .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createStack(getInteger(ctx, "count"), false))))
                                 .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createStack(1, false))))))
                     .then(literal("icon")
-                        .then(argument("icon", itemStack())
+                        .then(argument("icon", itemStack(registryAccess))
                             .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createStack(1, false)))))
                     .then(literal("rename")
                         .then(argument("new", string())
                             .executes(ctx -> renameGroup(ctx.getSource(), getString(ctx, "group"), getString(ctx, "new")))))))
             .then(literal("add")
                 .then(argument("group", string())
-                    .then(argument("icon", itemStack())
+                    .then(argument("icon", itemStack(registryAccess))
                          .executes(ctx -> addGroup(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createStack(1, false))))))
             .then(literal("remove")
                 .then(argument("group", string())
@@ -113,19 +112,27 @@ public class ItemGroupCommand {
 
         groups.put(name, new Group(itemGroup, icon, new NbtList()));
         saveFile();
-        sendFeedback("commands.citemgroup.addGroup.success", name);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.citemgroup.addGroup.success", name));
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static final Field FABRIC_CURRENT_PAGE_FIELD;
+    private static final Field CURRENT_PAGE_FIELD;
     static {
+        Field temp;
         try {
             //noinspection JavaReflectionMemberAccess
-            FABRIC_CURRENT_PAGE_FIELD = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
-            FABRIC_CURRENT_PAGE_FIELD.setAccessible(true);
+            temp = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
+            temp.setAccessible(true);
         } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+            try {
+                //noinspection JavaReflectionMemberAccess
+                temp = CreativeInventoryScreen.class.getDeclaredField("quilt$currentPage");
+                temp.setAccessible(true);
+            } catch (ReflectiveOperationException ex) {
+                throw new RuntimeException(ex);
+            }
         }
+        CURRENT_PAGE_FIELD = temp;
     }
 
     private static int removeGroup(FabricClientCommandSource source, String name) throws CommandSyntaxException {
@@ -138,13 +145,13 @@ public class ItemGroupCommand {
         reloadGroups();
         CreativeInventoryScreenAccessor.setSelectedTab(0);
         try {
-            FABRIC_CURRENT_PAGE_FIELD.set(null, 0);
+            CURRENT_PAGE_FIELD.set(null, 0);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
         saveFile();
-        sendFeedback("commands.citemgroup.removeGroup.success", name);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.citemgroup.removeGroup.success", name));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int addStack(FabricClientCommandSource source, String name, ItemStack itemStack) throws CommandSyntaxException {
@@ -158,8 +165,8 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int removeStack(FabricClientCommandSource source, String name, int index) throws CommandSyntaxException {
@@ -176,8 +183,8 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.removeStack.success", name, index);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.citemgroup.removeStack.success", name, index));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int setStack(FabricClientCommandSource source, String name, int index, ItemStack itemStack) throws CommandSyntaxException {
@@ -194,8 +201,8 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName());
-        return 0;
+        source.sendFeedback(Text.translatable("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName()));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int changeIcon(FabricClientCommandSource source, String name, ItemStack icon) throws CommandSyntaxException {
@@ -216,8 +223,8 @@ public class ItemGroupCommand {
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName());
-        return 0;
+        source.sendFeedback(Text.translatable("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName()));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int renameGroup(FabricClientCommandSource source, String name, String _new) throws CommandSyntaxException {
@@ -225,25 +232,23 @@ public class ItemGroupCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
+        Identifier identifier = Identifier.tryParse("clientcommands:" + _new);
+        if (identifier == null) {
+            throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
+        }
         Group group = groups.remove(name);
         ItemGroup itemGroup = group.getItemGroup();
         NbtList items = group.getItems();
         ItemStack icon = itemGroup.getIcon();
-        try {
-            itemGroup = FabricItemGroupBuilder.create(
-                    new Identifier("clientcommands", _new))
-                    .icon(() -> icon)
-                    .build();
-
-            groups.put(_new, new Group(itemGroup, icon, items));
-        } catch (InvalidIdentifierException e) {
-            throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
-        }
+        itemGroup = FabricItemGroupBuilder.create(identifier)
+                .icon(() -> icon)
+                .build();
+        groups.put(_new, new Group(itemGroup, icon, items));
 
         reloadGroups();
         saveFile();
-        sendFeedback("commands.citemgroup.renameGroup.success", name, _new);
-        return 0;
+        source.sendFeedback(Text.translatable("commands.citemgroup.renameGroup.success", name, _new));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static void saveFile() throws CommandSyntaxException {
@@ -256,7 +261,7 @@ public class ItemGroupCommand {
                 group.put("items", value.getItems());
                 compoundTag.put(key, group);
             });
-            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getWorldVersion());
+            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
             rootTag.put("Groups", compoundTag);
             File newFile = File.createTempFile("groups", ".dat", configPath.toFile());
             NbtIo.write(rootTag, newFile);
@@ -275,9 +280,10 @@ public class ItemGroupCommand {
         if (rootTag == null) {
             return;
         }
-        final int currentVersion = SharedConstants.getGameVersion().getWorldVersion();
+        final int currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
         final int fileVersion = rootTag.getInt("DataVersion");
         NbtCompound compoundTag = rootTag.getCompound("Groups");
+        DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
@@ -298,13 +304,13 @@ public class ItemGroupCommand {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
                 Dynamic<NbtElement> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, group.getCompound("icon"));
-                Dynamic<NbtElement> newStackDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
+                Dynamic<NbtElement> newStackDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
                 ItemStack icon = ItemStack.fromNbt((NbtCompound) newStackDynamic.getValue());
 
                 NbtList updatedListTag = new NbtList();
                 group.getList("items", NbtElement.COMPOUND_TYPE).forEach(tag -> {
                     Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                    Dynamic<NbtElement> newTagDynamic = client.getDataFixer().update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+                    Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 ItemGroup itemGroup = FabricItemGroupBuilder.create(

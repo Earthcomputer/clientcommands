@@ -3,9 +3,8 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.earthcomputer.clientcommands.TempRules;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 
 import java.util.Comparator;
@@ -14,8 +13,7 @@ import java.util.List;
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TempRuleCommand {
 
@@ -80,9 +78,9 @@ public class TempRuleCommand {
         List<String> rules = TempRules.getRules();
         rules.sort(Comparator.naturalOrder());
 
-        sendFeedback(new TranslatableText("commands.ctemprule.list.header", rules.size()));
+        source.sendFeedback(Text.translatable("commands.ctemprule.list.header", rules.size()));
         for (String rule : rules) {
-            sendFeedback(new LiteralText("- " + rule));
+            source.sendFeedback(Text.literal("- " + rule));
         }
 
         return rules.size();
@@ -91,21 +89,21 @@ public class TempRuleCommand {
     private static int getRule(FabricClientCommandSource source, String rule) {
         Object val = TempRules.get(rule);
         String str = TempRules.asString(val);
-        sendFeedback(new LiteralText(rule + " = " + str));
+        source.sendFeedback(Text.literal(rule + " = " + str));
         return 0;
     }
 
     private static int setRule(FabricClientCommandSource source, String rule, Object value) {
         TempRules.set(rule, value);
         String str = TempRules.asString(value);
-        sendFeedback(new TranslatableText("commands.ctemprule.set.success", rule, str));
+        source.sendFeedback(Text.translatable("commands.ctemprule.set.success", rule, str));
         return 0;
     }
 
     private static int resetRule(FabricClientCommandSource source, String rule) {
         TempRules.reset(rule);
         String str = TempRules.asString(TempRules.get(rule));
-        sendFeedback(new TranslatableText("commands.ctemprule.reset.success", rule, str));
+        source.sendFeedback(Text.translatable("commands.ctemprule.reset.success", rule, str));
         return 0;
     }
 

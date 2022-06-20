@@ -8,7 +8,7 @@ import net.minecraft.predicate.entity.LocationPredicate;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.gen.structure.Structure;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -27,7 +27,7 @@ public interface LocationPredicateAccessor {
     RegistryKey<Biome> getBiome();
 
     @Accessor
-    RegistryKey<ConfiguredStructureFeature<?, ?>> getFeature();
+    RegistryKey<Structure> getFeature();
 
     @Accessor
     RegistryKey<World> getDimension();

@@ -9,7 +9,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.EnchantmentScreenHandler;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,7 +36,7 @@ public abstract class MixinEnchantingScreen extends HandledScreen<EnchantmentScr
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
-            addDrawableChild(new ButtonWidget(width - 150, 0, 150, 20, new TranslatableText("enchCrack.addInfo"), button -> {
+            addDrawableChild(new ButtonWidget(width - 150, 0, 150, 20, Text.translatable("enchCrack.addInfo"), button -> {
                 EnchantmentCracker.addEnchantmentSeedInfo(MinecraftClient.getInstance().world, getScreenHandler());
             }));
         }

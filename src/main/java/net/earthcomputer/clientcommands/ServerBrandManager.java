@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands;
 
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class ServerBrandManager {
@@ -32,7 +32,7 @@ public class ServerBrandManager {
     public static void rngWarning() {
         if (!isVanilla() && !hasWarnedRng && !MinecraftClient.getInstance().isIntegratedServerRunning()) {
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
-                    new TranslatableText("playerManip.serverBrandWarning").formatted(Formatting.YELLOW));
+                    Text.translatable("playerManip.serverBrandWarning").formatted(Formatting.YELLOW));
             hasWarnedRng = true;
         }
     }

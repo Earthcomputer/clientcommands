@@ -13,8 +13,8 @@ import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.LevelLoadingScreen;
+import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.ProgressScreen;
-import net.minecraft.client.gui.screen.SaveLevelScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -50,7 +50,7 @@ public abstract class MixinMinecraftClient {
     @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void onOpenScreen(Screen screen, CallbackInfo ci) {
         if (screen != null
-                && !(screen instanceof SaveLevelScreen)
+                && !(screen instanceof MessageScreen)
                 && !(screen instanceof LevelLoadingScreen)
                 && !(screen instanceof ProgressScreen)
                 && !(screen instanceof ConnectScreen)
