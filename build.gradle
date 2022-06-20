@@ -1,5 +1,6 @@
 plugins {
-	id 'fabric-loom' version '0.11-SNAPSHOT'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
+	id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
 	id 'maven-publish'
 }
 
@@ -20,15 +21,6 @@ loom {
 	accessWidenerPath = file('src/main/resources/clientcommands.aw')
 }
 
-def clientcommandsScriptingExists = findProject(':clientcommands-scripting') != null
-subprojects {
-	afterEvaluate {
-		dependencies {
-			implementation project(':')
-		}
-	}
-}
-
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -41,22 +33,19 @@ dependencies {
 		transitive = false
 	}
 
-	modImplementation 'dev.xpple:clientarguments:1.3.1'
-	include 'dev.xpple:clientarguments:1.3.1'
-
-	if (clientcommandsScriptingExists) {
-		include project(':clientcommands-scripting')
-	}
+	modImplementation 'dev.xpple:clientarguments:1.4.1'
+	include 'dev.xpple:clientarguments:1.4.1'
 }
 
 processResources {
 	inputs.property "version", project.version
+	inputs.property "mcversion", project.minecraft_version_semver
 
 	duplicatesStrategy DuplicatesStrategy.WARN
 
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
-		expand "version": project.version
+		expand "version": project.version, "mcversion": project.minecraft_version_semver
 	}
 
 	from(sourceSets.main.resources.srcDirs) {
@@ -69,7 +58,7 @@ tasks.withType(JavaCompile) {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = "sources"
+	archiveClassifier.set("sources")
 	from sourceSets.main.allSource
 }
 

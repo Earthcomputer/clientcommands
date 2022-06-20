@@ -4,21 +4,22 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import com.mojang.datafixers.util.Either;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandRegistryWrapper;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.state.property.Property;
-import net.minecraft.tag.TagKey;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntryList;
 import net.minecraft.world.BlockView;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -31,16 +32,17 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgumentParser> {
-    private static final DynamicCommandExceptionType UNKNOWN_TAG_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("arguments.block.tag.unknown", arg));
-
+public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBlockPredicateArgumentType.ParseResult> {
+    private final CommandRegistryWrapper<Block> registryWrapper;
     private boolean allowNbt = true;
     private boolean allowTags = true;
 
-    private ClientBlockPredicateArgumentType() {}
+    private ClientBlockPredicateArgumentType(CommandRegistryAccess registryAccess) {
+        registryWrapper = registryAccess.createWrapper(Registry.BLOCK_KEY);
+    }
 
-    public static ClientBlockPredicateArgumentType blockPredicate() {
-        return new ClientBlockPredicateArgumentType();
+    public static ClientBlockPredicateArgumentType blockPredicate(CommandRegistryAccess registryAccess) {
+        return new ClientBlockPredicateArgumentType(registryAccess);
     }
 
     public ClientBlockPredicateArgumentType disallowNbt() {
@@ -54,30 +56,20 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
     }
 
     @Override
-    public BlockArgumentParser parse(StringReader stringReader) throws CommandSyntaxException {
-        return (new BlockArgumentParser(stringReader, allowTags)).parse(allowNbt);
+    public ParseResult parse(StringReader stringReader) throws CommandSyntaxException {
+        var result = BlockArgumentParser.blockOrTag(registryWrapper, stringReader, allowNbt);
+        return new ParseResult(result, registryWrapper);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        StringReader stringReader = new StringReader(builder.getInput());
-        stringReader.setCursor(builder.getStart());
-        BlockArgumentParser blockParser = new BlockArgumentParser(stringReader, allowTags);
-
-        try {
-            blockParser.parse(allowNbt);
-        } catch (CommandSyntaxException ignore) {
-        }
-
-        return blockParser.getSuggestions(builder, Registry.BLOCK);
+        return BlockArgumentParser.getSuggestions(registryWrapper, builder, allowTags, allowNbt);
     }
 
     public static ClientBlockPredicate getBlockPredicate(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
-        Registry<Block> blockRegistry = context.getSource().getRegistryManager().get(Registry.BLOCK_KEY);
-
-        BlockArgumentParser argParser = context.getArgument(arg, BlockArgumentParser.class);
-        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(blockRegistry, Collections.singletonList(argParser));
-        NbtCompound nbtData = argParser.getNbtData();
+        ParseResult result = context.getArgument(arg, ParseResult.class);
+        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(Collections.singletonList(result.result));
+        NbtCompound nbtData = result.result.map(BlockArgumentParser.BlockResult::nbt, BlockArgumentParser.TagResult::nbt);
         if (nbtData == null) {
             return predicate;
         }
@@ -92,19 +84,17 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
     }
 
     public static ClientBlockPredicate getBlockPredicateList(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
-        Registry<Block> blockRegistry = context.getSource().getRegistryManager().get(Registry.BLOCK_KEY);
+        List<ParseResult> results = ListArgumentType.getList(context, arg);
+        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(results.stream().map(ParseResult::result).toList());
 
-        List<BlockArgumentParser> argParsers = ListArgumentType.getList(context, arg);
-        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(blockRegistry, argParsers);
-
-        List<Pair<Predicate<BlockState>, NbtCompound>> nbtPredicates = new ArrayList<>(argParsers.size());
+        List<Pair<Predicate<BlockState>, NbtCompound>> nbtPredicates = new ArrayList<>(results.size());
         boolean nbtSensitive = false;
-        for (BlockArgumentParser parser : argParsers) {
-            NbtCompound nbtData = parser.getNbtData();
+        for (ParseResult result : results) {
+            NbtCompound nbtData = result.result.map(BlockArgumentParser.BlockResult::nbt, BlockArgumentParser.TagResult::nbt);
             if (nbtData != null) {
                 nbtSensitive = true;
             }
-            nbtPredicates.add(Pair.of(getPredicateWithoutNbt(blockRegistry, parser), nbtData));
+            nbtPredicates.add(Pair.of(getPredicateWithoutNbt(result.result), nbtData));
         }
 
         if (!nbtSensitive) {
@@ -145,10 +135,10 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
         };
     }
 
-    private static ClientBlockPredicate getPredicateForListWithoutNbt(Registry<Block> blockRegistry, List<BlockArgumentParser> parsers) throws CommandSyntaxException {
-        List<Predicate<BlockState>> predicates = new ArrayList<>(parsers.size());
-        for (BlockArgumentParser parser : parsers) {
-            predicates.add(getPredicateWithoutNbt(blockRegistry, parser));
+    private static ClientBlockPredicate getPredicateForListWithoutNbt(List<Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult>> results) throws CommandSyntaxException {
+        List<Predicate<BlockState>> predicates = new ArrayList<>(results.size());
+        for (var result : results) {
+            predicates.add(getPredicateWithoutNbt(result));
         }
 
         // slower than lazy computation but thread safe
@@ -166,48 +156,53 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<BlockArgum
         return (blockView, pos) -> mask.get(Block.STATE_IDS.getRawId(blockView.getBlockState(pos)));
     }
 
-    private static Predicate<BlockState> getPredicateWithoutNbt(Registry<Block> blockRegistry, BlockArgumentParser parser) throws CommandSyntaxException {
-        BlockState myState = parser.getBlockState();
-        if (myState != null) {
-            Map<Property<?>, Comparable<?>> props = parser.getBlockProperties();
-            return state -> {
-                if (!state.isOf(myState.getBlock())) {
-                    return false;
-                }
-                for (Map.Entry<Property<?>, Comparable<?>> entry : props.entrySet()) {
-                    if (state.get(entry.getKey()) != entry.getValue()) {
-                        return false;
-                    }
-                }
-                return true;
-            };
-        } else {
-            TagKey<Block> myTag = parser.getTagId();
-            if (!blockRegistry.containsTag(myTag)) {
-                throw UNKNOWN_TAG_EXCEPTION.create(myTag);
-            }
+    private static Predicate<BlockState> getPredicateWithoutNbt(Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult> result) throws CommandSyntaxException {
+        return result.map(
+                blockResult -> {
+                    Map<Property<?>, Comparable<?>> props = blockResult.properties();
+                    return state -> {
+                        if (!state.isOf(blockResult.blockState().getBlock())) {
+                            return false;
+                        }
+                        for (Map.Entry<Property<?>, Comparable<?>> entry : props.entrySet()) {
+                            if (state.get(entry.getKey()) != entry.getValue()) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    };
+                },
+                tagResult -> {
+                    RegistryEntryList<Block> myTag = tagResult.tag();
 
-            Map<String, String> props = parser.getProperties();
-            return state -> {
-                if (!state.isIn(myTag)) {
-                    return false;
+                    Map<String, String> props = tagResult.vagueProperties();
+                    return state -> {
+                        if (!state.isIn(myTag)) {
+                            return false;
+                        }
+                        for (Map.Entry<String, String> entry : props.entrySet()) {
+                            Property<?> prop = state.getBlock().getStateManager().getProperty(entry.getKey());
+                            if (prop == null) {
+                                return false;
+                            }
+                            Comparable<?> expectedValue = prop.parse(entry.getValue()).orElse(null);
+                            if (expectedValue == null) {
+                                return false;
+                            }
+                            if (state.get(prop) != expectedValue) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    };
                 }
-                for (Map.Entry<String, String> entry : props.entrySet()) {
-                    Property<?> prop = state.getBlock().getStateManager().getProperty(entry.getKey());
-                    if (prop == null) {
-                        return false;
-                    }
-                    Comparable<?> expectedValue = prop.parse(entry.getValue()).orElse(null);
-                    if (expectedValue == null) {
-                        return false;
-                    }
-                    if (state.get(prop) != expectedValue) {
-                        return false;
-                    }
-                }
-                return true;
-            };
-        }
+        );
+    }
+
+    public record ParseResult(
+            Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult> result,
+            CommandRegistryWrapper<Block> registryWrapper
+    ) {
     }
 
     @FunctionalInterface

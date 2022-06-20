@@ -13,6 +13,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.EnchantingTableBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.math.MatrixStack;
@@ -25,18 +26,22 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.screen.EnchantmentScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class EnchantmentCracker {
@@ -179,7 +184,7 @@ public class EnchantmentCracker {
         }
         int power = getEnchantPower(world, tablePos);
 
-        Random rand = new Random();
+        Random rand = Random.create();
         int[] actualEnchantLevels = container.enchantmentPower;
         int[] actualEnchantmentClues = container.enchantmentId;
         int[] actualLevelClues = container.enchantmentLevel;
@@ -319,7 +324,7 @@ public class EnchantmentCracker {
             int xpSeed = i == -1 ?
                     possibleXPSeeds.iterator().next()
                     : (int) (((seed * PlayerRandCracker.MULTIPLIER + PlayerRandCracker.ADDEND) & PlayerRandCracker.MASK) >>> 16);
-            Random rand = new Random();
+            Random rand = Random.create();
             for (bookshelvesNeeded = 0; bookshelvesNeeded <= 15; bookshelvesNeeded++) {
                 rand.setSeed(xpSeed);
                 for (slot = 0; slot < 3; slot++) {
@@ -395,7 +400,7 @@ public class EnchantmentCracker {
                 @Override
                 public void initialize() {
                     TempRules.playerCrackState = PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
-                    MinecraftClient.getInstance().player.sendSystemMessage(new TranslatableText("enchCrack.insn.dummy"), Util.NIL_UUID);
+                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("enchCrack.insn.dummy"));
                     doneEnchantment = false;
                 }
 
@@ -421,10 +426,10 @@ public class EnchantmentCracker {
             @Override
             public void run() {
                 if (TempRules.enchCrackState == CrackState.CRACKED && doneEnchantment) {
-                    ClientPlayerEntity p = MinecraftClient.getInstance().player;
-                    p.sendSystemMessage(new LiteralText(Formatting.BOLD + I18n.translate("enchCrack.insn.ready")), Util.NIL_UUID);
-                    p.sendSystemMessage(new TranslatableText("enchCrack.insn.bookshelves", bookshelvesNeeded_f), Util.NIL_UUID);
-                    p.sendSystemMessage(new TranslatableText("enchCrack.insn.slot", slot_f + 1), Util.NIL_UUID);
+                    ChatHud chatHud = MinecraftClient.getInstance().inGameHud.getChatHud();
+                    chatHud.addMessage(Text.translatable("enchCrack.insn.ready").formatted(Formatting.BOLD));
+                    chatHud.addMessage(Text.translatable("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
+                    chatHud.addMessage(Text.translatable("enchCrack.insn.slot", slot_f + 1));
                 }
             }
         });
@@ -494,7 +499,7 @@ public class EnchantmentCracker {
             }
         } else {
             // return the enchantments using our cracked seed
-            Random rand = new Random();
+            Random rand = Random.create();
             int xpSeed = possibleXPSeeds.iterator().next();
             ItemStack enchantingStack = enchContainer.getSlot(0).getStack();
             int enchantLevels = enchContainer.enchantmentPower[slot];

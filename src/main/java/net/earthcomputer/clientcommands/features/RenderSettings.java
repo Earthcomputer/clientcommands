@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import dev.xpple.clientarguments.arguments.CEntitySelector;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.entity.Entity;

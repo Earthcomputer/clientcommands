@@ -7,7 +7,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.*;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -23,9 +22,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinClientPlayerInteractionManager {
 
     @Inject(method = "interactBlock", at = @At("HEAD"))
-    public void onRightClickBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> ci) {
+    public void onRightClickBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> ci) {
         BlockPos pos = hitResult.getBlockPos();
-        if (world.getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE)
+        if (player.world.getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE)
             EnchantmentCracker.enchantingTablePos = pos;
     }
 
