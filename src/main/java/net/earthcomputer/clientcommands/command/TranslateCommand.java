@@ -30,7 +30,7 @@ public class TranslateCommand {
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
-    private static final int DURATION = 5; // seconds
+    private static final Duration DURATION = Duration.ofSeconds(5);
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctranslate")
@@ -41,7 +41,7 @@ public class TranslateCommand {
     private static int translate(FabricClientCommandSource source, TranslationQueryArgumentType.TranslationQuery query) throws CommandSyntaxException {
         try {
             HttpRequest request = HttpRequest.newBuilder(createUri(query.from(), query.to(), query.query()))
-                    .timeout(Duration.ofSeconds(DURATION))
+                    .timeout(DURATION)
                     .GET()
                     .build();
             httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())

@@ -33,7 +33,7 @@ public class PlayerInfoCommand {
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
-    private static final int DURATION = 5; // seconds
+    private static final Duration DURATION = Duration.ofSeconds(5);
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         LiteralCommandNode<FabricClientCommandSource> cplayerinfo = dispatcher.register(literal("cplayerinfo"));
@@ -77,7 +77,7 @@ public class PlayerInfoCommand {
 
     private static void getNameHistoryByName(FabricClientCommandSource source, String player) {
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/users/profiles/minecraft/" + player))
-                .timeout(Duration.ofSeconds(DURATION))
+                .timeout(DURATION)
                 .GET()
                 .build();
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
@@ -94,7 +94,7 @@ public class PlayerInfoCommand {
 
     private static void fetchNameHistory(FabricClientCommandSource source, String uuid) {
         HttpRequest request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/user/profiles/" + uuid + "/names"))
-                .timeout(Duration.ofSeconds(DURATION))
+                .timeout(DURATION)
                 .GET()
                 .build();
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
