@@ -73,6 +73,7 @@
     "MixinTextFieldWidget",
     "ProjectileEntityAccessor",
     "ScreenHandlerAccessor",
+    "SimpleOptionAccessor",
     "TagEntryAccessor",
     "WeatherCheckLootConditionAccessor"
   ],
