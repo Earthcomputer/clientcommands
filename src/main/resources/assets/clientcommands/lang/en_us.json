@@ -176,6 +176,12 @@
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
+  "commands.cwhisperencrypted.message_too_long": "Message too long",
+  "commands.cwhisperencrypted.player_not_found": "Player not found",
+  "commands.cwhisperencrypted.no_priv_key": "No private key found",
+  "commands.cwhisperencrypted.pub_key_not_found": "Public key not found",
+
+
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "Cancel",
   "commands.client.crack": "Crack",
