@@ -11,7 +11,7 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -93,7 +93,7 @@ public class MixinClientPlayNetworkHandler {
         final float velX = packet.getPlayerVelocityX();
         final float velZ = packet.getPlayerVelocityZ();
         if (velX != 0.0 || velZ != 0.0) {
-            sendError(new TranslatableText("tntFinder.explosionInterferenceWarning"));
+            sendError(Text.translatable("tntFinder.explosionInterferenceWarning"));
         }
     }
 
@@ -107,9 +107,9 @@ public class MixinClientPlayNetworkHandler {
             if (isReady) {
                 Vec3d loc = TntFinderManager.triangulate();
                 if (loc.y == -1184951860) {
-                    sendError(new TranslatableText("tntFinder.parallelVectorsWarning"));
+                    sendError(Text.translatable("tntFinder.parallelVectorsWarning"));
                 }
-                sendFeedback(new TranslatableText("tntFinder.triangulatedLocation", loc.x, loc.z));
+                sendFeedback(Text.translatable("tntFinder.triangulatedLocation", loc.x, loc.z));
             }
         }
     }
