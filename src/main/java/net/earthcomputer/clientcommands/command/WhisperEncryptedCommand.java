@@ -41,8 +41,8 @@ public class WhisperEncryptedCommand {
                 .then(argument("player", gameProfile())
                     .then(argument("message", string())
                         .executes((ctx) ->
-                            WhisperEncryptedCommand.whisper(ctx,
-                                CGameProfileArgumentType.getCProfileArgument(ctx, "player"),
+                            whisper(ctx.getSource(),
+                                getCProfileArgument(ctx, "player"),
                                 ctx.getArgument("message", String.class)
                             )
                         )
@@ -50,20 +50,20 @@ public class WhisperEncryptedCommand {
                 ));
     }
 
-    private static int whisper(CommandContext<FabricClientCommandSource> context, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {
-        assert context.getSource().getClient().getNetworkHandler() != null;
+    private static int whisper(FabricClientCommandSource source, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {
+        assert source.getClient().getNetworkHandler() != null;
         Optional<PlayerListEntry> entry = profiles.stream().findFirst().flatMap(gp ->
-            context.getSource().getClient().getNetworkHandler().getPlayerList().stream().filter(e -> e.getProfile().getName().equalsIgnoreCase(gp.getName())).findFirst()
+            source.getClient().getNetworkHandler().getPlayerList().stream().filter(e -> e.getProfile().getName().equalsIgnoreCase(gp.getName())).findFirst()
         );
         if (entry.isEmpty()) {
-            context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.playerNotFound"));
+            source.sendError(Text.translatable("commands.cwhisperencrypted.playerNotFound"));
             return 0;
         }
         try {
             // step 2 encrypt the encrypted message using the public key of the recipient
             PlayerPublicKey ppk = entry.get().getPublicKeyData();
             if (ppk == null) {
-                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.pubKeyNotFound"));
+                source.sendError(Text.translatable("commands.cwhisperencrypted.pubKeyNotFound"));
                 return 0;
             }
             PublicKey publicKey = ppk.data().key();
@@ -72,20 +72,20 @@ public class WhisperEncryptedCommand {
             byte[] encrypted = message.getBytes(StandardCharsets.UTF_8);
             encrypted = Gzip.compress(encrypted);
             if (encrypted.length > 245) {
-                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
+                source.sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
                 return 0;
             }
             cipher.update(encrypted);
             encrypted = cipher.doFinal();
             String commandMessage = "w " + entry.get().getProfile().getName() + " CCENC:" + BaseUTF8.toUnicode(encrypted);
             if (commandMessage.length() >= 256) {
-                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
+                source.sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
                 return 0;
             }
             justSent = true;
-            context.getSource().getClient().player.sendCommand(commandMessage);
+            source.getClient().player.sendCommand(commandMessage);
         } catch (Exception e) {
-            context.getSource().sendError(Text.translatable("commands.cplayerinfo.ioException"));
+            source.sendError(Text.translatable("commands.cplayerinfo.ioException"));
             e.printStackTrace();
             return 0;
         }
