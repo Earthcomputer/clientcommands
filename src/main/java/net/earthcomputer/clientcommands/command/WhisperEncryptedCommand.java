@@ -38,8 +38,8 @@ public class WhisperEncryptedCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cwe")
-                .then(argument("player", string())
-                    .then(argument("message", gameProfile())
+                .then(argument("player", gameProfile())
+                    .then(argument("message", string())
                         .executes((ctx) ->
                             WhisperEncryptedCommand.whisper(ctx,
                                 CGameProfileArgumentType.getCProfileArgument(ctx, "player"),
