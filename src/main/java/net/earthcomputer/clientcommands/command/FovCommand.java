@@ -1,35 +1,34 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
+import net.earthcomputer.clientcommands.mixin.SimpleOptionAccessor;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
-import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FovCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfov")
-            .then(argument("fov", doubleArg())
-                .executes(ctx -> setFov(ctx.getSource(), getDouble(ctx, "fov"))))
+            .then(argument("fov", integer(0, 360))
+                .executes(ctx -> setFov(ctx.getSource(), getInteger(ctx, "fov"))))
             .then(literal("normal")
                 .executes(ctx -> setFov(ctx.getSource(), 70)))
             .then(literal("quakePro")
                 .executes(ctx -> setFov(ctx.getSource(), 110))));
     }
 
-    private static int setFov(FabricClientCommandSource source, double fov) {
-        MinecraftClient.getInstance().options.fov = fov;
+    private static int setFov(FabricClientCommandSource source, int fov) {
+        ((SimpleOptionAccessor) (Object) source.getClient().options.getFov()).forceSetValue(fov);
 
-        Text feedback = new TranslatableText("commands.cfov.success", fov);
-        sendFeedback(feedback);
+        Text feedback = Text.translatable("commands.cfov.success", fov);
+        source.sendFeedback(feedback);
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

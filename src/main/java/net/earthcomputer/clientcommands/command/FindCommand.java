@@ -1,15 +1,16 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.HashSet;
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindCommand {
 
@@ -39,20 +40,20 @@ public class FindCommand {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(source, selector));
 
-            sendFeedback(new TranslatableText("commands.cfind.keepSearching.success")
+            source.sendFeedback(Text.translatable("commands.cfind.keepSearching.success")
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
-            return 0;
+            return Command.SINGLE_SUCCESS;
         } else {
             List<? extends Entity> entities = selector.getEntities(source);
 
             if (entities.isEmpty()) {
-                sendError(new TranslatableText("commands.cfind.noMatch"));
+                source.sendError(Text.translatable("commands.cfind.noMatch"));
                 return 0;
             }
 
-            sendFeedback(new TranslatableText("commands.cfind.success", entities.size()).formatted(Formatting.BOLD));
+            source.sendFeedback(Text.translatable("commands.cfind.success", entities.size()).formatted(Formatting.BOLD));
             for (Entity entity : entities) {
                 sendEntityFoundMessage(source, entity);
             }
@@ -63,9 +64,9 @@ public class FindCommand {
 
     private static void sendEntityFoundMessage(FabricClientCommandSource source, Entity entity) {
         double distance = Math.sqrt(entity.squaredDistanceTo(source.getPosition()));
-        sendFeedback(new TranslatableText("commands.cfind.found.left", entity.getName(), distance)
+        source.sendFeedback(Text.translatable("commands.cfind.found.left", entity.getName(), distance)
                 .append(getLookCoordsTextComponent(entity.getBlockPos()))
-                .append(new TranslatableText("commands.cfind.found.right", entity.getName(), distance)));
+                .append(Text.translatable("commands.cfind.found.right", entity.getName(), distance)));
     }
 
     private static class FindTask extends LongTask {

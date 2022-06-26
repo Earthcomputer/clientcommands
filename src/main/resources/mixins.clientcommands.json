@@ -5,6 +5,7 @@
   "mixins": [
     "AlternativeLootConditionAccessor",
     "AndConditionAccessor",
+    "CheckedRandomAccessor",
     "CombinedEntryAccessor",
     "CommandSuggestorAccessor",
     "CreativeInventoryScreenAccessor",
@@ -72,6 +73,7 @@
     "MixinTextFieldWidget",
     "ProjectileEntityAccessor",
     "ScreenHandlerAccessor",
+    "SimpleOptionAccessor",
     "TagEntryAccessor",
     "WeatherCheckLootConditionAccessor"
   ],
