@@ -174,12 +174,12 @@
 
   "commands.cuuid.success": "The UUID of %s is %s",
 
-  "commands.cwiki.failed": "Could not retrieve wiki content",
-
   "commands.cwhisperencrypted.messageTooLong": "Message too long",
   "commands.cwhisperencrypted.playerNotFound": "Player not found",
   "commands.cwhisperencrypted.noPrivKey": "No private key found",
   "commands.cwhisperencrypted.pubKeyNotFound": "Public key not found",
+
+  "commands.cwiki.failed": "Could not retrieve wiki content",
 
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "Cancel",
