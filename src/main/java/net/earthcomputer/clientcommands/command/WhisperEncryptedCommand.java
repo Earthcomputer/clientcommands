@@ -4,9 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.xpple.clientarguments.arguments.CGameProfileArgumentType;
 import net.earthcomputer.clientcommands.interfaces.IProfileKeys;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -22,60 +24,66 @@ import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-import static net.minecraft.command.CommandSource.suggestMatching;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
-public class WhisperEncrypted {
+public class WhisperEncryptedCommand {
     private static boolean justSent = false;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(literal("cwhisperencrypted")
+        dispatcher.register(literal("cwe")
                 .then(argument("player", string())
-                        .suggests((context, builder) -> suggestMatching(context.getSource().getPlayerNames(), builder))
-                        .then(argument("message", StringArgumentType.greedyString())
-                            .executes(WhisperEncrypted::whisper))));
+                    .then(argument("message", gameProfile())
+                        .executes((ctx) ->
+                            WhisperEncryptedCommand.whisper(ctx,
+                                CGameProfileArgumentType.getCProfileArgument(ctx, "player"),
+                                ctx.getArgument("message", String.class)
+                            )
+                        )
+                    )
+                ));
     }
 
-    private static int whisper(CommandContext<FabricClientCommandSource> context) {
-        String message = context.getArgument("message", String.class);
-        String player = context.getArgument("player", String.class);
-        Optional<PlayerListEntry> entry = MinecraftClient.getInstance().getNetworkHandler().getPlayerList().stream().filter(e -> e.getProfile().getName().equalsIgnoreCase(player)).findFirst();
+    private static int whisper(CommandContext<FabricClientCommandSource> context, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {
+        assert context.getSource().getClient().getNetworkHandler() != null;
+        Optional<PlayerListEntry> entry = profiles.stream().findFirst().flatMap(gp ->
+            context.getSource().getClient().getNetworkHandler().getPlayerList().stream().filter(e -> e.getProfile().getName().equalsIgnoreCase(gp.getName())).findFirst()
+        );
         if (entry.isEmpty()) {
-            context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.player_not_found"));
+            context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.playerNotFound"));
             return 0;
         }
         try {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             // step 2 encrypt the encrypted message using the public key of the recipient
             PlayerPublicKey ppk = entry.get().getPublicKeyData();
             if (ppk == null) {
-                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.pub_key_not_found"));
+                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.pubKeyNotFound"));
                 return 0;
             }
             PublicKey publicKey = ppk.data().key();
-            cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             byte[] encrypted = message.getBytes(StandardCharsets.UTF_8);
             encrypted = Gzip.compress(encrypted);
             if (encrypted.length > 245) {
-                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.message_too_long"));
+                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
                 return 0;
             }
             cipher.update(encrypted);
             encrypted = cipher.doFinal();
-            String commandMessage = "w " + player + " CCENC:" + BaseUTF8.toUnicode(encrypted);
+            String commandMessage = "w " + entry.get().getProfile().getName() + " CCENC:" + BaseUTF8.toUnicode(encrypted);
             if (commandMessage.length() >= 256) {
-                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.message_too_long"));
+                context.getSource().sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
                 return 0;
             }
             justSent = true;
-            MinecraftClient.getInstance().player.sendCommand(commandMessage);
+            context.getSource().getClient().player.sendCommand(commandMessage);
         } catch (Exception e) {
             context.getSource().sendError(Text.translatable("commands.cplayerinfo.ioException"));
             e.printStackTrace();
@@ -208,7 +216,9 @@ public class WhisperEncrypted {
                 bitPtr += 8;
                 if (bitPtr > 19) {
                     int codePoint = mapCodepoint((data & 0x0FFFFF) + LOWER_BOUND);
-                    if (codePoint >= UPPER_BOUND) throw new RuntimeException("WHAT?");
+                    if (codePoint >= UPPER_BOUND) {
+                        throw new RuntimeException("WHAT?");
+                    }
                     data >>= 20;
                     sb.appendCodePoint(codePoint);
                 }
@@ -216,7 +226,9 @@ public class WhisperEncrypted {
             }
             if (bitPtr != 0) {
                 int codePoint = mapCodepoint((data & 0x0FFFFF) + LOWER_BOUND);
-                if (codePoint >= UPPER_BOUND) throw new RuntimeException("WHAT?");
+                if (codePoint >= UPPER_BOUND) {
+                    throw new RuntimeException("WHAT?");
+                }
                 sb.appendCodePoint(codePoint);
             }
             return sb.toString();
@@ -227,10 +239,12 @@ public class WhisperEncrypted {
             int dataLength = (bitLength + 7) / 8;
             byte[] data = new byte[dataLength];
             int dataPtr = 0;
-            for (int i = 0; i < s.length(); ) {
+            for (int i = 0; i < s.length();) {
                 int codepoint = s.codePointAt(i);
                 i += Character.charCount(codepoint);
-                if (codepoint >= UPPER_BOUND) throw new RuntimeException("WHAT?");
+                if (codepoint >= UPPER_BOUND) {
+                    throw new RuntimeException("WHAT?");
+                }
                 codepoint = unmapCodepoint(codepoint);
                 codepoint -= LOWER_BOUND;
                 data[dataPtr / 8] |= codepoint << (dataPtr % 8);

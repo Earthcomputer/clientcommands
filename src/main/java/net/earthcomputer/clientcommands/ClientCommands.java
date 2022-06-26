@@ -72,7 +72,7 @@ public class ClientCommands implements ClientModInitializer {
         PlayerInfoCommand.register(dispatcher);
         PingCommand.register(dispatcher);
         UuidCommand.register(dispatcher);
-        WhisperEncrypted.register(dispatcher);
+        WhisperEncryptedCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher);
         TooltipCommand.register(dispatcher, registryAccess);
