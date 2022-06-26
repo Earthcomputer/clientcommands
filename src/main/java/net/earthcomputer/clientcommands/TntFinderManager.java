@@ -4,6 +4,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.intellij.lang.annotations.Language;
 
 public class TntFinderManager {
     private static final Logger LOGGER = LogManager.getLogger("clientcommands");
@@ -57,6 +58,7 @@ public class TntFinderManager {
         x1 = x2 = v1 = v2 = x3 = v3 = null;
     }
 
+    @Language("HTML")
     private static String generateGraph() {
         return """
                 <script src="https://www.desmos.com/api/v1.6/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
