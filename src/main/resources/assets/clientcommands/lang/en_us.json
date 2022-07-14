@@ -77,6 +77,7 @@
   "commands.cfish.error.impossibleLoot": "That loot cannot be obtained with fishing",
   "commands.cfish.error.onGround": "Fishing bobber hit the ground",
   "commands.cfish.error.openWater": "Fishing bobber needs to be in open water for treasure loot",
+  "commands.cfish.error.openWater.flowingWater": "Help: the water around the bobber must be still water, flowing water does not work",
   "commands.cfish.error.openWater.lilyPad": "Help: try trapping the bobber under a lily pad",
   "commands.cfish.error.outOfWater": "Fishing bobber out of water, manipulation won't work",
   "commands.cfish.help.tooManyEnchants": "Help: multiple enchantments at once are unlikely and may take a long time to obtain",
