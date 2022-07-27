@@ -99,7 +99,7 @@ public class AliasCommand {
             cmd = cmd.substring(1);
             source.getPlayer().sendCommand(cmd);
         } else {
-            source.getPlayer().sendChatMessage(cmd);
+            source.getPlayer().sendChatMessage(cmd, null);
         }
 
         return Command.SINGLE_SUCCESS;
