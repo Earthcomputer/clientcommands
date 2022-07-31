@@ -256,5 +256,5 @@
   "playerManip.uncracked": "需要破解玩家种子",
 
   "snakeGame.title": "Snake",
-  "snakeGame.score": "分数"
+  "snakeGame.score": "分数: %d"
 }
