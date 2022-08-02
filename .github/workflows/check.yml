@@ -12,4 +12,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 17
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
       - run: ./gradlew build --stacktrace --no-daemon
