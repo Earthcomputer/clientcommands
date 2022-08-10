@@ -149,7 +149,7 @@
   "commands.cstopsound.success.sourceless.sound": "已为自身停止播放%s声音",
   "commands.cstopsound.success.source.any": "已为自身停止播放所有%s声音",
 
-  "commands.cstopsound.success.source.sound": "已为自身停止播放来自%s音源的%s声音",
+  "commands.cstopsound.success.source.sound": "已为自身停止播放来自%2$s音源的%$1s声音",
   "commands.ctask.list.noTasks": "当前没有正在执行的任务",
   "commands.ctask.list.success": "%d 个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
