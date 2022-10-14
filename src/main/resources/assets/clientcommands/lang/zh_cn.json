@@ -77,7 +77,7 @@
   "commands.cfish.error.impossibleLoot": "那个战利品不能通过钓鱼获得",
   "commands.cfish.error.onGround": "浮标撞到了地上",
   "commands.cfish.error.openWater": "为了获得宝藏战利品，浮标需要在开放的水中",
-  "commands.cfish.error.openWater.flowingWater": "提示: 浮标周围的水必须是静止的水，流动的水不起作用",
+  "commands.cfish.error.openWater.flowingWater": "建议: 浮标周围的水必须是静止的水，流动的水不起作用",
   "commands.cfish.error.openWater.lilyPad": "建议：尝试使浮标卡在睡莲下",
   "commands.cfish.error.outOfWater": "浮标不在水中, 自动控制无法工作",
   "commands.cfish.help.tooManyEnchants": "建议：把多个附魔放在一起获得会很难且可能需要很长时间",
