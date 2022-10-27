@@ -33,6 +33,7 @@
     "MixinClientPlayerEntity",
     "MixinClientPlayerInteractionManager",
     "MixinClientPlayNetworkHandler",
+    "MixinClientPlayNetworkHandlerHighPriority",
     "MixinClientWorld",
     "MixinClientWorldProperties",
     "MixinCloseHandledScreenPacket",
@@ -83,8 +84,5 @@
   },
   "overwrites": {
     "requireAnnotations": true
-  },
-  "client": [
-    "MixinClientPlayNetworkHandlerHighPriority"
-  ]
+  }
 }
