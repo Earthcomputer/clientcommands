@@ -179,6 +179,16 @@
 
   "commands.cuuid.success": "The UUID of %s is %s",
 
+  "commands.cvar.notFound": "Variable \"%s\" not found",
+  "commands.cvar.saveFile.failed": "Could not save variables file",
+  "commands.cvar.add.success": "Successfully created variable \"%s\"",
+  "commands.cvar.add.alreadyExists": "Variable \"%s\" already exists",
+  "commands.cvar.remove.success": "Successfully removed variable \"%s\"",
+  "commands.cvar.edit.success": "Successfully edited variable \"%s\"",
+  "commands.cvar.parse.success": "\"%s\" evaluates to \"%s\"",
+  "commands.cvar.list.empty": "No available variables",
+  "commands.cvar.list": "Available variables: %s",
+
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
   "commands.client.blockpos": "(%d, %d, %d)",

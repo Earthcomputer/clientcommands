@@ -68,6 +68,7 @@
     "MixinPlayerInventory",
     "MixinProtectionEnchantment",
     "MixinPumpkinBlock",
+    "MixinChatScreen",
     "MixinShearsItem",
     "MixinStonecutterContainer",
     "MixinTextFieldWidget",
