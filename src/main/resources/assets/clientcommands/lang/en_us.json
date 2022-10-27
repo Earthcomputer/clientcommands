@@ -173,6 +173,10 @@
   "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
   "commands.ctp.success": "Teleported player to %s",
 
+  "commands.ctranslate.unknownError": "An error occurred",
+  "commands.ctranslate.unknownLanguageCode": "Unknown language code \"%s\"",
+  "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
+
   "commands.cuuid.success": "The UUID of %s is %s",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
