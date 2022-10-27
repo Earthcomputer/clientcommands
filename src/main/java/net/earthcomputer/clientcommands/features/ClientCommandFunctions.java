@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.command.VarCommand;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
@@ -166,7 +167,7 @@ public class ClientCommandFunctions {
                 if (count++ >= TempRules.commandExecutionLimit) {
                     throw COMMAND_LIMIT_REACHED_EXCEPTION.create(TempRules.commandExecutionLimit);
                 }
-                dispatcher.execute(entries.remove().command);
+                entries.remove().execute(dispatcher, source);
             }
             successMessageSender.accept(count);
             return count;
@@ -211,12 +212,16 @@ public class ClientCommandFunctions {
                     if (line.isEmpty() || line.startsWith("#")) {
                         continue;
                     }
-                    var command = dispatcher.parse(line, source);
-                    if (command.getReader().canRead()) {
-                        //noinspection ConstantConditions
-                        throw CommandManager.getException(command);
+                    if (VarCommand.containsVars(line)) {
+                        entries.add(new LazyEntry(line));
+                    } else {
+                        var command = dispatcher.parse(line, source);
+                        if (command.getReader().canRead()) {
+                            //noinspection ConstantConditions
+                            throw CommandManager.getException(command);
+                        }
+                        entries.add(new ParsedEntry(command));
                     }
-                    entries.add(new Entry(command));
                 }
             } catch (IOException e) {
                 LOGGER.error("Failed to read function file {}", path, e);
@@ -227,6 +232,21 @@ public class ClientCommandFunctions {
         }
     }
 
-    private record Entry(ParseResults<FabricClientCommandSource> command) {
+    private interface Entry {
+        void execute(CommandDispatcher<FabricClientCommandSource> dispatcher, FabricClientCommandSource source) throws CommandSyntaxException;
+    }
+
+    private record ParsedEntry(ParseResults<FabricClientCommandSource> command) implements Entry {
+        @Override
+        public void execute(CommandDispatcher<FabricClientCommandSource> dispatcher, FabricClientCommandSource source) throws CommandSyntaxException {
+            dispatcher.execute(command);
+        }
+    }
+
+    private record LazyEntry(String command) implements Entry {
+        @Override
+        public void execute(CommandDispatcher<FabricClientCommandSource> dispatcher, FabricClientCommandSource source) throws CommandSyntaxException {
+            dispatcher.execute(VarCommand.replaceVariables(command), source);
+        }
     }
 }

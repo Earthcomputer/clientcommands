@@ -151,4 +151,8 @@ public class VarCommand {
         matcher.appendTail(builder);
         return builder.toString();
     }
+
+    public static boolean containsVars(String command) {
+        return VARIABLE_PATTERN.matcher(command).find();
+    }
 }
