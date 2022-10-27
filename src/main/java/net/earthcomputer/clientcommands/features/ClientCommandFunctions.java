@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -147,8 +148,8 @@ public class ClientCommandFunctions {
                 func = CommandFunction.load(currentContext.dispatcher, currentContext.source, function);
                 currentContext.functions.put(function, func);
             }
-            for (int i = func.entries.length - 1; i >= 0; i--) {
-                currentContext.entries.addFirst(func.entries[i]);
+            for (int i = func.entries.size() - 1; i >= 0; i--) {
+                currentContext.entries.addFirst(func.entries.get(i));
             }
             return Command.SINGLE_SUCCESS;
         }
@@ -157,8 +158,7 @@ public class ClientCommandFunctions {
         Map<String, CommandFunction> functions = new HashMap<>();
         functions.put(function, func);
 
-        Deque<Entry> entries = new ArrayDeque<>();
-        Collections.addAll(entries, func.entries);
+        Deque<Entry> entries = new ArrayDeque<>(func.entries);
 
         currentContext = new ExecutionContext(dispatcher, source, entries, functions);
         try {
@@ -184,7 +184,7 @@ public class ClientCommandFunctions {
     ) {
     }
 
-    private record CommandFunction(Entry[] entries) {
+    private record CommandFunction(ImmutableList<Entry> entries) {
         @Nullable
         static Path getPath(String function) {
             Path path;
@@ -205,7 +205,7 @@ public class ClientCommandFunctions {
                 throw NO_SUCH_FUNCTION_EXCEPTION.create(function);
             }
 
-            List<Entry> entries = new ArrayList<>();
+            var entries = ImmutableList.<Entry>builder();
             try (Stream<String> lines = Files.lines(path)) {
                 for (String line : (Iterable<String>) lines::iterator) {
                     line = line.trim();
@@ -228,7 +228,7 @@ public class ClientCommandFunctions {
                 throw NO_SUCH_FUNCTION_EXCEPTION.create(function);
             }
 
-            return new CommandFunction(entries.toArray(new Entry[0]));
+            return new CommandFunction(entries.build());
         }
     }
 
