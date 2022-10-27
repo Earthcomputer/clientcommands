@@ -15,7 +15,9 @@
     "Earthcomputer"
   ],
   "contributors": [
-    "cortex"
+    "cortex",
+    "haykam",
+    "xpple"
   ],
   "entrypoints": {
     "client": [

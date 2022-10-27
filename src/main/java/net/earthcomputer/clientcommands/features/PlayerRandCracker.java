@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
+import net.earthcomputer.clientcommands.IntegratedServerUtil;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
@@ -16,12 +17,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -75,6 +78,17 @@ public class PlayerRandCracker {
 
 
     // ===== RESET DETECTION + PLAYER RNG MAINTENANCE ===== //
+
+    public static boolean isPredictingBlockBreaking = false;
+    @Nullable
+    private static Runnable postBlockBreakPredictAction = null;
+
+    public static void postSendBlockBreakingPredictionPacket() {
+        if (postBlockBreakPredictAction != null) {
+            postBlockBreakPredictAction.run();
+            postBlockBreakPredictAction = null;
+        }
+    }
 
     // TODO: update-sensitive: call hierarchy of PlayerEntity.random and PlayerEntity.getRandom()
 
@@ -246,7 +260,7 @@ public class PlayerRandCracker {
                     }
 
                     if (TempRules.infiniteTools && TempRules.playerCrackState.knowsSeed()) {
-                        throwItemsUntil(rand -> {
+                        Runnable action = () -> throwItemsUntil(rand -> {
                             for (int i = 0; i < amount; i++) {
                                 if (stack.getItem() instanceof ArmorItem && rand.nextFloat() < 0.6)
                                     return false;
@@ -255,6 +269,11 @@ public class PlayerRandCracker {
                             }
                             return true;
                         }, 64);
+                        if (isPredictingBlockBreaking) {
+                            postBlockBreakPredictAction = action;
+                        } else {
+                            action.run();
+                        }
                     }
                 }
             }

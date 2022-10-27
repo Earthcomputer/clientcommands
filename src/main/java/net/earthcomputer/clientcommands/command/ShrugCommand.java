@@ -14,7 +14,7 @@ public class ShrugCommand {
     }
 
     private static int shrug(FabricClientCommandSource source) {
-        source.getPlayer().sendChatMessage("¯\\_(ツ)_/¯");
+        source.getPlayer().sendChatMessage("¯\\_(ツ)_/¯", null);
         return Command.SINGLE_SUCCESS;
     }
 

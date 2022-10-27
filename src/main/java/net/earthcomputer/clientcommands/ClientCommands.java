@@ -69,12 +69,13 @@ public class ClientCommands implements ClientModInitializer {
         AliasCommand.register(dispatcher);
         AreaStatsCommand.register(dispatcher, registryAccess);
         CTeleportCommand.register(dispatcher);
-        PlayerInfoCommand.register(dispatcher);
+        // PlayerInfoCommand.register(dispatcher);
         PingCommand.register(dispatcher);
         UuidCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher);
         TooltipCommand.register(dispatcher, registryAccess);
+        TranslateCommand.register(dispatcher);
         VarCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
