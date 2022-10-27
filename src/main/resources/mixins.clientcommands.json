@@ -5,9 +5,9 @@
   "mixins": [
     "AlternativeLootConditionAccessor",
     "AndConditionAccessor",
+    "ChatInputSuggestorAccessor",
     "CheckedRandomAccessor",
     "CombinedEntryAccessor",
-    "ChatInputSuggestorAccessor",
     "CreativeInventoryScreenAccessor",
     "EntityPredicateAccessor",
     "EntityPropertiesLootConditionAccessor",
@@ -82,5 +82,8 @@
   },
   "overwrites": {
     "requireAnnotations": true
-  }
+  },
+  "client": [
+    "MixinClientPlayNetworkHandlerHighPriority"
+  ]
 }

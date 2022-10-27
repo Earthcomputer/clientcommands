@@ -75,6 +75,8 @@ public class ClientCommands implements ClientModInitializer {
         SnakeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher);
         TooltipCommand.register(dispatcher, registryAccess);
+        CFunctionCommand.register(dispatcher);
+        StartupCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
     }

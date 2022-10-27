@@ -89,6 +89,9 @@
 
   "commands.cfov.success": "Set FOV to %f",
 
+  "commands.cfunction.limitReached": "Command limit (%d) reached",
+  "commands.cfunction.success": "Run %d commands from function %s",
+
   "commands.cgamma.success": "Set gamma to %f",
 
   "commands.cghostblock.fill.success": "%d ghost blocks filled",
@@ -145,6 +148,10 @@
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
+
+  "commands.cstartup.add.success": "Added command to startup file",
+  "commands.cstartup.couldNotCreateFile": "Couldn't create startup file",
+  "commands.cstartup.couldNotEdit": "Couldn't edit startup file",
 
   "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
   "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",

@@ -1,15 +1,12 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import com.mojang.brigadier.CommandDispatcher;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.FishingCracker;
-import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
@@ -24,16 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
-
-    @Shadow
-    private CommandDispatcher<CommandSource> commandDispatcher;
-
     @Shadow @Final private MinecraftClient client;
-
-    @Inject(method = "onGameJoin", at = @At("RETURN"))
-    private void postGameJoin(CallbackInfo ci) {
-        Relogger.onRelogSuccess();
-    }
 
     @Inject(method = "onEntitySpawn", at = @At("TAIL"))
     public void onOnEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci) {
