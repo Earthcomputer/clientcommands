@@ -4,14 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import com.mojang.logging.LogUtils;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Util;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,18 +22,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.*;
-import static net.minecraft.command.CommandSource.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class VarCommand {
 
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("[%]([^%]+)[%]");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("%([^%]+)%");
 
-    private static final Logger LOGGER = LogManager.getLogger("clientcommands");
+    private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslatableText("commands.cvar.saveFile.failed"));
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.cvar.add.alreadyExists", arg));
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableText("commands.cvar.notFound", arg));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cvar.saveFile.failed"));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.cvar.add.alreadyExists", arg));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.cvar.notFound", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
 
@@ -76,7 +76,7 @@ public class VarCommand {
         }
         variables.put(variable, value);
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.cvar.add.success", variable));
+        source.sendFeedback(Text.translatable("commands.cvar.add.success", variable));
         return 0;
     }
 
@@ -85,7 +85,7 @@ public class VarCommand {
             throw NOT_FOUND_EXCEPTION.create(variable);
         }
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.cvar.remove.success", variable));
+        source.sendFeedback(Text.translatable("commands.cvar.remove.success", variable));
         return 0;
     }
 
@@ -95,7 +95,7 @@ public class VarCommand {
         }
         variables.put(variable, value);
         saveFile();
-        source.sendFeedback(new TranslatableText("commands.cvar.edit.success", variable));
+        source.sendFeedback(Text.translatable("commands.cvar.edit.success", variable));
         return 0;
     }
 
@@ -104,16 +104,16 @@ public class VarCommand {
         if (value == null) {
             throw NOT_FOUND_EXCEPTION.create(variable);
         }
-        source.sendFeedback(new TranslatableText("commands.cvar.parse.success", variable, value));
+        source.sendFeedback(Text.translatable("commands.cvar.parse.success", variable, value));
         return 0;
     }
 
     private static int listVariables(FabricClientCommandSource source) {
         if (variables.isEmpty()) {
-            source.sendFeedback(new TranslatableText("commands.cvar.list.empty"));
+            source.sendFeedback(Text.translatable("commands.cvar.list.empty"));
         } else {
             String list = "%" + String.join("%, %", variables.keySet()) + "%";
-            source.sendFeedback(new TranslatableText("commands.cvar.list", list));
+            source.sendFeedback(Text.translatable("commands.cvar.list", list));
         }
         return variables.size();
     }
