@@ -7,7 +7,7 @@
     "AndConditionAccessor",
     "CheckedRandomAccessor",
     "CombinedEntryAccessor",
-    "CommandSuggestorAccessor",
+    "ChatInputSuggestorAccessor",
     "CreativeInventoryScreenAccessor",
     "EntityPredicateAccessor",
     "EntityPropertiesLootConditionAccessor",
@@ -73,6 +73,7 @@
     "MixinTextFieldWidget",
     "ProjectileEntityAccessor",
     "ScreenHandlerAccessor",
+    "SimpleOptionAccessor",
     "TagEntryAccessor",
     "WeatherCheckLootConditionAccessor"
   ],

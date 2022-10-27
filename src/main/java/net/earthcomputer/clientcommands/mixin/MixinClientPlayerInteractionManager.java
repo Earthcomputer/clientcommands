@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
@@ -41,4 +42,18 @@ public class MixinClientPlayerInteractionManager {
         }
     }
 
+    @Inject(method = "sendSequencedPacket", at = @At("HEAD"))
+    private void preSendSequencedPacket(CallbackInfo ci) {
+        PlayerRandCracker.isPredictingBlockBreaking = true;
+    }
+
+    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", shift = At.Shift.AFTER))
+    private void postSendSequencedPacket(CallbackInfo ci) {
+        PlayerRandCracker.postSendBlockBreakingPredictionPacket();
+    }
+
+    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/PendingUpdateManager;close()V"))
+    private void sendSequencedPacketFinally(CallbackInfo ci) {
+        PlayerRandCracker.isPredictingBlockBreaking = false;
+    }
 }

@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 
+import net.earthcomputer.clientcommands.mixin.SimpleOptionAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 
@@ -18,7 +19,7 @@ public class GammaCommand {
     }
 
     private static int setGamma(FabricClientCommandSource source, double gamma) {
-        source.getClient().options.getGamma().setValue(gamma);
+        ((SimpleOptionAccessor) (Object) source.getClient().options.getGamma()).forceSetValue(gamma);
 
         Text feedback = Text.translatable("commands.cgamma.success", gamma);
         source.sendFeedback(feedback);
