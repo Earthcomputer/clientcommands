@@ -26,7 +26,7 @@ public class TranslateCommand {
 
     private static final SimpleCommandExceptionType UNKNOWN_ERROR_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctranslate.unknownError"));
 
-    private static final String url = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t";
+    private static final String URL = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t";
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -57,7 +57,7 @@ public class TranslateCommand {
     }
 
     private static URI createUri(String from, String to, String query) throws URISyntaxException {
-        URIBuilder builder = new URIBuilder(url, Charset.defaultCharset());
+        URIBuilder builder = new URIBuilder(URL, Charset.defaultCharset());
         builder.addParameter("sl", from);
         builder.addParameter("tl", to);
         builder.addParameter("q", query);
