@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
-import static net.minecraft.command.CommandSource.suggestMatching;
+import static net.minecraft.command.CommandSource.*;
 
 public class VarCommand {
 
