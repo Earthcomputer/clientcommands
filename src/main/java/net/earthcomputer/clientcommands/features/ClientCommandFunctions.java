@@ -119,7 +119,7 @@ public class ClientCommandFunctions {
             assert networkHandler != null : "Network handler should not be null while calling ClientCommandFunctions.runStartup()";
             var source = (FabricClientCommandSource) networkHandler.getCommandSource();
             int result = executeFunction(dispatcher, source, startupFunction, res -> {});
-            LOGGER.info("Run {} commands from startup function {}", result, startupFunction);
+            LOGGER.info("Ran {} commands from startup function {}", result, startupFunction);
         } catch (CommandSyntaxException e) {
             LOGGER.error("Error running startup function {}: {}", startupFunction, e.getMessage());
         }

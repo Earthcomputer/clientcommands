@@ -90,7 +90,7 @@
   "commands.cfov.success": "Set FOV to %f",
 
   "commands.cfunction.limitReached": "Command limit (%d) reached",
-  "commands.cfunction.success": "Run %d commands from function %s",
+  "commands.cfunction.success": "Ran %d commands from function %s",
 
   "commands.cgamma.success": "Set gamma to %f",
 
