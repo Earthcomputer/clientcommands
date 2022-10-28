@@ -83,10 +83,12 @@ public class Relogger {
         relogSuccessTasks.clear();
     }
 
-    public static void onRelogSuccess() {
+    public static boolean onRelogSuccess() {
+        boolean result = !relogSuccessTasks.isEmpty();
         for (Runnable task : relogSuccessTasks) {
             task.run();
         }
         relogSuccessTasks.clear();
+        return result;
     }
 }

@@ -77,6 +77,8 @@ public class ClientCommands implements ClientModInitializer {
         TooltipCommand.register(dispatcher, registryAccess);
         TranslateCommand.register(dispatcher);
         VarCommand.register(dispatcher);
+        CFunctionCommand.register(dispatcher);
+        StartupCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
     }
