@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -131,7 +132,7 @@ public class ClientCommandFunctions {
         try (Stream<Path> paths = Files.walk(FUNCTION_DIR)) {
             return paths.filter(path -> !Files.isDirectory(path) && path.getFileName().toString().endsWith(".mcfunction")).map(path -> {
                 String name = FUNCTION_DIR.relativize(path).toString();
-                return name.substring(0, name.length() - ".mcfunction".length());
+                return name.substring(0, name.length() - ".mcfunction".length()).replace(File.separator, "/");
             }).toList();
         } catch (IOException e) {
             return Collections.emptyList();
@@ -187,6 +188,12 @@ public class ClientCommandFunctions {
     private record CommandFunction(ImmutableList<Entry> entries) {
         @Nullable
         static Path getPath(String function) {
+            if (!"/".equals(File.separator)) {
+                if (function.contains(File.separator)) {
+                    return null;
+                }
+                function = function.replace(File.separator, "/");
+            }
             Path path;
             try {
                 path = FUNCTION_DIR.resolve(function + ".mcfunction");
