@@ -192,7 +192,7 @@ public class ClientCommandFunctions {
                 if (function.contains(File.separator)) {
                     return null;
                 }
-                function = function.replace(File.separator, "/");
+                function = function.replace("/", File.separator);
             }
             Path path;
             try {
