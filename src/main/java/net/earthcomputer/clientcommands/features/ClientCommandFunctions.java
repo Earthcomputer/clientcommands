@@ -7,11 +7,11 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.logging.LogUtils;
+import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.VarCommand;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.server.command.CommandManager;
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 public class ClientCommandFunctions {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Path FUNCTION_DIR = FabricLoader.getInstance().getConfigDir().resolve("clientcommands").resolve("functions");
+    private static final Path FUNCTION_DIR = ClientCommands.configDir.resolve("functions");
 
     private static final DynamicCommandExceptionType NO_SUCH_FUNCTION_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("arguments.function.unknown", id));
     private static final DynamicCommandExceptionType COMMAND_LIMIT_REACHED_EXCEPTION = new DynamicCommandExceptionType(limit -> Text.translatable("commands.cfunction.limitReached", limit));
