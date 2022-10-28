@@ -11,7 +11,7 @@ public class MixinChatScreen {
 
     // replace the text before the Fabric Command API executes it,
     // but ensure the message is added to the history in its raw form.
-    @ModifyArg(method = "sendMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ChatPreviewer;tryConsumeResponse(Ljava/lang/String;)Lnet/minecraft/text/Text;"))
+    @ModifyArg(method = "sendMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ChatPreviewer;tryConsumeResponse(Ljava/lang/String;)Lnet/minecraft/client/network/ChatPreviewer$Response;"))
     private String onSendMessage(String message) {
         return VarCommand.replaceVariables(message);
     }
