@@ -12,16 +12,19 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.interfaces.IProfileKeys;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ChatPreviewer;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -79,9 +82,10 @@ public class WhisperEncryptedCommand {
             if (commandMessage.length() >= 256) {
                 throw MESSAGE_TOO_LONG_EXCEPTION.create();
             }
+            Text preview = Util.map(source.getClient().inGameHud.getChatHud().getChatScreen().getChatPreviewer().tryConsumeResponse("/" + commandMessage), ChatPreviewer.Response::previewText);
+            source.getPlayer().sendCommand(commandMessage, preview);
             justSent = true;
-            source.getPlayer().sendCommand(commandMessage);
-        } catch (Exception e) {
+        } catch (GeneralSecurityException e) {
             e.printStackTrace();
             throw ENCRYPTION_FAILED_EXCEPTION.create();
         }
@@ -114,7 +118,7 @@ public class WhisperEncryptedCommand {
                     cipher.init(Cipher.DECRYPT_MODE, key.get());
                     byte[] decrypted = cipher.doFinal(encrypted);
                     decrypted = Gzip.uncompress(decrypted);
-                    String message = "ccenc: " + new String(decrypted, StandardCharsets.UTF_8);
+                    String message = "[/cwe] " + new String(decrypted, StandardCharsets.UTF_8);
                     return new JsonPrimitive(message);
                 } catch (Exception ex) {
                     if (!justSent) {
