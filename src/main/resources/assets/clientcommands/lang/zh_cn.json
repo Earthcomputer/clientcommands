@@ -9,12 +9,12 @@
   "commands.calias.listAliases.noAliasesRegistered": "没有已注册的别名",
   "commands.calias.listAliases.success": "%s 已注册的别名:",
   "commands.calias.removeAlias.success": "成功移除别名 \"%s\"",
-  
+
   "commands.careastats.notLoaded": "该区域的区块未加载",
   "commands.careastats.output.chunksScanned": "扫描 %d 个区块, 用时 %dns ≈ %dms",
   "commands.careastats.output.blocksMatched": "在一共 %2$d 个方块中匹配到 %1$d 个方块",
   "commands.careastats.output.entitiesFound": "在此区域中找到 %d 个实体",
-  
+
   "commands.cbook.success": "成功编辑书本",
   "commands.cbook.commandException": "你没有手握书本",
 
@@ -67,7 +67,7 @@
   "commands.cfinditem.starting": "正在搜索 %s",
   "commands.cfinditem.starting.keepSearching": "正在持续搜索 %s",
   "commands.cfinditem.total": "一共找到了 %d 个 %s ",
-  
+
   "commands.cfish.addGoal.success": "成功添加目标 %s",
   "commands.cfish.correctLoot": "在 %dms 校正后得到目标战利品",
   "commands.cfish.error.biome": "无法在这个区块得到目标战利品，需要 %s ",
@@ -88,23 +88,26 @@
   "commands.cfish.wrongLoot": "使用 %dms 校正后未获得目标物品, 可能游戏超前了 %s 刻",
 
   "commands.cfov.success": "将视场角设为 %f",
-  
+
+  "commands.cfunction.limitReached": "已达到命令限制(%d)",
+  "commands.cfunction.success": "从函数 %s 中运行%d个命令",
+
   "commands.cgamma.success": "将伽马值设为 %f",
-  
+
   "commands.cghostblock.fill.success": "成功填充%d 个幽灵方块",
   "commands.cghostblock.set.success": "成功放置幽灵方块",
-  
+
   "commands.cgive.success": "成功给予 %d 个 %s 给自己",
   "commands.cgive.notCreative": "仅创造模式玩家可以将物品给予自己",
-  
+
   "commands.cglow.entity.keepSearching.success": "正在使实体发光",
   "commands.cglow.entity.failed": "没有目标实体可以发光",
   "commands.cglow.entity.success": "成功使 %d 个实体发光",
   "commands.cglow.area.success": "成功使 %d 个区域发光",
-  
+
   "commands.chotbar.notCreative": "仅创造模式玩家可以恢复物品栏",
   "commands.chotbar.restoredHotbar": "成功恢复物品栏 %d",
-  
+
   "commands.citemgroup.notFound": "未找到创造模式物品栏 \"%s\"",
   "commands.citemgroup.outOfBounds": "指标 %d 越界",
   "commands.citemgroup.saveFile.failed": "无法保存创造模式物品栏文件",
@@ -141,10 +144,14 @@
 
   "commands.cping.local": "你在单人游戏世界(╯°□°）╯︵ ┻━┻",
   "commands.cping.multiplayer": "你的平均ping是%d毫秒",
-  
+
   "commands.crelog.failed": "未能重新登录",
 
   "commands.crender.entities.success": "实体渲染规则已更新",
+
+  "commands.cstartup.add.success": "在启动文件中添加了命令",
+  "commands.cstartup.couldNotCreateFile": "无法创建启动文件",
+  "commands.cstartup.couldNotEdit": "无法编辑启动文件",
 
   "commands.cstopsound.success.sourceless.any": "已为自身停止播放所有声音",
   "commands.cstopsound.success.sourceless.sound": "已为自身停止播放%s声音",
@@ -169,11 +176,25 @@
 
   "commands.ctooltip.header.held": "所持项目的工具提示是:",
   "commands.ctooltip.header.stack": "这个项目的工具提示将是:",
-  
+
   "commands.ctp.notSpectator": "仅观察者模式玩家可以使用传送",
   "commands.ctp.success": "成功将玩家传送到 %s",
 
+  "commands.ctranslate.unknownError": "发生错误",
+  "commands.ctranslate.unknownLanguageCode": "未知的语言代码 \"%s\"",
+  "commands.ctranslate.expectedFromTo": "有效参数：\"from\"/\"to\"",
+
   "commands.cuuid.success": "%s 的 UUID 是 %s",
+
+  "commands.cvar.notFound": "变量\"%s\"未找到",
+  "commands.cvar.saveFile.failed": "无法保存变量文件",
+  "commands.cvar.add.success": "成功创建变量\"%s\"",
+  "commands.cvar.add.alreadyExists": "变量\"%s\"已经存在",
+  "commands.cvar.remove.success": "成功删除变量\"%s\"",
+  "commands.cvar.edit.success": "成功编辑变量\"%s\"",
+  "commands.cvar.parse.success": "\"%s\"计算结果为\"%s\"",
+  "commands.cvar.list.empty": "没有可用的变量",
+  "commands.cvar.list": "可用变量：%s",
 
   "commands.cwiki.failed": "未能获取 Wiki 内容",
 
@@ -185,7 +206,7 @@
   "commands.client.notClient": "不是客户端指令",
   "commands.client.tooFewArguments": "参数过少",
   "commands.client.invalidArgumentException": "无效参数 '%s'",
-  
+
   "chorusManip.landing.success": "成功降落在: %d, %d, %d",
   "chorusManip.landing.failed": "降落操作不可用",
   "chorusManip.goalTooFar": "目标过远！",
