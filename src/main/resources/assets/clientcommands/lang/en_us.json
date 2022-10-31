@@ -196,6 +196,13 @@
   "commands.cvar.list.empty": "No available variables",
   "commands.cvar.list": "Available variables: %s",
 
+  "commands.cwe.messageTooLong": "Message too long (max. 255 characters)",
+  "commands.cwe.playerNotFound": "Player not found",
+  "commands.cwe.privateKeyNotFound": "Private key not found",
+  "commands.cwe.publicKeyNotFound": "Public key not found",
+  "commands.cwe.encryptionFailed": "Something failed while encrypting your message",
+  "commands.cwe.decryptionFailed": "An incoming message could not be decrypted",
+
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
   "commands.client.blockpos": "(%d, %d, %d)",
