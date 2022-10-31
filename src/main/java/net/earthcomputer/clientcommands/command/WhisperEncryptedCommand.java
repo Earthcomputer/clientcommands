@@ -82,8 +82,7 @@ public class WhisperEncryptedCommand {
             if (commandMessage.length() >= 256) {
                 throw MESSAGE_TOO_LONG_EXCEPTION.create();
             }
-            Text preview = Util.map(source.getClient().inGameHud.getChatHud().getChatScreen().getChatPreviewer().tryConsumeResponse("/" + commandMessage), ChatPreviewer.Response::previewText);
-            source.getPlayer().sendCommand(commandMessage, preview);
+            source.getPlayer().sendCommand(commandMessage, null);
             justSent = true;
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
