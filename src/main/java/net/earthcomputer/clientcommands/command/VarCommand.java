@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -77,7 +78,7 @@ public class VarCommand {
         variables.put(variable, value);
         saveFile();
         source.sendFeedback(Text.translatable("commands.cvar.add.success", variable));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int removeVariable(FabricClientCommandSource source, String variable) throws CommandSyntaxException {
@@ -86,7 +87,7 @@ public class VarCommand {
         }
         saveFile();
         source.sendFeedback(Text.translatable("commands.cvar.remove.success", variable));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int editVariable(FabricClientCommandSource source, String variable, String value) throws CommandSyntaxException {
@@ -96,7 +97,7 @@ public class VarCommand {
         variables.put(variable, value);
         saveFile();
         source.sendFeedback(Text.translatable("commands.cvar.edit.success", variable));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int parseVariable(FabricClientCommandSource source, String variable) throws CommandSyntaxException {
@@ -105,7 +106,7 @@ public class VarCommand {
             throw NOT_FOUND_EXCEPTION.create(variable);
         }
         source.sendFeedback(Text.translatable("commands.cvar.parse.success", variable, value));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int listVariables(FabricClientCommandSource source) {
