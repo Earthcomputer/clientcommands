@@ -185,6 +185,7 @@
   "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
 
   "commands.cuuid.success": "The UUID of %s is %s",
+  "commands.cuuid.success.nameless": "The UUID of that entity is %s",
 
   "commands.cvar.notFound": "Variable \"%s\" not found",
   "commands.cvar.saveFile.failed": "Could not save variables file",
