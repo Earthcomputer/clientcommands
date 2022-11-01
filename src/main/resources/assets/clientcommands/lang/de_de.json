@@ -30,13 +30,13 @@
 
   "commands.crender.entities.success": "Objektrenderingregeln wurden geändert",
 
-  "commands.ctask.list.noTasks": "Keine Tasks derzeit ausführen",
-  "commands.ctask.list.success": "%d Tasks derzeit ausführen",
-  "commands.ctask.stop.noMatch": "Keine passende Tasks",
+  "commands.ctask.list.noTasks": "Keine Tasks werden derzeit ausgeführt",
+  "commands.ctask.list.success": "%d Tasks werden derzeit ausgeführt",
+  "commands.ctask.stop.noMatch": "Keine passenden Tasks",
   "commands.ctask.stop.success": "%d Tasks wurden beendet",
 
-  "commands.ctemprule.list.header": "%d TempRules aufzählen:",
-  "commands.ctemprule.reset.success": "TempRule %s wurde zu %s zurücksetzen",
+  "commands.ctemprule.list.header": "Zähle %d TempRules auf:",
+  "commands.ctemprule.reset.success": "TempRule %s wurde zu %s zurückgesetzt",
   "commands.ctemprule.set.success": "TempRule %s wurde zu %s geändert",
 
   "commands.cwiki.failed": "Konnte Wiki-Inhalt nicht abrufen",

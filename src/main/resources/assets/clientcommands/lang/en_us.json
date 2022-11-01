@@ -77,6 +77,7 @@
   "commands.cfish.error.impossibleLoot": "That loot cannot be obtained with fishing",
   "commands.cfish.error.onGround": "Fishing bobber hit the ground",
   "commands.cfish.error.openWater": "Fishing bobber needs to be in open water for treasure loot",
+  "commands.cfish.error.openWater.flowingWater": "Help: the water around the bobber must be still water, flowing water does not work",
   "commands.cfish.error.openWater.lilyPad": "Help: try trapping the bobber under a lily pad",
   "commands.cfish.error.outOfWater": "Fishing bobber out of water, manipulation won't work",
   "commands.cfish.help.tooManyEnchants": "Help: multiple enchantments at once are unlikely and may take a long time to obtain",
@@ -87,6 +88,9 @@
   "commands.cfish.wrongLoot": "Didn't get the correct loot with correction of %dms, could have been %s ticks ahead",
 
   "commands.cfov.success": "Set FOV to %f",
+
+  "commands.cfunction.limitReached": "Command limit (%d) reached",
+  "commands.cfunction.success": "Ran %d commands from function %s",
 
   "commands.cgamma.success": "Set gamma to %f",
 
@@ -145,6 +149,10 @@
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
+  "commands.cstartup.add.success": "Added command to startup file",
+  "commands.cstartup.couldNotCreateFile": "Couldn't create startup file",
+  "commands.cstartup.couldNotEdit": "Couldn't edit startup file",
+
   "commands.cstopsound.success.sourceless.any": "Stopped all sounds for self",
   "commands.cstopsound.success.sourceless.sound": "Stopped sound '%s' for self",
   "commands.cstopsound.success.source.any": "Stopped all '%s' sounds for self",
@@ -172,12 +180,28 @@
   "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
   "commands.ctp.success": "Teleported player to %s",
 
+  "commands.ctranslate.unknownError": "An error occurred",
+  "commands.ctranslate.unknownLanguageCode": "Unknown language code \"%s\"",
+  "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
+
   "commands.cuuid.success": "The UUID of %s is %s",
 
-  "commands.cwhisperencrypted.messageTooLong": "Message too long",
-  "commands.cwhisperencrypted.playerNotFound": "Player not found",
-  "commands.cwhisperencrypted.noPrivKey": "No private key found",
-  "commands.cwhisperencrypted.pubKeyNotFound": "Public key not found",
+  "commands.cvar.notFound": "Variable \"%s\" not found",
+  "commands.cvar.saveFile.failed": "Could not save variables file",
+  "commands.cvar.add.success": "Successfully created variable \"%s\"",
+  "commands.cvar.add.alreadyExists": "Variable \"%s\" already exists",
+  "commands.cvar.remove.success": "Successfully removed variable \"%s\"",
+  "commands.cvar.edit.success": "Successfully edited variable \"%s\"",
+  "commands.cvar.parse.success": "\"%s\" evaluates to \"%s\"",
+  "commands.cvar.list.empty": "No available variables",
+  "commands.cvar.list": "Available variables: %s",
+
+  "commands.cwe.messageTooLong": "Message too long (max. 255 characters)",
+  "commands.cwe.playerNotFound": "Player not found",
+  "commands.cwe.privateKeyNotFound": "Private key not found",
+  "commands.cwe.publicKeyNotFound": "Public key not found",
+  "commands.cwe.encryptionFailed": "Something failed while encrypting your message",
+  "commands.cwe.decryptionFailed": "An incoming message could not be decrypted",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 

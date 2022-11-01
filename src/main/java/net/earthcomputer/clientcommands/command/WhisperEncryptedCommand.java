@@ -5,22 +5,26 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.xpple.clientarguments.arguments.CGameProfileArgumentType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.interfaces.IProfileKeys;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ChatPreviewer;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -34,73 +38,65 @@ import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class WhisperEncryptedCommand {
+
+    private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cwe.playerNotFound"));
+    private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cwe.publicKeyNotFound"));
+    private static final SimpleCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cwe.messageTooLong"));
+    private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cwe.encryptionFailed"));
+
     private static boolean justSent = false;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cwe")
                 .then(argument("player", gameProfile())
                     .then(argument("message", string())
-                        .executes((ctx) ->
-                            whisper(ctx.getSource(),
-                                getCProfileArgument(ctx, "player"),
-                                ctx.getArgument("message", String.class)
-                            )
-                        )
-                    )
-                ));
+                        .executes((ctx) -> whisper(ctx.getSource(), getCProfileArgument(ctx, "player"), getString(ctx, "message"))))));
     }
 
     private static int whisper(FabricClientCommandSource source, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {
         assert source.getClient().getNetworkHandler() != null;
-        Optional<PlayerListEntry> entry = profiles.stream().findFirst().flatMap(gp ->
-            source.getClient().getNetworkHandler().getPlayerList().stream().filter(e -> e.getProfile().getName().equalsIgnoreCase(gp.getName())).findFirst()
-        );
-        if (entry.isEmpty()) {
-            source.sendError(Text.translatable("commands.cwhisperencrypted.playerNotFound"));
-            return 0;
+        if (profiles.size() != 1) {
+            throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
+        PlayerListEntry recipient = source.getClient().getNetworkHandler().getPlayerList().stream()
+                .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
+                .findFirst()
+                .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
+
         try {
-            // step 2 encrypt the encrypted message using the public key of the recipient
-            PlayerPublicKey ppk = entry.get().getPublicKeyData();
+            PlayerPublicKey ppk = recipient.getPublicKeyData();
             if (ppk == null) {
-                source.sendError(Text.translatable("commands.cwhisperencrypted.pubKeyNotFound"));
-                return 0;
+                throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
             }
             PublicKey publicKey = ppk.data().key();
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            byte[] encrypted = message.getBytes(StandardCharsets.UTF_8);
-            encrypted = Gzip.compress(encrypted);
-            if (encrypted.length > 245) {
-                source.sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
-                return 0;
+            byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+            byte[] compressedBytes = Gzip.compress(bytes);
+            if (compressedBytes.length > 245) {
+                throw MESSAGE_TOO_LONG_EXCEPTION.create();
             }
-            cipher.update(encrypted);
-            encrypted = cipher.doFinal();
-            String commandMessage = "w " + entry.get().getProfile().getName() + " CCENC:" + BaseUTF8.toUnicode(encrypted);
+            cipher.update(compressedBytes);
+            compressedBytes = cipher.doFinal();
+            String commandMessage = "w " + recipient.getProfile().getName() + " CCENC:" + BaseUTF8.toUnicode(compressedBytes);
             if (commandMessage.length() >= 256) {
-                source.sendError(Text.translatable("commands.cwhisperencrypted.messageTooLong"));
-                return 0;
+                throw MESSAGE_TOO_LONG_EXCEPTION.create();
             }
+            source.getPlayer().sendCommand(commandMessage, null);
             justSent = true;
-            source.getClient().player.sendCommand(commandMessage);
-        } catch (Exception e) {
-            source.sendError(Text.translatable("commands.cplayerinfo.ioException"));
+        } catch (GeneralSecurityException e) {
             e.printStackTrace();
-            return 0;
+            throw ENCRYPTION_FAILED_EXCEPTION.create();
         }
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     public static Text decryptTest(Text t) {
-        if (t.getString().contains("CCENC:")) {
-            JsonElement el = visit(Text.Serializer.toJsonTree(t));
-            return Text.Serializer.fromJson(el);
-        }
-        return t;
+        JsonElement el = visit(Text.Serializer.toJsonTree(t));
+        return Text.Serializer.fromJson(el);
     }
 
-    public static JsonElement visit(JsonElement e) {
+    private static JsonElement visit(JsonElement e) {
         if (e instanceof JsonPrimitive && ((JsonPrimitive) e).isString()) {
             String s = e.getAsString();
             if (s.startsWith("CCENC:")) {
@@ -113,34 +109,30 @@ public class WhisperEncryptedCommand {
                     Optional<PrivateKey> key = ((IProfileKeys) MinecraftClient.getInstance().getProfileKeys()).getPrivateKey();
                     if (key.isEmpty()) {
                         if (!justSent) {
-                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable(
-                                "commands.cwhisperencrypted.no_priv_key").formatted(Formatting.DARK_RED));
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.cwe.privateKeyNotFound").formatted(Formatting.RED));
                         }
                         justSent = false;
                         return e;
                     }
                     cipher.init(Cipher.DECRYPT_MODE, key.get());
-                    encrypted = cipher.doFinal(encrypted);
-                    encrypted = Gzip.uncompress(encrypted);
-                    String message = "ccenc: " + new String(encrypted, StandardCharsets.UTF_8);
+                    byte[] decrypted = cipher.doFinal(encrypted);
+                    decrypted = Gzip.uncompress(decrypted);
+                    String message = "[/cwe] " + new String(decrypted, StandardCharsets.UTF_8);
                     return new JsonPrimitive(message);
                 } catch (Exception ex) {
                     if (!justSent) {
-                        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable(
-                            "commands.cplayerinfo.ioException").formatted(Formatting.DARK_RED));
+                        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.cwe.decryptionFailed").formatted(Formatting.RED));
                     }
                     justSent = false;
                     return e;
                 }
             }
         } else {
-            if (e instanceof JsonArray) {
-                JsonArray a = (JsonArray) e;
+            if (e instanceof JsonArray a) {
                 for (int i = 0; i < a.size(); i++) {
                     a.set(i, visit(a.get(i)));
                 }
-            } else if (e instanceof JsonObject) {
-                JsonObject o = (JsonObject) e;
+            } else if (e instanceof JsonObject o) {
                 for (String key : o.keySet()) {
                     o.add(key, visit(o.get(key)));
                 }
@@ -151,7 +143,7 @@ public class WhisperEncryptedCommand {
 
     public static class Gzip {
 
-        public static byte[] compress(byte[] str) {
+        private static byte[] compress(byte[] str) {
             if (str == null || str.length == 0) {
                 return null;
             }
@@ -161,13 +153,13 @@ public class WhisperEncryptedCommand {
                 gzip = new GZIPOutputStream(out);
                 gzip.write(str);
                 gzip.close();
-            } catch ( Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return out.toByteArray();
         }
 
-        public static byte[] uncompress(byte[] bytes) {
+        private static byte[] uncompress(byte[] bytes) {
             if (bytes == null || bytes.length == 0) {
                 return null;
             }
@@ -180,7 +172,7 @@ public class WhisperEncryptedCommand {
                 while ((n = ungzip.read(buffer)) >= 0) {
                     out.write(buffer, 0, n);
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return out.toByteArray();
@@ -207,7 +199,7 @@ public class WhisperEncryptedCommand {
             }
         }
 
-        public static String toUnicode(byte[] b) {
+        private static String toUnicode(byte[] b) {
             StringBuilder sb = new StringBuilder();
             int data = 0;
             int bitPtr = 0;
@@ -234,7 +226,7 @@ public class WhisperEncryptedCommand {
             return sb.toString();
         }
 
-        public static byte[] fromUnicode(String s) {
+        private static byte[] fromUnicode(String s) {
             int bitLength = s.codePointCount(0, s.length()) * 20;
             int dataLength = (bitLength + 7) / 8;
             byte[] data = new byte[dataLength];

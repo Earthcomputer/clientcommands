@@ -77,6 +77,7 @@
   "commands.cfish.error.impossibleLoot": "那个战利品不能通过钓鱼获得",
   "commands.cfish.error.onGround": "浮标撞到了地上",
   "commands.cfish.error.openWater": "为了获得宝藏战利品，浮标需要在开放的水中",
+  "commands.cfish.error.openWater.flowingWater": "建议: 浮标周围的水必须是静止的水，流动的水不起作用",
   "commands.cfish.error.openWater.lilyPad": "建议：尝试使浮标卡在睡莲下",
   "commands.cfish.error.outOfWater": "浮标不在水中, 自动控制无法工作",
   "commands.cfish.help.tooManyEnchants": "建议：把多个附魔放在一起获得会很难且可能需要很长时间",
@@ -138,6 +139,9 @@
 
   "commands.cplaysound.success": "成功播放音效 %s 给自己",
 
+  "commands.cping.local": "你在单人游戏世界(╯°□°）╯︵ ┻━┻",
+  "commands.cping.multiplayer": "你的平均ping是%d毫秒",
+  
   "commands.crelog.failed": "未能重新登录",
 
   "commands.crender.entities.success": "实体渲染规则已更新",
@@ -155,9 +159,21 @@
   "commands.ctemprule.list.header": "正在显示 %d 个 临时规则: ",
   "commands.ctemprule.reset.success": "临时规则 %s 已被重置为 %s",
   "commands.ctemprule.set.success": "临时规则 %s 已被更新为 %s",
+
+  "commands.ctitle.cleared": "已清除的标题",
+  "commands.ctitle.reset": "重置标题选项",
+  "commands.ctitle.show.title": "显示新标题",
+  "commands.ctitle.show.subtitle": "显示新的副标题",
+  "commands.ctitle.show.actionbar": "显示新的动作栏标题",
+  "commands.ctitle.times": "改变了标题显示时间",
+
+  "commands.ctooltip.header.held": "所持项目的工具提示是:",
+  "commands.ctooltip.header.stack": "这个项目的工具提示将是:",
   
   "commands.ctp.notSpectator": "仅观察者模式玩家可以使用传送",
   "commands.ctp.success": "成功将玩家传送到 %s",
+
+  "commands.cuuid.success": "%s 的 UUID 是 %s",
 
   "commands.cwiki.failed": "未能获取 Wiki 内容",
 
@@ -197,6 +213,8 @@
   "enchCrack.insn.itemThrows": "需要扔出物品: %d 次 (大约 %f 秒)",
   "enchCrack.insn.itemThrows.noDummy": "无需附魔其他物品",
   "enchCrack.insn.enchantments": "最终获得的附魔: ",
+
+  "itemCrack.notEnoughItems": "无法使用随机数种子破解: 玩家手中物品不足",
 
   "playerManip.state": "玩家种子破解状态: %s",
   "playerManip.state.uncracked": "未破解",
@@ -241,5 +259,6 @@
   "playerManip.notEnoughItems": "物品数量(%d , 共%d)不足以破解玩家种子",
   "playerManip.uncracked": "需要破解玩家种子",
 
-  "itemCrack.notEnoughItems": "无法使用随机数种子破解: 玩家手中物品不足"
+  "snakeGame.title": "潜行",
+  "snakeGame.score": "分数: %d"
 }

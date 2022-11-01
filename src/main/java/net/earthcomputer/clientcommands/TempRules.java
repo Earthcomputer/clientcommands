@@ -104,6 +104,9 @@ public class TempRules {
     @Rule
     public static boolean infiniteTools = false;
 
+    @Rule
+    public static int commandExecutionLimit = 65536;
+
     public static String asString(Object value) {
         if (value instanceof StringIdentifiable) {
             return ((StringIdentifiable) value).asString();

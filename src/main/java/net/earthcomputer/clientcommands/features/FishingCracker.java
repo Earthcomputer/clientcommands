@@ -791,7 +791,14 @@ public class FishingCracker {
                         Text help = Text.translatable("commands.cfish.error.openWater.lilyPad").styled(style -> style.withColor(Formatting.AQUA));
                         ClientCommandHelper.sendFeedback(help);
                     }
+                    boolean foundFlowingWater = false;
                     for (BlockPos openWaterViolation : fishingBobber.openWaterViolations) {
+                        if (!foundFlowingWater
+                            && fishingBobber.world.getBlockState(openWaterViolation).isOf(Blocks.WATER)
+                            && !fishingBobber.world.getFluidState(openWaterViolation).isStill()
+                        ) {
+                            foundFlowingWater = true;
+                        }
                         RenderQueue.addCuboid(
                                 RenderQueue.Layer.ON_TOP,
                                 UUID.randomUUID(),
@@ -800,6 +807,10 @@ public class FishingCracker {
                                 0xff0000,
                                 100
                         );
+                    }
+                    if (foundFlowingWater) {
+                        Text help = Text.translatable("commands.cfish.error.openWater.flowingWater").styled(style -> style.withColor(Formatting.AQUA));
+                        ClientCommandHelper.sendFeedback(help);
                     }
                     reset();
                     return;
