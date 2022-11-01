@@ -20,6 +20,8 @@ public class PingCommand {
 
     private static final SimpleCommandExceptionType PLAYER_IN_SINGLEPLAYER_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.singleplayer"));
     private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.playerNotFound"));
+    private static final SimpleCommandExceptionType TOO_MANY_PLAYERS_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.tooManyPlayers"));
+
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cping")
@@ -48,8 +50,11 @@ public class PingCommand {
             throw PLAYER_IN_SINGLEPLAYER_EXCEPTION.create();
         }
 
-        if (profiles.size() != 1) {
+        if (profiles.isEmpty()) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
+        }
+        if (profiles.size() > 1) {
+            throw TOO_MANY_PLAYERS_EXCEPTION.create();
         }
         GameProfile profile = profiles.iterator().next();
 
