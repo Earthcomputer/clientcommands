@@ -22,7 +22,6 @@ public class PingCommand {
     private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.playerNotFound"));
     private static final SimpleCommandExceptionType TOO_MANY_PLAYERS_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.tooManyPlayers"));
 
-
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cping")
             .executes(ctx -> printPing(ctx.getSource()))
