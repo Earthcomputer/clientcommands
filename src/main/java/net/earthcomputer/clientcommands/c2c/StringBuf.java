@@ -4,11 +4,11 @@ import java.nio.charset.StandardCharsets;
 
 public class StringBuf {
 
-    private final StringBuffer buffer;
+    private final StringBuilder buffer;
     private int cursor = 0;
 
     public StringBuf(String string) {
-        this.buffer = new StringBuffer(string);
+        this.buffer = new StringBuilder(string);
     }
 
     public StringBuf() {
