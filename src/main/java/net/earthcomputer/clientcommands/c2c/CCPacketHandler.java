@@ -1,0 +1,43 @@
+package net.earthcomputer.clientcommands.c2c;
+
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.minecraft.util.Util;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+public class CCPacketHandler {
+
+    private static final Object2IntMap<Class<? extends CCPacket>> packetIds = Util.make(new Object2IntOpenHashMap<>(), map -> map.defaultReturnValue(-1));
+    private static final List<Function<StringBuf, ? extends CCPacket>> packetFactories = new ArrayList<>();
+
+    static {
+        CCPacketHandler.register(MessageC2CPacket.class, MessageC2CPacket::new);
+    }
+
+    public static <P extends CCPacket> void register(Class<P> packet, Function<StringBuf, P> packetFactory) {
+        int id = packetFactories.size();
+        int i = packetIds.put(packet, id);
+        if (i != -1) {
+            String string = "Packet " + packet + " is already registered to ID " + i;
+            throw new IllegalArgumentException(string);
+        }
+        packetFactories.add(packetFactory);
+    }
+
+    @Nullable
+    public static <P extends CCPacket> Integer getId(Class<P> packet) {
+        int id = packetIds.getInt(packet);
+        return id == -1 ? null : id;
+    }
+
+    @Nullable
+    public static CCPacket createPacket(int id, StringBuf buf) {
+        Function<StringBuf, ? extends CCPacket> function = packetFactories.get(id);
+        return function == null ? null : function.apply(buf);
+    }
+}

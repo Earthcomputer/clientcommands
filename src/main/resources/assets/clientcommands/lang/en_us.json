@@ -196,12 +196,7 @@
   "commands.cvar.list.empty": "No available variables",
   "commands.cvar.list": "Available variables: %s",
 
-  "commands.cwe.messageTooLong": "Message too long (max. 255 characters)",
   "commands.cwe.playerNotFound": "Player not found",
-  "commands.cwe.privateKeyNotFound": "Private key not found",
-  "commands.cwe.publicKeyNotFound": "Public key not found",
-  "commands.cwe.encryptionFailed": "Something failed while encrypting your message",
-  "commands.cwe.decryptionFailed": "An incoming message could not be decrypted",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
 
@@ -288,5 +283,10 @@
   "playerManip.uncracked": "Player-Seed needs to be cracked",
 
   "snakeGame.title": "Snake",
-  "snakeGame.score": "Score: %d"
+  "snakeGame.score": "Score: %d",
+
+  "ccpacket.messageTooLong": "Message too long (max. 255 characters)",
+  "ccpacket.publicKeyNotFound": "Public key not found",
+  "ccpacket.encryptionFailed": "Something failed while encrypting your message",
+  "ccpacket.malformedPacket": "You have received a malformed packet:"
 }

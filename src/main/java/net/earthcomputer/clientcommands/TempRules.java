@@ -5,6 +5,7 @@ import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.annotation.Debug;
 import net.minecraft.util.math.MathHelper;
 
 import java.lang.annotation.ElementType;
@@ -106,6 +107,9 @@ public class TempRules {
 
     @Rule
     public static int commandExecutionLimit = 65536;
+
+    @Rule
+    public static boolean acceptC2CPackets = false;
 
     public static String asString(Object value) {
         if (value instanceof StringIdentifiable) {

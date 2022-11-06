@@ -3,14 +3,15 @@ package net.earthcomputer.clientcommands.mixin;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.c2c.*;
 import net.earthcomputer.clientcommands.features.FishingCracker;
+import net.earthcomputer.clientcommands.interfaces.IProfileKeys;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,6 +19,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
@@ -76,4 +82,59 @@ public class MixinClientPlayNetworkHandler {
         }
     }
 
+    @Inject(method = "onChatMessage", at = @At("HEAD"), cancellable = true)
+    public void onC2CPacket(ChatMessageS2CPacket packet, CallbackInfo ci) {
+        String content = packet.message().getContent().getString();
+        handleIfPacket(content, ci);
+    }
+
+    @Inject(method = "onGameMessage", at = @At("HEAD"), cancellable = true)
+    public void onC2CPacket(GameMessageS2CPacket packet, CallbackInfo ci) {
+        String content = packet.content().getString();
+        handleIfPacket(content, ci);
+    }
+
+    private void handleIfPacket(String content, CallbackInfo ci) {
+        if (!TempRules.acceptC2CPackets) {
+            return;
+        }
+        int index = content.indexOf("CCENC:");
+        if (index == -1) {
+            return;
+        }
+        if (CCNetworkHandler.justSent) {
+            CCNetworkHandler.justSent = false;
+            return;
+        }
+        if (handleC2CPacket(content.substring(index + 6))) {
+            ci.cancel();
+        } else {
+            this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.malformedPacket"));
+        }
+    }
+
+    private static boolean handleC2CPacket(String content) {
+        byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
+        encrypted = Arrays.copyOf(encrypted, 256);
+        Optional<PrivateKey> key = ((IProfileKeys) MinecraftClient.getInstance().getProfileKeys()).getPrivateKey();
+        if (key.isEmpty()) {
+            return false;
+        }
+        byte[] decrypted = ConversionHelper.RsaEcb.decrypt(encrypted, key.get());
+        if (decrypted == null) {
+            return false;
+        }
+        byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
+        StringBuf buf = new StringBuf(new String(uncompressed, StandardCharsets.UTF_8));
+        int id = buf.readInt();
+        CCPacket ccPacket = CCPacketHandler.createPacket(id, buf);
+        if (ccPacket == null) {
+            return false;
+        }
+        if (buf.getRemainingLength() > 0) {
+            return false;
+        }
+        ccPacket.apply(CCNetworkHandler.getInstance());
+        return true;
+    }
 }

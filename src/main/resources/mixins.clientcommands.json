@@ -29,7 +29,6 @@
     "MixinAxeHoeAndShovelItem",
     "MixinBowAndTridentItem",
     "MixinCartographyTableContainer",
-    "MixinChatHud",
     "MixinClientCommandSource",
     "MixinClientPlayerEntity",
     "MixinClientPlayerInteractionManager",
