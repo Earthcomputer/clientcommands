@@ -90,11 +90,8 @@ public class ConversionHelper {
                 return null;
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            GZIPOutputStream gzip;
-            try {
-                gzip = new GZIPOutputStream(out);
+            try (GZIPOutputStream gzip = new GZIPOutputStream(out)) {
                 gzip.write(bytes);
-                gzip.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -107,8 +104,7 @@ public class ConversionHelper {
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            try {
-                GZIPInputStream ungzip = new GZIPInputStream(in);
+            try (GZIPInputStream ungzip = new GZIPInputStream(in)) {
                 byte[] buffer = new byte[256];
                 int n;
                 while ((n = ungzip.read(buffer)) >= 0) {
