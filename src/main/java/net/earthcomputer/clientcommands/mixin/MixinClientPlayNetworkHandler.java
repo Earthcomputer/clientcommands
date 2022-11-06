@@ -104,6 +104,7 @@ public class MixinClientPlayNetworkHandler {
         }
         if (CCNetworkHandler.justSent) {
             CCNetworkHandler.justSent = false;
+            ci.cancel();
             return;
         }
         if (handleC2CPacket(content.substring(index + 6))) {
