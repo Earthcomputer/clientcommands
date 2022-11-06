@@ -10,9 +10,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.DynamicRegistryManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,6 +31,8 @@ import java.util.Optional;
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
     @Shadow @Final private MinecraftClient client;
+
+    @Shadow private DynamicRegistryManager.Immutable registryManager;
 
     @Inject(method = "onEntitySpawn", at = @At("TAIL"))
     public void onOnEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci) {
@@ -84,22 +89,34 @@ public class MixinClientPlayNetworkHandler {
 
     @Inject(method = "onChatMessage", at = @At("HEAD"), cancellable = true)
     public void onC2CPacket(ChatMessageS2CPacket packet, CallbackInfo ci) {
-        String content = packet.message().getContent().getString();
+        Optional<MessageType.Parameters> optionalParameters = packet.getParameters(this.registryManager);
+        if (optionalParameters.isEmpty()) {
+            return;
+        }
+        Text content = optionalParameters.get().applyChatDecoration(packet.message().getContent());
         handleIfPacket(content, ci);
     }
 
     @Inject(method = "onGameMessage", at = @At("HEAD"), cancellable = true)
     public void onC2CPacket(GameMessageS2CPacket packet, CallbackInfo ci) {
-        String content = packet.content().getString();
+        Text content = packet.content();
         handleIfPacket(content, ci);
     }
 
-    private void handleIfPacket(String content, CallbackInfo ci) {
-        if (!TempRules.acceptC2CPackets) {
+    private void handleIfPacket(Text content, CallbackInfo ci) {
+        String string = content.getString();
+        int index = string.indexOf("CCENC:");
+        if (index == -1) {
             return;
         }
-        int index = content.indexOf("CCENC:");
-        if (index == -1) {
+        if (!TempRules.acceptC2CPackets) {
+            if (CCNetworkHandler.justSent) {
+                this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.sentC2CPacket"));
+                CCNetworkHandler.justSent = false;
+            } else {
+                this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.receivedC2CPacket").styled(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, content))));
+            }
+            ci.cancel();
             return;
         }
         if (CCNetworkHandler.justSent) {
@@ -107,7 +124,7 @@ public class MixinClientPlayNetworkHandler {
             ci.cancel();
             return;
         }
-        if (handleC2CPacket(content.substring(index + 6))) {
+        if (handleC2CPacket(string.substring(index + 6))) {
             ci.cancel();
         } else {
             this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.malformedPacket"));
