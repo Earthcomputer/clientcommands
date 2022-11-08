@@ -20,8 +20,6 @@ public class CCNetworkHandler implements CCPacketListener {
     private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("ccpacket.publicKeyNotFound"));
     private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("ccpacket.encryptionFailed"));
 
-    public static boolean justSent = false;
-
     private static final CCNetworkHandler instance = new CCNetworkHandler();
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -55,12 +53,13 @@ public class CCNetworkHandler implements CCPacketListener {
         if (encrypted == null || encrypted.length == 0) {
             throw ENCRYPTION_FAILED_EXCEPTION.create();
         }
-        String commandString = "w " + recipient.getProfile().getName() + " CCENC:" + ConversionHelper.BaseUTF8.toUnicode(encrypted);
+        String packetString = ConversionHelper.BaseUTF8.toUnicode(encrypted);
+        String commandString = "w " + recipient.getProfile().getName() + " CCENC:" + packetString;
         if (commandString.length() >= 256) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create();
         }
         MinecraftClient.getInstance().player.sendCommand(commandString, null);
-        justSent = true;
+        PacketCacheHelper.addPacket(packetString);
     }
 
     @Override

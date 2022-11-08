@@ -109,22 +109,21 @@ public class MixinClientPlayNetworkHandler {
         if (index == -1) {
             return;
         }
+        String packetString = string.substring(index + 6);
         if (!TempRules.acceptC2CPackets) {
-            if (CCNetworkHandler.justSent) {
+            if (PacketCacheHelper.contains(packetString)) {
                 this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.sentC2CPacket"));
-                CCNetworkHandler.justSent = false;
             } else {
                 this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.receivedC2CPacket").styled(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, content))));
             }
             ci.cancel();
             return;
         }
-        if (CCNetworkHandler.justSent) {
-            CCNetworkHandler.justSent = false;
+        if (PacketCacheHelper.contains(packetString)) {
             ci.cancel();
             return;
         }
-        if (handleC2CPacket(string.substring(index + 6))) {
+        if (handleC2CPacket(packetString)) {
             ci.cancel();
         } else {
             this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.malformedPacket"));
