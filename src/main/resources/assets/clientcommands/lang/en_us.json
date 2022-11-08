@@ -132,6 +132,11 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.cnether.world.nether": "the Nether",
+  "commands.cnether.world.overworld": "the Overworld",
+  "commands.cnether.coords.left": " in %1$s is ",
+  "commands.cnether.coords.right": " in %2$s",
+
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 
