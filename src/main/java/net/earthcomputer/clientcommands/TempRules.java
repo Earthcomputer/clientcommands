@@ -5,7 +5,6 @@ import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.annotation.Debug;
 import net.minecraft.util.math.MathHelper;
 
 import java.lang.annotation.ElementType;

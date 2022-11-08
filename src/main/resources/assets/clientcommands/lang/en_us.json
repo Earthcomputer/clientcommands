@@ -291,5 +291,8 @@
   "ccpacket.encryptionFailed": "Something failed while encrypting your message",
   "ccpacket.malformedPacket": "You have received a malformed packet:",
   "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
-  "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!"
+  "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+
+  "ccpacket.messageC2CPacket.incoming": "%s -> you: %s",
+  "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s"
 }

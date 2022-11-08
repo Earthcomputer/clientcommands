@@ -46,7 +46,8 @@ public class WhisperEncryptedCommand {
         prefix.append(Text.literal("[").formatted(Formatting.DARK_GRAY));
         prefix.append(Text.literal("/cwe").formatted(Formatting.AQUA));
         prefix.append(Text.literal("]").formatted(Formatting.DARK_GRAY));
-        Text text = prefix.append(" you -> " + recipient.getProfile().getName() + ": " +  message).formatted(Formatting.GRAY);
+        prefix.append(Text.literal(" "));
+        Text text = prefix.append(Text.translatable("ccpacket.messageC2CPacket.outgoing", recipient.getProfile().getName(), message).formatted(Formatting.GRAY));
         source.sendFeedback(text);
         return Command.SINGLE_SUCCESS;
     }

@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.c2c;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.datafixers.kinds.IdF;
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
@@ -10,6 +10,7 @@ import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.slf4j.Logger;
 
 import java.security.PublicKey;
 
@@ -21,21 +22,21 @@ public class CCNetworkHandler implements CCPacketListener {
 
     public static boolean justSent = false;
 
-    private static CCNetworkHandler instance;
+    private static final CCNetworkHandler instance = new CCNetworkHandler();
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private CCNetworkHandler() {
     }
 
     public static CCNetworkHandler getInstance() {
-        if (instance == null) {
-            instance = new CCNetworkHandler();
-        }
         return instance;
     }
 
     public void sendPacket(CCPacket packet, PlayerListEntry recipient) throws CommandSyntaxException {
         Integer id = CCPacketHandler.getId(packet.getClass());
         if (id == null) {
+            LOGGER.warn("Could not send the packet because the id was not recognised");
             return;
         }
         PlayerPublicKey ppk = recipient.getPublicKeyData();
@@ -70,7 +71,8 @@ public class CCNetworkHandler implements CCPacketListener {
         prefix.append(Text.literal("[").formatted(Formatting.DARK_GRAY));
         prefix.append(Text.literal("/cwe").formatted(Formatting.AQUA));
         prefix.append(Text.literal("]").formatted(Formatting.DARK_GRAY));
-        Text text = prefix.append(" " + sender + " -> you: " + message).formatted(Formatting.GRAY);
+        prefix.append(Text.literal(" "));
+        Text text = prefix.append(Text.translatable("ccpacket.messageC2CPacket.incoming", sender, message).formatted(Formatting.GRAY));
         MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(text);
     }
 }
