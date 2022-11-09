@@ -10,7 +10,7 @@ public class PacketCacheHelper {
 
     private static final Set<String> cache = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(1)).<String, Boolean>build().asMap());
 
-    public static boolean contains(String packetString) {
+    public static boolean removeIfContains(String packetString) {
         return cache.remove(packetString);
     }
 
