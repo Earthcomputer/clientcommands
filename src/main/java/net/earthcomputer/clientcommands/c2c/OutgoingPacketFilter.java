@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 
-public class PacketCacheHelper {
+public class OutgoingPacketFilter {
 
     private static final Set<String> cache = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(1)).<String, Boolean>build().asMap());
 

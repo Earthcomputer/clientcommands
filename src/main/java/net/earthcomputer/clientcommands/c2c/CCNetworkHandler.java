@@ -59,7 +59,7 @@ public class CCNetworkHandler implements CCPacketListener {
             throw MESSAGE_TOO_LONG_EXCEPTION.create();
         }
         MinecraftClient.getInstance().player.sendCommand(commandString, null);
-        PacketCacheHelper.addPacket(packetString);
+        OutgoingPacketFilter.addPacket(packetString);
     }
 
     @Override

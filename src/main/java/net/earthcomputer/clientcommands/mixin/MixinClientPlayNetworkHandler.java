@@ -111,7 +111,7 @@ public class MixinClientPlayNetworkHandler {
         }
         String packetString = string.substring(index + 6);
         if (!TempRules.acceptC2CPackets) {
-            if (PacketCacheHelper.removeIfContains(packetString)) {
+            if (OutgoingPacketFilter.removeIfContains(packetString)) {
                 this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.sentC2CPacket"));
             } else {
                 this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.receivedC2CPacket").styled(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, content))));
@@ -119,7 +119,7 @@ public class MixinClientPlayNetworkHandler {
             ci.cancel();
             return;
         }
-        if (PacketCacheHelper.removeIfContains(packetString)) {
+        if (OutgoingPacketFilter.removeIfContains(packetString)) {
             ci.cancel();
             return;
         }
