@@ -198,6 +198,7 @@
   "commands.cvar.list": "Available variables: %s",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
+  "commands.cwiki.noContent": "There is no introductory paragraph in that article",
 
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "Cancel",
