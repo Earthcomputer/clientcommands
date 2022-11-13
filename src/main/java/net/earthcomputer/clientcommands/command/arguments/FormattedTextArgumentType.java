@@ -1,40 +1,43 @@
 package net.earthcomputer.clientcommands.command.arguments;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.*;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public class FormattedTextArgumentType implements ArgumentType<MutableText> {
+public class FormattedTextArgumentType implements ArgumentType<Text> {
 
-    private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "bold{italic{red{nwex}}}");
+    private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "&lxpple", "&l&o#fb8919nwex");
 
-    private FormattedTextArgumentType() {
-    }
+    private static final SimpleCommandExceptionType EXPECTED_FORMATTING_CODE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.expectedFormattingCode"));
+    private static final SimpleCommandExceptionType UNKNOWN_FORMATTING_CODE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.unknownFormattingCode"));
+    private static final SimpleCommandExceptionType EXPECTED_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.expectedHexValue"));
+    private static final SimpleCommandExceptionType INVALID_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.invalidHexValue"));
 
     public static FormattedTextArgumentType formattedText() {
         return new FormattedTextArgumentType();
     }
 
-    public static MutableText getFormattedText(CommandContext<FabricClientCommandSource> context, String arg) {
-        return context.getArgument(arg, MutableText.class);
+    public static Text getFormattedText(CommandContext<FabricClientCommandSource> context, String arg) {
+        return context.getArgument(arg, Text.class);
     }
 
     @Override
-    public MutableText parse(StringReader reader) throws CommandSyntaxException {
+    public Text parse(StringReader reader) throws CommandSyntaxException {
         return new Parser(reader).parse();
     }
 
@@ -44,10 +47,9 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
         reader.setCursor(builder.getStart());
 
         Parser parser = new Parser(reader);
-
         try {
             parser.parse();
-        } catch (CommandSyntaxException ignored) {
+        } catch (CommandSyntaxException ignore) {
         }
 
         if (parser.suggestor != null) {
@@ -70,135 +72,51 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
             this.reader = reader;
         }
 
-        public MutableText parse() throws CommandSyntaxException {
-            int cursor = reader.getCursor();
-            suggestor = builder -> {
-                SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                CommandSource.suggestMatching(FormattedText.FORMATTING.keySet(), newBuilder);
-                builder.add(newBuilder);
-            };
-
-            String word = reader.readUnquotedString();
-
-            if (FormattedText.FORMATTING.containsKey(word.toLowerCase(Locale.ROOT))) {
-                FormattedText.Styler styler = FormattedText.FORMATTING.get(word.toLowerCase(Locale.ROOT));
-                suggestor = null;
-                reader.skipWhitespace();
-
-                if (!reader.canRead() || reader.peek() != '{') {
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "{");
-                }
-                reader.skip();
-                reader.skipWhitespace();
-                MutableText literalText;
-                List<String> arguments = new ArrayList<>();
-                if (reader.canRead()) {
-                    if (reader.peek() != '}') {
-                        if (StringReader.isQuotedStringStart(reader.peek())) {
-                            literalText = Text.literal(reader.readQuotedString());
-                        } else {
-                            literalText = parse();
-                        }
-                        reader.skipWhitespace();
-                        while (reader.canRead() && reader.peek() != '}') {
-                            if (arguments.isEmpty()) {
-                                suggestor = builder -> {
-                                    SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                                    CommandSource.suggestMatching(styler.suggestions, newBuilder);
-                                    builder.add(newBuilder);
-                                };
-                            }
-                            if (reader.peek() != ',') {
-                                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, ",");
-                            }
-                            reader.skip();
-                            reader.skipWhitespace();
-                            arguments.add(readArgument());
-                            reader.skipWhitespace();
-                        }
-                    } else {
-                        literalText = Text.literal("");
+        public Text parse() throws CommandSyntaxException {
+            MutableText text = Text.empty();
+            Style style = Style.EMPTY;
+            while (reader.canRead()) {
+                char c = reader.read();
+                if (c == '&') { // Formatting.FORMATTING_CODE_PREFIX is not writable in chat
+                    suggestor = suggestions -> {
+                        SuggestionsBuilder builder = suggestions.createOffset(reader.getCursor());
+                        CommandSource.suggestMatching(Arrays.stream(Formatting.values()).map(f -> String.valueOf(f.getCode())), builder);
+                        suggestions.add(builder);
+                    };
+                    if (!reader.canRead()) {
+                        throw EXPECTED_FORMATTING_CODE_EXCEPTION.create();
                     }
+                    char code = reader.read();
+                    Formatting formatting = Formatting.byCode(code);
+                    if (formatting == null) {
+                        throw UNKNOWN_FORMATTING_CODE_EXCEPTION.create();
+                    }
+                    style = style.withFormatting(formatting);
+                } else if (c == '#') { // TextColor.RGB_PREFIX is private
+                    if (!reader.canRead()) {
+                        throw EXPECTED_HEX_VALUE_EXCEPTION.create();
+                    }
+                    StringBuilder builder = new StringBuilder();
+                    int hex = -1;
+                    for (int i = 0; i < 6 && reader.canRead(); i++) {
+                        builder.append(reader.peek());
+                        try {
+                            hex = Integer.parseInt(builder.toString(), 16);
+                        } catch (NumberFormatException e) {
+                            break;
+                        }
+                        reader.skip();
+                    }
+                    if (hex == -1) {
+                        throw INVALID_HEX_VALUE_EXCEPTION.create();
+                    }
+                    style = style.withColor(hex);
                 } else {
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "}");
+                    text.append(Text.literal(String.valueOf(c)).setStyle(style));
                 }
-                reader.skip();
-
-                if (styler.argumentCount != arguments.size()) {
-                    reader.setCursor(cursor);
-                    reader.readUnquotedString();
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
-                }
-                return new FormattedText(styler.operator, literalText, arguments).style();
-            } else {
-                return Text.literal(word + readArgument());
+                suggestor = null;
             }
+            return text;
         }
-
-        private String readArgument() {
-            final int start = reader.getCursor();
-            while (reader.canRead() && isAllowedInArgument(reader.peek())) {
-                reader.skip();
-            }
-            return reader.getString().substring(start, reader.getCursor());
-        }
-
-        private static boolean isAllowedInArgument(final char c) {
-            return c != ',' && c != '{' && c != '}';
-        }
-    }
-
-    static class FormattedText {
-        private static final Map<String, Styler> FORMATTING = ImmutableMap.<String, Styler>builder()
-                .put("aqua", new Styler((s, o) -> s.withFormatting(Formatting.AQUA), 0))
-                .put("black", new Styler((s, o) -> s.withFormatting(Formatting.BLACK), 0))
-                .put("blue", new Styler((s, o) -> s.withFormatting(Formatting.BLUE), 0))
-                .put("bold", new Styler((s, o) -> s.withFormatting(Formatting.BOLD), 0))
-                .put("dark_aqua", new Styler((s, o) -> s.withFormatting(Formatting.DARK_AQUA), 0))
-                .put("dark_blue", new Styler((s, o) -> s.withFormatting(Formatting.DARK_BLUE), 0))
-                .put("dark_gray", new Styler((s, o) -> s.withFormatting(Formatting.DARK_GRAY), 0))
-                .put("dark_green", new Styler((s, o) -> s.withFormatting(Formatting.DARK_GREEN), 0))
-                .put("dark_purple", new Styler((s, o) -> s.withFormatting(Formatting.DARK_PURPLE), 0))
-                .put("dark_red", new Styler((s, o) -> s.withFormatting(Formatting.DARK_RED), 0))
-                .put("gold", new Styler((s, o) -> s.withFormatting(Formatting.GOLD), 0))
-                .put("gray", new Styler((s, o) -> s.withFormatting(Formatting.GRAY), 0))
-                .put("green", new Styler((s, o) -> s.withFormatting(Formatting.GREEN), 0))
-                .put("italic", new Styler((s, o) -> s.withFormatting(Formatting.ITALIC), 0))
-                .put("light_purple", new Styler((s, o) -> s.withFormatting(Formatting.LIGHT_PURPLE), 0))
-                .put("obfuscated", new Styler((s, o) -> s.withFormatting(Formatting.OBFUSCATED), 0))
-                .put("red", new Styler((s, o) -> s.withFormatting(Formatting.RED), 0))
-                .put("reset", new Styler((s, o) -> s.withFormatting(Formatting.RESET), 0))
-                .put("strikethrough", new Styler((s, o) -> s.withFormatting(Formatting.STRIKETHROUGH), 0))
-                .put("underline", new Styler((s, o) -> s.withFormatting(Formatting.UNDERLINE), 0))
-                .put("white",  new Styler((s, o) -> s.withFormatting(Formatting.WHITE), 0))
-                .put("yellow", new Styler((s, o) -> s.withFormatting(Formatting.YELLOW), 0))
-
-                .put("font", new Styler((s, o) -> s.withFont(Identifier.tryParse(o.get(0))), 1, "alt", "default"))
-                .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.get(0), 16))), 1))
-                .put("insert", new Styler((s, o) -> s.withInsertion(o.get(0)), 1))
-
-                .put("click", new Styler((s, o) -> s.withClickEvent(new ClickEvent(ClickEvent.Action.byName(o.get(0)), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
-                .put("hover", new Styler((s, o) -> s.withHoverEvent(HoverEvent.Action.byName(o.get(0)).buildHoverEvent(Text.of(o.get(1)))), 2, "show_entity", "show_item", "show_text"))
-
-                // aliases
-                .put("strike", new Styler((s, o) -> s.withFormatting(Formatting.STRIKETHROUGH), 0))
-                .put("magic", new Styler((s, o) -> s.withFormatting(Formatting.OBFUSCATED), 0))
-                .build();
-
-        private final BiFunction<Style, List<String>, Style> styler;
-        private final MutableText argument;
-        private final List<String> optional;
-
-        public FormattedText(BiFunction<Style, List<String>, Style> styler, MutableText argument, List<String> optional) {
-            this.styler = styler;
-            this.argument = argument;
-            this.optional = optional;
-        }
-
-        public MutableText style() {
-            return this.argument.setStyle(this.styler.apply(this.argument.getStyle(), this.optional));
-        }
-
-        private record Styler(BiFunction<Style, List<String>, Style> operator, int argumentCount, String... suggestions) {}
     }
 }
