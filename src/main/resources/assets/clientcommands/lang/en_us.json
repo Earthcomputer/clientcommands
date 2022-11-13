@@ -206,6 +206,10 @@
   "commands.client.notClient": "Not a client-side command",
   "commands.client.tooFewArguments": "Too few arguments",
   "commands.client.invalidArgumentException": "Invalid argument '%s'",
+  "commands.client.expectedFormattingCode": "Expected a formatting code",
+  "commands.client.unknownFormattingCode": "Unknown formatting code",
+  "commands.client.expectedHexValue": "Expected a hex value",
+  "commands.client.invalidHexValue": "Invalid hex value",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",
