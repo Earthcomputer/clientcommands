@@ -138,8 +138,8 @@
 
   "commands.cplaysound.success": "Memainkan suara %s ke diri sendiri",
 
-  "commands.cping.local": "Kamu berada di dunia singleplayer (╯°□°）╯︵ ┻━┻",
-  "commands.cping.multiplayer": "Ping rata ratamu adalah %dms",
+  "commands.cping.singleplayer": "Kamu berada di dunia singleplayer (╯°□°）╯︵ ┻━┻",
+  "commands.cping.success": "Ping rata ratamu adalah %dms",
 
   "commands.crelog.failed": "Gagal relog",
 

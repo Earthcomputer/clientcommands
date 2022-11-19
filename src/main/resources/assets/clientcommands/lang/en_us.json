@@ -142,8 +142,11 @@
 
   "commands.cplaysound.success": "Played sound %s to self",
 
-  "commands.cping.local": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
-  "commands.cping.multiplayer": "Your average ping is %dms",
+  "commands.cping.success": "Your average ping is %dms",
+  "commands.cping.success.other": "The average ping of %s is %dms",
+  "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
+  "commands.cping.playerNotFound": "Player not found",
+  "commands.cping.tooManyPlayers": "Your query can match at most 1 player",
 
   "commands.crelog.failed": "Failed to relog",
 

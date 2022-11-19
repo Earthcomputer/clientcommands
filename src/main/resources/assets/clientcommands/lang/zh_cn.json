@@ -139,8 +139,8 @@
 
   "commands.cplaysound.success": "成功播放音效 %s 给自己",
 
-  "commands.cping.local": "你在单人游戏世界(╯°□°）╯︵ ┻━┻",
-  "commands.cping.multiplayer": "你的平均ping是%d毫秒",
+  "commands.cping.singleplayer": "你在单人游戏世界(╯°□°）╯︵ ┻━┻",
+  "commands.cping.success": "你的平均ping是%d毫秒",
   
   "commands.crelog.failed": "未能重新登录",
 
