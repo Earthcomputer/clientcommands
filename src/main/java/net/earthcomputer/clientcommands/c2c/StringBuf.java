@@ -20,7 +20,7 @@ public class StringBuf {
     }
 
     public int getRemainingLength() {
-        return this.buffer.length() - cursor;
+        return this.buffer.length() - this.cursor;
     }
 
     public String readString() {
