@@ -138,8 +138,8 @@
 
   "commands.cplaysound.success": "Проиграл звук %s самому себе",
 
-  "commands.cping.local": "Вы находитесь в одиночном мире (╯°□°）╯︵ ┻━┻",
-  "commands.cping.multiplayer": "Ваш средний пинг %dms",
+  "commands.cping.singleplayer": "Вы находитесь в одиночном мире (╯°□°）╯︵ ┻━┻",
+  "commands.cping.success": "Ваш средний пинг %dms",
 
   "commands.crelog.failed": "Не удалось повторно войти",
 

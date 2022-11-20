@@ -142,8 +142,11 @@
 
   "commands.cplaysound.success": "Played sound %s to self",
 
-  "commands.cping.local": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
-  "commands.cping.multiplayer": "Your average ping is %dms",
+  "commands.cping.success": "Your average ping is %dms",
+  "commands.cping.success.other": "The average ping of %s is %dms",
+  "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
+  "commands.cping.playerNotFound": "Player not found",
+  "commands.cping.tooManyPlayers": "Your query can match at most 1 player",
 
   "commands.crelog.failed": "Failed to relog",
 
@@ -185,6 +188,7 @@
   "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
 
   "commands.cuuid.success": "The UUID of %s is %s",
+  "commands.cuuid.success.nameless": "The UUID of that entity is %s",
 
   "commands.cvar.notFound": "Variable \"%s\" not found",
   "commands.cvar.saveFile.failed": "Could not save variables file",
@@ -197,6 +201,7 @@
   "commands.cvar.list": "Available variables: %s",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
+  "commands.cwiki.noContent": "There is no introductory paragraph in that article",
 
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "Cancel",
