@@ -142,8 +142,11 @@
 
   "commands.cplaysound.success": "成功播放音效 %s 给自己",
 
-  "commands.cping.local": "你在单人游戏世界(╯°□°）╯︵ ┻━┻",
-  "commands.cping.multiplayer": "你的平均ping是%d毫秒",
+  "commands.cping.success": "你的平均ping是%dms",
+  "commands.cping.success.other": "%s的平均ping是%dms",
+  "commands.cping.singleplayer": "你在一个单人世界里(╯°□°）╯︵ ┻━┻",
+  "commands.cping.playerNotFound": "未找到玩家",
+  "commands.cping.tooManyPlayers": "你的查询最多可以匹配1名玩家",
 
   "commands.crelog.failed": "未能重新登录",
 
@@ -185,6 +188,7 @@
   "commands.ctranslate.expectedFromTo": "有效参数：\"from\"/\"to\"",
 
   "commands.cuuid.success": "%s 的 UUID 是 %s",
+  "commands.cuuid.success.nameless": "该实体的UUID是%s",
 
   "commands.cvar.notFound": "变量\"%s\"未找到",
   "commands.cvar.saveFile.failed": "无法保存变量文件",
@@ -196,7 +200,8 @@
   "commands.cvar.list.empty": "没有可用的变量",
   "commands.cvar.list": "可用变量：%s",
 
-  "commands.cwiki.failed": "未能获取 Wiki 内容",
+  "commands.cwiki.failed": "未能获取维基内容",
+  "commands.cwiki.noContent": "那篇文章中没有介绍段落",
 
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "取消",
