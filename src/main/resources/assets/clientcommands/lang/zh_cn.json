@@ -201,7 +201,7 @@
   "commands.cvar.list": "可用变量：%s",
 
   "commands.cwiki.failed": "未能获取维基内容",
-  "commands.cwiki.noContent": "那篇文章中没有介绍段落",
+  "commands.cwiki.noContent": "那篇文章中没有用于介绍的段落",
 
   "commands.client.blockpos": "(%d, %d, %d)",
   "commands.client.cancel": "取消",
