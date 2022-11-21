@@ -12,14 +12,14 @@ import java.util.function.Function;
 
 public class CCPacketHandler {
 
-    private static final Object2IntMap<Class<? extends CCPacket>> packetIds = Util.make(new Object2IntOpenHashMap<>(), map -> map.defaultReturnValue(-1));
-    private static final List<Function<StringBuf, ? extends CCPacket>> packetFactories = new ArrayList<>();
+    private static final Object2IntMap<Class<? extends C2CPacket>> packetIds = Util.make(new Object2IntOpenHashMap<>(), map -> map.defaultReturnValue(-1));
+    private static final List<Function<StringBuf, ? extends C2CPacket>> packetFactories = new ArrayList<>();
 
     static {
         CCPacketHandler.register(MessageC2CPacket.class, MessageC2CPacket::new);
     }
 
-    public static <P extends CCPacket> void register(Class<P> packet, Function<StringBuf, P> packetFactory) {
+    public static <P extends C2CPacket> void register(Class<P> packet, Function<StringBuf, P> packetFactory) {
         int id = packetFactories.size();
         int i = packetIds.put(packet, id);
         if (i != -1) {
@@ -30,14 +30,14 @@ public class CCPacketHandler {
     }
 
     @Nullable
-    public static <P extends CCPacket> Integer getId(Class<P> packet) {
+    public static <P extends C2CPacket> Integer getId(Class<P> packet) {
         int id = packetIds.getInt(packet);
         return id == -1 ? null : id;
     }
 
     @Nullable
-    public static CCPacket createPacket(int id, StringBuf buf) {
-        Function<StringBuf, ? extends CCPacket> function = packetFactories.get(id);
+    public static C2CPacket createPacket(int id, StringBuf buf) {
+        Function<StringBuf, ? extends C2CPacket> function = packetFactories.get(id);
         return function == null ? null : function.apply(buf);
     }
 }

@@ -31,7 +31,7 @@ public class CCNetworkHandler implements CCPacketListener {
         return instance;
     }
 
-    public void sendPacket(CCPacket packet, PlayerListEntry recipient) throws CommandSyntaxException {
+    public void sendPacket(C2CPacket packet, PlayerListEntry recipient) throws CommandSyntaxException {
         Integer id = CCPacketHandler.getId(packet.getClass());
         if (id == null) {
             LOGGER.warn("Could not send the packet because the id was not recognised");

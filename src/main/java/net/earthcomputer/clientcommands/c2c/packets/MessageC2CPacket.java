@@ -1,10 +1,10 @@
 package net.earthcomputer.clientcommands.c2c.packets;
 
-import net.earthcomputer.clientcommands.c2c.CCPacket;
+import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.CCPacketListener;
 import net.earthcomputer.clientcommands.c2c.StringBuf;
 
-public class MessageC2CPacket implements CCPacket {
+public class MessageC2CPacket implements C2CPacket {
 
     private final String sender;
     private final String message;

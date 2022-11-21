@@ -73,14 +73,14 @@ public class MixinChatHud {
         byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
         StringBuf buf = new StringBuf(new String(uncompressed, StandardCharsets.UTF_8));
         int id = buf.readInt();
-        CCPacket ccPacket = CCPacketHandler.createPacket(id, buf);
-        if (ccPacket == null) {
+        C2CPacket c2CPacket = CCPacketHandler.createPacket(id, buf);
+        if (c2CPacket == null) {
             return false;
         }
         if (buf.getRemainingLength() > 0) {
             return false;
         }
-        ccPacket.apply(CCNetworkHandler.getInstance());
+        c2CPacket.apply(CCNetworkHandler.getInstance());
         return true;
     }
 }
