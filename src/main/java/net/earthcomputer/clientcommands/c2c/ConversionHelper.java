@@ -13,6 +13,9 @@ import java.util.zip.GZIPOutputStream;
 
 public class ConversionHelper {
 
+    /**
+     * @author Wagyourtail
+     */
     public static class BaseUTF8 {
         private static final int UNICODE_LOWER_BOUND = 34;
         private static final int UNICODE_UPPER_BOUND = 0x10ffff - 0x800;
@@ -84,6 +87,9 @@ public class ConversionHelper {
 
     }
 
+    /**
+     * @author Wagyourtail
+     */
     public static class Gzip {
         public static byte[] compress(byte[] bytes) {
             if (bytes == null || bytes.length == 0) {
