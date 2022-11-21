@@ -290,7 +290,7 @@
   "ccpacket.messageTooLong": "Message too long (max. 255 characters)",
   "ccpacket.publicKeyNotFound": "Public key not found",
   "ccpacket.encryptionFailed": "Something failed while encrypting your message",
-  "ccpacket.malformedPacket": "You have received a malformed packet:",
+  "ccpacket.malformedPacket": "You have received a malformed C2C packet:",
   "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
   "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
 
