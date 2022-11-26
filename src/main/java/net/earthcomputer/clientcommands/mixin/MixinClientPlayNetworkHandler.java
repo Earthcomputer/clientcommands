@@ -75,5 +75,4 @@ public class MixinClientPlayNetworkHandler {
             ServerBrandManager.setServerBrand(this.client.player.getServerBrand());
         }
     }
-
 }
