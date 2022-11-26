@@ -32,7 +32,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class BookCommand {
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Text.translatable("commands.cbook.commandException"));
 
-    private static final int MAX_LIMIT = WrittenBookItem.field_30933;
+    private static final int MAX_LIMIT = WrittenBookItem.MAX_PAGES;
     private static final int DEFAULT_LIMIT = 50;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

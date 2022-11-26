@@ -15,6 +15,9 @@ repositories {
 	maven {
 		url = 'https://maven.xpple.dev/maven2'
 	}
+	maven {
+		url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"
+	}
 }
 
 loom {
@@ -35,6 +38,8 @@ dependencies {
 
 	modImplementation 'dev.xpple:clientarguments:1.4.1'
 	include 'dev.xpple:clientarguments:1.4.1'
+
+	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
 }
 
 processResources {
