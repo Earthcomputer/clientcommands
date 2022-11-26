@@ -224,7 +224,7 @@
   "enchCrack.state.cracked": "已破解",
 
   "enchCrack.enchantments": "附魔：",
-  "enchCrack.clues": "线索：",
+  "enchCrack.clues": "提示：",
   "enchCrack.slot": "第%d行：",
 
   "enchCrack.xpSeed.one": "经验值种子：%08X",
