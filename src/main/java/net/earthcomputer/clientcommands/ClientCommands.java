@@ -79,7 +79,7 @@ public class ClientCommands implements ClientModInitializer {
         VarCommand.register(dispatcher);
         CFunctionCommand.register(dispatcher);
         StartupCommand.register(dispatcher);
-        NetherCommand.register(dispatcher);
+        PosCommand.register(dispatcher);
 
         CrackRNGCommand.register(dispatcher);
     }

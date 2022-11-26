@@ -132,11 +132,6 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
-  "commands.cnether.world.nether": "the Nether",
-  "commands.cnether.world.overworld": "the Overworld",
-  "commands.cnether.coords.left": " in %1$s is ",
-  "commands.cnether.coords.right": " in %2$s",
-
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 
@@ -149,6 +144,12 @@
 
   "commands.cping.local": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
   "commands.cping.multiplayer": "Your average ping is %dms",
+
+  "commands.cpos.world.overworld": "the Overworld",
+  "commands.cpos.world.the_end": "the End",
+  "commands.cpos.world.the_nether": "the Nether",
+  "commands.cpos.coords.left": " in %1$s is ",
+  "commands.cpos.coords.right": " in %2$s",
 
   "commands.crelog.failed": "Failed to relog",
 
