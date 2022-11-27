@@ -177,8 +177,8 @@
   "commands.ctitle.show.actionbar": "显示新的动作栏标题",
   "commands.ctitle.times": "改变了标题显示时间",
 
-  "commands.ctooltip.header.held": "所持项目的工具提示是：",
-  "commands.ctooltip.header.stack": "这个项目的工具提示将是：",
+  "commands.ctooltip.header.held": "所持物品的工具提示是：",
+  "commands.ctooltip.header.stack": "这个物品的工具提示将是：",
 
   "commands.ctp.notSpectator": "仅观察者模式玩家可以使用传送",
   "commands.ctp.success": "成功将玩家传送到%s",
