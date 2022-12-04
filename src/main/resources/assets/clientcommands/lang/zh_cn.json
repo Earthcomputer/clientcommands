@@ -296,13 +296,13 @@
   "snakeGame.title": "潜行",
   "snakeGame.score": "分数：%d",
 
-  "ccpacket.messageTooLong": "Message too long (max. 255 characters)",
-  "ccpacket.publicKeyNotFound": "Public key not found",
+  "ccpacket.messageTooLong": "信息过长（最多255个字符）",
+  "ccpacket.publicKeyNotFound": "未找到公共密匙",
   "ccpacket.encryptionFailed": "Something failed while encrypting your message",
   "ccpacket.malformedPacket": "You have received a malformed C2C packet:",
   "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
   "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> you: %s",
-  "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s"
+  "ccpacket.messageC2CPacket.incoming": "%s -> 你: %s",
+  "ccpacket.messageC2CPacket.outgoing": "你 -> %s: %s"
 }
