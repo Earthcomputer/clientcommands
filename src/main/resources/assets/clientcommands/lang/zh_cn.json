@@ -298,8 +298,8 @@
 
   "ccpacket.messageTooLong": "信息过长（最多255个字符）",
   "ccpacket.publicKeyNotFound": "未找到公共密匙",
-  "ccpacket.encryptionFailed": "Something failed while encrypting your message",
-  "ccpacket.malformedPacket": "You have received a malformed C2C packet:",
+  "ccpacket.encryptionFailed": "加密你的消息时出现问题",
+  "ccpacket.malformedPacket": "你收到了格式错误的客户端到客户端数据包：",
   "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
   "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
 
