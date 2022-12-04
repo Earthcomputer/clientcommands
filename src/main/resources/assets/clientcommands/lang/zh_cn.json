@@ -299,10 +299,10 @@
   "ccpacket.messageTooLong": "信息过长（最多255个字符）",
   "ccpacket.publicKeyNotFound": "未找到公共密匙",
   "ccpacket.encryptionFailed": "加密你的消息时出现问题",
-  "ccpacket.malformedPacket": "你收到了格式错误的客户端到客户端数据包：",
-  "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
-  "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+  "ccpacket.malformedPacket": "你收到了一个格式错误的客户端到客户端数据包：",
+  "ccpacket.receivedC2CPacket": "你收到了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！悬停以查看原始数据包。",
+  "ccpacket.sentC2CPacket": "你发送了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> 你: %s",
-  "ccpacket.messageC2CPacket.outgoing": "你 -> %s: %s"
+  "ccpacket.messageC2CPacket.incoming": "%s -> 你：%s",
+  "ccpacket.messageC2CPacket.outgoing": "你 -> %s：%s"
 }
