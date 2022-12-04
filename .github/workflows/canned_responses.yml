@@ -1,0 +1,18 @@
+name: issue canned response comments
+on:
+  issue_comment:                                     
+    types: [created]
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check for /paper
+        if: contains(github.event.comment.body, '/paper')
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.comment.issue.number }}
+          body: |
+            RNG manipulation is only guaranteed to work on vanilla (unmodified) servers. If the server is running other software, RNG manipulation might work, but we can make no guarantees. In particular, enchantment cracking is known to not work on paper servers or on hypixel. There is no workaround for this.
+            
+            
