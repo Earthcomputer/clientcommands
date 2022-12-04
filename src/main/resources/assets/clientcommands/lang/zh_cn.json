@@ -148,6 +148,12 @@
   "commands.cping.playerNotFound": "未找到玩家",
   "commands.cping.tooManyPlayers": "你的查询最多可以匹配1名玩家",
 
+  "commands.cpos.world.overworld": "主世界",
+  "commands.cpos.world.the_end": "末地",
+  "commands.cpos.world.the_nether": "下界",
+  "commands.cpos.coords.left": "在%1$s中是",
+  "commands.cpos.coords.right": "在%2$s中",
+
   "commands.crelog.failed": "未能重新登录",
 
   "commands.crender.entities.success": "实体渲染规则已更新",
@@ -199,6 +205,8 @@
   "commands.cvar.parse.success": "“%s”计算结果为“%s”",
   "commands.cvar.list.empty": "没有可用的变量",
   "commands.cvar.list": "可用变量：%s",
+
+  "commands.cwe.playerNotFound": "未找到玩家",
 
   "commands.cwiki.failed": "未能获取维基内容",
   "commands.cwiki.noContent": "那篇文章中没有用于介绍的段落",
@@ -286,5 +294,15 @@
   "playerManip.uncracked": "需要破解玩家种子",
 
   "snakeGame.title": "潜行",
-  "snakeGame.score": "分数：%d"
+  "snakeGame.score": "分数：%d",
+
+  "ccpacket.messageTooLong": "Message too long (max. 255 characters)",
+  "ccpacket.publicKeyNotFound": "Public key not found",
+  "ccpacket.encryptionFailed": "Something failed while encrypting your message",
+  "ccpacket.malformedPacket": "You have received a malformed C2C packet:",
+  "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
+  "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+
+  "ccpacket.messageC2CPacket.incoming": "%s -> you: %s",
+  "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s"
 }
