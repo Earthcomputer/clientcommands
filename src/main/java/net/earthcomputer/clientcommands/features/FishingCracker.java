@@ -37,7 +37,7 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.data.server.FishingLootTableGenerator;
+import net.minecraft.data.server.loottable.FishingLootTableGenerator;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
@@ -76,9 +76,12 @@ import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.predicate.entity.FishingHookPredicate;
 import net.minecraft.predicate.entity.TypeSpecificPredicate;
-import net.minecraft.tag.BlockTags;
-import net.minecraft.tag.FluidTags;
-import net.minecraft.tag.TagKey;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -91,9 +94,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
@@ -267,7 +267,7 @@ public class FishingCracker {
             addCondition(((ItemEntryAccessor) entry).getItem(), conditions);
         } else if (entry instanceof TagEntry) {
             TagKey<Item> tag = ((TagEntryAccessor) entry).getName();
-            Registry.ITEM.getEntryList(tag).ifPresent(list -> {
+            Registries.ITEM.getEntryList(tag).ifPresent(list -> {
                 for (RegistryEntry<Item> item : list) {
                     addCondition(item.value(), conditions);
                 }

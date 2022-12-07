@@ -32,7 +32,7 @@ public class TooltipCommand {
     private static int showTooltip(FabricClientCommandSource source, ItemStack stack, String type) {
         source.sendFeedback(Text.translatable("commands.ctooltip.header." + type));
 
-        TooltipContext context = getFlag(source, FLAG_ADVANCED) ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL;
+        TooltipContext context = getFlag(source, FLAG_ADVANCED) ? TooltipContext.ADVANCED : TooltipContext.BASIC;
 
         List<Text> tooltip = stack.getTooltip(source.getPlayer(), context);
         for (Text line : tooltip) {

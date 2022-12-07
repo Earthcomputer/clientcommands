@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.network.encryption.PlayerPublicKey;
+import net.minecraft.network.encryption.PublicPlayerSession;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -37,7 +38,11 @@ public class CCNetworkHandler implements CCPacketListener {
             LOGGER.warn("Could not send the packet because the id was not recognised");
             return;
         }
-        PlayerPublicKey ppk = recipient.getPublicKeyData();
+        PublicPlayerSession session = recipient.getSession();
+        if (session == null) {
+            throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
+        }
+        PlayerPublicKey ppk = session.publicKeyData();
         if (ppk == null) {
             throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
         }
@@ -58,7 +63,7 @@ public class CCNetworkHandler implements CCPacketListener {
         if (commandString.length() >= 256) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create();
         }
-        MinecraftClient.getInstance().player.sendCommand(commandString, null);
+        MinecraftClient.getInstance().getNetworkHandler().sendChatCommand(commandString);
         OutgoingPacketFilter.addPacket(packetString);
     }
 

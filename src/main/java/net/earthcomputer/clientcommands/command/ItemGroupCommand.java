@@ -8,10 +8,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
-import net.earthcomputer.clientcommands.interfaces.IItemGroup;
 import net.earthcomputer.clientcommands.mixin.CreativeInventoryScreenAccessor;
+import net.earthcomputer.clientcommands.mixin.ItemGroupsAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -19,6 +20,7 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.text.Text;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
@@ -106,9 +109,10 @@ public class ItemGroupCommand {
         if (identifier == null) {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(name);
         }
-        ItemGroup itemGroup = FabricItemGroupBuilder.create(identifier)
-                .icon(() -> icon)
-                .build();
+        ItemGroup itemGroup = FabricItemGroup.builder(identifier)
+            .displayName(Text.literal(name))
+            .icon(() -> icon)
+            .build();
 
         groups.put(name, new Group(itemGroup, icon, new NbtList()));
         saveFile();
@@ -143,7 +147,7 @@ public class ItemGroupCommand {
         groups.remove(name);
 
         reloadGroups();
-        CreativeInventoryScreenAccessor.setSelectedTab(0);
+        CreativeInventoryScreenAccessor.setSelectedTab(ItemGroups.getDefaultTab());
         try {
             CURRENT_PAGE_FIELD.set(null, 0);
         } catch (ReflectiveOperationException e) {
@@ -214,8 +218,9 @@ public class ItemGroupCommand {
         ItemGroup itemGroup = group.getItemGroup();
         NbtList items = group.getItems();
         ItemStack old = itemGroup.getIcon();
-        itemGroup = FabricItemGroupBuilder.create(
+        itemGroup = FabricItemGroup.builder(
                 new Identifier("clientcommands", name))
+                .displayName(Text.literal(name))
                 .icon(() -> icon)
                 .build();
 
@@ -240,9 +245,10 @@ public class ItemGroupCommand {
         ItemGroup itemGroup = group.getItemGroup();
         NbtList items = group.getItems();
         ItemStack icon = itemGroup.getIcon();
-        itemGroup = FabricItemGroupBuilder.create(identifier)
-                .icon(() -> icon)
-                .build();
+        itemGroup = FabricItemGroup.builder(identifier)
+            .displayName(Text.literal(name))
+            .icon(() -> icon)
+            .build();
         groups.put(_new, new Group(itemGroup, icon, items));
 
         reloadGroups();
@@ -289,12 +295,13 @@ public class ItemGroupCommand {
                 NbtCompound group = compoundTag.getCompound(key);
                 ItemStack icon = ItemStack.fromNbt(group.getCompound("icon"));
                 NbtList items = group.getList("items", NbtElement.COMPOUND_TYPE);
-                ItemGroup itemGroup = FabricItemGroupBuilder.create(
+                ItemGroup itemGroup = FabricItemGroup.builder(
                         new Identifier("clientcommands", key))
+                        .displayName(Text.literal(key))
                         .icon(() -> icon)
-                        .appendItems(stacks -> {
+                        .entries((enabledFeatures, entries, operatorEnabled) -> {
                             for (int i = 0; i < items.size(); i++) {
-                                stacks.add(ItemStack.fromNbt(items.getCompound(i)));
+                                entries.add(ItemStack.fromNbt(items.getCompound(i)));
                             }
                         })
                         .build();
@@ -313,12 +320,13 @@ public class ItemGroupCommand {
                     Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
-                ItemGroup itemGroup = FabricItemGroupBuilder.create(
+                ItemGroup itemGroup = FabricItemGroup.builder(
                         new Identifier("clientcommands", key))
+                        .displayName(Text.literal(key))
                         .icon(() -> icon)
-                        .appendItems(stacks -> {
+                        .entries((enabledFeatures, entries, operatorEnabled) -> {
                             for (int i = 0; i < updatedListTag.size(); i++) {
-                                stacks.add(ItemStack.fromNbt(updatedListTag.getCompound(i)));
+                                entries.add(ItemStack.fromNbt(updatedListTag.getCompound(i)));
                             }
                         })
                         .build();
@@ -328,16 +336,31 @@ public class ItemGroupCommand {
     }
 
     private static void reloadGroups() {
-        ((IItemGroup) ItemGroup.BUILDING_BLOCKS).shrink();
+        ItemGroupsAccessor.setGroups(
+            ItemGroups.getGroups().stream()
+                .filter(group -> !group.getId().getNamespace().equals("clientcommands"))
+                .toList()
+        );
+
+        if (groups.isEmpty()) {
+            // refresh the item groups list by remove and readding the last item group
+            List<ItemGroup> list = ItemGroups.getGroups();
+            ItemGroupsAccessor.setGroups(list.subList(0, list.size() - 1));
+            //noinspection UnstableApiUsage
+            ItemGroupHelper.appendItemGroup(list.get(list.size() - 1));
+            return;
+        }
+        // otherwise adding the groups will refresh the item groups list
 
         for (String key : groups.keySet()) {
             Group group = groups.get(key);
-            group.setItemGroup(FabricItemGroupBuilder.create(
+            group.setItemGroup(FabricItemGroup.builder(
                     new Identifier("clientcommands", key))
+                    .displayName(Text.literal(key))
                     .icon(group::getIcon)
-                    .appendItems(stacks -> {
+                    .entries((enabledFeatures, entries, operatorEnabled) -> {
                         for (int i = 0; i < group.getItems().size(); i++) {
-                            stacks.add(ItemStack.fromNbt(group.getItems().getCompound(i)));
+                            entries.add(ItemStack.fromNbt(group.getItems().getCompound(i)));
                         }
                     })
                     .build());

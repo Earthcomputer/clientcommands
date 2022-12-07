@@ -5,7 +5,7 @@ import net.minecraft.predicate.FluidPredicate;
 import net.minecraft.predicate.LightPredicate;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.LocationPredicate;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.Structure;

@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.multiconnect.api.MultiConnectAPI;
-import net.earthcomputer.multiconnect.api.Protocols;
+import net.earthcomputer.clientcommands.MulticonnectCompat;
 import net.minecraft.enchantment.Enchantment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,8 +12,8 @@ public class MixinEnchantmentWeight {
 
     @Inject(method = "getWeight", at = @At("HEAD"), cancellable = true)
     public void injectGetWeight(CallbackInfoReturnable<Integer> ci) {
-        int protocolVersion = MultiConnectAPI.instance().getProtocolVersion();
-        if (protocolVersion >= Protocols.V1_14 && protocolVersion <= Protocols.V1_14_2) {
+        int protocolVersion = MulticonnectCompat.getProtocolVersion();
+        if (protocolVersion >= MulticonnectCompat.V1_14 && protocolVersion <= MulticonnectCompat.V1_14_2) {
             int ret;
             switch ((Enchantment.Rarity) (Object) this) {
                 case COMMON:

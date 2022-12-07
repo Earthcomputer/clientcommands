@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.impl.command.client.ClientCommandInternals;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
@@ -95,11 +96,15 @@ public class AliasCommand {
         } else if (arguments != null){
             cmd += " " + arguments;
         }
+        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+        if (networkHandler == null) {
+            return Command.SINGLE_SUCCESS;
+        }
         if (cmd.startsWith("/")) {
             cmd = cmd.substring(1);
-            source.getPlayer().sendCommand(cmd);
+            networkHandler.sendChatCommand(cmd);
         } else {
-            source.getPlayer().sendChatMessage(cmd, null);
+            networkHandler.sendChatMessage(cmd);
         }
 
         return Command.SINGLE_SUCCESS;

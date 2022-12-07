@@ -60,7 +60,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
     }
 
     @Inject(method = "baseTick",
-            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/tag/FluidTags;WATER:Lnet/minecraft/tag/TagKey;", ordinal = 0)),
+            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/tag/FluidTags;WATER:Lnet/minecraft/registry/tag/TagKey;", ordinal = 0)),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;", ordinal = 0))
     public void onUnderwater(CallbackInfo ci) {
         if (isThePlayer())

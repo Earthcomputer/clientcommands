@@ -36,9 +36,9 @@ public abstract class MixinEnchantingScreen extends HandledScreen<EnchantmentScr
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
-            addDrawableChild(new ButtonWidget(width - 150, 0, 150, 20, Text.translatable("enchCrack.addInfo"), button -> {
+            addDrawableChild(ButtonWidget.builder(Text.translatable("enchCrack.addInfo"), button -> {
                 EnchantmentCracker.addEnchantmentSeedInfo(MinecraftClient.getInstance().world, getScreenHandler());
-            }));
+            }).position(width - 150, 0).build());
         }
     }
 }

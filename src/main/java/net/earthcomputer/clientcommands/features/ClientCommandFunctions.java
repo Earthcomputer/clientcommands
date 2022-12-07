@@ -17,7 +17,7 @@ import net.minecraft.client.network.ServerInfo;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.Text;
-import net.minecraft.util.FileNameUtil;
+import net.minecraft.util.PathUtil;
 import net.minecraft.util.WorldSavePath;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -200,7 +200,7 @@ public class ClientCommandFunctions {
             } catch (InvalidPathException e) {
                 return null;
             }
-            if (!FileNameUtil.isNormal(path) || !FileNameUtil.isAllowedName(path)) {
+            if (!PathUtil.isNormal(path) || !PathUtil.isAllowedName(path)) {
                 return null;
             }
             return path;

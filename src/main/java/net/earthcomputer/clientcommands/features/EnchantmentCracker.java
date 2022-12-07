@@ -1,14 +1,13 @@
 package net.earthcomputer.clientcommands.features;
 
 import com.mojang.logging.LogUtils;
+import net.earthcomputer.clientcommands.MulticonnectCompat;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;
 import net.earthcomputer.clientcommands.task.OneTickTask;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.earthcomputer.multiconnect.api.MultiConnectAPI;
-import net.earthcomputer.multiconnect.api.Protocols;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.EnchantingTableBlock;
 import net.minecraft.client.MinecraftClient;
@@ -24,6 +23,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.EnchantmentScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
@@ -32,7 +32,6 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 
@@ -221,7 +220,7 @@ public class EnchantmentCracker {
                     } else {
                         // check the right enchantment clue was generated
                         EnchantmentLevelEntry clue = enchantments.get(rand.nextInt(enchantments.size()));
-                        if (Registry.ENCHANTMENT.getRawId(clue.enchantment) != actualEnchantmentClues[slot]
+                        if (Registries.ENCHANTMENT.getRawId(clue.enchantment) != actualEnchantmentClues[slot]
                                 || clue.level != actualLevelClues[slot]) {
                             xpSeedItr.remove();
                             continue seedLoop;
@@ -449,7 +448,7 @@ public class EnchantmentCracker {
         int power = 0;
 
         for (BlockPos bookshelfOffset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
-            if (MultiConnectAPI.instance().getProtocolVersion() <= Protocols.V1_18) {
+            if (MulticonnectCompat.getProtocolVersion() <= MulticonnectCompat.V1_18) {
                 // old bookshelf detection method
                 BlockPos obstructionPos = tablePos.add(MathHelper.clamp(bookshelfOffset.getX(), -1, 1), 0, MathHelper.clamp(bookshelfOffset.getZ(), -1, 1));
                 if (world.getBlockState(tablePos.add(bookshelfOffset)).isOf(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {

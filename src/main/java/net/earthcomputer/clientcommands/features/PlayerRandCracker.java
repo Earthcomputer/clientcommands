@@ -1,11 +1,9 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.earthcomputer.clientcommands.IntegratedServerUtil;
+import net.earthcomputer.clientcommands.MulticonnectCompat;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
-import net.earthcomputer.multiconnect.api.MultiConnectAPI;
-import net.earthcomputer.multiconnect.api.Protocols;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -17,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -174,7 +171,7 @@ public class PlayerRandCracker {
     }
 
     public static void onEquipmentBreak() {
-        if (MultiConnectAPI.instance().getProtocolVersion() <= Protocols.V1_13_2) {
+        if (MulticonnectCompat.getProtocolVersion() <= MulticonnectCompat.V1_13_2) {
             resetCracker("itemBreak");
         }
     }
@@ -199,7 +196,7 @@ public class PlayerRandCracker {
     }
 
     public static void onXpOrb() {
-        if (MultiConnectAPI.instance().getProtocolVersion() >= Protocols.V1_17) {
+        if (MulticonnectCompat.getProtocolVersion() >= MulticonnectCompat.V1_17) {
             // TODO: is there a way to be smarter about this?
             resetCracker("xp");
         }

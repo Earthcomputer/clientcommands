@@ -29,15 +29,9 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation('net.earthcomputer.multiconnect:multiconnect-api:1.5.10') {
-		transitive = false
-	}
-	include('net.earthcomputer.multiconnect:multiconnect-api:1.5.10') {
-		transitive = false
-	}
 
-	modImplementation 'dev.xpple:clientarguments:1.4.1'
-	include 'dev.xpple:clientarguments:1.4.1'
+	modImplementation 'dev.xpple:clientarguments:1.4.2'
+	include 'dev.xpple:clientarguments:1.4.2'
 
 	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
 }

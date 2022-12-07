@@ -1,9 +1,11 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import com.mojang.brigadier.StringReader;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.features.FishingCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -33,7 +35,7 @@ public class MixinClientPlayNetworkHandler {
         SeedCracker.onEntityCreation(packet);
 
         if (FishingCracker.canManipulateFishing()) {
-            if (packet.getEntityData() == player.getId() && packet.getEntityTypeId() == EntityType.FISHING_BOBBER) {
+            if (packet.getEntityData() == player.getId() && packet.getEntityType() == EntityType.FISHING_BOBBER) {
                 FishingCracker.processBobberSpawn(packet.getUuid(), new Vec3d(packet.getX(), packet.getY(), packet.getZ()), new Vec3d(packet.getVelocityX(), packet.getVelocityY(), packet.getVelocityZ()));
             }
         }
@@ -48,11 +50,20 @@ public class MixinClientPlayNetworkHandler {
             return;
         }
 
-        if (!FishingCracker.canManipulateFishing() || packet.getEntityData() != player.getId() || packet.getEntityTypeId() != EntityType.FISHING_BOBBER) {
+        if (!FishingCracker.canManipulateFishing() || packet.getEntityData() != player.getId() || packet.getEntityType() != EntityType.FISHING_BOBBER) {
             return;
         }
 
         FishingCracker.onFishingBobberEntity();
+    }
+
+    @Inject(method = "sendChatCommand", at = @At("HEAD"))
+    private void onSendChatCommand(String command, CallbackInfo ci) {
+        StringReader reader = new StringReader(command);
+        String commandName = reader.canRead() ? reader.readUnquotedString() : "";
+        if ("give".equals(commandName)) {
+            PlayerRandCracker.onGiveCommand();
+        }
     }
 
     @Inject(method = "onExperienceOrbSpawn", at = @At("TAIL"))

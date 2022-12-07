@@ -12,14 +12,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandRegistryWrapper;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntryList;
 import net.minecraft.world.BlockView;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -33,12 +33,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBlockPredicateArgumentType.ParseResult> {
-    private final CommandRegistryWrapper<Block> registryWrapper;
+    private final RegistryWrapper<Block> registryWrapper;
     private boolean allowNbt = true;
     private boolean allowTags = true;
 
     private ClientBlockPredicateArgumentType(CommandRegistryAccess registryAccess) {
-        registryWrapper = registryAccess.createWrapper(Registry.BLOCK_KEY);
+        registryWrapper = registryAccess.createWrapper(RegistryKeys.BLOCK);
     }
 
     public static ClientBlockPredicateArgumentType blockPredicate(CommandRegistryAccess registryAccess) {
@@ -201,7 +201,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
 
     public record ParseResult(
             Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult> result,
-            CommandRegistryWrapper<Block> registryWrapper
+            RegistryWrapper<Block> registryWrapper
     ) {
     }
 

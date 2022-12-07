@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.c2c.*;
-import net.earthcomputer.clientcommands.interfaces.IProfileKeys;
+import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
@@ -62,7 +62,10 @@ public class MixinChatHud {
     private static boolean handleC2CPacket(String content) {
         byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
         encrypted = Arrays.copyOf(encrypted, 256);
-        Optional<PrivateKey> key = ((IProfileKeys) MinecraftClient.getInstance().getProfileKeys()).getPrivateKey();
+        if (!(MinecraftClient.getInstance().getProfileKeys() instanceof IHasPrivateKey privateKeyHolder)) {
+            return false;
+        }
+        Optional<PrivateKey> key = privateKeyHolder.getPrivateKey();
         if (key.isEmpty()) {
             return false;
         }

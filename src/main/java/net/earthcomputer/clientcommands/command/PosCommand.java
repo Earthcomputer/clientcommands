@@ -5,10 +5,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CDimensionArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;

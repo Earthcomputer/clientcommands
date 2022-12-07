@@ -105,7 +105,7 @@ public class SeedCracker {
     }
 
     public static void onEntityCreation(EntitySpawnS2CPacket packet) {
-        if (packet.getEntityTypeId() == EntityType.ITEM && SeedCracker.expectedItems>0) {
+        if (packet.getEntityType() == EntityType.ITEM && SeedCracker.expectedItems>0) {
 
             long rand_val = (long) ((Math.atan2(packet.getVelocityZ(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
             long top_bits = rand_val;
