@@ -28,7 +28,7 @@ public final class MulticonnectCompat {
             return null;
         }
         try {
-            return clazz.getMethod("getInstance").invoke(null);
+            return clazz.getMethod("instance").invoke(null);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
