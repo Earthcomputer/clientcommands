@@ -30,9 +30,13 @@ public class MapCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cmap")
-            .executes(ctx -> createMap(ctx.getSource(), 1))
-            .then(argument("upscale", integer(1, 16))
-                .executes(ctx -> createMap(ctx.getSource(), getInteger(ctx, "upscale")))));
+            .then(literal("export")
+                .executes(ctx -> createMap(ctx.getSource(), 1))
+                .then(argument("upscale", integer(1, 16))
+                    .executes(ctx -> createMap(ctx.getSource(), getInteger(ctx, "upscale")))
+                )
+            )
+        );
     }
 
     private static int createMap(FabricClientCommandSource source, int upscale) throws CommandSyntaxException {
