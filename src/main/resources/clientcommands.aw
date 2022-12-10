@@ -5,3 +5,4 @@ accessible class net/minecraft/command/argument/BlockPredicateArgumentType$State
 #accessible class net/minecraft/command/argument/BlockPredicateArgumentType$TagPredicate
 #accessible method net/minecraft/command/argument/BlockPredicateArgumentType$TagPredicate <init> (Lnet/minecraft/tag/TagKey;Ljava/util/Map;Lnet/minecraft/nbt/NbtCompound;)V
 extendable method net/minecraft/client/gui/screen/ingame/AbstractInventoryScreen drawStatusEffects (Lnet/minecraft/client/util/math/MatrixStack;II)V
+accessible method net/minecraft/client/util/ScreenshotRecorder getScreenshotFilename (Ljava/io/File;)Ljava/io/File;
