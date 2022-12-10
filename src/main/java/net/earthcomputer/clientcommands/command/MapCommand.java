@@ -31,15 +31,15 @@ public class MapCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cmap")
             .then(literal("export")
-                .executes(ctx -> createMap(ctx.getSource(), 1))
+                .executes(ctx -> exportMap(ctx.getSource(), 1))
                 .then(argument("upscale", integer(1, 16))
-                    .executes(ctx -> createMap(ctx.getSource(), getInteger(ctx, "upscale")))
+                    .executes(ctx -> exportMap(ctx.getSource(), getInteger(ctx, "upscale")))
                 )
             )
         );
     }
 
-    private static int createMap(FabricClientCommandSource source, int upscale) throws CommandSyntaxException {
+    private static int exportMap(FabricClientCommandSource source, int upscale) throws CommandSyntaxException {
         ClientPlayerEntity player = source.getPlayer();
 
         ItemStack map;
