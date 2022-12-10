@@ -39,9 +39,7 @@ public class MapCommand {
         );
     }
 
-    private static int exportMap(FabricClientCommandSource source, int upscale) throws CommandSyntaxException {
-        ClientPlayerEntity player = source.getPlayer();
-
+    private static MapState getMapState(PlayerEntity player) throws CommandSyntaxException {
         ItemStack map;
 
         // detect if map in hand
@@ -58,7 +56,12 @@ public class MapCommand {
         if (mapState == null) {
             throw NO_HELD_MAP.create();
         }
+        return mapState;
+    }
 
+
+    private static int exportMap(FabricClientCommandSource source, int upscale) throws CommandSyntaxException {
+        MapState mapState = getMapState(source.getPlayer());
         try (NativeImage image = new NativeImage(NativeImage.Format.RGBA, 128 * upscale, 128 * upscale, false)) {
             for (int i = 0; i < 128 * upscale; i+= upscale) {
                 for (int j = 0; j < 128 * upscale; j+= upscale) {
