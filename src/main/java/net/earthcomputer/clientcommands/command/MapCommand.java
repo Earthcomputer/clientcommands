@@ -39,7 +39,7 @@ public class MapCommand {
         );
     }
 
-    private static MapState getMapState(PlayerEntity player) throws CommandSyntaxException {
+    private static MapState getMapState(ClientPlayerEntity player) throws CommandSyntaxException {
         ItemStack map;
 
         // detect if map in hand
