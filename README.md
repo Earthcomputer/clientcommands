@@ -1,9 +1,9 @@
 # clientcommands
 Adds several useful client-side commands to Minecraft
 
-## Social
-Discord: https://discord.gg/Jg7Bun7
-Patreon: https://www.patreon.com/earthcomputer
+## Support & Community
+
+Join our growing community on [Discord](https://discord.gg/Jg7Bun7) to get help with installation or share your ideas for new features. You can also support the development of clientcommands by becoming a [Patreon](https://www.patreon.com/earthcomputer).
 
 ## Installation
 1. Download and run the [Fabric installer](https://fabricmc.net/use).
