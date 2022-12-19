@@ -73,7 +73,7 @@ public class MapCommand {
                     }
                 }
             }
-            File screenshotDir = new File(MinecraftClient.getInstance().runDirectory, "screenshots");
+            File screenshotDir = new File(source.getClient().runDirectory, "screenshots");
             screenshotDir.mkdirs();
             File file = ScreenshotRecorder.getScreenshotFilename(screenshotDir);
 
