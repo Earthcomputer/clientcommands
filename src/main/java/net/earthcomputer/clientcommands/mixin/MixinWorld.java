@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(World.class)
 public class MixinWorld {
 
-    @Inject(method = {"getRainGradient(F)F"}, at = {@At("HEAD")}, cancellable = true)
+    @Inject(method = "getRainGradient(F)F", at = {@At("HEAD")}, cancellable = true)
     private void onGetRainGradient(float delta, CallbackInfoReturnable<Float> cir) {
         float rain = ClientWeather.getRain();
         if (rain > -1) {
@@ -18,7 +18,7 @@ public class MixinWorld {
         }
     }
 
-    @Inject(method = {"getThunderGradient(F)F"}, at = {@At("HEAD")}, cancellable = true)
+    @Inject(method = "getThunderGradient(F)F", at = {@At("HEAD")}, cancellable = true)
     private void onGetThunderGradient(float delta, CallbackInfoReturnable<Float> cir) {
         float thunder = ClientWeather.getThunder();
         if (thunder > -1) {
