@@ -2,7 +2,9 @@ package net.earthcomputer.clientcommands.c2c;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.earthcomputer.clientcommands.c2c.packets.CoinflipC2CPackets;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,13 +15,14 @@ import java.util.function.Function;
 public class CCPacketHandler {
 
     private static final Object2IntMap<Class<? extends C2CPacket>> packetIds = Util.make(new Object2IntOpenHashMap<>(), map -> map.defaultReturnValue(-1));
-    private static final List<Function<StringBuf, ? extends C2CPacket>> packetFactories = new ArrayList<>();
+    private static final List<Function<PacketByteBuf, ? extends C2CPacket>> packetFactories = new ArrayList<>();
 
     static {
         CCPacketHandler.register(MessageC2CPacket.class, MessageC2CPacket::new);
+        CoinflipC2CPackets.register();
     }
 
-    public static <P extends C2CPacket> void register(Class<P> packet, Function<StringBuf, P> packetFactory) {
+    public static <P extends C2CPacket> void register(Class<P> packet, Function<PacketByteBuf, P> packetFactory) {
         int id = packetFactories.size();
         int i = packetIds.put(packet, id);
         if (i != -1) {
@@ -36,8 +39,8 @@ public class CCPacketHandler {
     }
 
     @Nullable
-    public static C2CPacket createPacket(int id, StringBuf buf) {
-        Function<StringBuf, ? extends C2CPacket> function = packetFactories.get(id);
+    public static C2CPacket createPacket(int id, PacketByteBuf buf) {
+        Function<PacketByteBuf, ? extends C2CPacket> function = packetFactories.get(id);
         return function == null ? null : function.apply(buf);
     }
 }

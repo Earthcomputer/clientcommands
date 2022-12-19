@@ -1,11 +1,14 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.c2c.*;
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -17,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.Optional;
@@ -74,16 +76,25 @@ public class MixinChatHud {
             return false;
         }
         byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
-        StringBuf buf = new StringBuf(new String(uncompressed, StandardCharsets.UTF_8));
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.wrappedBuffer(uncompressed));
         int id = buf.readInt();
         C2CPacket c2CPacket = CCPacketHandler.createPacket(id, buf);
         if (c2CPacket == null) {
             return false;
         }
-        if (buf.getRemainingLength() > 0) {
+        if (buf.readableBytes() > 0) {
             return false;
         }
-        c2CPacket.apply(CCNetworkHandler.getInstance());
+        try {
+            c2CPacket.apply(CCNetworkHandler.getInstance());
+        } catch (CommandSyntaxException e) {
+            if (e.getRawMessage() instanceof Text) {
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage((Text) e.getRawMessage());
+            }
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 }

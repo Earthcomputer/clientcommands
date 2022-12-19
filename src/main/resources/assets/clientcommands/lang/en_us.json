@@ -108,6 +108,13 @@
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
 
+  "commands.coinflip.sent": "Sent coin flip request to %s",
+  "commands.coinflip.received": "Received coin flip request from %s",
+  "commands.coinflip.value": "Coin flip result from %s: %s",
+  "commands.coinflip.heads": "Heads",
+  "commands.coinflip.tails": "Tails",
+  "commands.coinflip.cheater": "I think %s is cheating, they got a different value.",
+
   "commands.citemgroup.notFound": "Item group \"%s\" not found",
   "commands.citemgroup.outOfBounds": "Index %d is out of bounds",
   "commands.citemgroup.saveFile.failed": "Could not save item groups file",
