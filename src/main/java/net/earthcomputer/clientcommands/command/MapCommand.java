@@ -19,13 +19,11 @@ import net.minecraft.text.Text;
 import java.io.File;
 import java.io.IOException;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class MapCommand {
-    private static final SimpleCommandExceptionType NO_HELD_MAP = new SimpleCommandExceptionType(Text.translatable("commands.cmap.noHeld"));
+    private static final SimpleCommandExceptionType NO_HELD_MAP_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cmap.noHeld"));
 
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -48,13 +46,13 @@ public class MapCommand {
         } else if (player.getOffHandStack().getItem() instanceof FilledMapItem) {
             map = player.getOffHandStack();
         } else {
-            throw NO_HELD_MAP.create();
+            throw NO_HELD_MAP_EXCEPTION.create();
         }
 
         Integer mapId = FilledMapItem.getMapId(map);
         MapState mapState = FilledMapItem.getMapState(mapId, player.world);
         if (mapState == null) {
-            throw NO_HELD_MAP.create();
+            throw NO_HELD_MAP_EXCEPTION.create();
         }
         return mapState;
     }
