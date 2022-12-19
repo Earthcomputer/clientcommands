@@ -2,6 +2,7 @@ name: Check and Release Build
 on:
   push:
     branches: ['*']
+
 jobs:
   build:
     name: Build
