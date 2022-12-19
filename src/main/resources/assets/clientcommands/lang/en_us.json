@@ -208,7 +208,7 @@
 
   "commands.cwe.playerNotFound": "Player not found",
 
-  "commands.cweather.reset": "Reset weather",
+  "commands.cweather.reset": "Stopped overriding weather",
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
   "commands.cwiki.noContent": "There is no introductory paragraph in that article",
