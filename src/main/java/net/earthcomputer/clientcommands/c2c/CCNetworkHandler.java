@@ -4,9 +4,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
-import net.earthcomputer.clientcommands.c2c.packets.CoinflipC2CPackets;
+import net.earthcomputer.clientcommands.c2c.packets.DiceRollC2CPackets;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
-import net.earthcomputer.clientcommands.command.CoinflipCommand;
+import net.earthcomputer.clientcommands.command.DiceRollCommand;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.network.PacketByteBuf;
@@ -85,17 +85,17 @@ public class CCNetworkHandler implements CCPacketListener {
     }
 
     @Override
-    public void onCoinflipInitC2CPacket(CoinflipC2CPackets.CoinflipInitC2CPacket packet) throws CommandSyntaxException {
-        CoinflipCommand.initCoinflip(packet);
+    public void onCoinflipInitC2CPacket(DiceRollC2CPackets.DiceRollInitC2CPacket packet) throws CommandSyntaxException {
+        DiceRollCommand.initCoinflip(packet);
     }
 
     @Override
-    public void onCoinflipAcceptedC2CPacket(CoinflipC2CPackets.CoinflipAcceptedC2CPacket packet) throws CommandSyntaxException {
-        CoinflipCommand.acceptCoinflip(packet);
+    public void onCoinflipAcceptedC2CPacket(DiceRollC2CPackets.DiceRollAcceptedC2CPacket packet) throws CommandSyntaxException {
+        DiceRollCommand.acceptCoinflip(packet);
     }
 
     @Override
-    public void onCoinflipResultC2CPacket(CoinflipC2CPackets.CoinflipResultC2CPacket packet) {
-        CoinflipCommand.completeCoinflip(packet);
+    public void onCoinflipResultC2CPacket(DiceRollC2CPackets.DiceRollResultC2CPacket packet) {
+        DiceRollCommand.completeCoinflip(packet);
     }
 }

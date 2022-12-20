@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.CCNetworkHandler;
-import net.earthcomputer.clientcommands.c2c.packets.CoinflipC2CPackets;
+import net.earthcomputer.clientcommands.c2c.packets.DiceRollC2CPackets;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
@@ -23,12 +23,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.gameProfile;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.getCProfileArgument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
-public class CoinflipCommand {
+public class DiceRollCommand {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cwe.playerNotFound"));
 
@@ -45,31 +44,41 @@ public class CoinflipCommand {
 
     // TODO: make these clear old failed ones to not leak memory
 
-    // hash's of opponent's ABs
     private static final Map<String, byte[]> opponentHash = new HashMap<>();
-
-    //  oppoent name -> your AB
+    private static final Map<String, Integer> rollSides = new HashMap<>();
     private static final Map<String, BigInteger> playerAB = new HashMap<>();
-
-    // result to compare with opponent's
     private static final Map<String, BigInteger> result = new HashMap<>();
 
     private static final SecureRandom random = new SecureRandom();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ccoinflip")
-            .executes(ctx -> localCoinflip(ctx.getSource()))
+            .executes(ctx -> localDiceroll(ctx.getSource(), 2))
             .then(argument("player", gameProfile())
-                .executes(ctx -> coinflip(ctx.getSource(), getCProfileArgument(ctx, "player")))));
+                .executes(ctx -> diceroll(ctx.getSource(), getCProfileArgument(ctx, "player"), 2))));
+
+        dispatcher.register(literal("cdiceroll")
+                .executes(ctx -> localDiceroll(ctx.getSource(), 6))
+                .then(argument("sides", integer(2, 100))
+                        .executes(ctx -> localDiceroll(ctx.getSource(), getInteger(ctx, "sides")))
+                        .then(argument("player", gameProfile())
+                            .executes(ctx -> diceroll(ctx.getSource(), getCProfileArgument(ctx, "player"), getInteger(ctx, "sides")))))
+                .then(argument("player", gameProfile())
+                        .executes(ctx -> diceroll(ctx.getSource(), getCProfileArgument(ctx, "player"), 6))));
+
     }
 
-    private static int localCoinflip(FabricClientCommandSource source) {
-        source.sendFeedback(random.nextBoolean() ? Text.translatable("commands.coinflip.heads") : Text.translatable("commands.coinflip.tails"));
+    private static int localDiceroll(FabricClientCommandSource source, int sides) {
+        if (sides == 2) {
+            source.sendFeedback(random.nextBoolean() ? Text.translatable("commands.diceroll.heads") : Text.translatable("commands.diceroll.tails"));
+        } else {
+            source.sendFeedback(Text.literal(Integer.toString(random.nextInt(sides) + 1)));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
     public static byte[] toSHA1(byte[] convertme) {
-        MessageDigest md = null;
+        MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA-1");
         }
@@ -79,7 +88,7 @@ public class CoinflipCommand {
         return md.digest(convertme);
     }
 
-    private static int coinflip(FabricClientCommandSource source, Collection<GameProfile> profiles) throws CommandSyntaxException {
+    private static int diceroll(FabricClientCommandSource source, Collection<GameProfile> profiles, int sides) throws CommandSyntaxException {
         assert source.getClient().getNetworkHandler() != null;
         if (profiles.size() != 1) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
@@ -90,17 +99,21 @@ public class CoinflipCommand {
                 .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
 
         if (recipient.getProfile().getName().equals(source.getClient().getNetworkHandler().getProfile().getName())) {
-            return localCoinflip(source);
+            return localDiceroll(source, sides);
         }
 
         BigInteger a = new BigInteger(729, random).abs();
         BigInteger A = g.modPow(a, p);
         playerAB.put(recipient.getProfile().getName(), a);
+        rollSides.put(recipient.getProfile().getName(), sides);
 
-        CoinflipC2CPackets.CoinflipInitC2CPacket packet = new CoinflipC2CPackets.CoinflipInitC2CPacket(source.getClient().getNetworkHandler().getProfile().getName(), toSHA1(A.toByteArray()));
+        DiceRollC2CPackets.DiceRollInitC2CPacket packet = new DiceRollC2CPackets.DiceRollInitC2CPacket(source.getClient().getNetworkHandler().getProfile().getName(), sides, toSHA1(A.toByteArray()));
         CCNetworkHandler.getInstance().sendPacket(packet, recipient);
-        MutableText message = Text.translatable("commands.coinflip.sent", recipient.getProfile().getName());
-        source.sendFeedback(message);
+        if (sides == 2) {
+            source.sendFeedback(Text.translatable("commands.diceroll.sent", Text.translatable("commands.diceroll.coinflip"), recipient.getProfile().getName()));
+        } else {
+            source.sendFeedback(Text.translatable("commands.diceroll.sent", Text.translatable("commands.diceroll.diceroll", sides), recipient.getProfile().getName()));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
@@ -113,7 +126,7 @@ public class CoinflipCommand {
     }
 
 
-    public static void initCoinflip(CoinflipC2CPackets.CoinflipInitC2CPacket packet) throws CommandSyntaxException {
+    public static void initCoinflip(DiceRollC2CPackets.DiceRollInitC2CPacket packet) throws CommandSyntaxException {
 
         // get sender from name
         PlayerListEntry sender = MinecraftClient.getInstance().getNetworkHandler().getPlayerList().stream()
@@ -127,20 +140,27 @@ public class CoinflipCommand {
             BigInteger b = new BigInteger(729, random).abs();
             BigInteger B = g.modPow(b, p);
             playerAB.put(packet.sender, b);
+            rollSides.put(packet.sender, packet.sides);
 
-            CoinflipC2CPackets.CoinflipInitC2CPacket response = new CoinflipC2CPackets.CoinflipInitC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), toSHA1(B.toByteArray()));
+            DiceRollC2CPackets.DiceRollInitC2CPacket response = new DiceRollC2CPackets.DiceRollInitC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), packet.sides, toSHA1(B.toByteArray()));
             CCNetworkHandler.getInstance().sendPacket(response, sender);
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.coinflip.received", packet.sender));
+            MutableText message;
+            if (packet.sides == 2) {
+                message = Text.translatable("commands.diceroll.received", Text.translatable("commands.diceroll.coinflip"), packet.sender);
+            } else {
+                message = Text.translatable("commands.diceroll.recieved", Text.translatable("commands.diceroll.diceroll", packet.sides), packet.sender);
+            }
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
         }
 
         BigInteger b = playerAB.get(packet.sender);
         BigInteger B = g.modPow(b, p);
 
-        CoinflipC2CPackets.CoinflipAcceptedC2CPacket response = new CoinflipC2CPackets.CoinflipAcceptedC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), B);
+        DiceRollC2CPackets.DiceRollAcceptedC2CPacket response = new DiceRollC2CPackets.DiceRollAcceptedC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), B);
         CCNetworkHandler.getInstance().sendPacket(response, sender);
     }
 
-    public static void acceptCoinflip(CoinflipC2CPackets.CoinflipAcceptedC2CPacket packet) throws CommandSyntaxException {
+    public static void acceptCoinflip(DiceRollC2CPackets.DiceRollAcceptedC2CPacket packet) throws CommandSyntaxException {
         if (!opponentHash.containsKey(packet.sender)) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
@@ -158,34 +178,50 @@ public class CoinflipCommand {
         if (!Arrays.equals(opponentHash.get(packet.sender), toSHA1(B.toByteArray()))) {
             System.out.println("expected: " + byteArrayToHexString(opponentHash.get(packet.sender)));
             System.out.println("actual: " + byteArrayToHexString(toSHA1(B.toByteArray())));
-            MutableText message = Text.translatable("commands.coinflip.cheater", packet.sender).formatted(Formatting.RED);
+            MutableText message = Text.translatable("commands.diceroll.cheater", packet.sender).formatted(Formatting.RED);
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             opponentHash.remove(packet.sender);
             playerAB.remove(packet.sender);
+            rollSides.remove(packet.sender);
             return;
         }
         BigInteger s = B.modPow(a, p);
         result.put(packet.sender, s);
 
-        CoinflipC2CPackets.CoinflipResultC2CPacket response = new CoinflipC2CPackets.CoinflipResultC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), s);
+        DiceRollC2CPackets.DiceRollResultC2CPacket response = new DiceRollC2CPackets.DiceRollResultC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), s);
         CCNetworkHandler.getInstance().sendPacket(response, sender);
         opponentHash.remove(packet.sender);
         playerAB.remove(packet.sender);
     }
 
-    public static void completeCoinflip(CoinflipC2CPackets.CoinflipResultC2CPacket packet) {
+    public static void completeCoinflip(DiceRollC2CPackets.DiceRollResultC2CPacket packet) {
         if (result.containsKey(packet.sender)) {
             if (result.get(packet.sender).equals(packet.s)) {
                 LOGGER.info("Coinflip val: " + packet.s.toString(16));
-                MutableText message = Text.translatable("commands.coinflip.value", packet.sender, Text.translatable(packet.s.mod(BigInteger.TWO).equals(BigInteger.ONE) ? "commands.coinflip.heads" : "commands.coinflip.tails"));
+                MutableText message;
+                if (rollSides.get(packet.sender) == 2) {
+                    MutableText headstails;
+                    BigInteger half = p.divide(BigInteger.valueOf(2));
+                    if (packet.s.compareTo(half) > 0) {
+                        headstails = Text.translatable("commands.diceroll.heads");
+                    } else {
+                        headstails = Text.translatable("commands.diceroll.tails");
+                    }
+                    message = Text.translatable("commands.diceroll.value", Text.translatable("commands.diceroll.coinflip"), packet.sender, headstails);
+                } else {
+                    BigInteger sideVal = p.divide(BigInteger.valueOf(rollSides.get(packet.sender)));
+                    int side = packet.s.divide(sideVal).intValue() + 1;
+                    message = Text.translatable("commands.diceroll.value", Text.translatable("commands.diceroll.diceroll", rollSides.get(packet.sender)), packet.sender, side);
+                }
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             } else {
                 LOGGER.info("expected: " + result.get(packet.sender).toString(16));
                 LOGGER.info("actual: " + packet.s.toString(16));
-                MutableText message = Text.translatable("commands.coinflip.cheater", packet.sender).formatted(Formatting.RED);
+                MutableText message = Text.translatable("commands.diceroll.cheater", packet.sender).formatted(Formatting.RED);
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
             result.remove(packet.sender);
+            rollSides.remove(packet.sender);
         } else {
             throw new IllegalStateException("Coinflip result packet received before accepted/init packet");
         }

@@ -9,26 +9,30 @@ import net.minecraft.network.PacketByteBuf;
 import java.math.BigInteger;
 import java.util.BitSet;
 
-public class CoinflipC2CPackets {
+public class DiceRollC2CPackets {
     // use a diffie hellman key exchange in order to ensure that the coinflip is fair
 
-    public static class CoinflipInitC2CPacket implements C2CPacket {
+    public static class DiceRollInitC2CPacket implements C2CPacket {
         public final String sender;
+        public final int sides;
         public final byte[] ABHash;
 
-        public CoinflipInitC2CPacket(String sender, byte[] ABHash) {
+        public DiceRollInitC2CPacket(String sender, int sides, byte[] ABHash) {
             this.sender = sender;
+            this.sides = sides;
             this.ABHash = ABHash;
         }
 
-        public CoinflipInitC2CPacket(PacketByteBuf raw) {
+        public DiceRollInitC2CPacket(PacketByteBuf raw) {
             this.sender = raw.readString();
+            this.sides = raw.readInt();
             this.ABHash = raw.readByteArray();
         }
 
         @Override
         public void write(PacketByteBuf buf) {
             buf.writeString(this.sender);
+            buf.writeInt(this.sides);
             buf.writeByteArray(this.ABHash);
         }
 
@@ -38,16 +42,16 @@ public class CoinflipC2CPackets {
         }
     }
 
-    public static class CoinflipAcceptedC2CPacket implements C2CPacket {
+    public static class DiceRollAcceptedC2CPacket implements C2CPacket {
         public final String sender;
         public final BigInteger AB;
 
-        public CoinflipAcceptedC2CPacket(String sender, BigInteger publicKey) {
+        public DiceRollAcceptedC2CPacket(String sender, BigInteger publicKey) {
             this.sender = sender;
             this.AB = publicKey;
         }
 
-        public CoinflipAcceptedC2CPacket(PacketByteBuf stringBuf) {
+        public DiceRollAcceptedC2CPacket(PacketByteBuf stringBuf) {
             this.sender = stringBuf.readString();
             this.AB = new BigInteger(stringBuf.readBitSet().toByteArray());
         }
@@ -64,16 +68,16 @@ public class CoinflipC2CPackets {
         }
     }
 
-    public static class CoinflipResultC2CPacket implements C2CPacket {
+    public static class DiceRollResultC2CPacket implements C2CPacket {
         public final String sender;
         public final BigInteger s;
 
-        public CoinflipResultC2CPacket(String sender, BigInteger s) {
+        public DiceRollResultC2CPacket(String sender, BigInteger s) {
             this.sender = sender;
             this.s = s;
         }
 
-        public CoinflipResultC2CPacket(PacketByteBuf stringBuf) {
+        public DiceRollResultC2CPacket(PacketByteBuf stringBuf) {
             this.sender = stringBuf.readString();
             this.s = new BigInteger(stringBuf.readBitSet().toByteArray());
         }
@@ -91,8 +95,8 @@ public class CoinflipC2CPackets {
     }
 
     public static void register() {
-        CCPacketHandler.register(CoinflipInitC2CPacket.class, CoinflipInitC2CPacket::new);
-        CCPacketHandler.register(CoinflipAcceptedC2CPacket.class, CoinflipAcceptedC2CPacket::new);
-        CCPacketHandler.register(CoinflipResultC2CPacket.class, CoinflipResultC2CPacket::new);
+        CCPacketHandler.register(DiceRollInitC2CPacket.class, DiceRollInitC2CPacket::new);
+        CCPacketHandler.register(DiceRollAcceptedC2CPacket.class, DiceRollAcceptedC2CPacket::new);
+        CCPacketHandler.register(DiceRollResultC2CPacket.class, DiceRollResultC2CPacket::new);
     }
 }
