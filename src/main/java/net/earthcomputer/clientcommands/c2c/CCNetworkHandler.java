@@ -17,7 +17,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 
-import java.nio.ByteBuffer;
 import java.security.PublicKey;
 
 public class CCNetworkHandler implements CCPacketListener {
@@ -87,6 +86,11 @@ public class CCNetworkHandler implements CCPacketListener {
 
     @Override
     public void onCoinflipInitC2CPacket(CoinflipC2CPackets.CoinflipInitC2CPacket packet) throws CommandSyntaxException {
+        CoinflipCommand.initCoinflip(packet);
+    }
+
+    @Override
+    public void onCoinflipAcceptedC2CPacket(CoinflipC2CPackets.CoinflipAcceptedC2CPacket packet) throws CommandSyntaxException {
         CoinflipCommand.acceptCoinflip(packet);
     }
 

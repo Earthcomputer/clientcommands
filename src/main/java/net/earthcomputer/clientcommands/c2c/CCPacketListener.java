@@ -9,5 +9,7 @@ public interface CCPacketListener {
 
     void onCoinflipInitC2CPacket(CoinflipC2CPackets.CoinflipInitC2CPacket packet) throws CommandSyntaxException;
 
+    void onCoinflipAcceptedC2CPacket(CoinflipC2CPackets.CoinflipAcceptedC2CPacket packet) throws CommandSyntaxException;
+
     void onCoinflipResultC2CPacket(CoinflipC2CPackets.CoinflipResultC2CPacket packet);
 }

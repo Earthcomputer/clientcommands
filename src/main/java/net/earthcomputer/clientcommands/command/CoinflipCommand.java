@@ -15,14 +15,13 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.gameProfile;
 import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.getCProfileArgument;
@@ -44,8 +43,15 @@ public class CoinflipCommand {
 
     private static final BigInteger g = BigInteger.TWO;
 
-    //TODO: make these clear old failed ones to not leak memory
-    private static final Map<String, BigInteger> initializedCoinflips = new HashMap<>();
+    // TODO: make these clear old failed ones to not leak memory
+
+    // hash's of opponent's ABs
+    private static final Map<String, byte[]> opponentHash = new HashMap<>();
+
+    //  oppoent name -> your AB
+    private static final Map<String, BigInteger> playerAB = new HashMap<>();
+
+    // result to compare with opponent's
     private static final Map<String, BigInteger> result = new HashMap<>();
 
     private static final SecureRandom random = new SecureRandom();
@@ -62,6 +68,17 @@ public class CoinflipCommand {
         return Command.SINGLE_SUCCESS;
     }
 
+    public static byte[] toSHA1(byte[] convertme) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        }
+        catch(NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        return md.digest(convertme);
+    }
+
     private static int coinflip(FabricClientCommandSource source, Collection<GameProfile> profiles) throws CommandSyntaxException {
         assert source.getClient().getNetworkHandler() != null;
         if (profiles.size() != 1) {
@@ -72,54 +89,89 @@ public class CoinflipCommand {
                 .findFirst()
                 .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
 
-        BigInteger a = new BigInteger(729, random).abs();
+        if (recipient.getProfile().getName().equals(source.getClient().getName())) {
+            return localCoinflip(source);
+        }
 
+        BigInteger a = new BigInteger(729, random).abs();
         BigInteger A = g.modPow(a, p);
 
-        CoinflipC2CPackets.CoinflipInitC2CPacket packet = new CoinflipC2CPackets.CoinflipInitC2CPacket(source.getClient().getNetworkHandler().getProfile().getName(), A);
+        playerAB.put(recipient.getProfile().getName(), a);
+
+        CoinflipC2CPackets.CoinflipInitC2CPacket packet = new CoinflipC2CPackets.CoinflipInitC2CPacket(source.getClient().getNetworkHandler().getProfile().getName(), toSHA1(A.toByteArray()));
         CCNetworkHandler.getInstance().sendPacket(packet, recipient);
-        initializedCoinflips.put(recipient.getProfile().getName(), a);
+        playerAB.put(recipient.getProfile().getName(), a);
         MutableText message = Text.translatable("commands.coinflip.sent", recipient.getProfile().getName());
         source.sendFeedback(message);
         return Command.SINGLE_SUCCESS;
     }
 
-    public static void acceptCoinflip(CoinflipC2CPackets.CoinflipInitC2CPacket packet) throws CommandSyntaxException {
-        if (!initializedCoinflips.containsKey(packet.sender)) {
+    public static String byteArrayToHexString(byte[] b) {
+        StringBuilder result = new StringBuilder();
+        for (byte value : b) {
+            result.append(Integer.toString((value & 0xff) + 0x100, 16).substring(1));
+        }
+        return result.toString();
+    }
+
+
+    public static void initCoinflip(CoinflipC2CPackets.CoinflipInitC2CPacket packet) throws CommandSyntaxException {
+
+        // get sender from name
+        PlayerListEntry sender = MinecraftClient.getInstance().getNetworkHandler().getPlayerList().stream()
+                .filter(p -> p.getProfile().getName().equalsIgnoreCase(packet.sender))
+                .findFirst()
+                .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
+
+        opponentHash.put(packet.sender, packet.ABHash);
+
+        if (!playerAB.containsKey(packet.sender)) {
             BigInteger b = new BigInteger(729, random).abs();
             BigInteger B = g.modPow(b, p);
+            playerAB.put(packet.sender, b);
 
-            BigInteger s = packet.AB.modPow(b, p);
-            result.put(packet.sender, s);
-
-            CoinflipC2CPackets.CoinflipInitC2CPacket response = new CoinflipC2CPackets.CoinflipInitC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), B);
-
-            // get sender from name
-            PlayerListEntry sender = MinecraftClient.getInstance().getNetworkHandler().getPlayerList().stream()
-                    .filter(p -> p.getProfile().getName().equalsIgnoreCase(packet.sender))
-                    .findFirst()
-                    .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
-
+            CoinflipC2CPackets.CoinflipInitC2CPacket response = new CoinflipC2CPackets.CoinflipInitC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), toSHA1(B.toByteArray()));
             CCNetworkHandler.getInstance().sendPacket(response, sender);
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.coinflip.received", packet.sender));
-
-            CoinflipC2CPackets.CoinflipResultC2CPacket resultPacket = new CoinflipC2CPackets.CoinflipResultC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), s);
-            CCNetworkHandler.getInstance().sendPacket(resultPacket, sender);
-        } else {
-            BigInteger a = initializedCoinflips.get(packet.sender);
-            BigInteger s = packet.AB.modPow(a, p);
-            initializedCoinflips.remove(packet.sender);
-            result.put(packet.sender, s);
-
-            // get sender from name
-            PlayerListEntry sender = MinecraftClient.getInstance().getNetworkHandler().getPlayerList().stream()
-                    .filter(p -> p.getProfile().getName().equalsIgnoreCase(packet.sender))
-                    .findFirst()
-                    .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
-
-            CoinflipC2CPackets.CoinflipResultC2CPacket response = new CoinflipC2CPackets.CoinflipResultC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), s);
-            CCNetworkHandler.getInstance().sendPacket(response, sender);
         }
+
+        BigInteger b = playerAB.get(packet.sender);
+        BigInteger B = g.modPow(b, p);
+
+        CoinflipC2CPackets.CoinflipAcceptedC2CPacket response = new CoinflipC2CPackets.CoinflipAcceptedC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), B);
+        CCNetworkHandler.getInstance().sendPacket(response, sender);
+    }
+
+    public static void acceptCoinflip(CoinflipC2CPackets.CoinflipAcceptedC2CPacket packet) throws CommandSyntaxException {
+        if (!opponentHash.containsKey(packet.sender)) {
+            throw PLAYER_NOT_FOUND_EXCEPTION.create();
+        }
+
+        // get sender from name
+        PlayerListEntry sender = MinecraftClient.getInstance().getNetworkHandler().getPlayerList().stream()
+                .filter(p -> p.getProfile().getName().equalsIgnoreCase(packet.sender))
+                .findFirst()
+                .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
+
+        BigInteger a = playerAB.get(packet.sender);
+        BigInteger B = packet.AB;
+
+        // check if hash matches
+        if (!Arrays.equals(opponentHash.get(packet.sender), toSHA1(B.toByteArray()))) {
+            System.out.println("expected: " + byteArrayToHexString(opponentHash.get(packet.sender)));
+            System.out.println("actual: " + byteArrayToHexString(toSHA1(B.toByteArray())));
+            MutableText message = Text.translatable("commands.coinflip.cheater", packet.sender).formatted(Formatting.RED);
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
+            opponentHash.remove(packet.sender);
+            playerAB.remove(packet.sender);
+            return;
+        }
+
+        BigInteger s = B.modPow(a, p);
+        result.put(packet.sender, s);
+
+        CoinflipC2CPackets.CoinflipResultC2CPacket response = new CoinflipC2CPackets.CoinflipResultC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), s);
+        CCNetworkHandler.getInstance().sendPacket(response, sender);
     }
 
     public static void completeCoinflip(CoinflipC2CPackets.CoinflipResultC2CPacket packet) {
@@ -129,8 +181,8 @@ public class CoinflipCommand {
                 MutableText message = Text.translatable("commands.coinflip.value", packet.sender, Text.translatable(packet.s.mod(BigInteger.TWO).equals(BigInteger.ONE) ? "commands.coinflip.heads" : "commands.coinflip.tails"));
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             } else {
-                LOGGER.info("Coinflip val: " + result.get(packet.sender).toString(16));
-                LOGGER.info("Remote val: " + packet.s.toString(16));
+                LOGGER.info("expected: " + result.get(packet.sender).toString(16));
+                LOGGER.info("actual: " + packet.s.toString(16));
                 MutableText message = Text.translatable("commands.coinflip.cheater", packet.sender).formatted(Formatting.RED);
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }

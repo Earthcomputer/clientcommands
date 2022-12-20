@@ -14,14 +14,40 @@ public class CoinflipC2CPackets {
 
     public static class CoinflipInitC2CPacket implements C2CPacket {
         public final String sender;
+        public final byte[] ABHash;
+
+        public CoinflipInitC2CPacket(String sender, byte[] ABHash) {
+            this.sender = sender;
+            this.ABHash = ABHash;
+        }
+
+        public CoinflipInitC2CPacket(PacketByteBuf raw) {
+            this.sender = raw.readString();
+            this.ABHash = raw.readByteArray();
+        }
+
+        @Override
+        public void write(PacketByteBuf buf) {
+            buf.writeString(this.sender);
+            buf.writeByteArray(this.ABHash);
+        }
+
+        @Override
+        public void apply(CCPacketListener listener) throws CommandSyntaxException {
+            listener.onCoinflipInitC2CPacket(this);
+        }
+    }
+
+    public static class CoinflipAcceptedC2CPacket implements C2CPacket {
+        public final String sender;
         public final BigInteger AB;
 
-        public CoinflipInitC2CPacket(String sender, BigInteger publicKey) {
+        public CoinflipAcceptedC2CPacket(String sender, BigInteger publicKey) {
             this.sender = sender;
             this.AB = publicKey;
         }
 
-        public CoinflipInitC2CPacket(PacketByteBuf stringBuf) {
+        public CoinflipAcceptedC2CPacket(PacketByteBuf stringBuf) {
             this.sender = stringBuf.readString();
             this.AB = new BigInteger(stringBuf.readBitSet().toByteArray());
         }
@@ -34,7 +60,7 @@ public class CoinflipC2CPackets {
 
         @Override
         public void apply(CCPacketListener listener) throws CommandSyntaxException {
-            listener.onCoinflipInitC2CPacket(this);
+            listener.onCoinflipAcceptedC2CPacket(this);
         }
     }
 
@@ -66,6 +92,7 @@ public class CoinflipC2CPackets {
 
     public static void register() {
         CCPacketHandler.register(CoinflipInitC2CPacket.class, CoinflipInitC2CPacket::new);
+        CCPacketHandler.register(CoinflipAcceptedC2CPacket.class, CoinflipAcceptedC2CPacket::new);
         CCPacketHandler.register(CoinflipResultC2CPacket.class, CoinflipResultC2CPacket::new);
     }
 }
