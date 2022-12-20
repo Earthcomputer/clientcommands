@@ -86,16 +86,16 @@ public class CCNetworkHandler implements CCPacketListener {
 
     @Override
     public void onCoinflipInitC2CPacket(DiceRollC2CPackets.DiceRollInitC2CPacket packet) throws CommandSyntaxException {
-        DiceRollCommand.initCoinflip(packet);
+        DiceRollCommand.initDiceroll(packet);
     }
 
     @Override
     public void onCoinflipAcceptedC2CPacket(DiceRollC2CPackets.DiceRollAcceptedC2CPacket packet) throws CommandSyntaxException {
-        DiceRollCommand.acceptCoinflip(packet);
+        DiceRollCommand.acceptDiceroll(packet);
     }
 
     @Override
     public void onCoinflipResultC2CPacket(DiceRollC2CPackets.DiceRollResultC2CPacket packet) {
-        DiceRollCommand.completeCoinflip(packet);
+        DiceRollCommand.completeDiceroll(packet);
     }
 }

@@ -126,7 +126,7 @@ public class DiceRollCommand {
     }
 
 
-    public static void initCoinflip(DiceRollC2CPackets.DiceRollInitC2CPacket packet) throws CommandSyntaxException {
+    public static void initDiceroll(DiceRollC2CPackets.DiceRollInitC2CPacket packet) throws CommandSyntaxException {
 
         // get sender from name
         PlayerListEntry sender = MinecraftClient.getInstance().getNetworkHandler().getPlayerList().stream()
@@ -160,7 +160,7 @@ public class DiceRollCommand {
         CCNetworkHandler.getInstance().sendPacket(response, sender);
     }
 
-    public static void acceptCoinflip(DiceRollC2CPackets.DiceRollAcceptedC2CPacket packet) throws CommandSyntaxException {
+    public static void acceptDiceroll(DiceRollC2CPackets.DiceRollAcceptedC2CPacket packet) throws CommandSyntaxException {
         if (!opponentHash.containsKey(packet.sender)) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
@@ -194,7 +194,7 @@ public class DiceRollCommand {
         playerAB.remove(packet.sender);
     }
 
-    public static void completeCoinflip(DiceRollC2CPackets.DiceRollResultC2CPacket packet) {
+    public static void completeDiceroll(DiceRollC2CPackets.DiceRollResultC2CPacket packet) {
         if (result.containsKey(packet.sender)) {
             if (result.get(packet.sender).equals(packet.s)) {
                 LOGGER.info("Coinflip val: " + packet.s.toString(16));
