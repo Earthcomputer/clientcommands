@@ -78,15 +78,22 @@ public class MixinChatHud {
             return false;
         }
         // decrypt
+        int len = 0;
         byte[][] decryptedArrays = new byte[encryptedArrays.length][];
         for (int i = 0; i < encryptedArrays.length; i++) {
             decryptedArrays[i] = ConversionHelper.RsaEcb.decrypt(encryptedArrays[i], key.get());
             if (decryptedArrays[i] == null) {
                 return false;
             }
+            len += decryptedArrays[i].length;
         }
         // copy to new array
-        byte[] decrypted = new byte[decryptedArrays.length * 256];
+        byte[] decrypted = new byte[len];
+        int pos = 0;
+        for (byte[] decryptedArray : decryptedArrays) {
+            System.arraycopy(decryptedArray, 0, decrypted, pos, decryptedArray.length);
+            pos += decryptedArray.length;
+        }
         byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
         PacketByteBuf buf = new PacketByteBuf(Unpooled.wrappedBuffer(uncompressed));
         int id = buf.readInt();
