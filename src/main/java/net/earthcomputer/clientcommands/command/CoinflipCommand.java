@@ -89,18 +89,16 @@ public class CoinflipCommand {
                 .findFirst()
                 .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
 
-        if (recipient.getProfile().getName().equals(source.getClient().getName())) {
+        if (recipient.getProfile().getName().equals(source.getClient().getNetworkHandler().getProfile().getName())) {
             return localCoinflip(source);
         }
 
         BigInteger a = new BigInteger(729, random).abs();
         BigInteger A = g.modPow(a, p);
-
         playerAB.put(recipient.getProfile().getName(), a);
 
         CoinflipC2CPackets.CoinflipInitC2CPacket packet = new CoinflipC2CPackets.CoinflipInitC2CPacket(source.getClient().getNetworkHandler().getProfile().getName(), toSHA1(A.toByteArray()));
         CCNetworkHandler.getInstance().sendPacket(packet, recipient);
-        playerAB.put(recipient.getProfile().getName(), a);
         MutableText message = Text.translatable("commands.coinflip.sent", recipient.getProfile().getName());
         source.sendFeedback(message);
         return Command.SINGLE_SUCCESS;
@@ -166,12 +164,13 @@ public class CoinflipCommand {
             playerAB.remove(packet.sender);
             return;
         }
-
         BigInteger s = B.modPow(a, p);
         result.put(packet.sender, s);
 
         CoinflipC2CPackets.CoinflipResultC2CPacket response = new CoinflipC2CPackets.CoinflipResultC2CPacket(MinecraftClient.getInstance().getNetworkHandler().getProfile().getName(), s);
         CCNetworkHandler.getInstance().sendPacket(response, sender);
+        opponentHash.remove(packet.sender);
+        playerAB.remove(packet.sender);
     }
 
     public static void completeCoinflip(CoinflipC2CPackets.CoinflipResultC2CPacket packet) {
@@ -188,7 +187,7 @@ public class CoinflipCommand {
             }
             result.remove(packet.sender);
         } else {
-            throw new IllegalStateException("Coinflip result packet received before init packet");
+            throw new IllegalStateException("Coinflip result packet received before accepted/init packet");
         }
     }
 
