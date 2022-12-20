@@ -63,7 +63,13 @@ public class MixinChatHud {
 
     private static boolean handleC2CPacket(String content) {
         byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
-        encrypted = Arrays.copyOf(encrypted, 256);
+        // round down to multiple of 256 bytes
+        int length = encrypted.length & ~0xFF;
+        // copy to new array of arrays
+        byte[][] encryptedArrays = new byte[length / 256][];
+        for (int i = 0; i < length; i += 256) {
+            encryptedArrays[i / 256] = Arrays.copyOfRange(encrypted, i, i + 256);
+        }
         if (!(MinecraftClient.getInstance().getProfileKeys() instanceof IHasPrivateKey privateKeyHolder)) {
             return false;
         }
@@ -71,10 +77,16 @@ public class MixinChatHud {
         if (key.isEmpty()) {
             return false;
         }
-        byte[] decrypted = ConversionHelper.RsaEcb.decrypt(encrypted, key.get());
-        if (decrypted == null) {
-            return false;
+        // decrypt
+        byte[][] decryptedArrays = new byte[encryptedArrays.length][];
+        for (int i = 0; i < encryptedArrays.length; i++) {
+            decryptedArrays[i] = ConversionHelper.RsaEcb.decrypt(encryptedArrays[i], key.get());
+            if (decryptedArrays[i] == null) {
+                return false;
+            }
         }
+        // copy to new array
+        byte[] decrypted = new byte[decryptedArrays.length * 256];
         byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
         PacketByteBuf buf = new PacketByteBuf(Unpooled.wrappedBuffer(uncompressed));
         int id = buf.readInt();
