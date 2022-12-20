@@ -36,13 +36,14 @@ public class DiceRollCommand {
                     0xFFFFFFFF, 0xFFFFFFFF, 0xC90FDAA2, 0x2168C234, 0xC4C6628B, 0x80DC1CD1,
                     0x29024E08, 0x8A67CC74, 0x020BBEA6, 0x3B139B22, 0x514A0879, 0x8E3404DD,
                     0xEF9519B3, 0xCD3A431B, 0x302B0A6D, 0xF25F1437, 0x4FE1356D, 0x6D51C245,
-                    0xE485B576, 0x625E7EC6, 0xF44C42E9, 0xA63A3620, 0xFFFFFFFF, 0xFFFFFFFF
+                    0xE485B576, 0x625E7EC6, 0xF44C42E9, 0xA637ED6B, 0x0BFF5CB6, 0xF406B7ED,
+                    0xEE386BFB, 0x5A899FA5, 0xAE9F2411, 0x7C4B1FE6, 0x49286651, 0xECE65381,
+                    0xFFFFFFFF, 0xFFFFFFFF
             })
     );
 
     private static final BigInteger g = BigInteger.TWO;
 
-    // TODO: make these clear old failed ones to not leak memory
 
     private static final Map<String, byte[]> opponentHash = new HashMap<>();
     private static final Map<String, Integer> rollSides = new HashMap<>();
@@ -102,7 +103,7 @@ public class DiceRollCommand {
             return localDiceroll(source, sides);
         }
 
-        BigInteger a = new BigInteger(729, random).abs();
+        BigInteger a = new BigInteger(1025, random).abs();
         BigInteger A = g.modPow(a, p);
         playerAB.put(recipient.getProfile().getName(), a);
         rollSides.put(recipient.getProfile().getName(), sides);
@@ -114,6 +115,9 @@ public class DiceRollCommand {
         } else {
             source.sendFeedback(Text.translatable("commands.diceroll.sent", Text.translatable("commands.diceroll.diceroll", sides), recipient.getProfile().getName()));
         }
+
+        timeout(recipient.getProfile().getName(), sides);
+
         return Command.SINGLE_SUCCESS;
     }
 
@@ -123,6 +127,28 @@ public class DiceRollCommand {
             result.append(Integer.toString((value & 0xff) + 0x100, 16).substring(1));
         }
         return result.toString();
+    }
+
+    private static void timeout(String recipient, int sides) {
+
+        // timeout
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                MinecraftClient.getInstance().execute(() -> {
+                    if (playerAB.remove(recipient) != null ||
+                            rollSides.remove(recipient) != null ||
+                            opponentHash.remove(recipient) != null ||
+                            result.remove(recipient) != null) {
+                        if (sides == 2) {
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.diceroll.timeout", recipient, Text.translatable("commands.diceroll.coinflip")));
+                        } else {
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.diceroll.timeout", recipient, Text.translatable("commands.diceroll.diceroll", sides)));
+                        }
+                    }
+                });
+            }
+        }, 5000L);
     }
 
 
@@ -137,7 +163,7 @@ public class DiceRollCommand {
         opponentHash.put(packet.sender, packet.ABHash);
 
         if (!playerAB.containsKey(packet.sender)) {
-            BigInteger b = new BigInteger(729, random).abs();
+            BigInteger b = new BigInteger(1025, random).abs();
             BigInteger B = g.modPow(b, p);
             playerAB.put(packet.sender, b);
             rollSides.put(packet.sender, packet.sides);
@@ -148,9 +174,11 @@ public class DiceRollCommand {
             if (packet.sides == 2) {
                 message = Text.translatable("commands.diceroll.received", Text.translatable("commands.diceroll.coinflip"), packet.sender);
             } else {
-                message = Text.translatable("commands.diceroll.recieved", Text.translatable("commands.diceroll.diceroll", packet.sides), packet.sender);
+                message = Text.translatable("commands.diceroll.received", Text.translatable("commands.diceroll.diceroll", packet.sides), packet.sender);
             }
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
+
+            timeout(packet.sender, packet.sides);
         }
 
         BigInteger b = playerAB.get(packet.sender);
