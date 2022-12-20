@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.CCNetworkHandler;
@@ -22,6 +23,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
@@ -30,6 +33,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class DiceRollCommand {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cwe.playerNotFound"));
+    private static final DynamicCommandExceptionType WAITING_FOR_RESPONSE_EXCEPTION = new DynamicCommandExceptionType(d -> Text.translatable("commands.diceroll.waitingForResponse", d));
 
     private static final BigInteger p = new BigInteger(1,
             intsToBytes(new int[] {
@@ -49,6 +53,7 @@ public class DiceRollCommand {
     private static final Map<String, Integer> rollSides = new HashMap<>();
     private static final Map<String, BigInteger> playerAB = new HashMap<>();
     private static final Map<String, BigInteger> result = new HashMap<>();
+    private static final Map<String, AtomicBoolean> timeoutHolder = new HashMap<>();
 
     private static final SecureRandom random = new SecureRandom();
 
@@ -108,6 +113,10 @@ public class DiceRollCommand {
         playerAB.put(recipient.getProfile().getName(), a);
         rollSides.put(recipient.getProfile().getName(), sides);
 
+        if (timeoutHolder.containsKey(recipient.getProfile().getName())) {
+            throw WAITING_FOR_RESPONSE_EXCEPTION.create(recipient.getProfile().getName());
+        }
+
         DiceRollC2CPackets.DiceRollInitC2CPacket packet = new DiceRollC2CPackets.DiceRollInitC2CPacket(source.getClient().getNetworkHandler().getProfile().getName(), sides, toSHA1(A.toByteArray()));
         CCNetworkHandler.getInstance().sendPacket(packet, recipient);
         if (sides == 2) {
@@ -130,12 +139,16 @@ public class DiceRollCommand {
     }
 
     private static void timeout(String recipient, int sides) {
-
+        AtomicBoolean timeout = new AtomicBoolean(false);
+        timeoutHolder.put(recipient, timeout);
         // timeout
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 MinecraftClient.getInstance().execute(() -> {
+                    if (timeout.get()) {
+                        return;
+                    }
                     if (playerAB.remove(recipient) != null ||
                             rollSides.remove(recipient) != null ||
                             opponentHash.remove(recipient) != null ||
@@ -248,6 +261,7 @@ public class DiceRollCommand {
                 MutableText message = Text.translatable("commands.diceroll.cheater", packet.sender).formatted(Formatting.RED);
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
+            timeoutHolder.remove(packet.sender).set(true);
             result.remove(packet.sender);
             rollSides.remove(packet.sender);
         } else {

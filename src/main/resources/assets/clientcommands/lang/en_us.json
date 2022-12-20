@@ -117,6 +117,7 @@
   "commands.diceroll.tails": "Tails",
   "commands.diceroll.cheater": "I think %s is cheating, they got a different value.",
   "commands.diceroll.timeout": "Timeout waiting for %s's response to %s request",
+  "commands.diceroll.waitingForResponse": "Waiting for %s's response already",
 
   "commands.citemgroup.notFound": "Item group \"%s\" not found",
   "commands.citemgroup.outOfBounds": "Index %d is out of bounds",
