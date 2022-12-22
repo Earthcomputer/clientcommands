@@ -78,6 +78,7 @@ public class CCNetworkHandler implements CCPacketListener {
         if (commandString.length() >= 256) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create();
         }
+        assert MinecraftClient.getInstance().getNetworkHandler() != null;
         MinecraftClient.getInstance().getNetworkHandler().sendChatCommand(commandString);
         OutgoingPacketFilter.addPacket(packetString);
     }
@@ -133,6 +134,7 @@ public class CCNetworkHandler implements CCPacketListener {
         getPlayerByName(packet.sender()).ifPresent(sender -> {
             try {
                 sendPacket(new SnakeAddPlayersC2CPacket(snakeScreen.getOtherSnakes().keySet()), sender);
+                sendPacket(new SnakeSyncAppleC2CPacket(snakeScreen.getApple()), sender);
             } catch (CommandSyntaxException e) {
                 LOGGER.warn("Failed to reply to snake player join", e);
             }
@@ -158,5 +160,11 @@ public class CCNetworkHandler implements CCPacketListener {
     public void onSnakeRemovePlayerC2CPacket(SnakeRemovePlayerC2CPacket packet) {
         if (!(MinecraftClient.getInstance().currentScreen instanceof SnakeCommand.SnakeGameScreen snakeScreen)) return;
         snakeScreen.getOtherSnakes().remove(packet.player());
+    }
+
+    @Override
+    public void onSnakeSyncAppleC2CPacket(SnakeSyncAppleC2CPacket packet) {
+        if (!(MinecraftClient.getInstance().currentScreen instanceof SnakeCommand.SnakeGameScreen snakeScreen)) return;
+        snakeScreen.setApple(packet.applePos());
     }
 }

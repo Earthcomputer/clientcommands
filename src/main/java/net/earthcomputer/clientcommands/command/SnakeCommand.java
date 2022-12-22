@@ -7,12 +7,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
+import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.CCNetworkHandler;
 import net.earthcomputer.clientcommands.c2c.StringBuf;
-import net.earthcomputer.clientcommands.c2c.packets.SnakeBodyC2CPacket;
-import net.earthcomputer.clientcommands.c2c.packets.SnakeInviteC2CPacket;
-import net.earthcomputer.clientcommands.c2c.packets.SnakeJoinC2CPacket;
-import net.earthcomputer.clientcommands.c2c.packets.SnakeRemovePlayerC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.*;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -193,6 +191,7 @@ public class SnakeCommand {
             int scaleX = 17;
             int scaleZ = 17;
             for (final Map.Entry<String, List<Vec2i>> otherSnake : otherSnakes.entrySet()) {
+                if (otherSnake.getKey().equals(client.getSession().getUsername())) continue;
                 for (final Vec2i vec : otherSnake.getValue()) {
                     DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xffffa500);
                 }
@@ -248,18 +247,7 @@ public class SnakeCommand {
             super.close();
             if (otherSnakes.isEmpty()) return;
             assert client.getNetworkHandler() != null;
-            final SnakeRemovePlayerC2CPacket packet = new SnakeRemovePlayerC2CPacket(
-                client.getNetworkHandler().getProfile().getName()
-            );
-            for (final String otherSnake : otherSnakes.keySet()) {
-                CCNetworkHandler.getPlayerByName(otherSnake).ifPresent(player -> {
-                    try {
-                        CCNetworkHandler.getInstance().sendPacket(packet, player);
-                    } catch (CommandSyntaxException e) {
-                        LOGGER.warn("Failed to send removal packet to " + otherSnake, e);
-                    }
-                });
-            }
+            broadcastPacket(new SnakeRemovePlayerC2CPacket(client.getNetworkHandler().getProfile().getName()));
         }
 
         private boolean checkGameOver() {
@@ -282,24 +270,34 @@ public class SnakeCommand {
                 client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_GENERIC_EAT, 1));
                 do {
                     this.apple = new Vec2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Z + 1));
-                } while (this.snake.contains(this.apple));
+                } while (anyContainsPos(this.apple));
+                broadcastPacket(new SnakeSyncAppleC2CPacket(apple));
             } else {
                 this.snake.removeLast();
             }
         }
 
+        private boolean anyContainsPos(Vec2i pos) {
+            if (snake.contains(pos)) return true;
+            for (final List<Vec2i> otherSnake : otherSnakes.values()) {
+                if (otherSnake.contains(pos)) return true;
+            }
+            return false;
+        }
+
         private void syncPlayerData() {
             if (otherSnakes.isEmpty()) return;
             assert client.getNetworkHandler() != null;
-            final SnakeBodyC2CPacket packet = new SnakeBodyC2CPacket(
-                client.getNetworkHandler().getProfile().getName(), snake
-            );
+            broadcastPacket(new SnakeBodyC2CPacket(client.getNetworkHandler().getProfile().getName(), snake));
+        }
+
+        private void broadcastPacket(C2CPacket packet) {
             for (final String otherSnake : otherSnakes.keySet()) {
                 CCNetworkHandler.getPlayerByName(otherSnake).ifPresent(player -> {
                     try {
                         CCNetworkHandler.getInstance().sendPacket(packet, player);
                     } catch (CommandSyntaxException e) {
-                        LOGGER.warn("Failed to sync snake data to " + otherSnake, e);
+                        LOGGER.warn("Failed to broadcast packet to " + otherSnake, e);
                     }
                 });
             }
@@ -323,6 +321,14 @@ public class SnakeCommand {
 
         public Map<String, List<Vec2i>> getOtherSnakes() {
             return otherSnakes;
+        }
+
+        public Vec2i getApple() {
+            return apple;
+        }
+
+        public void setApple(Vec2i apple) {
+            this.apple = apple;
         }
     }
 
