@@ -195,6 +195,13 @@ public class SnakeCommand {
                 for (final Vec2i vec : otherSnake.getValue()) {
                     DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xffffa500);
                 }
+            }
+            DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.z() * scaleZ, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.z() * scaleZ + scaleZ, 0xff_f52559);
+            for (Vec2i vec : this.snake) {
+                DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xff_1f2df6);
+            }
+            for (final Map.Entry<String, List<Vec2i>> otherSnake : otherSnakes.entrySet()) {
+                if (otherSnake.getKey().equals(client.getSession().getUsername())) continue;
                 if (!otherSnake.getValue().isEmpty()) {
                     final Vec2i head = otherSnake.getValue().get(0);
                     DrawableHelper.drawCenteredText(
@@ -205,10 +212,6 @@ public class SnakeCommand {
                         0xffffffff
                     );
                 }
-            }
-            DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.z() * scaleZ, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.z() * scaleZ + scaleZ, 0xff_f52559);
-            for (Vec2i vec : this.snake) {
-                DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xff_1f2df6);
             }
         }
 
