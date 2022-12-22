@@ -15,9 +15,12 @@ import net.minecraft.util.Formatting;
 
 import java.util.Collection;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.gameProfile;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.getCProfileArgument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class WhisperEncryptedCommand {
 
@@ -35,9 +38,7 @@ public class WhisperEncryptedCommand {
         if (profiles.size() != 1) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
-        PlayerListEntry recipient = source.getClient().getNetworkHandler().getPlayerList().stream()
-                .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
-                .findFirst()
+        PlayerListEntry recipient = CCNetworkHandler.getPlayerByName(profiles.iterator().next().getName())
                 .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
 
         MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getNetworkHandler().getProfile().getName(), message);

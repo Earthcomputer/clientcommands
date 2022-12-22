@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.c2c;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.*;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +17,10 @@ public class CCPacketHandler {
 
     static {
         CCPacketHandler.register(MessageC2CPacket.class, MessageC2CPacket::new);
+        CCPacketHandler.register(SnakeInviteC2CPacket.class, SnakeInviteC2CPacket::new);
+        CCPacketHandler.register(SnakeJoinC2CPacket.class, SnakeJoinC2CPacket::new);
+        CCPacketHandler.register(SnakeAddPlayersC2CPacket.class, SnakeAddPlayersC2CPacket::new);
+        CCPacketHandler.register(SnakeBodyC2CPacket.class, SnakeBodyC2CPacket::new);
     }
 
     public static <P extends C2CPacket> void register(Class<P> packet, Function<StringBuf, P> packetFactory) {

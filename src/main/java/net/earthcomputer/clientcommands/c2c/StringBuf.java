@@ -1,6 +1,10 @@
 package net.earthcomputer.clientcommands.c2c;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public class StringBuf {
 
@@ -35,11 +39,27 @@ public class StringBuf {
         return Integer.parseInt(this.readString());
     }
 
+    public <E, C extends Collection<E>> C readCollection(IntFunction<C> collectionCreator, Function<StringBuf, E> elementReader) {
+        final int count = readInt();
+        final C result = collectionCreator.apply(count);
+        for (int i = 0; i < count; i++) {
+            result.add(elementReader.apply(this));
+        }
+        return result;
+    }
+
     public void writeString(String string) {
         this.buffer.append(string).append('\0');
     }
 
     public void writeInt(int integer) {
         this.buffer.append(integer).append('\0');
+    }
+
+    public <E> void writeCollection(Collection<E> collection, BiConsumer<StringBuf, E> elementWriter) {
+        writeInt(collection.size());
+        for (final E element : collection) {
+            elementWriter.accept(this, element);
+        }
     }
 }
