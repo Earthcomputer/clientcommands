@@ -12,6 +12,7 @@ import net.earthcomputer.clientcommands.c2c.StringBuf;
 import net.earthcomputer.clientcommands.c2c.packets.SnakeBodyC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.SnakeInviteC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.SnakeJoinC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.SnakeRemovePlayerC2CPacket;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -191,10 +192,6 @@ public class SnakeCommand {
             drawTexture(matrices, startX, startY, 0, 0, 425, 425, 425, 425);
             int scaleX = 17;
             int scaleZ = 17;
-            DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.z() * scaleZ, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.z() * scaleZ + scaleZ, 0xff_f52559);
-            for (Vec2i vec : this.snake) {
-                DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xff_1f2df6);
-            }
             for (final Map.Entry<String, List<Vec2i>> otherSnake : otherSnakes.entrySet()) {
                 for (final Vec2i vec : otherSnake.getValue()) {
                     DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xffffa500);
@@ -209,6 +206,10 @@ public class SnakeCommand {
                         0xffffffff
                     );
                 }
+            }
+            DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.z() * scaleZ, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.z() * scaleZ + scaleZ, 0xff_f52559);
+            for (Vec2i vec : this.snake) {
+                DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xff_1f2df6);
             }
         }
 
@@ -240,6 +241,25 @@ public class SnakeCommand {
             }
             this.checkApple();
             syncPlayerData();
+        }
+
+        @Override
+        public void close() {
+            super.close();
+            if (otherSnakes.isEmpty()) return;
+            assert client.getNetworkHandler() != null;
+            final SnakeRemovePlayerC2CPacket packet = new SnakeRemovePlayerC2CPacket(
+                client.getNetworkHandler().getProfile().getName()
+            );
+            for (final String otherSnake : otherSnakes.keySet()) {
+                CCNetworkHandler.getPlayerByName(otherSnake).ifPresent(player -> {
+                    try {
+                        CCNetworkHandler.getInstance().sendPacket(packet, player);
+                    } catch (CommandSyntaxException e) {
+                        LOGGER.warn("Failed to send removal packet to " + otherSnake, e);
+                    }
+                });
+            }
         }
 
         private boolean checkGameOver() {

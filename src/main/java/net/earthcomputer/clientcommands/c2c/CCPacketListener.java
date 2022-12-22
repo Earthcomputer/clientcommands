@@ -12,4 +12,6 @@ public interface CCPacketListener {
     void onSnakeAddPlayersC2CPacket(SnakeAddPlayersC2CPacket packet);
 
     void onSnakeBodyC2CPacket(SnakeBodyC2CPacket packet);
+
+    void onSnakeRemovePlayerC2CPacket(SnakeRemovePlayerC2CPacket packet);
 }

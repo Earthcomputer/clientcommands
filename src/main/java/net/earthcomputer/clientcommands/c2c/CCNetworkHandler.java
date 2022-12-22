@@ -102,7 +102,7 @@ public class CCNetworkHandler implements CCPacketListener {
             Text.literal(packet.sender())
                 .append(" invited you to a game of snake. ")
                 .append(
-                    Text.literal("[Accept]")
+                    Text.literal("[Join]")
                         .styled(style ->
                             style.withColor(Formatting.GREEN)
                                 .withHoverEvent(new HoverEvent(
@@ -152,5 +152,11 @@ public class CCNetworkHandler implements CCPacketListener {
     public void onSnakeBodyC2CPacket(SnakeBodyC2CPacket packet) {
         if (!(MinecraftClient.getInstance().currentScreen instanceof SnakeCommand.SnakeGameScreen snakeScreen)) return;
         snakeScreen.getOtherSnakes().put(packet.sender(), packet.segments());
+    }
+
+    @Override
+    public void onSnakeRemovePlayerC2CPacket(SnakeRemovePlayerC2CPacket packet) {
+        if (!(MinecraftClient.getInstance().currentScreen instanceof SnakeCommand.SnakeGameScreen snakeScreen)) return;
+        snakeScreen.getOtherSnakes().remove(packet.player());
     }
 }

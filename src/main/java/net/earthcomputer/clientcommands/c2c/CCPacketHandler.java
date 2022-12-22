@@ -21,6 +21,7 @@ public class CCPacketHandler {
         CCPacketHandler.register(SnakeJoinC2CPacket.class, SnakeJoinC2CPacket::new);
         CCPacketHandler.register(SnakeAddPlayersC2CPacket.class, SnakeAddPlayersC2CPacket::new);
         CCPacketHandler.register(SnakeBodyC2CPacket.class, SnakeBodyC2CPacket::new);
+        CCPacketHandler.register(SnakeRemovePlayerC2CPacket.class, SnakeRemovePlayerC2CPacket::new);
     }
 
     public static <P extends C2CPacket> void register(Class<P> packet, Function<StringBuf, P> packetFactory) {
