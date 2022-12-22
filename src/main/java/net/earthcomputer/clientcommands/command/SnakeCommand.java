@@ -17,9 +17,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.Random;
+import java.util.*;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -56,6 +54,7 @@ class SnakeGameScreen extends Screen {
     private Direction direction = Direction.EAST;
     private Direction lastMoved = Direction.EAST;
     private final LinkedList<Vec2i> snake = new LinkedList<>();
+    private final Queue<Direction> directionQueue = new ArrayDeque<>();
     private Vec2i apple;
 
     SnakeGameScreen() {
@@ -107,18 +106,21 @@ class SnakeGameScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (client.options.forwardKey.matchesKey(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_UP) {
-            return this.setDirection(Direction.NORTH);
+            return enqueueMove(Direction.NORTH);
         } else if (client.options.leftKey.matchesKey(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_LEFT) {
-            return this.setDirection(Direction.WEST);
+            return enqueueMove(Direction.WEST);
         } else if (client.options.backKey.matchesKey(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_DOWN) {
-            return this.setDirection(Direction.SOUTH);
+            return enqueueMove(Direction.SOUTH);
         } else if (client.options.rightKey.matchesKey(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_RIGHT) {
-            return this.setDirection(Direction.EAST);
+            return enqueueMove(Direction.EAST);
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     private void move() {
+        while (!directionQueue.isEmpty()) {
+            if (setDirection(directionQueue.remove())) break;
+        }
         Vec2i head = this.snake.getFirst();
         this.snake.addFirst(new Vec2i(head.x() + this.direction.getOffsetX(), head.z() + this.direction.getOffsetZ()));
         this.lastMoved = this.direction;
@@ -157,10 +159,18 @@ class SnakeGameScreen extends Screen {
     }
 
     private boolean setDirection(Direction direction) {
-        if (this.lastMoved == direction.getOpposite()) {
+        if (this.lastMoved == direction.getOpposite() || this.lastMoved == direction) {
             return false;
         }
         this.direction = direction;
+        return true;
+    }
+
+    private boolean enqueueMove(Direction direction) {
+        while (directionQueue.size() > 2) {
+            directionQueue.remove();
+        }
+        directionQueue.add(direction);
         return true;
     }
 }
