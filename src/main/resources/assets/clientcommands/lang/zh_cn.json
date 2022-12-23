@@ -208,7 +208,7 @@
 
   "commands.cwe.playerNotFound": "未找到玩家",
 
-  "commands.cweather.reset": "Stopped overriding weather",
+  "commands.cweather.reset": "停止天气覆盖",
 
   "commands.cwiki.failed": "未能获取维基内容",
   "commands.cwiki.noContent": "那篇文章中没有用于介绍的段落",
