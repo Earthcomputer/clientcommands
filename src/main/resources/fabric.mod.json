@@ -9,7 +9,8 @@
   "icon": "assets/clientcommands/icon.png",
   "contact": {
     "homepage": "https://earthcomputer.net/",
-    "issues": "https://github.com/Earthcomputer/clientcommands/issues"
+    "issues": "https://github.com/Earthcomputer/clientcommands/issues",
+    "sources": "https://github.com/Earthcomputer/clientcommands"
   },
   "authors": [
     "Earthcomputer"
