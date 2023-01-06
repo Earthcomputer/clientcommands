@@ -72,6 +72,7 @@
     "MixinProfileKeysImpl",
     "MixinProtectionEnchantment",
     "MixinPumpkinBlock",
+    "MixinScreen",
     "MixinShearsItem",
     "MixinStonecutterContainer",
     "MixinTextFieldWidget",

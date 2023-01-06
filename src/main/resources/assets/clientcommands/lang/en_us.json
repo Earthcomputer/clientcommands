@@ -38,6 +38,10 @@
   "commands.ccalcstack.success.empty.exact": "%d items is exactly %d stacks",
   "commands.ccalcstack.success.exact": "%d %s is exactly %d stacks",
 
+  "commands.cchess.playerNotFound": "Player not found",
+  "commands.cchess.alreadyInGame": "You are already in a game!",
+  "commands.cchess.notInGame": "You are currently not in a game!",
+
   "commands.ccrackrng.failed": "Failed to crack player seed",
   "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper.",
   "commands.ccrackrng.retries": "Cracking player seed, attempt %d/%d",
@@ -293,6 +297,10 @@
   "playerManip.notEnoughItems": "Not enough items(%d of %d) to manipulate seed",
   "playerManip.uncracked": "Player-Seed needs to be cracked",
 
+  "chessGame.title": "Chess game: You vs %s",
+  "chessGame.resign": "Resign",
+  "chessGame.exit": "Exit",
+
   "snakeGame.title": "Snake",
   "snakeGame.score": "Score: %d",
 
@@ -302,6 +310,24 @@
   "ccpacket.malformedPacket": "You have received a malformed C2C packet:",
   "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
   "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+
+  "ccpacket.chessAcceptInviteC2CPacket.incoming.accept": "%s has accepted your challenge!",
+  "ccpacket.chessAcceptInviteC2CPacket.incoming.deny": "%s has denied your challenge!",
+  "ccpacket.chessAcceptInviteC2CPacket.outgoing.accept": "You have accepted the challenge!",
+  "ccpacket.chessAcceptInviteC2CPacket.outgoing.deny": "You have denied the challenge!",
+
+  "ccpacket.chessBoardUpdateC2CPacket.incoming": "%s has played: %s to %s%s",
+  "ccpacket.chessBoardUpdateC2CPacket.incoming.invalid": "%s has played an invalid move!",
+
+  "ccpacket.chessInviteC2CPacket.incoming": "%s (playing as %s) has challenged you to a game of chess!",
+  "ccpacket.chessInviteC2CPacket.incoming.accept": "Accept",
+  "ccpacket.chessInviteC2CPacket.incoming.accept.hover": "Click to accept",
+  "ccpacket.chessInviteC2CPacket.incoming.deny": "Deny",
+  "ccpacket.chessInviteC2CPacket.incoming.deny.hover": "Click to deny",
+  "ccpacket.chessInviteC2CPacket.incoming.alreadyInGame": "%s has challenged you to a game of chess, but you are already playing!",
+  "ccpacket.chessInviteC2CPacket.outgoing": "You have challenged %s to a game of chess!",
+
+  "ccpacket.chessResignC2CPacket.incoming": "%s has resigned!",
 
   "ccpacket.messageC2CPacket.incoming": "%s -> you: %s",
   "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s"
