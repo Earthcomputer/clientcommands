@@ -76,6 +76,7 @@
     "MixinShearsItem",
     "MixinStonecutterContainer",
     "MixinTextFieldWidget",
+    "MixinWorld",
     "ProjectileEntityAccessor",
     "ScreenHandlerAccessor",
     "SimpleOptionAccessor",
