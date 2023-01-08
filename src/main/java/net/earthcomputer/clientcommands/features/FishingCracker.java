@@ -411,6 +411,7 @@ public class FishingCracker {
                                 100
                         );
                     }
+                    ClientCommandHelper.sendFeedback(Text.translatable("commands.cfish.error.openWater.help").styled(style -> style.withColor(Formatting.AQUA)));
                     if (foundFlowingWater) {
                         Text help = Text.translatable("commands.cfish.error.openWater.flowingWater").styled(style -> style.withColor(Formatting.AQUA));
                         ClientCommandHelper.sendFeedback(help);
