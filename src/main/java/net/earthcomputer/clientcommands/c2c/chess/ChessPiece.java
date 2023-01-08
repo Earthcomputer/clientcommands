@@ -61,7 +61,7 @@ public abstract class ChessPiece {
 
     /**
      * Checks if an attack is valid.
-     * This method is the same as {@link #isValidMove} for almost all pieces
+     * This method is the same as {@link #isValidMove} for almost all pieces.
      * @param target the target square
      * @return {@code true} if the attack is generally valid for this piece, {@code false} otherwise
      */

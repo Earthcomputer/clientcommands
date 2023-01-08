@@ -1,11 +1,14 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.c2c.*;
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.MessageIndicator;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -17,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.Optional;
@@ -61,7 +63,13 @@ public class MixinChatHud {
 
     private static boolean handleC2CPacket(String content) {
         byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
-        encrypted = Arrays.copyOf(encrypted, 256);
+        // round down to multiple of 256 bytes
+        int length = encrypted.length & ~0xFF;
+        // copy to new array of arrays
+        byte[][] encryptedArrays = new byte[length / 256][];
+        for (int i = 0; i < length; i += 256) {
+            encryptedArrays[i / 256] = Arrays.copyOfRange(encrypted, i, i + 256);
+        }
         if (!(MinecraftClient.getInstance().getProfileKeys() instanceof IHasPrivateKey privateKeyHolder)) {
             return false;
         }
@@ -69,21 +77,43 @@ public class MixinChatHud {
         if (key.isEmpty()) {
             return false;
         }
-        byte[] decrypted = ConversionHelper.RsaEcb.decrypt(encrypted, key.get());
-        if (decrypted == null) {
-            return false;
+        // decrypt
+        int len = 0;
+        byte[][] decryptedArrays = new byte[encryptedArrays.length][];
+        for (int i = 0; i < encryptedArrays.length; i++) {
+            decryptedArrays[i] = ConversionHelper.RsaEcb.decrypt(encryptedArrays[i], key.get());
+            if (decryptedArrays[i] == null) {
+                return false;
+            }
+            len += decryptedArrays[i].length;
+        }
+        // copy to new array
+        byte[] decrypted = new byte[len];
+        int pos = 0;
+        for (byte[] decryptedArray : decryptedArrays) {
+            System.arraycopy(decryptedArray, 0, decrypted, pos, decryptedArray.length);
+            pos += decryptedArray.length;
         }
         byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
-        StringBuf buf = new StringBuf(new String(uncompressed, StandardCharsets.UTF_8));
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.wrappedBuffer(uncompressed));
         int id = buf.readInt();
         C2CPacket c2CPacket = CCPacketHandler.createPacket(id, buf);
         if (c2CPacket == null) {
             return false;
         }
-        if (buf.getRemainingLength() > 0) {
+        if (buf.readableBytes() > 0) {
             return false;
         }
-        c2CPacket.apply(CCNetworkHandler.getInstance());
+        try {
+            c2CPacket.apply(CCNetworkHandler.getInstance());
+        } catch (CommandSyntaxException e) {
+            if (e.getRawMessage() instanceof Text) {
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage((Text) e.getRawMessage());
+            }
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 }

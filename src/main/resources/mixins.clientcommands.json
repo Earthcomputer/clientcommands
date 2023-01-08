@@ -3,27 +3,12 @@
   "package": "net.earthcomputer.clientcommands.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "AlternativeLootConditionAccessor",
-    "AndConditionAccessor",
     "ChatInputSuggestorAccessor",
     "CheckedRandomAccessor",
-    "CombinedEntryAccessor",
     "CreativeInventoryScreenAccessor",
-    "EntityPredicateAccessor",
-    "EntityPropertiesLootConditionAccessor",
-    "FishingHookPredicateAccessor",
     "InGameHudAccessor",
-    "InvertedLootConditionAccessor",
-    "ItemEntryAccessor",
     "ItemGroupsAccessor",
     "LandPathNodeMakerAccessor",
-    "LocationCheckLootConditionAccessor",
-    "LocationPredicateAccessor",
-    "LootContextAccessor",
-    "LootPoolAccessor",
-    "LootPoolEntryAccessor",
-    "LootTableAccessor",
-    "LootTableEntryAccessor",
     "MixinAnvilContainer",
     "MixinArmorStandEntity",
     "MixinArmorStandEntityRenderer",
@@ -79,9 +64,7 @@
     "MixinWorld",
     "ProjectileEntityAccessor",
     "ScreenHandlerAccessor",
-    "SimpleOptionAccessor",
-    "TagEntryAccessor",
-    "WeatherCheckLootConditionAccessor"
+    "SimpleOptionAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

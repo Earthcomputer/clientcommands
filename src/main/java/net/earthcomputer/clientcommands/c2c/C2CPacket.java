@@ -1,7 +1,10 @@
 package net.earthcomputer.clientcommands.c2c;
 
-public interface C2CPacket {
-    void write(StringBuf buf);
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.network.PacketByteBuf;
 
-    void apply(CCPacketListener listener);
+public interface C2CPacket {
+    void write(PacketByteBuf buf);
+
+    void apply(CCPacketListener listener) throws CommandSyntaxException;
 }

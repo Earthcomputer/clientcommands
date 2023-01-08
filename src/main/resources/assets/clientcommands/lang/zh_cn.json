@@ -148,6 +148,12 @@
   "commands.cping.playerNotFound": "未找到玩家",
   "commands.cping.tooManyPlayers": "你的查询最多可以匹配1名玩家",
 
+  "commands.cpos.world.overworld": "主世界",
+  "commands.cpos.world.the_end": "末地",
+  "commands.cpos.world.the_nether": "下界",
+  "commands.cpos.coords.left": "在%1$s中是",
+  "commands.cpos.coords.right": "在%2$s中",
+
   "commands.crelog.failed": "未能重新登录",
 
   "commands.crender.entities.success": "实体渲染规则已更新",
@@ -199,6 +205,10 @@
   "commands.cvar.parse.success": "“%s”计算结果为“%s”",
   "commands.cvar.list.empty": "没有可用的变量",
   "commands.cvar.list": "可用变量：%s",
+
+  "commands.cwe.playerNotFound": "未找到玩家",
+
+  "commands.cweather.reset": "停止天气覆盖",
 
   "commands.cwiki.failed": "未能获取维基内容",
   "commands.cwiki.noContent": "那篇文章中没有用于介绍的段落",
@@ -286,5 +296,15 @@
   "playerManip.uncracked": "需要破解玩家种子",
 
   "snakeGame.title": "潜行",
-  "snakeGame.score": "分数：%d"
+  "snakeGame.score": "分数：%d",
+
+  "ccpacket.messageTooLong": "信息过长（最多255个字符）",
+  "ccpacket.publicKeyNotFound": "未找到公共密匙",
+  "ccpacket.encryptionFailed": "加密你的消息时出现问题",
+  "ccpacket.malformedPacket": "你收到了一个格式错误的客户端到客户端数据包：",
+  "ccpacket.receivedC2CPacket": "你收到了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！悬停以查看原始数据包。",
+  "ccpacket.sentC2CPacket": "你发送了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！",
+
+  "ccpacket.messageC2CPacket.incoming": "%s -> 你：%s",
+  "ccpacket.messageC2CPacket.outgoing": "你 -> %s：%s"
 }
