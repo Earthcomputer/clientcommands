@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Command;
@@ -169,7 +170,7 @@ public class AliasCommand {
         Gson gson = new Gson();
         try (Reader fileReader = Files.newBufferedReader(ALIAS_PATH)) {
             return gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
-        } catch (IOException e) {
+        } catch (IOException | JsonSyntaxException e) {
             LOGGER.error("Error reading aliases file", e);
             return new HashMap<>();
         }
