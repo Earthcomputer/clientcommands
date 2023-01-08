@@ -43,12 +43,32 @@ public final class MulticonnectCompat {
             throw new RuntimeException(e);
         }
     });
+    private static final Method byProtocolVersion = Util.make(() -> {
+        if (api == null) {
+            return null;
+        }
+        try {
+            return api.getClass().getMethod("byProtocolVersion", int.class);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    });
     private static final Method doesServerKnow = Util.make(() -> {
         if (api == null) {
             return null;
         }
         try {
             return api.getClass().getMethod("doesServerKnow", Registry.class, Object.class);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    });
+    private static final Method protocolGetName = Util.make(() -> {
+        if (api == null) {
+            return null;
+        }
+        try {
+            return byProtocolVersion.getReturnType().getMethod("getName");
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -60,6 +80,18 @@ public final class MulticonnectCompat {
         } else {
             try {
                 return (Integer) getProtocolVersion.invoke(api);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static String getProtocolName() {
+        if (api == null) {
+            return SharedConstants.getGameVersion().getName();
+        } else {
+            try {
+                return (String) protocolGetName.invoke(byProtocolVersion.invoke(api, getProtocolVersion.invoke(api)));
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }

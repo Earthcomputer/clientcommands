@@ -1,31 +1,18 @@
 package net.earthcomputer.clientcommands.features;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.mojang.logging.LogUtils;
+import com.seedfinding.mcfeature.loot.*;
+import com.seedfinding.mcfeature.loot.condition.BiomeCondition;
+import com.seedfinding.mcfeature.loot.condition.LootCondition;
+import com.seedfinding.mcfeature.loot.condition.OpenWaterCondition;
+import com.seedfinding.mcfeature.loot.entry.ItemEntry;
+import com.seedfinding.mcfeature.loot.entry.LootEntry;
+import com.seedfinding.mcfeature.loot.entry.TableEntry;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
-import net.earthcomputer.clientcommands.mixin.AlternativeLootConditionAccessor;
-import net.earthcomputer.clientcommands.mixin.AndConditionAccessor;
 import net.earthcomputer.clientcommands.mixin.CheckedRandomAccessor;
-import net.earthcomputer.clientcommands.mixin.CombinedEntryAccessor;
-import net.earthcomputer.clientcommands.mixin.EntityPredicateAccessor;
-import net.earthcomputer.clientcommands.mixin.EntityPropertiesLootConditionAccessor;
-import net.earthcomputer.clientcommands.mixin.FishingHookPredicateAccessor;
-import net.earthcomputer.clientcommands.mixin.InvertedLootConditionAccessor;
-import net.earthcomputer.clientcommands.mixin.ItemEntryAccessor;
-import net.earthcomputer.clientcommands.mixin.LocationCheckLootConditionAccessor;
-import net.earthcomputer.clientcommands.mixin.LocationPredicateAccessor;
-import net.earthcomputer.clientcommands.mixin.LootContextAccessor;
-import net.earthcomputer.clientcommands.mixin.LootPoolAccessor;
-import net.earthcomputer.clientcommands.mixin.LootPoolEntryAccessor;
-import net.earthcomputer.clientcommands.mixin.LootTableAccessor;
-import net.earthcomputer.clientcommands.mixin.LootTableEntryAccessor;
 import net.earthcomputer.clientcommands.mixin.ProjectileEntityAccessor;
-import net.earthcomputer.clientcommands.mixin.TagEntryAccessor;
-import net.earthcomputer.clientcommands.mixin.WeatherCheckLootConditionAccessor;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -36,8 +23,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.data.server.loottable.FishingLootTableGenerator;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
@@ -46,46 +31,15 @@ import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.LootPool;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootTables;
-import net.minecraft.loot.condition.AlternativeLootCondition;
-import net.minecraft.loot.condition.EntityPropertiesLootCondition;
-import net.minecraft.loot.condition.InvertedLootCondition;
-import net.minecraft.loot.condition.LocationCheckLootCondition;
-import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.condition.LootConditionTypes;
-import net.minecraft.loot.condition.WeatherCheckLootCondition;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameter;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.entry.CombinedEntry;
-import net.minecraft.loot.entry.EmptyEntry;
-import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.entry.LootPoolEntry;
-import net.minecraft.loot.entry.LootTableEntry;
-import net.minecraft.loot.entry.TagEntry;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
-import net.minecraft.predicate.BlockPredicate;
-import net.minecraft.predicate.FluidPredicate;
-import net.minecraft.predicate.LightPredicate;
-import net.minecraft.predicate.NumberRange;
-import net.minecraft.predicate.entity.EntityPredicate;
-import net.minecraft.predicate.entity.FishingHookPredicate;
-import net.minecraft.predicate.entity.TypeSpecificPredicate;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.HitResult;
@@ -97,33 +51,17 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.OptionalLong;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class FishingCracker {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     // goals
     public static final List<ClientItemPredicateArgumentType.ClientItemPredicate> goals = new ArrayList<>();
     private static boolean hasWarnedMultipleEnchants = false;
@@ -160,392 +98,68 @@ public class FishingCracker {
 
     // region LOOT SIMULATION
 
-    private static final Map<Identifier, LootTable> FISHING_LOOT_TABLES;
-    private static final LootTable FISHING_LOOT_TABLE;
-    private static final Map<Item, LootConditionType> LOOT_CONDITIONS = new IdentityHashMap<>();
-    private static final LootContextParameter<Boolean> IN_OPEN_WATER_PARAMETER = new LootContextParameter<>(new Identifier("clientcommands", "in_open_water"));
-    static {
-        // fix for class load order issue
-        try {
-            Class.forName(EntityPredicate.class.getName(), true, FishingCracker.class.getClassLoader());
-        } catch (ClassNotFoundException e) {
-            throw new AssertionError(e);
-        }
-
-        var fishingLootTables = ImmutableMap.<Identifier, LootTable>builder();
-        new FishingLootTableGenerator().accept((id, builder) -> fishingLootTables.put(id, builder.build()));
-        FISHING_LOOT_TABLES = fishingLootTables.build();
-
-        {
-            LootTable lootTable = FISHING_LOOT_TABLES.get(LootTables.FISHING_GAMEPLAY);
-            walkLootTable(lootTable, new LootCondition[0]);
-            FISHING_LOOT_TABLE = lootTable;
-            assert lootTable != null;
-            LootPool[] pools = ((LootTableAccessor) lootTable).getPools();
-            LootPoolEntry[] entries = ((LootPoolAccessor) pools[0]).getEntries();
-            for (LootPoolEntry entry : entries) {
-                LootCondition[] conditions = ((LootPoolEntryAccessor) entry).getConditions();
-                for (int i = 0; i < conditions.length; i++) {
-                    LootCondition condition = conditions[i];
-                    if (condition instanceof EntityPropertiesLootCondition) {
-                        conditions[i] = new EntityPropertiesLootCondition(null, null) {
-                            @Override
-                            public Set<LootContextParameter<?>> getRequiredParameters() {
-                                return ImmutableSet.<LootContextParameter<?>>builder().addAll(super.getRequiredParameters()).add(IN_OPEN_WATER_PARAMETER).build();
-                            }
-
-                            @Override
-                            public boolean test(LootContext lootContext) {
-                                Boolean ret = lootContext.get(IN_OPEN_WATER_PARAMETER);
-                                assert ret != null;
-                                return ret;
-                            }
-                        };
-                        ((LootPoolEntryAccessor) entry).setConditionPredicate(LootConditionTypes.joinAnd(conditions));
-                    }
-                }
-            }
-        }
-
-        {
-            LootTable lootTable = FISHING_LOOT_TABLES.get(LootTables.FISHING_JUNK_GAMEPLAY);
-            assert lootTable != null;
-            LootPool[] pools = ((LootTableAccessor) lootTable).getPools();
-            for (LootPool pool : pools) {
-                LootPoolEntry[] entries = ((LootPoolAccessor) pool).getEntries();
-                for (LootPoolEntry entry : entries) {
-                    LootCondition[] conditions = ((LootPoolEntryAccessor) entry).getConditions();
-                    for (LootCondition condition : conditions) {
-                        if (condition instanceof AlternativeLootCondition) {
-                            LootCondition[] terms = ((AlternativeLootConditionAccessor) condition).getTerms();
-                            for (int i = 0; i < terms.length; i++) {
-                                LootCondition term = terms[i];
-                                if (term instanceof LocationCheckLootCondition) {
-                                    var accessor = (LocationCheckLootConditionAccessor) term;
-                                    var predicateAccessor = (LocationPredicateAccessor) accessor.getPredicate();
-                                    terms[i] = new LocationCheckLootCondition(accessor.getPredicate(), accessor.getOffset()) {
-                                        @Override
-                                        public boolean test(LootContext lootContext) {
-                                            ClientWorld world = MinecraftClient.getInstance().world;
-                                            assert world != null;
-                                            Vec3d origin = lootContext.get(LootContextParameters.ORIGIN);
-                                            if (origin == null) {
-                                                return false;
-                                            }
-                                            origin = origin.add(accessor.getOffset().getX(), accessor.getOffset().getY(), accessor.getOffset().getZ());
-                                            if (!predicateAccessor.getX().test((float)origin.getX()) || !predicateAccessor.getY().test((float)origin.getY()) || !predicateAccessor.getZ().test((float)origin.getZ())) {
-                                                return false;
-                                            }
-                                            var biome = world.getBiome(new BlockPos(origin));
-                                            return biome.getKey().isPresent() && biome.getKey().get() == predicateAccessor.getBiome();
-                                        }
-                                    };
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    private static boolean isMatchingLoot(ItemStack loot, ClientItemPredicateArgumentType.ClientItemPredicate goal) {
+        return goal.getPossibleItems().contains(loot.getItem());
     }
 
-    private static void walkLootTable(LootTable lootTable, LootCondition[] parentConditions) {
-        for (LootPool pool : ((LootTableAccessor) lootTable).getPools()) {
-            for (LootPoolEntry entry : ((LootPoolAccessor) pool).getEntries()) {
-                walkLootEntry(entry, parentConditions);
-            }
-        }
-    }
-
-    private static void walkLootEntry(LootPoolEntry entry, LootCondition[] parentConditions) {
-        LootCondition[] conditions = ArrayUtils.addAll(parentConditions, ((LootPoolEntryAccessor) entry).getConditions());
-        if (entry instanceof CombinedEntry) {
-            for (LootPoolEntry child : ((CombinedEntryAccessor) entry).getChildren()) {
-                walkLootEntry(child, conditions);
-            }
-        } else if (entry instanceof ItemEntry) {
-            addCondition(((ItemEntryAccessor) entry).getItem(), conditions);
-        } else if (entry instanceof TagEntry) {
-            TagKey<Item> tag = ((TagEntryAccessor) entry).getName();
-            Registries.ITEM.getEntryList(tag).ifPresent(list -> {
-                for (RegistryEntry<Item> item : list) {
-                    addCondition(item.value(), conditions);
-                }
-            });
-        } else if (entry instanceof LootTableEntry) {
-            walkLootTable(FISHING_LOOT_TABLES.get(((LootTableEntryAccessor) entry).getId()), conditions);
-        } else if (!(entry instanceof EmptyEntry)) {
-            throw new IllegalArgumentException("Cannot convert loot entry");
-        }
-    }
-
-    private static abstract sealed class LootConditionType {
-        @Nullable
-        abstract LootConditionType getFailedCondition(LootContext context, boolean inverted);
-
-        int getPriority() {
-            return 0;
-        }
-    }
-    private static final class AlwaysTrueCondition extends LootConditionType {
-        public static final AlwaysTrueCondition INSTANCE = new AlwaysTrueCondition();
-
-        @Override
-        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
-            return inverted ? this : null;
-        }
-    }
-    private static final class AndCondition extends LootConditionType {
-        private final LootConditionType[] children;
-
-        private AndCondition(LootConditionType[] children) {
-            this.children = children;
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLoot(LootTable table, @Nullable LootContext context, ClientItemPredicateArgumentType.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+        var result = new ArrayList<com.seedfinding.mcfeature.loot.item.ItemStack>();
+        for (LootPool lootPool : table.lootPools) {
+            result.addAll(generateAllMatchingLootForPool(lootPool, context, goal, failedConditions));
         }
 
-        @Override
-        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
-            LootConditionType result = null;
-            for (LootConditionType child : children) {
-                LootConditionType failure = child.getFailedCondition(context, inverted);
-                if (failure == null) {
-                    if (inverted) {
-                        return null;
-                    }
-                } else {
-                    if (result == null) {
-                        result = failure;
-                    } else if ((result.getPriority() < failure.getPriority()) != inverted) {
-                        result = failure;
-                    }
-                }
-            }
-            return result;
-        }
-    }
-    private static final class OrCondition extends LootConditionType {
-        private final LootConditionType[] children;
-
-        private OrCondition(LootConditionType[] children) {
-            this.children = children;
+        if (!result.isEmpty() && !checkConditions(table, context, failedConditions)) {
+            return Collections.emptyList();
         }
 
-        @Override
-        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
-            LootConditionType result = null;
-            for (LootConditionType child : children) {
-                LootConditionType failure = child.getFailedCondition(context, inverted);
-                if (failure == null) {
-                    if (!inverted) {
-                        return null;
-                    }
-                } else {
-                    if (result == null) {
-                        result = failure;
-                    } else if ((result.getPriority() < failure.getPriority()) == inverted) {
-                        result = failure;
-                    }
-                }
-            }
-            return result;
-        }
-    }
-    private static final class NotCondition extends LootConditionType {
-        private final LootConditionType operand;
-
-        private NotCondition(LootConditionType operand) {
-            this.operand = operand;
-        }
-
-        @Override
-        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
-            return operand.getFailedCondition(context, !inverted);
-        }
-    }
-    private static final class OpenWaterCondition extends LootConditionType {
-        public static final OpenWaterCondition INSTANCE = new OpenWaterCondition();
-
-        @Override
-        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
-            Boolean inOpenWater = context.get(IN_OPEN_WATER_PARAMETER);
-            assert inOpenWater != null;
-            return inOpenWater == inverted ? this : null;
-        }
-
-        @Override
-        int getPriority() {
-            return 2;
-        }
-    }
-    private static final class BiomeCondition extends LootConditionType {
-        private final BlockPos offset;
-        private final NumberRange.FloatRange xRange;
-        private final NumberRange.FloatRange yRange;
-        private final NumberRange.FloatRange zRange;
-        private final RegistryKey<Biome> biome;
-
-        private BiomeCondition(BlockPos offset, NumberRange.FloatRange xRange, NumberRange.FloatRange yRange, NumberRange.FloatRange zRange, RegistryKey<Biome> biome) {
-            this.offset = offset;
-            this.xRange = xRange;
-            this.yRange = yRange;
-            this.zRange = zRange;
-            this.biome = biome;
-        }
-
-        @Override
-        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
-            ClientWorld world = MinecraftClient.getInstance().world;
-            assert world != null;
-            Vec3d origin = context.get(LootContextParameters.ORIGIN);
-            if (origin == null) {
-                return this;
-            }
-            origin = origin.add(offset.getX(), offset.getY(), offset.getZ());
-            if (!xRange.test((float)origin.getX()) || !yRange.test((float)origin.getY()) || !zRange.test((float)origin.getZ())) {
-                return inverted ? null : this;
-            }
-            var biome = world.getBiome(new BlockPos(origin));
-            return (biome.getKey().isPresent() && biome.getKey().get() == this.biome) == inverted ? this : null;
-        }
-
-        @Override
-        int getPriority() {
-            return 1;
-        }
-    }
-    private static final class WeatherCheckCondition extends LootConditionType {
-        @Nullable final Boolean raining;
-        @Nullable final Boolean thundering;
-
-        private WeatherCheckCondition(@Nullable Boolean raining, @Nullable Boolean thundering) {
-            this.raining = raining;
-            this.thundering = thundering;
-        }
-
-        @Override
-        @Nullable LootConditionType getFailedCondition(LootContext context, boolean inverted) {
-            ClientWorld world = MinecraftClient.getInstance().world;
-            assert world != null;
-            if (this.raining != null && world.isRaining() != this.raining) {
-                return inverted ? null : this;
-            }
-            if (this.thundering != null && world.isThundering() != this.thundering) {
-                return inverted ? null : this;
-            }
-            return inverted ? this : null;
-        }
-    }
-
-    private static void addCondition(Item item, LootCondition[] conditions) {
-        LootConditionType condition = convertAndCondition(conditions);
-        LootConditionType existingCondition = LOOT_CONDITIONS.get(item);
-        if (existingCondition == null) {
-            LOOT_CONDITIONS.put(item, condition);
-            return;
-        }
-        if (existingCondition instanceof AlwaysTrueCondition) {
-            return;
-        }
-        if (condition instanceof AlwaysTrueCondition) {
-            LOOT_CONDITIONS.put(item, condition);
-            return;
-        }
-        if (existingCondition instanceof OrCondition existingOr) {
-            if (condition instanceof OrCondition or) {
-                LOOT_CONDITIONS.put(item, new OrCondition(ArrayUtils.addAll(existingOr.children, or.children)));
-            } else {
-                LOOT_CONDITIONS.put(item, new OrCondition(ArrayUtils.add(existingOr.children, condition)));
-            }
-        } else if (condition instanceof OrCondition or) {
-            LOOT_CONDITIONS.put(item, new OrCondition(ArrayUtils.add(or.children, existingCondition)));
-        } else {
-            LOOT_CONDITIONS.put(item, new OrCondition(new LootConditionType[]{existingCondition, condition}));
-        }
-    }
-
-    private static LootConditionType convertAndCondition(LootCondition[] conditions) {
-        if (conditions.length == 0) {
-            return AlwaysTrueCondition.INSTANCE;
-        } else if (conditions.length == 1) {
-            return convertCondition(conditions[0]);
-        } else {
-            return new AndCondition(convertConditions(conditions));
-        }
-    }
-
-    private static LootConditionType[] convertConditions(LootCondition[] conditions) {
-        LootConditionType[] result = new LootConditionType[conditions.length];
-        for (int i = 0; i < conditions.length; i++) {
-            result[i] = convertCondition(conditions[i]);
-        }
         return result;
     }
 
-    private static LootConditionType convertCondition(LootCondition condition) {
-        if (condition instanceof AlternativeLootCondition) {
-            return new OrCondition(convertConditions(((AlternativeLootConditionAccessor) condition).getTerms()));
-        } else if (condition instanceof AndConditionAccessor andCondition) {
-            return new AndCondition(convertConditions(andCondition.getTerms()));
-        } else if (condition instanceof InvertedLootCondition) {
-            return new NotCondition(convertCondition(((InvertedLootConditionAccessor) condition).getTerm()));
-        } else if (condition instanceof LocationCheckLootCondition) {
-            var accessor = (LocationCheckLootConditionAccessor) condition;
-            var predicate = (LocationPredicateAccessor) accessor.getPredicate();
-            if (predicate.getSmokey() != null
-                    || predicate.getDimension() != null
-                    || predicate.getFeature() != null
-                    || predicate.getFluid() != FluidPredicate.ANY
-                    || predicate.getBlock() != BlockPredicate.ANY
-                    || predicate.getLight() != LightPredicate.ANY
-                    || predicate.getBiome() == null) {
-                throw new IllegalArgumentException("Cannot convert condition");
-            }
-            return new BiomeCondition(accessor.getOffset(), predicate.getX(), predicate.getY(), predicate.getZ(), predicate.getBiome());
-        } else if (condition instanceof EntityPropertiesLootCondition) {
-            var accessor = (EntityPropertiesLootConditionAccessor) condition;
-            if (accessor.getEntity() != LootContext.EntityTarget.THIS) {
-                throw new IllegalArgumentException("Cannot convert condition");
-            }
-            EntityPredicate predicate = accessor.getPredicate();
-            for (Field field : EntityPredicate.class.getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers())) {
-                    continue;
-                }
-                if (field.getType() == TypeSpecificPredicate.class) {
-                    continue;
-                }
-                field.setAccessible(true);
-                try {
-                    if (field.get(predicate) != field.get(EntityPredicate.ANY)) {
-                        throw new IllegalArgumentException("Cannot convert condition " + field.getName() + ", " + field.get(predicate) + " != " + field.get(EntityPredicate.ANY));
-                    }
-                } catch (ReflectiveOperationException e) {
-                    throw new AssertionError(e);
-                }
-            }
-            TypeSpecificPredicate fishingHook = ((EntityPredicateAccessor) predicate).getTypeSpecific();
-            if (fishingHook == FishingHookPredicate.ANY || !(fishingHook instanceof FishingHookPredicate)) {
-                return AlwaysTrueCondition.INSTANCE;
-            } else if (((FishingHookPredicateAccessor) fishingHook).isInOpenWater()) {
-                return OpenWaterCondition.INSTANCE;
-            } else {
-                return new NotCondition(OpenWaterCondition.INSTANCE);
-            }
-        } else if (condition instanceof WeatherCheckLootCondition) {
-            var accessor = (WeatherCheckLootConditionAccessor) condition;
-            return new WeatherCheckCondition(accessor.getRaining(), accessor.getThundering());
-        } else {
-            throw new IllegalArgumentException("Cannot convert condition");
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForPool(LootPool pool, @Nullable LootContext context, ClientItemPredicateArgumentType.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+        var result = new ArrayList<com.seedfinding.mcfeature.loot.item.ItemStack>();
+        for (LootEntry lootEntry : pool.lootEntries) {
+            result.addAll(generateAllMatchingLootForEntry(lootEntry, context, goal, failedConditions));
         }
+
+        if (!result.isEmpty() && !checkConditions(pool, context, failedConditions)) {
+            return Collections.emptyList();
+        }
+
+        return result;
     }
 
-    private static LootContext createLootContext(Random rand, float luck, Map<LootContextParameter<?>, Object> parameters) {
-        return LootContextAccessor.createLootContext(rand, luck, null, id -> {
-            LootTable lootTable = FISHING_LOOT_TABLES.get(id);
-            if (lootTable == null) {
-                LOGGER.warn("Unknown loot table: {}", id);
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForEntry(LootEntry entry, @Nullable LootContext context, ClientItemPredicateArgumentType.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+        List<com.seedfinding.mcfeature.loot.item.ItemStack> result = Collections.emptyList();
+
+        if (entry instanceof ItemEntry itemEntry) {
+            if (isMatchingLoot(SeedfindingUtil.fromSeedfindingItem(itemEntry.item), goal)) {
+                result = Collections.singletonList(new com.seedfinding.mcfeature.loot.item.ItemStack(itemEntry.item));
             }
-            return lootTable;
-        }, id -> null, parameters, Collections.emptyMap());
+        } else if (entry instanceof TableEntry tableEntry) {
+            result = generateAllMatchingLoot(tableEntry.table.get().apply(SeedfindingUtil.getMCVersion()), context, goal, failedConditions);
+        }
+
+        if (!result.isEmpty() && !checkConditions(entry, context, failedConditions)) {
+            return Collections.emptyList();
+        }
+
+        return result;
+    }
+
+    private static boolean checkConditions(LootGenerator generator, @Nullable LootContext context, Consumer<LootCondition> failedConditions) {
+        if (context == null || generator.lootConditions == null) {
+            return true;
+        }
+
+        boolean result = true;
+        for (LootCondition condition : generator.lootConditions) {
+            if (!condition.is_valid(context)) {
+                result = false;
+                failedConditions.accept(condition);
+            }
+        }
+
+        return result;
     }
 
     // endregion
@@ -750,12 +364,12 @@ public class FishingCracker {
 
         if (ticksUntilOurItem == -1) {
             // diagnose issue
-            LootConditionType failedCondition = null;
+            Set<LootCondition> failedConditions = new HashSet<>();
             boolean impossible = true;
+            LootTable fishingLootTable = MCLootTables.FISHING.get().apply(SeedfindingUtil.getMCVersion());
             for (var goal : goals) {
                 if (goal instanceof ClientItemPredicateArgumentType.EnchantedItemPredicate predicate) {
-                    if (goal.getPossibleItems().contains(Items.ENCHANTED_BOOK)
-                            && predicate.predicate().numEnchantments() >= 2) {
+                    if (predicate.isEnchantedBook() && predicate.predicate().numEnchantments() >= 2) {
                         if (!hasWarnedMultipleEnchants) {
                             Text help = Text.translatable("commands.cfish.help.tooManyEnchants").styled(style -> style.withColor(Formatting.AQUA));
                             ClientCommandHelper.sendFeedback(help);
@@ -763,18 +377,7 @@ public class FishingCracker {
                         }
                     }
                 }
-                for (Item item : goal.getPossibleItems()) {
-                    LootConditionType conditionType = LOOT_CONDITIONS.get(item);
-                    if (conditionType != null) {
-                        impossible = false;
-                        LootConditionType failed = conditionType.getFailedCondition(fishingBobber.getLootContext(Random.create(((CheckedRandomAccessor) fishingBobber.random).getSeed().get() ^ 0x5deece66dL)), false);
-                        if (failed != null) {
-                            if (failedCondition == null || failed.getPriority() > failedCondition.getPriority()) {
-                                failedCondition = failed;
-                            }
-                        }
-                    }
-                }
+                impossible &= generateAllMatchingLoot(fishingLootTable, fishingBobber.getLootContext(), goal, failedConditions::add).isEmpty();
             }
 
             if (impossible) {
@@ -783,8 +386,8 @@ public class FishingCracker {
                 reset();
                 return;
             }
-            if (failedCondition != null) {
-                if (failedCondition instanceof OpenWaterCondition) {
+            if (!failedConditions.isEmpty()) {
+                if (failedConditions.stream().anyMatch(it -> it instanceof OpenWaterCondition)) {
                     Text error = Text.translatable("commands.cfish.error.openWater").styled(style -> style.withColor(Formatting.RED));
                     ClientCommandHelper.addOverlayMessage(error, 100);
                     if (!fishingBobber.world.getBlockState(new BlockPos(fishingBobber.pos).up()).isOf(Blocks.LILY_PAD)) {
@@ -815,10 +418,11 @@ public class FishingCracker {
                     reset();
                     return;
                 }
-                if (failedCondition instanceof BiomeCondition biomeCondition) {
+                BiomeCondition biomeCondition = (BiomeCondition) failedConditions.stream().filter(it -> it instanceof BiomeCondition).findFirst().orElse(null);
+                if (biomeCondition != null) {
                     Text error = Text.translatable(
                             "commands.cfish.error.biome",
-                            Text.translatable("biome." + biomeCondition.biome.getValue().getNamespace() + "." + biomeCondition.biome.getValue().getPath())
+                            Text.translatable("biome.minecraft." + biomeCondition.biomes.get(0).getName())
                     );
                     ClientCommandHelper.addOverlayMessage(error, 100);
                     reset();
@@ -936,7 +540,7 @@ public class FishingCracker {
                     ClientPlayerEntity oldPlayer = MinecraftClient.getInstance().player;
                     if (oldPlayer != null) {
                         ClientPlayNetworkHandler networkHandler = oldPlayer.networkHandler;
-                        while (System.nanoTime() < targetTime) {
+                        while (System.nanoTime() - targetTime < 0) {
                             if (state != State.ASYNC_WAITING_FOR_FISH){
                                 return;
                             }
@@ -1032,7 +636,18 @@ public class FishingCracker {
         WAITING_FOR_RETRHOW,
     }
 
-    public record Catch(ItemStack loot, int experience) {
+    public static class Catch {
+        private final ItemStack loot;
+        private final int experience;
+
+        public Catch(ItemStack loot, int experience) {
+            this.loot = loot.copy();
+            if (this.loot.isDamageable()) {
+                this.loot.setDamage(0);
+            }
+            this.experience = experience;
+        }
+
         @Override
         public int hashCode() {
             return 7 * (31 * Objects.hash(loot.getItem(), loot.getNbt()) + loot.getCount()) + experience;
@@ -1263,24 +878,21 @@ public class FishingCracker {
             fakeEntity.updatePosition(pos.x, pos.y, pos.z);
             fakeEntity.setVelocity(velocity);
 
-            Random randomCopy = Random.create(((CheckedRandomAccessor) random).getSeed().get() ^ 0x5deece66dL);
-            LootContext lootContext = getLootContext(randomCopy);
+            LootContext lootContext = getLootContext();
 
             List<Catch> catches = new ArrayList<>();
-            for (ItemStack loot : FISHING_LOOT_TABLE.generateLoot(lootContext)) {
-                catches.add(new Catch(loot, 1 + randomCopy.nextInt(6)));
+            for (var loot : MCLootTables.FISHING.get().generate(lootContext)) {
+                catches.add(new Catch(SeedfindingUtil.fromSeedfindingItem(loot), 1 + lootContext.nextInt(6)));
             }
+
             return catches;
         }
 
-        private LootContext getLootContext(Random randomCopy) {
-            var parameters = ImmutableMap.of(
-                    LootContextParameters.ORIGIN, pos,
-                    LootContextParameters.TOOL, tool,
-                    LootContextParameters.THIS_ENTITY, fakeEntity,
-                    IN_OPEN_WATER_PARAMETER, inOpenWater
-            );
-            return createLootContext(randomCopy, luckLevel, parameters);
+        private LootContext getLootContext() {
+            return new LootContext(((CheckedRandomAccessor) random).getSeed().get() ^ 0x5deece66dL, SeedfindingUtil.getMCVersion())
+                .withBiome(SeedfindingUtil.toSeedfindingBiome(world, world.getBiome(new BlockPos(pos))))
+                .withOpenWater(inOpenWater)
+                .withLuck(luckLevel);
         }
 
         public void tick() {

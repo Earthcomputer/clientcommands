@@ -119,7 +119,10 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
             return predicate.test(stack);
         }
 
-        @Override
+        public boolean isEnchantedBook() {
+            return predicate.item() == Items.ENCHANTED_BOOK || predicate.item() == Items.BOOK;
+        }
+
         public Collection<Item> getPossibleItems() {
             if (predicate.item() == Items.BOOK || predicate.item() == Items.ENCHANTED_BOOK) {
                 return Arrays.asList(Items.BOOK, Items.ENCHANTED_BOOK);
