@@ -5,15 +5,24 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
-import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.earthcomputer.clientcommands.c2c.chess.ChessBoard;
+import net.earthcomputer.clientcommands.c2c.chess.ChessGame;
+import net.earthcomputer.clientcommands.c2c.chess.ChessPiece;
+import net.earthcomputer.clientcommands.c2c.chess.ChessTeam;
+import net.earthcomputer.clientcommands.c2c.packets.*;
+import net.earthcomputer.clientcommands.command.ChessCommand;
+import net.earthcomputer.clientcommands.features.RunnableClickEventActionHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.network.encryption.PublicPlayerSession;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.joml.Vector2i;
 import org.slf4j.Logger;
 
 import java.security.PublicKey;
@@ -27,6 +36,8 @@ public class CCNetworkHandler implements CCPacketListener {
     private static final CCNetworkHandler instance = new CCNetworkHandler();
 
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private CCNetworkHandler() {
     }
@@ -81,7 +92,7 @@ public class CCNetworkHandler implements CCPacketListener {
         if (commandString.length() >= 256) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create(commandString.length());
         }
-        MinecraftClient.getInstance().getNetworkHandler().sendChatCommand(commandString);
+        client.getNetworkHandler().sendChatCommand(commandString);
         OutgoingPacketFilter.addPacket(packetString);
     }
 
@@ -95,6 +106,118 @@ public class CCNetworkHandler implements CCPacketListener {
         prefix.append(Text.literal("]").formatted(Formatting.DARK_GRAY));
         prefix.append(Text.literal(" "));
         Text text = prefix.append(Text.translatable("ccpacket.messageC2CPacket.incoming", sender, message).formatted(Formatting.GRAY));
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(text);
+        client.inGameHud.getChatHud().addMessage(text);
+    }
+
+    @Override
+    public void onChessInviteC2CPacket(ChessInviteC2CPacket packet) {
+        String sender = packet.getSender();
+        PlayerListEntry player = client.getNetworkHandler().getPlayerList().stream()
+                .filter(p -> p.getProfile().getName().equalsIgnoreCase(sender))
+                .findFirst()
+                .orElse(null);
+        if (player == null) {
+            return;
+        }
+        ChessTeam chessTeam = packet.getChessTeam();
+        if (ChessCommand.currentGame != null) {
+            try {
+                ChessAcceptInviteC2CPacket acceptInvitePacket = new ChessAcceptInviteC2CPacket(client.getNetworkHandler().getProfile().getName(), false, chessTeam);
+                CCNetworkHandler.getInstance().sendPacket(acceptInvitePacket, player);
+            } catch (CommandSyntaxException e) {
+                e.printStackTrace();
+                return;
+            }
+            client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.chessInviteC2CPacket.incoming.alreadyInGame", player.getProfile().getName()));
+            return;
+        }
+        MutableText body = Text.translatable("ccpacket.chessInviteC2CPacket.incoming", sender, chessTeam.asString());
+        Text accept = Text.translatable("ccpacket.chessInviteC2CPacket.incoming.accept").styled(style -> style
+                .withFormatting(Formatting.GREEN)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, RunnableClickEventActionHelper.registerCode(() -> {
+                    try {
+                        ChessAcceptInviteC2CPacket acceptInvitePacket = new ChessAcceptInviteC2CPacket(client.getNetworkHandler().getProfile().getName(), true, chessTeam);
+                        CCNetworkHandler.getInstance().sendPacket(acceptInvitePacket, player);
+                        client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.chessAcceptInviteC2CPacket.outgoing.accept"));
+
+                        ChessCommand.currentGame = new ChessGame(new ChessBoard(), player, chessTeam.other());
+                    } catch (CommandSyntaxException e) {
+                        e.printStackTrace();
+                    }
+                })))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("ccpacket.chessInviteC2CPacket.incoming.accept.hover"))));
+        Text deny = Text.translatable("ccpacket.chessInviteC2CPacket.incoming.deny").styled(style -> style
+                .withFormatting(Formatting.RED)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, RunnableClickEventActionHelper.registerCode(() -> {
+                    try {
+                        ChessAcceptInviteC2CPacket acceptInvitePacket = new ChessAcceptInviteC2CPacket(client.getNetworkHandler().getProfile().getName(), false, chessTeam);
+                        CCNetworkHandler.getInstance().sendPacket(acceptInvitePacket, player);
+                        client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.chessAcceptInviteC2CPacket.outgoing.deny"));
+                    } catch (CommandSyntaxException e) {
+                        e.printStackTrace();
+                    }
+                })))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("ccpacket.chessInviteC2CPacket.incoming.deny.hover"))));
+        Text message = body.append(" ").append(accept).append("/").append(deny);
+        client.inGameHud.getChatHud().addMessage(message);
+    }
+
+    @Override
+    public void onChessAcceptInviteC2CPacket(ChessAcceptInviteC2CPacket packet) {
+        if (ChessCommand.lastInvitedPlayer == null) {
+            return;
+        }
+        String sender = packet.getSender();
+        if (!sender.equals(ChessCommand.lastInvitedPlayer)) {
+            return;
+        }
+        PlayerListEntry opponent = client.getNetworkHandler().getPlayerList().stream()
+                .filter(p -> p.getProfile().getName().equalsIgnoreCase(sender))
+                .findFirst()
+                .orElse(null);
+        if (opponent == null) {
+            return;
+        }
+        boolean accept = packet.isAccept();
+        Text text;
+        if (accept) {
+            text = Text.translatable("ccpacket.chessAcceptInviteC2CPacket.incoming.accept", sender);
+            ChessCommand.currentGame = new ChessGame(new ChessBoard(), opponent, packet.getChessTeam());
+        } else {
+            text = Text.translatable("ccpacket.chessAcceptInviteC2CPacket.incoming.deny", sender);
+        }
+        client.inGameHud.getChatHud().addMessage(text);
+    }
+
+    @Override
+    public void onChessBoardUpdateC2CPacket(ChessBoardUpdateC2CPacket packet) {
+        if (ChessCommand.currentGame == null) {
+            return;
+        }
+        int fromX = packet.getFromX();
+        int fromY = packet.getFromY();
+        int toX = packet.getToX();
+        int toY = packet.getToY();
+        ChessPiece piece = ChessCommand.currentGame.getBoard().getPieceAt(fromX, fromY);
+        String sender = ChessCommand.currentGame.getOpponent().getProfile().getName();
+        Text text;
+        if (ChessCommand.currentGame.move(piece, new Vector2i(toX, toY))) {
+            //noinspection ConstantConditions
+            text = Text.translatable("ccpacket.chessBoardUpdateC2CPacket.incoming", sender, piece.getName(), ChessBoard.indexToFile(toX), toY + 1);
+        } else {
+            text = Text.translatable("ccpacket.chessBoardUpdateC2CPacket.incoming.invalid", sender);
+        }
+        client.inGameHud.getChatHud().addMessage(text);
+    }
+
+    @Override
+    public void onChessResignC2CPacket(ChessResignC2CPacket packet) {
+        if (ChessCommand.currentGame == null) {
+            return;
+        }
+        String sender = ChessCommand.currentGame.getOpponent().getProfile().getName();
+        Text text = Text.translatable("ccpacket.chessResignC2CPacket.incoming", sender);
+        ChessCommand.currentGame = null;
+        client.inGameHud.getChatHud().addMessage(text);
     }
 }
