@@ -380,7 +380,7 @@ public class FishingCracker {
                 impossible &= generateAllMatchingLoot(fishingLootTable, fishingBobber.getLootContext(), goal, failedConditions::add).isEmpty();
             }
 
-            if (impossible) {
+            if (impossible && failedConditions.isEmpty()) {
                 Text error = Text.translatable("commands.cfish.error.impossibleLoot").styled(style -> style.withColor(Formatting.RED));
                 ClientCommandHelper.addOverlayMessage(error, 100);
                 reset();
