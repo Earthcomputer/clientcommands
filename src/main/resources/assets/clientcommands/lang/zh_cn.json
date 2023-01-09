@@ -1,6 +1,6 @@
 {
   "commands.calias.notFound": "未找到别名“%s”",
-  "commands.calias.illegalFormatException": "指令格式或参数错误",
+  "commands.calias.illegalFormatException": "指令格式错误或缺少参数",
   "commands.calias.file.readError": "别名文件读取失败",
   "commands.calias.file.writeError": "别名文件写入失败",
   "commands.calias.addAlias.aliasAlreadyExists": "别名“%s”已经存在",
@@ -78,6 +78,7 @@
   "commands.cfish.error.onGround": "浮标撞到了地上",
   "commands.cfish.error.openWater": "为了获得宝藏战利品，浮标需要在开放的水中",
   "commands.cfish.error.openWater.flowingWater": "提示：浮标周围的水必须是静止的水，流动的水不起作用",
+  "commands.cfish.error.openWater.help": "提示：the red cubes show the blocks which are preventing the open water condition from being met",
   "commands.cfish.error.openWater.lilyPad": "提示：尝试使浮标卡在睡莲下",
   "commands.cfish.error.outOfWater": "浮标不在水中, 自动控制无法工作",
   "commands.cfish.help.tooManyEnchants": "提示：把多个附魔放在一起获得会很难且可能需要很长时间",
