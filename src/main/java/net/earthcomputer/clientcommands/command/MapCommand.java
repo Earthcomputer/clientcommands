@@ -163,7 +163,6 @@ public class MapCommand {
                 // this should never be possible
                 if (flattened.put(new Vec2i(x, y), next) != null) throw new IllegalStateException("Duplicate item frame at " + nextPos);
             }
-            System.out.println(flattened);
             // find min and max
             Iterator<Vec2i> vec2iIterator = flattened.keySet().iterator();
             Vec2i first = vec2iIterator.next();
