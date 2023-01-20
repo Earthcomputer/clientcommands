@@ -255,7 +255,7 @@ public class PlayerRandCracker {
 
                     if (TempRules.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
 
-                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15){
+                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15) {
                             MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10,0.1f);
                         }
 

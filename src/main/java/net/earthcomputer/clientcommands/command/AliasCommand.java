@@ -96,7 +96,7 @@ public class AliasCommand {
             } catch (IllegalFormatException e) {
                 throw ILLEGAL_FORMAT_EXCEPTION.create();
             }
-        } else if (arguments != null){
+        } else if (arguments != null) {
             cmd += " " + arguments;
         }
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
@@ -171,7 +171,7 @@ public class AliasCommand {
         }
         Gson gson = new Gson();
         try (Reader fileReader = Files.newBufferedReader(ALIAS_PATH)) {
-            return gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
+            return gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>() {}.getType());
         } catch (IOException | JsonSyntaxException e) {
             LOGGER.error("Error reading aliases file", e);
             return new HashMap<>();
