@@ -60,8 +60,9 @@ public abstract class MixinMinecraftClient {
                 && !(screen instanceof MultiplayerScreen)) {
             Relogger.cantHaveRelogSuccess();
         }
-        if (!GuiBlocker.onOpenGui(screen))
+        if (!GuiBlocker.onOpenGui(screen)) {
             ci.cancel();
+        }
     }
 
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
@@ -71,8 +72,9 @@ public abstract class MixinMinecraftClient {
             var oldRules = TempRules.getRules().stream().map(rule -> Pair.of(rule, TempRules.get(rule))).collect(Collectors.toList());
             Relogger.relogSuccessTasks.add(() -> oldRules.forEach(rule -> TempRules.set(rule.getLeft(), rule.getRight())));
         }
-        for (String rule : TempRules.getRules())
+        for (String rule : TempRules.getRules()) {
             TempRules.reset(rule);
+        }
         RenderSettings.clearEntityRenderSelectors();
     }
 

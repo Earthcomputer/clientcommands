@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.earthcomputer.clientcommands.TempRules;
@@ -90,21 +91,21 @@ public class TempRuleCommand {
         Object val = TempRules.get(rule);
         String str = TempRules.asString(val);
         source.sendFeedback(Text.literal(rule + " = " + str));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int setRule(FabricClientCommandSource source, String rule, Object value) {
         TempRules.set(rule, value);
         String str = TempRules.asString(value);
         source.sendFeedback(Text.translatable("commands.ctemprule.set.success", rule, str));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int resetRule(FabricClientCommandSource source, String rule) {
         TempRules.reset(rule);
         String str = TempRules.asString(TempRules.get(rule));
         source.sendFeedback(Text.translatable("commands.ctemprule.reset.success", rule, str));
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 
 }

@@ -18,10 +18,11 @@ public abstract class MixinArmorStandEntityRenderer extends LivingEntityRenderer
         super(ctx, model, shadowRadius);
     }
 
-    @Inject(method = "getRenderLayer", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getRenderLayer(Lnet/minecraft/entity/decoration/ArmorStandEntity;ZZZ)Lnet/minecraft/client/render/RenderLayer;", at = @At("HEAD"), cancellable = true)
     private void onGetRenderLayer(ArmorStandEntity armorStand, boolean visible, boolean translucent, boolean shouldRenderOutline, CallbackInfoReturnable<RenderLayer> ci) {
-        if (((IEntity) armorStand).hasGlowingTicket())
+        if (((IEntity) armorStand).hasGlowingTicket()) {
             ci.setReturnValue(super.getRenderLayer(armorStand, visible, translucent, shouldRenderOutline));
+        }
     }
 
 }

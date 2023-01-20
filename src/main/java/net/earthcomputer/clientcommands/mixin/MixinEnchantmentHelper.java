@@ -28,16 +28,18 @@ public class MixinEnchantmentHelper {
     @Inject(method = "generateEnchantments", at = @At("HEAD"), cancellable = true)
     private static void getEnchantments1140(Random rand, ItemStack stack, int level, boolean allowTreasure, CallbackInfoReturnable<List<EnchantmentLevelEntry>> ci) {
         int protocolVersion = MulticonnectCompat.getProtocolVersion();
-        if (protocolVersion < MulticonnectCompat.V1_14 || protocolVersion > MulticonnectCompat.V1_14_2)
+        if (protocolVersion < MulticonnectCompat.V1_14 || protocolVersion > MulticonnectCompat.V1_14_2) {
             return;
+        }
 
         List<EnchantmentLevelEntry> enchantments = Lists.newArrayList();
         ci.setReturnValue(enchantments);
 
         Item item = stack.getItem();
         int enchantability = item.getEnchantability();
-        if (enchantability <= 0)
+        if (enchantability <= 0) {
             return;
+        }
 
         level += 1 + rand.nextInt(enchantability / 4 + 1) + rand.nextInt(enchantability / 4 + 1);
         float change = (rand.nextFloat() + rand.nextFloat() - 1) * 0.15f;
@@ -55,8 +57,9 @@ public class MixinEnchantmentHelper {
                     EnchantmentHelper.removeConflicts(applicableEnchantments, ench);
                 }
 
-                if (applicableEnchantments.isEmpty())
+                if (applicableEnchantments.isEmpty()) {
                     break;
+                }
 
                 optEnch = Weighting.getRandom(rand, applicableEnchantments);
                 optEnch.ifPresent(enchantments::add);

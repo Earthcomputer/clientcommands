@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -25,6 +26,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class FindCommand {
 
     private static final int FLAG_KEEP_SEARCHING = 1;
+
+    private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cfind.noMatch"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var cfind = dispatcher.register(literal("cfind"));
@@ -49,8 +52,7 @@ public class FindCommand {
             List<? extends Entity> entities = selector.getEntities(source);
 
             if (entities.isEmpty()) {
-                source.sendError(Text.translatable("commands.cfind.noMatch"));
-                return 0;
+                throw NO_MATCH_EXCEPTION.create();
             }
 
             source.sendFeedback(Text.translatable("commands.cfind.success", entities.size()).formatted(Formatting.BOLD));

@@ -20,8 +20,9 @@ public abstract class MixinProtectionEnchantment extends Enchantment {
     @Inject(method = "canAccept", at = @At("HEAD"), cancellable = true)
     public void isCompatible1140(Enchantment other, CallbackInfoReturnable<Boolean> ci) {
         int protocolVersion = MulticonnectCompat.getProtocolVersion();
-        if (protocolVersion < MulticonnectCompat.V1_14 || protocolVersion > MulticonnectCompat.V1_14_2)
+        if (protocolVersion < MulticonnectCompat.V1_14 || protocolVersion > MulticonnectCompat.V1_14_2) {
             return;
+        }
 
         ci.setReturnValue(other != this);
     }

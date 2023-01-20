@@ -173,8 +173,9 @@ public class EnchantmentCracker {
             return;
         }
 
-        if (enchantingTablePos == null)
+        if (enchantingTablePos == null) {
             return;
+        }
         BlockPos tablePos = enchantingTablePos;
 
         if (crackState == CrackState.UNCRACKED) {
@@ -255,11 +256,13 @@ public class EnchantmentCracker {
 
             boolean valid = true;
             long seed = (7847617 * a - 18218081 * b) & PlayerRandCracker.MASK;
-            if ((int) (seed >>> 16) != firstXpSeed)
+            if ((int) (seed >>> 16) != firstXpSeed) {
                 valid = false;
+            }
             seed = (seed * PlayerRandCracker.MULTIPLIER + PlayerRandCracker.ADDEND) & PlayerRandCracker.MASK;
-            if ((int) (seed >>> 16) != enchantmentSeed)
+            if ((int) (seed >>> 16) != enchantmentSeed) {
                 valid = false;
+            }
             if (valid) {
                 PlayerRandCracker.setSeed(seed);
                 TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
@@ -377,10 +380,11 @@ public class EnchantmentCracker {
 
                         Slot slot = PlayerRandCracker.getBestItemThrowSlot(MinecraftClient.getInstance().player.currentScreenHandler.slots);
                         //noinspection RedundantIfStatement
-                        if (slot == null)
+                        if (slot == null) {
                             return true; // keep waiting
-                        else
+                        } else {
                             return false; // ready to throw an item
+                        }
                     }
 
                     @Override
@@ -492,8 +496,9 @@ public class EnchantmentCracker {
             } else {
                 // return a list containing the clue
                 Enchantment enchantment = Enchantment.byRawId(enchContainer.enchantmentId[slot]);
-                if (enchantment == null)
+                if (enchantment == null) {
                     return null;
+                }
                 return Collections.singletonList(new EnchantmentLevelEntry(enchantment, enchContainer.enchantmentLevel[slot]));
             }
         } else {

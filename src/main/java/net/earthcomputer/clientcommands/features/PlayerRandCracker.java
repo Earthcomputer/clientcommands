@@ -49,8 +49,9 @@ public class PlayerRandCracker {
     }
 
     public static int nextInt(int bound) {
-        if ((bound & -bound) == bound)
+        if ((bound & -bound) == bound) {
             return (int) ((bound * (long)next(31)) >> 31);
+        }
 
         int bits, val;
         do {
@@ -104,13 +105,16 @@ public class PlayerRandCracker {
     }
 
     public static void onDropItem() {
-        if (expectedThrows > 0 || canMaintainPlayerRNG())
-            for (int i = 0; i < 4; i++)
+        if (expectedThrows > 0 || canMaintainPlayerRNG()) {
+            for (int i = 0; i < 4; i++) {
                 nextInt();
-        else
+            }
+        } else {
             resetCracker("dropItem");
-        if (expectedThrows > 0)
+        }
+        if (expectedThrows > 0) {
             expectedThrows--;
+        }
     }
 
     public static void onEntityCramming() {
@@ -185,10 +189,11 @@ public class PlayerRandCracker {
     }
 
     public static void onAnvilUse() {
-        if (canMaintainPlayerRNG())
+        if (canMaintainPlayerRNG()) {
             nextInt();
-        else
+        } else {
             resetCracker("anvil");
+        }
     }
 
     public static void onMending() {
@@ -211,10 +216,11 @@ public class PlayerRandCracker {
     }
 
     public static void onBaneOfArthropods() {
-        if (canMaintainPlayerRNG())
+        if (canMaintainPlayerRNG()) {
             nextInt();
-        else
+        } else {
             resetCracker("baneOfArthropods");
+        }
     }
 
     public static void onRecreatePlayer() {
@@ -222,12 +228,15 @@ public class PlayerRandCracker {
     }
 
     public static void onUnbreaking(ItemStack stack, int amount, int unbreakingLevel) {
-        if (canMaintainPlayerRNG())
-            for (int i = 0; i < amount; i++)
-                if (!(stack.getItem() instanceof ArmorItem) || nextFloat() >= 0.6)
+        if (canMaintainPlayerRNG()) {
+            for (int i = 0; i < amount; i++) {
+                if (!(stack.getItem() instanceof ArmorItem) || nextFloat() >= 0.6) {
                     nextInt(unbreakingLevel + 1);
-                else
+                } else {
                     resetCracker("unbreaking");
+                }
+            }
+        }
     }
 
     public static void onUnbreakingUncertain(ItemStack stack, int minAmount, int maxAmount, int unbreakingLevel) {
@@ -240,8 +249,9 @@ public class PlayerRandCracker {
             if (stack.isDamageable()) {
                 if (amount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
-                    if (unbreakingLevel > 0)
+                    if (unbreakingLevel > 0) {
                         onUnbreaking(stack, amount, unbreakingLevel);
+                    }
 
                     if (TempRules.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
 
@@ -368,8 +378,9 @@ public class PlayerRandCracker {
         for (Slot slot : slots) {
             itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
         }
-        if (itemCounts.isEmpty())
+        if (itemCounts.isEmpty()) {
             return null;
+        }
         //noinspection OptionalGetWithoutIsPresent
         Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getMaxCount).thenComparing(itemCounts::get)).get();
         //noinspection OptionalGetWithoutIsPresent
@@ -424,8 +435,7 @@ public class PlayerRandCracker {
             NOT_ENOUGH_ITEMS(false, "playerManip.notEnoughItems"),
             NOT_POSSIBLE(false, "playerManip.throwError"),
             UNKNOWN_SEED(false, "playerManip.uncracked"),
-            SUCCESS(true, null),
-            ;
+            SUCCESS(true, null);
 
             private final boolean success;
             private final String translationKey;
@@ -454,8 +464,7 @@ public class PlayerRandCracker {
         CRACKING("cracking"),
         EATING("eating"),
         MANIPULATING_ENCHANTMENTS("manipulating_enchantments"),
-        WAITING_DUMMY_ENCHANT("waiting_dummy_enchant", true),
-        ;
+        WAITING_DUMMY_ENCHANT("waiting_dummy_enchant", true);
 
         private final String name;
         private final boolean knowsSeed;

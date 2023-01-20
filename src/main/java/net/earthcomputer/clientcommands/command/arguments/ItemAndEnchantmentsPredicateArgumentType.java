@@ -227,23 +227,27 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                     continue;
                 }
                 if (option == Option.WITH) {
-                    for (EnchantmentLevelEntry ench2 : with)
+                    for (EnchantmentLevelEntry ench2 : with) {
                         if (ench2.enchantment == ench || !ench2.enchantment.canCombine(ench)) {
                             continue nextEnchantment;
                         }
-                    for (EnchantmentLevelEntry ench2 : without)
+                    }
+                    for (EnchantmentLevelEntry ench2 : without) {
                         if (ench2.enchantment == ench && ench2.level == -1) {
                             continue nextEnchantment;
                         }
+                    }
                 } else {
-                    for (EnchantmentLevelEntry ench2 : with)
+                    for (EnchantmentLevelEntry ench2 : with) {
                         if (ench2.enchantment == ench && ench2.level == -1) {
                             continue nextEnchantment;
                         }
-                    for (EnchantmentLevelEntry ench2 : without)
+                    }
+                    for (EnchantmentLevelEntry ench2 : without) {
                         if (ench2.enchantment == ench && ench2.level == -1) {
                             continue nextEnchantment;
                         }
+                    }
                 }
                 allowedEnchantments.add(ench);
             }

@@ -77,7 +77,9 @@ public class RenderQueue {
     }
 
     public static void render(Layer layer, MatrixStack matrixStack, float delta) {
-        if (!queue.containsKey(layer)) return;
+        if (!queue.containsKey(layer)){
+            return;
+        }
         queue.get(layer).values().forEach(shape -> shape.render(matrixStack, delta));
     }
 

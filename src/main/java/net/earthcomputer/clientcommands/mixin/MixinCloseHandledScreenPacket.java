@@ -56,9 +56,9 @@ public class MixinCloseHandledScreenPacket {
 
         if (screenHandler instanceof BeaconScreenHandler) {
             Slot paymentSlot = screenHandler.getSlot(0);
-            if (paymentSlot.getStack().getCount() > paymentSlot.getMaxItemCount())
+            if (paymentSlot.getStack().getCount() > paymentSlot.getMaxItemCount()) {
                 PlayerRandCracker.onDropItem();
-
+            }
         }
     }
 

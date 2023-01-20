@@ -13,8 +13,9 @@ public class LongTaskList extends LongTask {
 
     @Override
     public void initialize() {
-        if (!children.isEmpty())
+        if (!children.isEmpty()) {
             children.get(0).initialize();
+        }
     }
 
     @Override
@@ -31,15 +32,18 @@ public class LongTaskList extends LongTask {
         LongTask child = children.get(0);
         if (child.isCompleted()) {
             child.onCompleted();
-            if (child.isDelayScheduled())
+            if (child.isDelayScheduled()) {
                 scheduleDelay();
+            }
             children.remove(0);
-            if (!children.isEmpty())
+            if (!children.isEmpty()) {
                 children.get(0).initialize();
+            }
         } else {
             child.body();
-            if (!child.isCompleted())
+            if (!child.isCompleted()) {
                 child.increment();
+            }
             if (child.isDelayScheduled()) {
                 child.unscheduleDelay();
                 scheduleDelay();

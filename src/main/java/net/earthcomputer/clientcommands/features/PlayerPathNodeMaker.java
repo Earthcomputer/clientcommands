@@ -262,8 +262,9 @@ public class PlayerPathNodeMaker extends LandPathNodeMaker {
     @Override
     public PathNodeType getNodeType(BlockView world, int x, int y, int z, MobEntity unusedMob, int sizeX, int sizeY, int sizeZ, boolean canOpenDoors, boolean canEnterOpenDoors) {
         PathNodeType customType = hints.getNodeType(world, new BlockPos(x, y, z));
-        if (customType != null)
+        if (customType != null) {
             return customType;
+        }
 
         EnumSet<PathNodeType> nodesInBounds = EnumSet.noneOf(PathNodeType.class);
         PathNodeType type = PathNodeType.BLOCKED;

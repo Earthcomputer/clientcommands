@@ -2,6 +2,8 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandRegistryAccess;
@@ -26,6 +28,8 @@ public class FindBlockCommand {
 
     public static final int MAX_RADIUS = 16 * 8;
 
+    private static final SimpleCommandExceptionType NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cfindblock.notFound"));
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cfindblock")
             .then(argument("block", blockPredicate(registryAccess))
@@ -40,7 +44,7 @@ public class FindBlockCommand {
                         .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), getInteger(ctx, "radius"), RadiusType.TAXICAB))))));
     }
 
-    public static int findBlock(FabricClientCommandSource source, ClientBlockPredicate block, int radius, RadiusType radiusType) {
+    public static int findBlock(FabricClientCommandSource source, ClientBlockPredicate block, int radius, RadiusType radiusType) throws CommandSyntaxException {
         List<BlockPos> candidates;
         if (radiusType == RadiusType.TAXICAB) {
             candidates = findBlockCandidatesInTaxicabArea(source, block, radius);
@@ -55,8 +59,7 @@ public class FindBlockCommand {
                 .orElse(null);
 
         if (closestBlock == null) {
-            source.sendError(Text.translatable("commands.cfindblock.notFound"));
-            return 0;
+            throw NOT_FOUND_EXCEPTION.create();
         } else {
             double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
             source.sendFeedback(Text.translatable("commands.cfindblock.success.left", foundRadius)
