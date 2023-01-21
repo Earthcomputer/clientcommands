@@ -4,8 +4,6 @@ import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.CCPacketListener;
 import net.minecraft.network.PacketByteBuf;
 
-import java.nio.ByteBuffer;
-
 public class MessageC2CPacket implements C2CPacket {
 
     private final String sender;
