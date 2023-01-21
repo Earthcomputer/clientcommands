@@ -48,13 +48,6 @@ public class AliasCommand {
     private static final HashMap<String, String> aliasMap = loadAliases();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        try {
-            Class.forName("net.fabricmc.fabric.impl.command.client.ClientCommandInternals");
-        } catch (ClassNotFoundException e) {
-            LOGGER.warn("Could not find ClientCommandInternals, /calias command not available");
-            return;
-        }
-
         dispatcher.register(literal("calias")
                 .then(literal("add")
                         .then(argument("key", string())
