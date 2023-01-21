@@ -435,7 +435,8 @@ public class PlayerRandCracker {
             NOT_ENOUGH_ITEMS(false, "playerManip.notEnoughItems"),
             NOT_POSSIBLE(false, "playerManip.throwError"),
             UNKNOWN_SEED(false, "playerManip.uncracked"),
-            SUCCESS(true, null);
+            SUCCESS(true, null),
+            ;
 
             private final boolean success;
             private final String translationKey;
@@ -464,7 +465,8 @@ public class PlayerRandCracker {
         CRACKING("cracking"),
         EATING("eating"),
         MANIPULATING_ENCHANTMENTS("manipulating_enchantments"),
-        WAITING_DUMMY_ENCHANT("waiting_dummy_enchant", true);
+        WAITING_DUMMY_ENCHANT("waiting_dummy_enchant", true),
+        ;
 
         private final String name;
         private final boolean knowsSeed;
