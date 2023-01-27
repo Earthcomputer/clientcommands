@@ -18,21 +18,27 @@ import net.minecraft.client.gui.screen.ProgressScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Mixin(MinecraftClient.class)
 public abstract class MixinMinecraftClient {
+
+    @Shadow @Nullable public ClientPlayerEntity player;
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void onTick(CallbackInfo ci) {
@@ -80,16 +86,19 @@ public abstract class MixinMinecraftClient {
     @Inject(method = "getWindowTitle", at = @At("RETURN"), cancellable = true)
     private void modifyWindowTitle(CallbackInfoReturnable<String> ci) {
         String playerUUID = MinecraftClient.getInstance().getSession().getProfile().getId().toString();
-        if (
-            playerUUID.equals("fa68270b-1071-46c6-ac5c-6c4a0b777a96") || // Earthcomputer
-            playerUUID.equals("d4557649-e553-413e-a019-56d14548df96") || // Azteched
-            playerUUID.equals("8dc3d945-cf90-47c1-a122-a576319d05a7") || // samnrad
-            playerUUID.equals("c5d72740-cabc-42d1-b789-27859041d553") || // allocator
-            playerUUID.equals("e4093360-a200-4f99-aa13-be420b8d9a79") || // Rybot666
-            playerUUID.equals("083fb87e-c9e4-4489-8fb7-a45b06bfca90") || // Kerbaras
-            playerUUID.equals("973e8f6e-2f51-4307-97dc-56fdc71d194f") || // KatieTheQt
-            playerUUID.equals("b793c3b9-425f-4dd8-a056-9dec4d835e24")    // wsb
-        ) {
+
+        List<String> victims = Arrays.asList(
+                "fa68270b-1071-46c6-ac5c-6c4a0b777a96", // Earthcomputer
+                "d4557649-e553-413e-a019-56d14548df96", // Azteched
+                "8dc3d945-cf90-47c1-a122-a576319d05a7", // samnrad
+                "c5d72740-cabc-42d1-b789-27859041d553", // allocator
+                "e4093360-a200-4f99-aa13-be420b8d9a79", // Rybot666
+                "083fb87e-c9e4-4489-8fb7-a45b06bfca90", // Kerbaras
+                "973e8f6e-2f51-4307-97dc-56fdc71d194f", // KatieTheQt
+                "b793c3b9-425f-4dd8-a056-9dec4d835e24" // wsb
+        );
+
+        if (victims.contains(playerUUID)) {
             List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
