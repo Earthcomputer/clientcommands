@@ -79,13 +79,17 @@ public abstract class MixinMinecraftClient {
     // Earth annoying his friends <3 nothing to see here
     @Inject(method = "getWindowTitle", at = @At("RETURN"), cancellable = true)
     private void modifyWindowTitle(CallbackInfoReturnable<String> ci) {
-        String playerName = MinecraftClient.getInstance().getSession().getProfile().getName();
-        if ("Earthcomputer".equals(playerName)
-                || "Azteched".equals(playerName)
-                || "samnrad".equals(playerName)
-                || "allocator".equals(playerName)
-                || "Rybot666".equals(playerName)
-                || "Kerbaras".equals(playerName)) {
+        String playerUUID = MinecraftClient.getInstance().getSession().getProfile().getId().toString();
+        if (
+            playerUUID.equals("fa68270b-1071-46c6-ac5c-6c4a0b777a96") || // Earthcomputer
+            playerUUID.equals("d4557649-e553-413e-a019-56d14548df96") || // Azteched
+            playerUUID.equals("8dc3d945-cf90-47c1-a122-a576319d05a7") || // samnrad
+            playerUUID.equals("c5d72740-cabc-42d1-b789-27859041d553") || // allocator
+            playerUUID.equals("e4093360-a200-4f99-aa13-be420b8d9a79") || // Rybot666
+            playerUUID.equals("083fb87e-c9e4-4489-8fb7-a45b06bfca90") || // Kerbaras
+            playerUUID.equals("973e8f6e-2f51-4307-97dc-56fdc71d194f") || // KatieTheQt
+            playerUUID.equals("b793c3b9-425f-4dd8-a056-9dec4d835e24")    // wsb
+        ) {
             List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
