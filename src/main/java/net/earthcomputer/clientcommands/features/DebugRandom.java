@@ -3,6 +3,8 @@ package net.earthcomputer.clientcommands.features;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.earthcomputer.clientcommands.ClientCommands;
@@ -14,6 +16,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.CheckedRandom;
 import net.minecraft.util.math.random.RandomSeed;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.swing.*;
@@ -22,14 +25,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class DebugRandom extends CheckedRandom {
-    private static final Logger LOGGER = LogUtils.getLogger();
+    static final Logger LOGGER = LogUtils.getLogger();
 
     public static final EntityType<?> DEBUG_ENTITY_TYPE;
     static {
@@ -171,14 +173,23 @@ public class DebugRandom extends CheckedRandom {
 
 class DebugRandomSourcePanel extends JPanel {
     private final List<List<RandomCall>> randomCalls;
-    private List<RandomCall> selectedTick = Collections.emptyList();
+    @Nullable
+    private List<RandomCall> selectedTick = null;
     private int selectedStackTrace = 0;
+    private final IntSet usedStackTraces = new IntOpenHashSet();
 
     private final JList<List<RandomCall>> randomCallsList;
     private final JList<RandomCall> callsInTickList;
+    private final JList<String> allStackTraceList;
 
     DebugRandomSourcePanel(List<List<RandomCall>> randomCalls) {
         this.randomCalls = randomCalls;
+
+        for (List<RandomCall> randomCallsThisTick : randomCalls) {
+            for (RandomCall randomCall : randomCallsThisTick) {
+                usedStackTraces.add(randomCall.stackTrace());
+            }
+        }
 
         setPreferredSize(new Dimension(1280, 720));
         setLayout(new BorderLayout());
@@ -190,7 +201,7 @@ class DebugRandomSourcePanel extends JPanel {
             if (isSameAsSelectedTick(value)) {
                 label.setForeground(Color.GREEN);
             } else if (containsSelectedStackTrace(value)) {
-                label.setForeground(Color.YELLOW);
+                label.setForeground(Color.RED);
             }
             return label;
         });
@@ -214,14 +225,57 @@ class DebugRandomSourcePanel extends JPanel {
         });
         callsInTickList.addListSelectionListener(e -> {
             int index = callsInTickList.getSelectedIndex();
-            if (index >= 0 && index < selectedTick.size()) {
-                selectedStackTrace = selectedTick.get(index).stackTrace();
-                randomCallsList.repaint();
-                callsInTickList.repaint();
+            if (selectedTick != null && index >= 0 && index < selectedTick.size()) {
+                setSelectedStackTrace(selectedTick.get(index).stackTrace());
             }
         });
 
-        add(new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(randomCallsList), new JScrollPane(callsInTickList)), BorderLayout.CENTER);
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Ticks", new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(randomCallsList), new JScrollPane(callsInTickList)));
+
+        allStackTraceList = new JList<>(new Vector<>(DebugRandom.stackTraceById));
+        allStackTraceList.addListSelectionListener(e -> {
+            setSelectedStackTrace(allStackTraceList.getSelectedIndex());
+        });
+        allStackTraceList.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            if (!usedStackTraces.contains(index)) {
+                return new JPanel();
+            }
+            JTextArea textArea = new JTextArea(value);
+            textArea.setEditable(false);
+            setupSelectionUI(list, textArea, isSelected, cellHasFocus);
+            if (index == selectedStackTrace) {
+                textArea.setBackground(Color.YELLOW);
+            }
+            return textArea;
+        });
+        tabbedPane.addTab("All traces", new JScrollPane(allStackTraceList));
+
+        add(tabbedPane, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        JButton dumpStackTraceButton = new JButton("Dump stack trace");
+        dumpStackTraceButton.addActionListener(e -> {
+            if (selectedStackTrace >= 0 && selectedStackTrace < DebugRandom.stackTraceById.size()) {
+                DebugRandom.LOGGER.info(DebugRandom.stackTraceById.get(selectedStackTrace));
+            }
+        });
+        bottomPanel.add(dumpStackTraceButton);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private void setSelectedStackTrace(int selectedStackTrace) {
+        this.selectedStackTrace = selectedStackTrace;
+        if (randomCallsList != null) {
+            randomCallsList.repaint();
+        }
+        if (callsInTickList != null) {
+            callsInTickList.repaint();
+        }
+        if (allStackTraceList != null) {
+            allStackTraceList.repaint();
+        }
     }
 
     private void setSelectedTick(List<RandomCall> randomCalls) {
@@ -235,6 +289,9 @@ class DebugRandomSourcePanel extends JPanel {
     }
 
     private boolean isSameAsSelectedTick(List<RandomCall> randomCalls) {
+        if (selectedTick == null) {
+            return false;
+        }
         if (randomCalls.size() != selectedTick.size()) {
             return false;
         }
