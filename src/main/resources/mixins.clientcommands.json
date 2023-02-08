@@ -57,6 +57,7 @@
     "MixinProfileKeysImpl",
     "MixinProtectionEnchantment",
     "MixinPumpkinBlock",
+    "MixinServerWorld",
     "MixinShearsItem",
     "MixinStonecutterContainer",
     "MixinTextFieldWidget",
