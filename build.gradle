@@ -12,10 +12,6 @@ version = project.mod_version
 group = project.maven_group
 
 configurations {
-	included
-	modImplementation.extendsFrom included
-	include.extendsFrom included
-
 	includedLibrary
 	modImplementation.extendsFrom includedLibrary
 }
@@ -45,7 +41,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	included 'dev.xpple:clientarguments:1.4.2'
+	include modImplementation('dev.xpple:clientarguments:1.4.2')
 	includedLibrary 'com.seedfinding:mc_feature:1.171.4'
 
 	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
