@@ -150,7 +150,7 @@ public class ChorusManipulation {
      * @see net.minecraft.entity.LivingEntity#teleport(double, double, double, boolean) (Vec3d)
      */
     public static Vec3d canTeleport(Box goalArea, Vec3d goalVec) {
-        BlockPos blockPos = new BlockPos(goalVec);
+        BlockPos blockPos = BlockPos.ofFloored(goalVec);
         World world = MinecraftClient.getInstance().world;
 
         if (world != null && world.isChunkLoaded(blockPos)) {

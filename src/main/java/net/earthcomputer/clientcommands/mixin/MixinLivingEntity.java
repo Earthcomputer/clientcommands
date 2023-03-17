@@ -97,7 +97,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
                 int frostWalkerLevel = EnchantmentHelper.getEquipmentLevel(Enchantments.FROST_WALKER, (LivingEntity) (Object) this);
                 if (frostWalkerLevel > 0) {
                     BlockState frostedIce = Blocks.FROSTED_ICE.getDefaultState();
-                    float radius = Math.min(16, frostWalkerLevel + 2);
+                    int radius = Math.min(16, frostWalkerLevel + 2);
                     for (BlockPos offsetPos : BlockPos.iterate(pos.add(-radius, -1, -radius), pos.add(radius, -1, radius))) {
                         BlockState offsetState = world.getBlockState(offsetPos);
                         if (offsetState.getMaterial() == Material.WATER && offsetState.get(FluidBlock.LEVEL) == 0 && world.canPlace(frostedIce, offsetPos, ShapeContext.absent())) {

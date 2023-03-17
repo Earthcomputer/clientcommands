@@ -299,7 +299,7 @@ public class ItemGroupCommand {
                         new Identifier("clientcommands", key))
                         .displayName(Text.literal(key))
                         .icon(() -> icon)
-                        .entries((enabledFeatures, entries, operatorEnabled) -> {
+                        .entries((displayContext, entries) -> {
                             for (int i = 0; i < items.size(); i++) {
                                 entries.add(ItemStack.fromNbt(items.getCompound(i)));
                             }
@@ -324,7 +324,7 @@ public class ItemGroupCommand {
                         new Identifier("clientcommands", key))
                         .displayName(Text.literal(key))
                         .icon(() -> icon)
-                        .entries((enabledFeatures, entries, operatorEnabled) -> {
+                        .entries((displayContext, entries) -> {
                             for (int i = 0; i < updatedListTag.size(); i++) {
                                 entries.add(ItemStack.fromNbt(updatedListTag.getCompound(i)));
                             }
@@ -358,7 +358,7 @@ public class ItemGroupCommand {
                     new Identifier("clientcommands", key))
                     .displayName(Text.literal(key))
                     .icon(group::getIcon)
-                    .entries((enabledFeatures, entries, operatorEnabled) -> {
+                    .entries((displayContext, entries) -> {
                         for (int i = 0; i < group.getItems().size(); i++) {
                             entries.add(ItemStack.fromNbt(group.getItems().getCompound(i)));
                         }

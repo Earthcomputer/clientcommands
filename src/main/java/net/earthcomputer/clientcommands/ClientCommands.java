@@ -31,6 +31,7 @@ public class ClientCommands implements ClientModInitializer {
     }
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        AuditMixinsCommand.register(dispatcher);
         BookCommand.register(dispatcher);
         LookCommand.register(dispatcher);
         NoteCommand.register(dispatcher);

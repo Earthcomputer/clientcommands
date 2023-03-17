@@ -91,7 +91,7 @@ class SnakeGameScreen extends Screen {
 
         drawTextWithShadow(matrices, client.textRenderer, this.title, startX, startY - 10, 0xff_ffffff);
         MutableText score = Text.translatable("snakeGame.score", this.snake.size());
-        drawCenteredText(matrices, client.textRenderer, score, this.width / 2, startY - 10, 0xff_ffffff);
+        drawCenteredTextWithShadow(matrices, client.textRenderer, score, this.width / 2, startY - 10, 0xff_ffffff);
 
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
