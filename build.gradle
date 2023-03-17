@@ -45,8 +45,8 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	included 'dev.xpple:clientarguments:1.4.2'
-	includedLibrary 'com.seedfinding:mc_feature:1.171.4'
+	included "dev.xpple:clientarguments:${project.clientarguments_version}"
+	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_version}"
 
 	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
 }

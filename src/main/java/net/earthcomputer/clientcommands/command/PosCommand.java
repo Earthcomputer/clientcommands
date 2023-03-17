@@ -76,7 +76,7 @@ public class PosCommand {
         }
 
         double scaleFactor = (double) getCoordinateScale(sourceWorld) / getCoordinateScale(targetWorld);
-        BlockPos targetPos = new BlockPos(Math.floor(pos.getX() * scaleFactor), pos.getY(), Math.floor(pos.getZ() * scaleFactor));
+        BlockPos targetPos = BlockPos.ofFloored(pos.getX() * scaleFactor, pos.getY(), pos.getZ() * scaleFactor);
         String sourceWorldName = getWorldName(sourceWorld);
         String targetWorldName = getWorldName(targetWorld);
 

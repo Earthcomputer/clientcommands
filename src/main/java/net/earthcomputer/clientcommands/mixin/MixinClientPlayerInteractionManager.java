@@ -47,7 +47,7 @@ public class MixinClientPlayerInteractionManager {
         PlayerRandCracker.isPredictingBlockBreaking = true;
     }
 
-    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", shift = At.Shift.AFTER))
+    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", shift = At.Shift.AFTER))
     private void postSendSequencedPacket(CallbackInfo ci) {
         PlayerRandCracker.postSendBlockBreakingPredictionPacket();
     }

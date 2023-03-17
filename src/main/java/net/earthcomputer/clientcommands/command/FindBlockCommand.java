@@ -48,7 +48,7 @@ public class FindBlockCommand {
             candidates = findBlockCandidatesInSquareArea(source, block, radius, radiusType);
         }
 
-        BlockPos origin = new BlockPos(source.getPosition());
+        BlockPos origin = BlockPos.ofFloored(source.getPosition());
         BlockPos closestBlock = candidates.stream()
                 .filter(pos -> radiusType.distanceFunc.applyAsDouble(pos.subtract(origin)) <= radius)
                 .min(Comparator.comparingDouble(pos -> radiusType.distanceFunc.applyAsDouble(pos.subtract(origin))))
@@ -70,7 +70,7 @@ public class FindBlockCommand {
 
     private static List<BlockPos> findBlockCandidatesInSquareArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius, RadiusType radiusType) {
         World world = source.getWorld();
-        BlockPos senderPos = new BlockPos(source.getPosition());
+        BlockPos senderPos = BlockPos.ofFloored(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
         List<BlockPos> blockCandidates = new ArrayList<>();
@@ -106,7 +106,7 @@ public class FindBlockCommand {
 
     private static List<BlockPos> findBlockCandidatesInTaxicabArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius) {
         World world = source.getWorld();
-        BlockPos senderPos = new BlockPos(source.getPosition());
+        BlockPos senderPos = BlockPos.ofFloored(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
         List<BlockPos> blockCandidates = new ArrayList<>();
