@@ -24,8 +24,9 @@ public abstract class MixinEnchantingScreen extends HandledScreen<EnchantmentScr
 
     @Inject(method = "render", at = @At("TAIL"))
     public void postRender(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        if (EnchantmentCracker.isEnchantingPredictionEnabled())
+        if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
             EnchantmentCracker.drawEnchantmentGUIOverlay(matrices);
+        }
     }
 
     @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickButton(II)V"))

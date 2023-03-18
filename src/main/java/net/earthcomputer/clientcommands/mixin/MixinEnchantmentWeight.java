@@ -14,23 +14,12 @@ public class MixinEnchantmentWeight {
     public void injectGetWeight(CallbackInfoReturnable<Integer> ci) {
         int protocolVersion = MulticonnectCompat.getProtocolVersion();
         if (protocolVersion >= MulticonnectCompat.V1_14 && protocolVersion <= MulticonnectCompat.V1_14_2) {
-            int ret;
-            switch ((Enchantment.Rarity) (Object) this) {
-                case COMMON:
-                    ret = 30;
-                    break;
-                case UNCOMMON:
-                    ret = 10;
-                    break;
-                case RARE:
-                    ret = 3;
-                    break;
-                case VERY_RARE:
-                    ret = 1;
-                    break;
-                default:
-                    return;
-            }
+            int ret = switch ((Enchantment.Rarity) (Object) this) {
+                case COMMON -> 30;
+                case UNCOMMON -> 10;
+                case RARE -> 3;
+                case VERY_RARE -> 1;
+            };
             ci.setReturnValue(ret);
         }
     }

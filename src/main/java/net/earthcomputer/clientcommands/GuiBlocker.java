@@ -27,8 +27,9 @@ public abstract class GuiBlocker {
         while (itr.hasNext()) {
             GuiBlocker blocker = itr.next();
             blocker.timeoutCounter--;
-            if (blocker.timeoutCounter <= 0)
+            if (blocker.timeoutCounter <= 0) {
                 itr.remove();
+            }
         }
     }
     public static void addBlocker(GuiBlocker blocker) {

@@ -31,15 +31,17 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 
     @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"))
     public void onDropItem(ItemStack stack, boolean randomDirection, boolean thisIsThrower, CallbackInfoReturnable<ItemEntity> ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onDropItem();
+        }
     }
 
     // TODO: update-sensitive: type hierarchy of Entity.damage
     @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", ordinal = 0))
     public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount) {
-        if (!world.isClient || !isThePlayer())
+        if (!world.isClient || !isThePlayer()) {
             return target.damage(source, amount);
+        }
 
         PlayerEntity _this = (PlayerEntity) (Object) this;
 

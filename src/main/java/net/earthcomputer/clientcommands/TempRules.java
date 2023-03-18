@@ -35,10 +35,11 @@ public class TempRules {
     }
     public static void setEnchantingPrediction(boolean enchantingPrediction) {
         TempRules.enchantingPrediction = enchantingPrediction;
-        if (enchantingPrediction)
+        if (enchantingPrediction) {
             ServerBrandManager.rngWarning();
-        else
+        } else {
             EnchantmentCracker.resetCracker();
+        }
     }
 
     public enum FishingManipulation implements StringIdentifiable {
@@ -119,8 +120,9 @@ public class TempRules {
 
     public static Object get(String name) {
         Field field = rules.get(name);
-        if (field == null)
+        if (field == null) {
             throw new IllegalArgumentException();
+        }
         try {
             return field.get(null);
         } catch (ReflectiveOperationException e) {
@@ -130,8 +132,9 @@ public class TempRules {
 
     public static void set(String name, Object value) {
         Consumer<Object> setter = setters.get(name);
-        if (setter == null)
+        if (setter == null) {
             throw new IllegalArgumentException();
+        }
         setter.accept(value);
     }
 
@@ -141,8 +144,9 @@ public class TempRules {
 
     public static Class<?> getType(String name) {
         Field field = rules.get(name);
-        if (field == null)
+        if (field == null) {
             throw new IllegalArgumentException();
+        }
         return field.getType();
     }
 

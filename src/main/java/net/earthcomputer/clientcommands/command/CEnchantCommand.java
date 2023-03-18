@@ -35,7 +35,7 @@ public class CEnchantCommand {
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/ctemprule set enchantingPrediction true"));
             source.sendFeedback(text);
-            return 0;
+            return Command.SINGLE_SUCCESS;
         }
         if (!TempRules.playerCrackState.knowsSeed() && TempRules.enchCrackState != EnchantmentCracker.CrackState.CRACKED) {
             Text text = Text.translatable("commands.cenchant.uncracked")

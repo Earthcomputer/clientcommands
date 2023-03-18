@@ -24,10 +24,11 @@ public class MixinPlayerInventory {
         if (!(player instanceof ServerPlayerEntity)) {
             int stackSize = stack.getCount();
             for (ItemStack item : main) {
-                if (item.isEmpty())
+                if (item.isEmpty()) {
                     stackSize -= stack.getMaxCount();
-                else if (item.isItemEqual(stack))
+                } else if (item.isItemEqual(stack)) {
                     stackSize -= stack.getMaxCount() - item.getCount();
+                }
             }
             if (stackSize > 0) {
                 PlayerRandCracker.onDropItem();

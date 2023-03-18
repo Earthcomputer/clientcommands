@@ -16,8 +16,9 @@ public class SeedCrackTask extends SimpleTask {
 
     @Override
     public void onCompleted() {
-        if (condition())
+        if (condition()) {
             TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+        }
         SeedCracker.currentTask = null;
     }
 }

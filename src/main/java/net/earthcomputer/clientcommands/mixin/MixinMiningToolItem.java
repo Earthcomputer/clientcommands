@@ -17,8 +17,9 @@ public class MixinMiningToolItem {
 
     @Inject(method = "postMine", at = @At("HEAD"))
     public void onPostMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner, CallbackInfoReturnable<Boolean> ci) {
-        if (state.getHardness(world, pos) != 0)
+        if (state.getHardness(world, pos) != 0) {
             PlayerRandCracker.onItemDamage(1, miner, stack);
+        }
     }
 
 }

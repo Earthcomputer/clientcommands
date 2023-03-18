@@ -14,7 +14,9 @@ import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.mixin.ChatInputSuggestorAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.*;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -60,8 +62,9 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         } catch (CommandSyntaxException ignore) {
         }
 
-        if (parser.suggestor != null)
+        if (parser.suggestor != null) {
             parser.suggestor.accept(builder);
+        }
 
         return builder.buildFuture();
     }
@@ -132,17 +135,19 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         private Expression parseUnary() throws CommandSyntaxException {
             boolean negative = false;
             while (reader.canRead() && (reader.peek() == '+' || reader.peek() == '-')) {
-                if (reader.peek() == '-')
+                if (reader.peek() == '-') {
                     negative = !negative;
+                }
                 reader.skip();
                 reader.skipWhitespace();
             }
 
             Expression right = parseImplicitMult();
-            if (negative)
+            if (negative) {
                 return new NegateExpression(right);
-            else
+            } else {
                 return right;
+            }
         }
 
         // <ImplicitMult> ::= <Exponentiation> | (<not lookahead Literal> <ImplicitMult>)
@@ -200,8 +205,9 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
             if (FunctionExpression.FUNCTIONS.containsKey(word)) {
                 suggestor = null;
                 reader.skipWhitespace();
-                if (!reader.canRead() || reader.peek() != '(')
+                if (!reader.canRead() || reader.peek() != '(') {
                     throw EXPECTED_EXCEPTION.createWithContext(reader, "(");
+                }
                 reader.skip();
                 reader.skipWhitespace();
                 List<Expression> arguments = new ArrayList<>();
@@ -209,16 +215,18 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                     arguments.add(parseExpression());
                     reader.skipWhitespace();
                     while (reader.canRead() && reader.peek() != ')') {
-                        if (reader.peek() != ',')
+                        if (reader.peek() != ',') {
                             throw EXPECTED_EXCEPTION.createWithContext(reader, ",");
+                        }
                         reader.skip();
                         reader.skipWhitespace();
                         arguments.add(parseExpression());
                         reader.skipWhitespace();
                     }
                 }
-                if (!reader.canRead())
+                if (!reader.canRead()) {
                     throw EXPECTED_EXCEPTION.createWithContext(reader, ")");
+                }
                 reader.skip();
 
                 var function = FunctionExpression.FUNCTIONS.get(word);
@@ -248,8 +256,9 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
                 reader.skipWhitespace();
                 Expression ret = parseExpression();
                 reader.skipWhitespace();
-                if (!reader.canRead() || reader.peek() != ')')
+                if (!reader.canRead() || reader.peek() != ')') {
                     throw EXPECTED_EXCEPTION.createWithContext(reader, ")");
+                }
                 reader.skip();
                 return ret;
             }
@@ -259,11 +268,13 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         // <Literal> ::= ("0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | ".")+
         private Expression parseLiteral() throws CommandSyntaxException {
             int start = reader.getCursor();
-            while (reader.canRead() && isAllowedNumber(reader.peek()))
+            while (reader.canRead() && isAllowedNumber(reader.peek())) {
                 reader.skip();
+            }
             String number = reader.getString().substring(start, reader.getCursor());
-            if (number.isEmpty())
+            if (number.isEmpty()) {
                 throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedDouble().createWithContext(reader);
+            }
             try {
                 return new LiteralExpression(Double.parseDouble(number));
             } catch (NumberFormatException e) {
@@ -440,8 +451,9 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         @Override
         public double eval() {
             double[] args = new double[arguments.length];
-            for (int i = 0; i < args.length; i++)
+            for (int i = 0; i < args.length; i++) {
                 args[i] = arguments[i].eval();
+            }
             return function.eval(args);
         }
 

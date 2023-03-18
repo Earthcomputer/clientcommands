@@ -15,6 +15,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
+import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.LinkedList;
@@ -50,21 +51,21 @@ class SnakeGameScreen extends Screen {
     private static final Random random = new Random();
 
     private static final int MAX_X = 16;
-    private static final int MAX_Z = 16;
+    private static final int MAX_Y = 16;
 
     private int tickCounter = 10;
     private Direction direction = Direction.EAST;
     private Direction lastMoved = Direction.EAST;
-    private final LinkedList<Vec2i> snake = new LinkedList<>();
-    private Vec2i apple;
+    private final LinkedList<Vector2i> snake = new LinkedList<>();
+    private Vector2i apple;
 
     SnakeGameScreen() {
         super(Text.translatable("snakeGame.title"));
-        this.snake.add(new Vec2i(6, 8));
-        this.snake.add(new Vec2i(5, 8));
-        this.snake.add(new Vec2i(4, 8));
+        this.snake.add(new Vector2i(6, 8));
+        this.snake.add(new Vector2i(5, 8));
+        this.snake.add(new Vector2i(4, 8));
         do {
-            this.apple = new Vec2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Z + 1));
+            this.apple = new Vector2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Y + 1));
         } while (this.snake.contains(this.apple));
     }
 
@@ -97,10 +98,10 @@ class SnakeGameScreen extends Screen {
         RenderSystem.setShaderTexture(0, GRID_TEXTURE);
         drawTexture(matrices, startX, startY, 0, 0, 289, 289, 289, 289);
         int scaleX = MAX_X + 1;
-        int scaleZ = MAX_Z + 1;
-        DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.z() * scaleZ, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.z() * scaleZ + scaleZ, 0xff_f52559);
-        for (Vec2i vec : this.snake) {
-            DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.z() * scaleZ, startX + vec.x() * scaleX + scaleX, startY + vec.z() * scaleZ + scaleZ, 0xff_1f2df6);
+        int scaleY = MAX_Y + 1;
+        DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.y() * scaleY, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.y() * scaleY + scaleY, 0xff_f52559);
+        for (Vector2i vec : this.snake) {
+            DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.y() * scaleY, startX + vec.x() * scaleX + scaleX, startY + vec.y() * scaleY + scaleY, 0xff_1f2df6);
         }
     }
 
@@ -119,8 +120,8 @@ class SnakeGameScreen extends Screen {
     }
 
     private void move() {
-        Vec2i head = this.snake.getFirst();
-        this.snake.addFirst(new Vec2i(head.x() + this.direction.getOffsetX(), head.z() + this.direction.getOffsetZ()));
+        Vector2i head = this.snake.getFirst();
+        this.snake.addFirst(new Vector2i(head.x() + this.direction.getOffsetX(), head.y() + this.direction.getOffsetZ()));
         this.lastMoved = this.direction;
         if (this.checkGameOver()) {
             client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_OCELOT_DEATH, 1));
@@ -131,11 +132,11 @@ class SnakeGameScreen extends Screen {
     }
 
     private boolean checkGameOver() {
-        Vec2i head = this.snake.getFirst();
-        if (head.x() < 0 || head.x() > MAX_X || head.z() < 0 || head.z() > MAX_Z) {
+        Vector2i head = this.snake.getFirst();
+        if (head.x() < 0 || head.x() > MAX_X || head.y() < 0 || head.y() > MAX_Y) {
             return true;
         }
-        ListIterator<Vec2i> it = this.snake.listIterator(1);
+        ListIterator<Vector2i> it = this.snake.listIterator(1);
         while (it.hasNext()) {
             if (it.next().equals(head)) {
                 return true;
@@ -145,11 +146,11 @@ class SnakeGameScreen extends Screen {
     }
 
     private void checkApple() {
-        Vec2i head = this.snake.getFirst();
+        Vector2i head = this.snake.getFirst();
         if (head.equals(this.apple)) {
             client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.ENTITY_GENERIC_EAT, 1));
             do {
-                this.apple = new Vec2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Z + 1));
+                this.apple = new Vector2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Y + 1));
             } while (this.snake.contains(this.apple));
         } else {
             this.snake.removeLast();
@@ -163,7 +164,4 @@ class SnakeGameScreen extends Screen {
         this.direction = direction;
         return true;
     }
-}
-
-record Vec2i(int x, int z) {
 }
