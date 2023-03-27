@@ -207,6 +207,14 @@
   "commands.cvar.list.empty": "No available variables",
   "commands.cvar.list": "Available variables: %s",
 
+  "commands.cwaypoint.add.success": "Waypoint \"%s\" at %s in %s successfully added",
+  "commands.cwaypoint.remove.success": "Waypoint \"%s\" successfully removed",
+  "commands.cwaypoint.edit.success": "Waypoint \"%s\" has successfully been changed to %s in %s",
+  "commands.cwaypoint.list": " - \"%s\" at %s in %s",
+  "commands.cwaypoint.list.empty": "No available waypoints",
+  "commands.cwaypoint.alreadyExists": "A waypoint with the name \"%s\" already exists",
+  "commands.cwaypoint.notFound": "No waypoint with the name \"%s\" could be found",
+
   "commands.cwe.playerNotFound": "Player not found",
 
   "commands.cweather.reset": "Stopped overriding weather",
