@@ -79,10 +79,6 @@ public class WaypointCommand {
 
         Map<String, Pair<BlockPos, RegistryKey<World>>> worldWaypoints = waypoints.computeIfAbsent(worldIdentifier, key -> new HashMap<>());
 
-        if (worldWaypoints.containsKey(name)) {
-            throw ALREADY_EXISTS_EXCEPTION.create(name);
-        }
-
         if (worldWaypoints.putIfAbsent(name, new Pair<>(pos, dimension)) != null) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
