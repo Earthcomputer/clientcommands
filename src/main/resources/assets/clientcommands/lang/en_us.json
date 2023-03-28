@@ -214,6 +214,7 @@
   "commands.cwaypoint.list.empty": "No available waypoints",
   "commands.cwaypoint.alreadyExists": "A waypoint with the name \"%s\" already exists",
   "commands.cwaypoint.notFound": "No waypoint with the name \"%s\" could be found",
+  "commands.cwaypoint.saveFailed": "Could not save waypoints file",
 
   "commands.cwe.playerNotFound": "Player not found",
 

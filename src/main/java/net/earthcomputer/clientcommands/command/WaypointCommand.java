@@ -4,17 +4,31 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
+import net.earthcomputer.clientcommands.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.slf4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
@@ -26,8 +40,19 @@ public class WaypointCommand {
 
     public static final Map<String, Map<String, Pair<BlockPos, RegistryKey<World>>>> waypoints = new HashMap<>();
 
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cwaypoint.saveFailed"));
     private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(name -> Text.translatable("commands.cwaypoint.alreadyExists", name));
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(name -> Text.translatable("commands.cwaypoint.notFound", name));
+
+    static {
+        try {
+            loadFile();
+        } catch (IOException e) {
+            LOGGER.error("Could not load waypoints file, hence /cwaypoint will not work!", e);
+        }
+    }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cwaypoint")
@@ -83,6 +108,7 @@ public class WaypointCommand {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
 
+        saveFile();
         source.sendFeedback(Text.translatable("commands.cwaypoint.add.success", name, pos.toShortString(), dimension.getValue()));
         return Command.SINGLE_SUCCESS;
     }
@@ -100,6 +126,7 @@ public class WaypointCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
+        saveFile();
         source.sendFeedback(Text.translatable("commands.cwaypoint.remove.success", name));
         return Command.SINGLE_SUCCESS;
     }
@@ -121,6 +148,7 @@ public class WaypointCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
+        saveFile();
         source.sendFeedback(Text.translatable("commands.cwaypoint.edit.success", name, pos.toShortString(), dimension.getValue()));
         return Command.SINGLE_SUCCESS;
     }
@@ -158,5 +186,45 @@ public class WaypointCommand {
             worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Text.translatable("commands.cwaypoint.list", name, waypoint.getLeft().toShortString(), waypoint.getRight().getValue())));
         });
         return Command.SINGLE_SUCCESS;
+    }
+
+    private static void saveFile() throws CommandSyntaxException {
+        try {
+            NbtCompound rootTag = new NbtCompound();
+            waypoints.forEach((worldIdentifier, worldWaypoints) -> rootTag.put(worldIdentifier, worldWaypoints.entrySet().stream()
+                .collect(NbtCompound::new, (result, entry) -> {
+                    NbtCompound waypoint = new NbtCompound();
+                    NbtCompound pos = NbtHelper.fromBlockPos(entry.getValue().getLeft());
+                    String dimension = entry.getValue().getRight().getValue().toString();
+                    waypoint.put("Pos", pos);
+                    waypoint.putString("Dimension", dimension);
+                    result.put(entry.getKey(), waypoint);
+                }, NbtCompound::copyFrom)));
+            File newFile = File.createTempFile("waypoints", ".dat", ClientCommands.configDir.toFile());
+            NbtIo.write(rootTag, newFile);
+            File backupFile = new File(ClientCommands.configDir.toFile(), "waypoints.dat_old");
+            File currentFile = new File(ClientCommands.configDir.toFile(), "waypoints.dat");
+            Util.backupAndReplace(currentFile, newFile, backupFile);
+        } catch (IOException e) {
+            throw SAVE_FAILED_EXCEPTION.create();
+        }
+    }
+
+    private static void loadFile() throws IOException {
+        waypoints.clear();
+        NbtCompound rootTag = NbtIo.read(new File(ClientCommands.configDir.toFile(), "waypoints.dat"));
+        if (rootTag == null) {
+            return;
+        }
+        rootTag.getKeys().forEach(worldIdentifier -> {
+            NbtCompound worldWaypoints = rootTag.getCompound(worldIdentifier);
+            waypoints.put(worldIdentifier, worldWaypoints.getKeys().stream()
+                .collect(Collectors.toMap(Function.identity(), name -> {
+                    NbtCompound waypoint = worldWaypoints.getCompound(name);
+                    BlockPos pos = NbtHelper.toBlockPos(waypoint.getCompound("Pos"));
+                    RegistryKey<World> dimension = World.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, waypoint.get("Dimension"))).resultOrPartial(LOGGER::error).orElseThrow();
+                    return new Pair<>(pos, dimension);
+                })));
+        });
     }
 }
