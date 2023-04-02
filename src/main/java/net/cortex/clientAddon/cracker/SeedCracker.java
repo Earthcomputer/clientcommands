@@ -1,6 +1,6 @@
 package net.cortex.clientAddon.cracker;
 
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
@@ -60,7 +60,7 @@ public class SeedCracker {
         }
         //Else, got a seed
 
-        TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
+        Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
 
         Random rand=Random.create(seed ^ 0x5deece66dL);
         rand.nextFloat();
@@ -89,7 +89,7 @@ public class SeedCracker {
         ClientCommandHelper.addOverlayMessage(Text.translatable("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         if(throwItems())
         {
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
             expectedItems=20;
             if (currentTask == null) {
                 currentTask = new SeedCrackTask();
@@ -100,7 +100,7 @@ public class SeedCracker {
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
         } else {
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
         }
     }
 
@@ -113,7 +113,7 @@ public class SeedCracker {
             SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
             SeedCracker.expectedItems--;
         }
-        if(SeedCracker.expectedItems == 0 && TempRules.playerCrackState == PlayerRandCracker.CrackState.CRACKING)//if its the last item
+        if(SeedCracker.expectedItems == 0 && Configs.playerCrackState == PlayerRandCracker.CrackState.CRACKING)//if its the last item
         {
             SeedCracker.attemptCrack();
         }

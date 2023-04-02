@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
+import dev.xpple.betterconfig.api.ModConfigBuilder;
 import net.earthcomputer.clientcommands.command.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -28,6 +29,8 @@ public class ClientCommands implements ClientModInitializer {
         } catch (IOException e) {
             LOGGER.error("Failed to create config dir", e);
         }
+
+        new ModConfigBuilder("clientcommands", Configs.class).build();
     }
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
@@ -41,7 +44,6 @@ public class ClientCommands implements ClientModInitializer {
         FindItemCommand.register(dispatcher, registryAccess);
         TaskCommand.register(dispatcher);
         CalcCommand.register(dispatcher);
-        TempRuleCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
         UsageTreeCommand.register(dispatcher);
         WikiCommand.register(dispatcher);

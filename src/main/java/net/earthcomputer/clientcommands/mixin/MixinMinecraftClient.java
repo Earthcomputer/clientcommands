@@ -1,25 +1,17 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import dev.xpple.betterconfig.api.BetterConfigAPI;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.RenderSettings;
-import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConnectScreen;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.LevelLoadingScreen;
-import net.minecraft.client.gui.screen.MessageScreen;
-import net.minecraft.client.gui.screen.ProgressScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.*;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.world.ClientWorld;
-import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -68,12 +60,8 @@ public abstract class MixinMinecraftClient {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
     public void onDisconnect(Screen screen, CallbackInfo ci) {
         ServerBrandManager.onDisconnect();
-        if (Relogger.isRelogging) {
-            var oldRules = TempRules.getRules().stream().map(rule -> Pair.of(rule, TempRules.get(rule))).toList();
-            Relogger.relogSuccessTasks.add(() -> oldRules.forEach(rule -> TempRules.set(rule.getLeft(), rule.getRight())));
-        }
-        for (String rule : TempRules.getRules()) {
-            TempRules.reset(rule);
+        if (!Relogger.isRelogging) {
+            BetterConfigAPI.getInstance().getModConfig("clientcommands").resetTemporaryConfigs();
         }
         RenderSettings.clearEntityRenderSelectors();
     }

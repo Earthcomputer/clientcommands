@@ -4,7 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
@@ -23,7 +23,7 @@ public class CrackRNGCommand {
         SeedCracker.crack(seed -> {
             source.sendFeedback(Text.translatable("commands.ccrackrng.success", Long.toHexString(seed)));
             PlayerRandCracker.setSeed(seed);
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
         });
         return Command.SINGLE_SUCCESS;
     }

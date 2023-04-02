@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -50,7 +50,7 @@ public class FishCommand {
     }
 
     private static int listGoals(FabricClientCommandSource source) throws CommandSyntaxException {
-        if (!TempRules.getFishingManipulation().isEnabled()) {
+        if (!Configs.getFishingManipulation().isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
@@ -67,7 +67,7 @@ public class FishCommand {
     }
 
     private static int addGoal(FabricClientCommandSource source, ClientItemPredicateArgumentType.ClientItemPredicate goal) throws CommandSyntaxException {
-        if (!TempRules.getFishingManipulation().isEnabled()) {
+        if (!Configs.getFishingManipulation().isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
@@ -79,7 +79,7 @@ public class FishCommand {
     }
 
     private static int addEnchantedGoal(FabricClientCommandSource source, Pair<String, ItemAndEnchantmentsPredicate> stringAndItemAndEnchantments) throws CommandSyntaxException {
-        if (!TempRules.getFishingManipulation().isEnabled()) {
+        if (!Configs.getFishingManipulation().isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
@@ -96,7 +96,7 @@ public class FishCommand {
     }
 
     private static int removeGoal(FabricClientCommandSource source, int index) throws CommandSyntaxException {
-        if (!TempRules.getFishingManipulation().isEnabled()) {
+        if (!Configs.getFishingManipulation().isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 

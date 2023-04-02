@@ -7,7 +7,7 @@ import com.seedfinding.mcfeature.loot.condition.OpenWaterCondition;
 import com.seedfinding.mcfeature.loot.entry.ItemEntry;
 import com.seedfinding.mcfeature.loot.entry.LootEntry;
 import com.seedfinding.mcfeature.loot.entry.TableEntry;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
@@ -231,7 +231,7 @@ public class FishingCracker {
     }
 
     public static boolean canManipulateFishing() {
-        return TempRules.getFishingManipulation().isEnabled() && !goals.isEmpty();
+        return Configs.getFishingManipulation().isEnabled() && !goals.isEmpty();
     }
 
     private static void handleFishingRodThrow(ItemStack stack) {
@@ -248,7 +248,7 @@ public class FishingCracker {
         synchronized (STATE_LOCK) {
             state = State.NOT_MANIPULATING;
 
-            if (canManipulateFishing() && TempRules.getFishingManipulation() == TempRules.FishingManipulation.AFK) {
+            if (canManipulateFishing() && Configs.getFishingManipulation() == Configs.FishingManipulation.AFK) {
                 state = State.WAITING_FOR_RETRHOW;
                 TaskManager.addTask("cfishRethrow", new LongTask() {
                     private int counter;
@@ -537,7 +537,7 @@ public class FishingCracker {
                 int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - magicMillisecondsCorrection - PingCommand.getLocalPing() - timeToStartOfTick + serverMspt / 2;
                 long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
-                    if (!TempRules.getFishingManipulation().isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
+                    if (!Configs.getFishingManipulation().isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
                         return;
                     }
                     ClientPlayerEntity oldPlayer = MinecraftClient.getInstance().player;

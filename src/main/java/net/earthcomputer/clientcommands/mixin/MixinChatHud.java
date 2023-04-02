@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import io.netty.buffer.Unpooled;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.c2c.*;
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
 import net.minecraft.client.MinecraftClient;
@@ -40,7 +40,7 @@ public class MixinChatHud {
             return;
         }
         String packetString = string.substring(index + 6);
-        if (!TempRules.acceptC2CPackets) {
+        if (!Configs.acceptC2CPackets) {
             if (OutgoingPacketFilter.removeIfContains(packetString)) {
                 this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.sentC2CPacket"));
             } else {

@@ -2,17 +2,17 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandException;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.text.*;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CEnchantCommand {
@@ -29,7 +29,7 @@ public class CEnchantCommand {
     }
 
     private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
-        if (!TempRules.getEnchantingPrediction()) {
+        if (!Configs.getEnchantingPrediction()) {
             Text text = Text.translatable("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
                     .append(" ")
@@ -37,7 +37,7 @@ public class CEnchantCommand {
             source.sendFeedback(text);
             return Command.SINGLE_SUCCESS;
         }
-        if (!TempRules.playerCrackState.knowsSeed() && TempRules.enchCrackState != EnchantmentCracker.CrackState.CRACKED) {
+        if (!Configs.playerCrackState.knowsSeed() && Configs.enchCrackState != EnchantmentCracker.CrackState.CRACKED) {
             Text text = Text.translatable("commands.cenchant.uncracked")
                     .formatted(Formatting.RED)
                     .append(" ")
