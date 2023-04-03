@@ -33,7 +33,7 @@ public class CEnchantCommand {
             Text text = Text.translatable("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set enchantingPrediction true"));
+                    .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands enchantingPrediction set true"));
             source.sendFeedback(text);
             return Command.SINGLE_SUCCESS;
         }

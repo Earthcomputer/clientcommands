@@ -32,7 +32,7 @@ public class FishCommand {
         Text.translatable("commands.cfish.needFishingManipulation")
             .styled(style -> style.withColor(Formatting.RED))
             .append(" ")
-            .append(getCommandTextComponent("commands.client.enable", "/ctemprule set fishingManipulation manual")));
+            .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands fishingManipulation set MANUAL")));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cfish")

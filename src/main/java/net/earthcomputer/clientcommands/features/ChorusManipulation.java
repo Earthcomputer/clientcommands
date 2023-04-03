@@ -49,7 +49,7 @@ public class ChorusManipulation {
             Text text = Text.translatable("chorusManip.needChorusManipulation")
                     .formatted(Formatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set chorusManipulation true"));
+                    .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands chorusManipulation set true"));
             sendFeedback(text);
             return 0;
         }
