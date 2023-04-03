@@ -299,7 +299,7 @@
   "snakeGame.title": "潜行",
   "snakeGame.score": "分数：%d",
 
-  "ccpacket.messageTooLong": "信息过长（最多255个字符）",
+  "ccpacket.messageTooLong": "信息过长，当前有%s个字符（最多255个字符）",
   "ccpacket.publicKeyNotFound": "未找到公共密匙",
   "ccpacket.encryptionFailed": "加密你的消息时出现问题",
   "ccpacket.malformedPacket": "你收到了一个格式错误的客户端到客户端数据包：",
