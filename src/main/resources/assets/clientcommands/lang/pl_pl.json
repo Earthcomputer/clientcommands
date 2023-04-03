@@ -148,10 +148,6 @@
   "commands.ctask.stop.noMatch": "Żadnych pasujących zadań",
   "commands.ctask.stop.success": "Zatrzymano %d zadań",
 
-  "commands.ctemprule.list.header": "Listowanie %d tymczasowych reguł:",
-  "commands.ctemprule.reset.success": "Zresetowano tymczasową regułę %s do %s",
-  "commands.ctemprule.set.success": "Zaktualizowano tymczasową regułę %s do %s",
-
   "commands.ctp.notSpectator": "Gracz musi być w trybie obserwatora by się przeteleportować",
   "commands.ctp.success": "Przeteleportowano gracza do %s",
 

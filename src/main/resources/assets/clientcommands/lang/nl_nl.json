@@ -74,10 +74,6 @@
   "commands.ctask.stop.noMatch": "Geen overeenkomende taken",
   "commands.ctask.stop.success": "%d taken gestopt",
 
-  "commands.ctemprule.list.header": "%d TempRules aan het vermelden:",
-  "commands.ctemprule.reset.success": "TempRule %s is gereset naar %s",
-  "commands.ctemprule.set.success": "TempRule %s is geupdatet naar %s",
-
   "commands.cwiki.failed": "Kon wiki-inhoud niet ophalen",
 
   "commands.client.blockpos": "(%d, %d, %d)",

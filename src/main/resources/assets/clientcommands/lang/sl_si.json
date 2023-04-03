@@ -34,10 +34,6 @@
     "commands.ctask.list.success": "%d trenutno izvajajočih nalog",
     "commands.ctask.stop.noMatch": "Ni ujemajočih se nalog",
   
-    "commands.ctemprule.list.header": "Naštevanje  %d začasnih pravil:",
-    "commands.ctemprule.reset.success": "Začasno pravilo %s je bilo ponastavljeno na %s",
-    "commands.ctemprule.set.success": "Začasno pravilo %s je bilo posodobljeno na %s",
-  
     "commands.cwiki.failed": "Vsebine wikija ni bilo mogoče pridobiti",
   
     "commands.client.blockpos": "(%d, %d, %d)",

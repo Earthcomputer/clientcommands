@@ -155,10 +155,6 @@
   "commands.ctask.stop.noMatch": "Нет подходящих задач",
   "commands.ctask.stop.success": "Остановлено %d задач",
 
-  "commands.ctemprule.list.header": "Список %d ВременныхПравил:",
-  "commands.ctemprule.reset.success": "ВременноеПравило %s было сброшено на %s",
-  "commands.ctemprule.set.success": "ВременноеПравило %s было обновлено до %s",
-
   "commands.ctitle.cleared": "Очищенные заголовки",
   "commands.ctitle.reset": "Сбросить параметры заголовка",
   "commands.ctitle.show.title": "Показан новый заголовок",

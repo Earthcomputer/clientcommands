@@ -155,10 +155,6 @@
   "commands.ctask.stop.noMatch": "Tidak ada tugas yang cocok",
   "commands.ctask.stop.success": "Memberhentikan tugas %d",
 
-  "commands.ctemprule.list.header": "Mendaftarkan %d TempRules:",
-  "commands.ctemprule.reset.success": "TempRule %s telah di reset menjadi %s",
-  "commands.ctemprule.set.success": "TempRule %s telah di update menjadi %s",
-
   "commands.ctp.notSpectator": "Pemain harus berada di mode penonton untuk teleportasi",
   "commands.ctp.success": "Menelportasi pemain ke %s",
 
