@@ -3,11 +3,14 @@ package net.earthcomputer.clientcommands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.command.*;
+import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -21,6 +24,16 @@ public class ClientCommands implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
+
+        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+            context.matrixStack().push();
+
+            Vec3d cameraPos = context.camera().getPos();
+            context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            RenderQueue.render(RenderQueue.Layer.ON_TOP, context.consumers().getBuffer(RenderQueue.noDepthLayer()), context.matrixStack(), context.tickDelta());
+
+            context.matrixStack().pop();
+        });
 
         configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
         try {
