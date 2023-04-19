@@ -61,7 +61,7 @@ public class FindBlockCommand {
         if (closestBlock == null) {
             throw NOT_FOUND_EXCEPTION.create();
         } else {
-            double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
+            String foundRadius = "%.2f".formatted(radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin)));
             source.sendFeedback(Text.translatable("commands.cfindblock.success.left", foundRadius)
                     .append(getLookCoordsTextComponent(closestBlock))
                     .append(" ")

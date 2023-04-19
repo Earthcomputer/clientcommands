@@ -20,14 +20,14 @@
   "commands.cenchant.uncracked": "您需要先破譯隨機種子。",
 
   "commands.cfind.found.left": "在 ",
-  "commands.cfind.found.right": " 找到 %1$s， 距離您 %2$.2f 格",
+  "commands.cfind.found.right": " 找到 %1$s， 距離您 %2$s 格",
   "commands.cfind.keepSearching.success": "找尋實體中。",
   "commands.cfind.noMatch": "沒有實體匹配您的查找條件",
   "commands.cfind.success": "%d 個實體匹配您的查找條件",
 
   "commands.cfindblock.notFound": "沒有發現此方塊",
   "commands.cfindblock.success.left": "離您最近的匹配方塊在 ",
-  "commands.cfindblock.success.right": "， 距離您 %1$.2f 格",
+  "commands.cfindblock.success.right": "， 距離您 %1$s 格",
 
   "commands.cfinditem.match.left": "在 ",
   "commands.cfinditem.match.right": " 找到 %dx %s",
