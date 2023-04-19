@@ -113,9 +113,10 @@ public class SeedCracker {
                 short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
                 SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
                 SeedCracker.expectedItems--;
-            } else {
-                //if its the last item
-                SeedCracker.attemptCrack();
+                if (SeedCracker.expectedItems == 0) {
+                    //if its the last item
+                    SeedCracker.attemptCrack();
+                }
             }
         }
     }
