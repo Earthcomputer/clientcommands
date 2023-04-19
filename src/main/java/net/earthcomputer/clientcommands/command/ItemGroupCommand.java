@@ -293,7 +293,7 @@ public class ItemGroupCommand {
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> {
                 NbtCompound group = compoundTag.getCompound(key);
-                ItemStack icon = ItemStack.fromNbt(group.getCompound("icon"));
+                ItemStack icon = singleItemFromNbt(group.getCompound("icon"));
                 NbtList items = group.getList("items", NbtElement.COMPOUND_TYPE);
                 ItemGroup itemGroup = FabricItemGroup.builder(
                         new Identifier("clientcommands", key))
@@ -301,7 +301,7 @@ public class ItemGroupCommand {
                         .icon(() -> icon)
                         .entries((displayContext, entries) -> {
                             for (int i = 0; i < items.size(); i++) {
-                                entries.add(ItemStack.fromNbt(items.getCompound(i)));
+                                entries.add(singleItemFromNbt(items.getCompound(i)));
                             }
                         })
                         .build();
@@ -312,7 +312,7 @@ public class ItemGroupCommand {
                 NbtCompound group = compoundTag.getCompound(key);
                 Dynamic<NbtElement> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, group.getCompound("icon"));
                 Dynamic<NbtElement> newStackDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
-                ItemStack icon = ItemStack.fromNbt((NbtCompound) newStackDynamic.getValue());
+                ItemStack icon = singleItemFromNbt((NbtCompound) newStackDynamic.getValue());
 
                 NbtList updatedListTag = new NbtList();
                 group.getList("items", NbtElement.COMPOUND_TYPE).forEach(tag -> {
@@ -326,13 +326,19 @@ public class ItemGroupCommand {
                         .icon(() -> icon)
                         .entries((displayContext, entries) -> {
                             for (int i = 0; i < updatedListTag.size(); i++) {
-                                entries.add(ItemStack.fromNbt(updatedListTag.getCompound(i)));
+                                entries.add(singleItemFromNbt(updatedListTag.getCompound(i)));
                             }
                         })
                         .build();
                 groups.put(key, new Group(itemGroup, icon, updatedListTag));
             });
         }
+    }
+
+    private static ItemStack singleItemFromNbt(NbtCompound nbt) {
+        ItemStack stack = ItemStack.fromNbt(nbt);
+        stack.setCount(1);
+        return stack;
     }
 
     private static void reloadGroups() {
