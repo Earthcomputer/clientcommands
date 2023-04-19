@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.MulticonnectCompat;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.ProtectionEnchantment;
@@ -19,8 +19,8 @@ public abstract class MixinProtectionEnchantment extends Enchantment {
 
     @Inject(method = "canAccept", at = @At("HEAD"), cancellable = true)
     public void isCompatible1140(Enchantment other, CallbackInfoReturnable<Boolean> ci) {
-        int protocolVersion = MulticonnectCompat.getProtocolVersion();
-        if (protocolVersion < MulticonnectCompat.V1_14 || protocolVersion > MulticonnectCompat.V1_14_2) {
+        int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+        if (protocolVersion < MultiVersionCompat.V1_14 || protocolVersion > MultiVersionCompat.V1_14_2) {
             return;
         }
 
