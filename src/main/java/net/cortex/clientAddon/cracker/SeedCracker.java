@@ -25,7 +25,7 @@ public class SeedCracker {
     public static int expectedItems=0;
     public static LongTask currentTask;
     private static int attemptCount = 0;
-    private static final int MAX_ATTEMPTS = 5;
+    private static final int MAX_ATTEMPTS = 10;
 
     //returns True on success or false on failer
     private static boolean throwItems()
@@ -53,6 +53,7 @@ public class SeedCracker {
             if (attemptCount > MAX_ATTEMPTS) {
                 ClientCommandHelper.sendError(Text.translatable("commands.ccrackrng.failed"));
                 ClientCommandHelper.sendFeedback(Text.translatable("commands.ccrackrng.failed.help").styled(style -> style.withColor(Formatting.AQUA)));
+                TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
             } else {
                 SeedCracker.doCrack(SeedCracker.callback);
             }
@@ -105,25 +106,17 @@ public class SeedCracker {
     }
 
     public static void onEntityCreation(EntitySpawnS2CPacket packet) {
-        if (packet.getEntityType() == EntityType.ITEM && SeedCracker.expectedItems>0) {
-
-            long rand_val = (long) ((Math.atan2(packet.getVelocityZ(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
-            long top_bits = rand_val;
-            short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
-            SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
-            SeedCracker.expectedItems--;
+        if (packet.getEntityType() == EntityType.ITEM && TempRules.playerCrackState == PlayerRandCracker.CrackState.CRACKING) {
+            if (SeedCracker.expectedItems > 0) {
+                long rand_val = (long) ((Math.atan2(packet.getVelocityZ(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
+                long top_bits = rand_val;
+                short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
+                SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
+                SeedCracker.expectedItems--;
+            } else {
+                //if its the last item
+                SeedCracker.attemptCrack();
+            }
         }
-        if(SeedCracker.expectedItems == 0 && TempRules.playerCrackState == PlayerRandCracker.CrackState.CRACKING)//if its the last item
-        {
-            SeedCracker.attemptCrack();
-        }
-        /*
-        else
-        {
-            long rand_val = (long) ((Math.atan2(this.getVelocityz(), this.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
-            long top_bits = rand_val;
-            short value = (short) ((top_bits >> (24 - 4)) ^ 0x8L);
-            System.out.println("Entity item spawn: Top 4 bits of direction: "+padLeftZeros(Long.toBinaryString(value), 4));
-        }*/
     }
 }
