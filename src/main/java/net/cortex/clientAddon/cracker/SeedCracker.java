@@ -52,7 +52,7 @@ public class SeedCracker {
             attemptCount++;
             if (attemptCount > MAX_ATTEMPTS) {
                 ClientCommandHelper.sendError(Text.translatable("commands.ccrackrng.failed"));
-                ClientCommandHelper.sendFeedback(Text.translatable("commands.ccrackrng.failed.help").styled(style -> style.withColor(Formatting.AQUA)));
+                ClientCommandHelper.sendHelp(Text.translatable("commands.ccrackrng.failed.help"));
                 TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
             } else {
                 SeedCracker.doCrack(SeedCracker.callback);

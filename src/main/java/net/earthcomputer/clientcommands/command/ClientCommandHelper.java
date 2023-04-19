@@ -34,6 +34,10 @@ public class ClientCommandHelper {
         sendFeedback(Text.literal("").append(error).formatted(Formatting.RED));
     }
 
+    public static void sendHelp(Text help) {
+        sendFeedback(Text.literal("").append(help).formatted(Formatting.AQUA));
+    }
+
     public static void sendFeedback(String message, Object... args) {
         sendFeedback(Text.translatable(message, args));
     }

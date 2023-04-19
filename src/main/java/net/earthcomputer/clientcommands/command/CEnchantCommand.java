@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.TempRules;
 import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandException;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
@@ -55,6 +56,12 @@ public class CEnchantCommand {
         );
         if (result == null) {
             source.sendFeedback(Text.translatable("commands.cenchant.failed"));
+            if (TempRules.playerCrackState != PlayerRandCracker.CrackState.CRACKED) {
+                MutableText help = Text.translatable("commands.cenchant.help.uncrackedPlayerSeed")
+                    .append(" ")
+                    .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+                sendHelp(help);
+            }
         } else {
             if (simulate) {
                 if (result.itemThrows() < 0) {
