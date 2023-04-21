@@ -8,6 +8,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.item.Item;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
@@ -30,6 +31,10 @@ public abstract sealed class MultiVersionCompat {
     public abstract int getProtocolVersion();
 
     public abstract String getProtocolName();
+
+    public boolean doesItemExist(Item item) {
+        return true;
+    }
 
     public static final MultiVersionCompat INSTANCE = Util.make(() -> {
         try {
@@ -201,16 +206,31 @@ public abstract sealed class MultiVersionCompat {
     }
 
     private static final class ViaFabricPlus extends AbstractViaVersion {
+        private final Field itemReleaseVersionMappingsInstance;
         private final Method getTargetVersion;
+        private final Method itemReleaseVersionMappingsContains;
 
         private ViaFabricPlus() throws ReflectiveOperationException {
             Class<?> protocolHack = Class.forName("de.florianmichael.viafabricplus.protocolhack.ProtocolHack");
+            Class<?> itemReleaseVersionMappings = Class.forName("de.florianmichael.viafabricplus.mappings.ItemReleaseVersionMappings");
+            itemReleaseVersionMappingsInstance = itemReleaseVersionMappings.getField("INSTANCE");
             getTargetVersion = protocolHack.getMethod("getTargetVersion");
+            itemReleaseVersionMappingsContains = itemReleaseVersionMappings.getMethod("contains", Item.class, getTargetVersion.getReturnType());
         }
 
         @Override
         protected Object getCurrentVersion() throws ReflectiveOperationException {
             return getTargetVersion.invoke(null);
+        }
+
+        @Override
+        public boolean doesItemExist(Item item) {
+            try {
+                Object instance = itemReleaseVersionMappingsInstance.get(null);
+                return (Boolean) itemReleaseVersionMappingsContains.invoke(instance, item, getCurrentVersion());
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.enchantment.Enchantment;
@@ -362,9 +363,13 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             List<Identifier> allowed = new ArrayList<>();
             for (Item item : Registries.ITEM) {
                 if (item.getEnchantability() > 0 && itemPredicate.test(item)) {
-                    allowed.add(Registries.ITEM.getId(item));
+                    if (MultiVersionCompat.INSTANCE.doesItemExist(item)) {
+                        allowed.add(Registries.ITEM.getId(item));
+                    }
                 } else if (item == Items.ENCHANTED_BOOK && itemPredicate.test(Items.BOOK)) {
-                    allowed.add(Registries.ITEM.getId(Items.ENCHANTED_BOOK));
+                    if (MultiVersionCompat.INSTANCE.doesItemExist(item)) {
+                        allowed.add(Registries.ITEM.getId(Items.ENCHANTED_BOOK));
+                    }
                 }
             }
             int start = reader.getCursor();
