@@ -46,6 +46,7 @@
 
   "commands.cenchant.expectedWithWithoutExactly": "有效参数：“with”“without”“exactly”",
   "commands.cenchant.failed": "你请求的附魔无法获得或者需要太长时间",
+  "commands.cenchant.help.uncrackedPlayerSeed": "提示：你还没有完全破解玩家种子",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测",
   "commands.cenchant.success": "正在开始操控附魔",
