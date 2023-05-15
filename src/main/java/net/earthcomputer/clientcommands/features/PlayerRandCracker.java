@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.earthcomputer.clientcommands.MulticonnectCompat;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
@@ -175,7 +175,7 @@ public class PlayerRandCracker {
     }
 
     public static void onEquipmentBreak() {
-        if (MulticonnectCompat.getProtocolVersion() <= MulticonnectCompat.V1_13_2) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_13_2) {
             resetCracker("itemBreak");
         }
     }
@@ -201,7 +201,7 @@ public class PlayerRandCracker {
     }
 
     public static void onXpOrb() {
-        if (MulticonnectCompat.getProtocolVersion() >= MulticonnectCompat.V1_17) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_17) {
             // TODO: is there a way to be smarter about this?
             resetCracker("xp");
         }

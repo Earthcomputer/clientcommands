@@ -371,8 +371,7 @@ public class FishingCracker {
                 if (goal instanceof ClientItemPredicateArgumentType.EnchantedItemPredicate predicate) {
                     if (predicate.isEnchantedBook() && predicate.predicate().numEnchantments() >= 2) {
                         if (!hasWarnedMultipleEnchants) {
-                            Text help = Text.translatable("commands.cfish.help.tooManyEnchants").styled(style -> style.withColor(Formatting.AQUA));
-                            ClientCommandHelper.sendFeedback(help);
+                            ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.help.tooManyEnchants"));
                             hasWarnedMultipleEnchants = true;
                         }
                     }
@@ -391,8 +390,7 @@ public class FishingCracker {
                     Text error = Text.translatable("commands.cfish.error.openWater").styled(style -> style.withColor(Formatting.RED));
                     ClientCommandHelper.addOverlayMessage(error, 100);
                     if (!fishingBobber.world.getBlockState(BlockPos.ofFloored(fishingBobber.pos).up()).isOf(Blocks.LILY_PAD)) {
-                        Text help = Text.translatable("commands.cfish.error.openWater.lilyPad").styled(style -> style.withColor(Formatting.AQUA));
-                        ClientCommandHelper.sendFeedback(help);
+                        ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.error.openWater.lilyPad"));
                     }
                     boolean foundFlowingWater = false;
                     for (BlockPos openWaterViolation : fishingBobber.openWaterViolations) {
@@ -411,10 +409,9 @@ public class FishingCracker {
                                 100
                         );
                     }
-                    ClientCommandHelper.sendFeedback(Text.translatable("commands.cfish.error.openWater.help").styled(style -> style.withColor(Formatting.AQUA)));
+                    ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.error.openWater.help"));
                     if (foundFlowingWater) {
-                        Text help = Text.translatable("commands.cfish.error.openWater.flowingWater").styled(style -> style.withColor(Formatting.AQUA));
-                        ClientCommandHelper.sendFeedback(help);
+                        ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.error.openWater.flowingWater"));
                     }
                     reset();
                     return;

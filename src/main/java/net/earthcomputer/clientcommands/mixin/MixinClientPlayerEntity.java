@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.earthcomputer.clientcommands.MulticonnectCompat;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -41,7 +41,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
         if (EnchantmentHelper.getLevel(Enchantments.MENDING, stack) <= 0) {
             return false;
         }
-        if (MulticonnectCompat.getProtocolVersion() <= MulticonnectCompat.V1_15_2) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_15_2) {
             return true; // xp may try to mend items even if they're fully repaired pre-1.16
         }
         return stack.isDamaged();

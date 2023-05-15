@@ -2,7 +2,9 @@ package net.earthcomputer.clientcommands.features;
 
 import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mccore.version.MCVersion;
-import net.earthcomputer.clientcommands.MulticonnectCompat;
+import com.seedfinding.mcfeature.loot.enchantment.Enchantments;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.minecraft.SharedConstants;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.EnchantedBookItem;
@@ -62,7 +64,20 @@ public class SeedfindingUtil {
         return ret;
     }
 
+    public static boolean doesEnchantmentExist(Enchantment enchantment) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() == SharedConstants.getProtocolVersion()) {
+            return true;
+        }
+
+        Identifier id = Registries.ENCHANTMENT.getId(enchantment);
+        if (id == null || !id.getNamespace().equals("minecraft")) {
+            return false;
+        }
+        String name = id.getPath();
+        return Enchantments.getFor(SeedfindingUtil.getMCVersion()).stream().anyMatch(ench -> ench.getName().equals(name));
+    }
+
     public static MCVersion getMCVersion() {
-        return Objects.requireNonNullElseGet(MCVersion.fromString(MulticonnectCompat.getProtocolName()), MCVersion::latest);
+        return Objects.requireNonNullElseGet(MCVersion.fromString(MultiVersionCompat.INSTANCE.getProtocolName()), MCVersion::latest);
     }
 }

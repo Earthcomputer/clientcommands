@@ -9,29 +9,21 @@ public class Line extends Shape {
     public final Vec3d start;
     public final Vec3d end;
     public final int color;
-    public final float thickness;
+    public static final float THICKNESS = 2f;
 
     public Line(Vec3d start, Vec3d end, int color) {
-        this(start, end, color, 2.0F);
-    }
-
-    public Line(Vec3d start, Vec3d end, int color, float thickness) {
         this.start = start;
         this.end = end;
         this.color = color;
-        this.thickness = thickness;
     }
 
     @Override
-    public void render(MatrixStack matrixStack, float delta) {
-        BufferBuilder buff = Tessellator.getInstance().getBuffer();
-        buff.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
-        renderLine(matrixStack, buff, delta, prevPos.subtract(getPos()));
-        Tessellator.getInstance().draw();
+    public void render(MatrixStack matrixStack, VertexConsumer vertexConsumer, float delta) {
+        renderLine(matrixStack, vertexConsumer, delta, prevPos.subtract(getPos()));
     }
 
     public void renderLine(MatrixStack matrixStack, VertexConsumer vertexConsumer, float delta, Vec3d prevPosOffset) {
-        RenderSystem.lineWidth(thickness);
+        RenderSystem.lineWidth(THICKNESS);
 
         putVertex(matrixStack, vertexConsumer, this.start.add(prevPosOffset.multiply(1 - delta)));
         putVertex(matrixStack, vertexConsumer, this.end.add(prevPosOffset.multiply(1 - delta)));

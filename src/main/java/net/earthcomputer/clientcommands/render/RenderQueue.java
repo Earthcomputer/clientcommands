@@ -1,15 +1,18 @@
 package net.earthcomputer.clientcommands.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Unit;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 
 public class RenderQueue {
     private static int tickCounter = 0;
@@ -76,11 +79,11 @@ public class RenderQueue {
         }
     }
 
-    public static void render(Layer layer, MatrixStack matrixStack, float delta) {
+    public static void render(Layer layer, VertexConsumer vertexConsumer, MatrixStack matrixStack, float delta) {
         if (!queue.containsKey(layer)) {
             return;
         }
-        queue.get(layer).values().forEach(shape -> shape.render(matrixStack, delta));
+        queue.get(layer).values().forEach(shape -> shape.render(matrixStack, vertexConsumer, delta));
     }
 
     public enum Layer {
@@ -90,4 +93,27 @@ public class RenderQueue {
     private record AddQueueEntry(Layer layer, Object key, Shape shape, int life) {}
 
     private record RemoveQueueEntry(Layer layer, Object key) {}
+
+    public static RenderLayer noDepthLayer() {
+        return NO_DEPTH_LAYER.apply(Unit.INSTANCE);
+    }
+
+    private static final Function<Unit, RenderLayer> NO_DEPTH_LAYER = Util.memoize($ -> {
+        RenderLayer.MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder()
+            .program(RenderLayer.LINES_PROGRAM)
+            .transparency(new RenderLayer.Transparency("translucent_transparency", () -> {
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+            }, () -> {
+                RenderSystem.disableBlend();
+                RenderSystem.defaultBlendFunc();
+            }))
+            .writeMaskState(RenderLayer.COLOR_MASK)
+            .cull(RenderLayer.DISABLE_CULLING)
+            .depthTest(RenderLayer.ALWAYS_DEPTH_TEST)
+            .layering(RenderLayer.VIEW_OFFSET_Z_LAYERING)
+            .lineWidth(new RenderLayer.LineWidth(OptionalDouble.of(2)))
+            .build(true);
+        return RenderLayer.of("clientcommands_no_depth", VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.LINES, 256, true, true, multiPhaseParameters);
+    });
 }

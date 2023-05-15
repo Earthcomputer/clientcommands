@@ -39,7 +39,6 @@
     "MixinFishingRodItem",
     "MixinFlintAndSteelItem",
     "MixinForgingScreenHandler",
-    "MixinGameRenderer",
     "MixinGrindstoneContainer",
     "MixinItemEntity",
     "MixinItemStack",

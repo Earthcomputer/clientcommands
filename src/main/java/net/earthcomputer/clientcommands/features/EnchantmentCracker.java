@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import com.mojang.logging.LogUtils;
-import net.earthcomputer.clientcommands.MulticonnectCompat;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;
@@ -452,7 +452,7 @@ public class EnchantmentCracker {
         int power = 0;
 
         for (BlockPos bookshelfOffset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
-            if (MulticonnectCompat.getProtocolVersion() <= MulticonnectCompat.V1_18) {
+            if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18) {
                 // old bookshelf detection method
                 BlockPos obstructionPos = tablePos.add(MathHelper.clamp(bookshelfOffset.getX(), -1, 1), 0, MathHelper.clamp(bookshelfOffset.getZ(), -1, 1));
                 if (world.getBlockState(tablePos.add(bookshelfOffset)).isOf(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {

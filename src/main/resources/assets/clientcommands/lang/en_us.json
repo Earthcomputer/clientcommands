@@ -46,13 +46,14 @@
 
   "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
+  "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Incompatible enchantments",
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
   "commands.cenchant.success": "Starting enchantment manipulation",
   "commands.cenchant.uncracked": "Seed needs to be cracked",
 
   "commands.cfind.found.left": "Found %1$s at ",
-  "commands.cfind.found.right": ", %2$.2f blocks away",
+  "commands.cfind.found.right": ", %2$s blocks away",
   "commands.cfind.keepSearching.success": "Finding entities",
   "commands.cfind.noMatch": "No entities matched your query",
   "commands.cfind.success": "%d entities matched your query",
@@ -60,7 +61,7 @@
   "commands.cfindblock.notFound": "No such block found",
   "commands.cfindblock.success.left": "Closest match is at ",
   "commands.cfindblock.success.glow": "[Glow]",
-  "commands.cfindblock.success.right": ", %1$.2f blocks away",
+  "commands.cfindblock.success.right": ", %1$s blocks away",
 
   "commands.cfinditem.match.left": "%dx %s found at ",
   "commands.cfinditem.match.right": "",

@@ -65,7 +65,7 @@ public class FindCommand {
     }
 
     private static void sendEntityFoundMessage(FabricClientCommandSource source, Entity entity) {
-        double distance = Math.sqrt(entity.squaredDistanceTo(source.getPosition()));
+        String distance = "%.2f".formatted(Math.sqrt(entity.squaredDistanceTo(source.getPosition())));
         source.sendFeedback(Text.translatable("commands.cfind.found.left", entity.getName(), distance)
                 .append(getLookCoordsTextComponent(entity.getBlockPos()))
                 .append(Text.translatable("commands.cfind.found.right", entity.getName(), distance)));
