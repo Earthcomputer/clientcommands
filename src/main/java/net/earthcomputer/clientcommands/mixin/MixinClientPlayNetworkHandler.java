@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.mixin;
 import com.mojang.brigadier.StringReader;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.MinecraftClient;
@@ -75,7 +75,7 @@ public class MixinClientPlayNetworkHandler {
 
     @Inject(method = "onWorldTimeUpdate", at = @At("HEAD"))
     private void onOnWorldTimeUpdatePre(CallbackInfo ci) {
-        if (TempRules.getFishingManipulation().isEnabled() && !MinecraftClient.getInstance().isOnThread()) {
+        if (Configs.getFishingManipulation().isEnabled() && !MinecraftClient.getInstance().isOnThread()) {
             FishingCracker.onTimeSync();
         }
     }

@@ -10,7 +10,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.mixin.ChatInputSuggestorAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandSource;
@@ -346,7 +346,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         private static final Map<String, DoubleSupplier> CONSTANTS = ImmutableMap.of(
                 "pi", () -> Math.PI,
                 "e", () -> Math.E,
-                "ans", () -> TempRules.calcAnswer
+                "ans", () -> Configs.calcAnswer
         );
 
         private final String type;

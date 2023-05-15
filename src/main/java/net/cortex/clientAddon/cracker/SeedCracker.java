@@ -1,6 +1,6 @@
 package net.cortex.clientAddon.cracker;
 
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
@@ -53,7 +53,7 @@ public class SeedCracker {
             if (attemptCount > MAX_ATTEMPTS) {
                 ClientCommandHelper.sendError(Text.translatable("commands.ccrackrng.failed"));
                 ClientCommandHelper.sendHelp(Text.translatable("commands.ccrackrng.failed.help"));
-                TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+                Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
             } else {
                 SeedCracker.doCrack(SeedCracker.callback);
             }
@@ -61,7 +61,7 @@ public class SeedCracker {
         }
         //Else, got a seed
 
-        TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
+        Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
 
         Random rand=Random.create(seed ^ 0x5deece66dL);
         rand.nextFloat();
@@ -90,7 +90,7 @@ public class SeedCracker {
         ClientCommandHelper.addOverlayMessage(Text.translatable("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         if(throwItems())
         {
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
             expectedItems=20;
             if (currentTask == null) {
                 currentTask = new SeedCrackTask();
@@ -101,12 +101,12 @@ public class SeedCracker {
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
         } else {
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
         }
     }
 
     public static void onEntityCreation(EntitySpawnS2CPacket packet) {
-        if (packet.getEntityType() == EntityType.ITEM && TempRules.playerCrackState == PlayerRandCracker.CrackState.CRACKING) {
+        if (packet.getEntityType() == EntityType.ITEM && Configs.playerCrackState == PlayerRandCracker.CrackState.CRACKING) {
             if (SeedCracker.expectedItems > 0) {
                 long rand_val = (long) ((Math.atan2(packet.getVelocityZ(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
                 long top_bits = rand_val;
