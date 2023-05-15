@@ -284,6 +284,11 @@ public class ItemGroupCommand {
         DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> {
+                if (Identifier.tryParse("clientcommands:" + key) == null) {
+                    LOGGER.warn("Skipping item group with invalid name {}", key);
+                    return;
+                }
+
                 NbtCompound group = compoundTag.getCompound(key);
                 ItemStack icon = singleItemFromNbt(group.getCompound("icon"));
                 NbtList items = group.getList("items", NbtElement.COMPOUND_TYPE);
@@ -292,6 +297,11 @@ public class ItemGroupCommand {
             });
         } else {
             compoundTag.getKeys().forEach(key -> {
+                if (Identifier.tryParse("clientcommands:" + key) == null) {
+                    LOGGER.warn("Skipping item group with invalid name {}", key);
+                    return;
+                }
+
                 NbtCompound group = compoundTag.getCompound(key);
                 Dynamic<NbtElement> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, group.getCompound("icon"));
                 Dynamic<NbtElement> newStackDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
