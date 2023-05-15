@@ -109,4 +109,13 @@ public class Configs {
 
     @Config
     public static boolean acceptC2CPackets = false;
+
+    public enum ResourcePackBypassPolicy {
+        VANILLA,
+        BYPASS_FORCED,
+        BYPASS_ALL;
+    }
+
+    @Config
+    public static ResourcePackBypassPolicy resourcePackBypassPolicy = ResourcePackBypassPolicy.VANILLA;
 }

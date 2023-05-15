@@ -304,5 +304,9 @@
   "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
 
   "ccpacket.messageC2CPacket.incoming": "%s -> you: %s",
-  "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s"
+  "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s",
+
+  "resourcePackBypass.rejectOrBypass": "Accept the resource pack, reject the resource pack and disconnect, or bypass it.",
+  "resourcePackBypass.bypass": "Bypass",
+  "resourcePackBypass.bypassed": "You have bypassed the required custom resource pack!"
 }
