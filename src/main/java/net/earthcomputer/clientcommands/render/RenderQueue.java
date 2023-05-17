@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexFormat;
@@ -101,13 +100,6 @@ public class RenderQueue {
     private static final Function<Unit, RenderLayer> NO_DEPTH_LAYER = Util.memoize($ -> {
         RenderLayer.MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder()
             .program(RenderLayer.LINES_PROGRAM)
-            .transparency(new RenderLayer.Transparency("translucent_transparency", () -> {
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-            }, () -> {
-                RenderSystem.disableBlend();
-                RenderSystem.defaultBlendFunc();
-            }))
             .writeMaskState(RenderLayer.COLOR_MASK)
             .cull(RenderLayer.DISABLE_CULLING)
             .depthTest(RenderLayer.ALWAYS_DEPTH_TEST)
