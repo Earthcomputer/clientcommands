@@ -174,10 +174,6 @@
   "commands.ctask.stop.noMatch": "没有匹配的任务",
   "commands.ctask.stop.success": "已停止%d个任务",
 
-  "commands.ctemprule.list.header": "正在显示%d个临时规则: ",
-  "commands.ctemprule.reset.success": "临时规则%s已被重置为%s",
-  "commands.ctemprule.set.success": "临时规则%s已被更新为%s",
-
   "commands.ctitle.cleared": "已清除的标题",
   "commands.ctitle.reset": "重置标题选项",
   "commands.ctitle.show.title": "显示新标题",
