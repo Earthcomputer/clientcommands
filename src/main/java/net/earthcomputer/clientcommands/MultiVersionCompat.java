@@ -5,12 +5,16 @@ import com.mojang.logging.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.item.Item;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.util.Util;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Field;
@@ -39,12 +43,11 @@ public abstract sealed class MultiVersionCompat {
     public static final MultiVersionCompat INSTANCE = Util.make(() -> {
         try {
             FabricLoader loader = FabricLoader.getInstance();
-            if (loader.isModLoaded("multiconnect")) {
-                return new Multiconnect();
-            } else if (loader.isModLoaded("viafabric")) {
+            ModContainer modContainer;
+            if ((modContainer = loader.getModContainer("viafabric").orElse(null)) != null) {
                 return new ViaFabric();
-            } else if (loader.isModLoaded("viafabricplus")) {
-                return new ViaFabricPlus();
+            } else if ((modContainer = loader.getModContainer("viafabricplus").orElse(null)) != null) {
+                return new ViaFabricPlus(modContainer);
             } else {
                 return new None();
             }
@@ -63,38 +66,6 @@ public abstract sealed class MultiVersionCompat {
         @Override
         public String getProtocolName() {
             return SharedConstants.getGameVersion().getName();
-        }
-    }
-
-    private static final class Multiconnect extends MultiVersionCompat {
-        private final Object api;
-        private final Method getProtocolVersion;
-        private final Method byProtocolVersion;
-        private final Method protocolGetName;
-
-        private Multiconnect() throws ReflectiveOperationException {
-            api = Class.forName("net.earthcomputer.multiconnect.api.MultiConnectAPI").getMethod("instance").invoke(null);
-            getProtocolVersion = api.getClass().getMethod("getProtocolVersion");
-            byProtocolVersion = api.getClass().getMethod("byProtocolVersion", int.class);
-            protocolGetName = byProtocolVersion.getReturnType().getMethod("getName");
-        }
-
-        @Override
-        public int getProtocolVersion() {
-            try {
-                return (Integer) getProtocolVersion.invoke(api);
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public String getProtocolName() {
-            try {
-                return (String) protocolGetName.invoke(byProtocolVersion.invoke(api, getProtocolVersion.invoke(api)));
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
@@ -208,19 +179,35 @@ public abstract sealed class MultiVersionCompat {
     private static final class ViaFabricPlus extends AbstractViaVersion {
         private final Field itemReleaseVersionMappingsInstance;
         private final Method getTargetVersion;
+        @Nullable
+        private final Method versionEnumGetProtocol;
         private final Method itemReleaseVersionMappingsContains;
 
-        private ViaFabricPlus() throws ReflectiveOperationException {
+        private static final Version V2_7_3 = Util.make(() -> {
+            try {
+                return Version.parse("2.7.3");
+            } catch (VersionParsingException e) {
+                throw new AssertionError(e);
+            }
+        });
+
+        private ViaFabricPlus(ModContainer modContainer) throws ReflectiveOperationException {
             Class<?> protocolHack = Class.forName("de.florianmichael.viafabricplus.protocolhack.ProtocolHack");
             Class<?> itemReleaseVersionMappings = Class.forName("de.florianmichael.viafabricplus.mappings.ItemReleaseVersionMappings");
             itemReleaseVersionMappingsInstance = itemReleaseVersionMappings.getField("INSTANCE");
             getTargetVersion = protocolHack.getMethod("getTargetVersion");
+            versionEnumGetProtocol = modContainer.getMetadata().getVersion().compareTo(V2_7_3) <= 0 ? null
+                : getTargetVersion.getReturnType().getMethod("getProtocol");
             itemReleaseVersionMappingsContains = itemReleaseVersionMappings.getMethod("contains", Item.class, getTargetVersion.getReturnType());
         }
 
         @Override
         protected Object getCurrentVersion() throws ReflectiveOperationException {
-            return getTargetVersion.invoke(null);
+            Object targetVersion = getTargetVersion.invoke(null);
+            if (versionEnumGetProtocol != null) {
+                targetVersion = versionEnumGetProtocol.invoke(targetVersion);
+            }
+            return targetVersion;
         }
 
         @Override
