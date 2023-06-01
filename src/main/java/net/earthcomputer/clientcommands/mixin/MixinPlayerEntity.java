@@ -39,7 +39,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
     // TODO: update-sensitive: type hierarchy of Entity.damage
     @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z", ordinal = 0))
     public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount) {
-        if (!world.isClient || !isThePlayer()) {
+        if (!getWorld().isClient || !isThePlayer()) {
             return target.damage(source, amount);
         }
 

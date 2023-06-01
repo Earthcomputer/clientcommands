@@ -44,6 +44,8 @@ public class ClientCommands implements ClientModInitializer {
         }
 
         new ModConfigBuilder("clientcommands", Configs.class).build();
+
+        ItemGroupCommand.registerItemGroups();
     }
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {

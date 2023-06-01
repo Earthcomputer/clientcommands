@@ -1,15 +1,12 @@
 package net.earthcomputer.clientcommands.command;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -78,30 +75,27 @@ class SnakeGameScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public void renderBackground(MatrixStack matrices) {
-        super.renderBackground(matrices);
+    public void renderBackground(DrawContext context) {
+        super.renderBackground(context);
         int startX = (this.width - 289) / 2;
         int startY = (this.height - 289) / 2;
 
-        drawTextWithShadow(matrices, client.textRenderer, this.title, startX, startY - 10, 0xff_ffffff);
+        context.drawTextWithShadow(client.textRenderer, this.title, startX, startY - 10, 0xff_ffffff);
         MutableText score = Text.translatable("snakeGame.score", this.snake.size());
-        drawCenteredTextWithShadow(matrices, client.textRenderer, score, this.width / 2, startY - 10, 0xff_ffffff);
+        context.drawCenteredTextWithShadow(client.textRenderer, score, this.width / 2, startY - 10, 0xff_ffffff);
 
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.setShaderTexture(0, GRID_TEXTURE);
-        drawTexture(matrices, startX, startY, 0, 0, 289, 289, 289, 289);
+        context.drawTexture(GRID_TEXTURE, startX, startY, 0, 0, 289, 289, 289, 289);
         int scaleX = MAX_X + 1;
         int scaleY = MAX_Y + 1;
-        DrawableHelper.fill(matrices, startX + this.apple.x() * scaleX, startY + this.apple.y() * scaleY, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.y() * scaleY + scaleY, 0xff_f52559);
+        context.fill(startX + this.apple.x() * scaleX, startY + this.apple.y() * scaleY, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.y() * scaleY + scaleY, 0xff_f52559);
         for (Vector2i vec : this.snake) {
-            DrawableHelper.fill(matrices, startX + vec.x() * scaleX, startY + vec.y() * scaleY, startX + vec.x() * scaleX + scaleX, startY + vec.y() * scaleY + scaleY, 0xff_1f2df6);
+            context.fill(startX + vec.x() * scaleX, startY + vec.y() * scaleY, startX + vec.x() * scaleX + scaleX, startY + vec.y() * scaleY + scaleY, 0xff_1f2df6);
         }
     }
 

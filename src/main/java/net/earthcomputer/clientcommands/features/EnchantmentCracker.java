@@ -12,10 +12,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.EnchantingTableBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
@@ -96,7 +96,7 @@ public class EnchantmentCracker {
      * This section is in charge of rendering the overlay on the enchantment GUI
      */
 
-    public static void drawEnchantmentGUIOverlay(MatrixStack matrices) {
+    public static void drawEnchantmentGUIOverlay(DrawContext context) {
         CrackState crackState = Configs.enchCrackState;
 
         List<String> lines = new ArrayList<>();
@@ -133,7 +133,7 @@ public class EnchantmentCracker {
         TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
         int y = 0;
         for (String line : lines) {
-            fontRenderer.draw(matrices, line, 0, y, 0xffffff);
+            context.drawText(fontRenderer, line, 0, y, 0xffffff, false);
             y += fontRenderer.fontHeight;
         }
     }
@@ -451,7 +451,7 @@ public class EnchantmentCracker {
     private static int getEnchantPower(World world, BlockPos tablePos) {
         int power = 0;
 
-        for (BlockPos bookshelfOffset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
+        for (BlockPos bookshelfOffset : EnchantingTableBlock.POWER_PROVIDER_OFFSETS) {
             if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18) {
                 // old bookshelf detection method
                 BlockPos obstructionPos = tablePos.add(MathHelper.clamp(bookshelfOffset.getX(), -1, 1), 0, MathHelper.clamp(bookshelfOffset.getZ(), -1, 1));
@@ -459,7 +459,7 @@ public class EnchantmentCracker {
                     power++;
                 }
             } else {
-                if (EnchantingTableBlock.canAccessBookshelf(world, tablePos, bookshelfOffset)) {
+                if (EnchantingTableBlock.canAccessPowerProvider(world, tablePos, bookshelfOffset)) {
                     power++;
                 }
             }

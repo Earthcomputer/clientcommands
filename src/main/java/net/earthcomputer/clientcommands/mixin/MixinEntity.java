@@ -4,12 +4,10 @@ import net.earthcomputer.clientcommands.features.DebugRandom;
 import net.earthcomputer.clientcommands.features.EntityGlowingTicket;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
@@ -64,7 +62,7 @@ public abstract class MixinEntity implements IEntity {
 
     @Override
     public void tickGlowingTickets() {
-        if (((Entity) (Object) this).world.isClient) {
+        if (((Entity) (Object) this).getWorld().isClient) {
             Iterator<EntityGlowingTicket> itr = glowingTickets.iterator();
             //noinspection Java8CollectionRemoveIf
             while (itr.hasNext()) {
@@ -98,8 +96,8 @@ public abstract class MixinEntity implements IEntity {
     }
 
     @Inject(method = "playAmethystChimeSound", at = @At("HEAD"))
-    private void onPlayAmethystChimeSound(BlockState state, CallbackInfo ci) {
-        if (isThePlayer() && state.isIn(BlockTags.CRYSTAL_SOUND_BLOCKS)) {
+    private void onPlayAmethystChimeSound(CallbackInfo ci) {
+        if (isThePlayer()) {
             PlayerRandCracker.onAmethystChime();
         }
     }

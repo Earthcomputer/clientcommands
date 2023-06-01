@@ -145,6 +145,7 @@ public class FindBlockCommand {
         int topY = world.getTopY();
 
         boolean found = false;
+        @SuppressWarnings("removal")
         int maxY = chunk.getHighestNonEmptySectionYOffset() + 15;
 
         BlockPos.Mutable mutablePos = new BlockPos.Mutable();

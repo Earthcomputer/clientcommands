@@ -561,7 +561,7 @@ public class FishingCracker {
                                 expectedFishingRodUses++;
                                 FishingBobberEntity prevFishingBobberEntity = player.fishHook;
                                 player.fishHook = oldFishingBobberEntity;
-                                TypedActionResult<ItemStack> result = oldStack.use(player.world, player, Hand.MAIN_HAND);
+                                TypedActionResult<ItemStack> result = oldStack.use(player.getWorld(), player, Hand.MAIN_HAND);
                                 player.fishHook = prevFishingBobberEntity;
 
                                 if (oldStack != result.getValue()) {

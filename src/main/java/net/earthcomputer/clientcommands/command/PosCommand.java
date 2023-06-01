@@ -59,7 +59,7 @@ public class PosCommand {
         RegistryKey<World> targetWorld;
         if (sourceDim == null && targetDim == null) {
             // If neither argument is given, set current dimension as source and "opposite" as target
-            sourceWorld = source.getPlayer().world.getRegistryKey();
+            sourceWorld = source.getPlayer().getWorld().getRegistryKey();
             targetWorld = getOppositeWorld(sourceWorld);
         } else if (targetDim == null) {
             // If only source dimension is given, set the target to "opposite"

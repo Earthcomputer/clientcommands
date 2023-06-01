@@ -3,11 +3,7 @@ package net.earthcomputer.clientcommands.mixin;
 import com.google.common.base.Objects;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.ILivingEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.block.Material;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -42,7 +38,7 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
 
     @Inject(method = "tickCramming", at = @At("HEAD"))
     public void onEntityCramming(CallbackInfo ci) {
-        if (isThePlayer() && world.getOtherEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
+        if (isThePlayer() && getWorld().getOtherEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
             PlayerRandCracker.onEntityCramming();
         }
     }
@@ -93,16 +89,18 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
         BlockPos pos = getBlockPos();
         if (!Objects.equal(pos, this.lastBlockPos)) {
             this.lastBlockPos = pos;
-            if (onGround) {
+            if (isOnGround()) {
                 int frostWalkerLevel = EnchantmentHelper.getEquipmentLevel(Enchantments.FROST_WALKER, (LivingEntity) (Object) this);
                 if (frostWalkerLevel > 0) {
                     BlockState frostedIce = Blocks.FROSTED_ICE.getDefaultState();
                     int radius = Math.min(16, frostWalkerLevel + 2);
                     for (BlockPos offsetPos : BlockPos.iterate(pos.add(-radius, -1, -radius), pos.add(radius, -1, radius))) {
-                        BlockState offsetState = world.getBlockState(offsetPos);
-                        if (offsetState.getMaterial() == Material.WATER && offsetState.get(FluidBlock.LEVEL) == 0 && world.canPlace(frostedIce, offsetPos, ShapeContext.absent())) {
-                            if (world.isAir(offsetPos.up())) {
-                                PlayerRandCracker.onFrostWalker();
+                        if (offsetPos.isWithinDistance(getPos(), radius)) {
+                            BlockState offsetState = getWorld().getBlockState(offsetPos);
+                            if (offsetState == FrostedIceBlock.getMeltedState() && getWorld().canPlace(frostedIce, offsetPos, ShapeContext.absent())) {
+                                if (getWorld().isAir(offsetPos.up())) {
+                                    PlayerRandCracker.onFrostWalker();
+                                }
                             }
                         }
                     }

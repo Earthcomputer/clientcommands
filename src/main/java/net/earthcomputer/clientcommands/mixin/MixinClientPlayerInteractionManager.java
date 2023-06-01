@@ -25,7 +25,7 @@ public class MixinClientPlayerInteractionManager {
     @Inject(method = "interactBlock", at = @At("HEAD"))
     public void onRightClickBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> ci) {
         BlockPos pos = hitResult.getBlockPos();
-        if (player.world.getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE) {
+        if (player.getWorld().getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE) {
             EnchantmentCracker.enchantingTablePos = pos;
         }
     }

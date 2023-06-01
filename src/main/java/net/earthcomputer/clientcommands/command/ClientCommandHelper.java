@@ -46,6 +46,10 @@ public class ClientCommandHelper {
         MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
     }
 
+    public static void sendRequiresRestart() {
+        sendFeedback(Text.translatable("commands.client.requiresRestart").formatted(Formatting.YELLOW));
+    }
+
     public static void addOverlayMessage(Text message, int time) {
         InGameHud inGameHud = MinecraftClient.getInstance().inGameHud;
         inGameHud.setOverlayMessage(message, false);

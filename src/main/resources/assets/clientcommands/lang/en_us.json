@@ -216,9 +216,10 @@
   "commands.client.crack": "Crack",
   "commands.client.enable": "Enable",
   "commands.client.expectedRegex": "Invalid regex %s",
-  "commands.client.notClient": "Not a client-side command",
-  "commands.client.tooFewArguments": "Too few arguments",
   "commands.client.invalidArgumentException": "Invalid argument '%s'",
+  "commands.client.notClient": "Not a client-side command",
+  "commands.client.requiresRestart": "This change will take effect after you restart your client",
+  "commands.client.tooFewArguments": "Too few arguments",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",

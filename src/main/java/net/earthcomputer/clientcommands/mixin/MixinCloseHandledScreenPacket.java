@@ -43,7 +43,7 @@ public class MixinCloseHandledScreenPacket {
                         itemCounts[toSlot] = Math.min(stackSize, stack.getMaxCount());
                         itemStacks[toSlot] = stack;
                         stackSize -= stack.getMaxCount();
-                    } else if (itemStacks[toSlot].isItemEqual(stack)) {
+                    } else if (ItemStack.canCombine(itemStacks[toSlot], stack)) {
                         stackSize -= stack.getMaxCount() - itemCounts[toSlot];
                         itemCounts[toSlot] = Math.min(itemCounts[toSlot] + stackSize, stack.getMaxCount());
                     }

@@ -159,7 +159,7 @@ public class ChorusManipulation {
             while (!blockBelowIsGround && blockPos.getY() > 0) {
                 BlockPos blockPos2 = blockPos.down();
                 BlockState blockState = world.getBlockState(blockPos2);
-                if (blockState.getMaterial().blocksMovement()) {
+                if (blockState.blocksMovement()) {
                     blockBelowIsGround = true;
                 } else {
                     blockPos = blockPos2;
