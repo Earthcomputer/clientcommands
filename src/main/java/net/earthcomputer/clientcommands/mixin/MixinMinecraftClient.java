@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import dev.xpple.betterconfig.api.BetterConfigAPI;
+import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
@@ -69,13 +70,7 @@ public abstract class MixinMinecraftClient {
     // Earth annoying his friends <3 nothing to see here
     @Inject(method = "getWindowTitle", at = @At("RETURN"), cancellable = true)
     private void modifyWindowTitle(CallbackInfoReturnable<String> ci) {
-        String playerName = MinecraftClient.getInstance().getSession().getProfile().getName();
-        if ("Earthcomputer".equals(playerName)
-                || "Azteched".equals(playerName)
-                || "samnrad".equals(playerName)
-                || "allocator".equals(playerName)
-                || "Rybot666".equals(playerName)
-                || "Kerbaras".equals(playerName)) {
+        if (ClientCommands.SCRAMBLE_WINDOW_TITLE) {
             List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));
