@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class ClientCommands implements ClientModInitializer {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -31,7 +32,7 @@ public class ClientCommands implements ClientModInitializer {
 
             Vec3d cameraPos = context.camera().getPos();
             context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-            RenderQueue.render(RenderQueue.Layer.ON_TOP, context.consumers().getBuffer(RenderQueue.noDepthLayer()), context.matrixStack(), context.tickDelta());
+            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickDelta());
 
             context.matrixStack().pop();
         });

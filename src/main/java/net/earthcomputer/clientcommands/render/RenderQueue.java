@@ -5,13 +5,10 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Unit;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class RenderQueue {
     private static int tickCounter = 0;
@@ -93,19 +90,12 @@ public class RenderQueue {
 
     private record RemoveQueueEntry(Layer layer, Object key) {}
 
-    public static RenderLayer noDepthLayer() {
-        return NO_DEPTH_LAYER.apply(Unit.INSTANCE);
-    }
-
-    private static final Function<Unit, RenderLayer> NO_DEPTH_LAYER = Util.memoize($ -> {
-        RenderLayer.MultiPhaseParameters multiPhaseParameters = RenderLayer.MultiPhaseParameters.builder()
+    public static RenderLayer NO_DEPTH_LAYER = RenderLayer.of("clientcommands_no_depth", VertexFormats.LINES, VertexFormat.DrawMode.LINES, 256, true, true, RenderLayer.MultiPhaseParameters.builder()
             .program(RenderLayer.LINES_PROGRAM)
             .writeMaskState(RenderLayer.COLOR_MASK)
             .cull(RenderLayer.DISABLE_CULLING)
             .depthTest(RenderLayer.ALWAYS_DEPTH_TEST)
             .layering(RenderLayer.VIEW_OFFSET_Z_LAYERING)
-            .lineWidth(new RenderLayer.LineWidth(OptionalDouble.of(2)))
-            .build(true);
-        return RenderLayer.of("clientcommands_no_depth", VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.LINES, 256, true, true, multiPhaseParameters);
-    });
+            .lineWidth(new RenderLayer.LineWidth(OptionalDouble.of(Line.THICKNESS)))
+            .build(true));
 }
