@@ -50,7 +50,7 @@ public class Configs {
         }
     }
 
-    @Config(setter = @Config.Setter("setFishingManipulation"), temporary = true)
+    @Config(setter = @Config.Setter("setFishingManipulation"), temporary = true, condition = "conditionLessThan1_20")
     private static FishingManipulation fishingManipulation = FishingManipulation.OFF;
     public static FishingManipulation getFishingManipulation() {
         return fishingManipulation;
@@ -109,4 +109,8 @@ public class Configs {
 
     @Config
     public static boolean acceptC2CPackets = false;
+
+    public static boolean conditionLessThan1_20() {
+        return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_20;
+    }
 }

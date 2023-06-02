@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -35,6 +36,10 @@ public class FishCommand {
             .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands fishingManipulation set MANUAL")));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20) {
+            return; // fishing manipulation patched in 1.20
+        }
+
         dispatcher.register(literal("cfish")
             .then(literal("list-goals")
                 .executes(ctx -> listGoals(ctx.getSource())))
