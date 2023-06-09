@@ -6,15 +6,12 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.api.Version;
-import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.item.Item;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.util.Util;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Field;
@@ -48,7 +45,7 @@ public abstract sealed class MultiVersionCompat {
             if ((modContainer = loader.getModContainer("viafabric").orElse(null)) != null) {
                 return new ViaFabric();
             } else if ((modContainer = loader.getModContainer("viafabricplus").orElse(null)) != null) {
-                return new ViaFabricPlus(modContainer);
+                return new ViaFabricPlus();
             } else {
                 return new None();
             }
@@ -180,42 +177,32 @@ public abstract sealed class MultiVersionCompat {
     private static final class ViaFabricPlus extends AbstractViaVersion {
         private final Field itemReleaseVersionMappingsInstance;
         private final Method getTargetVersion;
-        @Nullable
         private final Method versionEnumGetProtocol;
         private final Method itemReleaseVersionMappingsContains;
 
-        private static final Version V2_7_3 = Util.make(() -> {
-            try {
-                return Version.parse("2.7.3");
-            } catch (VersionParsingException e) {
-                throw new AssertionError(e);
-            }
-        });
-
-        private ViaFabricPlus(ModContainer modContainer) throws ReflectiveOperationException {
+        private ViaFabricPlus() throws ReflectiveOperationException {
             Class<?> protocolHack = Class.forName("de.florianmichael.viafabricplus.protocolhack.ProtocolHack");
             Class<?> itemReleaseVersionMappings = Class.forName("de.florianmichael.viafabricplus.mappings.ItemReleaseVersionMappings");
             itemReleaseVersionMappingsInstance = itemReleaseVersionMappings.getField("INSTANCE");
             getTargetVersion = protocolHack.getMethod("getTargetVersion");
-            versionEnumGetProtocol = modContainer.getMetadata().getVersion().compareTo(V2_7_3) <= 0 ? null
-                : getTargetVersion.getReturnType().getMethod("getProtocol");
+            versionEnumGetProtocol = getTargetVersion.getReturnType().getMethod("getProtocol");
             itemReleaseVersionMappingsContains = itemReleaseVersionMappings.getMethod("contains", Item.class, getTargetVersion.getReturnType());
         }
 
         @Override
         protected Object getCurrentVersion() throws ReflectiveOperationException {
-            Object targetVersion = getTargetVersion.invoke(null);
-            if (versionEnumGetProtocol != null) {
-                targetVersion = versionEnumGetProtocol.invoke(targetVersion);
-            }
-            return targetVersion;
+            return versionEnumGetProtocol.invoke(getVersionEnum());
+        }
+
+        private Object getVersionEnum() throws ReflectiveOperationException {
+            return getTargetVersion.invoke(null);
         }
 
         @Override
         public boolean doesItemExist(Item item) {
             try {
                 Object instance = itemReleaseVersionMappingsInstance.get(null);
-                return (Boolean) itemReleaseVersionMappingsContains.invoke(instance, item, getCurrentVersion());
+                return (Boolean) itemReleaseVersionMappingsContains.invoke(instance, item, getVersionEnum());
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
