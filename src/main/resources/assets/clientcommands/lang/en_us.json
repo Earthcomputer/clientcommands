@@ -190,6 +190,7 @@
   "commands.ctranslate.unknownError": "An error occurred",
   "commands.ctranslate.unknownLanguageCode": "Unknown language code \"%s\"",
   "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
+  "commands.ctranslate.hoverText": "Click to copy, shift-click to insert in chat field",
 
   "commands.cuuid.success": "The UUID of %s is %s",
   "commands.cuuid.success.nameless": "The UUID of that entity is %s",
