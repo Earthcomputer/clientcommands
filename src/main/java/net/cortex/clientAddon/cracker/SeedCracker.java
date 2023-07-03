@@ -1,6 +1,6 @@
 package net.cortex.clientAddon.cracker;
 
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
@@ -25,7 +25,7 @@ public class SeedCracker {
     public static int expectedItems=0;
     public static LongTask currentTask;
     private static int attemptCount = 0;
-    private static final int MAX_ATTEMPTS = 5;
+    private static final int MAX_ATTEMPTS = 10;
 
     //returns True on success or false on failer
     private static boolean throwItems()
@@ -52,7 +52,8 @@ public class SeedCracker {
             attemptCount++;
             if (attemptCount > MAX_ATTEMPTS) {
                 ClientCommandHelper.sendError(Text.translatable("commands.ccrackrng.failed"));
-                ClientCommandHelper.sendFeedback(Text.translatable("commands.ccrackrng.failed.help").styled(style -> style.withColor(Formatting.AQUA)));
+                ClientCommandHelper.sendHelp(Text.translatable("commands.ccrackrng.failed.help"));
+                Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
             } else {
                 SeedCracker.doCrack(SeedCracker.callback);
             }
@@ -60,7 +61,7 @@ public class SeedCracker {
         }
         //Else, got a seed
 
-        TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
+        Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
 
         Random rand=Random.create(seed ^ 0x5deece66dL);
         rand.nextFloat();
@@ -89,7 +90,7 @@ public class SeedCracker {
         ClientCommandHelper.addOverlayMessage(Text.translatable("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         if(throwItems())
         {
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
             expectedItems=20;
             if (currentTask == null) {
                 currentTask = new SeedCrackTask();
@@ -100,30 +101,23 @@ public class SeedCracker {
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
             }
         } else {
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
         }
     }
 
     public static void onEntityCreation(EntitySpawnS2CPacket packet) {
-        if (packet.getEntityTypeId() == EntityType.ITEM && SeedCracker.expectedItems>0) {
-
-            long rand_val = (long) ((Math.atan2(packet.getVelocityZ(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
-            long top_bits = rand_val;
-            short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
-            SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
-            SeedCracker.expectedItems--;
+        if (packet.getEntityType() == EntityType.ITEM && Configs.playerCrackState == PlayerRandCracker.CrackState.CRACKING) {
+            if (SeedCracker.expectedItems > 0) {
+                long rand_val = (long) ((Math.atan2(packet.getVelocityZ(), packet.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
+                long top_bits = rand_val;
+                short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
+                SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
+                SeedCracker.expectedItems--;
+                if (SeedCracker.expectedItems == 0) {
+                    //if its the last item
+                    SeedCracker.attemptCrack();
+                }
+            }
         }
-        if(SeedCracker.expectedItems == 0 && TempRules.playerCrackState == PlayerRandCracker.CrackState.CRACKING)//if its the last item
-        {
-            SeedCracker.attemptCrack();
-        }
-        /*
-        else
-        {
-            long rand_val = (long) ((Math.atan2(this.getVelocityz(), this.getVelocityX()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
-            long top_bits = rand_val;
-            short value = (short) ((top_bits >> (24 - 4)) ^ 0x8L);
-            System.out.println("Entity item spawn: Top 4 bits of direction: "+padLeftZeros(Long.toBinaryString(value), 4));
-        }*/
     }
 }

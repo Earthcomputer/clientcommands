@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.ClientCommands;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.VarCommand;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -17,7 +17,7 @@ import net.minecraft.client.network.ServerInfo;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.Text;
-import net.minecraft.util.FileNameUtil;
+import net.minecraft.util.PathUtil;
 import net.minecraft.util.WorldSavePath;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -165,8 +165,8 @@ public class ClientCommandFunctions {
         try {
             int count = 0;
             while (!entries.isEmpty()) {
-                if (count++ >= TempRules.commandExecutionLimit) {
-                    throw COMMAND_LIMIT_REACHED_EXCEPTION.create(TempRules.commandExecutionLimit);
+                if (count++ >= Configs.commandExecutionLimit) {
+                    throw COMMAND_LIMIT_REACHED_EXCEPTION.create(Configs.commandExecutionLimit);
                 }
                 entries.remove().execute(dispatcher, source);
             }
@@ -200,7 +200,7 @@ public class ClientCommandFunctions {
             } catch (InvalidPathException e) {
                 return null;
             }
-            if (!FileNameUtil.isNormal(path) || !FileNameUtil.isAllowedName(path)) {
+            if (!PathUtil.isNormal(path) || !PathUtil.isAllowedName(path)) {
                 return null;
             }
             return path;

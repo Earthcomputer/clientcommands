@@ -4,8 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.earthcomputer.multiconnect.api.MultiConnectAPI;
-import net.earthcomputer.multiconnect.api.Protocols;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -32,11 +31,11 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class BookCommand {
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Text.translatable("commands.cbook.commandException"));
 
-    private static final int MAX_LIMIT = WrittenBookItem.field_30933;
+    private static final int MAX_LIMIT = WrittenBookItem.MAX_PAGES;
     private static final int DEFAULT_LIMIT = 50;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        if (MultiConnectAPI.instance().getProtocolVersion() >= Protocols.V1_15) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_15) {
             return; // chunk savestate fixed in 1.15
         }
 

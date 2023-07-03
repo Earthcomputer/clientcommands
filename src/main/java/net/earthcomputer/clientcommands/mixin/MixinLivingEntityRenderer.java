@@ -21,8 +21,9 @@ public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extend
 
     @Inject(method = "getRenderLayer", at = @At("RETURN"), cancellable = true)
     private void onGetRenderLayer(T entity, boolean visible, boolean translucent, boolean showOutline, CallbackInfoReturnable<RenderLayer> ci) {
-        if (ci.getReturnValue() == null && ((IEntity) entity).hasGlowingTicket())
+        if (ci.getReturnValue() == null && ((IEntity) entity).hasGlowingTicket()) {
             ci.setReturnValue(RenderLayer.getOutline(getTexture(entity)));
+        }
     }
 
 }

@@ -2,6 +2,8 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandRegistryAccess;
@@ -26,6 +28,8 @@ public class FindBlockCommand {
 
     public static final int MAX_RADIUS = 16 * 8;
 
+    private static final SimpleCommandExceptionType NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cfindblock.notFound"));
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         dispatcher.register(literal("cfindblock")
             .then(argument("block", blockPredicate(registryAccess))
@@ -40,7 +44,7 @@ public class FindBlockCommand {
                         .executes(ctx -> findBlock(ctx.getSource(), getBlockPredicate(ctx, "block"), getInteger(ctx, "radius"), RadiusType.TAXICAB))))));
     }
 
-    public static int findBlock(FabricClientCommandSource source, ClientBlockPredicate block, int radius, RadiusType radiusType) {
+    public static int findBlock(FabricClientCommandSource source, ClientBlockPredicate block, int radius, RadiusType radiusType) throws CommandSyntaxException {
         List<BlockPos> candidates;
         if (radiusType == RadiusType.TAXICAB) {
             candidates = findBlockCandidatesInTaxicabArea(source, block, radius);
@@ -48,17 +52,16 @@ public class FindBlockCommand {
             candidates = findBlockCandidatesInSquareArea(source, block, radius, radiusType);
         }
 
-        BlockPos origin = new BlockPos(source.getPosition());
+        BlockPos origin = BlockPos.ofFloored(source.getPosition());
         BlockPos closestBlock = candidates.stream()
                 .filter(pos -> radiusType.distanceFunc.applyAsDouble(pos.subtract(origin)) <= radius)
                 .min(Comparator.comparingDouble(pos -> radiusType.distanceFunc.applyAsDouble(pos.subtract(origin))))
                 .orElse(null);
 
         if (closestBlock == null) {
-            source.sendError(Text.translatable("commands.cfindblock.notFound"));
-            return 0;
+            throw NOT_FOUND_EXCEPTION.create();
         } else {
-            double foundRadius = radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin));
+            String foundRadius = "%.2f".formatted(radiusType.distanceFunc.applyAsDouble(closestBlock.subtract(origin)));
             source.sendFeedback(Text.translatable("commands.cfindblock.success.left", foundRadius)
                     .append(getLookCoordsTextComponent(closestBlock))
                     .append(" ")
@@ -70,7 +73,7 @@ public class FindBlockCommand {
 
     private static List<BlockPos> findBlockCandidatesInSquareArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius, RadiusType radiusType) {
         World world = source.getWorld();
-        BlockPos senderPos = new BlockPos(source.getPosition());
+        BlockPos senderPos = BlockPos.ofFloored(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
         List<BlockPos> blockCandidates = new ArrayList<>();
@@ -106,7 +109,7 @@ public class FindBlockCommand {
 
     private static List<BlockPos> findBlockCandidatesInTaxicabArea(FabricClientCommandSource source, ClientBlockPredicate blockMatcher, int radius) {
         World world = source.getWorld();
-        BlockPos senderPos = new BlockPos(source.getPosition());
+        BlockPos senderPos = BlockPos.ofFloored(source.getPosition());
         ChunkPos chunkPos = new ChunkPos(senderPos);
 
         List<BlockPos> blockCandidates = new ArrayList<>();
@@ -142,6 +145,7 @@ public class FindBlockCommand {
         int topY = world.getTopY();
 
         boolean found = false;
+        @SuppressWarnings("removal")
         int maxY = chunk.getHighestNonEmptySectionYOffset() + 15;
 
         BlockPos.Mutable mutablePos = new BlockPos.Mutable();

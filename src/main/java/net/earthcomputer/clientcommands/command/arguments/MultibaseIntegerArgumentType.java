@@ -55,8 +55,9 @@ public class MultibaseIntegerArgumentType implements ArgumentType<Integer> {
             } else if (reader.peek() == 'x' || reader.peek() == 'X') {
                 reader.skip();
                 int nStart = reader.getCursor();
-                while (reader.canRead() && ((reader.peek() >= '0' && reader.peek() <= '9') || (reader.peek() >= 'a' && reader.peek() <= 'f') || (reader.peek() >= 'A' && reader.peek() <= 'F')))
+                while (reader.canRead() && ((reader.peek() >= '0' && reader.peek() <= '9') || (reader.peek() >= 'a' && reader.peek() <= 'f') || (reader.peek() >= 'A' && reader.peek() <= 'F'))) {
                     reader.skip();
+                }
                 try {
                     result = Integer.parseInt(reader.getString().substring(nStart, reader.getCursor()), 16);
                 } catch (NumberFormatException e) {
@@ -66,8 +67,9 @@ public class MultibaseIntegerArgumentType implements ArgumentType<Integer> {
             } else if (reader.peek() == 'b' || reader.peek() == 'B') {
                 reader.skip();
                 int nStart = reader.getCursor();
-                while (reader.canRead() && (reader.peek() == '0' || reader.peek() == '1'))
+                while (reader.canRead() && (reader.peek() == '0' || reader.peek() == '1')) {
                     reader.skip();
+                }
                 try {
                     result = Integer.parseInt(reader.getString().substring(nStart, reader.getCursor()), 2);
                 } catch (NumberFormatException e) {
@@ -76,8 +78,9 @@ public class MultibaseIntegerArgumentType implements ArgumentType<Integer> {
                 }
             } else if (reader.peek() >= '0' && reader.peek() <= '7') {
                 int nStart = reader.getCursor();
-                while (reader.canRead() && reader.peek() >= '0' && reader.peek() <= '7')
+                while (reader.canRead() && reader.peek() >= '0' && reader.peek() <= '7') {
                     reader.skip();
+                }
                 try {
                     result = Integer.parseInt(reader.getString().substring(nStart, reader.getCursor()), 8);
                 } catch (NumberFormatException e) {
@@ -104,8 +107,12 @@ public class MultibaseIntegerArgumentType implements ArgumentType<Integer> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof final MultibaseIntegerArgumentType that)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof final MultibaseIntegerArgumentType that)) {
+            return false;
+        }
 
         return maximum == that.maximum && minimum == that.minimum;
     }

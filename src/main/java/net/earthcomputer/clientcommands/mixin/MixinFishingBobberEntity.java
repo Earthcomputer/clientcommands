@@ -26,7 +26,7 @@ public abstract class MixinFishingBobberEntity extends Entity {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/entity/projectile/FishingBobberEntity;outOfOpenWaterTicks:I", ordinal = 0)),
             at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", remap = false, ordinal = 0))
     private void onBobOutOfWater(CallbackInfo ci) {
-        if (FishingCracker.canManipulateFishing() && world.isClient && getPlayerOwner() == MinecraftClient.getInstance().player) {
+        if (FishingCracker.canManipulateFishing() && getWorld().isClient && getPlayerOwner() == MinecraftClient.getInstance().player) {
             FishingCracker.onBobOutOfWater();
         }
     }

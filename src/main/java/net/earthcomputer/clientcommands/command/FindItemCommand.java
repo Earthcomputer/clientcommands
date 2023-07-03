@@ -179,11 +179,13 @@ public class FindItemCommand {
         private boolean canSearch(World world, BlockPos pos) {
             BlockState state = world.getBlockState(pos);
             BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (!(blockEntity instanceof Inventory) && state.getBlock() != Blocks.ENDER_CHEST)
+            if (!(blockEntity instanceof Inventory) && state.getBlock() != Blocks.ENDER_CHEST) {
                 return false;
+            }
             if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
-                if (ChestBlock.isChestBlocked(world, pos))
+                if (ChestBlock.isChestBlocked(world, pos)) {
                     return false;
+                }
                 if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
                     BlockPos offsetPos = pos.offset(ChestBlock.getFacing(state));
                     return world.getBlockState(offsetPos).getBlock() != state.getBlock() || !ChestBlock.isChestBlocked(world, offsetPos);
@@ -217,7 +219,7 @@ public class FindItemCommand {
                         }
 
                         @Override
-                        public ItemStack transferSlot(PlayerEntity player, int index) {
+                        public ItemStack quickMove(PlayerEntity player, int index) {
                             return ItemStack.EMPTY;
                         }
 

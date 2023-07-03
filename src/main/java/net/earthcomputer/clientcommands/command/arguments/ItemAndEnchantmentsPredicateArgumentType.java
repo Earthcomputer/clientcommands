@@ -9,17 +9,19 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.EnchantmentArgumentType;
+import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -161,7 +163,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             suggestEnchantableItem();
             int start = reader.getCursor();
             Identifier identifier = Identifier.fromCommandInput(reader);
-            Item item = Registry.ITEM.getOrEmpty(identifier).orElseThrow(() -> {
+            Item item = Registries.ITEM.getOrEmpty(identifier).orElseThrow(() -> {
                 reader.setCursor(start);
                 return ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
             });
@@ -220,29 +222,33 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
         private Enchantment parseEnchantment(boolean suggest, Option option, ItemStack stack) throws CommandSyntaxException {
             List<Enchantment> allowedEnchantments = new ArrayList<>();
-            nextEnchantment: for (Enchantment ench : Registry.ENCHANTMENT) {
+            nextEnchantment: for (Enchantment ench : Registries.ENCHANTMENT) {
                 boolean skip = (!ench.isAcceptableItem(stack) && stack.getItem() != Items.BOOK) || !enchantmentPredicate.test(ench);
                 if (skip) {
                     continue;
                 }
                 if (option == Option.WITH) {
-                    for (EnchantmentLevelEntry ench2 : with)
+                    for (EnchantmentLevelEntry ench2 : with) {
                         if (ench2.enchantment == ench || !ench2.enchantment.canCombine(ench)) {
                             continue nextEnchantment;
                         }
-                    for (EnchantmentLevelEntry ench2 : without)
+                    }
+                    for (EnchantmentLevelEntry ench2 : without) {
                         if (ench2.enchantment == ench && ench2.level == -1) {
                             continue nextEnchantment;
                         }
+                    }
                 } else {
-                    for (EnchantmentLevelEntry ench2 : with)
+                    for (EnchantmentLevelEntry ench2 : with) {
                         if (ench2.enchantment == ench && ench2.level == -1) {
                             continue nextEnchantment;
                         }
-                    for (EnchantmentLevelEntry ench2 : without)
+                    }
+                    for (EnchantmentLevelEntry ench2 : without) {
                         if (ench2.enchantment == ench && ench2.level == -1) {
                             continue nextEnchantment;
                         }
+                    }
                 }
                 allowedEnchantments.add(ench);
             }
@@ -251,15 +257,15 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             if (suggest) {
                 suggestor = suggestions -> {
                     SuggestionsBuilder builder = suggestions.createOffset(start);
-                    CommandSource.suggestIdentifiers(allowedEnchantments.stream().map(Registry.ENCHANTMENT::getId), builder);
+                    CommandSource.suggestIdentifiers(allowedEnchantments.stream().map(Registries.ENCHANTMENT::getId), builder);
                     suggestions.add(builder);
                 };
             }
 
             Identifier identifier = Identifier.fromCommandInput(reader);
-            Enchantment enchantment = Registry.ENCHANTMENT.getOrEmpty(identifier).orElseThrow(() -> {
+            Enchantment enchantment = Registries.ENCHANTMENT.getOrEmpty(identifier).orElseThrow(() -> {
                 reader.setCursor(start);
-                return EnchantmentArgumentType.UNKNOWN_ENCHANTMENT_EXCEPTION.createWithContext(reader, identifier);
+                return RegistryEntryArgumentType.NOT_FOUND_EXCEPTION.createWithContext(reader, identifier, RegistryKeys.ENCHANTMENT.getValue());
             });
 
             if (!enchantment.isAcceptableItem(stack) && stack.getItem() != Items.BOOK) {
@@ -355,11 +361,15 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
         private void suggestEnchantableItem() {
             List<Identifier> allowed = new ArrayList<>();
-            for (Item item : Registry.ITEM) {
+            for (Item item : Registries.ITEM) {
                 if (item.getEnchantability() > 0 && itemPredicate.test(item)) {
-                    allowed.add(Registry.ITEM.getId(item));
+                    if (MultiVersionCompat.INSTANCE.doesItemExist(item)) {
+                        allowed.add(Registries.ITEM.getId(item));
+                    }
                 } else if (item == Items.ENCHANTED_BOOK && itemPredicate.test(Items.BOOK)) {
-                    allowed.add(Registry.ITEM.getId(Items.ENCHANTED_BOOK));
+                    if (MultiVersionCompat.INSTANCE.doesItemExist(item)) {
+                        allowed.add(Registries.ITEM.getId(Items.ENCHANTED_BOOK));
+                    }
                 }
             }
             int start = reader.getCursor();

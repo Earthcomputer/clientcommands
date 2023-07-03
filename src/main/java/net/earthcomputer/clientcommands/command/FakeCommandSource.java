@@ -2,8 +2,8 @@ package net.earthcomputer.clientcommands.command;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.registry.DynamicRegistryManager;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

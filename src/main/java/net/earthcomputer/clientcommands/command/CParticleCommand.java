@@ -7,10 +7,10 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.registry.Registry;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
@@ -60,7 +60,7 @@ public class CParticleCommand {
                     }
                 }
                 source.sendFeedback(Text.translatable("commands.cparticle.success",
-                        Registry.PARTICLE_TYPE.getId(parameters.getType()).toString()));
+                        Registries.PARTICLE_TYPE.getId(parameters.getType()).toString()));
                 return Command.SINGLE_SUCCESS;
         }
     }

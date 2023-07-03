@@ -14,8 +14,9 @@ public class TaskManager {
         newTasks.forEach(LongTask::initialize);
         newTasks.clear();
 
-        if (tasks.isEmpty())
+        if (tasks.isEmpty()) {
             return;
+        }
 
         var iteratingTasks = new ArrayList<>(tasks.entrySet());
         while (!iteratingTasks.isEmpty()) {
@@ -91,8 +92,9 @@ public class TaskManager {
 
     public static void removeTask(String name) {
         LongTask task = tasks.get(name);
-        if (task != null)
+        if (task != null) {
             task._break();
+        }
     }
 
 }

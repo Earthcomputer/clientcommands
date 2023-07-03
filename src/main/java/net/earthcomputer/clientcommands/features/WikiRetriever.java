@@ -1,13 +1,17 @@
 package net.earthcomputer.clientcommands.features;
 
 import com.google.gson.Gson;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -17,13 +21,13 @@ public class WikiRetriever {
 
     private static final String WIKI_HOST = "https://minecraft.gamepedia.com/";
     private static final String PAGE_SUMMARY_QUERY = WIKI_HOST + "api.php?action=query&prop=extracts&exintro=true&format=json&titles=%s";
-    private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<\\s*(/)?\\s*(\\w+).*?>", Pattern.DOTALL);
+    private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<\\s*(/)?\\s*(\\w+).*?>|<!--.*?-->|\n", Pattern.DOTALL);
     private static final Formatting CODE_COLOR = Formatting.DARK_GREEN;
     private static final Gson GSON = new Gson();
 
     public static String decode(String html) {
         Matcher matcher = HTML_TAG_PATTERN.matcher(html);
-        StringBuffer raw = new StringBuffer();
+        StringBuilder raw = new StringBuilder();
 
         boolean bold = false, italic = false, underline = false, code = false;
 
@@ -34,7 +38,12 @@ public class WikiRetriever {
             matcher.appendReplacement(raw, "");
 
             boolean endTag = matcher.group(1) != null;
-            String tagName = matcher.group(2).toLowerCase(Locale.ENGLISH);
+            String tagName = matcher.group(2);
+            if (tagName == null) {
+                // we're in a comment or newline
+                continue;
+            }
+            tagName = tagName.toLowerCase(Locale.ROOT);
 
             if (!endTag) {
                 switch (tagName) {
@@ -53,9 +62,15 @@ public class WikiRetriever {
                         break;
                     case "code":
                         raw.append(CODE_COLOR);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (italic) raw.append(Formatting.ITALIC);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         code = true;
                         break;
                     case "dd":
@@ -81,34 +96,61 @@ public class WikiRetriever {
             } else {
                 switch (tagName) {
                     case "b":
-                        if (code) raw.append(CODE_COLOR);
-                        else raw.append(Formatting.RESET);
-                        if (italic) raw.append(Formatting.ITALIC);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (code) {
+                            raw.append(CODE_COLOR);
+                        } else {
+                            raw.append(Formatting.RESET);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         bold = false;
                         break;
                     case "i":
-                        if (code) raw.append(CODE_COLOR);
-                        else raw.append(Formatting.RESET);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (code) {
+                            raw.append(CODE_COLOR);
+                        } else {
+                            raw.append(Formatting.RESET);
+                        }
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         italic = false;
                         break;
                     case "dt":
                         raw.append("\n");
                         //fallthrough
                     case "u":
-                        if (code) raw.append(CODE_COLOR);
-                        else raw.append(Formatting.RESET);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (italic) raw.append(Formatting.ITALIC);
+                        if (code) {
+                            raw.append(CODE_COLOR);
+                        } else {
+                            raw.append(Formatting.RESET);
+                        }
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
                         underline = false;
                         break;
                     case "code":
                         raw.append(Formatting.RESET);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (italic) raw.append(Formatting.ITALIC);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         code = false;
                         break;
                     case "ul":
@@ -126,6 +168,10 @@ public class WikiRetriever {
         }
         matcher.appendTail(raw);
 
+        if (raw.length() == 0) {
+            return Formatting.ITALIC + I18n.translate("commands.cwiki.noContent");
+        }
+
         String rawStr = raw.toString();
         rawStr = rawStr.replace("&quot;", "\"");
         rawStr = rawStr.replace("&#39;", "'");
@@ -136,12 +182,13 @@ public class WikiRetriever {
         return rawStr;
     }
 
+    @Nullable
     public static String getWikiSummary(String pageName) {
         URL url;
         try {
-            String encodedPage = URLEncoder.encode(pageName, "UTF-8");
+            String encodedPage = URLEncoder.encode(pageName, StandardCharsets.UTF_8);
             url = new URL(String.format(PAGE_SUMMARY_QUERY, encodedPage));
-        } catch (UnsupportedEncodingException | MalformedURLException e) {
+        } catch (MalformedURLException e) {
             return null;
         }
 
@@ -161,10 +208,12 @@ public class WikiRetriever {
         return decode(html);
     }
 
+    @SuppressWarnings("unused")
     private static class QueryResult {
         public String batchcomplete;
         public Query query;
         private static class Query {
+            @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
             private Map<String, Page> pages;
             private static class Page {
                 public int pageid;

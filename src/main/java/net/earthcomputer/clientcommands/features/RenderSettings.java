@@ -30,15 +30,18 @@ public class RenderSettings {
     }
 
     public static void addEntityRenderSelector(CEntitySelector selector, boolean shouldRender) {
-        if (entityRenderSelectors.size() == 16)
+        if (entityRenderSelectors.size() == 16) {
             entityRenderSelectors.remove(0);
+        }
         entityRenderSelectors.add(new Pair<>(selector, shouldRender));
     }
 
     public static void preRenderEntities() {
         MinecraftClient client = MinecraftClient.getInstance();
         // prevent crash from other mods trying to load entity rendering without a world (usually a fake world and no client player)
-        if (client.player == null) return;
+        if (client.player == null) {
+            return;
+        }
         FabricClientCommandSource source = (FabricClientCommandSource) new ClientCommandSource(client.getNetworkHandler(), client);
 
         disabledEntities.clear();

@@ -3,7 +3,9 @@ package net.earthcomputer.clientcommands.command;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.earthcomputer.clientcommands.TempRules;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -24,9 +26,20 @@ import static net.earthcomputer.clientcommands.command.arguments.WithStringArgum
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FishCommand {
+
     private static final Set<Item> ENCHANTABLE_ITEMS = ImmutableSet.of(Items.BOOK, Items.FISHING_ROD, Items.BOW);
 
+    private static final SimpleCommandExceptionType NEED_FISHING_MANIPULATION_EXCEPTION = new SimpleCommandExceptionType(
+        Text.translatable("commands.cfish.needFishingManipulation")
+            .styled(style -> style.withColor(Formatting.RED))
+            .append(" ")
+            .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands fishingManipulation set MANUAL")));
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20) {
+            return; // fishing manipulation patched in 1.20
+        }
+
         dispatcher.register(literal("cfish")
             .then(literal("list-goals")
                 .executes(ctx -> listGoals(ctx.getSource())))
@@ -41,9 +54,9 @@ public class FishCommand {
                     .executes(ctx -> removeGoal(ctx.getSource(), getInteger(ctx, "index"))))));
     }
 
-    private static int listGoals(FabricClientCommandSource source) {
-        if (!checkFishingManipulationEnabled(source)) {
-            return 0;
+    private static int listGoals(FabricClientCommandSource source) throws CommandSyntaxException {
+        if (!Configs.getFishingManipulation().isEnabled()) {
+            throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
         if (FishingCracker.goals.isEmpty()) {
@@ -58,9 +71,9 @@ public class FishCommand {
         return FishingCracker.goals.size();
     }
 
-    private static int addGoal(FabricClientCommandSource source, ClientItemPredicateArgumentType.ClientItemPredicate goal) {
-        if (!checkFishingManipulationEnabled(source)) {
-            return 0;
+    private static int addGoal(FabricClientCommandSource source, ClientItemPredicateArgumentType.ClientItemPredicate goal) throws CommandSyntaxException {
+        if (!Configs.getFishingManipulation().isEnabled()) {
+            throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
         FishingCracker.goals.add(goal);
@@ -70,9 +83,9 @@ public class FishCommand {
         return FishingCracker.goals.size();
     }
 
-    private static int addEnchantedGoal(FabricClientCommandSource source, Pair<String, ItemAndEnchantmentsPredicate> stringAndItemAndEnchantments) {
-        if (!checkFishingManipulationEnabled(source)) {
-            return 0;
+    private static int addEnchantedGoal(FabricClientCommandSource source, Pair<String, ItemAndEnchantmentsPredicate> stringAndItemAndEnchantments) throws CommandSyntaxException {
+        if (!Configs.getFishingManipulation().isEnabled()) {
+            throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
         String string = stringAndItemAndEnchantments.getLeft();
@@ -88,8 +101,8 @@ public class FishCommand {
     }
 
     private static int removeGoal(FabricClientCommandSource source, int index) throws CommandSyntaxException {
-        if (!checkFishingManipulationEnabled(source)) {
-            return 0;
+        if (!Configs.getFishingManipulation().isEnabled()) {
+            throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
         if (index > FishingCracker.goals.size()) {
@@ -100,17 +113,5 @@ public class FishCommand {
         source.sendFeedback(Text.translatable("commands.cfish.removeGoal.success", goal.getPrettyString()));
 
         return FishingCracker.goals.size();
-    }
-
-    private static boolean checkFishingManipulationEnabled(FabricClientCommandSource source) {
-        if (!TempRules.getFishingManipulation().isEnabled()) {
-            source.sendFeedback(Text.translatable("commands.cfish.needFishingManipulation")
-                    .styled(style -> style.withColor(Formatting.RED))
-                    .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set fishingManipulation manual")));
-            return false;
-        } else {
-            return true;
-        }
     }
 }

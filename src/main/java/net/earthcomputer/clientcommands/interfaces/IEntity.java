@@ -10,4 +10,5 @@ public interface IEntity {
 
     int callGetPermissionLevel();
 
+    void tickDebugRandom();
 }

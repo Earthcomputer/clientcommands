@@ -103,7 +103,7 @@ public class MoteCommand {
     }
 
     private static int sendEmoticon(String emoticon) {
-        MinecraftClient.getInstance().player.sendChatMessage(emoticon, null);
+        MinecraftClient.getInstance().getNetworkHandler().sendChatMessage(emoticon);
         return Command.SINGLE_SUCCESS;
     }
 
