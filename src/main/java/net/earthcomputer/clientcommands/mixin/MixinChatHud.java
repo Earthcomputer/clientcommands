@@ -1,5 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import com.mojang.brigadier.Message;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.c2c.*;
@@ -105,6 +107,14 @@ public class MixinChatHud {
         }
         try {
             c2CPacket.apply(CCNetworkHandler.getInstance());
+        } catch (CommandSyntaxException e) {
+            Message m = e.getRawMessage();
+            if (m instanceof Text t) {
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(t);
+            } else {
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(m.getString()));
+            }
+            e.printStackTrace();
         } catch (Exception e) {
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(e.getMessage()));
             e.printStackTrace();
