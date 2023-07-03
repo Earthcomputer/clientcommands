@@ -5,9 +5,7 @@
   "mixins": [
     "ChatInputSuggestorAccessor",
     "CheckedRandomAccessor",
-    "CreativeInventoryScreenAccessor",
     "InGameHudAccessor",
-    "ItemGroupsAccessor",
     "LandPathNodeMakerAccessor",
     "MixinAnvilContainer",
     "MixinArmorStandEntity",
@@ -39,7 +37,6 @@
     "MixinFishingRodItem",
     "MixinFlintAndSteelItem",
     "MixinForgingScreenHandler",
-    "MixinGameRenderer",
     "MixinGrindstoneContainer",
     "MixinItemEntity",
     "MixinItemStack",

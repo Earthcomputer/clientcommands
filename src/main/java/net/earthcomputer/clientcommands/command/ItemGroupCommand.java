@@ -8,21 +8,18 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
-import net.earthcomputer.clientcommands.mixin.CreativeInventoryScreenAccessor;
-import net.earthcomputer.clientcommands.mixin.ItemGroupsAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.impl.itemgroup.ItemGroupHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.datafixer.TypeReferences;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemStackSet;
 import net.minecraft.nbt.*;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -30,11 +27,10 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
@@ -57,12 +53,13 @@ public class ItemGroupCommand {
 
     private static final Map<String, Group> groups = new HashMap<>();
 
-    static {
+    public static void registerItemGroups() {
         try {
             loadFile();
         } catch (IOException e) {
             LOGGER.error("Could not load groups file, hence /citemgroup will not work!", e);
         }
+        groups.forEach((key, group) -> group.registerItemGroup(key));
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
@@ -109,34 +106,12 @@ public class ItemGroupCommand {
         if (identifier == null) {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(name);
         }
-        ItemGroup itemGroup = FabricItemGroup.builder(identifier)
-            .displayName(Text.literal(name))
-            .icon(() -> icon)
-            .build();
 
-        groups.put(name, new Group(itemGroup, icon, new NbtList()));
+        groups.put(name, new Group(icon, new NbtList()));
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.addGroup.success", name));
+        ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static final Field CURRENT_PAGE_FIELD;
-    static {
-        Field temp;
-        try {
-            //noinspection JavaReflectionMemberAccess
-            temp = CreativeInventoryScreen.class.getDeclaredField("fabric_currentPage");
-            temp.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            try {
-                //noinspection JavaReflectionMemberAccess
-                temp = CreativeInventoryScreen.class.getDeclaredField("quilt$currentPage");
-                temp.setAccessible(true);
-            } catch (ReflectiveOperationException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-        CURRENT_PAGE_FIELD = temp;
     }
 
     private static int removeGroup(FabricClientCommandSource source, String name) throws CommandSyntaxException {
@@ -146,15 +121,9 @@ public class ItemGroupCommand {
 
         groups.remove(name);
 
-        reloadGroups();
-        CreativeInventoryScreenAccessor.setSelectedTab(ItemGroups.getDefaultTab());
-        try {
-            CURRENT_PAGE_FIELD.set(null, 0);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.removeGroup.success", name));
+        ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -164,12 +133,12 @@ public class ItemGroupCommand {
         }
 
         Group group = groups.get(name);
-        NbtList items = group.getItems();
+        NbtList items = group.items();
         items.add(itemStack.writeNbt(new NbtCompound()));
 
-        reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.addStack.success", itemStack.getItem().getName(), name));
+        ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -179,15 +148,15 @@ public class ItemGroupCommand {
         }
 
         Group group = groups.get(name);
-        NbtList items = group.getItems();
+        NbtList items = group.items();
         if (index < 0 || index >= items.size()) {
             throw OUT_OF_BOUNDS_EXCEPTION.create(index);
         }
         items.remove(index);
 
-        reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.removeStack.success", name, index));
+        ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -197,15 +166,15 @@ public class ItemGroupCommand {
         }
 
         Group group = groups.get(name);
-        NbtList items = group.getItems();
+        NbtList items = group.items();
         if ((index < 0) || (index >= items.size())) {
             throw OUT_OF_BOUNDS_EXCEPTION.create(index);
         }
         items.set(index, itemStack.writeNbt(new NbtCompound()));
 
-        reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.setStack.success", name, index, itemStack.getItem().getName()));
+        ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -215,20 +184,14 @@ public class ItemGroupCommand {
         }
 
         Group group = groups.get(name);
-        ItemGroup itemGroup = group.getItemGroup();
-        NbtList items = group.getItems();
-        ItemStack old = itemGroup.getIcon();
-        itemGroup = FabricItemGroup.builder(
-                new Identifier("clientcommands", name))
-                .displayName(Text.literal(name))
-                .icon(() -> icon)
-                .build();
+        NbtList items = group.items();
+        ItemStack old = group.icon();
 
-        groups.put(name, new Group(itemGroup, icon, items));
+        groups.put(name, new Group(icon, items));
 
-        reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.changeIcon.success", name, old.getItem().getName(), icon.getItem().getName()));
+        ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -242,18 +205,11 @@ public class ItemGroupCommand {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
         }
         Group group = groups.remove(name);
-        ItemGroup itemGroup = group.getItemGroup();
-        NbtList items = group.getItems();
-        ItemStack icon = itemGroup.getIcon();
-        itemGroup = FabricItemGroup.builder(identifier)
-            .displayName(Text.literal(name))
-            .icon(() -> icon)
-            .build();
-        groups.put(_new, new Group(itemGroup, icon, items));
+        groups.put(_new, group);
 
-        reloadGroups();
         saveFile();
         source.sendFeedback(Text.translatable("commands.citemgroup.renameGroup.success", name, _new));
+        ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -263,8 +219,8 @@ public class ItemGroupCommand {
             NbtCompound compoundTag = new NbtCompound();
             groups.forEach((key, value) -> {
                 NbtCompound group = new NbtCompound();
-                group.put("icon", value.getIcon().writeNbt(new NbtCompound()));
-                group.put("items", value.getItems());
+                group.put("icon", value.icon().writeNbt(new NbtCompound()));
+                group.put("items", value.items());
                 compoundTag.put(key, group);
             });
             rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
@@ -292,27 +248,27 @@ public class ItemGroupCommand {
         DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
         if (fileVersion >= currentVersion) {
             compoundTag.getKeys().forEach(key -> {
+                if (Identifier.tryParse("clientcommands:" + key) == null) {
+                    LOGGER.warn("Skipping item group with invalid name {}", key);
+                    return;
+                }
+
                 NbtCompound group = compoundTag.getCompound(key);
-                ItemStack icon = ItemStack.fromNbt(group.getCompound("icon"));
+                ItemStack icon = singleItemFromNbt(group.getCompound("icon"));
                 NbtList items = group.getList("items", NbtElement.COMPOUND_TYPE);
-                ItemGroup itemGroup = FabricItemGroup.builder(
-                        new Identifier("clientcommands", key))
-                        .displayName(Text.literal(key))
-                        .icon(() -> icon)
-                        .entries((enabledFeatures, entries, operatorEnabled) -> {
-                            for (int i = 0; i < items.size(); i++) {
-                                entries.add(ItemStack.fromNbt(items.getCompound(i)));
-                            }
-                        })
-                        .build();
-                groups.put(key, new Group(itemGroup, icon, items));
+                groups.put(key, new Group(icon, items));
             });
         } else {
             compoundTag.getKeys().forEach(key -> {
+                if (Identifier.tryParse("clientcommands:" + key) == null) {
+                    LOGGER.warn("Skipping item group with invalid name {}", key);
+                    return;
+                }
+
                 NbtCompound group = compoundTag.getCompound(key);
                 Dynamic<NbtElement> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, group.getCompound("icon"));
                 Dynamic<NbtElement> newStackDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
-                ItemStack icon = ItemStack.fromNbt((NbtCompound) newStackDynamic.getValue());
+                ItemStack icon = singleItemFromNbt((NbtCompound) newStackDynamic.getValue());
 
                 NbtList updatedListTag = new NbtList();
                 group.getList("items", NbtElement.COMPOUND_TYPE).forEach(tag -> {
@@ -320,79 +276,38 @@ public class ItemGroupCommand {
                     Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
-                ItemGroup itemGroup = FabricItemGroup.builder(
-                        new Identifier("clientcommands", key))
-                        .displayName(Text.literal(key))
-                        .icon(() -> icon)
-                        .entries((enabledFeatures, entries, operatorEnabled) -> {
-                            for (int i = 0; i < updatedListTag.size(); i++) {
-                                entries.add(ItemStack.fromNbt(updatedListTag.getCompound(i)));
-                            }
-                        })
-                        .build();
-                groups.put(key, new Group(itemGroup, icon, updatedListTag));
+                groups.put(key, new Group(icon, updatedListTag));
             });
         }
     }
 
-    private static void reloadGroups() {
-        ItemGroupsAccessor.setGroups(
-            ItemGroups.getGroups().stream()
-                .filter(group -> !group.getId().getNamespace().equals("clientcommands"))
-                .toList()
-        );
-
-        if (groups.isEmpty()) {
-            // refresh the item groups list by remove and readding the last item group
-            List<ItemGroup> list = ItemGroups.getGroups();
-            ItemGroupsAccessor.setGroups(list.subList(0, list.size() - 1));
-            //noinspection UnstableApiUsage
-            ItemGroupHelper.appendItemGroup(list.get(list.size() - 1));
-            return;
+    private static ItemStack singleItemFromNbt(NbtCompound nbt) {
+        ItemStack stack = ItemStack.fromNbt(nbt);
+        if (!stack.isEmpty()) {
+            stack.setCount(1);
         }
-        // otherwise adding the groups will refresh the item groups list
+        return stack;
+    }
 
-        for (String key : groups.keySet()) {
-            Group group = groups.get(key);
-            group.setItemGroup(FabricItemGroup.builder(
-                    new Identifier("clientcommands", key))
+    private record Group(ItemStack icon, NbtList items) {
+        void registerItemGroup(String key) {
+            Registry.register(Registries.ITEM_GROUP, new Identifier("clientcommands", key), FabricItemGroup.builder()
                     .displayName(Text.literal(key))
-                    .icon(group::getIcon)
-                    .entries((enabledFeatures, entries, operatorEnabled) -> {
-                        for (int i = 0; i < group.getItems().size(); i++) {
-                            entries.add(ItemStack.fromNbt(group.getItems().getCompound(i)));
+                    .icon(() -> icon)
+                    .entries((displayContext, entries) -> {
+                        Set<ItemStack> existingStacks = ItemStackSet.create();
+                        for (int i = 0; i < items.size(); i++) {
+                            ItemStack stack = singleItemFromNbt(items.getCompound(i));
+                            if (stack.isEmpty()) {
+                                continue;
+                            }
+                            stack.setCount(1);
+                            if (existingStacks.add(stack)) {
+                                entries.add(stack);
+                            }
                         }
                     })
                     .build());
         }
-    }
-}
-
-class Group {
-
-    private ItemGroup itemGroup;
-    private final ItemStack icon;
-    private final NbtList items;
-
-    public Group(ItemGroup itemGroup, ItemStack icon, NbtList items) {
-        this.itemGroup = itemGroup;
-        this.icon = icon;
-        this.items = items;
-    }
-
-    public ItemGroup getItemGroup() {
-        return this.itemGroup;
-    }
-
-    public ItemStack getIcon() {
-        return this.icon;
-    }
-
-    public NbtList getItems() {
-        return this.items;
-    }
-
-    public void setItemGroup(ItemGroup itemGroup) {
-        this.itemGroup = itemGroup;
     }
 }

@@ -62,9 +62,15 @@ public class WikiRetriever {
                         break;
                     case "code":
                         raw.append(CODE_COLOR);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (italic) raw.append(Formatting.ITALIC);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         code = true;
                         break;
                     case "dd":
@@ -90,34 +96,61 @@ public class WikiRetriever {
             } else {
                 switch (tagName) {
                     case "b":
-                        if (code) raw.append(CODE_COLOR);
-                        else raw.append(Formatting.RESET);
-                        if (italic) raw.append(Formatting.ITALIC);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (code) {
+                            raw.append(CODE_COLOR);
+                        } else {
+                            raw.append(Formatting.RESET);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         bold = false;
                         break;
                     case "i":
-                        if (code) raw.append(CODE_COLOR);
-                        else raw.append(Formatting.RESET);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (code) {
+                            raw.append(CODE_COLOR);
+                        } else {
+                            raw.append(Formatting.RESET);
+                        }
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         italic = false;
                         break;
                     case "dt":
                         raw.append("\n");
                         //fallthrough
                     case "u":
-                        if (code) raw.append(CODE_COLOR);
-                        else raw.append(Formatting.RESET);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (italic) raw.append(Formatting.ITALIC);
+                        if (code) {
+                            raw.append(CODE_COLOR);
+                        } else {
+                            raw.append(Formatting.RESET);
+                        }
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
                         underline = false;
                         break;
                     case "code":
                         raw.append(Formatting.RESET);
-                        if (bold) raw.append(Formatting.BOLD);
-                        if (italic) raw.append(Formatting.ITALIC);
-                        if (underline) raw.append(Formatting.UNDERLINE);
+                        if (bold) {
+                            raw.append(Formatting.BOLD);
+                        }
+                        if (italic) {
+                            raw.append(Formatting.ITALIC);
+                        }
+                        if (underline) {
+                            raw.append(Formatting.UNDERLINE);
+                        }
                         code = false;
                         break;
                     case "ul":

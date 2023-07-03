@@ -45,8 +45,9 @@ public class MathUtil {
     }
 
     public static Vec3d getClosestVisiblePoint(World world, BlockPos targetPos, Vec3d sourcePos, Entity excludingEntity, Direction dir) {
-        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z) > 7 * 7)
+        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z) > 7 * 7) {
             return null;
+        }
 
         Box totalArea = new Box(sourcePos, Vec3d.of(targetPos));
         List<Box> obscurers = new ArrayList<>();
@@ -209,8 +210,9 @@ public class MathUtil {
         }
 
         // the obstacle is fully behind the player, no need to do anything
-        if (behindSource[0] && behindSource[1] && behindSource[2] && behindSource[3])
+        if (behindSource[0] && behindSource[1] && behindSource[2] && behindSource[3]) {
             return null;
+        }
 
         int firstInFront, lastInFront;
         if (!behindSource[0] && !behindSource[3] && (behindSource[1] || behindSource[2])) {
@@ -236,7 +238,9 @@ public class MathUtil {
             // We also force lambda to be the value which makes r lie on the target plane, where a is the
             // eye position and b is the vector from the eye position to this point.
             double lambda = (targetPlaneCoord - sourceOffset) / (getComponent(obscurer[i][0], obscurer[i][1], obscurer[i][2], targetPlaneNormal.getAxis()) - sourceOffset);
-            if (!Double.isFinite(lambda)) return null; // only possible if the player is inside the obstacle
+            if (!Double.isFinite(lambda)) {
+                return null; // only possible if the player is inside the obstacle
+            }
             // actually find the point on the target plane
             Vec3d projected = sourcePos.add((obscurer[i][0] - sourcePos.x) * lambda, (obscurer[i][1] - sourcePos.y) * lambda, (obscurer[i][2] - sourcePos.z) * lambda);
             double x = getComponent(projected, xAxis);

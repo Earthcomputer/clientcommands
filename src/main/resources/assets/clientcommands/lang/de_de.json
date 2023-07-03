@@ -14,13 +14,13 @@
   "commands.cenchant.uncracked": "Seed muss geknackt sein.",
 
   "commands.cfind.found.left": "Fand %1$s an ",
-  "commands.cfind.found.right": ", %2$.2f Blöcke entfernt",
+  "commands.cfind.found.right": ", %2$s Blöcke entfernt",
   "commands.cfind.noMatch": "Keine Objekte haben die Abfrage entsprochen",
   "commands.cfind.success": "%d Objekte haben die Abfrage entsprochen",
 
   "commands.cfindblock.notFound": "Passender Block existiert nicht",
   "commands.cfindblock.success.left": "Nächster passender Block ist an ",
-  "commands.cfindblock.success.right": ", %1$.2f Blöcke entfernt",
+  "commands.cfindblock.success.right": ", %1$s Blöcke entfernt",
 
   "commands.cfinditem.match.left": "%dx %s wurde an ",
   "commands.cfinditem.match.right": " gefunden",
@@ -34,10 +34,6 @@
   "commands.ctask.list.success": "%d Tasks werden derzeit ausgeführt",
   "commands.ctask.stop.noMatch": "Keine passenden Tasks",
   "commands.ctask.stop.success": "%d Tasks wurden beendet",
-
-  "commands.ctemprule.list.header": "Zähle %d TempRules auf:",
-  "commands.ctemprule.reset.success": "TempRule %s wurde zu %s zurückgesetzt",
-  "commands.ctemprule.set.success": "TempRule %s wurde zu %s geändert",
 
   "commands.cwiki.failed": "Konnte Wiki-Inhalt nicht abrufen",
 

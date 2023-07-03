@@ -20,14 +20,14 @@
   "commands.cenchant.uncracked": "De seed moet gekraakt zijn.",
 
   "commands.cfind.found.left": "%1$s gevonden op ",
-  "commands.cfind.found.right": ", %2$.2f blokken verwijderd",
+  "commands.cfind.found.right": ", %2$s blokken verwijderd",
   "commands.cfind.keepSearching.success": "Entiteiten aan het vinden.",
   "commands.cfind.noMatch": "Geen enkele entiteit matchte jouw query",
   "commands.cfind.success": "%d entiteiten matchten jouw query",
 
   "commands.cfindblock.notFound": "Een dergelijk blok is niet gevonden",
   "commands.cfindblock.success.left": "De dichtstbijzijnde match is op ",
-  "commands.cfindblock.success.right": ", %1$.2f blokken verwijderd",
+  "commands.cfindblock.success.right": ", %1$s blokken verwijderd",
 
   "commands.cfinditem.match.left": "%dx %s gevonden op ",
   "commands.cfinditem.match.right": "",
@@ -73,10 +73,6 @@
   "commands.ctask.list.success": "%d taken die momenteel worden uitgevoerd",
   "commands.ctask.stop.noMatch": "Geen overeenkomende taken",
   "commands.ctask.stop.success": "%d taken gestopt",
-
-  "commands.ctemprule.list.header": "%d TempRules aan het vermelden:",
-  "commands.ctemprule.reset.success": "TempRule %s is gereset naar %s",
-  "commands.ctemprule.set.success": "TempRule %s is geupdatet naar %s",
 
   "commands.cwiki.failed": "Kon wiki-inhoud niet ophalen",
 

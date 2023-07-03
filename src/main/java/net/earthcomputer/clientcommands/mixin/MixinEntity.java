@@ -4,12 +4,10 @@ import net.earthcomputer.clientcommands.features.DebugRandom;
 import net.earthcomputer.clientcommands.features.EntityGlowingTicket;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IEntity;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
@@ -57,19 +55,21 @@ public abstract class MixinEntity implements IEntity {
 
     @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
     private void overrideIsGlowing(CallbackInfoReturnable<Boolean> ci) {
-        if (!glowingTickets.isEmpty())
+        if (!glowingTickets.isEmpty()) {
             ci.setReturnValue(Boolean.TRUE);
+        }
     }
 
     @Override
     public void tickGlowingTickets() {
-        if (((Entity) (Object) this).world.isClient) {
+        if (((Entity) (Object) this).getWorld().isClient) {
             Iterator<EntityGlowingTicket> itr = glowingTickets.iterator();
             //noinspection Java8CollectionRemoveIf
             while (itr.hasNext()) {
                 EntityGlowingTicket glowingTicket = itr.next();
-                if (!glowingTicket.tick())
+                if (!glowingTicket.tick()) {
                     itr.remove();
+                }
             }
         }
     }
@@ -90,27 +90,30 @@ public abstract class MixinEntity implements IEntity {
 
     @Inject(method = "onSwimmingStart", at = @At("HEAD"))
     public void onOnSwimmingStart(CallbackInfo ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onSwimmingStart();
+        }
     }
 
     @Inject(method = "playAmethystChimeSound", at = @At("HEAD"))
-    private void onPlayAmethystChimeSound(BlockState state, CallbackInfo ci) {
-        if (isThePlayer() && state.isIn(BlockTags.CRYSTAL_SOUND_BLOCKS)) {
+    private void onPlayAmethystChimeSound(CallbackInfo ci) {
+        if (isThePlayer()) {
             PlayerRandCracker.onAmethystChime();
         }
     }
 
     @Inject(method = "spawnSprintingParticles", at = @At("HEAD"))
     public void onSprinting(CallbackInfo ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onSprinting();
+        }
     }
 
     @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
     public void injectGetTeamColorValue(CallbackInfoReturnable<Integer> ci) {
-        if (hasGlowingTicket())
+        if (hasGlowingTicket()) {
             ci.setReturnValue(getGlowingTicketColor());
+        }
     }
 
     private boolean isThePlayer() {

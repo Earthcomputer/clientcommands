@@ -7,7 +7,7 @@ import com.seedfinding.mcfeature.loot.condition.OpenWaterCondition;
 import com.seedfinding.mcfeature.loot.entry.ItemEntry;
 import com.seedfinding.mcfeature.loot.entry.LootEntry;
 import com.seedfinding.mcfeature.loot.entry.TableEntry;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
@@ -201,7 +201,7 @@ public class FishingCracker {
 
     // region UTILITY
 
-    private static boolean internalInteractFishingBobber(){
+    private static boolean internalInteractFishingBobber() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
         if (player != null && interactionManager != null) {
@@ -215,12 +215,12 @@ public class FishingCracker {
         return false;
     }
 
-    public static boolean retractFishingBobber(){
+    public static boolean retractFishingBobber() {
         return internalInteractFishingBobber();
     }
 
     public static boolean throwFishingBobber() {
-        if (internalInteractFishingBobber()){
+        if (internalInteractFishingBobber()) {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             assert player != null;
             ItemStack stack = player.getMainHandStack();
@@ -231,7 +231,7 @@ public class FishingCracker {
     }
 
     public static boolean canManipulateFishing() {
-        return TempRules.getFishingManipulation().isEnabled() && !goals.isEmpty();
+        return Configs.getFishingManipulation().isEnabled() && !goals.isEmpty();
     }
 
     private static void handleFishingRodThrow(ItemStack stack) {
@@ -248,7 +248,7 @@ public class FishingCracker {
         synchronized (STATE_LOCK) {
             state = State.NOT_MANIPULATING;
 
-            if(canManipulateFishing() && TempRules.getFishingManipulation() == TempRules.FishingManipulation.AFK){
+            if (canManipulateFishing() && Configs.getFishingManipulation() == Configs.FishingManipulation.AFK) {
                 state = State.WAITING_FOR_RETRHOW;
                 TaskManager.addTask("cfishRethrow", new LongTask() {
                     private int counter;
@@ -259,7 +259,7 @@ public class FishingCracker {
 
                     @Override
                     public boolean condition() {
-                        synchronized (STATE_LOCK){
+                        synchronized (STATE_LOCK) {
                             return counter > 0 && state == State.WAITING_FOR_RETRHOW;
                         }
                     }
@@ -276,8 +276,8 @@ public class FishingCracker {
 
                     @Override
                     public void onCompleted() {
-                        synchronized (STATE_LOCK){
-                            if(throwFishingBobber()){
+                        synchronized (STATE_LOCK) {
+                            if (throwFishingBobber()) {
                                 state = State.WAITING_FOR_BOBBER;
                             } else {
                                 state = State.NOT_MANIPULATING;
@@ -371,8 +371,7 @@ public class FishingCracker {
                 if (goal instanceof ClientItemPredicateArgumentType.EnchantedItemPredicate predicate) {
                     if (predicate.isEnchantedBook() && predicate.predicate().numEnchantments() >= 2) {
                         if (!hasWarnedMultipleEnchants) {
-                            Text help = Text.translatable("commands.cfish.help.tooManyEnchants").styled(style -> style.withColor(Formatting.AQUA));
-                            ClientCommandHelper.sendFeedback(help);
+                            ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.help.tooManyEnchants"));
                             hasWarnedMultipleEnchants = true;
                         }
                     }
@@ -390,9 +389,8 @@ public class FishingCracker {
                 if (failedConditions.stream().anyMatch(it -> it instanceof OpenWaterCondition)) {
                     Text error = Text.translatable("commands.cfish.error.openWater").styled(style -> style.withColor(Formatting.RED));
                     ClientCommandHelper.addOverlayMessage(error, 100);
-                    if (!fishingBobber.world.getBlockState(new BlockPos(fishingBobber.pos).up()).isOf(Blocks.LILY_PAD)) {
-                        Text help = Text.translatable("commands.cfish.error.openWater.lilyPad").styled(style -> style.withColor(Formatting.AQUA));
-                        ClientCommandHelper.sendFeedback(help);
+                    if (!fishingBobber.world.getBlockState(BlockPos.ofFloored(fishingBobber.pos).up()).isOf(Blocks.LILY_PAD)) {
+                        ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.error.openWater.lilyPad"));
                     }
                     boolean foundFlowingWater = false;
                     for (BlockPos openWaterViolation : fishingBobber.openWaterViolations) {
@@ -411,10 +409,9 @@ public class FishingCracker {
                                 100
                         );
                     }
-                    ClientCommandHelper.sendFeedback(Text.translatable("commands.cfish.error.openWater.help").styled(style -> style.withColor(Formatting.AQUA)));
+                    ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.error.openWater.help"));
                     if (foundFlowingWater) {
-                        Text help = Text.translatable("commands.cfish.error.openWater.flowingWater").styled(style -> style.withColor(Formatting.AQUA));
-                        ClientCommandHelper.sendFeedback(help);
+                        ClientCommandHelper.sendHelp(Text.translatable("commands.cfish.error.openWater.flowingWater"));
                     }
                     reset();
                     return;
@@ -465,7 +462,9 @@ public class FishingCracker {
 
     public static void processExperienceOrbSpawn(double x, double y, double z, int experienceAmount) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
 
         synchronized (STATE_LOCK) {
             if (state != State.WAITING_FOR_XP) {
@@ -535,14 +534,14 @@ public class FishingCracker {
                 int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - magicMillisecondsCorrection - PingCommand.getLocalPing() - timeToStartOfTick + serverMspt / 2;
                 long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
-                    if (!TempRules.getFishingManipulation().isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
+                    if (!Configs.getFishingManipulation().isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
                         return;
                     }
                     ClientPlayerEntity oldPlayer = MinecraftClient.getInstance().player;
                     if (oldPlayer != null) {
                         ClientPlayNetworkHandler networkHandler = oldPlayer.networkHandler;
                         while (System.nanoTime() - targetTime < 0) {
-                            if (state != State.ASYNC_WAITING_FOR_FISH){
+                            if (state != State.ASYNC_WAITING_FOR_FISH) {
                                 return;
                             }
                         }
@@ -562,7 +561,7 @@ public class FishingCracker {
                                 expectedFishingRodUses++;
                                 FishingBobberEntity prevFishingBobberEntity = player.fishHook;
                                 player.fishHook = oldFishingBobberEntity;
-                                TypedActionResult<ItemStack> result = oldStack.use(player.world, player, Hand.MAIN_HAND);
+                                TypedActionResult<ItemStack> result = oldStack.use(player.getWorld(), player, Hand.MAIN_HAND);
                                 player.fishHook = prevFishingBobberEntity;
 
                                 if (oldStack != result.getValue()) {
@@ -656,8 +655,12 @@ public class FishingCracker {
 
         @Override
         public boolean equals(Object other) {
-            if (other == this) return true;
-            if (!(other instanceof Catch that)) return false;
+            if (other == this) {
+                return true;
+            }
+            if (!(other instanceof Catch that)) {
+                return false;
+            }
             return ItemStack.areEqual(loot, that.loot) && experience == that.experience;
         }
 
@@ -891,7 +894,7 @@ public class FishingCracker {
 
         private LootContext getLootContext() {
             return new LootContext(((CheckedRandomAccessor) random).getSeed().get() ^ 0x5deece66dL, SeedfindingUtil.getMCVersion())
-                .withBiome(SeedfindingUtil.toSeedfindingBiome(world, world.getBiome(new BlockPos(pos))))
+                .withBiome(SeedfindingUtil.toSeedfindingBiome(world, world.getBiome(BlockPos.ofFloored(pos))))
                 .withOpenWater(inOpenWater)
                 .withLuck(luckLevel);
         }
@@ -904,7 +907,7 @@ public class FishingCracker {
             }
 
             float f = 0.0F;
-            BlockPos blockPos = new BlockPos(this.pos);
+            BlockPos blockPos = BlockPos.ofFloored(this.pos);
             FluidState fluidState = this.world.getFluidState(blockPos);
             if (fluidState.isIn(FluidTags.WATER)) {
                 f = fluidState.getHeight(this.world, blockPos);
@@ -1042,13 +1045,13 @@ public class FishingCracker {
                 int o = 0;
                 BlockPos.Mutable mutable = new BlockPos.Mutable();
 
-                for(int p = i; p < j; ++p) {
-                    for(int q = k; q < l; ++q) {
-                        for(int r = m; r < n; ++r) {
+                for (int p = i; p < j; ++p) {
+                    for (int q = k; q < l; ++q) {
+                        for (int r = m; r < n; ++r) {
                             mutable.set(p, q, r);
                             FluidState fluidState = this.world.getFluidState(mutable);
                             if (fluidState.isIn(tag)) {
-                                double f = (double)((float)q + fluidState.getHeight(this.world, mutable));
+                                double f = (float)q + fluidState.getHeight(this.world, mutable);
                                 if (f >= box.minY) {
                                     bl2 = true;
                                     e = Math.max(f - box.minY, e);
@@ -1146,10 +1149,10 @@ public class FishingCracker {
 
         private float getVelocityMultiplier() {
             assert world != null;
-            Block block = this.world.getBlockState(new BlockPos(pos)).getBlock();
+            Block block = this.world.getBlockState(BlockPos.ofFloored(pos)).getBlock();
             float f = block.getVelocityMultiplier();
             if (block != Blocks.WATER && block != Blocks.BUBBLE_COLUMN) {
-                return (double)f == 1.0D ? this.world.getBlockState(new BlockPos(this.pos.x, this.boundingBox.minY - 0.5000001D, this.pos.z)).getBlock().getVelocityMultiplier() : f;
+                return (double)f == 1.0D ? this.world.getBlockState(BlockPos.ofFloored(this.pos.x, this.boundingBox.minY - 0.5000001D, this.pos.z)).getBlock().getVelocityMultiplier() : f;
             } else {
                 return f;
             }
@@ -1257,7 +1260,7 @@ public class FishingCracker {
                         q = this.pos.x + (double)(o * (float)this.fishTravelCountdown * 0.1F);
                         r = (double)((float)MathHelper.floor(this.pos.y) + 1.0F);
                         s = this.pos.z + (double)(p * (float)this.fishTravelCountdown * 0.1F);
-                        blockState2 = world.getBlockState(new BlockPos(q, r - 1.0D, s));
+                        blockState2 = world.getBlockState(BlockPos.ofFloored(q, r - 1.0D, s));
                         if (blockState2.isOf(Blocks.WATER)) {
                             if (this.random.nextFloat() < 0.15F) {
                                 //serverWorld.spawnParticles(ParticleTypes.BUBBLE, q, r - 0.10000000149011612D, s, 1, (double)o, 0.1D, (double)p, 0.0D);
@@ -1294,9 +1297,9 @@ public class FishingCracker {
                         o = MathHelper.nextFloat(this.random, 0.0F, 360.0F) * 0.017453292F;
                         p = MathHelper.nextFloat(this.random, 25.0F, 60.0F);
                         q = this.pos.x + (double)(MathHelper.sin(o) * p * 0.1F);
-                        r = (double)((float)MathHelper.floor(this.pos.y) + 1.0F);
+                        r = (float)MathHelper.floor(this.pos.y) + 1.0F;
                         s = this.pos.z + (double)(MathHelper.cos(o) * p * 0.1F);
-                        blockState2 = world.getBlockState(new BlockPos(q, r - 1.0D, s));
+                        blockState2 = world.getBlockState(BlockPos.ofFloored(q, r - 1.0D, s));
                         if (blockState2.isOf(Blocks.WATER)) {
                             random.nextInt(2);
                             //serverWorld.spawnParticles(ParticleTypes.SPLASH, q, r, s, 2 + this.random.nextInt(2), 0.10000000149011612D, 0.0D, 0.10000000149011612D, 0.0D);

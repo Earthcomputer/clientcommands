@@ -23,7 +23,7 @@ public abstract class MixinItemEntity extends Entity {
 
     @Inject(method = "onTrackedDataSet", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;setHolder(Lnet/minecraft/entity/Entity;)V"))
     private void onStackSet(CallbackInfo ci) {
-        if (world.isClient && FishingCracker.canManipulateFishing()) {
+        if (getWorld().isClient && FishingCracker.canManipulateFishing()) {
             FishingCracker.processItemSpawn(getPos(), getStack());
         }
     }

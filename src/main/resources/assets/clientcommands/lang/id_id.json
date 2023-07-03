@@ -52,7 +52,7 @@
   "commands.cenchant.uncracked": "Seed butuh diketahui.",
 
   "commands.cfind.found.left": "Menemukan %1$s di ",
-  "commands.cfind.found.right": ", %2$.2f block jaraknya",
+  "commands.cfind.found.right": ", %2$s block jaraknya",
   "commands.cfind.keepSearching.success": "Mencari entitas.",
   "commands.cfind.noMatch": "Tidak ada entitas yang cocok di kuery anda",
   "commands.cfind.success": "%d entitas yang cocok di kuery anda",
@@ -60,7 +60,7 @@
   "commands.cfindblock.notFound": "Blok tidak dapat ditemukan",
   "commands.cfindblock.success.left": "Hasil paling dekat adalah di ",
   "commands.cfindblock.success.glow": "[Sinar]",
-  "commands.cfindblock.success.right": ", %1$.2f block",
+  "commands.cfindblock.success.right": ", %1$s block",
 
   "commands.cfinditem.match.left": "%dx %s ketemu di ",
   "commands.cfinditem.match.right": "",
@@ -154,10 +154,6 @@
   "commands.ctask.list.success": "%d sedang menjalankan tugas",
   "commands.ctask.stop.noMatch": "Tidak ada tugas yang cocok",
   "commands.ctask.stop.success": "Memberhentikan tugas %d",
-
-  "commands.ctemprule.list.header": "Mendaftarkan %d TempRules:",
-  "commands.ctemprule.reset.success": "TempRule %s telah di reset menjadi %s",
-  "commands.ctemprule.set.success": "TempRule %s telah di update menjadi %s",
 
   "commands.ctp.notSpectator": "Pemain harus berada di mode penonton untuk teleportasi",
   "commands.ctp.success": "Menelportasi pemain ke %s",

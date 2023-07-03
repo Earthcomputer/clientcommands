@@ -74,7 +74,7 @@ public class Relogger {
             if (!disconnect(true)) {
                 return false;
             }
-            ConnectScreen.connect(mc.currentScreen, mc, ServerAddress.parse(serverInfo.address), serverInfo);
+            ConnectScreen.connect(mc.currentScreen, mc, ServerAddress.parse(serverInfo.address), serverInfo, false);
             return true;
         }
     }

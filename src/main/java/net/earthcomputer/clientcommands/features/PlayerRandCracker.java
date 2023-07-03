@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.earthcomputer.clientcommands.MulticonnectCompat;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.minecraft.client.MinecraftClient;
@@ -49,8 +49,9 @@ public class PlayerRandCracker {
     }
 
     public static int nextInt(int bound) {
-        if ((bound & -bound) == bound)
+        if ((bound & -bound) == bound) {
             return (int) ((bound * (long)next(31)) >> 31);
+        }
 
         int bits, val;
         do {
@@ -92,11 +93,11 @@ public class PlayerRandCracker {
     private static int expectedThrows = 0;
 
     public static void resetCracker() {
-        TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+        Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
     }
 
     public static void resetCracker(String reason) {
-        if (TempRules.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
+        if (Configs.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
             ClientCommandHelper.sendFeedback(Text.translatable("playerManip.reset", Text.translatable("playerManip.reset." + reason))
                     .formatted(Formatting.RED));
         }
@@ -104,13 +105,16 @@ public class PlayerRandCracker {
     }
 
     public static void onDropItem() {
-        if (expectedThrows > 0 || canMaintainPlayerRNG())
-            for (int i = 0; i < 4; i++)
+        if (expectedThrows > 0 || canMaintainPlayerRNG()) {
+            for (int i = 0; i < 4; i++) {
                 nextInt();
-        else
+            }
+        } else {
             resetCracker("dropItem");
-        if (expectedThrows > 0)
+        }
+        if (expectedThrows > 0) {
             expectedThrows--;
+        }
     }
 
     public static void onEntityCramming() {
@@ -136,7 +140,7 @@ public class PlayerRandCracker {
                 nextInt();
             }
 
-            if (TempRules.getChorusManipulation() && stack.getItem() == Items.CHORUS_FRUIT) {
+            if (Configs.getChorusManipulation() && stack.getItem() == Items.CHORUS_FRUIT) {
                 ChorusManipulation.onEat(pos, particleCount, itemUseTimeLeft);
                 if (particleCount == 16) {
                     //Consumption randoms
@@ -171,7 +175,7 @@ public class PlayerRandCracker {
     }
 
     public static void onEquipmentBreak() {
-        if (MulticonnectCompat.getProtocolVersion() <= MulticonnectCompat.V1_13_2) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_13_2) {
             resetCracker("itemBreak");
         }
     }
@@ -185,10 +189,11 @@ public class PlayerRandCracker {
     }
 
     public static void onAnvilUse() {
-        if (canMaintainPlayerRNG())
+        if (canMaintainPlayerRNG()) {
             nextInt();
-        else
+        } else {
             resetCracker("anvil");
+        }
     }
 
     public static void onMending() {
@@ -196,7 +201,7 @@ public class PlayerRandCracker {
     }
 
     public static void onXpOrb() {
-        if (MulticonnectCompat.getProtocolVersion() >= MulticonnectCompat.V1_17) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_17) {
             // TODO: is there a way to be smarter about this?
             resetCracker("xp");
         }
@@ -211,10 +216,11 @@ public class PlayerRandCracker {
     }
 
     public static void onBaneOfArthropods() {
-        if (canMaintainPlayerRNG())
+        if (canMaintainPlayerRNG()) {
             nextInt();
-        else
+        } else {
             resetCracker("baneOfArthropods");
+        }
     }
 
     public static void onRecreatePlayer() {
@@ -222,12 +228,15 @@ public class PlayerRandCracker {
     }
 
     public static void onUnbreaking(ItemStack stack, int amount, int unbreakingLevel) {
-        if (canMaintainPlayerRNG())
-            for (int i = 0; i < amount; i++)
-                if (!(stack.getItem() instanceof ArmorItem) || nextFloat() >= 0.6)
+        if (canMaintainPlayerRNG()) {
+            for (int i = 0; i < amount; i++) {
+                if (!(stack.getItem() instanceof ArmorItem) || nextFloat() >= 0.6) {
                     nextInt(unbreakingLevel + 1);
-                else
+                } else {
                     resetCracker("unbreaking");
+                }
+            }
+        }
     }
 
     public static void onUnbreakingUncertain(ItemStack stack, int minAmount, int maxAmount, int unbreakingLevel) {
@@ -240,12 +249,13 @@ public class PlayerRandCracker {
             if (stack.isDamageable()) {
                 if (amount > 0) {
                     int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
-                    if (unbreakingLevel > 0)
+                    if (unbreakingLevel > 0) {
                         onUnbreaking(stack, amount, unbreakingLevel);
+                    }
 
-                    if (TempRules.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
+                    if (Configs.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
 
-                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15){
+                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15) {
                             MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10,0.1f);
                         }
 
@@ -256,7 +266,7 @@ public class PlayerRandCracker {
                                 false);
                     }
 
-                    if (TempRules.infiniteTools && TempRules.playerCrackState.knowsSeed()) {
+                    if (Configs.infiniteTools && Configs.playerCrackState.knowsSeed()) {
                         Runnable action = () -> throwItemsUntil(rand -> {
                             for (int i = 0; i < amount; i++) {
                                 if (stack.getItem() instanceof ArmorItem && rand.nextFloat() < 0.6)
@@ -294,8 +304,8 @@ public class PlayerRandCracker {
     }
 
     private static boolean canMaintainPlayerRNG() {
-        if (TempRules.playerRNGMaintenance && TempRules.playerCrackState.knowsSeed()) {
-            TempRules.playerCrackState = CrackState.CRACKED;
+        if (Configs.playerRNGMaintenance && Configs.playerCrackState.knowsSeed()) {
+            Configs.playerCrackState = CrackState.CRACKED;
             return true;
         } else {
             return false;
@@ -306,10 +316,10 @@ public class PlayerRandCracker {
     // ===== UTILITIES ===== //
 
     public static ThrowItemsResult throwItemsUntil(Predicate<Random> condition, int max) {
-        if (!TempRules.playerCrackState.knowsSeed()) {
+        if (!Configs.playerCrackState.knowsSeed()) {
             return new ThrowItemsResult(ThrowItemsResult.Type.UNKNOWN_SEED);
         }
-        TempRules.playerCrackState = CrackState.CRACKED;
+        Configs.playerCrackState = CrackState.CRACKED;
 
         long seed = PlayerRandCracker.seed;
         Random rand = new Random(seed ^ MULTIPLIER);
@@ -368,8 +378,9 @@ public class PlayerRandCracker {
         for (Slot slot : slots) {
             itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
         }
-        if (itemCounts.isEmpty())
+        if (itemCounts.isEmpty()) {
             return null;
+        }
         //noinspection OptionalGetWithoutIsPresent
         Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getMaxCount).thenComparing(itemCounts::get)).get();
         //noinspection OptionalGetWithoutIsPresent

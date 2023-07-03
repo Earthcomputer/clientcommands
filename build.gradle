@@ -12,10 +12,6 @@ version = project.mod_version
 group = project.maven_group
 
 configurations {
-	included
-	modImplementation.extendsFrom included
-	include.extendsFrom included
-
 	includedLibrary
 	modImplementation.extendsFrom includedLibrary
 }
@@ -30,9 +26,6 @@ repositories {
 	maven {
 		url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"
 	}
-	maven {
-		url = 'https://maven.seedfinding.com'
-	}
 }
 
 loom {
@@ -45,8 +38,9 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	included 'dev.xpple:clientarguments:1.4.2'
-	includedLibrary 'com.seedfinding:mc_feature:1.171.4'
+	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
+	include modImplementation("dev.xpple:betterconfig:${project.betterconfig_version}")
+	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_version}"
 
 	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
 }

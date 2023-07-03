@@ -1,6 +1,6 @@
 {
   "commands.calias.notFound": "未找到别名“%s”",
-  "commands.calias.illegalFormatException": "指令格式或参数错误",
+  "commands.calias.illegalFormatException": "指令格式错误或缺少参数",
   "commands.calias.file.readError": "别名文件读取失败",
   "commands.calias.file.writeError": "别名文件写入失败",
   "commands.calias.addAlias.aliasAlreadyExists": "别名“%s”已经存在",
@@ -46,13 +46,14 @@
 
   "commands.cenchant.expectedWithWithoutExactly": "有效参数：“with”“without”“exactly”",
   "commands.cenchant.failed": "你请求的附魔无法获得或者需要太长时间",
+  "commands.cenchant.help.uncrackedPlayerSeed": "提示：你还没有完全破解玩家种子",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测",
   "commands.cenchant.success": "正在开始操控附魔",
   "commands.cenchant.uncracked": "你需要先破解随机种子",
 
   "commands.cfind.found.left": "在 ",
-  "commands.cfind.found.right": " 找到%1$s, 距离你%2$.2f格",
+  "commands.cfind.found.right": " 找到%1$s, 距离你%2$s格",
   "commands.cfind.keepSearching.success": "正在搜寻实体",
   "commands.cfind.noMatch": "未找到匹配查找条件的实体",
   "commands.cfind.success": "找到%d个匹配查找条件的实体",
@@ -60,7 +61,7 @@
   "commands.cfindblock.notFound": "未发现此方块",
   "commands.cfindblock.success.left": "离你最近的匹配方块在",
   "commands.cfindblock.success.glow": "[发光]",
-  "commands.cfindblock.success.right": "，距离你%1$.2f格",
+  "commands.cfindblock.success.right": "，距离你%1$s格",
 
   "commands.cfinditem.match.left": "在",
   "commands.cfinditem.match.right": "找到%dx %s",
@@ -78,6 +79,7 @@
   "commands.cfish.error.onGround": "浮标撞到了地上",
   "commands.cfish.error.openWater": "为了获得宝藏战利品，浮标需要在开放的水中",
   "commands.cfish.error.openWater.flowingWater": "提示：浮标周围的水必须是静止的水，流动的水不起作用",
+  "commands.cfish.error.openWater.help": "提示：红色立方体显示的方块导致了不满足开放水域条件",
   "commands.cfish.error.openWater.lilyPad": "提示：尝试使浮标卡在睡莲下",
   "commands.cfish.error.outOfWater": "浮标不在水中, 自动控制无法工作",
   "commands.cfish.help.tooManyEnchants": "提示：把多个附魔放在一起获得会很难且可能需要很长时间",
@@ -171,10 +173,6 @@
   "commands.ctask.list.success": "%d个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
   "commands.ctask.stop.success": "已停止%d个任务",
-
-  "commands.ctemprule.list.header": "正在显示%d个临时规则: ",
-  "commands.ctemprule.reset.success": "临时规则%s已被重置为%s",
-  "commands.ctemprule.set.success": "临时规则%s已被更新为%s",
 
   "commands.ctitle.cleared": "已清除的标题",
   "commands.ctitle.reset": "重置标题选项",

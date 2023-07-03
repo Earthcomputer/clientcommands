@@ -1,8 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.Unpooled;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.c2c.*;
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
 import net.minecraft.client.MinecraftClient;
@@ -41,7 +40,7 @@ public class MixinChatHud {
             return;
         }
         String packetString = string.substring(index + 6);
-        if (!TempRules.acceptC2CPackets) {
+        if (!Configs.acceptC2CPackets) {
             if (OutgoingPacketFilter.removeIfContains(packetString)) {
                 this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.sentC2CPacket"));
             } else {
@@ -106,12 +105,8 @@ public class MixinChatHud {
         }
         try {
             c2CPacket.apply(CCNetworkHandler.getInstance());
-        } catch (CommandSyntaxException e) {
-            if (e.getRawMessage() instanceof Text) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage((Text) e.getRawMessage());
-            }
-            e.printStackTrace();
         } catch (Exception e) {
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(e.getMessage()));
             e.printStackTrace();
         }
         return true;
