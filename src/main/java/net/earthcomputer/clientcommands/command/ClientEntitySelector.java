@@ -35,10 +35,12 @@ public class ClientEntitySelector {
 
     public Entity getEntity(ServerCommandSource source) throws CommandSyntaxException {
         List<Entity> entities = getEntities(source);
-        if (entities.isEmpty())
+        if (entities.isEmpty()) {
             throw EntityArgumentType.ENTITY_NOT_FOUND_EXCEPTION.create();
-        if (entities.size() > 1)
+        }
+        if (entities.size() > 1) {
             throw EntityArgumentType.TOO_MANY_ENTITIES_EXCEPTION.create();
+        }
         return entities.get(0);
     }
 
@@ -46,13 +48,15 @@ public class ClientEntitySelector {
         Vec3d origin = source.getPosition();
         origin = new Vec3d(originX == null ? origin.x : originX, originY == null ? origin.y : originY, originZ == null ? origin.z : originZ);
 
-        if (senderOnly)
+        if (senderOnly) {
             return filter.test(origin, source.getEntity()) ? Collections.singletonList(source.getEntity()) : Collections.emptyList();
+        }
 
         List<Entity> entities = new ArrayList<>();
         for (Entity entity : MinecraftClient.getInstance().world.getEntities()) {
-            if (filter.test(origin, entity))
+            if (filter.test(origin, entity)) {
                 entities.add(entity);
+            }
         }
 
         sorter.accept(origin, entities);

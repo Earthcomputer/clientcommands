@@ -1,11 +1,14 @@
 package net.earthcomputer.clientcommands.c2c;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.network.encryption.PublicPlayerSession;
 import net.minecraft.text.MutableText;
@@ -17,7 +20,7 @@ import java.security.PublicKey;
 
 public class CCNetworkHandler implements CCPacketListener {
 
-    private static final SimpleCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("ccpacket.messageTooLong"));
+    private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Text.translatable("ccpacket.messageTooLong", d));
     private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("ccpacket.publicKeyNotFound"));
     private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("ccpacket.encryptionFailed"));
 
@@ -47,21 +50,36 @@ public class CCNetworkHandler implements CCPacketListener {
             throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
         }
         PublicKey key = ppk.data().key();
-        StringBuf buf = new StringBuf();
+        PacketByteBuf buf = PacketByteBufs.create();
         buf.writeInt(id);
         packet.write(buf);
-        byte[] compressed = ConversionHelper.Gzip.compress(buf.bytes());
-        if (compressed.length > 245) {
-            throw MESSAGE_TOO_LONG_EXCEPTION.create();
+        byte[] compressed = ConversionHelper.Gzip.compress(buf.getWrittenBytes());
+        // split compressed into 245 byte chunks
+        int chunks = (compressed.length + 244) / 245;
+        byte[][] chunked = new byte[chunks][];
+        for (int i = 0; i < chunks; i++) {
+            int start = i * 245;
+            int end = Math.min(start + 245, compressed.length);
+            chunked[i] = new byte[end - start];
+            System.arraycopy(compressed, start, chunked[i], 0, end - start);
         }
-        byte[] encrypted = ConversionHelper.RsaEcb.encrypt(compressed, key);
-        if (encrypted == null || encrypted.length == 0) {
-            throw ENCRYPTION_FAILED_EXCEPTION.create();
+        // encrypt each chunk
+        byte[][] encrypted = new byte[chunks][];
+        for (int i = 0; i < chunks; i++) {
+            encrypted[i] = ConversionHelper.RsaEcb.encrypt(chunked[i], key);
+            if (encrypted[i] == null || encrypted[i].length == 0) {
+                throw ENCRYPTION_FAILED_EXCEPTION.create();
+            }
         }
-        String packetString = ConversionHelper.BaseUTF8.toUnicode(encrypted);
+        // join encrypted chunks into one byte array
+        byte[] joined = new byte[encrypted.length * 256];
+        for (int i = 0; i < encrypted.length; i++) {
+            System.arraycopy(encrypted[i], 0, joined, i * 256, 256);
+        }
+        String packetString = ConversionHelper.BaseUTF8.toUnicode(joined);
         String commandString = "w " + recipient.getProfile().getName() + " CCENC:" + packetString;
         if (commandString.length() >= 256) {
-            throw MESSAGE_TOO_LONG_EXCEPTION.create();
+            throw MESSAGE_TOO_LONG_EXCEPTION.create(commandString.length());
         }
         MinecraftClient.getInstance().getNetworkHandler().sendChatCommand(commandString);
         OutgoingPacketFilter.addPacket(packetString);

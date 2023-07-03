@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.ClientCommands;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.VarCommand;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -165,8 +165,8 @@ public class ClientCommandFunctions {
         try {
             int count = 0;
             while (!entries.isEmpty()) {
-                if (count++ >= TempRules.commandExecutionLimit) {
-                    throw COMMAND_LIMIT_REACHED_EXCEPTION.create(TempRules.commandExecutionLimit);
+                if (count++ >= Configs.commandExecutionLimit) {
+                    throw COMMAND_LIMIT_REACHED_EXCEPTION.create(Configs.commandExecutionLimit);
                 }
                 entries.remove().execute(dispatcher, source);
             }

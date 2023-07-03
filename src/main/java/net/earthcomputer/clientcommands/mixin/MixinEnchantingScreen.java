@@ -2,10 +2,10 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.EnchantmentScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.EnchantmentScreenHandler;
 import net.minecraft.text.Text;
@@ -23,9 +23,10 @@ public abstract class MixinEnchantingScreen extends HandledScreen<EnchantmentScr
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    public void postRender(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        if (EnchantmentCracker.isEnchantingPredictionEnabled())
-            EnchantmentCracker.drawEnchantmentGUIOverlay(matrices);
+    public void postRender(DrawContext context, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
+        if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
+            EnchantmentCracker.drawEnchantmentGUIOverlay(context);
+        }
     }
 
     @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickButton(II)V"))

@@ -11,7 +11,15 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+configurations {
+	includedLibrary
+	modImplementation.extendsFrom includedLibrary
+}
+
 repositories {
+	maven {
+		url = 'https://maven.seedfinding.com'
+	}
 	maven {
 		url = 'https://maven.xpple.dev/maven2'
 	}
@@ -30,10 +38,17 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation 'dev.xpple:clientarguments:1.4.2'
-	include 'dev.xpple:clientarguments:1.4.2'
+	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
+	include modImplementation("dev.xpple:betterconfig:${project.betterconfig_version}")
+	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_version}"
 
 	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
+}
+
+jar {
+	from(configurations.includedLibrary.collect { it.isDirectory() ? it : zipTree(it) }) {
+		include 'com/seedfinding/**'
+	}
 }
 
 processResources {

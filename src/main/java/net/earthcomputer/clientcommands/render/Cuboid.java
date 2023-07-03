@@ -34,13 +34,10 @@ public class Cuboid extends Shape {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, float delta) {
-        BufferBuilder buff = Tessellator.getInstance().getBuffer();
-        buff.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+    public void render(MatrixStack matrixStack, VertexConsumer vertexConsumer, float delta) {
         for (Line edge : this.edges) {
-            edge.renderLine(matrixStack, buff, delta, prevPos.subtract(getPos()));
+            edge.renderLine(matrixStack, vertexConsumer, delta, prevPos.subtract(getPos()));
         }
-        Tessellator.getInstance().draw();
     }
 
     @Override

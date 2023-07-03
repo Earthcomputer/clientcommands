@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Command;
@@ -11,8 +12,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.BrigadierRemover;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.impl.command.client.ClientCommandInternals;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -20,7 +21,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -45,13 +48,6 @@ public class AliasCommand {
     private static final HashMap<String, String> aliasMap = loadAliases();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        try {
-            Class.forName("net.fabricmc.fabric.impl.command.client.ClientCommandInternals");
-        } catch (ClassNotFoundException e) {
-            LOGGER.warn("Could not find ClientCommandInternals, /calias command not available");
-            return;
-        }
-
         dispatcher.register(literal("calias")
                 .then(literal("add")
                         .then(argument("key", string())
@@ -93,7 +89,7 @@ public class AliasCommand {
             } catch (IllegalFormatException e) {
                 throw ILLEGAL_FORMAT_EXCEPTION.create();
             }
-        } else if (arguments != null){
+        } else if (arguments != null) {
             cmd += " " + arguments;
         }
         ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
@@ -115,14 +111,14 @@ public class AliasCommand {
         if (aliasMap.containsKey(key)) {
             throw ALIAS_EXISTS_EXCEPTION.create(key);
         }
-        if (ClientCommandInternals.getActiveDispatcher().getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
+        if (ClientCommandManager.getActiveDispatcher().getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
             throw COMMAND_EXISTS_EXCEPTION.create(key);
         }
         if (!command.startsWith("/")) {
             command = "/" + command;
         }
 
-        for (CommandDispatcher<FabricClientCommandSource> dispatcher : new CommandDispatcher[] { ClientCommandInternals.getActiveDispatcher(), MinecraftClient.getInstance().getNetworkHandler().getCommandDispatcher() }) {
+        for (CommandDispatcher<FabricClientCommandSource> dispatcher : new CommandDispatcher[] { ClientCommandManager.getActiveDispatcher(), MinecraftClient.getInstance().getNetworkHandler().getCommandDispatcher() }) {
             dispatcher.register(literal(key)
                     .executes(ctx -> executeAliasCommand(source, key, null))
                     .then(argument("arguments", greedyString())
@@ -150,7 +146,7 @@ public class AliasCommand {
 
     private static int removeAlias(FabricClientCommandSource source, String key) throws CommandSyntaxException {
         if (aliasMap.containsKey(key)) {
-            BrigadierRemover.of(ClientCommandInternals.getActiveDispatcher()).get(key).remove();
+            BrigadierRemover.of(ClientCommandManager.getActiveDispatcher()).get(key).remove();
             BrigadierRemover.of(MinecraftClient.getInstance().getNetworkHandler().getCommandDispatcher()).get(key).remove();
             aliasMap.remove(key);
         } else {
@@ -168,8 +164,8 @@ public class AliasCommand {
         }
         Gson gson = new Gson();
         try (Reader fileReader = Files.newBufferedReader(ALIAS_PATH)) {
-            return gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>(){}.getType());
-        } catch (IOException e) {
+            return gson.fromJson(new JsonReader(fileReader), new TypeToken<HashMap<String, String>>() {}.getType());
+        } catch (IOException | JsonSyntaxException e) {
             LOGGER.error("Error reading aliases file", e);
             return new HashMap<>();
         }

@@ -59,7 +59,7 @@ public class PosCommand {
         RegistryKey<World> targetWorld;
         if (sourceDim == null && targetDim == null) {
             // If neither argument is given, set current dimension as source and "opposite" as target
-            sourceWorld = source.getPlayer().world.getRegistryKey();
+            sourceWorld = source.getPlayer().getWorld().getRegistryKey();
             targetWorld = getOppositeWorld(sourceWorld);
         } else if (targetDim == null) {
             // If only source dimension is given, set the target to "opposite"
@@ -76,7 +76,7 @@ public class PosCommand {
         }
 
         double scaleFactor = (double) getCoordinateScale(sourceWorld) / getCoordinateScale(targetWorld);
-        BlockPos targetPos = new BlockPos(Math.floor(pos.getX() * scaleFactor), pos.getY(), Math.floor(pos.getZ() * scaleFactor));
+        BlockPos targetPos = BlockPos.ofFloored(pos.getX() * scaleFactor, pos.getY(), pos.getZ() * scaleFactor);
         String sourceWorldName = getWorldName(sourceWorld);
         String targetWorldName = getWorldName(targetWorld);
 

@@ -52,7 +52,7 @@
   "commands.cenchant.uncracked": "Сид нужно взломать",
 
   "commands.cfind.found.left": "Найденный %1$s ",
-  "commands.cfind.found.right": ", %2$.2f блоков от вас",
+  "commands.cfind.found.right": ", %2$s блоков от вас",
   "commands.cfind.keepSearching.success": "Поиск сущностей",
   "commands.cfind.noMatch": "Нет объектов, соответствующих вашему запросу",
   "commands.cfind.success": "%d сущностей соответствуют вашему запросу",
@@ -60,7 +60,7 @@
   "commands.cfindblock.notFound": "Такой блок не найден",
   "commands.cfindblock.success.left": "Ближайший в ",
   "commands.cfindblock.success.glow": "[Подсветить]",
-  "commands.cfindblock.success.right": ", %1$.2f блоков от вас",
+  "commands.cfindblock.success.right": ", %1$s блоков от вас",
 
   "commands.cfinditem.match.left": "%dx %s найдено в ",
   "commands.cfinditem.match.right": "",
@@ -154,10 +154,6 @@
   "commands.ctask.list.success": "%d в настоящее время выполняет задачи",
   "commands.ctask.stop.noMatch": "Нет подходящих задач",
   "commands.ctask.stop.success": "Остановлено %d задач",
-
-  "commands.ctemprule.list.header": "Список %d ВременныхПравил:",
-  "commands.ctemprule.reset.success": "ВременноеПравило %s было сброшено на %s",
-  "commands.ctemprule.set.success": "ВременноеПравило %s было обновлено до %s",
 
   "commands.ctitle.cleared": "Очищенные заголовки",
   "commands.ctitle.reset": "Сбросить параметры заголовка",

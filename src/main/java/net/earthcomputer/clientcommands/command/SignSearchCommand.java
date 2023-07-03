@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.function.Predicate;
@@ -45,8 +46,14 @@ public class SignSearchCommand {
                 return false;
             }
 
-            for (int i = 0; i < 4; i++) {
-                String line = sign.getTextOnRow(i, MinecraftClient.getInstance().shouldFilterText()).getString();
+            SignText frontText = sign.getFrontText();
+            SignText backText = sign.getBackText();
+            for (int i = 0; i < SignText.field_43299; i++) {
+                String line = frontText.getMessage(i, MinecraftClient.getInstance().shouldFilterText()).getString();
+                if (linePredicate.test(line)) {
+                    return true;
+                }
+                line = backText.getMessage(i, MinecraftClient.getInstance().shouldFilterText()).getString();
                 if (linePredicate.test(line)) {
                     return true;
                 }

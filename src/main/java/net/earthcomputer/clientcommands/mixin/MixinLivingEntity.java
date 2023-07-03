@@ -3,11 +3,7 @@ package net.earthcomputer.clientcommands.mixin;
 import com.google.common.base.Objects;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.ILivingEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.block.Material;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -42,61 +38,69 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
 
     @Inject(method = "tickCramming", at = @At("HEAD"))
     public void onEntityCramming(CallbackInfo ci) {
-        if (isThePlayer() && world.getOtherEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
+        if (isThePlayer() && getWorld().getOtherEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
             PlayerRandCracker.onEntityCramming();
         }
     }
 
     @Inject(method = "spawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getDrinkSound(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/sound/SoundEvent;"))
     public void onDrink(CallbackInfo ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onDrink();
+        }
     }
 
     @Inject(method = "spawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getEatSound(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/sound/SoundEvent;"))
     public void onEat(ItemStack stack, int particleCount, CallbackInfo ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onEat(stack, this.getPos(), particleCount, this.itemUseTimeLeft);
+        }
     }
 
     @Inject(method = "baseTick",
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/tag/FluidTags;WATER:Lnet/minecraft/registry/tag/TagKey;", ordinal = 0)),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;", ordinal = 0))
     public void onUnderwater(CallbackInfo ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onUnderwater();
+        }
     }
 
     @Inject(method = "playEquipmentBreakEffects", at = @At("HEAD"))
     public void onEquipmentBreak(ItemStack stack, CallbackInfo ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onEquipmentBreak();
+        }
     }
 
     @Inject(method = "tickStatusEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isInvisible()Z"))
     public void onPotionParticles(CallbackInfo ci) {
-        if (isThePlayer())
+        if (isThePlayer()) {
             PlayerRandCracker.onPotionParticles();
+        }
     }
 
     @Inject(method = "baseTick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z", ordinal = 2))
     public void testFrostWalker(CallbackInfo ci) {
-        if (!isThePlayer())
+        if (!isThePlayer()) {
             return;
+        }
 
         BlockPos pos = getBlockPos();
         if (!Objects.equal(pos, this.lastBlockPos)) {
             this.lastBlockPos = pos;
-            if (onGround) {
+            if (isOnGround()) {
                 int frostWalkerLevel = EnchantmentHelper.getEquipmentLevel(Enchantments.FROST_WALKER, (LivingEntity) (Object) this);
                 if (frostWalkerLevel > 0) {
                     BlockState frostedIce = Blocks.FROSTED_ICE.getDefaultState();
-                    float radius = Math.min(16, frostWalkerLevel + 2);
+                    int radius = Math.min(16, frostWalkerLevel + 2);
                     for (BlockPos offsetPos : BlockPos.iterate(pos.add(-radius, -1, -radius), pos.add(radius, -1, radius))) {
-                        BlockState offsetState = world.getBlockState(offsetPos);
-                        if (offsetState.getMaterial() == Material.WATER && offsetState.get(FluidBlock.LEVEL) == 0 && world.canPlace(frostedIce, offsetPos, ShapeContext.absent())) {
-                            if (world.isAir(offsetPos.up())) {
-                                PlayerRandCracker.onFrostWalker();
+                        if (offsetPos.isWithinDistance(getPos(), radius)) {
+                            BlockState offsetState = getWorld().getBlockState(offsetPos);
+                            if (offsetState == FrostedIceBlock.getMeltedState() && getWorld().canPlace(frostedIce, offsetPos, ShapeContext.absent())) {
+                                if (getWorld().isAir(offsetPos.up())) {
+                                    PlayerRandCracker.onFrostWalker();
+                                }
                             }
                         }
                     }
@@ -107,8 +111,9 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
 
     @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;shouldDisplaySoulSpeedEffects()Z"))
     private void testSoulSpeed(CallbackInfo ci) {
-        if (!isThePlayer())
+        if (!isThePlayer()) {
             return;
+        }
 
         boolean hasSoulSpeed = EnchantmentHelper.hasSoulSpeed((LivingEntity) (Object) this);
         if (hasSoulSpeed && isOnSoulSpeedBlock()) {

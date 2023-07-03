@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -30,7 +30,7 @@ public class ChorusManipulation {
         TaskManager.addTask("chorusManipRenderer", new SimpleTask() {
             @Override
             public boolean condition() {
-                return TempRules.getChorusManipulation() && MinecraftClient.getInstance().player != null;
+                return Configs.getChorusManipulation() && MinecraftClient.getInstance().player != null;
             }
 
             @Override
@@ -45,16 +45,16 @@ public class ChorusManipulation {
     }
 
     public static int setGoal(Vec3d v1, Vec3d v2, boolean relative) {
-        if (!TempRules.getChorusManipulation()) {
+        if (!Configs.getChorusManipulation()) {
             Text text = Text.translatable("chorusManip.needChorusManipulation")
                     .formatted(Formatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/ctemprule set chorusManipulation true"));
+                    .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands chorusManipulation set true"));
             sendFeedback(text);
             return 0;
         }
 
-        if (!TempRules.playerCrackState.knowsSeed()) {
+        if (!Configs.playerCrackState.knowsSeed()) {
             Text text = Text.translatable("playerManip.uncracked")
                     .formatted(Formatting.RED)
                     .append(" ")
@@ -118,7 +118,7 @@ public class ChorusManipulation {
                     } else {
                         return false;
                     }
-                }, TempRules.maxChorusItemThrows);
+                }, Configs.getMaxChorusItemThrows());
         if (!throwItemsState.getType().isSuccess()) {
             sendError(throwItemsState.getMessage());
             MinecraftClient.getInstance().inGameHud.setOverlayMessage(
@@ -150,7 +150,7 @@ public class ChorusManipulation {
      * @see net.minecraft.entity.LivingEntity#teleport(double, double, double, boolean) (Vec3d)
      */
     public static Vec3d canTeleport(Box goalArea, Vec3d goalVec) {
-        BlockPos blockPos = new BlockPos(goalVec);
+        BlockPos blockPos = BlockPos.ofFloored(goalVec);
         World world = MinecraftClient.getInstance().world;
 
         if (world != null && world.isChunkLoaded(blockPos)) {
@@ -159,7 +159,7 @@ public class ChorusManipulation {
             while (!blockBelowIsGround && blockPos.getY() > 0) {
                 BlockPos blockPos2 = blockPos.down();
                 BlockState blockState = world.getBlockState(blockPos2);
-                if (blockState.getMaterial().blocksMovement()) {
+                if (blockState.blocksMovement()) {
                     blockBelowIsGround = true;
                 } else {
                     blockPos = blockPos2;

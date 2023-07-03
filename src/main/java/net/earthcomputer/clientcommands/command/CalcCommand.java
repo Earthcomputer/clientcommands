@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.*;
@@ -46,7 +46,7 @@ public class CalcCommand {
         } catch (StackOverflowError e) {
             throw TOO_DEEPLY_NESTED_EXCEPTION.create();
         }
-        TempRules.calcAnswer = result;
+        Configs.calcAnswer = result;
         int iresult = 0;
 
         MutableText feedback = Text.literal(expression.strVal + " = ");

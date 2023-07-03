@@ -1,6 +1,8 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
@@ -13,6 +15,8 @@ import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TaskCommand {
+
+    private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctask.stop.noMatch"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctask")
@@ -30,7 +34,7 @@ public class TaskCommand {
         int taskCount = TaskManager.getTaskCount();
 
         if (taskCount == 0) {
-            source.sendError(Text.translatable("commands.ctask.list.noTasks"));
+            source.sendFeedback(Text.translatable("commands.ctask.list.noTasks"));
         } else {
             source.sendFeedback(Text.translatable("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
             for (String task : tasks) {
@@ -41,20 +45,22 @@ public class TaskCommand {
         return taskCount;
     }
 
-    private static int stopTasks(FabricClientCommandSource source, String pattern) {
+    private static int stopTasks(FabricClientCommandSource source, String pattern) throws CommandSyntaxException {
         List<String> tasksToStop = new ArrayList<>();
         for (String task : TaskManager.getTaskNames()) {
-            if (task.contains(pattern))
+            if (task.contains(pattern)) {
                 tasksToStop.add(task);
+            }
         }
-        for (String task : tasksToStop)
+        for (String task : tasksToStop) {
             TaskManager.removeTask(task);
+        }
 
         if (tasksToStop.isEmpty()) {
             if (pattern.isEmpty()) {
-                source.sendError(Text.translatable("commands.ctask.list.noTasks"));
+                source.sendFeedback(Text.translatable("commands.ctask.list.noTasks"));
             } else {
-                source.sendError(Text.translatable("commands.ctask.stop.noMatch"));
+                throw NO_MATCH_EXCEPTION.create();
             }
         } else {
             source.sendFeedback(Text.translatable("commands.ctask.stop.success", tasksToStop.size()));

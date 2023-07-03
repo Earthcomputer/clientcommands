@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands.features;
 
 import com.mojang.logging.LogUtils;
-import net.earthcomputer.clientcommands.MulticonnectCompat;
-import net.earthcomputer.clientcommands.TempRules;
+import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;
 import net.earthcomputer.clientcommands.task.OneTickTask;
@@ -12,10 +12,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.EnchantingTableBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
@@ -96,13 +96,13 @@ public class EnchantmentCracker {
      * This section is in charge of rendering the overlay on the enchantment GUI
      */
 
-    public static void drawEnchantmentGUIOverlay(MatrixStack matrices) {
-        CrackState crackState = TempRules.enchCrackState;
+    public static void drawEnchantmentGUIOverlay(DrawContext context) {
+        CrackState crackState = Configs.enchCrackState;
 
         List<String> lines = new ArrayList<>();
 
         lines.add(I18n.translate("enchCrack.state", I18n.translate("enchCrack.state." + crackState.asString())));
-        lines.add(I18n.translate("playerManip.state", I18n.translate("playerManip.state." + TempRules.playerCrackState.asString())));
+        lines.add(I18n.translate("playerManip.state", I18n.translate("playerManip.state." + Configs.playerCrackState.asString())));
 
         lines.add("");
 
@@ -133,7 +133,7 @@ public class EnchantmentCracker {
         TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
         int y = 0;
         for (String line : lines) {
-            fontRenderer.draw(matrices, line, 0, y, 0xffffff);
+            context.drawText(fontRenderer, line, 0, y, 0xffffff, false);
             y += fontRenderer.fontHeight;
         }
     }
@@ -149,7 +149,7 @@ public class EnchantmentCracker {
     private static boolean doneEnchantment = false;
 
     public static void resetCracker() {
-        TempRules.enchCrackState = CrackState.UNCRACKED;
+        Configs.enchCrackState = CrackState.UNCRACKED;
         possibleXPSeeds.clear();
     }
 
@@ -163,7 +163,7 @@ public class EnchantmentCracker {
     }
 
     public static void addEnchantmentSeedInfo(World world, EnchantmentScreenHandler container) {
-        CrackState crackState = TempRules.enchCrackState;
+        CrackState crackState = Configs.enchCrackState;
         if (crackState == CrackState.CRACKED) {
             return;
         }
@@ -173,12 +173,13 @@ public class EnchantmentCracker {
             return;
         }
 
-        if (enchantingTablePos == null)
+        if (enchantingTablePos == null) {
             return;
+        }
         BlockPos tablePos = enchantingTablePos;
 
         if (crackState == CrackState.UNCRACKED) {
-            TempRules.enchCrackState = CrackState.CRACKING;
+            Configs.enchCrackState = CrackState.CRACKING;
             prepareForNextEnchantmentSeedCrack(container.getSeed());
         }
         int power = getEnchantPower(world, tablePos);
@@ -232,20 +233,20 @@ public class EnchantmentCracker {
 
         // test the outcome, see if we need to change state
         if (possibleXPSeeds.size() == 0) {
-            TempRules.enchCrackState = CrackState.UNCRACKED;
+            Configs.enchCrackState = CrackState.UNCRACKED;
             LOGGER.warn(
                     "Invalid enchantment seed information. Has the server got unknown mods, is there a desync, or is the client just bugged?");
         } else if (possibleXPSeeds.size() == 1) {
-            TempRules.enchCrackState = CrackState.CRACKED;
+            Configs.enchCrackState = CrackState.CRACKED;
             addPlayerRNGInfo(possibleXPSeeds.iterator().next());
         }
     }
 
     private static void addPlayerRNGInfo(int enchantmentSeed) {
-        if (TempRules.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_1) {
+        if (Configs.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_1) {
             firstXpSeed = enchantmentSeed;
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.HALF_CRACKED;
-        } else if (TempRules.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_2) {
+            Configs.playerCrackState = PlayerRandCracker.CrackState.HALF_CRACKED;
+        } else if (Configs.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_2) {
             // lattispaghetti
             long max_1 = Integer.toUnsignedLong(firstXpSeed) + 1;
             long min_1 = Integer.toUnsignedLong(firstXpSeed);
@@ -255,16 +256,18 @@ public class EnchantmentCracker {
 
             boolean valid = true;
             long seed = (7847617 * a - 18218081 * b) & PlayerRandCracker.MASK;
-            if ((int) (seed >>> 16) != firstXpSeed)
+            if ((int) (seed >>> 16) != firstXpSeed) {
                 valid = false;
+            }
             seed = (seed * PlayerRandCracker.MULTIPLIER + PlayerRandCracker.ADDEND) & PlayerRandCracker.MASK;
-            if ((int) (seed >>> 16) != enchantmentSeed)
+            if ((int) (seed >>> 16) != enchantmentSeed) {
                 valid = false;
+            }
             if (valid) {
                 PlayerRandCracker.setSeed(seed);
-                TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
+                Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
             } else {
-                TempRules.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+                Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
                 LOGGER.warn(
                         "Invalid player RNG information. Has the server got unknown mods, is there a desync, has an operator used /give, or is the client just bugged?");
             }
@@ -272,27 +275,27 @@ public class EnchantmentCracker {
     }
 
     public static void onEnchantedItem() {
-        if (TempRules.playerCrackState == PlayerRandCracker.CrackState.UNCRACKED && !isEnchantingPredictionEnabled()) {
+        if (Configs.playerCrackState == PlayerRandCracker.CrackState.UNCRACKED && !isEnchantingPredictionEnabled()) {
             return;
         }
-        if (TempRules.playerCrackState.knowsSeed()) {
+        if (Configs.playerCrackState.knowsSeed()) {
             possibleXPSeeds.clear();
             possibleXPSeeds.add(PlayerRandCracker.nextInt());
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
-            TempRules.enchCrackState = CrackState.CRACKED;
-        } else if (TempRules.playerCrackState == PlayerRandCracker.CrackState.HALF_CRACKED) {
+            Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
+            Configs.enchCrackState = CrackState.CRACKED;
+        } else if (Configs.playerCrackState == PlayerRandCracker.CrackState.HALF_CRACKED) {
             possibleXPSeeds.clear();
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.ENCH_CRACKING_2;
-            TempRules.enchCrackState = CrackState.UNCRACKED;
-        } else if ((TempRules.playerCrackState == PlayerRandCracker.CrackState.UNCRACKED
-                || TempRules.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_1
-                || TempRules.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_2)) {
+            Configs.playerCrackState = PlayerRandCracker.CrackState.ENCH_CRACKING_2;
+            Configs.enchCrackState = CrackState.UNCRACKED;
+        } else if ((Configs.playerCrackState == PlayerRandCracker.CrackState.UNCRACKED
+                || Configs.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_1
+                || Configs.playerCrackState == PlayerRandCracker.CrackState.ENCH_CRACKING_2)) {
             possibleXPSeeds.clear();
-            TempRules.playerCrackState = PlayerRandCracker.CrackState.ENCH_CRACKING_1;
-            TempRules.enchCrackState = CrackState.UNCRACKED;
+            Configs.playerCrackState = PlayerRandCracker.CrackState.ENCH_CRACKING_1;
+            Configs.enchCrackState = CrackState.UNCRACKED;
         } else {
             PlayerRandCracker.onUnexpectedItemEnchant();
-            TempRules.enchCrackState = CrackState.UNCRACKED;
+            Configs.enchCrackState = CrackState.UNCRACKED;
         }
         doneEnchantment = true;
     }
@@ -317,8 +320,8 @@ public class EnchantmentCracker {
         List<EnchantmentLevelEntry> enchantments = null;
         int[] enchantLevels = new int[3];
         outerLoop:
-        for (int i = TempRules.enchCrackState == CrackState.CRACKED ? -1 : 0;
-             i < (TempRules.playerCrackState.knowsSeed() ? TempRules.maxEnchantItemThrows : 0);
+        for (int i = Configs.enchCrackState == CrackState.CRACKED ? -1 : 0;
+             i < (Configs.playerCrackState.knowsSeed() ? Configs.getMaxEnchantItemThrows() : 0);
              i++) {
             int xpSeed = i == -1 ?
                     possibleXPSeeds.iterator().next()
@@ -363,24 +366,25 @@ public class EnchantmentCracker {
                 player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), 90);
                 // sync rotation to server before we throw any items
                 player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(player.getYaw(), 90, player.isOnGround()));
-                TempRules.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
+                Configs.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
             }
             for (int i = 0; i < timesNeeded; i++) {
                 // throw the item once it's in the inventory
                 taskList.addTask(new SimpleTask() {
                     @Override
                     public boolean condition() {
-                        if (TempRules.playerCrackState != PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS) {
+                        if (Configs.playerCrackState != PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS) {
                             taskList._break();
                             return false;
                         }
 
                         Slot slot = PlayerRandCracker.getBestItemThrowSlot(MinecraftClient.getInstance().player.currentScreenHandler.slots);
                         //noinspection RedundantIfStatement
-                        if (slot == null)
+                        if (slot == null) {
                             return true; // keep waiting
-                        else
+                        } else {
                             return false; // ready to throw an item
+                        }
                     }
 
                     @Override
@@ -398,14 +402,14 @@ public class EnchantmentCracker {
             taskList.addTask(new LongTask() {
                 @Override
                 public void initialize() {
-                    TempRules.playerCrackState = PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
+                    Configs.playerCrackState = PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
                     MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("enchCrack.insn.dummy"));
                     doneEnchantment = false;
                 }
 
                 @Override
                 public boolean condition() {
-                    return TempRules.playerCrackState == PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
+                    return Configs.playerCrackState == PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
                 }
 
                 @Override
@@ -424,7 +428,7 @@ public class EnchantmentCracker {
         taskList.addTask(new OneTickTask() {
             @Override
             public void run() {
-                if (TempRules.enchCrackState == CrackState.CRACKED && doneEnchantment) {
+                if (Configs.enchCrackState == CrackState.CRACKED && doneEnchantment) {
                     ChatHud chatHud = MinecraftClient.getInstance().inGameHud.getChatHud();
                     chatHud.addMessage(Text.translatable("enchCrack.insn.ready").formatted(Formatting.BOLD));
                     chatHud.addMessage(Text.translatable("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
@@ -441,21 +445,21 @@ public class EnchantmentCracker {
     // MISCELLANEOUS HELPER METHODS & ENCHANTING SIMULATION
 
     public static boolean isEnchantingPredictionEnabled() {
-        return TempRules.getEnchantingPrediction();
+        return Configs.getEnchantingPrediction();
     }
 
     private static int getEnchantPower(World world, BlockPos tablePos) {
         int power = 0;
 
-        for (BlockPos bookshelfOffset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
-            if (MulticonnectCompat.getProtocolVersion() <= MulticonnectCompat.V1_18) {
+        for (BlockPos bookshelfOffset : EnchantingTableBlock.POWER_PROVIDER_OFFSETS) {
+            if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18) {
                 // old bookshelf detection method
                 BlockPos obstructionPos = tablePos.add(MathHelper.clamp(bookshelfOffset.getX(), -1, 1), 0, MathHelper.clamp(bookshelfOffset.getZ(), -1, 1));
                 if (world.getBlockState(tablePos.add(bookshelfOffset)).isOf(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {
                     power++;
                 }
             } else {
-                if (EnchantingTableBlock.canAccessBookshelf(world, tablePos, bookshelfOffset)) {
+                if (EnchantingTableBlock.canAccessPowerProvider(world, tablePos, bookshelfOffset)) {
                     power++;
                 }
             }
@@ -481,7 +485,7 @@ public class EnchantmentCracker {
     public static List<EnchantmentLevelEntry> getEnchantmentsInTable(int slot) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         assert player != null;
-        CrackState crackState = TempRules.enchCrackState;
+        CrackState crackState = Configs.enchCrackState;
         EnchantmentScreenHandler enchContainer = (EnchantmentScreenHandler) player.currentScreenHandler;
 
         if (crackState != CrackState.CRACKED) {
@@ -492,8 +496,9 @@ public class EnchantmentCracker {
             } else {
                 // return a list containing the clue
                 Enchantment enchantment = Enchantment.byRawId(enchContainer.enchantmentId[slot]);
-                if (enchantment == null)
+                if (enchantment == null) {
                     return null;
+                }
                 return Collections.singletonList(new EnchantmentLevelEntry(enchantment, enchContainer.enchantmentLevel[slot]));
             }
         } else {

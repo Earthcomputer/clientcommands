@@ -25,8 +25,9 @@ public class MixinClientPlayerInteractionManager {
     @Inject(method = "interactBlock", at = @At("HEAD"))
     public void onRightClickBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> ci) {
         BlockPos pos = hitResult.getBlockPos();
-        if (player.world.getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE)
+        if (player.getWorld().getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE) {
             EnchantmentCracker.enchantingTablePos = pos;
+        }
     }
 
     @Inject(method = "breakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)V"))
@@ -37,8 +38,9 @@ public class MixinClientPlayerInteractionManager {
         Item item = stack.getItem();
         if (item instanceof MiningToolItem) {
             BlockState state = world.getBlockState(pos);
-            if (state.getHardness(world, pos) != 0)
+            if (state.getHardness(world, pos) != 0) {
                 PlayerRandCracker.onItemDamage(1, player, stack);
+            }
         }
     }
 
@@ -47,7 +49,7 @@ public class MixinClientPlayerInteractionManager {
         PlayerRandCracker.isPredictingBlockBreaking = true;
     }
 
-    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", shift = At.Shift.AFTER))
+    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", shift = At.Shift.AFTER))
     private void postSendSequencedPacket(CallbackInfo ci) {
         PlayerRandCracker.postSendBlockBreakingPredictionPacket();
     }

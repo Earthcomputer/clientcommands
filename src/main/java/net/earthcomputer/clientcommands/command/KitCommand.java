@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.command;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -13,8 +12,8 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -218,33 +217,30 @@ class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
 
     public PreviewScreen(PlayerScreenHandler playerScreenHandler, PlayerInventory inventory, String name) {
         super(playerScreenHandler, inventory, Text.literal(name).styled(style -> style.withColor(Formatting.RED)));
-        this.passEvents = true;
         this.titleX = 80;
     }
 
     @Override
-    protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-        this.textRenderer.draw(matrices, this.title, (float) this.titleX, (float) this.titleY, 0x404040);
+    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+        context.drawText(this.textRenderer, this.title, this.titleX, this.titleY, 0x404040, false);
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(DrawContext DrawContext, int mouseX, int mouseY, float delta) {
+        this.renderBackground(DrawContext);
+        super.render(DrawContext, mouseX, mouseY, delta);
 
-        this.drawMouseoverTooltip(matrices, mouseX, mouseY);
+        this.drawMouseoverTooltip(DrawContext, mouseX, mouseY);
     }
 
     @Override
-    protected void drawStatusEffects(MatrixStack matrices, int mouseX, int mouseY) {
+    protected void drawStatusEffects(DrawContext context, int mouseX, int mouseY) {
         // nop
     }
 
     @Override
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
-        this.drawTexture(matrices, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+        context.drawTexture(BACKGROUND_TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 
     @Override
