@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.MapColor;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.texture.NativeImage;
@@ -30,8 +29,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class MapCommand {
     private static final SimpleCommandExceptionType NO_HELD_MAP_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cmap.noHeld"));
@@ -64,8 +65,8 @@ public class MapCommand {
     private static int exportMap(FabricClientCommandSource source, int upscale) throws CommandSyntaxException {
         MapInfo[][] mapInfo = getMaps(source.getPlayer(), source.getClient());
         // calculate width and height
-        int width = mapInfo[0].length * 128 * upscale;
-        int height = mapInfo.length * 128 * upscale;
+        int width = mapInfo[0].length * FilledMapItem.field_30907 * upscale;
+        int height = mapInfo.length * FilledMapItem.field_30908 * upscale;
 
         try (NativeImage image = new NativeImage(NativeImage.Format.RGBA, width, height, true)) {
             for (int i = 0; i < mapInfo.length; ++i) {
@@ -74,7 +75,7 @@ public class MapCommand {
                     if (info == null) {
                         continue;
                     }
-                    drawMapOffset(image, info, j * 128 * upscale, i * 128 * upscale, upscale);
+                    drawMapOffset(image, info, j * FilledMapItem.field_30907 * upscale, i * FilledMapItem.field_30908 * upscale, upscale);
                 }
             }
             File screenshotDir = new File(source.getClient().runDirectory, "screenshots");
@@ -93,8 +94,8 @@ public class MapCommand {
     }
 
     private static void drawMapOffset(NativeImage image, MapInfo map, int xOff, int yOff, int upscale) {
-        for (int i = 0; i < 128; ++i) {
-            for (int j = 0; j < 128; ++j) {
+        for (int i = 0; i < FilledMapItem.field_30907; ++i) {
+            for (int j = 0; j < FilledMapItem.field_30908; ++j) {
                 int color = MapColor.getRenderColor(map.getColor(i, j));
                 for (int k = 0; k < upscale; k++) {
                     for (int l = 0; l < upscale; l++) {
@@ -117,7 +118,7 @@ public class MapCommand {
             return null;
         }
 
-        return new MapInfo(fromItemStack(player.world, map), 0);
+        return new MapInfo(fromItemStack(player.getWorld(), map), 0);
     }
 
     private static MapInfo[][] fromWorld(ClientPlayerEntity player, Entity target) {
@@ -227,7 +228,7 @@ public class MapCommand {
 
     private static MapState fromItemFrame(ItemFrameEntity entity) {
         Integer mapId = entity.getMapId().orElseThrow();
-        return FilledMapItem.getMapState(mapId, entity.world);
+        return FilledMapItem.getMapState(mapId, entity.getWorld());
     }
 
     private record MapInfo(MapState state, int rotation) {
@@ -236,33 +237,54 @@ public class MapCommand {
             // rotate x/y
             switch (rotation % 4) {
                 case 0 -> {
-                    return state.colors[x + y * 128];
+                    return state.colors[x + y * FilledMapItem.field_30907];
                 }
                 case 1 -> {
                     // 90 clockwise
                     int newX = y;
-                    int newY = 127 - x;
-                    return state.colors[newX + newY * 128];
+                    int newY = FilledMapItem.field_30907 - x - 1;
+                    return state.colors[newX + newY * FilledMapItem.field_30907];
                 }
                 case 2 -> {
                     // 180 clockwise
-                    int newX = 127 - x;
-                    int newY = 127 - y;
-                    return state.colors[newX + newY * 128];
+                    int newX = FilledMapItem.field_30907 - x - 1;
+                    int newY = FilledMapItem.field_30908 - y - 1;
+                    return state.colors[newX + newY * FilledMapItem.field_30907];
                 }
                 case 3 -> {
                     // 270 clockwise
-                    int newX = 127 - y;
+                    int newX = FilledMapItem.field_30908 - y - 1;
                     int newY = x;
-                    return state.colors[newX + newY * 128];
+                    return state.colors[newX + newY * FilledMapItem.field_30907];
                 }
                 // this should never be possible
                 default -> throw new IllegalStateException("Unexpected value: " + rotation);
             }
         }
+
+        public int width() {
+            if (rotation % 2 == 0) {
+                return FilledMapItem.field_30907;
+            } else {
+                return FilledMapItem.field_30908;
+            }
+        }
+
+        public int height() {
+            if (rotation % 2 == 0) {
+                return FilledMapItem.field_30908;
+            } else {
+                return FilledMapItem.field_30907;
+            }
+        }
     }
 
     private record FramePos(BlockPos pos, Direction facing) {
+
+    }
+
+    private record Vec2i(int x, int z) {
+
     }
 
 }
