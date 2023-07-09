@@ -8,6 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -48,7 +50,7 @@ public class TranslateCommand {
                     .thenApply(HttpResponse::body)
                     .thenAccept(response -> source.getClient().send(() -> {
                         JsonArray result = JsonParser.parseString(response).getAsJsonArray();
-                        source.sendFeedback(Text.of(result.get(0).getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString()));
+                        source.sendFeedback(createText(result.get(0).getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString()));
                     }));
         } catch (Exception e) {
             throw UNKNOWN_ERROR_EXCEPTION.create();
@@ -62,5 +64,14 @@ public class TranslateCommand {
         builder.addParameter("tl", to);
         builder.addParameter("q", query);
         return builder.build();
+    }
+
+    private static Text createText(String translation) {
+        return Text.literal(translation).styled(s -> s
+            .withUnderline(true)
+            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, translation))
+            .withInsertion(translation)
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("commands.ctranslate.hoverText")))
+        );
     }
 }
