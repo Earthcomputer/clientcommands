@@ -114,6 +114,11 @@ public class EnchantmentCracker {
 
         lines.add("");
 
+        if (enchantingTablePos != null) {
+            lines.add(I18n.translate("enchCrack.bookshelfCount", getEnchantPower(MinecraftClient.getInstance().world, enchantingTablePos)));
+            lines.add("");
+        }
+
         if (crackState == CrackState.CRACKED) {
             lines.add(I18n.translate("enchCrack.enchantments"));
         } else {
@@ -451,10 +456,18 @@ public class EnchantmentCracker {
     private static int getEnchantPower(World world, BlockPos tablePos) {
         int power = 0;
 
+        int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+
         for (BlockPos bookshelfOffset : EnchantingTableBlock.POWER_PROVIDER_OFFSETS) {
-            if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18) {
+            if (protocolVersion <= MultiVersionCompat.V1_18) {
                 // old bookshelf detection method
                 BlockPos obstructionPos = tablePos.add(MathHelper.clamp(bookshelfOffset.getX(), -1, 1), 0, MathHelper.clamp(bookshelfOffset.getZ(), -1, 1));
+                if (world.getBlockState(tablePos.add(bookshelfOffset)).isOf(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {
+                    power++;
+                }
+            } else if (protocolVersion < MultiVersionCompat.V1_20) {
+                // any non-air block used to obstruct bookshelves
+                BlockPos obstructionPos = tablePos.add(bookshelfOffset.getX() / 2, bookshelfOffset.getY(), bookshelfOffset.getZ() / 2);
                 if (world.getBlockState(tablePos.add(bookshelfOffset)).isOf(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {
                     power++;
                 }

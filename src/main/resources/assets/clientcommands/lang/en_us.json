@@ -236,6 +236,7 @@
   "enchCrack.enchantments": "Enchantments:",
   "enchCrack.clues": "Clues:",
   "enchCrack.slot": "Slot %d:",
+  "enchCrack.bookshelfCount": "Bookshelf Count: %d",
 
   "enchCrack.xpSeed.one": "XP Seed: %08X",
   "enchCrack.xpSeed.many": "Possible XP seeds: %d",
