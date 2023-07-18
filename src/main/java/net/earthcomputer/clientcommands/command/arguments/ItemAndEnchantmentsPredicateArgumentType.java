@@ -25,6 +25,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -37,7 +38,8 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
     private static final DynamicCommandExceptionType ID_INVALID_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("argument.item.id.invalid", id));
 
     private Predicate<Item> itemPredicate = item -> true;
-    private Predicate<Enchantment> enchantmentPredicate = ench -> true;
+    private BiPredicate<Item, Enchantment> enchantmentPredicate = (item, ench) -> true;
+    private boolean constrainMaxLevel = false;
 
     private ItemAndEnchantmentsPredicateArgumentType() {
     }
@@ -51,8 +53,13 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         return this;
     }
 
-    public ItemAndEnchantmentsPredicateArgumentType withEnchantmentPredicate(Predicate<Enchantment> predicate) {
+    public ItemAndEnchantmentsPredicateArgumentType withEnchantmentPredicate(BiPredicate<Item, Enchantment> predicate) {
         this.enchantmentPredicate = predicate;
+        return this;
+    }
+
+    public ItemAndEnchantmentsPredicateArgumentType constrainMaxLevel() {
+        this.constrainMaxLevel = true;
         return this;
     }
 
@@ -223,7 +230,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
         private Enchantment parseEnchantment(boolean suggest, Option option, ItemStack stack) throws CommandSyntaxException {
             List<Enchantment> allowedEnchantments = new ArrayList<>();
             nextEnchantment: for (Enchantment ench : Registries.ENCHANTMENT) {
-                boolean skip = (!ench.isAcceptableItem(stack) && stack.getItem() != Items.BOOK) || !enchantmentPredicate.test(ench);
+                boolean skip = (!ench.isAcceptableItem(stack) && stack.getItem() != Items.BOOK) || !enchantmentPredicate.test(stack.getItem(), ench);
                 if (skip) {
                     continue;
                 }
@@ -278,7 +285,7 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
 
         private int parseEnchantmentLevel(boolean suggest, Option option, ItemStack stack, Enchantment enchantment) throws CommandSyntaxException {
             int maxLevel;
-            {
+            if (constrainMaxLevel) {
                 int enchantability = stack.getItem().getEnchantability();
                 int level = 30 + 1 + enchantability / 4 + enchantability / 4;
                 level += Math.round(level * 0.15f);
@@ -287,6 +294,8 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
                         break;
                     }
                 }
+            } else {
+                maxLevel = enchantment.getMaxLevel();
             }
 
             List<Integer> allowedLevels = new ArrayList<>();
