@@ -189,7 +189,8 @@
 
   "commands.ctranslate.unknownError": "发生错误",
   "commands.ctranslate.unknownLanguageCode": "未知的语言代码“%s”",
-  "commands.ctranslate.expectedFromTo": "有效参数：“from”“to”",
+  "commands.ctranslate.expectedFromTo": "有效参数：“from”/“to”",
+  "commands.ctranslate.hoverText": "单击以复制，按住Shift键单击以插入到聊天栏",
 
   "commands.cuuid.success": "%s的UUID是%s",
   "commands.cuuid.success.nameless": "该实体的UUID是%s",
