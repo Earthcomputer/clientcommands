@@ -189,7 +189,8 @@
 
   "commands.ctranslate.unknownError": "发生错误",
   "commands.ctranslate.unknownLanguageCode": "未知的语言代码“%s”",
-  "commands.ctranslate.expectedFromTo": "有效参数：“from”“to”",
+  "commands.ctranslate.expectedFromTo": "有效参数：“from”/“to”",
+  "commands.ctranslate.hoverText": "单击以复制，按住Shift键单击以插入到聊天栏",
 
   "commands.cuuid.success": "%s的UUID是%s",
   "commands.cuuid.success.nameless": "该实体的UUID是%s",
@@ -216,9 +217,10 @@
   "commands.client.crack": "破解",
   "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式%s",
-  "commands.client.notClient": "不是客户端指令",
-  "commands.client.tooFewArguments": "参数过少",
   "commands.client.invalidArgumentException": "无效参数‘%s’",
+  "commands.client.notClient": "不是客户端指令",
+  "commands.client.requiresRestart": "此更改将在你重新启动客户端后生效",
+  "commands.client.tooFewArguments": "参数过少",
 
   "chorusManip.landing.success": "成功降落在：%d，%d，%d",
   "chorusManip.landing.failed": "降落操作不可用",
@@ -293,7 +295,7 @@
   "playerManip.notEnoughItems": "物品数量（%d，共%d）不足以破解玩家种子",
   "playerManip.uncracked": "需要破解玩家种子",
 
-  "snakeGame.title": "潜行",
+  "snakeGame.title": "贪吃蛇",
   "snakeGame.score": "分数：%d",
 
   "ccpacket.messageTooLong": "信息过长（最多255个字符）",
