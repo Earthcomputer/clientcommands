@@ -295,7 +295,7 @@
   "playerManip.notEnoughItems": "物品数量（%d，共%d）不足以破解玩家种子",
   "playerManip.uncracked": "需要破解玩家种子",
 
-  "snakeGame.title": "潜行",
+  "snakeGame.title": "贪吃蛇",
   "snakeGame.score": "分数：%d",
 
   "ccpacket.messageTooLong": "信息过长（最多255个字符）",
