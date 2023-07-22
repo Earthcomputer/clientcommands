@@ -167,7 +167,7 @@
   "commands.cstopsound.success.sourceless.any": "已为自身停止播放所有声音",
   "commands.cstopsound.success.sourceless.sound": "已为自身停止播放%s声音",
   "commands.cstopsound.success.source.any": "已为自身停止播放所有%s声音",
-  "commands.cstopsound.success.source.sound": "已为自身停止播放来自%2$s音源的%$1s声音",
+  "commands.cstopsound.success.source.sound": "已为自身停止播放来自%2$s音源的%1$s声音",
 
   "commands.ctask.list.noTasks": "当前没有正在执行的任务",
   "commands.ctask.list.success": "%d个任务正在执行",
@@ -236,6 +236,7 @@
   "enchCrack.enchantments": "附魔：",
   "enchCrack.clues": "提示：",
   "enchCrack.slot": "第%d行：",
+  "enchCrack.bookshelfCount": "书架数量：%d",
 
   "enchCrack.xpSeed.one": "经验值种子：%08X",
   "enchCrack.xpSeed.many": "可能的经验值种子数量：%d",
