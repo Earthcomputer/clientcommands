@@ -28,7 +28,7 @@ import static net.minecraft.command.CommandSource.*;
 
 public class VarCommand {
 
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("%([^%]+)%");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("%([^%$]+)%");
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
