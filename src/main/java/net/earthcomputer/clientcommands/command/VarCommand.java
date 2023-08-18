@@ -28,7 +28,7 @@ import static net.minecraft.command.CommandSource.*;
 
 public class VarCommand {
 
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("%([^%$]+)%");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("%([^%]+)%");
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -143,7 +143,7 @@ public class VarCommand {
     }
 
     public static String replaceVariables(String originalString) {
-        Matcher matcher = VARIABLE_PATTERN.matcher(originalString);
+        Matcher matcher = VARIABLE_PATTERN.matcher(originalString.replace("\\", "\\\\").replace("$", "\\$"));
         StringBuilder builder = new StringBuilder();
         while (matcher.find()) {
             String group = matcher.group();
