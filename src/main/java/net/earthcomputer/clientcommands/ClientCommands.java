@@ -1,17 +1,23 @@
 package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
@@ -19,12 +25,17 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ClientCommands implements ClientModInitializer {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static Path configDir;
+    private static final Set<String> clientcommandsCommands = new HashSet<>();
+    public static final Identifier COMMAND_EXECUTION_PACKET_ID = new Identifier("clientcommands", "command_execution");
 
     public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
         String playerUUID = MinecraftClient.getInstance().getSession().getProfile().getId().toString();
@@ -68,7 +79,26 @@ public class ClientCommands implements ClientModInitializer {
         ItemGroupCommand.registerItemGroups();
     }
 
+    private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {
+        return dispatcher.getRoot().getChildren().stream().flatMap(node -> node instanceof LiteralCommandNode<?> literal ? Stream.of(literal.getLiteral()) : Stream.empty()).collect(Collectors.toSet());
+    }
+
+    public static void sendCommandExecutionToServer(String command) {
+        StringReader reader = new StringReader(command);
+        reader.skipWhitespace();
+        String theCommand = reader.readUnquotedString();
+        if (clientcommandsCommands.contains(theCommand) && !"cwe".equals(theCommand)) { // avoid sending end-to-end encrypted messages
+            if (ClientPlayNetworking.canSend(COMMAND_EXECUTION_PACKET_ID)) {
+                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+                buf.writeString(command);
+                ClientPlayNetworking.send(COMMAND_EXECUTION_PACKET_ID, buf);
+            }
+        }
+    }
+
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+        Set<String> existingCommands = getCommands(dispatcher);
+
         AuditMixinsCommand.register(dispatcher);
         BookCommand.register(dispatcher);
         LookCommand.register(dispatcher);
@@ -121,5 +151,12 @@ public class ClientCommands implements ClientModInitializer {
         PosCommand.register(dispatcher);
         CrackRNGCommand.register(dispatcher);
         WeatherCommand.register(dispatcher);
+
+        clientcommandsCommands.clear();
+        for (String command : getCommands(dispatcher)) {
+            if (!existingCommands.contains(command)) {
+                clientcommandsCommands.add(command);
+            }
+        }
     }
 }

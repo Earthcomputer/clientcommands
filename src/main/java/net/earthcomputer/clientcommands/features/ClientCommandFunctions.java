@@ -227,7 +227,7 @@ public class ClientCommandFunctions {
                             //noinspection ConstantConditions
                             throw CommandManager.getException(command);
                         }
-                        entries.add(new ParsedEntry(command));
+                        entries.add(new ParsedEntry(line, command));
                     }
                 }
             } catch (IOException e) {
@@ -243,9 +243,10 @@ public class ClientCommandFunctions {
         void execute(CommandDispatcher<FabricClientCommandSource> dispatcher, FabricClientCommandSource source) throws CommandSyntaxException;
     }
 
-    private record ParsedEntry(ParseResults<FabricClientCommandSource> command) implements Entry {
+    private record ParsedEntry(String commandString, ParseResults<FabricClientCommandSource> command) implements Entry {
         @Override
         public void execute(CommandDispatcher<FabricClientCommandSource> dispatcher, FabricClientCommandSource source) throws CommandSyntaxException {
+            ClientCommands.sendCommandExecutionToServer(commandString);
             dispatcher.execute(command);
         }
     }
@@ -253,7 +254,9 @@ public class ClientCommandFunctions {
     private record LazyEntry(String command) implements Entry {
         @Override
         public void execute(CommandDispatcher<FabricClientCommandSource> dispatcher, FabricClientCommandSource source) throws CommandSyntaxException {
-            dispatcher.execute(VarCommand.replaceVariables(command), source);
+            String replacedCommand = VarCommand.replaceVariables(command);
+            ClientCommands.sendCommandExecutionToServer(replacedCommand);
+            dispatcher.execute(replacedCommand, source);
         }
     }
 }
