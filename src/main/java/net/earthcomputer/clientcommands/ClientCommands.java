@@ -36,6 +36,7 @@ public class ClientCommands implements ClientModInitializer {
     public static Path configDir;
     private static final Set<String> clientcommandsCommands = new HashSet<>();
     public static final Identifier COMMAND_EXECUTION_PACKET_ID = new Identifier("clientcommands", "command_execution");
+    private static final Set<String> COMMANDS_TO_NOT_SEND_TO_SERVER = Set.of("cwe", "cnote"); // could contain private information
 
     public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
         String playerUUID = MinecraftClient.getInstance().getSession().getProfile().getId().toString();
@@ -87,7 +88,7 @@ public class ClientCommands implements ClientModInitializer {
         StringReader reader = new StringReader(command);
         reader.skipWhitespace();
         String theCommand = reader.readUnquotedString();
-        if (clientcommandsCommands.contains(theCommand) && !"cwe".equals(theCommand)) { // avoid sending end-to-end encrypted messages
+        if (clientcommandsCommands.contains(theCommand) && !COMMANDS_TO_NOT_SEND_TO_SERVER.contains(theCommand)) {
             if (ClientPlayNetworking.canSend(COMMAND_EXECUTION_PACKET_ID)) {
                 PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                 buf.writeString(command);
