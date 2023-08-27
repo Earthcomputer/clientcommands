@@ -59,6 +59,7 @@
   "commands.cfind.success": "%d entities matched your query",
 
   "commands.cfindblock.notFound": "No such block found",
+  "commands.cfindblock.starting": "Searching for %s",
   "commands.cfindblock.success.left": "Closest match is at ",
   "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$s blocks away",
@@ -159,6 +160,8 @@
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
+
+  "commands.csignsearch.starting": "Searching signs",
 
   "commands.cstartup.add.success": "Added command to startup file",
   "commands.cstartup.couldNotCreateFile": "Couldn't create startup file",

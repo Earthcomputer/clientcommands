@@ -8,6 +8,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -22,10 +23,10 @@ public class SignSearchCommand {
         dispatcher.register(literal("csignsearch")
             .then(literal("text")
                 .then(argument("query", greedyString())
-                    .executes(ctx -> FindBlockCommand.findBlock(ctx.getSource(), predicate(getString(ctx, "query")), FindBlockCommand.MAX_RADIUS, FindBlockCommand.RadiusType.CARTESIAN))))
+                    .executes(ctx -> FindBlockCommand.findBlock(Text.translatable("commands.csignsearch.starting"), predicate(getString(ctx, "query"))))))
             .then(literal("regex")
                 .then(argument("query", greedyRegex())
-                    .executes(ctx -> FindBlockCommand.findBlock(ctx.getSource(), predicate(getRegex(ctx, "query")), FindBlockCommand.MAX_RADIUS, FindBlockCommand.RadiusType.CARTESIAN)))));
+                    .executes(ctx -> FindBlockCommand.findBlock(Text.translatable("commands.csignsearch.starting"), predicate(getRegex(ctx, "query")))))));
     }
 
     private static ClientBlockPredicateArgumentType.ClientBlockPredicate predicate(String query) {

@@ -67,7 +67,10 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
     }
 
     public static ClientBlockPredicate getBlockPredicate(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
-        ParseResult result = context.getArgument(arg, ParseResult.class);
+        return getBlockPredicate(context.getArgument(arg, ParseResult.class));
+    }
+
+    public static ClientBlockPredicate getBlockPredicate(ParseResult result) throws CommandSyntaxException {
         ClientBlockPredicate predicate = getPredicateForListWithoutNbt(Collections.singletonList(result.result));
         NbtCompound nbtData = result.result.map(BlockArgumentParser.BlockResult::nbt, BlockArgumentParser.TagResult::nbt);
         if (nbtData == null) {
