@@ -14,6 +14,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
+import net.minecraft.network.packet.s2c.play.NbtQueryResponseS2CPacket;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -89,6 +90,13 @@ public class MixinClientPlayNetworkHandler implements ClientcommandsDataQueryHan
     public void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
         if (CustomPayloadS2CPacket.BRAND.equals(packet.getChannel())) {
             ServerBrandManager.setServerBrand(this.client.player.getServerBrand());
+        }
+    }
+
+    @Inject(method = "onNbtQueryResponse", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER), cancellable = true)
+    private void onOnNbtQueryResponse(NbtQueryResponseS2CPacket packet, CallbackInfo ci) {
+        if (ccDataQueryHandler.handleQueryResponse(packet.getTransactionId(), packet.getNbt())) {
+            ci.cancel();
         }
     }
 
