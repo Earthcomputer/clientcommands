@@ -59,6 +59,7 @@
   "commands.cfind.success": "找到%d个匹配查找条件的实体",
 
   "commands.cfindblock.notFound": "未发现此方块",
+  "commands.cfindblock.starting": "Searching for %s",
   "commands.cfindblock.success.left": "离你最近的匹配方块在",
   "commands.cfindblock.success.glow": "[发光]",
   "commands.cfindblock.success.right": "，距离你%1$s格",
@@ -106,6 +107,8 @@
   "commands.cglow.entity.failed": "没有目标实体可以发光",
   "commands.cglow.entity.success": "成功使%d个实体发光",
   "commands.cglow.area.success": "成功使%d个区域发光",
+
+  "commands.chat.success": "Successfully opened c??",
 
   "commands.chotbar.notCreative": "仅创造模式玩家可以恢复物品栏",
   "commands.chotbar.restoredHotbar": "成功恢复物品栏%d",
@@ -160,6 +163,8 @@
 
   "commands.crender.entities.success": "实体渲染规则已更新",
 
+  "commands.csignsearch.starting": "Searching signs",
+
   "commands.cstartup.add.success": "在启动文件中添加了命令",
   "commands.cstartup.couldNotCreateFile": "无法创建启动文件",
   "commands.cstartup.couldNotEdit": "无法编辑启动文件",
@@ -173,6 +178,8 @@
   "commands.ctask.list.success": "%d个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
   "commands.ctask.stop.success": "已停止%d个任务",
+
+  "commands.ctime.reset.success": "The time now matches the server",
 
   "commands.ctitle.cleared": "已清除的标题",
   "commands.ctitle.reset": "重置标题选项",
