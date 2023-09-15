@@ -108,6 +108,8 @@
   "commands.cglow.entity.success": "Glowing %d entities",
   "commands.cglow.area.success": "Glowing %d area(s)",
 
+  "commands.chat.success": "Successfully opened c🎩",
+
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
 

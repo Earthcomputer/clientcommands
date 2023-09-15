@@ -7,3 +7,5 @@ accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
 accessible class net/minecraft/client/render/RenderPhase$LineWidth
 
 accessible field net/minecraft/client/network/DataQueryHandler expectedTransactionId I
+
+accessible method net/minecraft/client/MinecraftClient openChatScreen (Ljava/lang/String;)V
