@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.features.ClientTimeModifier;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -61,6 +62,7 @@ public class CTimeCommand {
     
     private static int executeResetTime(FabricClientCommandSource source) {
         ClientTimeModifier.none();
-        return executeQueryDayTime(source);
+        source.sendFeedback(Text.translatable("commands.ctime.reset.success"));
+        return Command.SINGLE_SUCCESS;
     }
 }

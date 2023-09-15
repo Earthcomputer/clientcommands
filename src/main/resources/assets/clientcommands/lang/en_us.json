@@ -179,6 +179,8 @@
   "commands.ctask.stop.noMatch": "No matching tasks",
   "commands.ctask.stop.success": "Stopped %d tasks",
 
+  "commands.ctime.reset.success": "The time now matches the server",
+
   "commands.ctitle.cleared": "Cleared titles",
   "commands.ctitle.reset": "Reset title options",
   "commands.ctitle.show.title": "Showing new title",
