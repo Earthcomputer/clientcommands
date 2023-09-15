@@ -34,5 +34,10 @@
   "mixins": [
     "mixins.clientcommands.json"
   ],
-  "accessWidener": "clientcommands.aw"
+  "accessWidener": "clientcommands.aw",
+  "custom": {
+    "modmenu": {
+      "update_checker": true
+    }
+  }
 }
