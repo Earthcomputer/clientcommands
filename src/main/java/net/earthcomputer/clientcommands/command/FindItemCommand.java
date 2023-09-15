@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
@@ -18,32 +19,39 @@ import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -74,7 +82,7 @@ public class FindItemCommand {
     }
 
     private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, Predicate<ItemStack>> item) {
-        String taskName = TaskManager.addTask("cfinditem", new FindItemsTask(item.getLeft(), item.getRight(), !noSearchShulkerBox, keepSearching));
+        String taskName = TaskManager.addTask("cfinditem", makeFindItemsTask(item.getLeft(), item.getRight(), !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
             ctx.getSource().sendFeedback(Text.translatable("commands.cfinditem.starting.keepSearching", item.getLeft())
                     .append(" ")
@@ -86,23 +94,71 @@ public class FindItemCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static class FindItemsTask extends SimpleTask {
-        private final String searchingForName;
-        private final Predicate<ItemStack> searchingFor;
-        private final boolean searchShulkerBoxes;
-        private final boolean keepSearching;
+    private static SimpleTask makeFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        assert player != null;
+        if (player.hasPermissionLevel(2)) {
+            return new NbtQueryFindItemsTask(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
+        } else {
+            return new ClickInventoriesFindItemsTask(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
+        }
+    }
 
-        private int totalFound = 0;
+    private static abstract class AbstractFindItemsTask extends SimpleTask {
+        protected final String searchingForName;
+        protected final Predicate<ItemStack> searchingFor;
+        protected final boolean searchShulkerBoxes;
+        protected final boolean keepSearching;
+
+        protected int totalFound = 0;
+
+        private AbstractFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+            this.searchingForName = searchingForName;
+            this.searchingFor = searchingFor;
+            this.searchShulkerBoxes = searchShulkerBoxes;
+            this.keepSearching = keepSearching;
+        }
+
+        protected int countItems(NbtList inventory) {
+            int result = 0;
+            for (int i = 0; i < inventory.size(); i++) {
+                NbtCompound compound = inventory.getCompound(i);
+                ItemStack stack = ItemStack.fromNbt(compound);
+                if (searchingFor.test(stack)) {
+                    result += stack.getCount();
+                }
+                if (searchShulkerBoxes && stack.getItem() instanceof BlockItem block && block.getBlock() instanceof ShulkerBoxBlock) {
+                    NbtCompound blockEntityNbt = BlockItem.getBlockEntityNbt(stack);
+                    if (blockEntityNbt != null && blockEntityNbt.contains("Items", NbtElement.LIST_TYPE)) {
+                        result += countItems(blockEntityNbt.getList("Items", NbtElement.COMPOUND_TYPE));
+                    }
+                }
+            }
+            return result;
+        }
+
+        protected void printLocation(BlockPos pos, int count) {
+            sendFeedback(Text.translatable("commands.cfinditem.match.left", count, searchingForName)
+                .append(getLookCoordsTextComponent(pos))
+                .append(" ")
+                .append(getGlowCoordsTextComponent(Text.translatable("commands.cfindblock.success.glow"), pos))
+                .append(Text.translatable("commands.cfinditem.match.right", count, searchingForName)));
+        }
+
+        @Override
+        public void onCompleted() {
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
+        }
+    }
+
+    private static class ClickInventoriesFindItemsTask extends AbstractFindItemsTask {
         private final Set<BlockPos> searchedBlocks = new HashSet<>();
         private BlockPos currentlySearching = null;
         private int currentlySearchingTimeout;
         private boolean hasSearchedEnderChest = false;
 
-        public FindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
-            this.searchingForName = searchingForName;
-            this.searchingFor = searchingFor;
-            this.searchShulkerBoxes = searchShulkerBoxes;
-            this.keepSearching = keepSearching;
+        public ClickInventoriesFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+            super(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
         }
 
         @Override
@@ -201,7 +257,7 @@ public class FindItemCommand {
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
                 public boolean accept(Screen screen) {
-                    if (!(screen instanceof ScreenHandlerProvider handlerProvider)) {
+                    if (!(screen instanceof ScreenHandlerProvider<?> handlerProvider)) {
                         return true;
                     }
                     assert mc.player != null;
@@ -235,22 +291,14 @@ public class FindItemCommand {
                                     matchingItems += stack.getCount();
                                 }
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    NbtCompound blockEntityTag = stack.getSubNbt("BlockEntityTag");
-                                    if (blockEntityTag != null && blockEntityTag.contains("Items")) {
-                                        DefaultedList<ItemStack> boxInv = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                                        Inventories.readNbt(blockEntityTag, boxInv);
-                                        for (ItemStack stackInBox : boxInv) {
-                                            if (searchingFor.test(stackInBox)) {
-                                                matchingItems += stackInBox.getCount();
-                                            }
-                                        }
+                                    NbtCompound blockEntityTag = BlockItem.getBlockEntityNbt(stack);
+                                    if (blockEntityTag != null && blockEntityTag.contains("Items", NbtElement.LIST_TYPE)) {
+                                        matchingItems += countItems(blockEntityTag.getList("Items", NbtElement.COMPOUND_TYPE));
                                     }
                                 }
                             }
                             if (matchingItems > 0) {
-                                sendFeedback(Text.translatable("commands.cfinditem.match.left", matchingItems, searchingForName)
-                                        .append(getLookCoordsTextComponent(currentlySearching))
-                                        .append(Text.translatable("commands.cfinditem.match.right", matchingItems, searchingForName)));
+                                printLocation(currentlySearching, matchingItems);
                                 totalFound += matchingItems;
                             }
                             currentlySearching = null;
@@ -267,10 +315,163 @@ public class FindItemCommand {
                             Direction.getFacing((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
                             pos, false));
         }
+    }
+
+    private static class NbtQueryFindItemsTask extends AbstractFindItemsTask {
+        private static final long MAX_SCAN_TIME = 30_000_000L; // 30ms
+        private static final int NO_RESPONSE_TIMEOUT = 100; // ticks
+
+
+        private final Set<BlockPos> searchedBlocks = new HashSet<>();
+        private boolean isScanning = true;
+        private Iterator<BlockPos.Mutable> scanningIterator;
+        private final Set<BlockPos> waitingOnBlocks = new HashSet<>();
+        private int currentlySearchingTimeout;
+        @Nullable
+        private BlockPos enderChestPosition = null;
+        @Nullable
+        private Integer numItemsInEnderChest = null;
+        private boolean hasPrintedEnderChest = false;
+
+        public NbtQueryFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+            super(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
+        }
+
+        @Override
+        public boolean condition() {
+            return true;
+        }
+
+        @Override
+        protected void onTick() {
+            Entity cameraEntity = MinecraftClient.getInstance().cameraEntity;
+            if (cameraEntity == null) {
+                _break();
+                return;
+            }
+            ClientWorld world = MinecraftClient.getInstance().world;
+            assert world != null;
+
+            if (isScanning) {
+                long startTime = System.nanoTime();
+                if (scanningIterator == null) {
+                    Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
+                    scanningIterator = BlockPos.iterateInSquare(new BlockPos(MathHelper.floor(cameraPos.x) >> 4, 0, MathHelper.floor(cameraPos.z) >> 4), MinecraftClient.getInstance().options.getViewDistance().getValue(), Direction.EAST, Direction.SOUTH).iterator();
+                }
+                while (scanningIterator.hasNext()) {
+                    BlockPos chunkPosAsBlockPos = scanningIterator.next();
+                    if (world.getChunk(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ(), ChunkStatus.FULL, false) != null) {
+                        scanChunk(new ChunkPos(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ()), cameraEntity);
+                    }
+
+                    if (System.nanoTime() - startTime > MAX_SCAN_TIME) {
+                        // wait a tick
+                        return;
+                    }
+                }
+                isScanning = false;
+            }
+
+            if (waitingOnBlocks.isEmpty() && (enderChestPosition == null || numItemsInEnderChest != null)) {
+                if (keepSearching) {
+                    isScanning = true;
+                } else {
+                    _break();
+                }
+                return;
+            }
+
+            if (currentlySearchingTimeout > 0) {
+                currentlySearchingTimeout--;
+            } else {
+                // timeout
+                _break();
+            }
+        }
+
+        private void scanChunk(ChunkPos chunkToScan, Entity cameraEntity) {
+            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+            assert player != null;
+            ClientWorld world = MinecraftClient.getInstance().world;
+            assert world != null;
+            ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+            assert networkHandler != null;
+
+            // check if we can possibly find a closer ender chest
+            if (enderChestPosition != null && numItemsInEnderChest != null && !hasPrintedEnderChest) {
+                Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
+                double enderChestDistanceSq = enderChestPosition.getSquaredDistance(cameraPos);
+                int cameraChunkX = MathHelper.floor(cameraPos.x) >> 4;
+                int cameraChunkZ = MathHelper.floor(cameraPos.z) >> 4;
+                int currentChunkRadius = Math.max(Math.abs(cameraChunkX - chunkToScan.x), Math.abs(cameraChunkZ - chunkToScan.z));
+                double closestPossibleDistance = ((currentChunkRadius - 1) << 4) + Math.min(
+                    Math.min(cameraPos.x - (cameraChunkX << 4), cameraPos.z - (cameraChunkZ << 4)),
+                    Math.min(((cameraChunkX + 1) << 4) - cameraPos.x, ((cameraChunkZ + 1) << 4) - cameraPos.z));
+                if (enderChestDistanceSq < closestPossibleDistance * closestPossibleDistance) {
+                    hasPrintedEnderChest = true;
+                    if (numItemsInEnderChest > 0) {
+                        printLocation(enderChestPosition, numItemsInEnderChest);
+                    }
+                }
+            }
+
+            WorldChunk chunk = world.getChunk(chunkToScan.x, chunkToScan.z);
+
+            for (BlockPos pos : BlockPos.iterate(chunkToScan.getStartX(), world.getBottomY(), chunkToScan.getStartZ(), chunkToScan.getEndX(), world.getTopY(), chunkToScan.getEndZ())) {
+                if (searchedBlocks.contains(pos)) {
+                    continue;
+                }
+                BlockState state = chunk.getBlockState(pos);
+
+                if (state.isOf(Blocks.ENDER_CHEST)) {
+                    BlockPos currentPos = pos.toImmutable();
+                    searchedBlocks.add(currentPos);
+                    if (enderChestPosition == null) {
+                        enderChestPosition = currentPos;
+                        currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
+                        ClientcommandsDataQueryHandler.get(networkHandler).queryEntityNbt(player.getId(), playerNbt -> {
+                            int numItemsInEnderChest = 0;
+                            if (playerNbt != null && playerNbt.contains("EnderItems", NbtElement.LIST_TYPE)) {
+                                numItemsInEnderChest = countItems(playerNbt.getList("EnderItems", NbtElement.COMPOUND_TYPE));
+                            }
+                            this.numItemsInEnderChest = numItemsInEnderChest;
+                            totalFound += numItemsInEnderChest;
+                            currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
+                        });
+                    } else if (!hasPrintedEnderChest) {
+                        Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
+                        double currentDistanceSq = enderChestPosition.getSquaredDistance(cameraPos);
+                        double newDistanceSq = currentPos.getSquaredDistance(cameraPos);
+                        if (newDistanceSq < currentDistanceSq) {
+                            enderChestPosition = currentPos;
+                        }
+                    }
+                } else if (chunk.getBlockEntity(pos) instanceof Inventory) {
+                    BlockPos currentPos = pos.toImmutable();
+                    searchedBlocks.add(currentPos);
+                    waitingOnBlocks.add(currentPos);
+                    currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
+                    ClientcommandsDataQueryHandler.get(networkHandler).queryBlockNbt(currentPos, blockNbt -> {
+                        waitingOnBlocks.remove(currentPos);
+                        if (blockNbt != null && blockNbt.contains("Items", NbtElement.LIST_TYPE)) {
+                            int count = countItems(blockNbt.getList("Items", NbtElement.COMPOUND_TYPE));
+                            if (count > 0) {
+                                totalFound += count;
+                                printLocation(currentPos, count);
+                            }
+                        }
+                        currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
+                    });
+                }
+            }
+        }
 
         @Override
         public void onCompleted() {
-            sendFeedback(Text.translatable("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
+            if (enderChestPosition != null && numItemsInEnderChest != null && numItemsInEnderChest > 0 && !hasPrintedEnderChest) {
+                printLocation(enderChestPosition, numItemsInEnderChest);
+            }
+            super.onCompleted();
         }
     }
 }

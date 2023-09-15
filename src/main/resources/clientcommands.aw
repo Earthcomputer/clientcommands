@@ -5,3 +5,5 @@ extendable method net/minecraft/client/gui/screen/ingame/AbstractInventoryScreen
 
 accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
 accessible class net/minecraft/client/render/RenderPhase$LineWidth
+
+accessible field net/minecraft/client/network/DataQueryHandler expectedTransactionId I

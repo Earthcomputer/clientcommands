@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.brigadier.StringReader;
 import net.cortex.clientAddon.cracker.SeedCracker;
+import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.FishingCracker;
@@ -17,13 +18,17 @@ import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayNetworkHandler.class)
-public class MixinClientPlayNetworkHandler {
+public class MixinClientPlayNetworkHandler implements ClientcommandsDataQueryHandler.IClientPlayNetworkHandler {
     @Shadow @Final private MinecraftClient client;
+
+    @Unique
+    private final ClientcommandsDataQueryHandler ccDataQueryHandler = new ClientcommandsDataQueryHandler((ClientPlayNetworkHandler) (Object) this);
 
     @Inject(method = "onEntitySpawn", at = @At("TAIL"))
     public void onOnEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci) {
@@ -85,5 +90,10 @@ public class MixinClientPlayNetworkHandler {
         if (CustomPayloadS2CPacket.BRAND.equals(packet.getChannel())) {
             ServerBrandManager.setServerBrand(this.client.player.getServerBrand());
         }
+    }
+
+    @Override
+    public ClientcommandsDataQueryHandler clientcommands_getCCDataQueryHandler() {
+        return ccDataQueryHandler;
     }
 }
