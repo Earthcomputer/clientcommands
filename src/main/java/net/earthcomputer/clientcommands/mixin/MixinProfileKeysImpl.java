@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
-import net.minecraft.client.util.ProfileKeysImpl;
+import net.minecraft.client.session.ProfileKeysImpl;
 import net.minecraft.network.encryption.PlayerKeyPair;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

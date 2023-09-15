@@ -3,33 +3,34 @@ package net.earthcomputer.clientcommands.mixin;
 import com.mojang.brigadier.StringReader;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
-import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientCommonNetworkHandler;
+import net.minecraft.client.network.ClientConnectionState;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.NbtQueryResponseS2CPacket;
 import net.minecraft.util.math.Vec3d;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayNetworkHandler.class)
-public class MixinClientPlayNetworkHandler implements ClientcommandsDataQueryHandler.IClientPlayNetworkHandler {
-    @Shadow @Final private MinecraftClient client;
-
+public abstract class MixinClientPlayNetworkHandler extends ClientCommonNetworkHandler implements ClientcommandsDataQueryHandler.IClientPlayNetworkHandler {
     @Unique
     private final ClientcommandsDataQueryHandler ccDataQueryHandler = new ClientcommandsDataQueryHandler((ClientPlayNetworkHandler) (Object) this);
+
+    protected MixinClientPlayNetworkHandler(MinecraftClient client, ClientConnection connection, ClientConnectionState connectionState) {
+        super(client, connection, connectionState);
+    }
 
     @Inject(method = "onEntitySpawn", at = @At("TAIL"))
     public void onOnEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci) {
@@ -83,13 +84,6 @@ public class MixinClientPlayNetworkHandler implements ClientcommandsDataQueryHan
     private void onOnWorldTimeUpdatePre(CallbackInfo ci) {
         if (Configs.getFishingManipulation().isEnabled() && !MinecraftClient.getInstance().isOnThread()) {
             FishingCracker.onTimeSync();
-        }
-    }
-
-    @Inject(method = "onCustomPayload", at = @At("TAIL"))
-    public void onOnCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        if (CustomPayloadS2CPacket.BRAND.equals(packet.getChannel())) {
-            ServerBrandManager.setServerBrand(this.client.player.getServerBrand());
         }
     }
 

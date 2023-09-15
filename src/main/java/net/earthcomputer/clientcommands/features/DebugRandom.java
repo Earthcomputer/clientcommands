@@ -153,7 +153,7 @@ public class DebugRandom extends CheckedRandom {
                 for (IntList stackTracesThisTick : stackTraces) {
                     List<RandomCall> callsThisTick = new ArrayList<>(stackTracesThisTick.size());
                     for (int j = 0; j < stackTracesThisTick.size(); j++) {
-                        callsThisTick.add(new RandomCall(stackTracesThisTick.getInt(j), NbtIo.read(in2)));
+                        callsThisTick.add(new RandomCall(stackTracesThisTick.getInt(j), NbtIo.readCompound(in2)));
                     }
                     randomCalls.add(callsThisTick);
                 }

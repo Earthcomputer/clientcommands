@@ -226,11 +226,11 @@ class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
     }
 
     @Override
-    public void render(DrawContext DrawContext, int mouseX, int mouseY, float delta) {
-        this.renderBackground(DrawContext);
-        super.render(DrawContext, mouseX, mouseY, delta);
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        this.renderBackground(drawContext, mouseX, mouseY, delta);
+        super.render(drawContext, mouseX, mouseY, delta);
 
-        this.drawMouseoverTooltip(DrawContext, mouseX, mouseY);
+        this.drawMouseoverTooltip(drawContext, mouseX, mouseY);
     }
 
     @Override

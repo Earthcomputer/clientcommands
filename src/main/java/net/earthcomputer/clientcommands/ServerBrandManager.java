@@ -15,7 +15,7 @@ public class ServerBrandManager {
     }
 
     public static String getServerBrand() {
-        return serverBrand;
+        return MinecraftClient.getInstance().getNetworkHandler().getBrand();
     }
 
     public static boolean isVanilla() {

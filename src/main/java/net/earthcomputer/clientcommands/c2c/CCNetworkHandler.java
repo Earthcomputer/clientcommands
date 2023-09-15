@@ -53,7 +53,9 @@ public class CCNetworkHandler implements CCPacketListener {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeInt(id);
         packet.write(buf);
-        byte[] compressed = ConversionHelper.Gzip.compress(buf.getWrittenBytes());
+        byte[] uncompressed = new byte[buf.readableBytes()];
+        buf.getBytes(0, uncompressed);
+        byte[] compressed = ConversionHelper.Gzip.compress(uncompressed);
         // split compressed into 245 byte chunks
         int chunks = (compressed.length + 244) / 245;
         byte[][] chunked = new byte[chunks][];

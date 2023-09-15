@@ -40,7 +40,7 @@ public class ClientCommands implements ClientModInitializer {
     private static final Set<String> COMMANDS_TO_NOT_SEND_TO_SERVER = Set.of("cwe", "cnote"); // could contain private information
 
     public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
-        String playerUUID = MinecraftClient.getInstance().getSession().getProfile().getId().toString();
+        String playerUUID = String.valueOf(MinecraftClient.getInstance().getSession().getUuidOrNull());
 
         Set<String> victims = Set.of(
             "fa68270b-1071-46c6-ac5c-6c4a0b777a96", // Earthcomputer
@@ -162,7 +162,7 @@ public class ClientCommands implements ClientModInitializer {
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;
-        registerChatCommand |= CHAT_COMMAND_USERS.contains(MinecraftClient.getInstance().getSession().getProfile().getId().toString());
+        registerChatCommand |= CHAT_COMMAND_USERS.contains(String.valueOf(MinecraftClient.getInstance().getSession().getUuidOrNull()));
         registerChatCommand |= Boolean.getBoolean("clientcommands.debugChatCommand");
         if (registerChatCommand) {
             ChatCommand.register(dispatcher);
