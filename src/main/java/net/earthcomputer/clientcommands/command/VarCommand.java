@@ -143,11 +143,11 @@ public class VarCommand {
     }
 
     public static String replaceVariables(String originalString) {
-        Matcher matcher = VARIABLE_PATTERN.matcher(originalString.replace("\\", "\\\\").replace("$", "\\$"));
+        Matcher matcher = VARIABLE_PATTERN.matcher(originalString);
         StringBuilder builder = new StringBuilder();
         while (matcher.find()) {
             String group = matcher.group();
-            matcher.appendReplacement(builder, variables.getOrDefault(group.substring(1, group.length() - 1), group));
+            matcher.appendReplacement(builder, variables.getOrDefault(group.substring(1, group.length() - 1), group).replace("\\", "\\\\").replace("$", "\\$"));
         }
         matcher.appendTail(builder);
         return builder.toString();
