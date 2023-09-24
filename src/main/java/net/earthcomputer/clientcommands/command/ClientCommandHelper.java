@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.demonwav.mcdev.annotations.Translatable;
 import com.mojang.brigadier.context.CommandContext;
 import net.earthcomputer.clientcommands.interfaces.IFlaggedCommandSource;
 import net.earthcomputer.clientcommands.mixin.InGameHudAccessor;
@@ -38,7 +39,7 @@ public class ClientCommandHelper {
         sendFeedback(Text.literal("").append(help).formatted(Formatting.AQUA));
     }
 
-    public static void sendFeedback(String message, Object... args) {
+    public static void sendFeedback(@Translatable String message, Object... args) {
         sendFeedback(Text.translatable(message, args));
     }
 
@@ -74,7 +75,7 @@ public class ClientCommandHelper {
         return getCommandTextComponent(translatableText, String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Text getCommandTextComponent(String translationKey, String command) {
+    public static Text getCommandTextComponent(@Translatable String translationKey, String command) {
         return getCommandTextComponent(Text.translatable(translationKey), command);
     }
 
