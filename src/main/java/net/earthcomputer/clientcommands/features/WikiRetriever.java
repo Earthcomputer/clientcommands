@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class WikiRetriever {
 
-    private static final String WIKI_HOST = "https://minecraft.gamepedia.com/";
+    private static final String WIKI_HOST = "https://minecraft.wiki/";
     private static final String PAGE_SUMMARY_QUERY = WIKI_HOST + "api.php?action=query&prop=extracts&exintro=true&format=json&titles=%s";
     private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<\\s*(/)?\\s*(\\w+).*?>|<!--.*?-->|\n", Pattern.DOTALL);
     private static final Formatting CODE_COLOR = Formatting.DARK_GREEN;
