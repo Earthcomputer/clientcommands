@@ -1,16 +1,21 @@
 package net.earthcomputer.clientcommands.task;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 public abstract class RenderDistanceScanTask extends SimpleTask {
     private static final long MAX_SCAN_TIME = 30_000_000L; // 30ms
@@ -41,13 +46,23 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             return;
         }
 
+        ClientWorld world = MinecraftClient.getInstance().world;
+        assert world != null;
+
         long startTime = System.nanoTime();
         while (squarePosIterator.hasNext()) {
             BlockPos chunkPosAsBlockPos = squarePosIterator.next();
             ChunkPos chunkPos = new ChunkPos(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ());
 
             if (canScanChunk(cameraEntity, chunkPos)) {
-                scanChunk(cameraEntity, chunkPos);
+                int minSection = world.getBottomSectionCoord();
+                int maxSection = world.getTopSectionCoord();
+                for (int sectionY = minSection; sectionY < maxSection; sectionY++) {
+                    ChunkSectionPos sectionPos = ChunkSectionPos.from(chunkPos, sectionY);
+                    if (canScanChunkSection(cameraEntity, sectionPos)) {
+                        scanChunkSection(cameraEntity, sectionPos);
+                    }
+                }
             }
 
             if (System.nanoTime() - startTime > MAX_SCAN_TIME) {
@@ -75,6 +90,10 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         return world.getChunk(pos.x, pos.z, ChunkStatus.FULL, false) != null;
     }
 
+    protected boolean canScanChunkSection(Entity cameraEntity, ChunkSectionPos pos) {
+        return true;
+    }
+
     protected boolean hasAnyBlockCloserThan(Entity cameraEntity, ChunkPos chunkPos, double distanceSq) {
         Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
         double closestX = MathHelper.clamp(cameraPos.x, chunkPos.x << 4, (chunkPos.x + 1) << 4);
@@ -95,10 +114,18 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         return minPossibleDistance * minPossibleDistance < distanceSq;
     }
 
-    private void scanChunk(Entity cameraEntity, ChunkPos chunkPos) {
+    protected boolean hasBlockState(ChunkSectionPos pos, Predicate<BlockState> stateTest) {
         ClientWorld world = MinecraftClient.getInstance().world;
         assert world != null;
-        for (BlockPos pos : BlockPos.iterate(chunkPos.getStartX(), world.getBottomY(), chunkPos.getStartZ(), chunkPos.getEndX(), world.getTopY(), chunkPos.getEndZ())) {
+        WorldChunk chunk = world.getChunk(pos.getX(), pos.getZ());
+        ChunkSection section = chunk.getSection(chunk.sectionCoordToIndex(pos.getY()));
+        return section.hasAny(stateTest);
+    }
+
+    private void scanChunkSection(Entity cameraEntity, ChunkSectionPos sectionPos) {
+        ClientWorld world = MinecraftClient.getInstance().world;
+        assert world != null;
+        for (BlockPos pos : BlockPos.iterate(sectionPos.getMinX(), sectionPos.getMinY(), sectionPos.getMinZ(), sectionPos.getMaxX(), sectionPos.getMaxY(), sectionPos.getMaxZ())) {
             scanBlock(cameraEntity, pos);
         }
     }

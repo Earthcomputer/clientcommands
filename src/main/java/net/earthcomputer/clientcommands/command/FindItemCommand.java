@@ -417,51 +417,59 @@ public class FindItemCommand {
 
             WorldChunk chunk = world.getChunk(chunkToScan.x, chunkToScan.z);
 
-            for (BlockPos pos : BlockPos.iterate(chunkToScan.getStartX(), world.getBottomY(), chunkToScan.getStartZ(), chunkToScan.getEndX(), world.getTopY(), chunkToScan.getEndZ())) {
-                if (searchedBlocks.contains(pos)) {
+            int minSection = chunk.getBottomSectionCoord();
+            int maxSection = chunk.getTopSectionCoord();
+            for (int sectionY = minSection; sectionY < maxSection; sectionY++) {
+                if (!chunk.getSection(chunk.sectionCoordToIndex(sectionY)).hasAny(state -> state.isOf(Blocks.ENDER_CHEST) || state.hasBlockEntity())) {
                     continue;
                 }
-                BlockState state = chunk.getBlockState(pos);
 
-                if (state.isOf(Blocks.ENDER_CHEST)) {
-                    BlockPos currentPos = pos.toImmutable();
-                    searchedBlocks.add(currentPos);
-                    if (enderChestPosition == null) {
-                        enderChestPosition = currentPos;
-                        currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
-                        ClientcommandsDataQueryHandler.get(networkHandler).queryEntityNbt(player.getId(), playerNbt -> {
-                            int numItemsInEnderChest = 0;
-                            if (playerNbt != null && playerNbt.contains("EnderItems", NbtElement.LIST_TYPE)) {
-                                numItemsInEnderChest = countItems(playerNbt.getList("EnderItems", NbtElement.COMPOUND_TYPE));
+                for (BlockPos pos : BlockPos.iterate(chunkToScan.getStartX(), sectionY << 4, chunkToScan.getStartZ(), chunkToScan.getEndX(), (sectionY << 4) + 15, chunkToScan.getEndZ())) {
+                    if (searchedBlocks.contains(pos)) {
+                        continue;
+                    }
+                    BlockState state = chunk.getBlockState(pos);
+
+                    if (state.isOf(Blocks.ENDER_CHEST)) {
+                        BlockPos currentPos = pos.toImmutable();
+                        searchedBlocks.add(currentPos);
+                        if (enderChestPosition == null) {
+                            enderChestPosition = currentPos;
+                            currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
+                            ClientcommandsDataQueryHandler.get(networkHandler).queryEntityNbt(player.getId(), playerNbt -> {
+                                int numItemsInEnderChest = 0;
+                                if (playerNbt != null && playerNbt.contains("EnderItems", NbtElement.LIST_TYPE)) {
+                                    numItemsInEnderChest = countItems(playerNbt.getList("EnderItems", NbtElement.COMPOUND_TYPE));
+                                }
+                                this.numItemsInEnderChest = numItemsInEnderChest;
+                                totalFound += numItemsInEnderChest;
+                                currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
+                            });
+                        } else if (!hasPrintedEnderChest) {
+                            Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
+                            double currentDistanceSq = enderChestPosition.getSquaredDistance(cameraPos);
+                            double newDistanceSq = currentPos.getSquaredDistance(cameraPos);
+                            if (newDistanceSq < currentDistanceSq) {
+                                enderChestPosition = currentPos;
                             }
-                            this.numItemsInEnderChest = numItemsInEnderChest;
-                            totalFound += numItemsInEnderChest;
+                        }
+                    } else if (chunk.getBlockEntity(pos) instanceof Inventory) {
+                        BlockPos currentPos = pos.toImmutable();
+                        searchedBlocks.add(currentPos);
+                        waitingOnBlocks.add(currentPos);
+                        currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
+                        ClientcommandsDataQueryHandler.get(networkHandler).queryBlockNbt(currentPos, blockNbt -> {
+                            waitingOnBlocks.remove(currentPos);
+                            if (blockNbt != null && blockNbt.contains("Items", NbtElement.LIST_TYPE)) {
+                                int count = countItems(blockNbt.getList("Items", NbtElement.COMPOUND_TYPE));
+                                if (count > 0) {
+                                    totalFound += count;
+                                    printLocation(currentPos, count);
+                                }
+                            }
                             currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
                         });
-                    } else if (!hasPrintedEnderChest) {
-                        Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
-                        double currentDistanceSq = enderChestPosition.getSquaredDistance(cameraPos);
-                        double newDistanceSq = currentPos.getSquaredDistance(cameraPos);
-                        if (newDistanceSq < currentDistanceSq) {
-                            enderChestPosition = currentPos;
-                        }
                     }
-                } else if (chunk.getBlockEntity(pos) instanceof Inventory) {
-                    BlockPos currentPos = pos.toImmutable();
-                    searchedBlocks.add(currentPos);
-                    waitingOnBlocks.add(currentPos);
-                    currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
-                    ClientcommandsDataQueryHandler.get(networkHandler).queryBlockNbt(currentPos, blockNbt -> {
-                        waitingOnBlocks.remove(currentPos);
-                        if (blockNbt != null && blockNbt.contains("Items", NbtElement.LIST_TYPE)) {
-                            int count = countItems(blockNbt.getList("Items", NbtElement.COMPOUND_TYPE));
-                            if (count > 0) {
-                                totalFound += count;
-                                printLocation(currentPos, count);
-                            }
-                        }
-                        currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
-                    });
                 }
             }
         }

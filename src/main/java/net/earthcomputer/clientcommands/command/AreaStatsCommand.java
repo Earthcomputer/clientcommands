@@ -33,7 +33,7 @@ public class AreaStatsCommand {
                         .then(argument("pos2", blockPos())
                                 .then(argument("predicates", list(blockPredicate(registryAccess).disallowNbt(), 1))
                                         .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), getBlockPredicateList(ctx, "predicates"))))
-                                .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), (chunk, pos) -> !chunk.getBlockState(pos).isAir())))));
+                                .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), ClientBlockPredicate.simple(state -> !state.isAir()))))));
     }
 
     private static int areaStats(FabricClientCommandSource source, BlockPos pos1, BlockPos pos2, ClientBlockPredicate blockPredicate) throws CommandSyntaxException {

@@ -13,6 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,6 +65,11 @@ public class FindBlockCommand {
         protected boolean canScanChunk(Entity cameraEntity, ChunkPos pos) {
             return (closestBlock == null || hasAnyBlockCloserThan(cameraEntity, pos, closestBlock.getSquaredDistance(cameraEntity.getCameraPosVec(0))))
                 && super.canScanChunk(cameraEntity, pos);
+        }
+
+        @Override
+        protected boolean canScanChunkSection(Entity cameraEntity, ChunkSectionPos pos) {
+            return hasBlockState(pos, predicate::canEverMatch) && super.canScanChunkSection(cameraEntity, pos);
         }
 
         @Override

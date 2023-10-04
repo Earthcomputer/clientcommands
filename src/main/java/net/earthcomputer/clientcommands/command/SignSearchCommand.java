@@ -4,11 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.AbstractSignBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -38,29 +41,37 @@ public class SignSearchCommand {
     }
 
     private static ClientBlockPredicateArgumentType.ClientBlockPredicate signPredicateFromLinePredicate(Predicate<String> linePredicate) {
-        return (blockView, pos) -> {
-            if (!(blockView.getBlockState(pos).getBlock() instanceof AbstractSignBlock)) {
-                return false;
-            }
-            BlockEntity be = blockView.getBlockEntity(pos);
-            if (!(be instanceof SignBlockEntity sign)) {
+        return new ClientBlockPredicateArgumentType.ClientBlockPredicate() {
+            @Override
+            public boolean test(BlockView blockView, BlockPos pos) {
+                if (!(blockView.getBlockState(pos).getBlock() instanceof AbstractSignBlock)) {
+                    return false;
+                }
+                BlockEntity be = blockView.getBlockEntity(pos);
+                if (!(be instanceof SignBlockEntity sign)) {
+                    return false;
+                }
+
+                SignText frontText = sign.getFrontText();
+                SignText backText = sign.getBackText();
+                for (int i = 0; i < SignText.field_43299; i++) {
+                    String line = frontText.getMessage(i, MinecraftClient.getInstance().shouldFilterText()).getString();
+                    if (linePredicate.test(line)) {
+                        return true;
+                    }
+                    line = backText.getMessage(i, MinecraftClient.getInstance().shouldFilterText()).getString();
+                    if (linePredicate.test(line)) {
+                        return true;
+                    }
+                }
+
                 return false;
             }
 
-            SignText frontText = sign.getFrontText();
-            SignText backText = sign.getBackText();
-            for (int i = 0; i < SignText.field_43299; i++) {
-                String line = frontText.getMessage(i, MinecraftClient.getInstance().shouldFilterText()).getString();
-                if (linePredicate.test(line)) {
-                    return true;
-                }
-                line = backText.getMessage(i, MinecraftClient.getInstance().shouldFilterText()).getString();
-                if (linePredicate.test(line)) {
-                    return true;
-                }
+            @Override
+            public boolean canEverMatch(BlockState state) {
+                return state.getBlock() instanceof AbstractSignBlock;
             }
-
-            return false;
         };
     }
 

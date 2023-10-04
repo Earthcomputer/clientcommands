@@ -71,24 +71,32 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
     }
 
     public static ClientBlockPredicate getBlockPredicate(ParseResult result) throws CommandSyntaxException {
-        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(Collections.singletonList(result.result));
+        Predicate<BlockState> predicate = getPredicateForListWithoutNbt(Collections.singletonList(result.result));
         NbtCompound nbtData = result.result.map(BlockArgumentParser.BlockResult::nbt, BlockArgumentParser.TagResult::nbt);
         if (nbtData == null) {
-            return predicate;
+            return ClientBlockPredicate.simple(predicate);
         }
 
-        return (blockView, pos) -> {
-            if (!predicate.test(blockView, pos)) {
-                return false;
+        return new ClientBlockPredicate() {
+            @Override
+            public boolean test(BlockView blockView, BlockPos pos) {
+                if (!predicate.test(blockView.getBlockState(pos))) {
+                    return false;
+                }
+                BlockEntity be = blockView.getBlockEntity(pos);
+                return be != null && NbtHelper.matches(nbtData, be.createNbt(), true);
             }
-            BlockEntity be = blockView.getBlockEntity(pos);
-            return be != null && NbtHelper.matches(nbtData, be.createNbt(), true);
+
+            @Override
+            public boolean canEverMatch(BlockState state) {
+                return predicate.test(state);
+            }
         };
     }
 
     public static ClientBlockPredicate getBlockPredicateList(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
         List<ParseResult> results = ListArgumentType.getList(context, arg);
-        ClientBlockPredicate predicate = getPredicateForListWithoutNbt(results.stream().map(ParseResult::result).toList());
+        Predicate<BlockState> predicate = getPredicateForListWithoutNbt(results.stream().map(ParseResult::result).toList());
 
         List<Pair<Predicate<BlockState>, NbtCompound>> nbtPredicates = new ArrayList<>(results.size());
         boolean nbtSensitive = false;
@@ -101,44 +109,52 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
         }
 
         if (!nbtSensitive) {
-            return predicate;
+            return ClientBlockPredicate.simple(predicate);
         }
 
         // sort by non-nbt-sensitive versions first in case we can get away with not querying block entities
         nbtPredicates.sort(Map.Entry.comparingByValue(Comparator.nullsFirst(Comparator.comparingInt(System::identityHashCode))));
 
-        return (blockView, pos) -> {
-            if (!predicate.test(blockView, pos)) {
+        return new ClientBlockPredicate() {
+            @Override
+            public boolean test(BlockView blockView, BlockPos pos) {
+                BlockState state = blockView.getBlockState(pos);
+                if (!predicate.test(state)) {
+                    return false;
+                }
+
+                NbtCompound actualNbt = null;
+                for (Pair<Predicate<BlockState>, NbtCompound> nbtPredicate : nbtPredicates) {
+                    if (nbtPredicate.getLeft().test(state)) {
+                        NbtCompound nbt = nbtPredicate.getRight();
+                        if (nbt == null) {
+                            return true;
+                        }
+                        if (actualNbt == null) {
+                            BlockEntity be = blockView.getBlockEntity(pos);
+                            if (be == null) {
+                                // from this point we would always require a block entity
+                                return false;
+                            }
+                            actualNbt = be.createNbt();
+                        }
+                        if (NbtHelper.matches(nbt, actualNbt, true)) {
+                            return true;
+                        }
+                    }
+                }
+
                 return false;
             }
 
-            BlockState state = blockView.getBlockState(pos);
-            NbtCompound actualNbt = null;
-            for (Pair<Predicate<BlockState>, NbtCompound> nbtPredicate : nbtPredicates) {
-                if (nbtPredicate.getLeft().test(state)) {
-                    NbtCompound nbt = nbtPredicate.getRight();
-                    if (nbt == null) {
-                        return true;
-                    }
-                    if (actualNbt == null) {
-                        BlockEntity be = blockView.getBlockEntity(pos);
-                        if (be == null) {
-                            // from this point we would always require a block entity
-                            return false;
-                        }
-                        actualNbt = be.createNbt();
-                    }
-                    if (NbtHelper.matches(nbt, actualNbt, true)) {
-                        return true;
-                    }
-                }
+            @Override
+            public boolean canEverMatch(BlockState state) {
+                return predicate.test(state);
             }
-
-            return false;
         };
     }
 
-    private static ClientBlockPredicate getPredicateForListWithoutNbt(List<Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult>> results) throws CommandSyntaxException {
+    private static Predicate<BlockState> getPredicateForListWithoutNbt(List<Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult>> results) throws CommandSyntaxException {
         List<Predicate<BlockState>> predicates = new ArrayList<>(results.size());
         for (var result : results) {
             predicates.add(getPredicateWithoutNbt(result));
@@ -156,7 +172,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
             }
         }
 
-        return (blockView, pos) -> mask.get(Block.STATE_IDS.getRawId(blockView.getBlockState(pos)));
+        return blockState -> mask.get(Block.STATE_IDS.getRawId(blockState));
     }
 
     private static Predicate<BlockState> getPredicateWithoutNbt(Either<BlockArgumentParser.BlockResult, BlockArgumentParser.TagResult> result) throws CommandSyntaxException {
@@ -208,8 +224,22 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
     ) {
     }
 
-    @FunctionalInterface
     public interface ClientBlockPredicate {
         boolean test(BlockView blockView, BlockPos pos);
+        boolean canEverMatch(BlockState state);
+
+        static ClientBlockPredicate simple(Predicate<BlockState> delegate) {
+            return new ClientBlockPredicate() {
+                @Override
+                public boolean test(BlockView blockView, BlockPos pos) {
+                    return delegate.test(blockView.getBlockState(pos));
+                }
+
+                @Override
+                public boolean canEverMatch(BlockState state) {
+                    return delegate.test(state);
+                }
+            };
+        }
     }
 }
