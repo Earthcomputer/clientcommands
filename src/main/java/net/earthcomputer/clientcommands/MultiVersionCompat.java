@@ -202,6 +202,10 @@ public abstract sealed class MultiVersionCompat {
         public boolean doesItemExist(Item item) {
             try {
                 Object instance = itemReleaseVersionMappingsInstance.get(null);
+                if (instance == null) {
+                    // Quilt initializes commands on startup, allowing this to be called outside a world
+                    return true;
+                }
                 return (Boolean) itemReleaseVersionMappingsContains.invoke(instance, item, getVersionEnum());
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
