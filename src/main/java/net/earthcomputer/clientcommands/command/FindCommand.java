@@ -25,21 +25,21 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindCommand {
 
-    private static final int FLAG_KEEP_SEARCHING = 1;
+    private static final Argument<Boolean> ARG_KEEP_SEARCHING = Argument.ofFlag("keep-searching");
 
     private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cfind.noMatch"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var cfind = dispatcher.register(literal("cfind"));
         dispatcher.register(literal("cfind")
-            .then(literal("--keep-searching")
-                .redirect(cfind, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
+            .then(literal(ARG_KEEP_SEARCHING.getFlag())
+                .redirect(cfind, ctx -> withArg(ctx.getSource(), ARG_KEEP_SEARCHING, true)))
             .then(argument("filter", entities())
                 .executes(ctx -> listEntities(ctx.getSource(), ctx.getArgument("filter", CEntitySelector.class)))));
     }
 
     private static int listEntities(FabricClientCommandSource source, CEntitySelector selector) throws CommandSyntaxException {
-        boolean keepSearching = getFlag(source, FLAG_KEEP_SEARCHING);
+        boolean keepSearching = getArg(source, ARG_KEEP_SEARCHING);
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(source, selector));
 

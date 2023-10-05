@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.demonwav.mcdev.annotations.Translatable;
 import com.mojang.brigadier.context.CommandContext;
-import net.earthcomputer.clientcommands.interfaces.IFlaggedCommandSource;
+import net.earthcomputer.clientcommands.interfaces.IClientCommandSource;
 import net.earthcomputer.clientcommands.mixin.InGameHudAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -13,22 +13,16 @@ import net.minecraft.util.math.BlockPos;
 
 public class ClientCommandHelper {
 
-    public static boolean getFlag(CommandContext<FabricClientCommandSource> ctx, int flag) {
-        return getFlag(ctx.getSource(), flag);
+    public static <T> T getArg(CommandContext<FabricClientCommandSource> ctx, Argument<T> arg) {
+        return getArg(ctx.getSource(), arg);
     }
 
-    public static boolean getFlag(FabricClientCommandSource source, int flag) {
-        return (((IFlaggedCommandSource) source).getFlags() & flag) != 0;
+    public static <T> T getArg(FabricClientCommandSource source, Argument<T> arg) {
+        return ((IClientCommandSource) source).clientcommands_getArg(arg);
     }
 
-    public static FabricClientCommandSource withFlags(FabricClientCommandSource source, int flags, boolean value) {
-        IFlaggedCommandSource flaggedSource = (IFlaggedCommandSource) source;
-
-        if (value) {
-            return (FabricClientCommandSource) flaggedSource.withFlags(flaggedSource.getFlags() | flags);
-        } else {
-            return (FabricClientCommandSource) flaggedSource.withFlags(flaggedSource.getFlags() & ~flags);
-        }
+    public static <T> FabricClientCommandSource withArg(FabricClientCommandSource source, Argument<T> arg, T value) {
+        return (FabricClientCommandSource) ((IClientCommandSource) source).clientcommands_withArg(arg, value);
     }
 
     public static void sendError(Text error) {

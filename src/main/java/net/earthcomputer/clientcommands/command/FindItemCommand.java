@@ -62,22 +62,22 @@ import static net.earthcomputer.clientcommands.command.arguments.WithStringArgum
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindItemCommand {
-    private static final int FLAG_NO_SEARCH_SHULKER_BOX = 1;
-    private static final int FLAG_KEEP_SEARCHING = 2;
+    private static final Argument<Boolean> FLAG_NO_SEARCH_SHULKER_BOX = Argument.ofFlag("no-search-shulker-box");
+    private static final Argument<Boolean> FLAG_KEEP_SEARCHING = Argument.ofFlag("keep-searching");
 
     @SuppressWarnings("unchecked")
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         var cfinditem = dispatcher.register(literal("cfinditem"));
         dispatcher.register(literal("cfinditem")
-                .then(literal("--no-search-shulker-box")
-                        .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
-                .then(literal("--keep-searching")
-                        .redirect(cfinditem, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
+                .then(literal(FLAG_NO_SEARCH_SHULKER_BOX.getFlag())
+                        .redirect(cfinditem, ctx -> withArg(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
+                .then(literal(FLAG_KEEP_SEARCHING.getFlag())
+                        .redirect(cfinditem, ctx -> withArg(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
                 .then(argument("item", withString(itemPredicate(registryAccess)))
                         .executes(ctx ->
                                 findItem(ctx,
-                                        getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
-                                        getFlag(ctx, FLAG_KEEP_SEARCHING),
+                                        getArg(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
+                                        getArg(ctx, FLAG_KEEP_SEARCHING),
                                         getWithString(ctx, "item", (Class<Predicate<ItemStack>>) (Class<?>) Predicate.class)))));
     }
 

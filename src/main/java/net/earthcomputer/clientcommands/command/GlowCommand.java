@@ -32,16 +32,16 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class GlowCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cglow.entity.failed"));
 
-    private static final int FLAG_KEEP_SEARCHING = 1;
+    private static final Argument<Boolean> FLAG_KEEP_SEARCHING = Argument.ofFlag("keep-searching");
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var cglow = dispatcher.register(literal("cglow"));
         dispatcher.register(literal("cglow")
-                .then(literal("--keep-searching-entities")
-                    .redirect(cglow, ctx -> withFlags(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
+                .then(literal(FLAG_KEEP_SEARCHING.getFlag())
+                    .redirect(cglow, ctx -> withArg(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
                 .then(literal("entities")
                     .then(argument("targets", entities())
-                        .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getFlag(ctx, FLAG_KEEP_SEARCHING) ? 0 : 30, 0xffffff))
+                        .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getArg(ctx, FLAG_KEEP_SEARCHING) ? 0 : 30, 0xffffff))
                         .then(argument("seconds", integer(0))
                             .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), 0xffffff))
                             .then(literal("color")
@@ -76,7 +76,7 @@ public class GlowCommand {
     }
 
     private static int glowEntities(FabricClientCommandSource source, CEntitySelector entitySelector, int seconds, int color) throws CommandSyntaxException {
-        boolean keepSearching = getFlag(source, FLAG_KEEP_SEARCHING);
+        boolean keepSearching = getArg(source, FLAG_KEEP_SEARCHING);
         if (keepSearching) {
             String taskName = TaskManager.addTask("cglow", new SimpleTask() {
                 @Override

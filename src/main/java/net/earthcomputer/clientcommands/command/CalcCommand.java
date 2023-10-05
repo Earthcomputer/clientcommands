@@ -18,19 +18,19 @@ public class CalcCommand {
 
     private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ccalc.tooDeeplyNested"));
 
-    private static final int FLAG_PARSE = 1;
+    private static final Argument<Boolean> ARG_PARSE = Argument.ofFlag("parse");
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var ccalc = dispatcher.register(literal("ccalc"));
         dispatcher.register(literal("ccalc")
-            .then(literal("--parse")
-                .redirect(ccalc, ctx -> withFlags(ctx.getSource(), FLAG_PARSE, true)))
+            .then(literal(ARG_PARSE.getFlag())
+                .redirect(ccalc, ctx -> withArg(ctx.getSource(), ARG_PARSE, true)))
             .then(argument("expr", expression())
                 .executes(ctx -> evaluateExpression(ctx.getSource(), getExpression(ctx, "expr")))));
     }
 
     private static int evaluateExpression(FabricClientCommandSource source, ExpressionArgumentType.Expression expression) throws CommandSyntaxException {
-        if (getFlag(source, FLAG_PARSE)) {
+        if (getArg(source, ARG_PARSE)) {
             Text parsedTree;
             try {
                 parsedTree = expression.getParsedTree(0);
