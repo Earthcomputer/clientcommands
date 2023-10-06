@@ -22,15 +22,13 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CEnchantCommand {
 
-    private static final Argument<Boolean> FLAG_SIMULATE = Argument.ofFlag("simulate");
+    private static final Flag<Boolean> FLAG_SIMULATE = Flag.ofFlag("simulate").build();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        var cenchant = dispatcher.register(literal("cenchant"));
-        dispatcher.register(literal("cenchant")
-                .then(literal(FLAG_SIMULATE.getFlag())
-                        .redirect(cenchant, ctx -> withArg(ctx.getSource(), FLAG_SIMULATE, true)))
-                .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(CEnchantCommand::enchantmentPredicate).constrainMaxLevel())
-                        .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
+        var cenchant = dispatcher.register(literal("cenchant")
+            .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(CEnchantCommand::enchantmentPredicate).constrainMaxLevel())
+                    .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
+        FLAG_SIMULATE.addToCommand(dispatcher, cenchant, ctx -> true);
     }
 
     private static boolean enchantmentPredicate(Item item, Enchantment ench) {
@@ -55,7 +53,7 @@ public class CEnchantCommand {
             return Command.SINGLE_SUCCESS;
         }
 
-        boolean simulate = getArg(source, FLAG_SIMULATE);
+        boolean simulate = getFlag(source, FLAG_SIMULATE);
 
         var result = EnchantmentCracker.manipulateEnchantments(
                 itemAndEnchantmentsPredicate.item(),

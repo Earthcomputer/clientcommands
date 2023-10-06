@@ -32,51 +32,49 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class GlowCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cglow.entity.failed"));
 
-    private static final Argument<Boolean> FLAG_KEEP_SEARCHING = Argument.ofFlag("keep-searching");
+    private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        var cglow = dispatcher.register(literal("cglow"));
-        dispatcher.register(literal("cglow")
-                .then(literal(FLAG_KEEP_SEARCHING.getFlag())
-                    .redirect(cglow, ctx -> withArg(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
-                .then(literal("entities")
-                    .then(argument("targets", entities())
-                        .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getArg(ctx, FLAG_KEEP_SEARCHING) ? 0 : 30, 0xffffff))
+        var cglow = dispatcher.register(literal("cglow")
+            .then(literal("entities")
+                .then(argument("targets", entities())
+                    .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getFlag(ctx, FLAG_KEEP_SEARCHING) ? 0 : 30, 0xffffff))
+                    .then(argument("seconds", integer(0))
+                        .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), 0xffffff))
+                        .then(literal("color")
+                            .then(argument("color", color())
+                                .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                        .then(literal("colorCode")
+                            .then(argument("color", multibaseInteger(0, 0xffffff))
+                                .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color"))))))))
+            .then(literal("area")
+                .then(argument("from", blockPos())
+                    .then(argument("to", blockPos())
+                        .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), 1, 0xffffff))
                         .then(argument("seconds", integer(0))
-                            .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), 0xffffff))
+                            .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), 0xffffff))
                             .then(literal("color")
                                 .then(argument("color", color())
-                                    .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                                    .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
                             .then(literal("colorCode")
                                 .then(argument("color", multibaseInteger(0, 0xffffff))
-                                    .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color"))))))))
-                .then(literal("area")
-                    .then(argument("from", blockPos())
-                        .then(argument("to", blockPos())
-                            .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), 1, 0xffffff))
-                            .then(argument("seconds", integer(0))
-                                .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), 0xffffff))
-                                .then(literal("color")
-                                    .then(argument("color", color())
-                                        .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
-                                .then(literal("colorCode")
-                                    .then(argument("color", multibaseInteger(0, 0xffffff))
-                                        .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))))
-                .then(literal("block")
-                    .then(argument("block", blockPos())
-                        .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, 1, 0xffffff))
-                        .then(argument("seconds", integer(0))
-                            .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), 0xffffff))
-                            .then(literal("color")
-                                .then(argument("color", color())
-                                    .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
-                            .then(literal("colorCode")
-                                .then(argument("color", multibaseInteger(0, 0xffffff))
-                                    .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))));
+                                    .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))))
+            .then(literal("block")
+                .then(argument("block", blockPos())
+                    .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, 1, 0xffffff))
+                    .then(argument("seconds", integer(0))
+                        .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), 0xffffff))
+                        .then(literal("color")
+                            .then(argument("color", color())
+                                .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                        .then(literal("colorCode")
+                            .then(argument("color", multibaseInteger(0, 0xffffff))
+                                .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))));
+        FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cglow, ctx -> true);
     }
 
     private static int glowEntities(FabricClientCommandSource source, CEntitySelector entitySelector, int seconds, int color) throws CommandSyntaxException {
-        boolean keepSearching = getArg(source, FLAG_KEEP_SEARCHING);
+        boolean keepSearching = getFlag(source, FLAG_KEEP_SEARCHING);
         if (keepSearching) {
             String taskName = TaskManager.addTask("cglow", new SimpleTask() {
                 @Override

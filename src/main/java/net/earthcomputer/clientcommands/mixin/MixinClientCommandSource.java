@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.mixin;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.suggestion.Suggestion;
-import net.earthcomputer.clientcommands.command.Argument;
+import net.earthcomputer.clientcommands.command.Flag;
 import net.earthcomputer.clientcommands.interfaces.IClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
@@ -26,30 +26,30 @@ public class MixinClientCommandSource implements IClientCommandSource {
     private MinecraftClient client;
 
     @Unique
-    private ImmutableMap<Argument<?>, Object> arguments = ImmutableMap.of();
+    private ImmutableMap<Flag<?>, Object> flags = ImmutableMap.of();
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T clientcommands_getArg(Argument<T> arg) {
-        return (T) this.arguments.getOrDefault(arg, arg.getDefaultValue());
+    public <T> T clientcommands_getFlag(Flag<T> flag) {
+        return (T) this.flags.getOrDefault(flag, flag.getDefaultValue());
     }
 
     @Override
-    public <T> IClientCommandSource clientcommands_withArg(Argument<T> arg, T value) {
+    public <T> IClientCommandSource clientcommands_withFlag(Flag<T> flag, T value) {
         MixinClientCommandSource source = (MixinClientCommandSource) (Object) new ClientCommandSource(this.networkHandler, this.client);
-        source.arguments = ImmutableMap.<Argument<?>, Object>builderWithExpectedSize(this.arguments.size() + 1).putAll(this.arguments).put(arg, value).build();
+        source.flags = ImmutableMap.<Flag<?>, Object>builderWithExpectedSize(this.flags.size() + 1).putAll(this.flags).put(flag, value).build();
         return source;
     }
 
     @Override
     @Nullable
     public List<Suggestion> clientcommands_filterSuggestions(List<Suggestion> suggestions) {
-        if (arguments.isEmpty()) {
+        if (flags.isEmpty()) {
             return null;
         } else {
             return suggestions.stream().filter(suggestion -> {
                 String text = suggestion.getText();
-                return !Argument.isFlag(text) || arguments.keySet().stream().noneMatch(arg -> !arg.isRepeatable() && arg.getFlag().equals(text));
+                return !Flag.isFlag(text) || flags.keySet().stream().noneMatch(arg -> !arg.isRepeatable() && (text.equals(arg.getFlag()) || text.equals(arg.getShortFlag())));
             }).toList();
         }
     }

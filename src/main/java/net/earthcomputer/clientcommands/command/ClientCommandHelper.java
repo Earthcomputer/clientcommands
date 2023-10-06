@@ -13,16 +13,16 @@ import net.minecraft.util.math.BlockPos;
 
 public class ClientCommandHelper {
 
-    public static <T> T getArg(CommandContext<FabricClientCommandSource> ctx, Argument<T> arg) {
-        return getArg(Argument.getActualSource(ctx), arg);
+    public static <T> T getFlag(CommandContext<FabricClientCommandSource> ctx, Flag<T> flag) {
+        return getFlag(Flag.getActualSource(ctx), flag);
     }
 
-    public static <T> T getArg(FabricClientCommandSource source, Argument<T> arg) {
-        return ((IClientCommandSource) source).clientcommands_getArg(arg);
+    public static <T> T getFlag(FabricClientCommandSource source, Flag<T> flag) {
+        return ((IClientCommandSource) source).clientcommands_getFlag(flag);
     }
 
-    public static <T> FabricClientCommandSource withArg(FabricClientCommandSource source, Argument<T> arg, T value) {
-        return (FabricClientCommandSource) ((IClientCommandSource) source).clientcommands_withArg(arg, value);
+    public static <T> FabricClientCommandSource withFlag(FabricClientCommandSource source, Flag<T> flag, T value) {
+        return (FabricClientCommandSource) ((IClientCommandSource) source).clientcommands_withFlag(flag, value);
     }
 
     public static void sendError(Text error) {

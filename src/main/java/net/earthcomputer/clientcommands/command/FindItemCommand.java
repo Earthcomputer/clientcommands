@@ -62,23 +62,20 @@ import static net.earthcomputer.clientcommands.command.arguments.WithStringArgum
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindItemCommand {
-    private static final Argument<Boolean> FLAG_NO_SEARCH_SHULKER_BOX = Argument.ofFlag("no-search-shulker-box");
-    private static final Argument<Boolean> FLAG_KEEP_SEARCHING = Argument.ofFlag("keep-searching");
+    private static final Flag<Boolean> FLAG_NO_SEARCH_SHULKER_BOX = Flag.ofFlag("no-search-shulker-box").withShortName('s').build();
+    private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
     @SuppressWarnings("unchecked")
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-        var cfinditem = dispatcher.register(literal("cfinditem"));
-        dispatcher.register(literal("cfinditem")
-                .then(literal(FLAG_NO_SEARCH_SHULKER_BOX.getFlag())
-                        .redirect(cfinditem, ctx -> withArg(ctx.getSource(), FLAG_NO_SEARCH_SHULKER_BOX, true)))
-                .then(literal(FLAG_KEEP_SEARCHING.getFlag())
-                        .redirect(cfinditem, ctx -> withArg(ctx.getSource(), FLAG_KEEP_SEARCHING, true)))
-                .then(argument("item", withString(itemPredicate(registryAccess)))
-                        .executes(ctx ->
-                                findItem(ctx,
-                                        getArg(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
-                                        getArg(ctx, FLAG_KEEP_SEARCHING),
-                                        getWithString(ctx, "item", (Class<Predicate<ItemStack>>) (Class<?>) Predicate.class)))));
+        var cfinditem = dispatcher.register(literal("cfinditem")
+            .then(argument("item", withString(itemPredicate(registryAccess)))
+                .executes(ctx ->
+                    findItem(ctx,
+                        getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
+                        getFlag(ctx, FLAG_KEEP_SEARCHING),
+                        getWithString(ctx, "item", (Class<Predicate<ItemStack>>) (Class<?>) Predicate.class)))));
+        FLAG_NO_SEARCH_SHULKER_BOX.addToCommand(dispatcher, cfinditem, ctx -> true);
+        FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cfinditem, ctx -> true);
     }
 
     private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, Predicate<ItemStack>> item) {
