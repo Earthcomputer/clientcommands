@@ -14,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 public class ClientCommandHelper {
 
     public static <T> T getArg(CommandContext<FabricClientCommandSource> ctx, Argument<T> arg) {
-        return getArg(ctx.getSource(), arg);
+        return getArg(Argument.getActualSource(ctx), arg);
     }
 
     public static <T> T getArg(FabricClientCommandSource source, Argument<T> arg) {

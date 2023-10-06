@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.mixin;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import net.earthcomputer.clientcommands.command.Argument;
 import net.earthcomputer.clientcommands.interfaces.IClientCommandSource;
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.command.CommandSource;
@@ -31,9 +32,9 @@ public class MixinChatInputSuggestor {
     private void filterSuggestions(CallbackInfo ci) {
         assert this.pendingSuggestions != null && this.parse != null;
         this.pendingSuggestions = this.pendingSuggestions.thenApply(suggestions -> {
-            CommandSource source = this.parse.getContext().getSource();
+            CommandSource source = Argument.getActualSource(this.parse);
             if (source instanceof IClientCommandSource mySource) {
-                List<Suggestion> newSuggestions = mySource.clientcommands_filterSuggestions(suggestions.getList(), this.parse.getContext().getNodes());
+                List<Suggestion> newSuggestions = mySource.clientcommands_filterSuggestions(suggestions.getList());
                 return newSuggestions == null ? suggestions : new Suggestions(suggestions.getRange(), newSuggestions);
             } else {
                 return suggestions;

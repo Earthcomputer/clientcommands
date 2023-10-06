@@ -14,5 +14,5 @@ public interface IClientCommandSource {
     <T> IClientCommandSource clientcommands_withArg(Argument<T> arg, T value);
 
     @Nullable
-    List<Suggestion> clientcommands_filterSuggestions(List<Suggestion> suggestions, List<ParsedCommandNode<CommandSource>> parsedNodes);
+    List<Suggestion> clientcommands_filterSuggestions(List<Suggestion> suggestions);
 }
