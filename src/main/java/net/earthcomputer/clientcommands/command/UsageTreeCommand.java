@@ -6,35 +6,45 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class UsageTreeCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.help.failed"));
 
+    @SuppressWarnings("unchecked")
+    private static final Flag<UnaryOperator<CommandDispatcher<FabricClientCommandSource>>> FLAG_DISPATCHER =
+        Flag.of((Class<UnaryOperator<CommandDispatcher<FabricClientCommandSource>>>) (Class<?>) UnaryOperator.class, "all").withDefaultValue(UnaryOperator.identity()).build();
+
+    @SuppressWarnings("unchecked")
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(
+        var cusagetree = dispatcher.register(
             literal("cusagetree")
-                .executes(ctx -> usage(ctx.getSource(), dispatcher))
+                .executes(ctx -> usage(ctx.getSource(), getFlag(ctx, FLAG_DISPATCHER).apply(dispatcher)))
                 .then(
                     argument("command", greedyString())
                         .suggests((ctx, builder) ->
-                            CommandSource.suggestMatching(dispatcher.getRoot()
+                            CommandSource.suggestMatching(getFlag(ctx, FLAG_DISPATCHER).apply(dispatcher).getRoot()
                                 .getChildren()
                                 .stream()
                                 .map(CommandNode::getUsageText)
                                 .toList(), builder)
                         )
-                        .executes(ctx -> usageCommand(ctx.getSource(), getString(ctx, "command"), dispatcher))
+                        .executes(ctx -> usageCommand(ctx.getSource(), getString(ctx, "command"), getFlag(ctx, FLAG_DISPATCHER).apply(dispatcher)))
                 )
         );
+        FLAG_DISPATCHER.addToCommand(dispatcher, cusagetree, ctx -> d -> (CommandDispatcher<FabricClientCommandSource>) (CommandDispatcher<?>) Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).getCommandDispatcher());
     }
 
     private static int usage(FabricClientCommandSource source, CommandDispatcher<FabricClientCommandSource> dispatcher) {
