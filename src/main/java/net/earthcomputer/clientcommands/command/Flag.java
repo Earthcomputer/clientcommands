@@ -70,11 +70,13 @@ public final class Flag<T> {
     public void addToCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> commandNode, Function<CommandContext<FabricClientCommandSource>, T> value) {
         dispatcher.register(commandNode.createBuilder()
             .then(ClientCommandManager.literal(getFlag())
-                .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))));
+                .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))
+                .executes(commandNode.getCommand())));
         if (shortName != null) {
             dispatcher.register(commandNode.createBuilder()
                 .then(ClientCommandManager.literal(getShortFlag())
-                    .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))));
+                    .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))
+                    .executes(commandNode.getCommand())));
         }
     }
 
@@ -82,12 +84,14 @@ public final class Flag<T> {
         dispatcher.register(commandNode.createBuilder()
             .then(ClientCommandManager.literal(getFlag())
                 .then(ClientCommandManager.argument(this.name, argument)
-                    .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type))))));
+                    .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type)))
+                    .executes(commandNode.getCommand()))));
         if (shortName != null) {
             dispatcher.register(commandNode.createBuilder()
                 .then(ClientCommandManager.literal(getShortFlag())
                     .then(ClientCommandManager.argument(this.name, argument)
-                        .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type))))));
+                        .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type)))
+                        .executes(commandNode.getCommand()))));
         }
     }
 
