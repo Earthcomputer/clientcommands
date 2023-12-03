@@ -17,6 +17,7 @@ import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.item.*;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -102,8 +103,8 @@ public abstract class MixinPlayerEntity extends LivingEntity {
         return target.damage(source, amount);
     }
 
+    @Unique
     private boolean isThePlayer() {
-        //noinspection ConstantConditions
         return (Object) this instanceof ClientPlayerEntity;
     }
 

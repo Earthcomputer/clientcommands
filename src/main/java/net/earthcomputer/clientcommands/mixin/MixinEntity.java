@@ -116,8 +116,8 @@ public abstract class MixinEntity implements IEntity {
         }
     }
 
+    @Unique
     private boolean isThePlayer() {
-        //noinspection ConstantConditions
         return (Object) this instanceof ClientPlayerEntity;
     }
 

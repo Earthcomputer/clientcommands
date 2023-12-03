@@ -15,6 +15,7 @@ import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,6 +34,7 @@ public class MixinChatHud {
         handleIfPacket(message, ci);
     }
 
+    @Unique
     private void handleIfPacket(Text content, CallbackInfo ci) {
         String string = content.getString();
         int index = string.indexOf("CCENC:");
@@ -60,6 +62,7 @@ public class MixinChatHud {
         }
     }
 
+    @Unique
     private static boolean handleC2CPacket(String content) {
         byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
         // round down to multiple of 256 bytes

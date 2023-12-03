@@ -1,7 +1,7 @@
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
+	id 'fabric-loom' version '1.4-SNAPSHOT'
 	id 'maven-publish'
+	id 'com.modrinth.minotaur' version '2.+'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -13,7 +13,7 @@ group = project.maven_group
 
 configurations {
 	includedLibrary
-	modImplementation.extendsFrom includedLibrary
+	implementation.extendsFrom includedLibrary
 }
 
 repositories {
@@ -40,7 +40,11 @@ dependencies {
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include modImplementation("dev.xpple:betterconfig:${project.betterconfig_version}")
-	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_version}"
+
+	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_feature_version}"
+	includedLibrary "com.seedfinding:mc_biome:${project.seedfinding_biome_version}"
+	includedLibrary "com.seedfinding:mc_core:${project.seedfinding_core_version}"
+	includedLibrary "com.seedfinding:mc_seed:${project.seedfinding_seed_version}"
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
@@ -80,6 +84,17 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 jar {
 	from "LICENSE"
+}
+
+modrinth {
+	token = project.hasProperty('modrinthKey') ? project.modrinthKey : System.getenv("MODRINTH_TOKEN")
+	projectId = 'clientcommands' // This can be the project ID or the slug. Either will work!
+	uploadFile = remapJar
+	gameVersions = project.minecraft_version_list.split('\\s*,\\s*').toList()
+	loaders = ['fabric', 'quilt']
+	dependencies {
+		required.project 'fabric-api'
+	}
 }
 
 publishing {
