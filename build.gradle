@@ -108,7 +108,7 @@ tasks.modrinth.onlyIf {
 }
 
 githubRelease {
-	token(project.hasProperty('githubKey') ? project.githubKey : System.getenv("GITHUB_TOKEN") as CharSequence)
+	token(project.hasProperty('githubKey') ? project.githubKey : (System.getenv("GITHUB_TOKEN") ?: ''))
 	owner 'Earthcomputer'
 	repo 'clientcommands'
 	targetCommitish 'fabric'
