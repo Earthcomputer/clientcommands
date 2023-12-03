@@ -2,6 +2,7 @@ plugins {
 	id 'fabric-loom' version '1.4-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
+	id 'com.github.breadmoirai.github-release' version '2.4.1'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -86,15 +87,37 @@ jar {
 	from "LICENSE"
 }
 
+// read the changelog from the changelog.txt file, make sure the changelog is recent to avoid accidentally using the previous version's changelog.
+def changelogFile = file('changelog.txt')
+def changelogText = changelogFile.exists() && System.currentTimeMillis() - changelogFile.lastModified() <= 1000 * 60 * 60 ?
+		changelogFile.readLines('UTF-8').join('\n') : ''
+
 modrinth {
 	token = project.hasProperty('modrinthKey') ? project.modrinthKey : System.getenv("MODRINTH_TOKEN")
 	projectId = 'clientcommands' // This can be the project ID or the slug. Either will work!
 	uploadFile = remapJar
-	gameVersions = project.minecraft_version_list.split('\\s*,\\s*').toList()
-	loaders = ['fabric', 'quilt']
+	gameVersions.set(project.minecraft_version_list.split('\\s*,\\s*').toList())
+	loaders.set(['fabric', 'quilt'])
+	changelog = changelogText
 	dependencies {
 		required.project 'fabric-api'
 	}
+}
+tasks.modrinth.onlyIf {
+	!changelogText.isBlank()
+}
+
+githubRelease {
+	token(project.hasProperty('githubKey') ? project.githubKey : System.getenv("GITHUB_TOKEN"))
+	owner 'Earthcomputer'
+	repo "clientcommands"
+	targetCommitish 'fabric'
+	releaseName "Version ${project.version} for Minecraft ${project.minecraft_version_list_presentable}"
+	body changelogText
+	releaseAssets remapJar.outputs
+}
+tasks.githubRelease.onlyIf {
+	!changelogText.isBlank()
 }
 
 publishing {

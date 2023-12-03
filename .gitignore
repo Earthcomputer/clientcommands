@@ -23,3 +23,5 @@ bin/
 
 run/
 logs/
+
+/changelog.txt
