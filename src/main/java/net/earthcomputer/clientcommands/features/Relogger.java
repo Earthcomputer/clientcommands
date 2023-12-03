@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
@@ -64,7 +64,7 @@ public class Relogger {
                 return false;
             }
             mc.setScreenAndRender(new MessageScreen(Text.translatable("selectWorld.data_read")));
-            mc.createIntegratedServerLoader().start(mc.currentScreen, levelName);
+            mc.createIntegratedServerLoader().start(levelName, () -> mc.setScreen(new TitleScreen()));
             return true;
         } else {
             ServerInfo serverInfo = mc.getCurrentServerEntry();

@@ -123,10 +123,10 @@ public class VarCommand {
         try {
             NbtCompound rootTag = new NbtCompound();
             variables.forEach(rootTag::putString);
-            File newFile = File.createTempFile("vars", ".dat", configPath.toFile());
+            Path newFile = File.createTempFile("vars", ".dat", configPath.toFile()).toPath();
             NbtIo.write(rootTag, newFile);
-            File backupFile = new File(configPath.toFile(), "vars.dat_old");
-            File currentFile = new File(configPath.toFile(), "vars.dat");
+            Path backupFile = configPath.resolve("vars.dat_old");
+            Path currentFile = configPath.resolve("vars.dat");
             Util.backupAndReplace(currentFile, newFile, backupFile);
         } catch (IOException e) {
             throw SAVE_FAILED_EXCEPTION.create();
@@ -135,7 +135,7 @@ public class VarCommand {
 
     private static void loadFile() throws IOException {
         variables.clear();
-        NbtCompound rootTag = NbtIo.read(new File(configPath.toFile(), "vars.dat"));
+        NbtCompound rootTag = NbtIo.read(configPath.resolve("vars.dat"));
         if (rootTag == null) {
             return;
         }

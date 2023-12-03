@@ -49,7 +49,9 @@ dependencies {
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
-	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
+	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
 }
 
 jar {

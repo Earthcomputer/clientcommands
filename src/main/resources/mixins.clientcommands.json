@@ -5,6 +5,7 @@
   "mixins": [
     "ChatInputSuggestorAccessor",
     "CheckedRandomAccessor",
+    "HoverEventActionAccessor",
     "InGameHudAccessor",
     "LandPathNodeMakerAccessor",
     "MixinAnvilContainer",

@@ -7,7 +7,6 @@ import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPre
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandException;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentLevelEntry;
 import net.minecraft.item.Item;
@@ -35,7 +34,7 @@ public class CEnchantCommand {
         return !ench.isTreasure() && ench.isAvailableForRandomSelection() && (item == Items.BOOK || ench.target.isAcceptableItem(item));
     }
 
-    private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandException {
+    private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) {
         if (!Configs.getEnchantingPrediction()) {
             Text text = Text.translatable("commands.cenchant.needEnchantingPrediction")
                     .formatted(Formatting.RED)

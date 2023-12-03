@@ -129,7 +129,7 @@ public class GlowCommand {
                 boundingBoxes.replaceAll((box) -> box.offset(pos1));
             }
         } else {
-            boundingBoxes.add(new Box(pos1, pos2));
+            boundingBoxes.add(Box.enclosing(pos1, pos2));
         }
 
         for (Box box : boundingBoxes) {

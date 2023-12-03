@@ -225,10 +225,10 @@ public class ItemGroupCommand {
             });
             rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
             rootTag.put("Groups", compoundTag);
-            File newFile = File.createTempFile("groups", ".dat", configPath.toFile());
+            Path newFile = File.createTempFile("groups", ".dat", configPath.toFile()).toPath();
             NbtIo.write(rootTag, newFile);
-            File backupFile = new File(configPath.toFile(), "groups.dat_old");
-            File currentFile = new File(configPath.toFile(), "groups.dat");
+            Path backupFile = configPath.resolve("groups.dat_old");
+            Path currentFile = configPath.resolve("groups.dat");
             Util.backupAndReplace(currentFile, newFile, backupFile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -238,7 +238,7 @@ public class ItemGroupCommand {
 
     private static void loadFile() throws IOException {
         groups.clear();
-        NbtCompound rootTag = NbtIo.read(new File(configPath.toFile(), "groups.dat"));
+        NbtCompound rootTag = NbtIo.read(configPath.resolve("groups.dat"));
         if (rootTag == null) {
             return;
         }
