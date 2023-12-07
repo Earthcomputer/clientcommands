@@ -103,6 +103,7 @@ modrinth {
 	changelog = changelogText
 	dependencies {
 		required.project 'fabric-api'
+		embedded.project 'betterconfig'
 	}
 }
 tasks.modrinth.onlyIf {
