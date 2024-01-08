@@ -4,7 +4,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import dev.xpple.clientarguments.arguments.CBlockPredicateArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -13,11 +12,11 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPredicateArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CBlockStateArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -36,10 +35,10 @@ public class GhostBlockCommand {
                 .then(argument("from", blockPos())
                     .then(argument("to", blockPos())
                         .then(argument("block", blockState(registryAccess))
-                            .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), null))
+                            .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), pos -> true))
                             .then(literal("replace")
-                                .then(argument("filter", CBlockPredicateArgumentType.blockPredicate(registryAccess))
-                                    .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), CBlockPredicateArgumentType.getCBlockPredicate(ctx, "filter"))))))))));
+                                .then(argument("filter", blockPredicate(registryAccess))
+                                    .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), getCBlockPredicate(ctx, "filter"))))))))));
     }
 
     private static int setGhostBlock(FabricClientCommandSource source, BlockPos pos, BlockState state) throws CommandSyntaxException {
@@ -57,7 +56,7 @@ public class GhostBlockCommand {
         }
     }
 
-    private static int fillGhostBlocks(FabricClientCommandSource source, BlockPos from, BlockPos to, BlockState state, @Nullable Predicate<CachedBlockPosition> filter) throws CommandSyntaxException {
+    private static int fillGhostBlocks(FabricClientCommandSource source, BlockPos from, BlockPos to, BlockState state, Predicate<CachedBlockPosition> filter) throws CommandSyntaxException {
         ClientWorld world = source.getWorld();
         assert world != null;
 
@@ -67,7 +66,7 @@ public class GhostBlockCommand {
         BlockBox range = BlockBox.create(from, to);
         int successCount = 0;
         for (BlockPos pos : BlockPos.iterate(range.getMinX(), range.getMinY(), range.getMinZ(), range.getMaxX(), range.getMaxY(), range.getMaxZ())) {
-            if (filter == null || filter.test(new CachedBlockPosition(world, pos, true))) {
+            if (filter.test(new CachedBlockPosition(world, pos, true))) {
                 if (world.setBlockState(pos, state, 18)) {
                     successCount++;
                 }
