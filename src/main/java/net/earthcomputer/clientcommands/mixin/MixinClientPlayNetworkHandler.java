@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.command.PluginsCommand;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.MinecraftClient;
@@ -13,6 +14,7 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.NbtQueryResponseS2CPacket;
@@ -97,5 +99,10 @@ public abstract class MixinClientPlayNetworkHandler extends ClientCommonNetworkH
     @Override
     public ClientcommandsDataQueryHandler clientcommands_getCCDataQueryHandler() {
         return ccDataQueryHandler;
+    }
+
+    @Inject(method = "onCommandSuggestions", at = @At("TAIL"))
+    private void onCommandSuggestions(CommandSuggestionsS2CPacket packet, CallbackInfo ci) {
+        PluginsCommand.onCommandSuggestions(packet);
     }
 }

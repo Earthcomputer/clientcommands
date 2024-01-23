@@ -147,6 +147,8 @@
 
   "commands.cplaysound.success": "Played sound %s to self",
 
+  "commands.cplugins.found": "Found the following plugins:",
+
   "commands.cping.success": "Your average ping is %dms",
   "commands.cping.success.other": "The average ping of %s is %dms",
   "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
