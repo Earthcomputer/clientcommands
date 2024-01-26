@@ -46,7 +46,7 @@ public class PluginsCommand {
                 .collect(Collectors.joining(", "));
 
             source.sendFeedback(Text.translatable("commands.cplugins.found"));
-            source.sendFeedback(Text.of(plugins));
+            source.sendFeedback(Text.literal(plugins));
         };
         return Command.SINGLE_SUCCESS;
     }
@@ -60,7 +60,7 @@ public class PluginsCommand {
             .collect(Collectors.joining(", "));
 
         source.sendFeedback(Text.translatable("commands.cplugins.found"));
-        source.sendFeedback(Text.of(plugins));
+        source.sendFeedback(Text.literal(plugins));
         return Command.SINGLE_SUCCESS;
     }
 
