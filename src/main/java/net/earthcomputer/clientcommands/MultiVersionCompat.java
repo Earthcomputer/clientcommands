@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -41,10 +40,9 @@ public abstract sealed class MultiVersionCompat {
     public static final MultiVersionCompat INSTANCE = Util.make(() -> {
         try {
             FabricLoader loader = FabricLoader.getInstance();
-            ModContainer modContainer;
-            if ((modContainer = loader.getModContainer("viafabric").orElse(null)) != null) {
+            if (loader.isModLoaded("viafabric")) {
                 return new ViaFabric();
-            } else if ((modContainer = loader.getModContainer("viafabricplus").orElse(null)) != null) {
+            } else if (loader.isModLoaded("viafabricplus")) {
                 return new ViaFabricPlus();
             } else {
                 return new None();
@@ -175,38 +173,27 @@ public abstract sealed class MultiVersionCompat {
     }
 
     private static final class ViaFabricPlus extends AbstractViaVersion {
-        private final Field itemReleaseVersionMappingsInstance;
         private final Method getTargetVersion;
         private final Method versionEnumGetProtocol;
-        private final Method itemReleaseVersionMappingsContains;
+        private final Method itemRegistryDiffKeepItem;
 
         private ViaFabricPlus() throws ReflectiveOperationException {
             Class<?> protocolHack = Class.forName("de.florianmichael.viafabricplus.protocolhack.ProtocolHack");
-            Class<?> itemReleaseVersionMappings = Class.forName("de.florianmichael.viafabricplus.mappings.ItemReleaseVersionMappings");
-            itemReleaseVersionMappingsInstance = itemReleaseVersionMappings.getField("INSTANCE");
+            Class<?> itemRegistryDiff = Class.forName("de.florianmichael.viafabricplus.fixes.data.ItemRegistryDiff");
             getTargetVersion = protocolHack.getMethod("getTargetVersion");
             versionEnumGetProtocol = getTargetVersion.getReturnType().getMethod("getProtocol");
-            itemReleaseVersionMappingsContains = itemReleaseVersionMappings.getMethod("contains", Item.class, getTargetVersion.getReturnType());
+            itemRegistryDiffKeepItem = itemRegistryDiff.getMethod("keepItem", Item.class);
         }
 
         @Override
         protected Object getCurrentVersion() throws ReflectiveOperationException {
-            return versionEnumGetProtocol.invoke(getVersionEnum());
-        }
-
-        private Object getVersionEnum() throws ReflectiveOperationException {
-            return getTargetVersion.invoke(null);
+            return versionEnumGetProtocol.invoke(getTargetVersion.invoke(null));
         }
 
         @Override
         public boolean doesItemExist(Item item) {
             try {
-                Object instance = itemReleaseVersionMappingsInstance.get(null);
-                if (instance == null) {
-                    // Quilt initializes commands on startup, allowing this to be called outside a world
-                    return true;
-                }
-                return (Boolean) itemReleaseVersionMappingsContains.invoke(instance, item, getVersionEnum());
+                return (Boolean) itemRegistryDiffKeepItem.invoke(null, item);
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
