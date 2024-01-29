@@ -125,6 +125,7 @@ public class ClientCommands implements ClientModInitializer {
         GetDataCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher, registryAccess);
         GammaCommand.register(dispatcher);
+        MapCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
         ChorusCommand.register(dispatcher);
         FishCommand.register(dispatcher, registryAccess);

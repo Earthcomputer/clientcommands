@@ -137,6 +137,9 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.cmap.noHeld": "You must be holding a map to use this command",
+  "commands.cmap.success": "Map successfully saved as %s",
+
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 
