@@ -4,7 +4,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
+import io.netty.buffer.Unpooled;
+import net.earthcomputer.clientcommands.c2c.packets.DiceRollC2CPackets;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.earthcomputer.clientcommands.command.DiceRollCommand;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
@@ -98,5 +101,20 @@ public class CCNetworkHandler implements CCPacketListener {
         prefix.append(Text.literal(" "));
         Text text = prefix.append(Text.translatable("ccpacket.messageC2CPacket.incoming", sender, message).formatted(Formatting.GRAY));
         MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(text);
+    }
+
+    @Override
+    public void onCoinflipInitC2CPacket(DiceRollC2CPackets.DiceRollInitC2CPacket packet) throws CommandSyntaxException {
+        DiceRollCommand.initDiceroll(packet);
+    }
+
+    @Override
+    public void onCoinflipAcceptedC2CPacket(DiceRollC2CPackets.DiceRollAcceptedC2CPacket packet) throws CommandSyntaxException {
+        DiceRollCommand.acceptDiceroll(packet);
+    }
+
+    @Override
+    public void onCoinflipResultC2CPacket(DiceRollC2CPackets.DiceRollResultC2CPacket packet) {
+        DiceRollCommand.completeDiceroll(packet);
     }
 }

@@ -113,6 +113,17 @@
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
 
+  "commands.diceroll.diceroll": "dice roll (%s side)",
+  "commands.diceroll.coinflip": "coin flip",
+  "commands.diceroll.sent": "Sent %s request to %s",
+  "commands.diceroll.received": "Received %s request from %s",
+  "commands.diceroll.value": "%s result from %s: %s",
+  "commands.diceroll.heads": "Heads",
+  "commands.diceroll.tails": "Tails",
+  "commands.diceroll.cheater": "I think %s is cheating, they got a different value.",
+  "commands.diceroll.timeout": "Timeout waiting for %s's response to %s request",
+  "commands.diceroll.waitingForResponse": "Waiting for %s's response already",
+
   "commands.citemgroup.notFound": "Item group \"%s\" not found",
   "commands.citemgroup.outOfBounds": "Index %d is out of bounds",
   "commands.citemgroup.saveFile.failed": "Could not save item groups file",

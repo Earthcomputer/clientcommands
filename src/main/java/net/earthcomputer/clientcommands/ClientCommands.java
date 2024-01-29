@@ -109,6 +109,7 @@ public class ClientCommands implements ClientModInitializer {
 
         AuditMixinsCommand.register(dispatcher);
         BookCommand.register(dispatcher);
+        DiceRollCommand.register(dispatcher);
         LookCommand.register(dispatcher);
         NoteCommand.register(dispatcher);
         ShrugCommand.register(dispatcher);

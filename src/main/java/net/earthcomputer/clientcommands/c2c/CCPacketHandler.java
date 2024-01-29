@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.c2c;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.earthcomputer.clientcommands.c2c.packets.DiceRollC2CPackets;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Util;
@@ -18,6 +19,7 @@ public class CCPacketHandler {
 
     static {
         CCPacketHandler.register(MessageC2CPacket.class, MessageC2CPacket::new);
+        DiceRollC2CPackets.register();
     }
 
     public static <P extends C2CPacket> void register(Class<P> packet, Function<PacketByteBuf, P> packetFactory) {
