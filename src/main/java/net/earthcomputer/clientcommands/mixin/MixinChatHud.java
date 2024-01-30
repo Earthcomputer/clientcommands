@@ -12,16 +12,19 @@ import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.collection.ArrayListDeque;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.security.PrivateKey;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 @Mixin(ChatHud.class)
@@ -113,5 +116,10 @@ public class MixinChatHud {
             e.printStackTrace();
         }
         return true;
+    }
+
+    @Redirect(method = "clear", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/collection/ArrayListDeque;addAll(Ljava/util/Collection;)Z"))
+    private boolean preventAddAll(ArrayListDeque<String> instance, Collection<String> collection) {
+        return false;
     }
 }
