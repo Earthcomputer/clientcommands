@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinAxeHoeAndShovelItem {
 
     @Inject(method = "useOn", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
-    public void onUseOnBlock(UseOnContext context, CallbackInfoReturnable<InteractionResult> ci) {
+    public void onUseOn(UseOnContext context, CallbackInfoReturnable<InteractionResult> ci) {
         PlayerRandCracker.onItemDamage(1, context.getPlayer(), context.getItemInHand());
     }
 

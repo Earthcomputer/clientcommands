@@ -55,10 +55,10 @@ public class FindBlockCommand {
 
         @Override
         protected void scanBlock(Entity cameraEntity, BlockPos pos) {
-            ClientLevel world = Minecraft.getInstance().level;
-            assert world != null;
+            ClientLevel level = Minecraft.getInstance().level;
+            assert level != null;
             Vec3 cameraPos = cameraEntity.getEyePosition(0);
-            if ((closestBlock == null || pos.distToCenterSqr(cameraPos) < closestBlock.distToCenterSqr(cameraPos)) && predicate.test(world, pos)) {
+            if ((closestBlock == null || pos.distToCenterSqr(cameraPos) < closestBlock.distToCenterSqr(cameraPos)) && predicate.test(level, pos)) {
                 closestBlock = pos.immutable();
             }
         }

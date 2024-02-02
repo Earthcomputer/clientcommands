@@ -47,11 +47,11 @@ public class MathUtil {
         return result.val;
     }
 
-    public static Vec3 getClosestVisiblePoint(Level world, BlockPos targetPos, Vec3 sourcePos, Entity excludingEntity) {
-        return getClosestVisiblePoint(world, targetPos, sourcePos, excludingEntity, null);
+    public static Vec3 getClosestVisiblePoint(Level level, BlockPos targetPos, Vec3 sourcePos, Entity excludingEntity) {
+        return getClosestVisiblePoint(level, targetPos, sourcePos, excludingEntity, null);
     }
 
-    public static Vec3 getClosestVisiblePoint(Level world, BlockPos targetPos, Vec3 sourcePos, Entity excludingEntity, Direction dir) {
+    public static Vec3 getClosestVisiblePoint(Level level, BlockPos targetPos, Vec3 sourcePos, Entity excludingEntity, Direction dir) {
         if (targetPos.distToLowCornerSqr(sourcePos.x, sourcePos.y, sourcePos.z) > 7 * 7) {
             return null;
         }
@@ -61,15 +61,15 @@ public class MathUtil {
         for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(totalArea.minX), Mth.floor(totalArea.minY), Mth.floor(totalArea.minZ),
                 Mth.ceil(totalArea.maxX), Mth.ceil(totalArea.maxY), Mth.ceil(totalArea.maxZ))) {
             if (!pos.equals(targetPos)) {
-                world.getBlockState(pos).getShape(world, pos).forAllBoxes((x1, y1, z1, x2, y2, z2) ->
+                level.getBlockState(pos).getShape(level, pos).forAllBoxes((x1, y1, z1, x2, y2, z2) ->
                         obscurers.add(new AABB(x1, y1, z1, x2, y2, z2).move(pos).inflate(EPSILON)));
             }
         }
-        for (Entity entity : world.getEntities(excludingEntity, totalArea, entity -> !entity.isSpectator() && entity.isPickable())) {
+        for (Entity entity : level.getEntities(excludingEntity, totalArea, entity -> !entity.isSpectator() && entity.isPickable())) {
             obscurers.add(entity.getBoundingBox().inflate(entity.getPickRadius() + EPSILON));
         }
         List<AABB> targetBoxes = new ArrayList<>();
-        world.getBlockState(targetPos).getShape(world, targetPos).forAllBoxes((x1, y1, z1, x2, y2, z2) ->
+        level.getBlockState(targetPos).getShape(level, targetPos).forAllBoxes((x1, y1, z1, x2, y2, z2) ->
                 targetBoxes.add(new AABB(x1, y1, z1, x2, y2, z2).move(targetPos)));
 
         Vec3 resultVal = null;
@@ -81,7 +81,7 @@ public class MathUtil {
                 if (sourcePos.subtract(faceBox.minX, faceBox.minY, faceBox.minZ)
                         .dot(new Vec3(face.getStepX(), face.getStepY(), face.getStepZ())) > 0) {
                     //noinspection StaticPseudoFunctionalStyleMethod
-                    Vec3 val = getClosestVisiblePoint(world,
+                    Vec3 val = getClosestVisiblePoint(level,
                             Iterables.concat(obscurers,
                                     Iterables.transform(Iterables.filter(targetBoxes, it -> it != box),
                                             b -> b.inflate(EPSILON))),
@@ -100,7 +100,7 @@ public class MathUtil {
         return resultVal;
     }
 
-    private static Vec3 getClosestVisiblePoint(BlockGetter world, Iterable<AABB> obscurers, AABB face, Vec3 sourcePos, Direction dir) {
+    private static Vec3 getClosestVisiblePoint(BlockGetter level, Iterable<AABB> obscurers, AABB face, Vec3 sourcePos, Direction dir) {
         Direction.Axis xAxis, yAxis;
         switch (dir.getAxis()) {
             case X -> {

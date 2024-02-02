@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinShearsItem {
 
     @Inject(method = "mineBlock", at = @At("HEAD"))
-    public void onPostMine(ItemStack stack, Level world, BlockState state, BlockPos pos, LivingEntity miner, CallbackInfoReturnable<Boolean> ci) {
+    public void onMineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miner, CallbackInfoReturnable<Boolean> ci) {
         PlayerRandCracker.onItemDamage(1, miner, stack);
     }
 

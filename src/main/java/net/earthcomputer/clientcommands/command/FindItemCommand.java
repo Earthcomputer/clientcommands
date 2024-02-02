@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
-import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
+import net.earthcomputer.clientcommands.mixin.AbstractContainerMenuAccessor;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -172,8 +172,8 @@ public class FindItemCommand {
                 _break();
                 return;
             }
-            Level world = Minecraft.getInstance().level;
-            assert world != null;
+            Level level = Minecraft.getInstance().level;
+            assert level != null;
             LocalPlayer player = Minecraft.getInstance().player;
             assert player != null;
             MultiPlayerGameMode interactionManager = Minecraft.getInstance().gameMode;
@@ -197,14 +197,14 @@ public class FindItemCommand {
                 for (int y = minY; y <= maxY; y++) {
                     for (int z = minZ; z <= maxZ; z++) {
                         BlockPos pos = new BlockPos(x, y, z);
-                        if (!canSearch(world, pos)) {
+                        if (!canSearch(level, pos)) {
                             continue;
                         }
                         if (searchedBlocks.contains(pos)) {
                             continue;
                         }
-                        BlockState state = world.getBlockState(pos);
-                        Vec3 closestPos = MathUtil.getClosestPoint(pos, state.getShape(world, pos), origin);
+                        BlockState state = level.getBlockState(pos);
+                        Vec3 closestPos = MathUtil.getClosestPoint(pos, state.getShape(level, pos), origin);
                         if (closestPos.distanceToSqr(origin) > reachDistance * reachDistance) {
                             continue;
                         }
@@ -216,7 +216,7 @@ public class FindItemCommand {
                             hasSearchedEnderChest = true;
                         } else if (state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
                             BlockPos offsetPos = pos.relative(ChestBlock.getConnectedDirection(state));
-                            if (world.getBlockState(offsetPos).getBlock() == state.getBlock()) {
+                            if (level.getBlockState(offsetPos).getBlock() == state.getBlock()) {
                                 searchedBlocks.add(offsetPos);
                             }
                         }
@@ -231,19 +231,19 @@ public class FindItemCommand {
             }
         }
 
-        private boolean canSearch(Level world, BlockPos pos) {
-            BlockState state = world.getBlockState(pos);
-            BlockEntity blockEntity = world.getBlockEntity(pos);
+        private boolean canSearch(Level level, BlockPos pos) {
+            BlockState state = level.getBlockState(pos);
+            BlockEntity blockEntity = level.getBlockEntity(pos);
             if (!(blockEntity instanceof Container) && state.getBlock() != Blocks.ENDER_CHEST) {
                 return false;
             }
             if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
-                if (ChestBlock.isChestBlockedAt(world, pos)) {
+                if (ChestBlock.isChestBlockedAt(level, pos)) {
                     return false;
                 }
                 if (state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
                     BlockPos offsetPos = pos.relative(ChestBlock.getConnectedDirection(state));
-                    return world.getBlockState(offsetPos).getBlock() != state.getBlock() || !ChestBlock.isChestBlockedAt(world, offsetPos);
+                    return level.getBlockState(offsetPos).getBlock() != state.getBlock() || !ChestBlock.isChestBlockedAt(level, offsetPos);
                 }
             }
             return true;
@@ -267,7 +267,7 @@ public class FindItemCommand {
                             playerInvSlots.add(slot.index);
                         }
                     }
-                    mc.player.containerMenu = new AbstractContainerMenu(((ScreenHandlerAccessor) container).getNullableType(), container.containerId) {
+                    mc.player.containerMenu = new AbstractContainerMenu(((AbstractContainerMenuAccessor) container).getNullableType(), container.containerId) {
                         @Override
                         public boolean stillValid(Player var1) {
                             return true;
@@ -348,8 +348,8 @@ public class FindItemCommand {
                 _break();
                 return;
             }
-            ClientLevel world = Minecraft.getInstance().level;
-            assert world != null;
+            ClientLevel level = Minecraft.getInstance().level;
+            assert level != null;
 
             if (isScanning) {
                 long startTime = System.nanoTime();
@@ -359,7 +359,7 @@ public class FindItemCommand {
                 }
                 while (scanningIterator.hasNext()) {
                     BlockPos chunkPosAsBlockPos = scanningIterator.next();
-                    if (world.getChunk(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ(), ChunkStatus.FULL, false) != null) {
+                    if (level.getChunk(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ(), ChunkStatus.FULL, false) != null) {
                         scanChunk(new ChunkPos(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ()), cameraEntity);
                     }
 
@@ -391,8 +391,8 @@ public class FindItemCommand {
         private void scanChunk(ChunkPos chunkToScan, Entity cameraEntity) {
             LocalPlayer player = Minecraft.getInstance().player;
             assert player != null;
-            ClientLevel world = Minecraft.getInstance().level;
-            assert world != null;
+            ClientLevel level = Minecraft.getInstance().level;
+            assert level != null;
             ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
             assert networkHandler != null;
 
@@ -414,7 +414,7 @@ public class FindItemCommand {
                 }
             }
 
-            LevelChunk chunk = world.getChunk(chunkToScan.x, chunkToScan.z);
+            LevelChunk chunk = level.getChunk(chunkToScan.x, chunkToScan.z);
 
             int minSection = chunk.getMinSection();
             int maxSection = chunk.getMaxSection();

@@ -34,9 +34,9 @@ public class Cuboid extends Shape {
     }
 
     @Override
-    public void render(PoseStack matrixStack, VertexConsumer vertexConsumer, float delta) {
+    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float delta) {
         for (Line edge : this.edges) {
-            edge.renderLine(matrixStack, vertexConsumer, delta, prevPos.subtract(getPos()));
+            edge.renderLine(poseStack, vertexConsumer, delta, prevPos.subtract(getPos()));
         }
     }
 

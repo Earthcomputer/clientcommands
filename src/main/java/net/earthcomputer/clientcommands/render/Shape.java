@@ -11,7 +11,7 @@ public abstract class Shape {
     public void tick() {
     }
 
-    public abstract void render(PoseStack matrixStack, VertexConsumer vertexConsumer, float delta);
+    public abstract void render(PoseStack poseStack, VertexConsumer vertexConsumer, float delta);
 
     public abstract Vec3 getPos();
 

@@ -29,12 +29,12 @@ public class CGiveCommand {
                 .executes(ctx -> give(ctx.getSource(), getCItemStackArgument(ctx, "item"), getInteger(ctx, "count"))))));
     }
 
-    private static int give(FabricClientCommandSource source, ItemInput itemArgument, int count) throws CommandSyntaxException {
+    private static int give(FabricClientCommandSource source, ItemInput itemInput, int count) throws CommandSyntaxException {
         if (!source.getPlayer().getAbilities().instabuild) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-        ItemStack stack = itemArgument.createItemStack(Math.min(count, itemArgument.getItem().getMaxStackSize()), false);
+        ItemStack stack = itemInput.createItemStack(Math.min(count, itemInput.getItem().getMaxStackSize()), false);
         source.getClient().gameMode.handleCreativeModeItemAdd(stack, 36 + source.getPlayer().getInventory().selected);
         source.getPlayer().inventoryMenu.broadcastChanges();
 

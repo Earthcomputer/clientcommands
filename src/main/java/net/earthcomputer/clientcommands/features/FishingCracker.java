@@ -15,8 +15,8 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
-import net.earthcomputer.clientcommands.mixin.CheckedRandomAccessor;
-import net.earthcomputer.clientcommands.mixin.ProjectileEntityAccessor;
+import net.earthcomputer.clientcommands.mixin.LegacyRandomSourceAccessor;
+import net.earthcomputer.clientcommands.mixin.ProjectileAccessor;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -402,14 +402,14 @@ public class FishingCracker {
                 if (failedConditions.stream().anyMatch(it -> it instanceof OpenWaterCondition)) {
                     Component error = Component.translatable("commands.cfish.error.openWater").withStyle(style -> style.withColor(ChatFormatting.RED));
                     ClientCommandHelper.addOverlayMessage(error, 100);
-                    if (!fishingBobber.world.getBlockState(BlockPos.containing(fishingBobber.pos).above()).is(Blocks.LILY_PAD)) {
+                    if (!fishingBobber.level.getBlockState(BlockPos.containing(fishingBobber.pos).above()).is(Blocks.LILY_PAD)) {
                         ClientCommandHelper.sendHelp(Component.translatable("commands.cfish.error.openWater.lilyPad"));
                     }
                     boolean foundFlowingWater = false;
                     for (BlockPos openWaterViolation : fishingBobber.openWaterViolations) {
                         if (!foundFlowingWater
-                            && fishingBobber.world.getBlockState(openWaterViolation).is(Blocks.WATER)
-                            && !fishingBobber.world.getFluidState(openWaterViolation).isSource()
+                            && fishingBobber.level.getBlockState(openWaterViolation).is(Blocks.WATER)
+                            && !fishingBobber.level.getFluidState(openWaterViolation).isSource()
                         ) {
                             foundFlowingWater = true;
                         }
@@ -836,9 +836,9 @@ public class FishingCracker {
     private static class SimulatedFishingBobber {
         private static final EntityDimensions FISHING_BOBBER_DIMENSIONS = EntityType.FISHING_BOBBER.getDimensions();
 
-        private final Level world = Objects.requireNonNull(Minecraft.getInstance().level);
+        private final Level level = Objects.requireNonNull(Minecraft.getInstance().level);
 
-        private final FishingHook fakeEntity = new FishingHook(Objects.requireNonNull(Minecraft.getInstance().player), world, 0, 0);
+        private final FishingHook fakeEntity = new FishingHook(Objects.requireNonNull(Minecraft.getInstance().player), level, 0, 0);
 
         // state variables
         private Vec3 pos;
@@ -906,8 +906,8 @@ public class FishingCracker {
         }
 
         private LootContext getLootContext() {
-            return new LootContext(((CheckedRandomAccessor) random).getSeed().get() ^ 0x5deece66dL, SeedfindingUtil.getMCVersion())
-                .withBiome(SeedfindingUtil.toSeedfindingBiome(world, world.getBiome(BlockPos.containing(pos))))
+            return new LootContext(((LegacyRandomSourceAccessor) random).getSeed().get() ^ 0x5deece66dL, SeedfindingUtil.getMCVersion())
+                .withBiome(SeedfindingUtil.toSeedfindingBiome(level, level.getBiome(BlockPos.containing(pos))))
                 .withOpenWater(inOpenWater)
                 .withLuck(luckLevel);
         }
@@ -921,9 +921,9 @@ public class FishingCracker {
 
             float f = 0.0F;
             BlockPos blockPos = BlockPos.containing(this.pos);
-            FluidState fluidState = this.world.getFluidState(blockPos);
+            FluidState fluidState = this.level.getFluidState(blockPos);
             if (fluidState.is(FluidTags.WATER)) {
-                f = fluidState.getHeight(this.world, blockPos);
+                f = fluidState.getHeight(this.level, blockPos);
             }
 
             boolean bl = f > 0.0F;
@@ -1049,7 +1049,7 @@ public class FishingCracker {
             int l = Mth.ceil(box.maxY);
             int m = Mth.floor(box.minZ);
             int n = Mth.ceil(box.maxZ);
-            if (!this.world.hasChunksAt(i, k, m, j, l, n)) {
+            if (!this.level.hasChunksAt(i, k, m, j, l, n)) {
                 return false;
             } else {
                 double e = 0.0D;
@@ -1062,9 +1062,9 @@ public class FishingCracker {
                     for (int q = k; q < l; ++q) {
                         for (int r = m; r < n; ++r) {
                             mutable.set(p, q, r);
-                            FluidState fluidState = this.world.getFluidState(mutable);
+                            FluidState fluidState = this.level.getFluidState(mutable);
                             if (fluidState.is(tag)) {
-                                double f = (float)q + fluidState.getHeight(this.world, mutable);
+                                double f = (float)q + fluidState.getHeight(this.level, mutable);
                                 if (f >= box.minY) {
                                     bl2 = true;
                                     e = Math.max(f - box.minY, e);
@@ -1098,14 +1098,14 @@ public class FishingCracker {
         private void checkForCollision() {
             fakeEntity.absMoveTo(pos.x, pos.y, pos.z);
             fakeEntity.setDeltaMovement(velocity);
-            HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(fakeEntity, ((ProjectileEntityAccessor) fakeEntity)::callCanHit);
+            HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(fakeEntity, ((ProjectileAccessor) fakeEntity)::callCanHitEntity);
             if (hitResult.getType() != HitResult.Type.MISS) {
                 failedReason = "collision";
             }
         }
 
         private void move(Vec3 movement) {
-            assert world != null;
+            assert level != null;
 
             Vec3 vec3d = this.adjustMovementForCollisions(movement);
             if (vec3d.lengthSqr() > 1.0E-7D) {
@@ -1139,7 +1139,7 @@ public class FishingCracker {
 
             float i = this.getVelocityMultiplier();
             this.velocity = this.velocity.multiply((double)i, 1.0D, (double)i);
-            if (this.world.getBlockStatesIfLoaded(this.boundingBox.deflate(0.001D)).anyMatch((blockStatex) -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA))) {
+            if (this.level.getBlockStatesIfLoaded(this.boundingBox.deflate(0.001D)).anyMatch((blockStatex) -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA))) {
                 failedReason = "fire";
             }
         }
@@ -1148,24 +1148,25 @@ public class FishingCracker {
             AABB box = this.boundingBox;
             fakeEntity.absMoveTo(pos.x, pos.y, pos.z);
             fakeEntity.setDeltaMovement(velocity);
-            assert world != null;
+            assert level != null;
 
-            VoxelShape voxelShape = this.world.getWorldBorder().getCollisionShape();
+            VoxelShape voxelShape = this.level.getWorldBorder().getCollisionShape();
             List<VoxelShape> voxelShapes = new ArrayList<>();
             if (!Shapes.joinIsNotEmpty(voxelShape, Shapes.create(box.deflate(1.0E-7D)), BooleanOp.AND)) {
                 voxelShapes.add(voxelShape);
             }
-            voxelShapes.addAll(this.world.getEntityCollisions(fakeEntity, box.expandTowards(movement)));
+            voxelShapes.addAll(this.level.getEntityCollisions(fakeEntity, box.expandTowards(movement)));
 
-            return movement.lengthSqr() == 0.0D ? movement : Entity.collideBoundingBox(fakeEntity, movement, box, this.world, voxelShapes);
+            return movement.lengthSqr() == 0.0D ? movement : Entity.collideBoundingBox(fakeEntity, movement, box, this.level, voxelShapes);
         }
 
         private float getVelocityMultiplier() {
-            assert world != null;
-            Block block = this.world.getBlockState(BlockPos.containing(pos)).getBlock();
+            assert level != null;
+            Block block = this.level.getBlockState(BlockPos.containing(pos)).getBlock();
             float f = block.getSpeedFactor();
             if (block != Blocks.WATER && block != Blocks.BUBBLE_COLUMN) {
-                return (double)f == 1.0D ? this.world.getBlockState(BlockPos.containing(this.pos.x, this.boundingBox.minY - 0.5000001D, this.pos.z)).getBlock().getSpeedFactor() : f;
+                return (double)f == 1.0D ? this.level
+                    .getBlockState(BlockPos.containing(this.pos.x, this.boundingBox.minY - 0.5000001D, this.pos.z)).getBlock().getSpeedFactor() : f;
             } else {
                 return f;
             }
@@ -1226,25 +1227,25 @@ public class FishingCracker {
         }
 
         private PositionType getPositionType(BlockPos pos) {
-            assert world != null;
-            BlockState blockState = this.world.getBlockState(pos);
+            assert level != null;
+            BlockState blockState = this.level.getBlockState(pos);
             if (!blockState.isAir() && !blockState.is(Blocks.LILY_PAD)) {
                 FluidState fluidState = blockState.getFluidState();
-                return fluidState.is(FluidTags.WATER) && fluidState.isSource() && blockState.getCollisionShape(this.world, pos).isEmpty() ? PositionType.INSIDE_WATER : PositionType.INVALID;
+                return fluidState.is(FluidTags.WATER) && fluidState.isSource() && blockState.getCollisionShape(this.level, pos).isEmpty() ? PositionType.INSIDE_WATER : PositionType.INVALID;
             } else {
                 return PositionType.ABOVE_WATER;
             }
         }
 
         private void tickFishingLogic(BlockPos pos) {
-            assert world != null;
+            assert level != null;
             int i = 1;
             BlockPos blockPos = pos.above();
-            if (this.random.nextFloat() < 0.25F && this.world.isRainingAt(blockPos)) {
+            if (this.random.nextFloat() < 0.25F && this.level.isRainingAt(blockPos)) {
                 ++i;
             }
 
-            if (this.random.nextFloat() < 0.5F && !this.world.canSeeSky(blockPos)) {
+            if (this.random.nextFloat() < 0.5F && !this.level.canSeeSky(blockPos)) {
                 --i;
             }
 
@@ -1273,7 +1274,7 @@ public class FishingCracker {
                         q = this.pos.x + (double)(o * (float)this.fishTravelCountdown * 0.1F);
                         r = (double)((float)Mth.floor(this.pos.y) + 1.0F);
                         s = this.pos.z + (double)(p * (float)this.fishTravelCountdown * 0.1F);
-                        blockState2 = world.getBlockState(BlockPos.containing(q, r - 1.0D, s));
+                        blockState2 = level.getBlockState(BlockPos.containing(q, r - 1.0D, s));
                         if (blockState2.is(Blocks.WATER)) {
                             if (this.random.nextFloat() < 0.15F) {
                                 //serverWorld.spawnParticles(ParticleTypes.BUBBLE, q, r - 0.10000000149011612D, s, 1, (double)o, 0.1D, (double)p, 0.0D);
@@ -1312,7 +1313,7 @@ public class FishingCracker {
                         q = this.pos.x + (double)(Mth.sin(o) * p * 0.1F);
                         r = (float)Mth.floor(this.pos.y) + 1.0F;
                         s = this.pos.z + (double)(Mth.cos(o) * p * 0.1F);
-                        blockState2 = world.getBlockState(BlockPos.containing(q, r - 1.0D, s));
+                        blockState2 = level.getBlockState(BlockPos.containing(q, r - 1.0D, s));
                         if (blockState2.is(Blocks.WATER)) {
                             random.nextInt(2);
                             //serverWorld.spawnParticles(ParticleTypes.SPLASH, q, r, s, 2 + this.random.nextInt(2), 0.10000000149011612D, 0.0D, 0.10000000149011612D, 0.0D);

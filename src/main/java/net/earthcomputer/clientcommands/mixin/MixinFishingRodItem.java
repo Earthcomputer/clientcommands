@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinFishingRodItem {
 
     @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/sounds/SoundEvents;FISHING_BOBBER_RETRIEVE:Lnet/minecraft/sounds/SoundEvent;"))
-    public void onRetrieveFishingRod(Level world, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> ci) {
-        if (world.isClientSide) {
+    public void onRetrieveFishingRod(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> ci) {
+        if (level.isClientSide) {
             ItemStack stack = player.getItemInHand(hand);
             PlayerRandCracker.onItemDamageUncertain(1, 5, player, stack);
             if (FishingCracker.canManipulateFishing()) {
@@ -28,8 +28,8 @@ public class MixinFishingRodItem {
     }
 
     @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/sounds/SoundEvents;FISHING_BOBBER_THROW:Lnet/minecraft/sounds/SoundEvent;"))
-    private void onThrowFishingRod(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> ci) {
-        if (world.isClientSide && FishingCracker.canManipulateFishing()) {
+    private void onThrowFishingRod(Level level, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> ci) {
+        if (level.isClientSide && FishingCracker.canManipulateFishing()) {
             FishingCracker.onThrownFishingRod(user.getItemInHand(hand));
         }
     }

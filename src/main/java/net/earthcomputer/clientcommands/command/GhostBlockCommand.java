@@ -45,12 +45,12 @@ public class GhostBlockCommand {
     }
 
     private static int setGhostBlock(FabricClientCommandSource source, BlockPos pos, BlockState state) throws CommandSyntaxException {
-        ClientLevel world = source.getWorld();
-        assert world != null;
+        ClientLevel level = source.getWorld();
+        assert level != null;
 
-        checkLoaded(world, pos);
+        checkLoaded(level, pos);
 
-        boolean result = world.setBlock(pos, state, 18);
+        boolean result = level.setBlock(pos, state, 18);
         if (result) {
             source.sendFeedback(Component.translatable("commands.cghostblock.set.success"));
             return Command.SINGLE_SUCCESS;
@@ -60,17 +60,17 @@ public class GhostBlockCommand {
     }
 
     private static int fillGhostBlocks(FabricClientCommandSource source, BlockPos from, BlockPos to, BlockState state, Predicate<BlockInWorld> filter) throws CommandSyntaxException {
-        ClientLevel world = source.getWorld();
-        assert world != null;
+        ClientLevel level = source.getWorld();
+        assert level != null;
 
-        checkLoaded(world, from);
-        checkLoaded(world, to);
+        checkLoaded(level, from);
+        checkLoaded(level, to);
 
         BoundingBox range = BoundingBox.fromCorners(from, to);
         int successCount = 0;
         for (BlockPos pos : BlockPos.betweenClosed(range.minX(), range.minY(), range.minZ(), range.maxX(), range.maxY(), range.maxZ())) {
-            if (filter.test(new BlockInWorld(world, pos, true))) {
-                if (world.setBlock(pos, state, 18)) {
+            if (filter.test(new BlockInWorld(level, pos, true))) {
+                if (level.setBlock(pos, state, 18)) {
                     successCount++;
                 }
             }
@@ -85,10 +85,10 @@ public class GhostBlockCommand {
         return successCount;
     }
 
-    private static void checkLoaded(ClientLevel world, BlockPos pos) throws CommandSyntaxException {
-        if (!world.hasChunkAt(pos)) {
+    private static void checkLoaded(ClientLevel level, BlockPos pos) throws CommandSyntaxException {
+        if (!level.hasChunkAt(pos)) {
             throw UNLOADED_EXCEPTION.create();
-        } else if (!world.isInWorldBounds(pos)) {
+        } else if (!level.isInWorldBounds(pos)) {
             throw OUT_OF_WORLD_EXCEPTION.create();
         }
     }

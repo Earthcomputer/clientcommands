@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands;
 
-import net.earthcomputer.clientcommands.mixin.CheckedRandomAccessor;
+import net.earthcomputer.clientcommands.mixin.LegacyRandomSourceAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.MinecraftServer;
@@ -45,27 +45,27 @@ public final class IntegratedServerUtil {
 
     @Nullable
     private static Entity getServerEntityUnchecked(Entity entity) {
-        ServerLevel world = getServerWorld();
-        if (world == null) {
+        ServerLevel level = getServerLevel();
+        if (level == null) {
             return null;
         }
-        return world.getEntity(entity.getId());
+        return level.getEntity(entity.getId());
     }
 
     /**
      * Returns the server world for the dimension the player is currently in, in singleplayer
      */
     @Nullable
-    public static ServerLevel getServerWorld() {
+    public static ServerLevel getServerLevel() {
         MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
         if (server == null) {
             return null;
         }
-        ClientLevel world = Minecraft.getInstance().level;
-        if (world == null) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
             return null;
         }
-        return server.getLevel(world.dimension());
+        return server.getLevel(level.dimension());
     }
 
     /**
@@ -78,11 +78,11 @@ public final class IntegratedServerUtil {
             return null;
         }
 
-        ClientLevel world = Minecraft.getInstance().level;
-        if (world == null) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
             return null;
         }
-        Entity clientEntity = world.getEntity(entity.getId());
+        Entity clientEntity = level.getEntity(entity.getId());
         if (clientEntity != null && clientEntity.getClass() == entity.getClass()) {
             return (T) clientEntity;
         }
@@ -97,6 +97,6 @@ public final class IntegratedServerUtil {
         if (player == null) {
             return 0;
         }
-        return ((CheckedRandomAccessor) player.getRandom()).getSeed().get();
+        return ((LegacyRandomSourceAccessor) player.getRandom()).getSeed().get();
     }
 }

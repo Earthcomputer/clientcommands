@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class MixinItemStack {
 
     @Inject(method = "hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At("HEAD"))
-    public <T extends LivingEntity> void onDamage(int amount, T holder, Consumer<T> breakHandler, CallbackInfo ci) {
+    public <T extends LivingEntity> void onHurtAndBreak(int amount, T holder, Consumer<T> breakHandler, CallbackInfo ci) {
         PlayerRandCracker.onItemDamage(amount, holder, (ItemStack) (Object) this);
     }
 

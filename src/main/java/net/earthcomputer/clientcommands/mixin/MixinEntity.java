@@ -51,14 +51,14 @@ public abstract class MixinEntity implements IEntity {
     }
 
     @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;random:Lnet/minecraft/util/RandomSource;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
-    private void onInitRandom(EntityType<?> type, Level world, CallbackInfo ci) {
-        if (type == DebugRandom.DEBUG_ENTITY_TYPE && !world.isClientSide) {
+    private void onInitRandom(EntityType<?> type, Level level, CallbackInfo ci) {
+        if (type == DebugRandom.DEBUG_ENTITY_TYPE && !level.isClientSide) {
             this.random = new DebugRandom((Entity) (Object) this);
         }
     }
 
     @Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
-    private void overrideIsGlowing(CallbackInfoReturnable<Boolean> ci) {
+    private void overrideIsCurrentlyGlowing(CallbackInfoReturnable<Boolean> ci) {
         if (!glowingTickets.isEmpty()) {
             ci.setReturnValue(Boolean.TRUE);
         }
@@ -93,14 +93,14 @@ public abstract class MixinEntity implements IEntity {
     }
 
     @Inject(method = "doWaterSplashEffect", at = @At("HEAD"))
-    public void onOnSwimmingStart(CallbackInfo ci) {
+    public void onDoWaterSplashEffect(CallbackInfo ci) {
         if (isThePlayer()) {
             PlayerRandCracker.onSwimmingStart();
         }
     }
 
     @Inject(method = "playAmethystStepSound", at = @At("HEAD"))
-    private void onPlayAmethystChimeSound(CallbackInfo ci) {
+    private void onPlayAmethystStepSound(CallbackInfo ci) {
         if (isThePlayer()) {
             PlayerRandCracker.onAmethystChime();
         }
@@ -114,7 +114,7 @@ public abstract class MixinEntity implements IEntity {
     }
 
     @Inject(method = "getTeamColor", at = @At("HEAD"), cancellable = true)
-    public void injectGetTeamColorValue(CallbackInfoReturnable<Integer> ci) {
+    public void injectGetTeamColor(CallbackInfoReturnable<Integer> ci) {
         if (hasGlowingTicket()) {
             ci.setReturnValue(getGlowingTicketColor());
         }

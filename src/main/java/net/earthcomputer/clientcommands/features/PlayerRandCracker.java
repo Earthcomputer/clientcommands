@@ -93,7 +93,7 @@ public class PlayerRandCracker {
         }
     }
 
-    // TODO: update-sensitive: call hierarchy of PlayerEntity.random and PlayerEntity.getRandom()
+    // TODO: update-sensitive: call hierarchy of Player.random and Player.getRandom()
 
     private static int expectedThrows = 0;
 

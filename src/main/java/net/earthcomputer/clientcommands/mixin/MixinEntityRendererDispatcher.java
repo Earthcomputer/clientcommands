@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinEntityRendererDispatcher {
 
     @Inject(method = "prepare", at = @At("HEAD"))
-    public void onConfigure(Level world, Camera camera, Entity entity, CallbackInfo ci) {
+    public void onPrepare(Level level, Camera camera, Entity entity, CallbackInfo ci) {
         RenderSettings.preRenderEntities();
     }
 

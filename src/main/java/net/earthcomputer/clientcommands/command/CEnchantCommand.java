@@ -38,19 +38,19 @@ public class CEnchantCommand {
 
     private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) {
         if (!Configs.getEnchantingPrediction()) {
-            Component text = Component.translatable("commands.cenchant.needEnchantingPrediction")
+            Component component = Component.translatable("commands.cenchant.needEnchantingPrediction")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands enchantingPrediction set true"));
-            source.sendFeedback(text);
+            source.sendFeedback(component);
             return Command.SINGLE_SUCCESS;
         }
         if (!Configs.playerCrackState.knowsSeed() && Configs.enchCrackState != EnchantmentCracker.CrackState.CRACKED) {
-            Component text = Component.translatable("commands.cenchant.uncracked")
+            Component component = Component.translatable("commands.cenchant.uncracked")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
-            source.sendFeedback(text);
+            source.sendFeedback(component);
             return Command.SINGLE_SUCCESS;
         }
 

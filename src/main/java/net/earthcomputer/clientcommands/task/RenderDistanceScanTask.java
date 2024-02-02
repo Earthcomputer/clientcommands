@@ -46,8 +46,8 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             return;
         }
 
-        ClientLevel world = Minecraft.getInstance().level;
-        assert world != null;
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
 
         long startTime = System.nanoTime();
         while (squarePosIterator.hasNext()) {
@@ -55,8 +55,8 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             ChunkPos chunkPos = new ChunkPos(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ());
 
             if (canScanChunk(cameraEntity, chunkPos)) {
-                int minSection = world.getMinSection();
-                int maxSection = world.getMaxSection();
+                int minSection = level.getMinSection();
+                int maxSection = level.getMaxSection();
                 for (int sectionY = minSection; sectionY < maxSection; sectionY++) {
                     SectionPos sectionPos = SectionPos.of(chunkPos, sectionY);
                     if (canScanChunkSection(cameraEntity, sectionPos)) {
@@ -85,9 +85,9 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     }
 
     protected boolean canScanChunk(Entity cameraEntity, ChunkPos pos) {
-        ClientLevel world = Minecraft.getInstance().level;
-        assert world != null;
-        return world.getChunk(pos.x, pos.z, ChunkStatus.FULL, false) != null;
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
+        return level.getChunk(pos.x, pos.z, ChunkStatus.FULL, false) != null;
     }
 
     protected boolean canScanChunkSection(Entity cameraEntity, SectionPos pos) {
@@ -115,16 +115,16 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     }
 
     protected boolean hasBlockState(SectionPos pos, Predicate<BlockState> stateTest) {
-        ClientLevel world = Minecraft.getInstance().level;
-        assert world != null;
-        LevelChunk chunk = world.getChunk(pos.getX(), pos.getZ());
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
+        LevelChunk chunk = level.getChunk(pos.getX(), pos.getZ());
         LevelChunkSection section = chunk.getSection(chunk.getSectionIndexFromSectionY(pos.getY()));
         return section.maybeHas(stateTest);
     }
 
     private void scanChunkSection(Entity cameraEntity, SectionPos sectionPos) {
-        ClientLevel world = Minecraft.getInstance().level;
-        assert world != null;
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
         for (BlockPos pos : BlockPos.betweenClosed(sectionPos.minBlockX(), sectionPos.minBlockY(), sectionPos.minBlockZ(), sectionPos.maxBlockX(), sectionPos.maxBlockY(), sectionPos.maxBlockZ())) {
             scanBlock(cameraEntity, pos);
         }

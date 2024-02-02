@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinFlintAndSteelItem {
 
     @Inject(method = "useOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/context/UseOnContext;getItemInHand()Lnet/minecraft/world/item/ItemStack;"))
-    public void onUseOnBlock(UseOnContext context, CallbackInfoReturnable<InteractionResult> ci) {
+    public void onUseOn(UseOnContext context, CallbackInfoReturnable<InteractionResult> ci) {
         PlayerRandCracker.onItemDamage(1, context.getPlayer(), context.getItemInHand());
     }
 

@@ -17,19 +17,19 @@ public class Line extends Shape {
     }
 
     @Override
-    public void render(PoseStack matrixStack, VertexConsumer vertexConsumer, float delta) {
-        renderLine(matrixStack, vertexConsumer, delta, prevPos.subtract(getPos()));
+    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float delta) {
+        renderLine(poseStack, vertexConsumer, delta, prevPos.subtract(getPos()));
     }
 
-    public void renderLine(PoseStack matrixStack, VertexConsumer vertexConsumer, float delta, Vec3 prevPosOffset) {
+    public void renderLine(PoseStack poseStack, VertexConsumer vertexConsumer, float delta, Vec3 prevPosOffset) {
         Vec3 normal = this.end.subtract(this.start).normalize();
-        putVertex(matrixStack, vertexConsumer, this.start.add(prevPosOffset.scale(1 - delta)), normal);
-        putVertex(matrixStack, vertexConsumer, this.end.add(prevPosOffset.scale(1 - delta)), normal);
+        putVertex(poseStack, vertexConsumer, this.start.add(prevPosOffset.scale(1 - delta)), normal);
+        putVertex(poseStack, vertexConsumer, this.end.add(prevPosOffset.scale(1 - delta)), normal);
     }
 
-    private void putVertex(PoseStack matrixStack, VertexConsumer vertexConsumer, Vec3 pos, Vec3 normal) {
+    private void putVertex(PoseStack poseStack, VertexConsumer vertexConsumer, Vec3 pos, Vec3 normal) {
         vertexConsumer.vertex(
-                matrixStack.last().pose(),
+                poseStack.last().pose(),
                 (float) pos.x(),
                 (float) pos.y(),
                 (float) pos.z()
@@ -39,7 +39,7 @@ public class Line extends Shape {
                 (color & 0xFF) / 255.0F,
                 1.0F
         ).normal(
-                matrixStack.last().normal(),
+                poseStack.last().normal(),
                 (float) normal.x(),
                 (float) normal.y(),
                 (float) normal.z()

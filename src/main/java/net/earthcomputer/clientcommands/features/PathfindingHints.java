@@ -6,7 +6,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public interface PathfindingHints {
 
-    BlockPathTypes getNodeType(BlockGetter world, BlockPos pos);
+    BlockPathTypes getNodeType(BlockGetter level, BlockPos pos);
 
     float getPathfindingPenalty(BlockPathTypes type);
 

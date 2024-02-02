@@ -4,7 +4,7 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.mixin.CheckedRandomAccessor;
+import net.earthcomputer.clientcommands.mixin.LegacyRandomSourceAccessor;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.ChatFormatting;
@@ -77,7 +77,7 @@ public class SeedCracker {
 			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" \n");
 		}*/
 
-        callback.callback(((CheckedRandomAccessor) rand).getSeed().get());//extract seed and call callback
+        callback.callback(((LegacyRandomSourceAccessor) rand).getSeed().get());//extract seed and call callback
     }
 
     public static void crack(OnCrack callback) {

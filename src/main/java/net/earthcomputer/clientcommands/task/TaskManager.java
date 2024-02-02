@@ -45,13 +45,13 @@ public class TaskManager {
         }
     }
 
-    public static void onWorldUnload(boolean isDisconnect) {
+    public static void onLevelUnload(boolean isDisconnect) {
         var oldTasks = new ArrayList<Map.Entry<String, LongTask>>();
         {
             var itr = tasks.entrySet().iterator();
             while (itr.hasNext()) {
                 var entry = itr.next();
-                if (entry.getValue().stopOnWorldUnload(isDisconnect)) {
+                if (entry.getValue().stopOnLevelUnload(isDisconnect)) {
                     itr.remove();
                     oldTasks.add(entry);
                 }
@@ -62,7 +62,7 @@ public class TaskManager {
             Iterator<LongTask> itr = newTasks.iterator();
             while (itr.hasNext()) {
                 LongTask newTask = itr.next();
-                if (newTask.stopOnWorldUnload(isDisconnect)) {
+                if (newTask.stopOnLevelUnload(isDisconnect)) {
                     itr.remove();
                     oldNewTasks.add(newTask);
                 }

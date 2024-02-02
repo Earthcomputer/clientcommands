@@ -96,7 +96,7 @@ public class EnchantmentCracker {
      * This section is in charge of rendering the overlay on the enchantment GUI
      */
 
-    public static void drawEnchantmentGUIOverlay(GuiGraphics context) {
+    public static void drawEnchantmentGUIOverlay(GuiGraphics graphics) {
         CrackState crackState = Configs.enchCrackState;
 
         List<String> lines = new ArrayList<>();
@@ -138,7 +138,7 @@ public class EnchantmentCracker {
         Font fontRenderer = Minecraft.getInstance().font;
         int y = 0;
         for (String line : lines) {
-            context.drawString(fontRenderer, line, 0, y, 0xffffff, false);
+            graphics.drawString(fontRenderer, line, 0, y, 0xffffff, false);
             y += fontRenderer.lineHeight;
         }
     }
@@ -167,13 +167,13 @@ public class EnchantmentCracker {
         }
     }
 
-    public static void addEnchantmentSeedInfo(Level world, EnchantmentMenu container) {
+    public static void addEnchantmentSeedInfo(Level level, EnchantmentMenu menu) {
         CrackState crackState = Configs.enchCrackState;
         if (crackState == CrackState.CRACKED) {
             return;
         }
 
-        ItemStack itemToEnchant = container.getSlot(0).getItem();
+        ItemStack itemToEnchant = menu.getSlot(0).getItem();
         if (itemToEnchant.isEmpty() || !itemToEnchant.isEnchantable()) {
             return;
         }
@@ -185,14 +185,14 @@ public class EnchantmentCracker {
 
         if (crackState == CrackState.UNCRACKED) {
             Configs.enchCrackState = CrackState.CRACKING;
-            prepareForNextEnchantmentSeedCrack(container.getEnchantmentSeed());
+            prepareForNextEnchantmentSeedCrack(menu.getEnchantmentSeed());
         }
-        int power = getEnchantPower(world, tablePos);
+        int power = getEnchantPower(level, tablePos);
 
         RandomSource rand = RandomSource.create();
-        int[] actualEnchantLevels = container.costs;
-        int[] actualEnchantmentClues = container.enchantClue;
-        int[] actualLevelClues = container.levelClue;
+        int[] actualEnchantLevels = menu.costs;
+        int[] actualEnchantmentClues = menu.enchantClue;
+        int[] actualLevelClues = menu.levelClue;
 
         // brute force the possible seeds
         Iterator<Integer> xpSeedItr = possibleXPSeeds.iterator();
@@ -202,11 +202,11 @@ public class EnchantmentCracker {
 
             // check enchantment levels match
             for (int slot = 0; slot < 3; slot++) {
-                int level = EnchantmentHelper.getEnchantmentCost(rand, slot, power, itemToEnchant);
-                if (level < slot + 1) {
-                    level = 0;
+                int cost = EnchantmentHelper.getEnchantmentCost(rand, slot, power, itemToEnchant);
+                if (cost < slot + 1) {
+                    cost = 0;
                 }
-                if (level != actualEnchantLevels[slot]) {
+                if (cost != actualEnchantLevels[slot]) {
                     xpSeedItr.remove();
                     continue seedLoop;
                 }
@@ -453,7 +453,7 @@ public class EnchantmentCracker {
         return Configs.getEnchantingPrediction();
     }
 
-    private static int getEnchantPower(Level world, BlockPos tablePos) {
+    private static int getEnchantPower(Level level, BlockPos tablePos) {
         int power = 0;
 
         int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
@@ -462,17 +462,17 @@ public class EnchantmentCracker {
             if (protocolVersion <= MultiVersionCompat.V1_18) {
                 // old bookshelf detection method
                 BlockPos obstructionPos = tablePos.offset(Mth.clamp(bookshelfOffset.getX(), -1, 1), 0, Mth.clamp(bookshelfOffset.getZ(), -1, 1));
-                if (world.getBlockState(tablePos.offset(bookshelfOffset)).is(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {
+                if (level.getBlockState(tablePos.offset(bookshelfOffset)).is(Blocks.BOOKSHELF) && level.getBlockState(obstructionPos).isAir()) {
                     power++;
                 }
             } else if (protocolVersion < MultiVersionCompat.V1_20) {
                 // any non-air block used to obstruct bookshelves
                 BlockPos obstructionPos = tablePos.offset(bookshelfOffset.getX() / 2, bookshelfOffset.getY(), bookshelfOffset.getZ() / 2);
-                if (world.getBlockState(tablePos.offset(bookshelfOffset)).is(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {
+                if (level.getBlockState(tablePos.offset(bookshelfOffset)).is(Blocks.BOOKSHELF) && level.getBlockState(obstructionPos).isAir()) {
                     power++;
                 }
             } else {
-                if (EnchantmentTableBlock.isValidBookShelf(world, tablePos, bookshelfOffset)) {
+                if (EnchantmentTableBlock.isValidBookShelf(level, tablePos, bookshelfOffset)) {
                     power++;
                 }
             }

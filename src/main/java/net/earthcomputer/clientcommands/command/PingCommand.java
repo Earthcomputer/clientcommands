@@ -59,9 +59,9 @@ public class PingCommand {
         }
         GameProfile profile = profiles.iterator().next();
 
-        ClientPacketListener networkHandler = source.getClient().getConnection();
-        assert networkHandler != null;
-        PlayerInfo player = networkHandler.getPlayerInfo(profile.getId());
+        ClientPacketListener packetListener = source.getClient().getConnection();
+        assert packetListener != null;
+        PlayerInfo player = packetListener.getPlayerInfo(profile.getId());
         if (player == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
@@ -72,12 +72,12 @@ public class PingCommand {
     }
 
     public static int getLocalPing() {
-        ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
-        if (networkHandler == null) {
+        ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+        if (packetListener == null) {
             return -1;
         }
 
-        PlayerInfo localPlayer = networkHandler.getPlayerInfo(networkHandler.getLocalGameProfile().getId());
+        PlayerInfo localPlayer = packetListener.getPlayerInfo(packetListener.getLocalGameProfile().getId());
         if (localPlayer == null) {
             return -1;
         }

@@ -26,8 +26,8 @@ public class SeedfindingUtil {
     }
 
     @Nullable
-    public static com.seedfinding.mcbiome.biome.Biome toSeedfindingBiome(Level world, Holder<Biome> biome) {
-        ResourceLocation name = world.registryAccess().registryOrThrow(Registries.BIOME).getKey(biome.value());
+    public static com.seedfinding.mcbiome.biome.Biome toSeedfindingBiome(Level level, Holder<Biome> biome) {
+        ResourceLocation name = level.registryAccess().registryOrThrow(Registries.BIOME).getKey(biome.value());
         if (name == null || !"minecraft".equals(name.getNamespace())) {
             return null;
         }

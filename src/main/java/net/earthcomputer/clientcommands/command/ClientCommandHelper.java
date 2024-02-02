@@ -2,8 +2,8 @@ package net.earthcomputer.clientcommands.command;
 
 import com.demonwav.mcdev.annotations.Translatable;
 import com.mojang.brigadier.context.CommandContext;
-import net.earthcomputer.clientcommands.interfaces.IClientCommandSource;
-import net.earthcomputer.clientcommands.mixin.InGameHudAccessor;
+import net.earthcomputer.clientcommands.interfaces.IClientSuggestionsProvider;
+import net.earthcomputer.clientcommands.mixin.GuiAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -21,11 +21,11 @@ public class ClientCommandHelper {
     }
 
     public static <T> T getFlag(FabricClientCommandSource source, Flag<T> flag) {
-        return ((IClientCommandSource) source).clientcommands_getFlag(flag);
+        return ((IClientSuggestionsProvider) source).clientcommands_getFlag(flag);
     }
 
     public static <T> FabricClientCommandSource withFlag(FabricClientCommandSource source, Flag<T> flag, T value) {
-        return (FabricClientCommandSource) ((IClientCommandSource) source).clientcommands_withFlag(flag, value);
+        return (FabricClientCommandSource) ((IClientSuggestionsProvider) source).clientcommands_withFlag(flag, value);
     }
 
     public static void sendError(Component error) {
@@ -51,7 +51,7 @@ public class ClientCommandHelper {
     public static void addOverlayMessage(Component message, int time) {
         Gui inGameHud = Minecraft.getInstance().gui;
         inGameHud.setOverlayMessage(message, false);
-        ((InGameHudAccessor) inGameHud).setOverlayRemaining(time);
+        ((GuiAccessor) inGameHud).setOverlayMessageTime(time);
     }
 
     public static Component getLookCoordsTextComponent(BlockPos pos) {

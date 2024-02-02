@@ -11,7 +11,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.mixin.ChatInputSuggestorAccessor;
+import net.earthcomputer.clientcommands.mixin.CommandSuggestionsAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
@@ -299,7 +299,7 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
         public abstract Component getParsedTree(int depth) throws StackOverflowError;
 
         protected static Component getDepthStyled(int depth, MutableComponent text) {
-            List<Style> formattings = ChatInputSuggestorAccessor.getHighlightStyles();
+            List<Style> formattings = CommandSuggestionsAccessor.getArgumentStyles();
             return text.setStyle(formattings.get(depth % formattings.size()));
         }
     }

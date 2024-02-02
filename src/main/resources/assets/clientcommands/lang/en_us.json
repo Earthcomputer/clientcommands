@@ -155,9 +155,9 @@
   "commands.cping.playerNotFound": "Player not found",
   "commands.cping.tooManyPlayers": "Your query can match at most 1 player",
 
-  "commands.cpos.world.overworld": "the Overworld",
-  "commands.cpos.world.the_end": "the End",
-  "commands.cpos.world.the_nether": "the Nether",
+  "commands.cpos.level.overworld": "the Overworld",
+  "commands.cpos.level.the_end": "the End",
+  "commands.cpos.level.the_nether": "the Nether",
   "commands.cpos.coords.left": " in %1$s is ",
   "commands.cpos.coords.right": " in %2$s",
 

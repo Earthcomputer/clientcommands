@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinBowAndTridentItem {
 
     @Inject(method = "releaseUsing", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
-    public void onOnStoppedUsing(ItemStack stack, Level world, LivingEntity thrower, int remainingUseTicks, CallbackInfo ci) {
+    public void onReleaseUsing(ItemStack stack, Level level, LivingEntity thrower, int remainingUseTicks, CallbackInfo ci) {
         PlayerRandCracker.onItemDamage(1, thrower, stack);
     }
 

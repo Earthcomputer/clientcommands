@@ -36,12 +36,12 @@ public class RenderSettings {
     }
 
     public static void preRenderEntities() {
-        Minecraft client = Minecraft.getInstance();
-        // prevent crash from other mods trying to load entity rendering without a world (usually a fake world and no client player)
-        if (client.player == null) {
+        Minecraft minecraft = Minecraft.getInstance();
+        // prevent crash from other mods trying to load entity rendering without a level (usually a fake level and no client player)
+        if (minecraft.player == null) {
             return;
         }
-        FabricClientCommandSource source = (FabricClientCommandSource) new ClientSuggestionProvider(client.getConnection(), client);
+        FabricClientCommandSource source = (FabricClientCommandSource) new ClientSuggestionProvider(minecraft.getConnection(), minecraft);
 
         disabledEntities.clear();
         for (var filter : entityRenderSelectors) {

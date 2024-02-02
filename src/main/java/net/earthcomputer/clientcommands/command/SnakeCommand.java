@@ -41,7 +41,7 @@ public class SnakeCommand {
 
 class SnakeGameScreen extends Screen {
 
-    private static final Minecraft client = Minecraft.getInstance();
+    private static final Minecraft minecraft = Minecraft.getInstance();
 
     private static final ResourceLocation GRID_TEXTURE = new ResourceLocation("clientcommands:textures/snake_grid.png");
 
@@ -86,9 +86,9 @@ class SnakeGameScreen extends Screen {
         int startX = (this.width - 289) / 2;
         int startY = (this.height - 289) / 2;
 
-        context.drawString(client.font, this.title, startX, startY - 10, 0xff_ffffff);
+        context.drawString(minecraft.font, this.title, startX, startY - 10, 0xff_ffffff);
         MutableComponent score = Component.translatable("snakeGame.score", this.snake.size());
-        context.drawCenteredString(client.font, score, this.width / 2, startY - 10, 0xff_ffffff);
+        context.drawCenteredString(minecraft.font, score, this.width / 2, startY - 10, 0xff_ffffff);
 
         context.blit(GRID_TEXTURE, startX, startY, 0, 0, 289, 289, 289, 289);
         int scaleX = MAX_X + 1;
@@ -101,13 +101,13 @@ class SnakeGameScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (client.options.keyUp.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_UP) {
+        if (minecraft.options.keyUp.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_UP) {
             return this.setDirection(Direction.NORTH);
-        } else if (client.options.keyLeft.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_LEFT) {
+        } else if (minecraft.options.keyLeft.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_LEFT) {
             return this.setDirection(Direction.WEST);
-        } else if (client.options.keyDown.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_DOWN) {
+        } else if (minecraft.options.keyDown.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_DOWN) {
             return this.setDirection(Direction.SOUTH);
-        } else if (client.options.keyRight.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_RIGHT) {
+        } else if (minecraft.options.keyRight.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_RIGHT) {
             return this.setDirection(Direction.EAST);
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -118,7 +118,7 @@ class SnakeGameScreen extends Screen {
         this.snake.addFirst(new Vector2i(head.x() + this.direction.getStepX(), head.y() + this.direction.getStepZ()));
         this.lastMoved = this.direction;
         if (this.checkGameOver()) {
-            client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.OCELOT_DEATH, 1));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.OCELOT_DEATH, 1));
             this.onClose();
             return;
         }
@@ -142,7 +142,7 @@ class SnakeGameScreen extends Screen {
     private void checkApple() {
         Vector2i head = this.snake.getFirst();
         if (head.equals(this.apple)) {
-            client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EAT, 1));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GENERIC_EAT, 1));
             do {
                 this.apple = new Vector2i(random.nextInt(MAX_X + 1), random.nextInt(MAX_Y + 1));
             } while (this.snake.contains(this.apple));

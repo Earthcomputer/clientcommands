@@ -96,7 +96,7 @@ public class CCNetworkHandler implements CCPacketListener {
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
         prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal(" "));
-        Component text = prefix.append(Component.translatable("ccpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
-        Minecraft.getInstance().gui.getChat().addMessage(text);
+        Component component = prefix.append(Component.translatable("ccpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
+        Minecraft.getInstance().gui.getChat().addMessage(component);
     }
 }

@@ -46,20 +46,20 @@ public class ChorusManipulation {
 
     public static int setGoal(Vec3 v1, Vec3 v2, boolean relative) {
         if (!Configs.getChorusManipulation()) {
-            Component text = Component.translatable("chorusManip.needChorusManipulation")
+            Component component = Component.translatable("chorusManip.needChorusManipulation")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands chorusManipulation set true"));
-            sendFeedback(text);
+            sendFeedback(component);
             return 0;
         }
 
         if (!Configs.playerCrackState.knowsSeed()) {
-            Component text = Component.translatable("playerManip.uncracked")
+            Component component = Component.translatable("playerManip.uncracked")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
-            sendFeedback(text);
+            sendFeedback(component);
             return 0;
         }
 
@@ -102,9 +102,9 @@ public class ChorusManipulation {
                     }
 
                     final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.x();
-                    ClientLevel world = Minecraft.getInstance().level;
-                    assert world != null;
-                    final double y = Mth.clamp(pos.y() + (double) (rand.nextInt(16) - 8), world.getMinBuildHeight(), (world.getMinBuildHeight() + world.getHeight() - 1));
+                    ClientLevel level = Minecraft.getInstance().level;
+                    assert level != null;
+                    final double y = Mth.clamp(pos.y() + (double) (rand.nextInt(16) - 8), level.getMinBuildHeight(), (level.getMinBuildHeight() + level.getHeight() - 1));
                     final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.z();
                     final Vec3 landingArea = canTeleport(area, new Vec3(x, y, z));
 
@@ -151,14 +151,14 @@ public class ChorusManipulation {
      */
     public static Vec3 canTeleport(AABB goalArea, Vec3 goalVec) {
         BlockPos blockPos = BlockPos.containing(goalVec);
-        Level world = Minecraft.getInstance().level;
+        Level level = Minecraft.getInstance().level;
 
-        if (world != null && world.hasChunkAt(blockPos)) {
+        if (level != null && level.hasChunkAt(blockPos)) {
             boolean blockBelowIsGround = false;
 
             while (!blockBelowIsGround && blockPos.getY() > 0) {
                 BlockPos blockPos2 = blockPos.below();
-                BlockState blockState = world.getBlockState(blockPos2);
+                BlockState blockState = level.getBlockState(blockPos2);
                 if (blockState.blocksMotion()) {
                     blockBelowIsGround = true;
                 } else {
@@ -169,7 +169,7 @@ public class ChorusManipulation {
             if (blockBelowIsGround) {
                 goalVec = new Vec3(goalVec.x(), blockPos.getY(), goalVec.z());
                 final AABB boundingBox = new AABB(goalVec.x() - 0.3, goalVec.y(), goalVec.z() - 0.3, goalVec.x() + 0.3, goalVec.y() + 1.8, goalVec.z() + 0.3);
-                if (goalArea.contains(goalVec) && world.noCollision(boundingBox) && !world.containsAnyLiquid(boundingBox)) {
+                if (goalArea.contains(goalVec) && level.noCollision(boundingBox) && !level.containsAnyLiquid(boundingBox)) {
                     return goalVec;
                 }
             }

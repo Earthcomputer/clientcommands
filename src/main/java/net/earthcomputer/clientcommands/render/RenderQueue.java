@@ -81,11 +81,11 @@ public class RenderQueue {
         }
     }
 
-    public static void render(Layer layer, VertexConsumer vertexConsumer, PoseStack matrixStack, float delta) {
+    public static void render(Layer layer, VertexConsumer vertexConsumer, PoseStack poseStack, float delta) {
         if (!queue.containsKey(layer)) {
             return;
         }
-        queue.get(layer).values().forEach(shape -> shape.render(matrixStack, vertexConsumer, delta));
+        queue.get(layer).values().forEach(shape -> shape.render(poseStack, vertexConsumer, delta));
     }
 
     public enum Layer {

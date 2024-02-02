@@ -221,32 +221,32 @@ public class KitCommand {
 
 class PreviewScreen extends EffectRenderingInventoryScreen<InventoryMenu> {
 
-    public PreviewScreen(InventoryMenu playerScreenHandler, Inventory inventory, String name) {
-        super(playerScreenHandler, inventory, Component.literal(name).withStyle(style -> style.withColor(ChatFormatting.RED)));
+    public PreviewScreen(InventoryMenu menu, Inventory inventory, String name) {
+        super(menu, inventory, Component.literal(name).withStyle(style -> style.withColor(ChatFormatting.RED)));
         this.titleLabelX = 80;
     }
 
     @Override
-    protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
-        context.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0x404040, false);
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0x404040, false);
     }
 
     @Override
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
-        this.renderBackground(drawContext, mouseX, mouseY, delta);
-        super.render(drawContext, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.renderBackground(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
 
-        this.renderTooltip(drawContext, mouseX, mouseY);
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
-    protected void renderEffects(GuiGraphics context, int mouseX, int mouseY) {
+    protected void renderEffects(GuiGraphics graphics, int mouseX, int mouseY) {
         // nop
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
-        context.blit(INVENTORY_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+    protected void renderBg(GuiGraphics graphics, float delta, int mouseX, int mouseY) {
+        graphics.blit(INVENTORY_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override

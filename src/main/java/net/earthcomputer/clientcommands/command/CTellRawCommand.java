@@ -17,8 +17,8 @@ public class CTellRawCommand {
         dispatcher.register(literal("ctellraw")
             .then(argument("message", text())
                 .executes(ctx -> {
-                    MutableComponent text = ComponentUtils.updateForEntity(new FakeCommandSource(ctx.getSource().getPlayer()), getCTextArgument(ctx, "message"), ctx.getSource().getPlayer(), 0);
-                    ctx.getSource().getClient().gui.getChat().addMessage(text);
+                    MutableComponent component = ComponentUtils.updateForEntity(new FakeCommandSource(ctx.getSource().getPlayer()), getCTextArgument(ctx, "message"), ctx.getSource().getPlayer(), 0);
+                    ctx.getSource().getClient().gui.getChat().addMessage(component);
                     return Command.SINGLE_SUCCESS;
                 })
             )
