@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.task;
 
 import net.earthcomputer.clientcommands.features.Relogger;
 
-import java.util.*;
+import java.util.List; import java.util.ArrayList; import java.util.Map; import java.util.LinkedHashMap; import java.util.Iterator; 
 
 public class TaskManager {
 

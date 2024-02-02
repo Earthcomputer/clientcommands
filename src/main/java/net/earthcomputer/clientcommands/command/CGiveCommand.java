@@ -5,20 +5,23 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.ItemStackArgument;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.arguments.item.ItemInput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.getCItemStackArgument;
+import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.itemStack;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class CGiveCommand {
 
-    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cgive.notCreative"));
+    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cgive.notCreative"));
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
         dispatcher.register(literal("cgive")
             .then(argument("item", itemStack(registryAccess))
             .executes(ctx -> give(ctx.getSource(), getCItemStackArgument(ctx, "item"), 1))
@@ -26,16 +29,16 @@ public class CGiveCommand {
                 .executes(ctx -> give(ctx.getSource(), getCItemStackArgument(ctx, "item"), getInteger(ctx, "count"))))));
     }
 
-    private static int give(FabricClientCommandSource source, ItemStackArgument itemArgument, int count) throws CommandSyntaxException {
-        if (!source.getPlayer().getAbilities().creativeMode) {
+    private static int give(FabricClientCommandSource source, ItemInput itemArgument, int count) throws CommandSyntaxException {
+        if (!source.getPlayer().getAbilities().instabuild) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-        ItemStack stack = itemArgument.createStack(Math.min(count, itemArgument.getItem().getMaxCount()), false);
-        source.getClient().interactionManager.clickCreativeStack(stack, 36 + source.getPlayer().getInventory().selectedSlot);
-        source.getPlayer().playerScreenHandler.sendContentUpdates();
+        ItemStack stack = itemArgument.createItemStack(Math.min(count, itemArgument.getItem().getMaxStackSize()), false);
+        source.getClient().gameMode.handleCreativeModeItemAdd(stack, 36 + source.getPlayer().getInventory().selected);
+        source.getPlayer().inventoryMenu.broadcastChanges();
 
-        source.sendFeedback(Text.translatable("commands.cgive.success", count, stack.toHoverableText()));
+        source.sendFeedback(Component.translatable("commands.cgive.success", count, stack.getDisplayName()));
         return Command.SINGLE_SUCCESS;
     }
 }

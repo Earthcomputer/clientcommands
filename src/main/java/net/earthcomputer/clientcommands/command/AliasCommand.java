@@ -15,10 +15,10 @@ import net.earthcomputer.clientcommands.features.BrigadierRemover;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -31,7 +31,8 @@ import java.util.IllegalFormatException;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class AliasCommand {
 
@@ -39,11 +40,11 @@ public class AliasCommand {
 
     private static final Path ALIAS_PATH = FabricLoader.getInstance().getConfigDir().resolve("clientcommands").resolve("alias_list.json");
 
-    private static final SimpleCommandExceptionType ILLEGAL_FORMAT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.calias.illegalFormatException"));
+    private static final SimpleCommandExceptionType ILLEGAL_FORMAT_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.calias.illegalFormatException"));
 
-    private static final DynamicCommandExceptionType ALIAS_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.calias.addAlias.aliasAlreadyExists", arg));
-    private static final DynamicCommandExceptionType COMMAND_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.calias.addAlias.commandAlreadyExists", arg));
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.calias.notFound", arg));
+    private static final DynamicCommandExceptionType ALIAS_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.calias.addAlias.aliasAlreadyExists", arg));
+    private static final DynamicCommandExceptionType COMMAND_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.calias.addAlias.commandAlreadyExists", arg));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.calias.notFound", arg));
 
     private static final HashMap<String, String> aliasMap = loadAliases();
 
@@ -92,15 +93,15 @@ public class AliasCommand {
         } else if (arguments != null) {
             cmd += " " + arguments;
         }
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+        ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
         if (networkHandler == null) {
             return Command.SINGLE_SUCCESS;
         }
         if (cmd.startsWith("/")) {
             cmd = cmd.substring(1);
-            networkHandler.sendChatCommand(cmd);
+            networkHandler.sendCommand(cmd);
         } else {
-            networkHandler.sendChatMessage(cmd);
+            networkHandler.sendChat(cmd);
         }
 
         return Command.SINGLE_SUCCESS;
@@ -118,7 +119,7 @@ public class AliasCommand {
             command = "/" + command;
         }
 
-        for (CommandDispatcher<FabricClientCommandSource> dispatcher : new CommandDispatcher[] { ClientCommandManager.getActiveDispatcher(), MinecraftClient.getInstance().getNetworkHandler().getCommandDispatcher() }) {
+        for (CommandDispatcher<FabricClientCommandSource> dispatcher : new CommandDispatcher[] { ClientCommandManager.getActiveDispatcher(), Minecraft.getInstance().getConnection().getCommands() }) {
             dispatcher.register(literal(key)
                     .executes(ctx -> executeAliasCommand(source, key, null))
                     .then(argument("arguments", greedyString())
@@ -128,17 +129,17 @@ public class AliasCommand {
         aliasMap.put(key, command);
 
         saveAliases();
-        source.sendFeedback(Text.translatable("commands.calias.addAlias.success", key));
+        source.sendFeedback(Component.translatable("commands.calias.addAlias.success", key));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int listAliases(FabricClientCommandSource source) {
         if (aliasMap.isEmpty()) {
-            source.sendFeedback(Text.translatable("commands.calias.listAliases.noAliasesRegistered"));
+            source.sendFeedback(Component.translatable("commands.calias.listAliases.noAliasesRegistered"));
         } else {
-            source.sendFeedback(Text.translatable("commands.calias.listAliases.success", aliasMap.size()));
+            source.sendFeedback(Component.translatable("commands.calias.listAliases.success", aliasMap.size()));
             for (String key : aliasMap.keySet()) {
-                source.sendFeedback(Text.of(Formatting.BOLD + key + Formatting.RESET + ": " + aliasMap.get(key).replace("%","%%")));
+                source.sendFeedback(Component.nullToEmpty(ChatFormatting.BOLD + key + ChatFormatting.RESET + ": " + aliasMap.get(key).replace("%","%%")));
             }
         }
         return Command.SINGLE_SUCCESS;
@@ -147,14 +148,14 @@ public class AliasCommand {
     private static int removeAlias(FabricClientCommandSource source, String key) throws CommandSyntaxException {
         if (aliasMap.containsKey(key)) {
             BrigadierRemover.of(ClientCommandManager.getActiveDispatcher()).get(key).remove();
-            BrigadierRemover.of(MinecraftClient.getInstance().getNetworkHandler().getCommandDispatcher()).get(key).remove();
+            BrigadierRemover.of(Minecraft.getInstance().getConnection().getCommands()).get(key).remove();
             aliasMap.remove(key);
         } else {
             throw NOT_FOUND_EXCEPTION.create(key);
         }
 
         saveAliases();
-        source.sendFeedback(Text.translatable("commands.calias.removeAlias.success", key));
+        source.sendFeedback(Component.translatable("commands.calias.removeAlias.success", key));
         return Command.SINGLE_SUCCESS;
     }
 

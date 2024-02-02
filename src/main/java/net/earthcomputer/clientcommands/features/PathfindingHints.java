@@ -1,14 +1,14 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.minecraft.entity.ai.pathing.PathNodeType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public interface PathfindingHints {
 
-    PathNodeType getNodeType(BlockView world, BlockPos pos);
+    BlockPathTypes getNodeType(BlockGetter world, BlockPos pos);
 
-    float getPathfindingPenalty(PathNodeType type);
+    float getPathfindingPenalty(BlockPathTypes type);
 
     float getFollowRange();
 

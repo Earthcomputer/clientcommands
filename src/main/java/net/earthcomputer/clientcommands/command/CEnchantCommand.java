@@ -7,17 +7,19 @@ import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPre
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.getItemAndEnchantmentsPredicate;
+import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.itemAndEnchantmentsPredicate;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class CEnchantCommand {
 
@@ -31,21 +33,21 @@ public class CEnchantCommand {
     }
 
     private static boolean enchantmentPredicate(Item item, Enchantment ench) {
-        return !ench.isTreasure() && ench.isAvailableForRandomSelection() && (item == Items.BOOK || ench.target.isAcceptableItem(item));
+        return !ench.isTreasureOnly() && ench.isDiscoverable() && (item == Items.BOOK || ench.category.canEnchant(item));
     }
 
     private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) {
         if (!Configs.getEnchantingPrediction()) {
-            Text text = Text.translatable("commands.cenchant.needEnchantingPrediction")
-                    .formatted(Formatting.RED)
+            Component text = Component.translatable("commands.cenchant.needEnchantingPrediction")
+                    .withStyle(ChatFormatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands enchantingPrediction set true"));
             source.sendFeedback(text);
             return Command.SINGLE_SUCCESS;
         }
         if (!Configs.playerCrackState.knowsSeed() && Configs.enchCrackState != EnchantmentCracker.CrackState.CRACKED) {
-            Text text = Text.translatable("commands.cenchant.uncracked")
-                    .formatted(Formatting.RED)
+            Component text = Component.translatable("commands.cenchant.uncracked")
+                    .withStyle(ChatFormatting.RED)
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
             source.sendFeedback(text);
@@ -60,27 +62,27 @@ public class CEnchantCommand {
                 simulate
         );
         if (result == null) {
-            source.sendFeedback(Text.translatable("commands.cenchant.failed"));
+            source.sendFeedback(Component.translatable("commands.cenchant.failed"));
             if (Configs.playerCrackState != PlayerRandCracker.CrackState.CRACKED) {
-                MutableText help = Text.translatable("commands.cenchant.help.uncrackedPlayerSeed")
+                MutableComponent help = Component.translatable("commands.cenchant.help.uncrackedPlayerSeed")
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
                 sendHelp(help);
             }
         } else {
             if (result.itemThrows() < 0) {
-                source.sendFeedback(Text.translatable("enchCrack.insn.itemThrows.noDummy"));
+                source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows.noDummy"));
             } else {
-                source.sendFeedback(Text.translatable("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / 20f));
+                source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / 20f));
             }
-            source.sendFeedback(Text.translatable("enchCrack.insn.bookshelves", result.bookshelves()));
-            source.sendFeedback(Text.translatable("enchCrack.insn.slot", result.slot() + 1));
-            source.sendFeedback(Text.translatable("enchCrack.insn.enchantments"));
-            for (EnchantmentLevelEntry ench : result.enchantments()) {
-                source.sendFeedback(Text.literal("- ").append(ench.enchantment.getName(ench.level)));
+            source.sendFeedback(Component.translatable("enchCrack.insn.bookshelves", result.bookshelves()));
+            source.sendFeedback(Component.translatable("enchCrack.insn.slot", result.slot() + 1));
+            source.sendFeedback(Component.translatable("enchCrack.insn.enchantments"));
+            for (EnchantmentInstance ench : result.enchantments()) {
+                source.sendFeedback(Component.literal("- ").append(ench.enchantment.getFullname(ench.level)));
             }
             if (!simulate) {
-                source.sendFeedback(Text.translatable("commands.cenchant.success"));
+                source.sendFeedback(Component.translatable("commands.cenchant.success"));
             }
         }
         return Command.SINGLE_SUCCESS;

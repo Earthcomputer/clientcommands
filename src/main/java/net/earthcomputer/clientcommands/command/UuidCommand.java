@@ -3,16 +3,18 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 
 import java.util.UUID;
 
-import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.entityUuid;
+import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.getEntityUuid;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class UuidCommand {
 
@@ -24,22 +26,22 @@ public class UuidCommand {
 
     private static int getUuid(FabricClientCommandSource source, UUID entity) {
         String uuid = entity.toString();
-        Text uuidText = Text.literal(uuid).styled(style -> style
-            .withUnderline(true)
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.copy.click")))
+        Component uuidText = Component.literal(uuid).withStyle(style -> style
+            .withUnderlined(true)
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
             .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid))
         );
 
-        ClientPlayNetworkHandler networkHandler = source.getClient().getNetworkHandler();
+        ClientPacketListener networkHandler = source.getClient().getConnection();
         assert networkHandler != null;
 
-        PlayerListEntry player = networkHandler.getPlayerListEntry(entity);
+        PlayerInfo player = networkHandler.getPlayerInfo(entity);
         if (player == null) {
-            source.sendFeedback(Text.translatable("commands.cuuid.success.nameless", uuidText));
+            source.sendFeedback(Component.translatable("commands.cuuid.success.nameless", uuidText));
             return Command.SINGLE_SUCCESS;
         }
         String name = player.getProfile().getName();
-        source.sendFeedback(Text.translatable("commands.cuuid.success", name, uuidText));
+        source.sendFeedback(Component.translatable("commands.cuuid.success", name, uuidText));
         return Command.SINGLE_SUCCESS;
     }
 }

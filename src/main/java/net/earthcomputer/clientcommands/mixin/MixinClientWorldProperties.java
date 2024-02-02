@@ -6,12 +6,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.earthcomputer.clientcommands.features.ClientTimeModifier;
-import net.minecraft.client.world.ClientWorld.Properties;
+import net.minecraft.client.multiplayer.ClientLevel.ClientLevelData;
 
-@Mixin(Properties.class)
+@Mixin(ClientLevelData.class)
 public class MixinClientWorldProperties {
 
-    @Inject(at = @At("TAIL"), method = "getTimeOfDay()J", cancellable = true)
+    @Inject(at = @At("TAIL"), method = "getDayTime()J", cancellable = true)
     public void getTimeOfDay(CallbackInfoReturnable<Long> info) {
         var timeOfDay = info.getReturnValue();
         long modifiedTimeOfDay = ClientTimeModifier.getModifiedTime(timeOfDay);

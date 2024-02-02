@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.ServerBrandManager;
-import net.minecraft.client.network.ClientCommonNetworkHandler;
-import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ClientCommonNetworkHandler.class)
+@Mixin(ClientCommonPacketListenerImpl.class)
 public class MixinClientCommonNetworkHandler {
-    @Shadow @Nullable protected String brand;
+    @Shadow @Nullable protected String serverBrand;
 
-    @Inject(method = "onCustomPayload(Lnet/minecraft/network/packet/s2c/common/CustomPayloadS2CPacket;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientCommonNetworkHandler;brand:Ljava/lang/String;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
-    private void onBrand(CustomPayloadS2CPacket packet, CallbackInfo ci) {
-        ServerBrandManager.setServerBrand(brand);
+    @Inject(method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/ClientCommonPacketListenerImpl;serverBrand:Ljava/lang/String;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
+    private void onBrand(ClientboundCustomPayloadPacket packet, CallbackInfo ci) {
+        ServerBrandManager.setServerBrand(serverBrand);
     }
 }

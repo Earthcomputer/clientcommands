@@ -1,21 +1,21 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.RenderSettings;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.Frustum;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo; import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable; 
 
 @Mixin(EntityRenderDispatcher.class)
 public class MixinEntityRendererDispatcher {
 
-    @Inject(method = "configure", at = @At("HEAD"))
-    public void onConfigure(World world, Camera camera, Entity entity, CallbackInfo ci) {
+    @Inject(method = "prepare", at = @At("HEAD"))
+    public void onConfigure(Level world, Camera camera, Entity entity, CallbackInfo ci) {
         RenderSettings.preRenderEntities();
     }
 

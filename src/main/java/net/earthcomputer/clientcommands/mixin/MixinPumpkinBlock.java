@@ -1,13 +1,13 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.PumpkinBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.PumpkinBlock;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PumpkinBlock.class)
 public class MixinPumpkinBlock {
 
-    @Inject(method = "onUse", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z"))
-    public void onShear(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<Boolean> ci) {
-        PlayerRandCracker.onItemDamage(1, player, player.getStackInHand(hand));
+    @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
+    public void onShear(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<Boolean> ci) {
+        PlayerRandCracker.onItemDamage(1, player, player.getItemInHand(hand));
     }
 
 }

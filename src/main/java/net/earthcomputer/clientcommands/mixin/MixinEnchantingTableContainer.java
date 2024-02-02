@@ -2,25 +2,25 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
 import net.earthcomputer.clientcommands.interfaces.IEnchantingTableContainer;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.screen.EnchantmentScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(EnchantmentScreenHandler.class)
+@Mixin(EnchantmentMenu.class)
 public abstract class MixinEnchantingTableContainer implements IEnchantingTableContainer, IDroppableInventoryContainer {
 
-    @Shadow @Final private Inventory inventory;
+    @Shadow @Final private Container enchantSlots;
 
-    @Accessor
+    @Accessor("access")
     @Override
-    public abstract ScreenHandlerContext getContext();
+    public abstract ContainerLevelAccess getContext();
 
     @Override
-    public Inventory getDroppableInventory() {
-        return inventory;
+    public Container getDroppableInventory() {
+        return enchantSlots;
     }
 }

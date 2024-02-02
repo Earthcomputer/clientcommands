@@ -13,18 +13,18 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.JsonOps;
 import net.earthcomputer.clientcommands.mixin.HoverEventActionAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.Util;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,11 +36,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class FormattedTextArgumentType implements ArgumentType<MutableText> {
+public class FormattedTextArgumentType implements ArgumentType<MutableComponent> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "bold{italic{red{nwex}}}");
-    private static final DynamicCommandExceptionType INVALID_CLICK_ACTION = new DynamicCommandExceptionType(action -> Text.translatable("commands.client.invalidClickAction", action));
-    private static final DynamicCommandExceptionType INVALID_HOVER_ACTION = new DynamicCommandExceptionType(action -> Text.translatable("commands.client.invalidHoverAction", action));
-    private static final DynamicCommandExceptionType INVALID_HOVER_EVENT = new DynamicCommandExceptionType(event -> Text.translatable("commands.client.invalidHoverEvent", event));
+    private static final DynamicCommandExceptionType INVALID_CLICK_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidClickAction", action));
+    private static final DynamicCommandExceptionType INVALID_HOVER_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidHoverAction", action));
+    private static final DynamicCommandExceptionType INVALID_HOVER_EVENT = new DynamicCommandExceptionType(event -> Component.translatable("commands.client.invalidHoverEvent", event));
 
     private FormattedTextArgumentType() {
     }
@@ -49,12 +49,12 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
         return new FormattedTextArgumentType();
     }
 
-    public static MutableText getFormattedText(CommandContext<FabricClientCommandSource> context, String arg) {
-        return context.getArgument(arg, MutableText.class);
+    public static MutableComponent getFormattedText(CommandContext<FabricClientCommandSource> context, String arg) {
+        return context.getArgument(arg, MutableComponent.class);
     }
 
     @Override
-    public MutableText parse(StringReader reader) throws CommandSyntaxException {
+    public MutableComponent parse(StringReader reader) throws CommandSyntaxException {
         return new Parser(reader).parse();
     }
 
@@ -90,11 +90,11 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
             this.reader = reader;
         }
 
-        public MutableText parse() throws CommandSyntaxException {
+        public MutableComponent parse() throws CommandSyntaxException {
             int cursor = reader.getCursor();
             suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                CommandSource.suggestMatching(FormattedText.FORMATTING.keySet(), newBuilder);
+                SharedSuggestionProvider.suggest(FormattedText.FORMATTING.keySet(), newBuilder);
                 builder.add(newBuilder);
             };
 
@@ -110,12 +110,12 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
                 }
                 reader.skip();
                 reader.skipWhitespace();
-                MutableText literalText;
+                MutableComponent literalText;
                 List<String> arguments = new ArrayList<>();
                 if (reader.canRead()) {
                     if (reader.peek() != '}') {
                         if (StringReader.isQuotedStringStart(reader.peek())) {
-                            literalText = Text.literal(reader.readQuotedString());
+                            literalText = Component.literal(reader.readQuotedString());
                         } else {
                             literalText = parse();
                         }
@@ -124,7 +124,7 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
                             if (arguments.isEmpty()) {
                                 suggestor = builder -> {
                                     SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                                    CommandSource.suggestMatching(styler.suggestions, newBuilder);
+                                    SharedSuggestionProvider.suggest(styler.suggestions, newBuilder);
                                     builder.add(newBuilder);
                                 };
                             }
@@ -137,7 +137,7 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
                             reader.skipWhitespace();
                         }
                     } else {
-                        literalText = Text.literal("");
+                        literalText = Component.literal("");
                     }
                 } else {
                     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "}");
@@ -151,7 +151,7 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
                 }
                 return new FormattedText(styler.operator, literalText, arguments).style();
             } else {
-                return Text.literal(word + readArgument());
+                return Component.literal(word + readArgument());
             }
         }
 
@@ -170,30 +170,30 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
 
     static class FormattedText {
         private static final Map<String, Styler> FORMATTING = ImmutableMap.<String, Styler>builder()
-                .put("aqua", new Styler((s, o) -> s.withFormatting(Formatting.AQUA), 0))
-                .put("black", new Styler((s, o) -> s.withFormatting(Formatting.BLACK), 0))
-                .put("blue", new Styler((s, o) -> s.withFormatting(Formatting.BLUE), 0))
-                .put("bold", new Styler((s, o) -> s.withFormatting(Formatting.BOLD), 0))
-                .put("dark_aqua", new Styler((s, o) -> s.withFormatting(Formatting.DARK_AQUA), 0))
-                .put("dark_blue", new Styler((s, o) -> s.withFormatting(Formatting.DARK_BLUE), 0))
-                .put("dark_gray", new Styler((s, o) -> s.withFormatting(Formatting.DARK_GRAY), 0))
-                .put("dark_green", new Styler((s, o) -> s.withFormatting(Formatting.DARK_GREEN), 0))
-                .put("dark_purple", new Styler((s, o) -> s.withFormatting(Formatting.DARK_PURPLE), 0))
-                .put("dark_red", new Styler((s, o) -> s.withFormatting(Formatting.DARK_RED), 0))
-                .put("gold", new Styler((s, o) -> s.withFormatting(Formatting.GOLD), 0))
-                .put("gray", new Styler((s, o) -> s.withFormatting(Formatting.GRAY), 0))
-                .put("green", new Styler((s, o) -> s.withFormatting(Formatting.GREEN), 0))
-                .put("italic", new Styler((s, o) -> s.withFormatting(Formatting.ITALIC), 0))
-                .put("light_purple", new Styler((s, o) -> s.withFormatting(Formatting.LIGHT_PURPLE), 0))
-                .put("obfuscated", new Styler((s, o) -> s.withFormatting(Formatting.OBFUSCATED), 0))
-                .put("red", new Styler((s, o) -> s.withFormatting(Formatting.RED), 0))
-                .put("reset", new Styler((s, o) -> s.withFormatting(Formatting.RESET), 0))
-                .put("strikethrough", new Styler((s, o) -> s.withFormatting(Formatting.STRIKETHROUGH), 0))
-                .put("underline", new Styler((s, o) -> s.withFormatting(Formatting.UNDERLINE), 0))
-                .put("white",  new Styler((s, o) -> s.withFormatting(Formatting.WHITE), 0))
-                .put("yellow", new Styler((s, o) -> s.withFormatting(Formatting.YELLOW), 0))
+                .put("aqua", new Styler((s, o) -> s.applyFormat(ChatFormatting.AQUA), 0))
+                .put("black", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLACK), 0))
+                .put("blue", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLUE), 0))
+                .put("bold", new Styler((s, o) -> s.applyFormat(ChatFormatting.BOLD), 0))
+                .put("dark_aqua", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_AQUA), 0))
+                .put("dark_blue", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_BLUE), 0))
+                .put("dark_gray", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_GRAY), 0))
+                .put("dark_green", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_GREEN), 0))
+                .put("dark_purple", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_PURPLE), 0))
+                .put("dark_red", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_RED), 0))
+                .put("gold", new Styler((s, o) -> s.applyFormat(ChatFormatting.GOLD), 0))
+                .put("gray", new Styler((s, o) -> s.applyFormat(ChatFormatting.GRAY), 0))
+                .put("green", new Styler((s, o) -> s.applyFormat(ChatFormatting.GREEN), 0))
+                .put("italic", new Styler((s, o) -> s.applyFormat(ChatFormatting.ITALIC), 0))
+                .put("light_purple", new Styler((s, o) -> s.applyFormat(ChatFormatting.LIGHT_PURPLE), 0))
+                .put("obfuscated", new Styler((s, o) -> s.applyFormat(ChatFormatting.OBFUSCATED), 0))
+                .put("red", new Styler((s, o) -> s.applyFormat(ChatFormatting.RED), 0))
+                .put("reset", new Styler((s, o) -> s.applyFormat(ChatFormatting.RESET), 0))
+                .put("strikethrough", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
+                .put("underline", new Styler((s, o) -> s.applyFormat(ChatFormatting.UNDERLINE), 0))
+                .put("white",  new Styler((s, o) -> s.applyFormat(ChatFormatting.WHITE), 0))
+                .put("yellow", new Styler((s, o) -> s.applyFormat(ChatFormatting.YELLOW), 0))
 
-                .put("font", new Styler((s, o) -> s.withFont(Identifier.tryParse(o.get(0))), 1, "alt", "default"))
+                .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.tryParse(o.get(0))), 1, "alt", "default"))
                 .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.get(0), 16))), 1))
                 .put("insert", new Styler((s, o) -> s.withInsertion(o.get(0)), 1))
 
@@ -201,21 +201,21 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
                 .put("hover", new Styler((s, o) -> s.withHoverEvent(parseHoverEvent(o.get(0), o.get(1))), 2, "show_entity", "show_item", "show_text"))
 
                 // aliases
-                .put("strike", new Styler((s, o) -> s.withFormatting(Formatting.STRIKETHROUGH), 0))
-                .put("magic", new Styler((s, o) -> s.withFormatting(Formatting.OBFUSCATED), 0))
+                .put("strike", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
+                .put("magic", new Styler((s, o) -> s.applyFormat(ChatFormatting.OBFUSCATED), 0))
                 .build();
 
         private final StylerFunc styler;
-        private final MutableText argument;
+        private final MutableComponent argument;
         private final List<String> args;
 
-        public FormattedText(StylerFunc styler, MutableText argument, List<String> args) {
+        public FormattedText(StylerFunc styler, MutableComponent argument, List<String> args) {
             this.styler = styler;
             this.argument = argument;
             this.args = args;
         }
 
-        public MutableText style() throws CommandSyntaxException {
+        public MutableComponent style() throws CommandSyntaxException {
             return this.argument.setStyle(this.styler.apply(this.argument.getStyle(), this.args));
         }
 
@@ -226,7 +226,7 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
             Style apply(Style style, List<String> args) throws CommandSyntaxException;
         }
 
-        private static final Function<String, ClickEvent.Action> CLICK_EVENT_ACTION_BY_NAME = StringIdentifiable.createMapper(ClickEvent.Action.values(), Function.identity());
+        private static final Function<String, ClickEvent.Action> CLICK_EVENT_ACTION_BY_NAME = StringRepresentable.createNameLookup(ClickEvent.Action.values(), Function.identity());
 
         private static ClickEvent parseClickEvent(String name, String value) throws CommandSyntaxException {
             ClickEvent.Action action = CLICK_EVENT_ACTION_BY_NAME.apply(name);
@@ -237,13 +237,13 @@ public class FormattedTextArgumentType implements ArgumentType<MutableText> {
         }
 
         private static HoverEvent parseHoverEvent(String name, String value) throws CommandSyntaxException {
-            HoverEvent.Action<?> action = HoverEvent.Action.UNVALIDATED_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(name)).result().orElse(null);
+            HoverEvent.Action<?> action = HoverEvent.Action.UNSAFE_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(name)).result().orElse(null);
             if (action == null) {
                 throw INVALID_HOVER_ACTION.create(name);
             }
 
-            JsonElement text = Util.getResult(TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, Text.of(value)), IllegalStateException::new);
-            HoverEvent.EventData<?> eventData = Util.getResult(((HoverEventActionAccessor) action).getLegacyCodec().parse(JsonOps.INSTANCE, text), error -> INVALID_HOVER_EVENT.create(value));
+            JsonElement text = Util.getOrThrow(ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)), IllegalStateException::new);
+            HoverEvent.TypedHoverEvent<?> eventData = Util.getOrThrow(((HoverEventActionAccessor) action).getLegacyCodec().parse(JsonOps.INSTANCE, text), error -> INVALID_HOVER_EVENT.create(value));
             return new HoverEvent(eventData);
         }
     }

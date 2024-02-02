@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands;
 
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.ArrayList;
 import java.util.Iterator;

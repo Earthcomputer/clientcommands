@@ -8,9 +8,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
@@ -21,12 +21,14 @@ import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.time.Duration;
 
-import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.getTranslationQuery;
+import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.translationQuery;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class TranslateCommand {
 
-    private static final SimpleCommandExceptionType UNKNOWN_ERROR_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctranslate.unknownError"));
+    private static final SimpleCommandExceptionType UNKNOWN_ERROR_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctranslate.unknownError"));
 
     private static final String URL = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t";
 
@@ -48,7 +50,7 @@ public class TranslateCommand {
                     .build();
             httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenApply(HttpResponse::body)
-                    .thenAccept(response -> source.getClient().send(() -> {
+                    .thenAccept(response -> source.getClient().tell(() -> {
                         JsonArray result = JsonParser.parseString(response).getAsJsonArray();
                         source.sendFeedback(createText(result.get(0).getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString()));
                     }));
@@ -66,12 +68,12 @@ public class TranslateCommand {
         return builder.build();
     }
 
-    private static Text createText(String translation) {
-        return Text.literal(translation).styled(s -> s
-            .withUnderline(true)
+    private static Component createText(String translation) {
+        return Component.literal(translation).withStyle(s -> s
+            .withUnderlined(true)
             .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, translation))
             .withInsertion(translation)
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("commands.ctranslate.hoverText")))
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.ctranslate.hoverText")))
         );
     }
 }

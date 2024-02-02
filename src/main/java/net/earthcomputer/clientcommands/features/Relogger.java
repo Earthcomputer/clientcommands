@@ -1,15 +1,15 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.MessageScreen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.storage.LevelResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,18 +23,18 @@ public class Relogger {
     }
 
     private static boolean disconnect(boolean relogging) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.world == null) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) {
             return false;
         }
 
-        boolean singleplayer = mc.isInSingleplayer();
-        mc.world.disconnect();
+        boolean singleplayer = mc.isLocalServer();
+        mc.level.disconnect();
         if (relogging) {
             isRelogging = true;
         }
         if (singleplayer) {
-            mc.disconnect(new MessageScreen(Text.translatable("menu.savingLevel")));
+            mc.disconnect(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
         } else {
             mc.disconnect();
         }
@@ -43,38 +43,38 @@ public class Relogger {
         if (singleplayer) {
             mc.setScreen(new TitleScreen());
         } else {
-            mc.setScreen(new MultiplayerScreen(new TitleScreen()));
+            mc.setScreen(new JoinMultiplayerScreen(new TitleScreen()));
         }
 
         return true;
     }
 
     public static boolean relog() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.isInSingleplayer()) {
-            IntegratedServer server = MinecraftClient.getInstance().getServer();
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.isLocalServer()) {
+            IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
             if (server == null) {
                 return false;
             }
-            String levelName = server.getSavePath(WorldSavePath.ROOT).normalize().getFileName().toString();
+            String levelName = server.getWorldPath(LevelResource.ROOT).normalize().getFileName().toString();
             if (!disconnect(true)) {
                 return false;
             }
-            if (!mc.getLevelStorage().levelExists(levelName)) {
+            if (!mc.getLevelSource().levelExists(levelName)) {
                 return false;
             }
-            mc.setScreenAndRender(new MessageScreen(Text.translatable("selectWorld.data_read")));
-            mc.createIntegratedServerLoader().start(levelName, () -> mc.setScreen(new TitleScreen()));
+            mc.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("selectWorld.data_read")));
+            mc.createWorldOpenFlows().checkForBackupAndLoad(levelName, () -> mc.setScreen(new TitleScreen()));
             return true;
         } else {
-            ServerInfo serverInfo = mc.getCurrentServerEntry();
+            ServerData serverInfo = mc.getCurrentServer();
             if (serverInfo == null) {
                 return false;
             }
             if (!disconnect(true)) {
                 return false;
             }
-            ConnectScreen.connect(mc.currentScreen, mc, ServerAddress.parse(serverInfo.address), serverInfo, false);
+            ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverInfo.ip), serverInfo, false);
             return true;
         }
     }

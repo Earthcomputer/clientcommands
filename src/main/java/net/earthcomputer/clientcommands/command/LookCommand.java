@@ -4,13 +4,16 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CPosArgument;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec2f;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec2;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CRotationArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.blockPos;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.getCBlockPos;
+import static dev.xpple.clientarguments.arguments.CRotationArgumentType.getCRotation;
+import static dev.xpple.clientarguments.arguments.CRotationArgumentType.rotation;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class LookCommand {
 
@@ -38,9 +41,9 @@ public class LookCommand {
     }
 
     private static int lookBlock(FabricClientCommandSource source, BlockPos pos) {
-        ClientPlayerEntity player = source.getPlayer();
+        LocalPlayer player = source.getPlayer();
         double dx = (pos.getX() + 0.5) - player.getX();
-        double dy = (pos.getY() + 0.5) - (player.getY() + player.getStandingEyeHeight());
+        double dy = (pos.getY() + 0.5) - (player.getY() + player.getEyeHeight());
         double dz = (pos.getZ() + 0.5) - player.getZ();
         double dh = Math.sqrt(dx * dx + dz * dz);
         float yaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90;
@@ -49,7 +52,7 @@ public class LookCommand {
     }
 
     private static int lookAngles(FabricClientCommandSource source, CPosArgument rotation) {
-        Vec2f rot = rotation.toAbsoluteRotation(source);
+        Vec2 rot = rotation.toAbsoluteRotation(source);
         return doLook(source.getPlayer(), rot.y, rot.x);
     }
 
@@ -61,8 +64,8 @@ public class LookCommand {
         return lookCardinal(source, source.getRotation().y, pitch);
     }
 
-    private static int doLook(ClientPlayerEntity player, float yaw, float pitch) {
-        player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), yaw, pitch);
+    private static int doLook(LocalPlayer player, float yaw, float pitch) {
+        player.moveTo(player.getX(), player.getY(), player.getZ(), yaw, pitch);
         return Command.SINGLE_SUCCESS;
     }
 

@@ -10,27 +10,33 @@ import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CColorArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.blockPos;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.getCBlockPos;
+import static dev.xpple.clientarguments.arguments.CColorArgumentType.color;
+import static dev.xpple.clientarguments.arguments.CColorArgumentType.getCColor;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.entities;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getCommandTextComponent;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getFlag;
+import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.getMultibaseInteger;
+import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.multibaseInteger;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class GlowCommand {
-    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cglow.entity.failed"));
+    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cglow.entity.failed"));
 
     private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
@@ -43,7 +49,7 @@ public class GlowCommand {
                         .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), 0xffffff))
                         .then(literal("color")
                             .then(argument("color", color())
-                                .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                                .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColor()).orElse(0xffffff)))))
                         .then(literal("colorCode")
                             .then(argument("color", multibaseInteger(0, 0xffffff))
                                 .executes(ctx -> glowEntities(ctx.getSource(), ctx.getArgument("targets", CEntitySelector.class), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color"))))))))
@@ -55,7 +61,7 @@ public class GlowCommand {
                             .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), 0xffffff))
                             .then(literal("color")
                                 .then(argument("color", color())
-                                    .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                                    .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColor()).orElse(0xffffff)))))
                             .then(literal("colorCode")
                                 .then(argument("color", multibaseInteger(0, 0xffffff))
                                     .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))))
@@ -66,7 +72,7 @@ public class GlowCommand {
                         .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), 0xffffff))
                         .then(literal("color")
                             .then(argument("color", color())
-                                .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColorValue()).orElse(0xffffff)))))
+                                .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), Optional.ofNullable(getCColor(ctx, "color").getColor()).orElse(0xffffff)))))
                         .then(literal("colorCode")
                             .then(argument("color", multibaseInteger(0, 0xffffff))
                                 .executes(ctx -> glowBlock(ctx.getSource(), getCBlockPos(ctx, "block"), null, getInteger(ctx, "seconds"), getMultibaseInteger(ctx, "color")))))))));
@@ -79,12 +85,12 @@ public class GlowCommand {
             String taskName = TaskManager.addTask("cglow", new SimpleTask() {
                 @Override
                 public boolean condition() {
-                    return MinecraftClient.getInstance().player != null;
+                    return Minecraft.getInstance().player != null;
                 }
 
                 @Override
                 protected void onTick() {
-                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                    LocalPlayer player = Minecraft.getInstance().player;
                     assert player != null;
 
                     try {
@@ -97,7 +103,7 @@ public class GlowCommand {
                 }
             });
 
-            source.sendFeedback(Text.translatable("commands.cglow.entity.keepSearching.success")
+            source.sendFeedback(Component.translatable("commands.cglow.entity.keepSearching.success")
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
@@ -112,31 +118,31 @@ public class GlowCommand {
                 ((IEntity) entity).addGlowingTicket(seconds * 20, color);
             }
 
-            source.sendFeedback(Text.translatable("commands.cglow.entity.success", entities.size()));
+            source.sendFeedback(Component.translatable("commands.cglow.entity.success", entities.size()));
 
             return entities.size();
         }
     }
 
     private static int glowBlock(FabricClientCommandSource source, BlockPos pos1, BlockPos pos2, int seconds, int color) {
-        List<Box> boundingBoxes = new ArrayList<>();
+        List<AABB> boundingBoxes = new ArrayList<>();
 
         if (pos2 == null) {
-            boundingBoxes.addAll(MinecraftClient.getInstance().world.getBlockState(pos1).getOutlineShape(source.getWorld(), pos1).getBoundingBoxes());
+            boundingBoxes.addAll(Minecraft.getInstance().level.getBlockState(pos1).getShape(source.getWorld(), pos1).toAabbs());
             if (boundingBoxes.isEmpty()) {
-                boundingBoxes.add(new Box(pos1));
+                boundingBoxes.add(new AABB(pos1));
             } else {
-                boundingBoxes.replaceAll((box) -> box.offset(pos1));
+                boundingBoxes.replaceAll((box) -> box.move(pos1));
             }
         } else {
-            boundingBoxes.add(Box.enclosing(pos1, pos2));
+            boundingBoxes.add(AABB.encapsulatingFullBlocks(pos1, pos2));
         }
 
-        for (Box box : boundingBoxes) {
+        for (AABB box : boundingBoxes) {
             RenderQueue.addCuboid(RenderQueue.Layer.ON_TOP, box, box, color, seconds * 20);
         }
 
-        source.sendFeedback(Text.translatable("commands.cglow.area.success", boundingBoxes.size()));
+        source.sendFeedback(Component.translatable("commands.cglow.area.success", boundingBoxes.size()));
 
         return boundingBoxes.size();
     }

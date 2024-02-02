@@ -9,17 +9,17 @@ import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.MessageScreen;
-import net.minecraft.client.gui.screen.ProgressScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.ProgressScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public abstract class MixinMinecraftClient {
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -41,8 +41,8 @@ public abstract class MixinMinecraftClient {
         GuiBlocker.tick();
     }
 
-    @Inject(method = "setWorld", at = @At("HEAD"))
-    public void onSetWorld(ClientWorld world, CallbackInfo ci) {
+    @Inject(method = "updateLevelInEngines", at = @At("HEAD"))
+    public void onSetWorld(ClientLevel world, CallbackInfo ci) {
         PlayerRandCracker.onRecreatePlayer();
         TaskManager.onWorldUnload(world == null);
     }
@@ -50,14 +50,14 @@ public abstract class MixinMinecraftClient {
     @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void onOpenScreen(Screen screen, CallbackInfo ci) {
         if (screen != null
-                && !(screen instanceof MessageScreen)
+                && !(screen instanceof GenericDirtMessageScreen)
                 && !(screen instanceof LevelLoadingScreen)
                 && !(screen instanceof ProgressScreen)
                 && !(screen instanceof ConnectScreen)
-                && !(screen instanceof GameMenuScreen)
-                && !(screen instanceof DownloadingTerrainScreen)
+                && !(screen instanceof PauseScreen)
+                && !(screen instanceof ReceivingLevelScreen)
                 && !(screen instanceof TitleScreen)
-                && !(screen instanceof MultiplayerScreen)) {
+                && !(screen instanceof JoinMultiplayerScreen)) {
             Relogger.cantHaveRelogSuccess();
         }
         if (!GuiBlocker.onOpenGui(screen)) {
@@ -65,7 +65,7 @@ public abstract class MixinMinecraftClient {
         }
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("RETURN"))
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("RETURN"))
     public void onDisconnect(Screen screen, CallbackInfo ci) {
         ServerBrandManager.onDisconnect();
         if (!Relogger.isRelogging) {
@@ -75,7 +75,7 @@ public abstract class MixinMinecraftClient {
     }
 
     // Earth annoying his friends <3 nothing to see here
-    @Inject(method = "getWindowTitle", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "createTitle", at = @At("RETURN"), cancellable = true)
     private void modifyWindowTitle(CallbackInfoReturnable<String> ci) {
         if (ClientCommands.SCRAMBLE_WINDOW_TITLE) {
             List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));

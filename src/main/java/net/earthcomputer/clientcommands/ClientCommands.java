@@ -6,7 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
 import io.netty.buffer.Unpooled;
-import net.earthcomputer.clientcommands.command.*;
+import net.earthcomputer.clientcommands.command.ItemGroupCommand; import net.earthcomputer.clientcommands.command.AuditMixinsCommand; import net.earthcomputer.clientcommands.command.BookCommand; import net.earthcomputer.clientcommands.command.LookCommand; import net.earthcomputer.clientcommands.command.NoteCommand; import net.earthcomputer.clientcommands.command.ShrugCommand; import net.earthcomputer.clientcommands.command.FindCommand; import net.earthcomputer.clientcommands.command.FindBlockCommand; import net.earthcomputer.clientcommands.command.FindItemCommand; import net.earthcomputer.clientcommands.command.TaskCommand; import net.earthcomputer.clientcommands.command.CalcCommand; import net.earthcomputer.clientcommands.command.RenderCommand; import net.earthcomputer.clientcommands.command.UsageTreeCommand; import net.earthcomputer.clientcommands.command.WikiCommand; import net.earthcomputer.clientcommands.command.CEnchantCommand; import net.earthcomputer.clientcommands.command.GlowCommand; import net.earthcomputer.clientcommands.command.GetDataCommand; import net.earthcomputer.clientcommands.command.CalcStackCommand; import net.earthcomputer.clientcommands.command.GammaCommand; import net.earthcomputer.clientcommands.command.MoteCommand; import net.earthcomputer.clientcommands.command.ChorusCommand; import net.earthcomputer.clientcommands.command.FishCommand; import net.earthcomputer.clientcommands.command.SignSearchCommand; import net.earthcomputer.clientcommands.command.GhostBlockCommand; import net.earthcomputer.clientcommands.command.RelogCommand; import net.earthcomputer.clientcommands.command.CGiveCommand; import net.earthcomputer.clientcommands.command.CPlaySoundCommand; import net.earthcomputer.clientcommands.command.CStopSoundCommand; import net.earthcomputer.clientcommands.command.FovCommand; import net.earthcomputer.clientcommands.command.HotbarCommand; import net.earthcomputer.clientcommands.command.KitCommand; import net.earthcomputer.clientcommands.command.CParticleCommand; import net.earthcomputer.clientcommands.command.PermissionLevelCommand; import net.earthcomputer.clientcommands.command.CTellRawCommand; import net.earthcomputer.clientcommands.command.CTimeCommand; import net.earthcomputer.clientcommands.command.AliasCommand; import net.earthcomputer.clientcommands.command.AreaStatsCommand; import net.earthcomputer.clientcommands.command.CTeleportCommand; import net.earthcomputer.clientcommands.command.PingCommand; import net.earthcomputer.clientcommands.command.UuidCommand; import net.earthcomputer.clientcommands.command.SnakeCommand; import net.earthcomputer.clientcommands.command.CTitleCommand; import net.earthcomputer.clientcommands.command.TooltipCommand; import net.earthcomputer.clientcommands.command.TranslateCommand; import net.earthcomputer.clientcommands.command.VarCommand; import net.earthcomputer.clientcommands.command.CFunctionCommand; import net.earthcomputer.clientcommands.command.StartupCommand; import net.earthcomputer.clientcommands.command.WhisperEncryptedCommand; import net.earthcomputer.clientcommands.command.PosCommand; import net.earthcomputer.clientcommands.command.CrackRNGCommand; import net.earthcomputer.clientcommands.command.WeatherCommand; import net.earthcomputer.clientcommands.command.PluginsCommand; import net.earthcomputer.clientcommands.command.ChatCommand; 
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -14,12 +14,12 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.Util;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -36,11 +36,11 @@ public class ClientCommands implements ClientModInitializer {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static Path configDir;
     private static final Set<String> clientcommandsCommands = new HashSet<>();
-    public static final Identifier COMMAND_EXECUTION_PACKET_ID = new Identifier("clientcommands", "command_execution");
+    public static final ResourceLocation COMMAND_EXECUTION_PACKET_ID = new ResourceLocation("clientcommands", "command_execution");
     private static final Set<String> COMMANDS_TO_NOT_SEND_TO_SERVER = Set.of("cwe", "cnote"); // could contain private information
 
     public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
-        String playerUUID = String.valueOf(MinecraftClient.getInstance().getSession().getUuidOrNull());
+        String playerUUID = String.valueOf(Minecraft.getInstance().getUser().getProfileId());
 
         Set<String> victims = Set.of(
             "fa68270b-1071-46c6-ac5c-6c4a0b777a96", // Earthcomputer
@@ -66,13 +66,13 @@ public class ClientCommands implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-            context.matrixStack().push();
+            context.matrixStack().pushPose();
 
-            Vec3d cameraPos = context.camera().getPos();
+            Vec3 cameraPos = context.camera().getPosition();
             context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
             RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickDelta());
 
-            context.matrixStack().pop();
+            context.matrixStack().popPose();
         });
 
         configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
@@ -97,14 +97,14 @@ public class ClientCommands implements ClientModInitializer {
         String theCommand = reader.readUnquotedString();
         if (clientcommandsCommands.contains(theCommand) && !COMMANDS_TO_NOT_SEND_TO_SERVER.contains(theCommand)) {
             if (ClientPlayNetworking.canSend(COMMAND_EXECUTION_PACKET_ID)) {
-                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-                buf.writeString(command);
+                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                buf.writeUtf(command);
                 ClientPlayNetworking.send(COMMAND_EXECUTION_PACKET_ID, buf);
             }
         }
     }
 
-    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
         Set<String> existingCommands = getCommands(dispatcher);
 
         AuditMixinsCommand.register(dispatcher);
@@ -163,7 +163,7 @@ public class ClientCommands implements ClientModInitializer {
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;
-        registerChatCommand |= CHAT_COMMAND_USERS.contains(String.valueOf(MinecraftClient.getInstance().getSession().getUuidOrNull()));
+        registerChatCommand |= CHAT_COMMAND_USERS.contains(String.valueOf(Minecraft.getInstance().getUser().getProfileId()));
         registerChatCommand |= Boolean.getBoolean("clientcommands.debugChatCommand");
         if (registerChatCommand) {
             ChatCommand.register(dispatcher);

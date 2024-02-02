@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.interfaces;
 
-import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 
 public interface IEnchantingTableContainer {
 
-    ScreenHandlerContext getContext();
+    ContainerLevelAccess getContext();
 
 }

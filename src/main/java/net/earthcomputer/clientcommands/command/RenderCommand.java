@@ -5,10 +5,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.entities;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class RenderCommand {
 
@@ -26,7 +27,7 @@ public class RenderCommand {
 
     private static int enableEntityRendering(FabricClientCommandSource source, CEntitySelector selector, boolean enable) {
         RenderSettings.addEntityRenderSelector(selector, enable);
-        source.sendFeedback(Text.translatable("commands.crender.entities.success"));
+        source.sendFeedback(Component.translatable("commands.crender.entities.success"));
         return Command.SINGLE_SUCCESS;
     }
 

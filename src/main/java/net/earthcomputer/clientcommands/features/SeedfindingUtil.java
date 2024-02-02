@@ -5,18 +5,18 @@ import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.loot.enchantment.Enchantments;
 import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.minecraft.SharedConstants;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.item.EnchantedBookItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -26,8 +26,8 @@ public class SeedfindingUtil {
     }
 
     @Nullable
-    public static com.seedfinding.mcbiome.biome.Biome toSeedfindingBiome(World world, RegistryEntry<Biome> biome) {
-        Identifier name = world.getRegistryManager().get(RegistryKeys.BIOME).getId(biome.value());
+    public static com.seedfinding.mcbiome.biome.Biome toSeedfindingBiome(Level world, Holder<Biome> biome) {
+        ResourceLocation name = world.registryAccess().registryOrThrow(Registries.BIOME).getKey(biome.value());
         if (name == null || !"minecraft".equals(name.getNamespace())) {
             return null;
         }
@@ -44,21 +44,21 @@ public class SeedfindingUtil {
     }
 
     public static ItemStack fromSeedfindingItem(com.seedfinding.mcfeature.loot.item.ItemStack stack) {
-        Item item = Registries.ITEM.get(new Identifier(stack.getItem().getName()));
+        Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(stack.getItem().getName()));
         if (!stack.getItem().getEnchantments().isEmpty() && item == Items.BOOK) {
             item = Items.ENCHANTED_BOOK;
         }
 
         ItemStack ret = new ItemStack(item, stack.getCount());
         for (var enchAndLevel : stack.getItem().getEnchantments()) {
-            Enchantment enchantment = Registries.ENCHANTMENT.get(new Identifier(enchAndLevel.getFirst()));
+            Enchantment enchantment = BuiltInRegistries.ENCHANTMENT.get(new ResourceLocation(enchAndLevel.getFirst()));
             if (enchantment == null) {
                 continue;
             }
             if (item == Items.ENCHANTED_BOOK) {
-                EnchantedBookItem.addEnchantment(ret, new EnchantmentLevelEntry(enchantment, enchAndLevel.getSecond()));
+                EnchantedBookItem.addEnchantment(ret, new EnchantmentInstance(enchantment, enchAndLevel.getSecond()));
             } else {
-                ret.addEnchantment(enchantment, enchAndLevel.getSecond());
+                ret.enchant(enchantment, enchAndLevel.getSecond());
             }
         }
         return ret;
@@ -69,7 +69,7 @@ public class SeedfindingUtil {
             return true;
         }
 
-        Identifier id = Registries.ENCHANTMENT.getId(enchantment);
+        ResourceLocation id = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
         if (id == null || !id.getNamespace().equals("minecraft")) {
             return false;
         }

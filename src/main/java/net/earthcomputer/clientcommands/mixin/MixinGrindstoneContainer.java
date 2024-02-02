@@ -1,19 +1,19 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.screen.GrindstoneScreenHandler;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.GrindstoneMenu;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(GrindstoneScreenHandler.class)
+@Mixin(GrindstoneMenu.class)
 public class MixinGrindstoneContainer implements IDroppableInventoryContainer {
 
-    @Shadow @Final Inventory input;
+    @Shadow @Final Container repairSlots;
 
     @Override
-    public Inventory getDroppableInventory() {
-        return input;
+    public Container getDroppableInventory() {
+        return repairSlots;
     }
 }

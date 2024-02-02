@@ -1,23 +1,23 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.passive.MooshroomEntity;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.entity.passive.SnowGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({CreeperEntity.class, MooshroomEntity.class, SheepEntity.class, SnowGolemEntity.class})
+@Mixin({Creeper.class, MushroomCow.class, Sheep.class, SnowGolem.class})
 public class MixinCreeperMooshroomSheepAndSnowGolemEntity {
 
-    @Inject(method = "interactMob", at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isClient:Z"))
-    public void onInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<Boolean> ci) {
-        PlayerRandCracker.onItemDamage(1, player, player.getStackInHand(hand));
+    @Inject(method = "mobInteract", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
+    public void onInteract(Player player, InteractionHand hand, CallbackInfoReturnable<Boolean> ci) {
+        PlayerRandCracker.onItemDamage(1, player, player.getItemInHand(hand));
     }
 
 }

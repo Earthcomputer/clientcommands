@@ -2,13 +2,14 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-
 import net.earthcomputer.clientcommands.mixin.SimpleOptionAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
-import static com.mojang.brigadier.arguments.DoubleArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
+import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class GammaCommand {
 
@@ -19,9 +20,9 @@ public class GammaCommand {
     }
 
     private static int setGamma(FabricClientCommandSource source, double gamma) {
-        ((SimpleOptionAccessor) (Object) source.getClient().options.getGamma()).forceSetValue(gamma);
+        ((SimpleOptionAccessor) (Object) source.getClient().options.gamma()).forceSetValue(gamma);
 
-        Text feedback = Text.translatable("commands.cgamma.success", gamma);
+        Component feedback = Component.translatable("commands.cgamma.success", gamma);
         source.sendFeedback(feedback);
 
         return Command.SINGLE_SUCCESS;

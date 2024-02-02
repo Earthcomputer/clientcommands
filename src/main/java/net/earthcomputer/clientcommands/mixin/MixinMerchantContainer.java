@@ -1,21 +1,21 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.screen.MerchantScreenHandler;
-import net.minecraft.village.MerchantInventory;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.inventory.MerchantContainer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MerchantScreenHandler.class)
+@Mixin(MerchantMenu.class)
 public class MixinMerchantContainer implements IDroppableInventoryContainer {
 
-    @Shadow @Final private MerchantInventory merchantInventory;
+    @Shadow @Final private MerchantContainer tradeContainer;
 
     @Override
-    public Inventory getDroppableInventory() {
-        return new SimpleInventory(merchantInventory.getStack(0), merchantInventory.getStack(1));
+    public Container getDroppableInventory() {
+        return new SimpleContainer(tradeContainer.getItem(0), tradeContainer.getItem(1));
     }
 }

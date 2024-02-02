@@ -1,13 +1,12 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.minecraft.entity.ai.pathing.LandPathNodeMaker;
-import net.minecraft.entity.ai.pathing.PathNode;
-import net.minecraft.util.math.Direction;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(LandPathNodeMaker.class)
+@Mixin(WalkNodeEvaluator.class)
 public interface LandPathNodeMakerAccessor {
-    @Invoker
-    boolean callIsValidAdjacentSuccessor(PathNode node, PathNode successor);
+    @Invoker("isNeighborValid")
+    boolean callIsValidAdjacentSuccessor(Node node, Node successor);
 }

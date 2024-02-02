@@ -2,16 +2,20 @@ package net.earthcomputer.clientcommands.mixin;
 
 import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.c2c.*;
+import net.earthcomputer.clientcommands.c2c.C2CPacket;
+import net.earthcomputer.clientcommands.c2c.CCNetworkHandler;
+import net.earthcomputer.clientcommands.c2c.CCPacketHandler;
+import net.earthcomputer.clientcommands.c2c.ConversionHelper;
+import net.earthcomputer.clientcommands.c2c.OutgoingPacketFilter;
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.client.gui.hud.MessageIndicator;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.message.MessageSignatureData;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.GuiMessageTag;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MessageSignature;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,18 +28,18 @@ import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.Optional;
 
-@Mixin(ChatHud.class)
+@Mixin(ChatComponent.class)
 public class MixinChatHud {
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow @Final private Minecraft minecraft;
 
-    @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At("HEAD"), cancellable = true)
-    private void onC2CPacket(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator, boolean refresh, CallbackInfo ci) {
+    @Inject(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V", at = @At("HEAD"), cancellable = true)
+    private void onC2CPacket(Component message, MessageSignature signature, int ticks, GuiMessageTag indicator, boolean refresh, CallbackInfo ci) {
         handleIfPacket(message, ci);
     }
 
     @Unique
-    private void handleIfPacket(Text content, CallbackInfo ci) {
+    private void handleIfPacket(Component content, CallbackInfo ci) {
         String string = content.getString();
         int index = string.indexOf("CCENC:");
         if (index == -1) {
@@ -44,9 +48,9 @@ public class MixinChatHud {
         String packetString = string.substring(index + 6);
         if (!Configs.acceptC2CPackets) {
             if (OutgoingPacketFilter.removeIfContains(packetString)) {
-                this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.sentC2CPacket"));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("ccpacket.sentC2CPacket"));
             } else {
-                this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.receivedC2CPacket").styled(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, content))));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("ccpacket.receivedC2CPacket").withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, content))));
             }
             ci.cancel();
             return;
@@ -58,7 +62,7 @@ public class MixinChatHud {
         if (handleC2CPacket(packetString)) {
             ci.cancel();
         } else {
-            this.client.inGameHud.getChatHud().addMessage(Text.translatable("ccpacket.malformedPacket").formatted(Formatting.RED));
+            this.minecraft.gui.getChat().addMessage(Component.translatable("ccpacket.malformedPacket").withStyle(ChatFormatting.RED));
         }
     }
 
@@ -72,7 +76,7 @@ public class MixinChatHud {
         for (int i = 0; i < length; i += 256) {
             encryptedArrays[i / 256] = Arrays.copyOfRange(encrypted, i, i + 256);
         }
-        if (!(MinecraftClient.getInstance().getProfileKeys() instanceof IHasPrivateKey privateKeyHolder)) {
+        if (!(Minecraft.getInstance().getProfileKeyPairManager() instanceof IHasPrivateKey privateKeyHolder)) {
             return false;
         }
         Optional<PrivateKey> key = privateKeyHolder.getPrivateKey();
@@ -97,7 +101,7 @@ public class MixinChatHud {
             pos += decryptedArray.length;
         }
         byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.wrappedBuffer(uncompressed));
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(uncompressed));
         int id = buf.readInt();
         C2CPacket c2CPacket = CCPacketHandler.createPacket(id, buf);
         if (c2CPacket == null) {
@@ -109,7 +113,7 @@ public class MixinChatHud {
         try {
             c2CPacket.apply(CCNetworkHandler.getInstance());
         } catch (Exception e) {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(e.getMessage()));
+            Minecraft.getInstance().gui.getChat().addMessage(Component.nullToEmpty(e.getMessage()));
             e.printStackTrace();
         }
         return true;

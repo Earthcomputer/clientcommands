@@ -1,14 +1,14 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.EnchantmentScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.EnchantmentScreenHandler;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,20 +16,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EnchantmentScreen.class)
-public abstract class MixinEnchantingScreen extends HandledScreen<EnchantmentScreenHandler> {
+public abstract class MixinEnchantingScreen extends AbstractContainerScreen<EnchantmentMenu> {
 
-    public MixinEnchantingScreen(EnchantmentScreenHandler container_1, PlayerInventory playerInventory_1, Text text_1) {
+    public MixinEnchantingScreen(EnchantmentMenu container_1, Inventory playerInventory_1, Component text_1) {
         super(container_1, playerInventory_1, text_1);
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    public void postRender(DrawContext context, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
+    public void postRender(GuiGraphics context, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
             EnchantmentCracker.drawEnchantmentGUIOverlay(context);
         }
     }
 
-    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;clickButton(II)V"))
+    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleInventoryButtonClick(II)V"))
     public void onItemEnchanted(double mouseX, double mouseY, int mouseButton, CallbackInfoReturnable<Boolean> ci) {
         EnchantmentCracker.onEnchantedItem();
     }
@@ -37,9 +37,9 @@ public abstract class MixinEnchantingScreen extends HandledScreen<EnchantmentScr
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
-            addDrawableChild(ButtonWidget.builder(Text.translatable("enchCrack.addInfo"), button -> {
-                EnchantmentCracker.addEnchantmentSeedInfo(MinecraftClient.getInstance().world, getScreenHandler());
-            }).position(width - 150, 0).build());
+            addRenderableWidget(Button.builder(Component.translatable("enchCrack.addInfo"), button -> {
+                EnchantmentCracker.addEnchantmentSeedInfo(Minecraft.getInstance().level, getMenu());
+            }).pos(width - 150, 0).build());
         }
     }
 }

@@ -1,27 +1,27 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IEntity;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.model.ArmorStandEntityModel;
-import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.client.model.ArmorStandModel;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ArmorStandRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ArmorStandEntityRenderer.class)
-public abstract class MixinArmorStandEntityRenderer extends LivingEntityRenderer<ArmorStandEntity, ArmorStandEntityModel> {
-    public MixinArmorStandEntityRenderer(EntityRendererFactory.Context ctx, ArmorStandEntityModel model, float shadowRadius) {
+@Mixin(ArmorStandRenderer.class)
+public abstract class MixinArmorStandEntityRenderer extends LivingEntityRenderer<ArmorStand, ArmorStandModel> {
+    public MixinArmorStandEntityRenderer(EntityRendererProvider.Context ctx, ArmorStandModel model, float shadowRadius) {
         super(ctx, model, shadowRadius);
     }
 
-    @Inject(method = "getRenderLayer(Lnet/minecraft/entity/decoration/ArmorStandEntity;ZZZ)Lnet/minecraft/client/render/RenderLayer;", at = @At("HEAD"), cancellable = true)
-    private void onGetRenderLayer(ArmorStandEntity armorStand, boolean visible, boolean translucent, boolean shouldRenderOutline, CallbackInfoReturnable<RenderLayer> ci) {
+    @Inject(method = "getRenderType(Lnet/minecraft/world/entity/decoration/ArmorStand;ZZZ)Lnet/minecraft/client/renderer/RenderType;", at = @At("HEAD"), cancellable = true)
+    private void onGetRenderLayer(ArmorStand armorStand, boolean visible, boolean translucent, boolean shouldRenderOutline, CallbackInfoReturnable<RenderType> ci) {
         if (((IEntity) armorStand).hasGlowingTicket()) {
-            ci.setReturnValue(super.getRenderLayer(armorStand, visible, translucent, shouldRenderOutline));
+            ci.setReturnValue(super.getRenderType(armorStand, visible, translucent, shouldRenderOutline));
         }
     }
 

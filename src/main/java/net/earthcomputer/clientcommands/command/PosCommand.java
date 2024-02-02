@@ -4,17 +4,20 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.xpple.clientarguments.arguments.CDimensionArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.blockPos;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.getCBlockPos;
+import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.dimension;
+import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.getCDimensionArgument;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getLookCoordsTextComponent;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class PosCommand {
     // Syntax: "/cpos [to|from <dimension>] [from|to <dimension>] [<pos>]"
@@ -33,9 +36,9 @@ public class PosCommand {
                                     .executes(ctx -> convertCoords(ctx.getSource(),
                                             getCBlockPos(ctx, "pos"), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension"))))
                             .executes(ctx -> convertCoords(ctx.getSource(),
-                                    ctx.getSource().getPlayer().getBlockPos(), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension")))))
+                                    ctx.getSource().getPlayer().blockPosition(), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension")))))
                     .executes(ctx -> convertCoords(ctx.getSource(),
-                            ctx.getSource().getPlayer().getBlockPos(), null, getCDimensionArgument(ctx, "targetDimension")))))
+                            ctx.getSource().getPlayer().blockPosition(), null, getCDimensionArgument(ctx, "targetDimension")))))
             .then(literal("from").then(argument("sourceDimension", dimension())
                     .then(argument("pos", blockPos())
                             .executes(ctx -> convertCoords(ctx.getSource(),
@@ -45,21 +48,21 @@ public class PosCommand {
                                     .executes(ctx -> convertCoords(ctx.getSource(),
                                             getCBlockPos(ctx, "pos"), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension"))))
                             .executes(ctx -> convertCoords(ctx.getSource(),
-                                    ctx.getSource().getPlayer().getBlockPos(), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension")))))
+                                    ctx.getSource().getPlayer().blockPosition(), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension")))))
                     .executes(ctx -> convertCoords(ctx.getSource(),
-                            ctx.getSource().getPlayer().getBlockPos(), getCDimensionArgument(ctx, "sourceDimension"), null))))
+                            ctx.getSource().getPlayer().blockPosition(), getCDimensionArgument(ctx, "sourceDimension"), null))))
             .executes(ctx -> convertCoords(ctx.getSource(),
-                    ctx.getSource().getPlayer().getBlockPos(), null, null)));
+                    ctx.getSource().getPlayer().blockPosition(), null, null)));
     }
 
     private static int convertCoords(FabricClientCommandSource source, BlockPos pos,
                                      CDimensionArgumentType.DimensionArgument sourceDim,
                                      CDimensionArgumentType.DimensionArgument targetDim) {
-        RegistryKey<World> sourceWorld;
-        RegistryKey<World> targetWorld;
+        ResourceKey<Level> sourceWorld;
+        ResourceKey<Level> targetWorld;
         if (sourceDim == null && targetDim == null) {
             // If neither argument is given, set current dimension as source and "opposite" as target
-            sourceWorld = source.getPlayer().getWorld().getRegistryKey();
+            sourceWorld = source.getPlayer().level().dimension();
             targetWorld = getOppositeWorld(sourceWorld);
         } else if (targetDim == null) {
             // If only source dimension is given, set the target to "opposite"
@@ -76,14 +79,14 @@ public class PosCommand {
         }
 
         double scaleFactor = (double) getCoordinateScale(sourceWorld) / getCoordinateScale(targetWorld);
-        BlockPos targetPos = BlockPos.ofFloored(pos.getX() * scaleFactor, pos.getY(), pos.getZ() * scaleFactor);
+        BlockPos targetPos = BlockPos.containing(pos.getX() * scaleFactor, pos.getY(), pos.getZ() * scaleFactor);
         String sourceWorldName = getWorldName(sourceWorld);
         String targetWorldName = getWorldName(targetWorld);
 
         source.sendFeedback(getCoordsTextComponent(pos)
-                .append(Text.translatable("commands.cpos.coords.left", sourceWorldName, targetWorldName))
+                .append(Component.translatable("commands.cpos.coords.left", sourceWorldName, targetWorldName))
                 .append(getLookCoordsTextComponent(targetPos))
-                .append(Text.translatable("commands.cpos.coords.right", sourceWorldName, targetWorldName)));
+                .append(Component.translatable("commands.cpos.coords.right", sourceWorldName, targetWorldName)));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -92,22 +95,22 @@ public class PosCommand {
      * Return the "opposite" world; that is the Nether when given anything else than the Nether,
      * and the Overworld, if given the Nether.
      */
-    private static RegistryKey<World> getOppositeWorld(RegistryKey<World> world) {
-        if (world == World.NETHER) {
-            return World.OVERWORLD;
+    private static ResourceKey<Level> getOppositeWorld(ResourceKey<Level> world) {
+        if (world == Level.NETHER) {
+            return Level.OVERWORLD;
         } else {
-            return World.NETHER;
+            return Level.NETHER;
         }
     }
 
     /**
      * Return the scale factor of the given world.
      */
-    private static int getCoordinateScale(RegistryKey<World> world) {
+    private static int getCoordinateScale(ResourceKey<Level> world) {
         // This is supposed to mimick the value from DimensionType.coordinateScale(),
         // which unfortunately is not available to us at this time, so we hard-code
         // the known values of Vanilla.
-        if (world == World.NETHER) {
+        if (world == Level.NETHER) {
             return 8;
         } else {
             return 1;
@@ -118,16 +121,16 @@ public class PosCommand {
      * Return a translated string describing the given world, or the built-in ID
      * if that fails.
      */
-    private static String getWorldName(RegistryKey<World> world) {
-        String worldNameKey = "commands.cpos.world." + world.getValue().getPath();
-        if (I18n.hasTranslation(worldNameKey)) {
-            return I18n.translate(worldNameKey);
+    private static String getWorldName(ResourceKey<Level> world) {
+        String worldNameKey = "commands.cpos.world." + world.location().getPath();
+        if (I18n.exists(worldNameKey)) {
+            return I18n.get(worldNameKey);
         } else {
-            return world.getValue().getPath();
+            return world.location().getPath();
         }
     }
 
-    private static MutableText getCoordsTextComponent(BlockPos pos) {
-        return Text.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ());
+    private static MutableComponent getCoordsTextComponent(BlockPos pos) {
+        return Component.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ());
     }
 }

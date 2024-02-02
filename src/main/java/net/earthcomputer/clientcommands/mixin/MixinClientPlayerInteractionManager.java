@@ -2,59 +2,61 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.item.*;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public class MixinClientPlayerInteractionManager {
 
-    @Inject(method = "interactBlock", at = @At("HEAD"))
-    public void onRightClickBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> ci) {
+    @Inject(method = "useItemOn", at = @At("HEAD"))
+    public void onRightClickBlock(LocalPlayer player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> ci) {
         BlockPos pos = hitResult.getBlockPos();
-        if (player.getWorld().getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE) {
+        if (player.level().getBlockState(pos).getBlock() == Blocks.ENCHANTING_TABLE) {
             EnchantmentCracker.enchantingTablePos = pos;
         }
     }
 
-    @Inject(method = "breakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/block/BlockState;"))
+    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;playerWillDestroy(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/level/block/state/BlockState;"))
     public void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> ci) {
-        World world = MinecraftClient.getInstance().world;
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        ItemStack stack = player.getMainHandStack();
+        Level world = Minecraft.getInstance().level;
+        LocalPlayer player = Minecraft.getInstance().player;
+        ItemStack stack = player.getMainHandItem();
         Item item = stack.getItem();
-        if (item instanceof MiningToolItem) {
+        if (item instanceof DiggerItem) {
             BlockState state = world.getBlockState(pos);
-            if (state.getHardness(world, pos) != 0) {
+            if (state.getDestroySpeed(world, pos) != 0) {
                 PlayerRandCracker.onItemDamage(1, player, stack);
             }
         }
     }
 
-    @Inject(method = "sendSequencedPacket", at = @At("HEAD"))
+    @Inject(method = "startPrediction", at = @At("HEAD"))
     private void preSendSequencedPacket(CallbackInfo ci) {
         PlayerRandCracker.isPredictingBlockBreaking = true;
     }
 
-    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", shift = At.Shift.AFTER))
+    @Inject(method = "startPrediction", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V", shift = At.Shift.AFTER))
     private void postSendSequencedPacket(CallbackInfo ci) {
         PlayerRandCracker.postSendBlockBreakingPredictionPacket();
     }
 
-    @Inject(method = "sendSequencedPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/PendingUpdateManager;close()V"))
+    @Inject(method = "startPrediction", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/prediction/BlockStatePredictionHandler;close()V"))
     private void sendSequencedPacketFinally(CallbackInfo ci) {
         PlayerRandCracker.isPredictingBlockBreaking = false;
     }

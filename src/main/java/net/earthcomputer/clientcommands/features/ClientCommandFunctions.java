@@ -12,13 +12,13 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.VarCommand;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.Text;
-import net.minecraft.util.PathUtil;
-import net.minecraft.util.WorldSavePath;
+import net.minecraft.FileUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -28,7 +28,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
@@ -37,8 +42,8 @@ public class ClientCommandFunctions {
 
     private static final Path FUNCTION_DIR = ClientCommands.configDir.resolve("functions");
 
-    private static final DynamicCommandExceptionType NO_SUCH_FUNCTION_EXCEPTION = new DynamicCommandExceptionType(id -> Text.translatable("arguments.function.unknown", id));
-    private static final DynamicCommandExceptionType COMMAND_LIMIT_REACHED_EXCEPTION = new DynamicCommandExceptionType(limit -> Text.translatable("commands.cfunction.limitReached", limit));
+    private static final DynamicCommandExceptionType NO_SUCH_FUNCTION_EXCEPTION = new DynamicCommandExceptionType(id -> Component.translatable("arguments.function.unknown", id));
+    private static final DynamicCommandExceptionType COMMAND_LIMIT_REACHED_EXCEPTION = new DynamicCommandExceptionType(limit -> Component.translatable("commands.cfunction.limitReached", limit));
 
     @Nullable
     public static Path getLocalStartupFunction() {
@@ -46,15 +51,15 @@ public class ClientCommandFunctions {
     }
 
     private static String getLocalStartupFunctionStr() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        ServerInfo mpServer = mc.getCurrentServerEntry();
+        Minecraft mc = Minecraft.getInstance();
+        ServerData mpServer = mc.getCurrentServer();
         String startupFunction;
         if (mpServer != null) {
-            startupFunction = "startup_multiplayer_" + mpServer.address.replace(':', '_');
+            startupFunction = "startup_multiplayer_" + mpServer.ip.replace(':', '_');
         } else {
-            IntegratedServer server = mc.getServer();
+            IntegratedServer server = mc.getSingleplayerServer();
             if (server != null) {
-                startupFunction = "startup_singleplayer_" + server.getSavePath(WorldSavePath.ROOT).normalize().getFileName();
+                startupFunction = "startup_singleplayer_" + server.getWorldPath(LevelResource.ROOT).normalize().getFileName();
             } else {
                 startupFunction = "startup";
             }
@@ -118,9 +123,9 @@ public class ClientCommandFunctions {
 
         try {
             var dispatcher = ClientCommandManager.getActiveDispatcher();
-            var networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+            var networkHandler = Minecraft.getInstance().getConnection();
             assert networkHandler != null : "Network handler should not be null while calling ClientCommandFunctions.runStartup()";
-            var source = (FabricClientCommandSource) networkHandler.getCommandSource();
+            var source = (FabricClientCommandSource) networkHandler.getSuggestionsProvider();
             int result = executeFunction(dispatcher, source, startupFunction, res -> {});
             LOGGER.info("Ran {} commands from startup function {}", result, startupFunction);
         } catch (CommandSyntaxException e) {
@@ -200,7 +205,7 @@ public class ClientCommandFunctions {
             } catch (InvalidPathException e) {
                 return null;
             }
-            if (!PathUtil.isNormal(path) || !PathUtil.isAllowedName(path)) {
+            if (!FileUtil.isPathNormalized(path) || !FileUtil.isPathPortable(path)) {
                 return null;
             }
             return path;
@@ -225,7 +230,7 @@ public class ClientCommandFunctions {
                         var command = dispatcher.parse(line, source);
                         if (command.getReader().canRead()) {
                             //noinspection ConstantConditions
-                            throw CommandManager.getException(command);
+                            throw Commands.getParseException(command);
                         }
                         entries.add(new ParsedEntry(line, command));
                     }

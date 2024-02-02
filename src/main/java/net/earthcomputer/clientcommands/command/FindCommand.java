@@ -3,31 +3,31 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.entities;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class FindCommand {
 
     private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
-    private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cfind.noMatch"));
+    private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cfind.noMatch"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var cfind = dispatcher.register(literal("cfind")
@@ -41,7 +41,7 @@ public class FindCommand {
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(source, selector));
 
-            source.sendFeedback(Text.translatable("commands.cfind.keepSearching.success")
+            source.sendFeedback(Component.translatable("commands.cfind.keepSearching.success")
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
@@ -53,7 +53,7 @@ public class FindCommand {
                 throw NO_MATCH_EXCEPTION.create();
             }
 
-            source.sendFeedback(Text.translatable("commands.cfind.success", entities.size()).formatted(Formatting.BOLD));
+            source.sendFeedback(Component.translatable("commands.cfind.success", entities.size()).withStyle(ChatFormatting.BOLD));
             for (Entity entity : entities) {
                 sendEntityFoundMessage(source, entity);
             }
@@ -63,10 +63,10 @@ public class FindCommand {
     }
 
     private static void sendEntityFoundMessage(FabricClientCommandSource source, Entity entity) {
-        String distance = "%.2f".formatted(Math.sqrt(entity.squaredDistanceTo(source.getPosition())));
-        source.sendFeedback(Text.translatable("commands.cfind.found.left", entity.getName(), distance)
-                .append(getLookCoordsTextComponent(entity.getBlockPos()))
-                .append(Text.translatable("commands.cfind.found.right", entity.getName(), distance)));
+        String distance = "%.2f".formatted(Math.sqrt(entity.distanceToSqr(source.getPosition())));
+        source.sendFeedback(Component.translatable("commands.cfind.found.left", entity.getName(), distance)
+                .append(getLookCoordsTextComponent(entity.blockPosition()))
+                .append(Component.translatable("commands.cfind.found.right", entity.getName(), distance)));
     }
 
     private static class FindTask extends LongTask {
@@ -85,7 +85,7 @@ public class FindCommand {
 
         @Override
         public boolean condition() {
-            return MinecraftClient.getInstance().player != null;
+            return Minecraft.getInstance().player != null;
         }
 
         @Override
@@ -96,7 +96,7 @@ public class FindCommand {
         public void body() {
             try {
                 for (Entity entity : selector.getEntities(this.source)) {
-                    if (foundEntities.add(entity.getUuid())) {
+                    if (foundEntities.add(entity.getUUID())) {
                         sendEntityFoundMessage(source, entity);
                     }
                 }

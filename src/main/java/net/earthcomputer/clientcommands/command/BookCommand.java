@@ -6,16 +6,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.WrittenBookItem;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.WrittenBookItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,15 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static com.mojang.brigadier.arguments.LongArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
+import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class BookCommand {
-    private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Text.translatable("commands.cbook.commandException"));
+    private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Component.translatable("commands.cbook.commandException"));
 
     private static final int MAX_LIMIT = WrittenBookItem.MAX_PAGES;
     private static final int DEFAULT_LIMIT = 50;
@@ -71,35 +74,35 @@ public class BookCommand {
     }
 
     private static int fillBook(FabricClientCommandSource source, IntStream characterGenerator, int limit) throws CommandSyntaxException {
-        ClientPlayerEntity player = source.getPlayer();
+        LocalPlayer player = source.getPlayer();
         assert player != null;
 
-        ItemStack heldItem = player.getMainHandStack();
-        Hand hand = Hand.MAIN_HAND;
+        ItemStack heldItem = player.getMainHandItem();
+        InteractionHand hand = InteractionHand.MAIN_HAND;
         if (heldItem.getItem() != Items.WRITABLE_BOOK) {
-            heldItem = player.getOffHandStack();
-            hand = Hand.OFF_HAND;
+            heldItem = player.getOffhandItem();
+            hand = InteractionHand.OFF_HAND;
             if (heldItem.getItem() != Items.WRITABLE_BOOK) {
                 throw NO_BOOK.create();
             }
         }
-        int slot = hand == Hand.MAIN_HAND ? player.getInventory().selectedSlot : PlayerInventory.OFF_HAND_SLOT;
+        int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : Inventory.SLOT_OFFHAND;
 
         String joinedPages = characterGenerator.limit(MAX_LIMIT * 210).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
 
         List<String> pages = new ArrayList<>(limit);
-        NbtList pagesNbt = new NbtList();
+        ListTag pagesNbt = new ListTag();
 
         for (int pageIndex = 0; pageIndex < limit; pageIndex++) {
             String page = joinedPages.substring(pageIndex * 210, (pageIndex + 1) * 210);
             pages.add(page);
-            pagesNbt.add(NbtString.of(page));
+            pagesNbt.add(StringTag.valueOf(page));
         }
 
-        heldItem.setSubNbt("pages", pagesNbt);
-        player.networkHandler.sendPacket(new BookUpdateC2SPacket(slot, pages, Optional.empty()));
+        heldItem.addTagElement("pages", pagesNbt);
+        player.connection.send(new ServerboundEditBookPacket(slot, pages, Optional.empty()));
 
-        source.sendFeedback(Text.translatable("commands.cbook.success"));
+        source.sendFeedback(Component.translatable("commands.cbook.success"));
 
         return Command.SINGLE_SUCCESS;
     }

@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
-import net.minecraft.client.session.ProfileKeysImpl;
-import net.minecraft.network.encryption.PlayerKeyPair;
+import net.minecraft.client.multiplayer.AccountProfileKeyPairManager;
+import net.minecraft.world.entity.player.ProfileKeyPair;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -10,12 +10,12 @@ import java.security.PrivateKey;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(ProfileKeysImpl.class)
+@Mixin(AccountProfileKeyPairManager.class)
 public class MixinProfileKeysImpl implements IHasPrivateKey {
-    @Shadow private CompletableFuture<Optional<PlayerKeyPair>> keyFuture;
+    @Shadow private CompletableFuture<Optional<ProfileKeyPair>> keyPair;
 
     @Override
     public Optional<PrivateKey> getPrivateKey() {
-        return this.keyFuture.join().map(PlayerKeyPair::privateKey);
+        return this.keyPair.join().map(ProfileKeyPair::privateKey);
     }
 }

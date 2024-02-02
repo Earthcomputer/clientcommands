@@ -7,36 +7,36 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.PluginsCommand;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientCommonNetworkHandler;
-import net.minecraft.client.network.ClientConnectionState;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.NbtQueryResponseS2CPacket;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.CommonListenerCookie;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
+import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
+import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ClientPlayNetworkHandler.class)
-public abstract class MixinClientPlayNetworkHandler extends ClientCommonNetworkHandler implements ClientcommandsDataQueryHandler.IClientPlayNetworkHandler {
+@Mixin(ClientPacketListener.class)
+public abstract class MixinClientPlayNetworkHandler extends ClientCommonPacketListenerImpl implements ClientcommandsDataQueryHandler.IClientPlayNetworkHandler {
     @Unique
-    private final ClientcommandsDataQueryHandler ccDataQueryHandler = new ClientcommandsDataQueryHandler((ClientPlayNetworkHandler) (Object) this);
+    private final ClientcommandsDataQueryHandler ccDataQueryHandler = new ClientcommandsDataQueryHandler((ClientPacketListener) (Object) this);
 
-    protected MixinClientPlayNetworkHandler(MinecraftClient client, ClientConnection connection, ClientConnectionState connectionState) {
+    protected MixinClientPlayNetworkHandler(Minecraft client, Connection connection, CommonListenerCookie connectionState) {
         super(client, connection, connectionState);
     }
 
-    @Inject(method = "onEntitySpawn", at = @At("TAIL"))
-    public void onOnEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci) {
-        ClientPlayerEntity player = client.player;
+    @Inject(method = "handleAddEntity", at = @At("TAIL"))
+    public void onOnEntitySpawn(ClientboundAddEntityPacket packet, CallbackInfo ci) {
+        LocalPlayer player = minecraft.player;
         if (player == null) {
             return;
         }
@@ -44,29 +44,29 @@ public abstract class MixinClientPlayNetworkHandler extends ClientCommonNetworkH
         SeedCracker.onEntityCreation(packet);
 
         if (FishingCracker.canManipulateFishing()) {
-            if (packet.getEntityData() == player.getId() && packet.getEntityType() == EntityType.FISHING_BOBBER) {
-                FishingCracker.processBobberSpawn(packet.getUuid(), new Vec3d(packet.getX(), packet.getY(), packet.getZ()), new Vec3d(packet.getVelocityX(), packet.getVelocityY(), packet.getVelocityZ()));
+            if (packet.getData() == player.getId() && packet.getType() == EntityType.FISHING_BOBBER) {
+                FishingCracker.processBobberSpawn(packet.getUUID(), new Vec3(packet.getX(), packet.getY(), packet.getZ()), new Vec3(packet.getXa(), packet.getYa(), packet.getZa()));
             }
         }
     }
 
-    @Inject(method = "onEntitySpawn", at = @At("HEAD"))
-    public void onOnEntitySpawnPre(EntitySpawnS2CPacket packet, CallbackInfo ci) {
+    @Inject(method = "handleAddEntity", at = @At("HEAD"))
+    public void onOnEntitySpawnPre(ClientboundAddEntityPacket packet, CallbackInfo ci) {
         // Called on network thread first, FishingCracker.waitingForFishingRod
 
-        ClientPlayerEntity player = client.player;
+        LocalPlayer player = minecraft.player;
         if (player == null) {
             return;
         }
 
-        if (!FishingCracker.canManipulateFishing() || packet.getEntityData() != player.getId() || packet.getEntityType() != EntityType.FISHING_BOBBER) {
+        if (!FishingCracker.canManipulateFishing() || packet.getData() != player.getId() || packet.getType() != EntityType.FISHING_BOBBER) {
             return;
         }
 
         FishingCracker.onFishingBobberEntity();
     }
 
-    @Inject(method = "sendChatCommand", at = @At("HEAD"))
+    @Inject(method = "sendCommand", at = @At("HEAD"))
     private void onSendChatCommand(String command, CallbackInfo ci) {
         StringReader reader = new StringReader(command);
         String commandName = reader.canRead() ? reader.readUnquotedString() : "";
@@ -75,23 +75,23 @@ public abstract class MixinClientPlayNetworkHandler extends ClientCommonNetworkH
         }
     }
 
-    @Inject(method = "onExperienceOrbSpawn", at = @At("TAIL"))
-    public void onOnExperienceOrbSpawn(ExperienceOrbSpawnS2CPacket packet, CallbackInfo ci) {
+    @Inject(method = "handleAddExperienceOrb", at = @At("TAIL"))
+    public void onOnExperienceOrbSpawn(ClientboundAddExperienceOrbPacket packet, CallbackInfo ci) {
         if (FishingCracker.canManipulateFishing()) {
-            FishingCracker.processExperienceOrbSpawn(packet.getX(), packet.getY(), packet.getZ(), packet.getExperience());
+            FishingCracker.processExperienceOrbSpawn(packet.getX(), packet.getY(), packet.getZ(), packet.getValue());
         }
     }
 
-    @Inject(method = "onWorldTimeUpdate", at = @At("HEAD"))
+    @Inject(method = "handleSetTime", at = @At("HEAD"))
     private void onOnWorldTimeUpdatePre(CallbackInfo ci) {
-        if (Configs.getFishingManipulation().isEnabled() && !MinecraftClient.getInstance().isOnThread()) {
+        if (Configs.getFishingManipulation().isEnabled() && !Minecraft.getInstance().isSameThread()) {
             FishingCracker.onTimeSync();
         }
     }
 
-    @Inject(method = "onNbtQueryResponse", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER), cancellable = true)
-    private void onOnNbtQueryResponse(NbtQueryResponseS2CPacket packet, CallbackInfo ci) {
-        if (ccDataQueryHandler.handleQueryResponse(packet.getTransactionId(), packet.getNbt())) {
+    @Inject(method = "handleTagQueryPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V", shift = At.Shift.AFTER), cancellable = true)
+    private void onOnNbtQueryResponse(ClientboundTagQueryPacket packet, CallbackInfo ci) {
+        if (ccDataQueryHandler.handleQueryResponse(packet.getTransactionId(), packet.getTag())) {
             ci.cancel();
         }
     }
@@ -101,8 +101,8 @@ public abstract class MixinClientPlayNetworkHandler extends ClientCommonNetworkH
         return ccDataQueryHandler;
     }
 
-    @Inject(method = "onCommandSuggestions", at = @At("TAIL"))
-    private void onCommandSuggestions(CommandSuggestionsS2CPacket packet, CallbackInfo ci) {
+    @Inject(method = "handleCommandSuggestions", at = @At("TAIL"))
+    private void onCommandSuggestions(ClientboundCommandSuggestionsPacket packet, CallbackInfo ci) {
         PluginsCommand.onCommandSuggestions(packet);
     }
 }

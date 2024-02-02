@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.c2c;
 
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 public interface C2CPacket {
-    void write(PacketByteBuf buf);
+    void write(FriendlyByteBuf buf);
 
     void apply(CCPacketListener listener);
 }

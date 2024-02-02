@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,7 +14,7 @@ import java.util.regex.PatternSyntaxException;
 
 public class RegexArgumentType implements ArgumentType<Pattern> {
 
-    private static final DynamicCommandExceptionType EXPECTED_REGEX_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.client.expectedRegex", arg));
+    private static final DynamicCommandExceptionType EXPECTED_REGEX_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.client.expectedRegex", arg));
 
     private final RegexType type;
 

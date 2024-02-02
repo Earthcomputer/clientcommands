@@ -10,43 +10,43 @@ import net.earthcomputer.clientcommands.mixin.ScreenHandlerAccessor;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.ChestType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,17 +56,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static dev.xpple.clientarguments.arguments.CItemPredicateArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemPredicateArgumentType.itemPredicate;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.getWithString;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.withString;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class FindItemCommand {
     private static final Flag<Boolean> FLAG_NO_SEARCH_SHULKER_BOX = Flag.ofFlag("no-search-shulker-box").withShortName('s').build();
     private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
     @SuppressWarnings("unchecked")
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
         var cfinditem = dispatcher.register(literal("cfinditem")
             .then(argument("item", withString(itemPredicate(registryAccess)))
                 .executes(ctx ->
@@ -81,20 +83,20 @@ public class FindItemCommand {
     private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, Predicate<ItemStack>> item) {
         String taskName = TaskManager.addTask("cfinditem", makeFindItemsTask(item.getLeft(), item.getRight(), !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
-            ctx.getSource().sendFeedback(Text.translatable("commands.cfinditem.starting.keepSearching", item.getLeft())
+            ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting.keepSearching", item.getLeft())
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
         } else {
-            ctx.getSource().sendFeedback(Text.translatable("commands.cfinditem.starting", item.getLeft()));
+            ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting", item.getLeft()));
         }
 
         return Command.SINGLE_SUCCESS;
     }
 
     private static SimpleTask makeFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
-        if (player.hasPermissionLevel(2)) {
+        if (player.hasPermissions(2)) {
             return new NbtQueryFindItemsTask(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
         } else {
             return new ClickInventoriesFindItemsTask(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
@@ -116,18 +118,18 @@ public class FindItemCommand {
             this.keepSearching = keepSearching;
         }
 
-        protected int countItems(NbtList inventory) {
+        protected int countItems(ListTag inventory) {
             int result = 0;
             for (int i = 0; i < inventory.size(); i++) {
-                NbtCompound compound = inventory.getCompound(i);
-                ItemStack stack = ItemStack.fromNbt(compound);
+                CompoundTag compound = inventory.getCompound(i);
+                ItemStack stack = ItemStack.of(compound);
                 if (searchingFor.test(stack)) {
                     result += stack.getCount();
                 }
                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem block && block.getBlock() instanceof ShulkerBoxBlock) {
-                    NbtCompound blockEntityNbt = BlockItem.getBlockEntityNbt(stack);
-                    if (blockEntityNbt != null && blockEntityNbt.contains("Items", NbtElement.LIST_TYPE)) {
-                        result += countItems(blockEntityNbt.getList("Items", NbtElement.COMPOUND_TYPE));
+                    CompoundTag blockEntityNbt = BlockItem.getBlockEntityData(stack);
+                    if (blockEntityNbt != null && blockEntityNbt.contains("Items", Tag.TAG_LIST)) {
+                        result += countItems(blockEntityNbt.getList("Items", Tag.TAG_COMPOUND));
                     }
                 }
             }
@@ -135,16 +137,16 @@ public class FindItemCommand {
         }
 
         protected void printLocation(BlockPos pos, int count) {
-            sendFeedback(Text.translatable("commands.cfinditem.match.left", count, searchingForName)
+            sendFeedback(Component.translatable("commands.cfinditem.match.left", count, searchingForName)
                 .append(getLookCoordsTextComponent(pos))
                 .append(" ")
-                .append(getGlowCoordsTextComponent(Text.translatable("commands.cfindblock.success.glow"), pos))
-                .append(Text.translatable("commands.cfinditem.match.right", count, searchingForName)));
+                .append(getGlowCoordsTextComponent(Component.translatable("commands.cfindblock.success.glow"), pos))
+                .append(Component.translatable("commands.cfinditem.match.right", count, searchingForName)));
         }
 
         @Override
         public void onCompleted() {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("commands.cfinditem.total", totalFound, searchingForName).formatted(Formatting.BOLD));
+            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.cfinditem.total", totalFound, searchingForName).withStyle(ChatFormatting.BOLD));
         }
     }
 
@@ -165,32 +167,32 @@ public class FindItemCommand {
 
         @Override
         protected void onTick() {
-            Entity entity = MinecraftClient.getInstance().cameraEntity;
+            Entity entity = Minecraft.getInstance().cameraEntity;
             if (entity == null) {
                 _break();
                 return;
             }
-            World world = MinecraftClient.getInstance().world;
+            Level world = Minecraft.getInstance().level;
             assert world != null;
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+            LocalPlayer player = Minecraft.getInstance().player;
             assert player != null;
-            ClientPlayerInteractionManager interactionManager = MinecraftClient.getInstance().interactionManager;
+            MultiPlayerGameMode interactionManager = Minecraft.getInstance().gameMode;
             assert interactionManager != null;
             if (currentlySearchingTimeout > 0) {
                 currentlySearchingTimeout--;
                 return;
             }
-            if (player.isSneaking()) {
+            if (player.isShiftKeyDown()) {
                 return;
             }
-            Vec3d origin = entity.getCameraPosVec(0);
-            float reachDistance = interactionManager.getReachDistance();
-            int minX = MathHelper.floor(origin.x - reachDistance);
-            int minY = MathHelper.floor(origin.y - reachDistance);
-            int minZ = MathHelper.floor(origin.z - reachDistance);
-            int maxX = MathHelper.floor(origin.x + reachDistance);
-            int maxY = MathHelper.floor(origin.y + reachDistance);
-            int maxZ = MathHelper.floor(origin.z + reachDistance);
+            Vec3 origin = entity.getEyePosition(0);
+            float reachDistance = interactionManager.getPickRange();
+            int minX = Mth.floor(origin.x - reachDistance);
+            int minY = Mth.floor(origin.y - reachDistance);
+            int minZ = Mth.floor(origin.z - reachDistance);
+            int maxX = Mth.floor(origin.x + reachDistance);
+            int maxY = Mth.floor(origin.y + reachDistance);
+            int maxZ = Mth.floor(origin.z + reachDistance);
             for (int x = minX; x <= maxX; x++) {
                 for (int y = minY; y <= maxY; y++) {
                     for (int z = minZ; z <= maxZ; z++) {
@@ -202,8 +204,8 @@ public class FindItemCommand {
                             continue;
                         }
                         BlockState state = world.getBlockState(pos);
-                        Vec3d closestPos = MathUtil.getClosestPoint(pos, state.getOutlineShape(world, pos), origin);
-                        if (closestPos.squaredDistanceTo(origin) > reachDistance * reachDistance) {
+                        Vec3 closestPos = MathUtil.getClosestPoint(pos, state.getShape(world, pos), origin);
+                        if (closestPos.distanceToSqr(origin) > reachDistance * reachDistance) {
                             continue;
                         }
                         searchedBlocks.add(pos);
@@ -212,8 +214,8 @@ public class FindItemCommand {
                                 continue;
                             }
                             hasSearchedEnderChest = true;
-                        } else if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
-                            BlockPos offsetPos = pos.offset(ChestBlock.getFacing(state));
+                        } else if (state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
+                            BlockPos offsetPos = pos.relative(ChestBlock.getConnectedDirection(state));
                             if (world.getBlockState(offsetPos).getBlock() == state.getBlock()) {
                                 searchedBlocks.add(offsetPos);
                             }
@@ -229,55 +231,55 @@ public class FindItemCommand {
             }
         }
 
-        private boolean canSearch(World world, BlockPos pos) {
+        private boolean canSearch(Level world, BlockPos pos) {
             BlockState state = world.getBlockState(pos);
             BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (!(blockEntity instanceof Inventory) && state.getBlock() != Blocks.ENDER_CHEST) {
+            if (!(blockEntity instanceof Container) && state.getBlock() != Blocks.ENDER_CHEST) {
                 return false;
             }
             if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
-                if (ChestBlock.isChestBlocked(world, pos)) {
+                if (ChestBlock.isChestBlockedAt(world, pos)) {
                     return false;
                 }
-                if (state.getBlock() instanceof ChestBlock && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
-                    BlockPos offsetPos = pos.offset(ChestBlock.getFacing(state));
-                    return world.getBlockState(offsetPos).getBlock() != state.getBlock() || !ChestBlock.isChestBlocked(world, offsetPos);
+                if (state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
+                    BlockPos offsetPos = pos.relative(ChestBlock.getConnectedDirection(state));
+                    return world.getBlockState(offsetPos).getBlock() != state.getBlock() || !ChestBlock.isChestBlockedAt(world, offsetPos);
                 }
             }
             return true;
         }
 
-        private void startSearch(BlockPos pos, Vec3d cameraPos, Vec3d clickPos) {
-            MinecraftClient mc = MinecraftClient.getInstance();
+        private void startSearch(BlockPos pos, Vec3 cameraPos, Vec3 clickPos) {
+            Minecraft mc = Minecraft.getInstance();
             currentlySearching = pos;
             currentlySearchingTimeout = 100;
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
                 public boolean accept(Screen screen) {
-                    if (!(screen instanceof ScreenHandlerProvider<?> handlerProvider)) {
+                    if (!(screen instanceof MenuAccess<?> handlerProvider)) {
                         return true;
                     }
                     assert mc.player != null;
-                    ScreenHandler container = handlerProvider.getScreenHandler();
+                    AbstractContainerMenu container = handlerProvider.getMenu();
                     Set<Integer> playerInvSlots = new HashSet<>();
                     for (Slot slot : container.slots) {
-                        if (slot.inventory instanceof PlayerInventory) {
-                            playerInvSlots.add(slot.id);
+                        if (slot.container instanceof Inventory) {
+                            playerInvSlots.add(slot.index);
                         }
                     }
-                    mc.player.currentScreenHandler = new ScreenHandler(((ScreenHandlerAccessor) container).getNullableType(), container.syncId) {
+                    mc.player.containerMenu = new AbstractContainerMenu(((ScreenHandlerAccessor) container).getNullableType(), container.containerId) {
                         @Override
-                        public boolean canUse(PlayerEntity var1) {
+                        public boolean stillValid(Player var1) {
                             return true;
                         }
 
                         @Override
-                        public ItemStack quickMove(PlayerEntity player, int index) {
+                        public ItemStack quickMoveStack(Player player, int index) {
                             return ItemStack.EMPTY;
                         }
 
                         @Override
-                        public void updateSlotStacks(int revision, List<ItemStack> stacks, ItemStack cursorStack) {
+                        public void initializeContents(int revision, List<ItemStack> stacks, ItemStack cursorStack) {
                             int matchingItems = 0;
                             for (int slot = 0; slot < stacks.size(); slot++) {
                                 if (playerInvSlots.contains(slot)) {
@@ -288,9 +290,9 @@ public class FindItemCommand {
                                     matchingItems += stack.getCount();
                                 }
                                 if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    NbtCompound blockEntityTag = BlockItem.getBlockEntityNbt(stack);
-                                    if (blockEntityTag != null && blockEntityTag.contains("Items", NbtElement.LIST_TYPE)) {
-                                        matchingItems += countItems(blockEntityTag.getList("Items", NbtElement.COMPOUND_TYPE));
+                                    CompoundTag blockEntityTag = BlockItem.getBlockEntityData(stack);
+                                    if (blockEntityTag != null && blockEntityTag.contains("Items", Tag.TAG_LIST)) {
+                                        matchingItems += countItems(blockEntityTag.getList("Items", Tag.TAG_COMPOUND));
                                     }
                                 }
                             }
@@ -300,16 +302,16 @@ public class FindItemCommand {
                             }
                             currentlySearching = null;
                             currentlySearchingTimeout = 0;
-                            mc.player.closeHandledScreen();
+                            mc.player.closeContainer();
                         }
                     };
                     return false;
                 }
             });
-            assert mc.interactionManager != null;
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND,
+            assert mc.gameMode != null;
+            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND,
                     new BlockHitResult(clickPos,
-                            Direction.getFacing((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
+                            Direction.getNearest((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
                             pos, false));
         }
     }
@@ -321,7 +323,7 @@ public class FindItemCommand {
 
         private final Set<BlockPos> searchedBlocks = new HashSet<>();
         private boolean isScanning = true;
-        private Iterator<BlockPos.Mutable> scanningIterator;
+        private Iterator<BlockPos.MutableBlockPos> scanningIterator;
         private final Set<BlockPos> waitingOnBlocks = new HashSet<>();
         private int currentlySearchingTimeout;
         @Nullable
@@ -341,19 +343,19 @@ public class FindItemCommand {
 
         @Override
         protected void onTick() {
-            Entity cameraEntity = MinecraftClient.getInstance().cameraEntity;
+            Entity cameraEntity = Minecraft.getInstance().cameraEntity;
             if (cameraEntity == null) {
                 _break();
                 return;
             }
-            ClientWorld world = MinecraftClient.getInstance().world;
+            ClientLevel world = Minecraft.getInstance().level;
             assert world != null;
 
             if (isScanning) {
                 long startTime = System.nanoTime();
                 if (scanningIterator == null) {
-                    Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
-                    scanningIterator = BlockPos.iterateInSquare(new BlockPos(MathHelper.floor(cameraPos.x) >> 4, 0, MathHelper.floor(cameraPos.z) >> 4), MinecraftClient.getInstance().options.getViewDistance().getValue(), Direction.EAST, Direction.SOUTH).iterator();
+                    Vec3 cameraPos = cameraEntity.getEyePosition(0);
+                    scanningIterator = BlockPos.spiralAround(new BlockPos(Mth.floor(cameraPos.x) >> 4, 0, Mth.floor(cameraPos.z) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator();
                 }
                 while (scanningIterator.hasNext()) {
                     BlockPos chunkPosAsBlockPos = scanningIterator.next();
@@ -387,19 +389,19 @@ public class FindItemCommand {
         }
 
         private void scanChunk(ChunkPos chunkToScan, Entity cameraEntity) {
-            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+            LocalPlayer player = Minecraft.getInstance().player;
             assert player != null;
-            ClientWorld world = MinecraftClient.getInstance().world;
+            ClientLevel world = Minecraft.getInstance().level;
             assert world != null;
-            ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+            ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
             assert networkHandler != null;
 
             // check if we can possibly find a closer ender chest
             if (enderChestPosition != null && numItemsInEnderChest != null && !hasPrintedEnderChest) {
-                Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
-                double enderChestDistanceSq = enderChestPosition.getSquaredDistance(cameraPos);
-                int cameraChunkX = MathHelper.floor(cameraPos.x) >> 4;
-                int cameraChunkZ = MathHelper.floor(cameraPos.z) >> 4;
+                Vec3 cameraPos = cameraEntity.getEyePosition(0);
+                double enderChestDistanceSq = enderChestPosition.distToCenterSqr(cameraPos);
+                int cameraChunkX = Mth.floor(cameraPos.x) >> 4;
+                int cameraChunkZ = Mth.floor(cameraPos.z) >> 4;
                 int currentChunkRadius = Math.max(Math.abs(cameraChunkX - chunkToScan.x), Math.abs(cameraChunkZ - chunkToScan.z));
                 double closestPossibleDistance = ((currentChunkRadius - 1) << 4) + Math.min(
                     Math.min(cameraPos.x - (cameraChunkX << 4), cameraPos.z - (cameraChunkZ << 4)),
@@ -412,53 +414,53 @@ public class FindItemCommand {
                 }
             }
 
-            WorldChunk chunk = world.getChunk(chunkToScan.x, chunkToScan.z);
+            LevelChunk chunk = world.getChunk(chunkToScan.x, chunkToScan.z);
 
-            int minSection = chunk.getBottomSectionCoord();
-            int maxSection = chunk.getTopSectionCoord();
+            int minSection = chunk.getMinSection();
+            int maxSection = chunk.getMaxSection();
             for (int sectionY = minSection; sectionY < maxSection; sectionY++) {
-                if (!chunk.getSection(chunk.sectionCoordToIndex(sectionY)).hasAny(state -> state.isOf(Blocks.ENDER_CHEST) || state.hasBlockEntity())) {
+                if (!chunk.getSection(chunk.getSectionIndexFromSectionY(sectionY)).maybeHas(state -> state.is(Blocks.ENDER_CHEST) || state.hasBlockEntity())) {
                     continue;
                 }
 
-                for (BlockPos pos : BlockPos.iterate(chunkToScan.getStartX(), sectionY << 4, chunkToScan.getStartZ(), chunkToScan.getEndX(), (sectionY << 4) + 15, chunkToScan.getEndZ())) {
+                for (BlockPos pos : BlockPos.betweenClosed(chunkToScan.getMinBlockX(), sectionY << 4, chunkToScan.getMinBlockZ(), chunkToScan.getMaxBlockX(), (sectionY << 4) + 15, chunkToScan.getMaxBlockZ())) {
                     if (searchedBlocks.contains(pos)) {
                         continue;
                     }
                     BlockState state = chunk.getBlockState(pos);
 
-                    if (state.isOf(Blocks.ENDER_CHEST)) {
-                        BlockPos currentPos = pos.toImmutable();
+                    if (state.is(Blocks.ENDER_CHEST)) {
+                        BlockPos currentPos = pos.immutable();
                         searchedBlocks.add(currentPos);
                         if (enderChestPosition == null) {
                             enderChestPosition = currentPos;
                             currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
                             ClientcommandsDataQueryHandler.get(networkHandler).queryEntityNbt(player.getId(), playerNbt -> {
                                 int numItemsInEnderChest = 0;
-                                if (playerNbt != null && playerNbt.contains("EnderItems", NbtElement.LIST_TYPE)) {
-                                    numItemsInEnderChest = countItems(playerNbt.getList("EnderItems", NbtElement.COMPOUND_TYPE));
+                                if (playerNbt != null && playerNbt.contains("EnderItems", Tag.TAG_LIST)) {
+                                    numItemsInEnderChest = countItems(playerNbt.getList("EnderItems", Tag.TAG_COMPOUND));
                                 }
                                 this.numItemsInEnderChest = numItemsInEnderChest;
                                 totalFound += numItemsInEnderChest;
                                 currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
                             });
                         } else if (!hasPrintedEnderChest) {
-                            Vec3d cameraPos = cameraEntity.getCameraPosVec(0);
-                            double currentDistanceSq = enderChestPosition.getSquaredDistance(cameraPos);
-                            double newDistanceSq = currentPos.getSquaredDistance(cameraPos);
+                            Vec3 cameraPos = cameraEntity.getEyePosition(0);
+                            double currentDistanceSq = enderChestPosition.distToCenterSqr(cameraPos);
+                            double newDistanceSq = currentPos.distToCenterSqr(cameraPos);
                             if (newDistanceSq < currentDistanceSq) {
                                 enderChestPosition = currentPos;
                             }
                         }
-                    } else if (chunk.getBlockEntity(pos) instanceof Inventory) {
-                        BlockPos currentPos = pos.toImmutable();
+                    } else if (chunk.getBlockEntity(pos) instanceof Container) {
+                        BlockPos currentPos = pos.immutable();
                         searchedBlocks.add(currentPos);
                         waitingOnBlocks.add(currentPos);
                         currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
                         ClientcommandsDataQueryHandler.get(networkHandler).queryBlockNbt(currentPos, blockNbt -> {
                             waitingOnBlocks.remove(currentPos);
-                            if (blockNbt != null && blockNbt.contains("Items", NbtElement.LIST_TYPE)) {
-                                int count = countItems(blockNbt.getList("Items", NbtElement.COMPOUND_TYPE));
+                            if (blockNbt != null && blockNbt.contains("Items", Tag.TAG_LIST)) {
+                                int count = countItems(blockNbt.getList("Items", Tag.TAG_COMPOUND));
                                 if (count > 0) {
                                     totalFound += count;
                                     printLocation(currentPos, count);

@@ -5,11 +5,14 @@ import com.mojang.brigadier.context.CommandContext;
 import net.earthcomputer.clientcommands.interfaces.IClientCommandSource;
 import net.earthcomputer.clientcommands.mixin.InGameHudAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 
 public class ClientCommandHelper {
 
@@ -25,58 +28,58 @@ public class ClientCommandHelper {
         return (FabricClientCommandSource) ((IClientCommandSource) source).clientcommands_withFlag(flag, value);
     }
 
-    public static void sendError(Text error) {
-        sendFeedback(Text.literal("").append(error).formatted(Formatting.RED));
+    public static void sendError(Component error) {
+        sendFeedback(Component.literal("").append(error).withStyle(ChatFormatting.RED));
     }
 
-    public static void sendHelp(Text help) {
-        sendFeedback(Text.literal("").append(help).formatted(Formatting.AQUA));
+    public static void sendHelp(Component help) {
+        sendFeedback(Component.literal("").append(help).withStyle(ChatFormatting.AQUA));
     }
 
     public static void sendFeedback(@Translatable String message, Object... args) {
-        sendFeedback(Text.translatable(message, args));
+        sendFeedback(Component.translatable(message, args));
     }
 
-    public static void sendFeedback(Text message) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message);
+    public static void sendFeedback(Component message) {
+        Minecraft.getInstance().gui.getChat().addMessage(message);
     }
 
     public static void sendRequiresRestart() {
-        sendFeedback(Text.translatable("commands.client.requiresRestart").formatted(Formatting.YELLOW));
+        sendFeedback(Component.translatable("commands.client.requiresRestart").withStyle(ChatFormatting.YELLOW));
     }
 
-    public static void addOverlayMessage(Text message, int time) {
-        InGameHud inGameHud = MinecraftClient.getInstance().inGameHud;
+    public static void addOverlayMessage(Component message, int time) {
+        Gui inGameHud = Minecraft.getInstance().gui;
         inGameHud.setOverlayMessage(message, false);
         ((InGameHudAccessor) inGameHud).setOverlayRemaining(time);
     }
 
-    public static Text getLookCoordsTextComponent(BlockPos pos) {
-        return getCommandTextComponent(Text.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
+    public static Component getLookCoordsTextComponent(BlockPos pos) {
+        return getCommandTextComponent(Component.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
                 String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Text getLookCoordsTextComponent(MutableText translatableText, BlockPos pos) {
+    public static Component getLookCoordsTextComponent(MutableComponent translatableText, BlockPos pos) {
         return getCommandTextComponent(translatableText, String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Text getGlowCoordsTextComponent(BlockPos pos) {
-        return getCommandTextComponent(Text.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
+    public static Component getGlowCoordsTextComponent(BlockPos pos) {
+        return getCommandTextComponent(Component.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
                 String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Text getGlowCoordsTextComponent(MutableText translatableText, BlockPos pos) {
+    public static Component getGlowCoordsTextComponent(MutableComponent translatableText, BlockPos pos) {
         return getCommandTextComponent(translatableText, String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Text getCommandTextComponent(@Translatable String translationKey, String command) {
-        return getCommandTextComponent(Text.translatable(translationKey), command);
+    public static Component getCommandTextComponent(@Translatable String translationKey, String command) {
+        return getCommandTextComponent(Component.translatable(translationKey), command);
     }
 
-    public static Text getCommandTextComponent(MutableText translatableText, String command) {
-        return translatableText.styled(style -> style.withFormatting(Formatting.UNDERLINE)
+    public static Component getCommandTextComponent(MutableComponent translatableText, String command) {
+        return translatableText.withStyle(style -> style.applyFormat(ChatFormatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(command))));
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(command))));
     }
 
 }

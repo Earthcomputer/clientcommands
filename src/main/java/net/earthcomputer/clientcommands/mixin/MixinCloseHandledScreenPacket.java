@@ -2,50 +2,50 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.screen.BeaconScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(CloseHandledScreenC2SPacket.class)
+@Mixin(ServerboundContainerClosePacket.class)
 public class MixinCloseHandledScreenPacket {
 
     @Inject(method = "<init>(I)V", at = @At("RETURN"))
     public void onCreate(int syncId, CallbackInfo ci) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
 
-        PlayerInventory playerInv = player.getInventory();
-        ScreenHandler screenHandler = player.currentScreenHandler;
+        Inventory playerInv = player.getInventory();
+        AbstractContainerMenu screenHandler = player.containerMenu;
 
-        if (!screenHandler.getCursorStack().isEmpty()) {
+        if (!screenHandler.getCarried().isEmpty()) {
             PlayerRandCracker.onDropItem();
         }
 
         if (screenHandler instanceof IDroppableInventoryContainer) {
-            int[] itemCounts = playerInv.main.stream().mapToInt(ItemStack::getCount).toArray();
-            ItemStack[] itemStacks = playerInv.main.toArray(new ItemStack[0]);
-            Inventory toDrop = ((IDroppableInventoryContainer) screenHandler).getDroppableInventory();
-            for (int fromSlot = 0; fromSlot < toDrop.size(); fromSlot++) {
-                ItemStack stack = toDrop.getStack(fromSlot);
+            int[] itemCounts = playerInv.items.stream().mapToInt(ItemStack::getCount).toArray();
+            ItemStack[] itemStacks = playerInv.items.toArray(new ItemStack[0]);
+            Container toDrop = ((IDroppableInventoryContainer) screenHandler).getDroppableInventory();
+            for (int fromSlot = 0; fromSlot < toDrop.getContainerSize(); fromSlot++) {
+                ItemStack stack = toDrop.getItem(fromSlot);
                 int stackSize = stack.getCount();
                 for (int toSlot = 0; toSlot < itemCounts.length && stackSize > 0; toSlot++) {
                     if (itemCounts[toSlot] == 0) {
-                        itemCounts[toSlot] = Math.min(stackSize, stack.getMaxCount());
+                        itemCounts[toSlot] = Math.min(stackSize, stack.getMaxStackSize());
                         itemStacks[toSlot] = stack;
-                        stackSize -= stack.getMaxCount();
-                    } else if (ItemStack.canCombine(itemStacks[toSlot], stack)) {
-                        stackSize -= stack.getMaxCount() - itemCounts[toSlot];
-                        itemCounts[toSlot] = Math.min(itemCounts[toSlot] + stackSize, stack.getMaxCount());
+                        stackSize -= stack.getMaxStackSize();
+                    } else if (ItemStack.isSameItemSameTags(itemStacks[toSlot], stack)) {
+                        stackSize -= stack.getMaxStackSize() - itemCounts[toSlot];
+                        itemCounts[toSlot] = Math.min(itemCounts[toSlot] + stackSize, stack.getMaxStackSize());
                     }
                 }
                 if (stackSize > 0) {
@@ -54,9 +54,9 @@ public class MixinCloseHandledScreenPacket {
             }
         }
 
-        if (screenHandler instanceof BeaconScreenHandler) {
+        if (screenHandler instanceof BeaconMenu) {
             Slot paymentSlot = screenHandler.getSlot(0);
-            if (paymentSlot.getStack().getCount() > paymentSlot.getMaxItemCount()) {
+            if (paymentSlot.getItem().getCount() > paymentSlot.getMaxStackSize()) {
                 PlayerRandCracker.onDropItem();
             }
         }
