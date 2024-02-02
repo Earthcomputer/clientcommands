@@ -16,11 +16,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getFlag;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class UsageTreeCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.help.failed"));

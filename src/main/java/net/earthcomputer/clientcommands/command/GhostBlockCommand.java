@@ -16,12 +16,9 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import java.util.function.Predicate;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CBlockPredicateArgumentType.blockPredicate;
-import static dev.xpple.clientarguments.arguments.CBlockPredicateArgumentType.getCBlockPredicate;
-import static dev.xpple.clientarguments.arguments.CBlockStateArgumentType.blockState;
-import static dev.xpple.clientarguments.arguments.CBlockStateArgumentType.getCBlockState;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CBlockPredicateArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockStateArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GhostBlockCommand {
 

@@ -5,13 +5,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static dev.xpple.clientarguments.arguments.CTextArgumentType.getCTextArgument;
-import static dev.xpple.clientarguments.arguments.CTextArgumentType.text;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.sendFeedback;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CTextArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTitleCommand {
 

@@ -9,11 +9,9 @@ import net.minecraft.world.item.TooltipFlag;
 
 import java.util.List;
 
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.getCItemStackArgument;
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.itemStack;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getFlag;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TooltipCommand {
 

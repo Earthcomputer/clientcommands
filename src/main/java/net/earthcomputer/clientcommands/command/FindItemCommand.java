@@ -56,12 +56,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static dev.xpple.clientarguments.arguments.CItemPredicateArgumentType.itemPredicate;
+import static dev.xpple.clientarguments.arguments.CItemPredicateArgumentType.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.getWithString;
-import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.withString;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindItemCommand {
     private static final Flag<Boolean> FLAG_NO_SEARCH_SHULKER_BOX = Flag.ofFlag("no-search-shulker-box").withShortName('s').build();

@@ -11,10 +11,8 @@ import net.minecraft.network.chat.HoverEvent;
 
 import java.util.UUID;
 
-import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.entityUuid;
-import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.getEntityUuid;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class UuidCommand {
 

@@ -5,8 +5,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.sendFeedback;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class ChatCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

@@ -12,16 +12,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
-import static com.mojang.brigadier.arguments.FloatArgumentType.floatArg;
-import static com.mojang.brigadier.arguments.FloatArgumentType.getFloat;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static dev.xpple.clientarguments.arguments.CParticleEffectArgumentType.getCParticle;
-import static dev.xpple.clientarguments.arguments.CParticleEffectArgumentType.particleEffect;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.getCVec3;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.vec3;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.FloatArgumentType.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CParticleEffectArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CParticleCommand {
 

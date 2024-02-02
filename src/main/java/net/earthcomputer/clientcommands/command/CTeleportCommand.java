@@ -12,10 +12,8 @@ import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 
 import java.util.UUID;
 
-import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.entityUuid;
-import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.getEntityUuid;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTeleportCommand {
     private static final SimpleCommandExceptionType NOT_SPECTATOR_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctp.notSpectator"));

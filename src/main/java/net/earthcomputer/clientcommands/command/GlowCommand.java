@@ -21,19 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.blockPos;
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.getCBlockPos;
-import static dev.xpple.clientarguments.arguments.CColorArgumentType.color;
-import static dev.xpple.clientarguments.arguments.CColorArgumentType.getCColor;
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.entities;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getCommandTextComponent;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getFlag;
-import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.getMultibaseInteger;
-import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.multibaseInteger;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CColorArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.earthcomputer.clientcommands.command.arguments.MultibaseIntegerArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GlowCommand {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cglow.entity.failed"));

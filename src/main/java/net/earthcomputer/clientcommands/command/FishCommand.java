@@ -18,16 +18,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Set;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getCommandTextComponent;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType.*;
-import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate;
-import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.itemAndEnchantmentsPredicate;
-import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.getWithString;
-import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.withString;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FishCommand {
 

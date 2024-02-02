@@ -7,9 +7,8 @@ import net.earthcomputer.clientcommands.features.RenderSettings;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.entities;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class RenderCommand {
 

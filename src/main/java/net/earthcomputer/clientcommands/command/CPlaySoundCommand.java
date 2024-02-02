@@ -13,14 +13,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
-import static com.mojang.brigadier.arguments.FloatArgumentType.floatArg;
-import static com.mojang.brigadier.arguments.FloatArgumentType.getFloat;
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.getCIdentifier;
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.identifier;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.getCVec3;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.vec3;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.FloatArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CPlaySoundCommand {
 

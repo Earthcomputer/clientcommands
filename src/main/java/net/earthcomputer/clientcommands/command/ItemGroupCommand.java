@@ -36,15 +36,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.getCItemStackArgument;
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.itemStack;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-import static net.minecraft.commands.SharedSuggestionProvider.suggest;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.minecraft.commands.SharedSuggestionProvider.*;
 
 public class ItemGroupCommand {
 

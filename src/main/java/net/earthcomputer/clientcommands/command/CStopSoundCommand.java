@@ -9,10 +9,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.getCIdentifier;
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.identifier;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CStopSoundCommand {
 

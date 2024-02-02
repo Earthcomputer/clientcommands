@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class SnakeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

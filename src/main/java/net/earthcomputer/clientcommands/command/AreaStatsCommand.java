@@ -15,12 +15,10 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.blockPos;
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.getCBlockPos;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
-import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.list;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.earthcomputer.clientcommands.command.arguments.ListArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class AreaStatsCommand {
 

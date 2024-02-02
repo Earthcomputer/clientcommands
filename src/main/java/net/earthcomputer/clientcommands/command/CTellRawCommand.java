@@ -6,10 +6,8 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 
-import static dev.xpple.clientarguments.arguments.CTextArgumentType.getCTextArgument;
-import static dev.xpple.clientarguments.arguments.CTextArgumentType.text;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CTextArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTellRawCommand {
 

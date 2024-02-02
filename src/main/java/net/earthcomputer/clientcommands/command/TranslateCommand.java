@@ -21,10 +21,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.time.Duration;
 
-import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.getTranslationQuery;
-import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.translationQuery;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TranslateCommand {
 

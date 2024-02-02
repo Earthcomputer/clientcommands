@@ -15,12 +15,9 @@ import net.minecraft.network.chat.MutableComponent;
 
 import java.util.Collection;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.gameProfile;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.getCProfileArgument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class WhisperEncryptedCommand {
 

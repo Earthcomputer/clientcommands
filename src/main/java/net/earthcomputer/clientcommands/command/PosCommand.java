@@ -11,13 +11,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.blockPos;
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.getCBlockPos;
-import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.dimension;
-import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.getCDimensionArgument;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.getLookCoordsTextComponent;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.*;
+import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class PosCommand {
     // Syntax: "/cpos [to|from <dimension>] [from|to <dimension>] [<pos>]"

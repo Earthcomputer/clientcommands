@@ -8,12 +8,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec2;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.blockPos;
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.getCBlockPos;
-import static dev.xpple.clientarguments.arguments.CRotationArgumentType.getCRotation;
-import static dev.xpple.clientarguments.arguments.CRotationArgumentType.rotation;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CRotationArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class LookCommand {
 
