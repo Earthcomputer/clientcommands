@@ -1,12 +1,11 @@
 package net.earthcomputer.clientcommands.mixin;
 
+import net.earthcomputer.clientcommands.features.ClientTimeModifier;
+import net.minecraft.client.multiplayer.ClientLevel.ClientLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import net.earthcomputer.clientcommands.features.ClientTimeModifier;
-import net.minecraft.client.multiplayer.ClientLevel.ClientLevelData;
 
 @Mixin(ClientLevelData.class)
 public class MixinClientWorldProperties {

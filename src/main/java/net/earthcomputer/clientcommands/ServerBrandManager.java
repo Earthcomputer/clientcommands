@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands;
 
 import net.earthcomputer.clientcommands.features.Relogger;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
 
 public class ServerBrandManager {
 

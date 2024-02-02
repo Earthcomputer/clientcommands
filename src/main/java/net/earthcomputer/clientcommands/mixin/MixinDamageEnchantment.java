@@ -2,9 +2,9 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.item.enchantment.DamageEnchantment;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.enchantment.DamageEnchantment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

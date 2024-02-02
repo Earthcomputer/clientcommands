@@ -6,11 +6,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.world.item.Item;
 import net.minecraft.network.Connection;
-import net.minecraft.Util;
+import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Field;

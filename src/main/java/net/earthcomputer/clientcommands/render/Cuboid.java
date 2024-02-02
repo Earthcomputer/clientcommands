@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands.render;
 
 
-import com.mojang.blaze3d.vertex.VertexConsumer; 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
