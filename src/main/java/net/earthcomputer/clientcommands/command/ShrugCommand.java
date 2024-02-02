@@ -16,9 +16,9 @@ public class ShrugCommand {
     }
 
     private static int shrug(FabricClientCommandSource source) {
-        ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
-        if (networkHandler != null) {
-            networkHandler.sendChat("¯\\_(ツ)_/¯");
+        ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+        if (packetListener != null) {
+            packetListener.sendChat("¯\\_(ツ)_/¯");
         }
         return Command.SINGLE_SUCCESS;
     }

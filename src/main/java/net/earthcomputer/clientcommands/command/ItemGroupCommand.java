@@ -66,13 +66,13 @@ public class ItemGroupCommand {
         groups.forEach((key, group) -> group.registerItemGroup(key));
     }
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("citemgroup")
             .then(literal("modify")
                 .then(argument("group", string())
                     .suggests((ctx, builder) -> suggest(groups.keySet(), builder))
                     .then(literal("add")
-                        .then(argument("itemstack", itemStack(registryAccess))
+                        .then(argument("itemstack", itemStack(context))
                             .then(argument("count", integer(1))
                                 .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
                             .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "itemstack").createItemStack(1, false)))))
@@ -81,19 +81,19 @@ public class ItemGroupCommand {
                             .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index")))))
                     .then(literal("set")
                         .then(argument("index", integer(0))
-                            .then(argument("itemstack", itemStack(registryAccess))
+                            .then(argument("itemstack", itemStack(context))
                                 .then(argument("count", integer(1))
                                     .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
                                 .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "group"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createItemStack(1, false))))))
                     .then(literal("icon")
-                        .then(argument("icon", itemStack(registryAccess))
+                        .then(argument("icon", itemStack(context))
                             .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createItemStack(1, false)))))
                     .then(literal("rename")
                         .then(argument("new", string())
                             .executes(ctx -> renameGroup(ctx.getSource(), getString(ctx, "group"), getString(ctx, "new")))))))
             .then(literal("add")
                 .then(argument("group", string())
-                    .then(argument("icon", itemStack(registryAccess))
+                    .then(argument("icon", itemStack(context))
                          .executes(ctx -> addGroup(ctx.getSource(), getString(ctx, "group"), getCItemStackArgument(ctx, "icon").createItemStack(1, false))))))
             .then(literal("remove")
                 .then(argument("group", string())

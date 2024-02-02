@@ -24,21 +24,21 @@ public class AreaStatsCommand {
 
     private static final SimpleCommandExceptionType NOT_LOADED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.careastats.notLoaded"));
 
-    private static ChunkSource chunkManager;
+    private static ChunkSource chunkSource;
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         LiteralCommandNode<FabricClientCommandSource> careastats = dispatcher.register(literal("careastats"));
         dispatcher.register(literal("careastats")
                 .then(argument("pos1", blockPos())
                         .then(argument("pos2", blockPos())
-                                .then(argument("predicates", list(blockPredicate(registryAccess).disallowNbt(), 1))
+                                .then(argument("predicates", list(blockPredicate(context).disallowNbt(), 1))
                                         .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), getBlockPredicateList(ctx, "predicates"))))
                                 .executes(ctx -> areaStats(ctx.getSource(), getCBlockPos(ctx, "pos1"), getCBlockPos(ctx, "pos2"), ClientBlockPredicate.simple(state -> !state.isAir()))))));
     }
 
     private static int areaStats(FabricClientCommandSource source, BlockPos pos1, BlockPos pos2, ClientBlockPredicate blockPredicate) throws CommandSyntaxException {
         final ClientLevel level = source.getWorld();
-        chunkManager = level.getChunkSource();
+        chunkSource = level.getChunkSource();
         assertChunkIsLoaded(pos1.getX() >> 4, pos1.getZ() >> 4);
         assertChunkIsLoaded(pos2.getX() >> 4, pos2.getZ() >> 4);
 
@@ -188,7 +188,7 @@ public class AreaStatsCommand {
     }
 
     private static void assertChunkIsLoaded(int x, int z) throws CommandSyntaxException {
-        if (chunkManager.hasChunk(x, z)) {
+        if (chunkSource.hasChunk(x, z)) {
             return;
         }
         throw NOT_LOADED_EXCEPTION.create();

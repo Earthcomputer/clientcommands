@@ -123,9 +123,9 @@ public class ClientCommandFunctions {
 
         try {
             var dispatcher = ClientCommandManager.getActiveDispatcher();
-            var networkHandler = Minecraft.getInstance().getConnection();
-            assert networkHandler != null : "Network handler should not be null while calling ClientCommandFunctions.runStartup()";
-            var source = (FabricClientCommandSource) networkHandler.getSuggestionsProvider();
+            var packetListener = Minecraft.getInstance().getConnection();
+            assert packetListener != null : "Network handler should not be null while calling ClientCommandFunctions.runStartup()";
+            var source = (FabricClientCommandSource) packetListener.getSuggestionsProvider();
             int result = executeFunction(dispatcher, source, startupFunction, res -> {});
             LOGGER.info("Ran {} commands from startup function {}", result, startupFunction);
         } catch (CommandSyntaxException e) {

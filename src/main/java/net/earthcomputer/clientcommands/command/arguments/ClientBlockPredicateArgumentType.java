@@ -37,12 +37,12 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
     private boolean allowNbt = true;
     private boolean allowTags = true;
 
-    private ClientBlockPredicateArgumentType(CommandBuildContext registryAccess) {
-        registryWrapper = registryAccess.holderLookup(Registries.BLOCK);
+    private ClientBlockPredicateArgumentType(CommandBuildContext context) {
+        registryWrapper = context.holderLookup(Registries.BLOCK);
     }
 
-    public static ClientBlockPredicateArgumentType blockPredicate(CommandBuildContext registryAccess) {
-        return new ClientBlockPredicateArgumentType(registryAccess);
+    public static ClientBlockPredicateArgumentType blockPredicate(CommandBuildContext context) {
+        return new ClientBlockPredicateArgumentType(context);
     }
 
     public ClientBlockPredicateArgumentType disallowNbt() {

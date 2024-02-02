@@ -155,9 +155,9 @@ public abstract sealed class MultiVersionCompat {
             int protocolVersion = SharedConstants.getProtocolVersion();
 
             // https://github.com/ViaVersion/ViaFabric/blob/fda8d39147d46c80698d204538ede790f02589f6/viafabric-mc18/src/main/java/com/viaversion/fabric/mc18/mixin/debug/client/MixinDebugHud.java
-            ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
-            if (networkHandler != null) {
-                Channel channel = (Channel) this.channel.get(networkHandler.getConnection());
+            ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+            if (packetListener != null) {
+                Channel channel = (Channel) this.channel.get(packetListener.getConnection());
                 ChannelHandler viaDecoder = channel.pipeline().get("via-decoder");
                 if (fabricDecodeHandler.isInstance(viaDecoder)) {
                     Object user = getInfo.invoke(viaDecoder);

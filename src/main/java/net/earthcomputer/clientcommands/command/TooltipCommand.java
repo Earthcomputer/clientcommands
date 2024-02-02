@@ -17,12 +17,12 @@ public class TooltipCommand {
 
     private static final Flag<Boolean> FLAG_ADVANCED = Flag.ofFlag("advanced").build();
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         var ctooltip = dispatcher.register(literal("ctooltip")
             .then(literal("held")
                 .executes(ctx -> showTooltip(ctx.getSource(), ctx.getSource().getPlayer().getMainHandItem(), "held")))
             .then(literal("stack")
-                .then(argument("stack", itemStack(registryAccess))
+                .then(argument("stack", itemStack(context))
                     .executes(ctx -> showTooltip(ctx.getSource(), getCItemStackArgument(ctx, "stack").createItemStack(1, false), "stack")))));
         FLAG_ADVANCED.addToCommand(dispatcher, ctooltip, ctx -> true);
     }

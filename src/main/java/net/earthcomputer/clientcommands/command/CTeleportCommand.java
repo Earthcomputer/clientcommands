@@ -29,12 +29,12 @@ public class CTeleportCommand {
             throw NOT_SPECTATOR_EXCEPTION.create();
         }
 
-        ClientPacketListener networkHandler = source.getClient().getConnection();
-        assert networkHandler != null;
+        ClientPacketListener packetListener = source.getClient().getConnection();
+        assert packetListener != null;
 
-        networkHandler.send(new ServerboundTeleportToEntityPacket(uuid));
+        packetListener.send(new ServerboundTeleportToEntityPacket(uuid));
 
-        PlayerInfo playerListEntry = networkHandler.getPlayerInfo(uuid);
+        PlayerInfo playerListEntry = packetListener.getPlayerInfo(uuid);
         String name;
         if (playerListEntry != null) {
             name = playerListEntry.getProfile().getName();

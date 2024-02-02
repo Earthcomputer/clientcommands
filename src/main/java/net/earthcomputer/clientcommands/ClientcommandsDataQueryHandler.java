@@ -13,15 +13,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ClientcommandsDataQueryHandler {
-    private final ClientPacketListener networkHandler;
+    private final ClientPacketListener packetListener;
     private final List<CallbackEntry> callbacks = new ArrayList<>();
 
-    public ClientcommandsDataQueryHandler(ClientPacketListener networkHandler) {
-        this.networkHandler = networkHandler;
+    public ClientcommandsDataQueryHandler(ClientPacketListener packetListener) {
+        this.packetListener = packetListener;
     }
 
-    public static ClientcommandsDataQueryHandler get(ClientPacketListener networkHandler) {
-        return ((IClientPlayNetworkHandler) networkHandler).clientcommands_getCCDataQueryHandler();
+    public static ClientcommandsDataQueryHandler get(ClientPacketListener packetListener) {
+        return ((IClientPlayNetworkHandler) packetListener).clientcommands_getCCDataQueryHandler();
     }
 
     public boolean handleQueryResponse(int transactionId, @Nullable CompoundTag nbt) {
@@ -41,19 +41,19 @@ public class ClientcommandsDataQueryHandler {
     }
 
     private int nextQuery(Consumer<@Nullable CompoundTag> callback) {
-        int transactionId = ++networkHandler.getDebugQueryHandler().transactionId;
+        int transactionId = ++packetListener.getDebugQueryHandler().transactionId;
         callbacks.add(new CallbackEntry(transactionId, callback));
         return transactionId;
     }
 
     public void queryEntityNbt(int entityNetworkId, Consumer<@Nullable CompoundTag> callback) {
         int transactionId = nextQuery(callback);
-        networkHandler.send(new ServerboundEntityTagQuery(transactionId, entityNetworkId));
+        packetListener.send(new ServerboundEntityTagQuery(transactionId, entityNetworkId));
     }
 
     public void queryBlockNbt(BlockPos pos, Consumer<@Nullable CompoundTag> callback) {
         int transactionId = nextQuery(callback);
-        networkHandler.send(new ServerboundBlockEntityTagQuery(transactionId, pos));
+        packetListener.send(new ServerboundBlockEntityTagQuery(transactionId, pos));
     }
 
     private record CallbackEntry(int transactionId, Consumer<@Nullable CompoundTag> callback) {

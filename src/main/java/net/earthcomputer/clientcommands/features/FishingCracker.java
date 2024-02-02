@@ -552,14 +552,14 @@ public class FishingCracker {
                     }
                     LocalPlayer oldPlayer = Minecraft.getInstance().player;
                     if (oldPlayer != null) {
-                        ClientPacketListener networkHandler = oldPlayer.connection;
+                        ClientPacketListener packetListener = oldPlayer.connection;
                         while (System.nanoTime() - targetTime < 0) {
                             if (state != State.ASYNC_WAITING_FOR_FISH) {
                                 return;
                             }
                         }
                         FishingHook oldFishingBobberEntity = oldPlayer.fishing;
-                        networkHandler.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, 0));
+                        packetListener.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, 0));
                         synchronized (STATE_LOCK) {
                             state = State.WAITING_FOR_ITEM;
                         }

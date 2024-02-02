@@ -66,9 +66,9 @@ public class FindItemCommand {
     private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
     @SuppressWarnings("unchecked")
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         var cfinditem = dispatcher.register(literal("cfinditem")
-            .then(argument("item", withString(itemPredicate(registryAccess)))
+            .then(argument("item", withString(itemPredicate(context)))
                 .executes(ctx ->
                     findItem(ctx,
                         getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
@@ -391,8 +391,8 @@ public class FindItemCommand {
             assert player != null;
             ClientLevel level = Minecraft.getInstance().level;
             assert level != null;
-            ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
-            assert networkHandler != null;
+            ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+            assert packetListener != null;
 
             // check if we can possibly find a closer ender chest
             if (enderChestPosition != null && numItemsInEnderChest != null && !hasPrintedEnderChest) {
@@ -433,7 +433,7 @@ public class FindItemCommand {
                         if (enderChestPosition == null) {
                             enderChestPosition = currentPos;
                             currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
-                            ClientcommandsDataQueryHandler.get(networkHandler).queryEntityNbt(player.getId(), playerNbt -> {
+                            ClientcommandsDataQueryHandler.get(packetListener).queryEntityNbt(player.getId(), playerNbt -> {
                                 int numItemsInEnderChest = 0;
                                 if (playerNbt != null && playerNbt.contains("EnderItems", Tag.TAG_LIST)) {
                                     numItemsInEnderChest = countItems(playerNbt.getList("EnderItems", Tag.TAG_COMPOUND));
@@ -455,7 +455,7 @@ public class FindItemCommand {
                         searchedBlocks.add(currentPos);
                         waitingOnBlocks.add(currentPos);
                         currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
-                        ClientcommandsDataQueryHandler.get(networkHandler).queryBlockNbt(currentPos, blockNbt -> {
+                        ClientcommandsDataQueryHandler.get(packetListener).queryBlockNbt(currentPos, blockNbt -> {
                             waitingOnBlocks.remove(currentPos);
                             if (blockNbt != null && blockNbt.contains("Items", Tag.TAG_LIST)) {
                                 int count = countItems(blockNbt.getList("Items", Tag.TAG_COMPOUND));

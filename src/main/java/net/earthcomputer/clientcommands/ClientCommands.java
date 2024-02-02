@@ -156,7 +156,7 @@ public class ClientCommands implements ClientModInitializer {
         }
     }
 
-    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         Set<String> existingCommands = getCommands(dispatcher);
 
         AuditMixinsCommand.register(dispatcher);
@@ -165,8 +165,8 @@ public class ClientCommands implements ClientModInitializer {
         NoteCommand.register(dispatcher);
         ShrugCommand.register(dispatcher);
         FindCommand.register(dispatcher);
-        FindBlockCommand.register(dispatcher, registryAccess);
-        FindItemCommand.register(dispatcher, registryAccess);
+        FindBlockCommand.register(dispatcher, context);
+        FindItemCommand.register(dispatcher, context);
         TaskCommand.register(dispatcher);
         CalcCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
@@ -175,34 +175,34 @@ public class ClientCommands implements ClientModInitializer {
         CEnchantCommand.register(dispatcher);
         GlowCommand.register(dispatcher);
         GetDataCommand.register(dispatcher);
-        CalcStackCommand.register(dispatcher, registryAccess);
+        CalcStackCommand.register(dispatcher, context);
         GammaCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
         ChorusCommand.register(dispatcher);
-        FishCommand.register(dispatcher, registryAccess);
+        FishCommand.register(dispatcher, context);
         SignSearchCommand.register(dispatcher);
-        GhostBlockCommand.register(dispatcher, registryAccess);
+        GhostBlockCommand.register(dispatcher, context);
         RelogCommand.register(dispatcher);
-        CGiveCommand.register(dispatcher, registryAccess);
+        CGiveCommand.register(dispatcher, context);
         CPlaySoundCommand.register(dispatcher);
         CStopSoundCommand.register(dispatcher);
         FovCommand.register(dispatcher);
         HotbarCommand.register(dispatcher);
         KitCommand.register(dispatcher);
-        ItemGroupCommand.register(dispatcher, registryAccess);
+        ItemGroupCommand.register(dispatcher, context);
         CParticleCommand.register(dispatcher);
         PermissionLevelCommand.register(dispatcher);
         CTellRawCommand.register(dispatcher);
         CTimeCommand.register(dispatcher);
         AliasCommand.register(dispatcher);
-        AreaStatsCommand.register(dispatcher, registryAccess);
+        AreaStatsCommand.register(dispatcher, context);
         CTeleportCommand.register(dispatcher);
         // PlayerInfoCommand.register(dispatcher);
         PingCommand.register(dispatcher);
         UuidCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher);
-        TooltipCommand.register(dispatcher, registryAccess);
+        TooltipCommand.register(dispatcher, context);
         TranslateCommand.register(dispatcher);
         VarCommand.register(dispatcher);
         CFunctionCommand.register(dispatcher);

@@ -31,20 +31,20 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
 
     private final HolderLookup<Item> registryWrapper;
 
-    private ClientItemPredicateArgumentType(CommandBuildContext registryAccess) {
-        registryWrapper = registryAccess.holderLookup(Registries.ITEM);
+    private ClientItemPredicateArgumentType(CommandBuildContext context) {
+        registryWrapper = context.holderLookup(Registries.ITEM);
     }
 
     /**
      * @deprecated Use {@link #clientItemPredicate(CommandBuildContext)} instead
      */
     @Deprecated
-    public static ItemPredicateArgument itemPredicate(CommandBuildContext registryAccess) {
-        return ItemPredicateArgument.itemPredicate(registryAccess);
+    public static ItemPredicateArgument itemPredicate(CommandBuildContext context) {
+        return ItemPredicateArgument.itemPredicate(context);
     }
 
-    public static ClientItemPredicateArgumentType clientItemPredicate(CommandBuildContext registryAccess) {
-        return new ClientItemPredicateArgumentType(registryAccess);
+    public static ClientItemPredicateArgumentType clientItemPredicate(CommandBuildContext context) {
+        return new ClientItemPredicateArgumentType(context);
     }
 
     public static ClientItemPredicate getClientItemPredicate(CommandContext<FabricClientCommandSource> ctx, String name) {

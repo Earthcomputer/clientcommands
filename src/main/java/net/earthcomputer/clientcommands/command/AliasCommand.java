@@ -92,15 +92,15 @@ public class AliasCommand {
         } else if (arguments != null) {
             cmd += " " + arguments;
         }
-        ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
-        if (networkHandler == null) {
+        ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+        if (packetListener == null) {
             return Command.SINGLE_SUCCESS;
         }
         if (cmd.startsWith("/")) {
             cmd = cmd.substring(1);
-            networkHandler.sendCommand(cmd);
+            packetListener.sendCommand(cmd);
         } else {
-            networkHandler.sendChat(cmd);
+            packetListener.sendChat(cmd);
         }
 
         return Command.SINGLE_SUCCESS;
@@ -138,7 +138,7 @@ public class AliasCommand {
         } else {
             source.sendFeedback(Component.translatable("commands.calias.listAliases.success", aliasMap.size()));
             for (String key : aliasMap.keySet()) {
-                source.sendFeedback(Component.nullToEmpty(ChatFormatting.BOLD + key + ChatFormatting.RESET + ": " + aliasMap.get(key).replace("%","%%")));
+                source.sendFeedback(Component.literal(ChatFormatting.BOLD + key + ChatFormatting.RESET + ": " + aliasMap.get(key).replace("%","%%")));
             }
         }
         return Command.SINGLE_SUCCESS;

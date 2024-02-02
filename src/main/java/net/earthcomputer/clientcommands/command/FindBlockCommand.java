@@ -25,9 +25,9 @@ import static net.earthcomputer.clientcommands.command.arguments.WithStringArgum
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindBlockCommand {
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("cfindblock")
-            .then(argument("block", withString(blockPredicate(registryAccess)))
+            .then(argument("block", withString(blockPredicate(context)))
                 .executes(ctx -> {
                     var blockWithString = getWithString(ctx, "block", ClientBlockPredicateArgumentType.ParseResult.class);
                     return findBlock(Component.translatable("commands.cfindblock.starting", blockWithString.getLeft()), getBlockPredicate(blockWithString.getRight()));

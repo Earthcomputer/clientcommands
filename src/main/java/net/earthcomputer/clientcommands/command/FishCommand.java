@@ -35,7 +35,7 @@ public class FishCommand {
             .append(" ")
             .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands fishingManipulation set MANUAL")));
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20) {
             return; // fishing manipulation patched in 1.20
         }
@@ -44,7 +44,7 @@ public class FishCommand {
             .then(literal("list-goals")
                 .executes(ctx -> listGoals(ctx.getSource())))
             .then(literal("add-goal")
-                .then(argument("goal", clientItemPredicate(registryAccess))
+                .then(argument("goal", clientItemPredicate(context))
                     .executes(ctx -> addGoal(ctx.getSource(), getClientItemPredicate(ctx, "goal")))))
             .then(literal("add-enchanted-goal")
                 .then(argument("goal", withString(itemAndEnchantmentsPredicate().withItemPredicate(ENCHANTABLE_ITEMS::contains).withEnchantmentPredicate((item, ench) -> ench.isDiscoverable()).constrainMaxLevel()))
@@ -64,7 +64,7 @@ public class FishCommand {
         } else {
             source.sendFeedback(Component.translatable("commands.cfish.listGoals.success", FishingCracker.goals.size()));
             for (int i = 0; i < FishingCracker.goals.size(); i++) {
-                source.sendFeedback(Component.nullToEmpty((i + 1) + ": " + FishingCracker.goals.get(i).getPrettyString()));
+                source.sendFeedback(Component.literal((i + 1) + ": " + FishingCracker.goals.get(i).getPrettyString()));
             }
         }
 

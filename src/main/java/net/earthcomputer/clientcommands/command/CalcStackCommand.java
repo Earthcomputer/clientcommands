@@ -14,10 +14,10 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CalcStackCommand {
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("ccalcstack")
             .then(argument("count", integer(0))
-                .then(argument("item", itemStack(registryAccess))
+                .then(argument("item", itemStack(context))
                 .executes(ctx -> {
                     ItemStack stack = getCItemStackArgument(ctx, "item").createItemStack(1, false);
                     return getStackSize(ctx.getSource(), stack, getInteger(ctx, "count"));

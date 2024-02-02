@@ -30,10 +30,10 @@ public class UuidCommand {
             .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid))
         );
 
-        ClientPacketListener networkHandler = source.getClient().getConnection();
-        assert networkHandler != null;
+        ClientPacketListener packetListener = source.getClient().getConnection();
+        assert packetListener != null;
 
-        PlayerInfo player = networkHandler.getPlayerInfo(entity);
+        PlayerInfo player = packetListener.getPlayerInfo(entity);
         if (player == null) {
             source.sendFeedback(Component.translatable("commands.cuuid.success.nameless", uuidText));
             return Command.SINGLE_SUCCESS;

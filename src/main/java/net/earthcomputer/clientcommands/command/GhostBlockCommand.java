@@ -25,19 +25,19 @@ public class GhostBlockCommand {
     private static final SimpleCommandExceptionType SET_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.setblock.failed"));
     private static final SimpleCommandExceptionType FILL_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.fill.failed"));
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("cghostblock")
             .then(literal("set")
                 .then(argument("pos", blockPos())
-                    .then(argument("block", blockState(registryAccess))
+                    .then(argument("block", blockState(context))
                         .executes(ctx -> setGhostBlock(ctx.getSource(), getCBlockPos(ctx, "pos"), getCBlockState(ctx, "block").getBlockState())))))
             .then(literal("fill")
                 .then(argument("from", blockPos())
                     .then(argument("to", blockPos())
-                        .then(argument("block", blockState(registryAccess))
+                        .then(argument("block", blockState(context))
                             .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), pos -> true))
                             .then(literal("replace")
-                                .then(argument("filter", blockPredicate(registryAccess))
+                                .then(argument("filter", blockPredicate(context))
                                     .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), getCBlockPredicate(ctx, "filter"))))))))));
     }
 

@@ -18,9 +18,9 @@ public class CGiveCommand {
 
     private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cgive.notCreative"));
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("cgive")
-            .then(argument("item", itemStack(registryAccess))
+            .then(argument("item", itemStack(context))
             .executes(ctx -> give(ctx.getSource(), getCItemStackArgument(ctx, "item"), 1))
                 .then(argument("count", integer(1))
                 .executes(ctx -> give(ctx.getSource(), getCItemStackArgument(ctx, "item"), getInteger(ctx, "count"))))));
