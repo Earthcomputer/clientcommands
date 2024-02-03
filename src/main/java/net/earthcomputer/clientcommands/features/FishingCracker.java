@@ -216,12 +216,12 @@ public class FishingCracker {
 
     private static boolean internalInteractFishingBobber() {
         LocalPlayer player = Minecraft.getInstance().player;
-        MultiPlayerGameMode interactionManager = Minecraft.getInstance().gameMode;
-        if (player != null && interactionManager != null) {
+        MultiPlayerGameMode gameMode = Minecraft.getInstance().gameMode;
+        if (player != null && gameMode != null) {
             ItemStack stack = player.getMainHandItem();
             if (stack.getItem() == Items.FISHING_ROD) {
                 expectedFishingRodUses++;
-                interactionManager.useItem(player, InteractionHand.MAIN_HAND);
+                gameMode.useItem(player, InteractionHand.MAIN_HAND);
                 return true;
             }
         }
@@ -558,7 +558,7 @@ public class FishingCracker {
                                 return;
                             }
                         }
-                        FishingHook oldFishingBobberEntity = oldPlayer.fishing;
+                        FishingHook oldFishingHook = oldPlayer.fishing;
                         packetListener.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, 0));
                         synchronized (STATE_LOCK) {
                             state = State.WAITING_FOR_ITEM;
@@ -572,10 +572,10 @@ public class FishingCracker {
                                 // then the fish hook would be null and the client would act as if the fishing rod is extending.
                                 // Temporarily set to the previous fishing hook to fix this.
                                 expectedFishingRodUses++;
-                                FishingHook prevFishingBobberEntity = player.fishing;
-                                player.fishing = oldFishingBobberEntity;
+                                FishingHook prevFishingHook = player.fishing;
+                                player.fishing = oldFishingHook;
                                 InteractionResultHolder<ItemStack> result = oldStack.use(player.level(), player, InteractionHand.MAIN_HAND);
-                                player.fishing = prevFishingBobberEntity;
+                                player.fishing = prevFishingHook;
 
                                 if (oldStack != result.getObject()) {
                                     player.setItemInHand(InteractionHand.MAIN_HAND, result.getObject());
@@ -937,13 +937,13 @@ public class FishingCracker {
                 this.checkForCollision();
             } else {
                 if (this.state == State.BOBBING) {
-                    Vec3 vec3d = this.velocity;
-                    double d = this.pos.y + vec3d.y - (double)blockPos.getY() - (double)f;
+                    Vec3 vec3 = this.velocity;
+                    double d = this.pos.y + vec3.y - (double)blockPos.getY() - (double)f;
                     if (Math.abs(d) < 0.01D) {
                         d += Math.signum(d) * 0.1D;
                     }
 
-                    this.velocity = new Vec3(vec3d.x * 0.9D, vec3d.y - d * (double)this.random.nextFloat() * 0.2D, vec3d.z * 0.9D);
+                    this.velocity = new Vec3(vec3.x * 0.9D, vec3.y - d * (double)this.random.nextFloat() * 0.2D, vec3.z * 0.9D);
                     if (this.hookCountdown <= 0 && this.fishTravelCountdown <= 0) {
                         this.inOpenWater = true;
                     } else {
@@ -1006,8 +1006,8 @@ public class FishingCracker {
 
         private void onSwimmingStart() {
             float f = 0.2F;
-            Vec3 vec3d = velocity;
-            float g = (float) Math.sqrt(vec3d.x * vec3d.x * 0.20000000298023224D + vec3d.y * vec3d.y + vec3d.z * vec3d.z * 0.20000000298023224D) * f;
+            Vec3 vec3 = velocity;
+            float g = (float) Math.sqrt(vec3.x * vec3.x * 0.20000000298023224D + vec3.y * vec3.y + vec3.z * vec3.z * 0.20000000298023224D) * f;
             if (g > 1.0F) {
                 g = 1.0F;
             }
@@ -1042,19 +1042,19 @@ public class FishingCracker {
         }
 
         private boolean updateMovementInFluid(TagKey<Fluid> tag, double d) {
-            AABB box = this.boundingBox.deflate(0.001D);
-            int i = Mth.floor(box.minX);
-            int j = Mth.ceil(box.maxX);
-            int k = Mth.floor(box.minY);
-            int l = Mth.ceil(box.maxY);
-            int m = Mth.floor(box.minZ);
-            int n = Mth.ceil(box.maxZ);
+            AABB aabb = this.boundingBox.deflate(0.001D);
+            int i = Mth.floor(aabb.minX);
+            int j = Mth.ceil(aabb.maxX);
+            int k = Mth.floor(aabb.minY);
+            int l = Mth.ceil(aabb.maxY);
+            int m = Mth.floor(aabb.minZ);
+            int n = Mth.ceil(aabb.maxZ);
             if (!this.level.hasChunksAt(i, k, m, j, l, n)) {
                 return false;
             } else {
                 double e = 0.0D;
                 boolean bl2 = false;
-                Vec3 vec3d = Vec3.ZERO;
+                Vec3 vec3 = Vec3.ZERO;
                 int o = 0;
                 BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
@@ -1065,30 +1065,30 @@ public class FishingCracker {
                             FluidState fluidState = this.level.getFluidState(mutable);
                             if (fluidState.is(tag)) {
                                 double f = (float)q + fluidState.getHeight(this.level, mutable);
-                                if (f >= box.minY) {
+                                if (f >= aabb.minY) {
                                     bl2 = true;
-                                    e = Math.max(f - box.minY, e);
+                                    e = Math.max(f - aabb.minY, e);
                                 }
                             }
                         }
                     }
                 }
 
-                if (vec3d.length() > 0.0D) {
+                if (vec3.length() > 0.0D) {
                     if (o > 0) {
-                        vec3d = vec3d.scale(1.0D / (double)o);
+                        vec3 = vec3.scale(1.0D / (double)o);
                     }
 
-                    vec3d = vec3d.normalize();
+                    vec3 = vec3.normalize();
 
-                    Vec3 vec3d3 = this.velocity;
-                    vec3d = vec3d.scale(d);
+                    Vec3 vec33 = this.velocity;
+                    vec3 = vec3.scale(d);
                     double g = 0.003D;
-                    if (Math.abs(vec3d3.x) < 0.003D && Math.abs(vec3d3.z) < 0.003D && vec3d.length() < 0.0045000000000000005D) {
-                        vec3d = vec3d.normalize().scale(0.0045000000000000005D);
+                    if (Math.abs(vec33.x) < 0.003D && Math.abs(vec33.z) < 0.003D && vec3.length() < 0.0045000000000000005D) {
+                        vec3 = vec3.normalize().scale(0.0045000000000000005D);
                     }
 
-                    this.velocity = this.velocity.add(vec3d);
+                    this.velocity = this.velocity.add(vec3);
                 }
 
                 return bl2;
@@ -1107,26 +1107,26 @@ public class FishingCracker {
         private void move(Vec3 movement) {
             assert level != null;
 
-            Vec3 vec3d = this.adjustMovementForCollisions(movement);
-            if (vec3d.lengthSqr() > 1.0E-7D) {
-                this.boundingBox = this.boundingBox.move(vec3d);
+            Vec3 vec3 = this.adjustMovementForCollisions(movement);
+            if (vec3.lengthSqr() > 1.0E-7D) {
+                this.boundingBox = this.boundingBox.move(vec3);
                 this.pos = new Vec3((boundingBox.minX + boundingBox.maxX) / 2.0D, boundingBox.minY, (boundingBox.minZ + boundingBox.maxZ) / 2.0D);
             }
 
-            this.horizontalCollision = !Mth.equal(movement.x, vec3d.x) || !Mth.equal(movement.z, vec3d.z);
-            this.verticalCollision = movement.y != vec3d.y;
+            this.horizontalCollision = !Mth.equal(movement.x, vec3.x) || !Mth.equal(movement.z, vec3.z);
+            this.verticalCollision = movement.y != vec3.y;
             this.onGround = this.verticalCollision && movement.y < 0.0D;
             //this.fall(vec3d.y, this.onGround, blockState, blockPos);
-            Vec3 vec3d2 = this.velocity;
-            if (movement.x != vec3d.x) {
-                this.velocity = new Vec3(0.0D, vec3d2.y, vec3d2.z);
+            Vec3 vec32 = this.velocity;
+            if (movement.x != vec3.x) {
+                this.velocity = new Vec3(0.0D, vec32.y, vec32.z);
             }
 
-            if (movement.z != vec3d.z) {
-                this.velocity = new Vec3(vec3d2.x, vec3d2.y, 0.0D);
+            if (movement.z != vec3.z) {
+                this.velocity = new Vec3(vec32.x, vec32.y, 0.0D);
             }
 
-            if (movement.y != vec3d.y) {
+            if (movement.y != vec3.y) {
                 // block.onLanded
                 velocity = velocity.multiply(1.0D, 0.0D, 1.0D);
             }
@@ -1145,19 +1145,19 @@ public class FishingCracker {
         }
 
         private Vec3 adjustMovementForCollisions(Vec3 movement) {
-            AABB box = this.boundingBox;
+            AABB aabb = this.boundingBox;
             fakeEntity.absMoveTo(pos.x, pos.y, pos.z);
             fakeEntity.setDeltaMovement(velocity);
             assert level != null;
 
             VoxelShape voxelShape = this.level.getWorldBorder().getCollisionShape();
             List<VoxelShape> voxelShapes = new ArrayList<>();
-            if (!Shapes.joinIsNotEmpty(voxelShape, Shapes.create(box.deflate(1.0E-7D)), BooleanOp.AND)) {
+            if (!Shapes.joinIsNotEmpty(voxelShape, Shapes.create(aabb.deflate(1.0E-7D)), BooleanOp.AND)) {
                 voxelShapes.add(voxelShape);
             }
-            voxelShapes.addAll(this.level.getEntityCollisions(fakeEntity, box.expandTowards(movement)));
+            voxelShapes.addAll(this.level.getEntityCollisions(fakeEntity, aabb.expandTowards(movement)));
 
-            return movement.lengthSqr() == 0.0D ? movement : Entity.collideBoundingBox(fakeEntity, movement, box, this.level, voxelShapes);
+            return movement.lengthSqr() == 0.0D ? movement : Entity.collideBoundingBox(fakeEntity, movement, aabb, this.level, voxelShapes);
         }
 
         private float getVelocityMultiplier() {

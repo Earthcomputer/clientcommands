@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ProtectionEnchantment.class)
 public abstract class MixinProtectionEnchantment extends Enchantment {
 
-    protected MixinProtectionEnchantment(Rarity weight, EnchantmentCategory target, EquipmentSlot[] slots) {
-        super(weight, target, slots);
+    protected MixinProtectionEnchantment(Rarity weight, EnchantmentCategory category, EquipmentSlot[] slots) {
+        super(weight, category, slots);
     }
 
     @Inject(method = "checkCompatibility", at = @At("HEAD"), cancellable = true)

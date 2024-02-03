@@ -34,7 +34,7 @@ public class MixinChatComponent {
     @Shadow @Final private Minecraft minecraft;
 
     @Inject(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V", at = @At("HEAD"), cancellable = true)
-    private void onC2CPacket(Component message, MessageSignature signature, int ticks, GuiMessageTag indicator, boolean refresh, CallbackInfo ci) {
+    private void onC2CPacket(Component message, MessageSignature signature, int ticks, GuiMessageTag tag, boolean refresh, CallbackInfo ci) {
         handleIfPacket(message, ci);
     }
 

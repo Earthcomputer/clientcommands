@@ -67,14 +67,14 @@ public class Relogger {
             mc.createWorldOpenFlows().checkForBackupAndLoad(levelName, () -> mc.setScreen(new TitleScreen()));
             return true;
         } else {
-            ServerData serverInfo = mc.getCurrentServer();
-            if (serverInfo == null) {
+            ServerData serverData = mc.getCurrentServer();
+            if (serverData == null) {
                 return false;
             }
             if (!disconnect(true)) {
                 return false;
             }
-            ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverInfo.ip), serverInfo, false);
+            ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false);
             return true;
         }
     }

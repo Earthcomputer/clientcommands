@@ -30,8 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Player.class)
 public abstract class MixinPlayer extends LivingEntity {
 
-    protected MixinPlayer(EntityType<? extends LivingEntity> entityType_1, Level world_1) {
-        super(entityType_1, world_1);
+    protected MixinPlayer(EntityType<? extends LivingEntity> entityType_1, Level level_1) {
+        super(entityType_1, level_1);
     }
 
     @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At("HEAD"))
@@ -80,10 +80,10 @@ public abstract class MixinPlayer extends LivingEntity {
             if (living.getHealth() <= 0) {
                 canAttack = false;
             }
-            if (((ILivingEntity) living).callBlockedByShield(source)) {
+            if (((ILivingEntity) living).callIsDamageSourceBlocked(source)) {
                 canAttack = false;
             }
-            if (living.invulnerableTime >= 10 && amount <= ((ILivingEntity) living).getLastDamageTaken()) {
+            if (living.invulnerableTime >= 10 && amount <= ((ILivingEntity) living).getLastHurt()) {
                 canAttack = false;
             }
         }

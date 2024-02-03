@@ -174,8 +174,8 @@ public class FindItemCommand {
             assert level != null;
             LocalPlayer player = Minecraft.getInstance().player;
             assert player != null;
-            MultiPlayerGameMode interactionManager = Minecraft.getInstance().gameMode;
-            assert interactionManager != null;
+            MultiPlayerGameMode gameMode = Minecraft.getInstance().gameMode;
+            assert gameMode != null;
             if (currentlySearchingTimeout > 0) {
                 currentlySearchingTimeout--;
                 return;
@@ -184,7 +184,7 @@ public class FindItemCommand {
                 return;
             }
             Vec3 origin = entity.getEyePosition(0);
-            float reachDistance = interactionManager.getPickRange();
+            float reachDistance = gameMode.getPickRange();
             int minX = Mth.floor(origin.x - reachDistance);
             int minY = Mth.floor(origin.y - reachDistance);
             int minZ = Mth.floor(origin.z - reachDistance);
@@ -254,11 +254,11 @@ public class FindItemCommand {
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
                 public boolean accept(Screen screen) {
-                    if (!(screen instanceof MenuAccess<?> handlerProvider)) {
+                    if (!(screen instanceof MenuAccess<?> menuAccess)) {
                         return true;
                     }
                     assert mc.player != null;
-                    AbstractContainerMenu container = handlerProvider.getMenu();
+                    AbstractContainerMenu container = menuAccess.getMenu();
                     Set<Integer> playerInvSlots = new HashSet<>();
                     for (Slot slot : container.slots) {
                         if (slot.container instanceof Inventory) {

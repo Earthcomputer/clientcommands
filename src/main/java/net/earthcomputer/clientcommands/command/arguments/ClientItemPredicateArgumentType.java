@@ -29,10 +29,10 @@ import java.util.function.Predicate;
 
 public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemPredicateArgumentType.ClientItemPredicate> {
 
-    private final HolderLookup<Item> registryWrapper;
+    private final HolderLookup<Item> holderLookup;
 
     private ClientItemPredicateArgumentType(CommandBuildContext context) {
-        registryWrapper = context.holderLookup(Registries.ITEM);
+        holderLookup = context.holderLookup(Registries.ITEM);
     }
 
     /**
@@ -54,7 +54,7 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
     @Override
     public ClientItemPredicate parse(StringReader reader) throws CommandSyntaxException {
         int start = reader.getCursor();
-        var result = ItemParser.parseForTesting(registryWrapper, reader);
+        var result = ItemParser.parseForTesting(holderLookup, reader);
         return result.map(
                 itemResult -> new ItemPredicate(itemResult.item(), itemResult.nbt()),
                 tagResult -> new TagPredicate(reader.getString().substring(start, reader.getCursor()), tagResult.tag(), tagResult.nbt())
@@ -63,7 +63,7 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ItemParser.fillSuggestions(registryWrapper, builder, true);
+        return ItemParser.fillSuggestions(holderLookup, builder, true);
     }
 
     public sealed interface ClientItemPredicate extends Predicate<ItemStack> {

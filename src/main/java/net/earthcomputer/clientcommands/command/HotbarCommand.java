@@ -32,39 +32,39 @@ public class HotbarCommand {
     }
 
     private static int save(FabricClientCommandSource source, int index) {
-        Minecraft client = source.getClient();
+        Minecraft minecraft = source.getClient();
 
-        HotbarManager storage = client.getHotbarManager();
-        Hotbar entry = storage.get(index - 1);
+        HotbarManager manager = minecraft.getHotbarManager();
+        Hotbar hotbar = manager.get(index - 1);
 
         for (int slot = 0; slot < Inventory.getSelectionSize(); slot++) {
-            entry.set(slot, source.getPlayer().getInventory().getItem(slot).copy());
+            hotbar.set(slot, source.getPlayer().getInventory().getItem(slot).copy());
         }
-        storage.save();
+        manager.save();
 
-        Component loadKey = client.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
-        Component hotbarKey = client.options.keyHotbarSlots[index - 1].getTranslatedKeyMessage();
+        Component loadKey = minecraft.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
+        Component hotbarKey = minecraft.options.keyHotbarSlots[index - 1].getTranslatedKeyMessage();
 
         source.sendFeedback(Component.translatable("inventory.hotbarSaved", loadKey, hotbarKey));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int restore(FabricClientCommandSource source, int index) throws CommandSyntaxException {
-        Minecraft client = source.getClient();
+        Minecraft minecraft = source.getClient();
 
         LocalPlayer player = source.getPlayer();
         if (!player.getAbilities().instabuild) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-        HotbarManager storage = client.getHotbarManager();
-        Hotbar entry = storage.get(index - 1);
+        HotbarManager manager = minecraft.getHotbarManager();
+        Hotbar hotbar = manager.get(index - 1);
 
         for (int slot = 0; slot < Inventory.getSelectionSize(); slot++) {
-            ItemStack stack = entry.get(slot).copy();
+            ItemStack stack = hotbar.get(slot).copy();
 
             player.getInventory().setItem(slot, stack);
-            client.gameMode.handleCreativeModeItemAdd(stack, 36 + slot);
+            minecraft.gameMode.handleCreativeModeItemAdd(stack, 36 + slot);
         }
 
         player.inventoryMenu.broadcastChanges();

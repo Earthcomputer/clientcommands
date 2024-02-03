@@ -17,33 +17,33 @@ public class CStopSoundCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var builder = literal("cstopsound");
 
-        for (SoundSource category : SoundSource.values()) {
-            builder.then(buildArguments(category, category.getName()));
+        for (SoundSource source : SoundSource.values()) {
+            builder.then(buildArguments(source, source.getName()));
         }
         builder.then(buildArguments(null, "*"));
 
         dispatcher.register(builder);
     }
 
-    private static LiteralArgumentBuilder<FabricClientCommandSource> buildArguments(SoundSource category, String literal) {
+    private static LiteralArgumentBuilder<FabricClientCommandSource> buildArguments(SoundSource source, String literal) {
         return literal(literal)
-            .executes(ctx -> stopSound(ctx.getSource(), category, null))
+            .executes(ctx -> stopSound(ctx.getSource(), source, null))
             .then(argument("sound", identifier())
                 .suggests(CSuggestionProviders.AVAILABLE_SOUNDS)
-                .executes(ctx -> stopSound(ctx.getSource(), category, getCIdentifier(ctx, "sound"))));
+                .executes(ctx -> stopSound(ctx.getSource(), source, getCIdentifier(ctx, "sound"))));
     }
 
-    private static int stopSound(FabricClientCommandSource source, SoundSource category, ResourceLocation sound) {
-        source.getClient().getSoundManager().stop(sound, category);
+    private static int stopSound(FabricClientCommandSource source, SoundSource soundSource, ResourceLocation sound) {
+        source.getClient().getSoundManager().stop(sound, soundSource);
 
-        if (category == null && sound == null) {
+        if (soundSource == null && sound == null) {
             source.sendFeedback(Component.translatable("commands.cstopsound.success.sourceless.any"));
-        } else if (category == null) {
+        } else if (soundSource == null) {
             source.sendFeedback(Component.translatable("commands.cstopsound.success.sourceless.sound", sound));
         } else if (sound == null) {
-            source.sendFeedback(Component.translatable("commands.cstopsound.success.source.any", category.getName()));
+            source.sendFeedback(Component.translatable("commands.cstopsound.success.source.any", soundSource.getName()));
         } else {
-            source.sendFeedback(Component.translatable("commands.cstopsound.success.source.sound", sound, category.getName()));
+            source.sendFeedback(Component.translatable("commands.cstopsound.success.source.sound", sound, soundSource.getName()));
         }
         return Command.SINGLE_SUCCESS;
     }

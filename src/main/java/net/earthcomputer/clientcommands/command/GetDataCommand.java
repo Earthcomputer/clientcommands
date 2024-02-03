@@ -40,9 +40,9 @@ public class GetDataCommand {
     private static final SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
     private static final SimpleCommandExceptionType INVALID_BLOCK_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.data.block.invalid"));
 
-    public static final Function<String, ObjectType> CLIENT_ENTITY_DATA_OBJECT = argName -> new ObjectType() {
+    public static final Function<String, AccessorType> CLIENT_ENTITY_DATA_ACCESSOR = argName -> new AccessorType() {
         @Override
-        public DataAccessor getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+        public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
             return new EntityDataAccessor(getCEntity(ctx, argName));
         }
 
@@ -52,8 +52,8 @@ public class GetDataCommand {
         }
     };
 
-    public static final Function<String, ObjectType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new ObjectType() {
-        public DataAccessor getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+    public static final Function<String, AccessorType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new AccessorType() {
+        public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
             BlockPos pos = getCBlockPos(ctx, argName + "Pos");
             BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
             if (blockEntity == null) {
@@ -68,26 +68,26 @@ public class GetDataCommand {
         }
     };
 
-    public static List<Function<String, ObjectType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_OBJECT, CLIENT_TILE_ENTITY_DATA_OBJECT);
-    public static List<ObjectType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
+    public static List<Function<String, AccessorType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_ACCESSOR, CLIENT_TILE_ENTITY_DATA_OBJECT);
+    public static List<AccessorType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        for (ObjectType objType : TARGET_OBJECT_TYPES) {
+        for (AccessorType objType : TARGET_OBJECT_TYPES) {
             //noinspection unchecked
             dispatcher.register((LiteralArgumentBuilder<FabricClientCommandSource>) objType.addArgumentsToBuilder(literal("cgetdata"), builder ->
-                    builder.executes(ctx -> getData(ctx.getSource(), objType.getObject(ctx)))
+                    builder.executes(ctx -> getData(ctx.getSource(), objType.getAccessor(ctx)))
                     .then(argument("path", nbtPath())
-                        .executes(ctx -> getData(ctx.getSource(), objType.getObject(ctx), getCNbtPath(ctx, "path"))))));
+                        .executes(ctx -> getData(ctx.getSource(), objType.getAccessor(ctx), getCNbtPath(ctx, "path"))))));
         }
     }
 
-    private static int getData(FabricClientCommandSource source, DataAccessor dataObj) throws CommandSyntaxException {
-        source.sendFeedback(dataObj.getPrintSuccess(dataObj.getData()));
+    private static int getData(FabricClientCommandSource source, DataAccessor accessor) throws CommandSyntaxException {
+        source.sendFeedback(accessor.getPrintSuccess(accessor.getData()));
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int getData(FabricClientCommandSource source, DataAccessor dataObj, NbtPath path) throws CommandSyntaxException {
-        Tag tag = getNbt(path, dataObj);
+    private static int getData(FabricClientCommandSource source, DataAccessor accessor, NbtPath path) throws CommandSyntaxException {
+        Tag tag = getNbt(path, accessor);
         int ret;
         if (tag instanceof NumericTag) {
             ret = Mth.floor(((NumericTag) tag).getAsDouble());
@@ -101,12 +101,12 @@ public class GetDataCommand {
             throw GET_UNKNOWN_EXCEPTION.create(path.toString());
         }
 
-        source.sendFeedback(dataObj.getPrintSuccess(tag));
+        source.sendFeedback(accessor.getPrintSuccess(tag));
         return ret;
     }
 
-    private static Tag getNbt(NbtPath path, DataAccessor dataObj) throws CommandSyntaxException {
-        Collection<Tag> tags = path.get(dataObj.getData());
+    private static Tag getNbt(NbtPath path, DataAccessor accessor) throws CommandSyntaxException {
+        Collection<Tag> tags = path.get(accessor.getData());
         Iterator<Tag> tagItr = tags.iterator();
         Tag firstTag = tagItr.next();
         if (tagItr.hasNext()) {
@@ -116,8 +116,8 @@ public class GetDataCommand {
         }
     }
 
-    private interface ObjectType {
-        DataAccessor getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException;
+    private interface AccessorType {
+        DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException;
         ArgumentBuilder<FabricClientCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<FabricClientCommandSource, ?> builder, Function<ArgumentBuilder<FabricClientCommandSource, ?>, ArgumentBuilder<FabricClientCommandSource, ?>> subcommandAdder);
     }
 

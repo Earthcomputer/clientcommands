@@ -75,27 +75,27 @@ class SnakeGameScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
-        super.render(context, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.renderBackground(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderBackground(context, mouseX, mouseY, delta);
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.renderBackground(graphics, mouseX, mouseY, delta);
         int startX = (this.width - 289) / 2;
         int startY = (this.height - 289) / 2;
 
-        context.drawString(minecraft.font, this.title, startX, startY - 10, 0xff_ffffff);
+        graphics.drawString(minecraft.font, this.title, startX, startY - 10, 0xff_ffffff);
         MutableComponent score = Component.translatable("snakeGame.score", this.snake.size());
-        context.drawCenteredString(minecraft.font, score, this.width / 2, startY - 10, 0xff_ffffff);
+        graphics.drawCenteredString(minecraft.font, score, this.width / 2, startY - 10, 0xff_ffffff);
 
-        context.blit(GRID_TEXTURE, startX, startY, 0, 0, 289, 289, 289, 289);
+        graphics.blit(GRID_TEXTURE, startX, startY, 0, 0, 289, 289, 289, 289);
         int scaleX = MAX_X + 1;
         int scaleY = MAX_Y + 1;
-        context.fill(startX + this.apple.x() * scaleX, startY + this.apple.y() * scaleY, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.y() * scaleY + scaleY, 0xff_f52559);
+        graphics.fill(startX + this.apple.x() * scaleX, startY + this.apple.y() * scaleY, startX + this.apple.x() * scaleX + scaleX, startY + this.apple.y() * scaleY + scaleY, 0xff_f52559);
         for (Vector2i vec : this.snake) {
-            context.fill(startX + vec.x() * scaleX, startY + vec.y() * scaleY, startX + vec.x() * scaleX + scaleX, startY + vec.y() * scaleY + scaleY, 0xff_1f2df6);
+            graphics.fill(startX + vec.x() * scaleX, startY + vec.y() * scaleY, startX + vec.x() * scaleX + scaleX, startY + vec.y() * scaleY + scaleY, 0xff_1f2df6);
         }
     }
 

@@ -43,11 +43,11 @@ public class SignSearchCommand {
     private static ClientBlockPredicateArgumentType.ClientBlockPredicate signPredicateFromLinePredicate(Predicate<String> linePredicate) {
         return new ClientBlockPredicateArgumentType.ClientBlockPredicate() {
             @Override
-            public boolean test(BlockGetter blockView, BlockPos pos) {
-                if (!(blockView.getBlockState(pos).getBlock() instanceof SignBlock)) {
+            public boolean test(BlockGetter blockGetter, BlockPos pos) {
+                if (!(blockGetter.getBlockState(pos).getBlock() instanceof SignBlock)) {
                     return false;
                 }
-                BlockEntity be = blockView.getBlockEntity(pos);
+                BlockEntity be = blockGetter.getBlockEntity(pos);
                 if (!(be instanceof SignBlockEntity sign)) {
                     return false;
                 }

@@ -135,11 +135,11 @@ public class EnchantmentCracker {
             }
         }
 
-        Font fontRenderer = Minecraft.getInstance().font;
+        Font font = Minecraft.getInstance().font;
         int y = 0;
         for (String line : lines) {
-            graphics.drawString(fontRenderer, line, 0, y, 0xffffff, false);
-            y += fontRenderer.lineHeight;
+            graphics.drawString(font, line, 0, y, 0xffffff, false);
+            y += font.lineHeight;
         }
     }
 
@@ -434,10 +434,10 @@ public class EnchantmentCracker {
             @Override
             public void run() {
                 if (Configs.enchCrackState == CrackState.CRACKED && doneEnchantment) {
-                    ChatComponent chatHud = Minecraft.getInstance().gui.getChat();
-                    chatHud.addMessage(Component.translatable("enchCrack.insn.ready").withStyle(ChatFormatting.BOLD));
-                    chatHud.addMessage(Component.translatable("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
-                    chatHud.addMessage(Component.translatable("enchCrack.insn.slot", slot_f + 1));
+                    ChatComponent chat = Minecraft.getInstance().gui.getChat();
+                    chat.addMessage(Component.translatable("enchCrack.insn.ready").withStyle(ChatFormatting.BOLD));
+                    chat.addMessage(Component.translatable("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
+                    chat.addMessage(Component.translatable("enchCrack.insn.slot", slot_f + 1));
                 }
             }
         });

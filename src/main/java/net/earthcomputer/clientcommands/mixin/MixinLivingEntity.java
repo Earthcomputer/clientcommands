@@ -36,8 +36,8 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
 
     @Shadow protected int useItemRemaining;
 
-    public MixinLivingEntity(EntityType<?> entityType_1, Level world_1) {
-        super(entityType_1, world_1);
+    public MixinLivingEntity(EntityType<?> entityType_1, Level level_1) {
+        super(entityType_1, level_1);
     }
 
     @Inject(method = "pushEntities", at = @At("HEAD"))
@@ -130,11 +130,11 @@ public abstract class MixinLivingEntity extends Entity implements ILivingEntity 
         return (Object) this instanceof LocalPlayer;
     }
 
-    @Accessor("lastHurt")
+    @Accessor
     @Override
-    public abstract float getLastDamageTaken();
+    public abstract float getLastHurt();
 
-    @Invoker("isDamageSourceBlocked")
+    @Invoker
     @Override
-    public abstract boolean callBlockedByShield(DamageSource damageSource);
+    public abstract boolean callIsDamageSourceBlocked(DamageSource damageSource);
 }

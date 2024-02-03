@@ -4,8 +4,8 @@ import net.minecraft.world.damagesource.DamageSource;
 
 public interface ILivingEntity {
 
-    float getLastDamageTaken();
+    float getLastHurt();
 
-    boolean callBlockedByShield(DamageSource damageSource);
+    boolean callIsDamageSourceBlocked(DamageSource damageSource);
 
 }

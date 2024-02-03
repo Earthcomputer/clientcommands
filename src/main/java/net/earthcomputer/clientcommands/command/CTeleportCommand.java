@@ -34,10 +34,10 @@ public class CTeleportCommand {
 
         packetListener.send(new ServerboundTeleportToEntityPacket(uuid));
 
-        PlayerInfo playerListEntry = packetListener.getPlayerInfo(uuid);
+        PlayerInfo playerInfo = packetListener.getPlayerInfo(uuid);
         String name;
-        if (playerListEntry != null) {
-            name = playerListEntry.getProfile().getName();
+        if (playerInfo != null) {
+            name = playerInfo.getProfile().getName();
         } else {
             name = uuid.toString();
         }

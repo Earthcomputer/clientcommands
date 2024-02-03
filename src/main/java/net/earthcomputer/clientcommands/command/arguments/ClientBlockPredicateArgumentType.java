@@ -33,12 +33,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBlockPredicateArgumentType.ParseResult> {
-    private final HolderLookup<Block> registryWrapper;
+    private final HolderLookup<Block> holderLookup;
     private boolean allowNbt = true;
     private boolean allowTags = true;
 
     private ClientBlockPredicateArgumentType(CommandBuildContext context) {
-        registryWrapper = context.holderLookup(Registries.BLOCK);
+        holderLookup = context.holderLookup(Registries.BLOCK);
     }
 
     public static ClientBlockPredicateArgumentType blockPredicate(CommandBuildContext context) {
@@ -57,13 +57,13 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
 
     @Override
     public ParseResult parse(StringReader stringReader) throws CommandSyntaxException {
-        var result = BlockStateParser.parseForTesting(registryWrapper, stringReader, allowNbt);
-        return new ParseResult(result, registryWrapper);
+        var result = BlockStateParser.parseForTesting(holderLookup, stringReader, allowNbt);
+        return new ParseResult(result, holderLookup);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return BlockStateParser.fillSuggestions(registryWrapper, builder, allowTags, allowNbt);
+        return BlockStateParser.fillSuggestions(holderLookup, builder, allowTags, allowNbt);
     }
 
     public static ClientBlockPredicate getBlockPredicate(CommandContext<FabricClientCommandSource> context, String arg) throws CommandSyntaxException {
@@ -79,11 +79,11 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
 
         return new ClientBlockPredicate() {
             @Override
-            public boolean test(BlockGetter blockView, BlockPos pos) {
-                if (!predicate.test(blockView.getBlockState(pos))) {
+            public boolean test(BlockGetter blockGetter, BlockPos pos) {
+                if (!predicate.test(blockGetter.getBlockState(pos))) {
                     return false;
                 }
-                BlockEntity be = blockView.getBlockEntity(pos);
+                BlockEntity be = blockGetter.getBlockEntity(pos);
                 return be != null && NbtUtils.compareNbt(nbtData, be.saveWithoutMetadata(), true);
             }
 
@@ -117,8 +117,8 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
 
         return new ClientBlockPredicate() {
             @Override
-            public boolean test(BlockGetter blockView, BlockPos pos) {
-                BlockState state = blockView.getBlockState(pos);
+            public boolean test(BlockGetter blockGetter, BlockPos pos) {
+                BlockState state = blockGetter.getBlockState(pos);
                 if (!predicate.test(state)) {
                     return false;
                 }
@@ -131,7 +131,7 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
                             return true;
                         }
                         if (actualNbt == null) {
-                            BlockEntity be = blockView.getBlockEntity(pos);
+                            BlockEntity be = blockGetter.getBlockEntity(pos);
                             if (be == null) {
                                 // from this point we would always require a block entity
                                 return false;
@@ -220,19 +220,19 @@ public class ClientBlockPredicateArgumentType implements ArgumentType<ClientBloc
 
     public record ParseResult(
             Either<BlockStateParser.BlockResult, BlockStateParser.TagResult> result,
-            HolderLookup<Block> registryWrapper
+            HolderLookup<Block> holderLookup
     ) {
     }
 
     public interface ClientBlockPredicate {
-        boolean test(BlockGetter blockView, BlockPos pos);
+        boolean test(BlockGetter blockGetter, BlockPos pos);
         boolean canEverMatch(BlockState state);
 
         static ClientBlockPredicate simple(Predicate<BlockState> delegate) {
             return new ClientBlockPredicate() {
                 @Override
-                public boolean test(BlockGetter blockView, BlockPos pos) {
-                    return delegate.test(blockView.getBlockState(pos));
+                public boolean test(BlockGetter blockGetter, BlockPos pos) {
+                    return delegate.test(blockGetter.getBlockState(pos));
                 }
 
                 @Override

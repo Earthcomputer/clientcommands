@@ -17,8 +17,8 @@ public abstract class MixinItemEntity extends Entity {
 
     @Shadow public abstract ItemStack getItem();
 
-    public MixinItemEntity(EntityType<?> type, Level world) {
-        super(type, world);
+    public MixinItemEntity(EntityType<?> type, Level level) {
+        super(type, level);
     }
 
     @Inject(method = "onSyncedDataUpdated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"))

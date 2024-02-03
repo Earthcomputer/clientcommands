@@ -30,8 +30,8 @@ public abstract class MixinClientPacketListener extends ClientCommonPacketListen
     @Unique
     private final ClientcommandsDataQueryHandler ccDataQueryHandler = new ClientcommandsDataQueryHandler((ClientPacketListener) (Object) this);
 
-    protected MixinClientPacketListener(Minecraft client, Connection connection, CommonListenerCookie connectionState) {
-        super(client, connection, connectionState);
+    protected MixinClientPacketListener(Minecraft minecraft, Connection connection, CommonListenerCookie listenerCookie) {
+        super(minecraft, connection, listenerCookie);
     }
 
     @Inject(method = "handleAddEntity", at = @At("TAIL"))
