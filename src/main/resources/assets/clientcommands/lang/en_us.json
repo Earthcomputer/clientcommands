@@ -137,6 +137,17 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.packetError": "ERROR",
+  "commands.clisten.add.success": "Successfully started listening to that packet",
+  "commands.clisten.add.failed": "Already listening to that packet",
+  "commands.clisten.remove.success": "No longer listening to that packet",
+  "commands.clisten.remove.failed": "Not listening to that packet",
+  "commands.clisten.list.none": "Not listening to any packets",
+  "commands.clisten.list": "Listening to the following packets:",
+  "commands.clisten.clear": "No longer listening to any packets",
+
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 

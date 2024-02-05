@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.MinecraftVersion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.network.PacketByteBuf;
@@ -85,6 +86,8 @@ public class ClientCommands implements ClientModInitializer {
         new ModConfigBuilder("clientcommands", Configs.class).build();
 
         ItemGroupCommand.registerItemGroups();
+
+        MappingsHelper.initMappings(MinecraftVersion.CURRENT.getName());
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {
@@ -160,6 +163,7 @@ public class ClientCommands implements ClientModInitializer {
         CrackRNGCommand.register(dispatcher);
         WeatherCommand.register(dispatcher);
         PluginsCommand.register(dispatcher);
+        ListenCommand.register(dispatcher);
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;

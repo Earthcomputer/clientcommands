@@ -113,4 +113,12 @@ public class Configs {
     public static boolean conditionLessThan1_20() {
         return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_20;
     }
+
+    @Config
+    public static PacketDumpMethod packetDumpMethod = PacketDumpMethod.REFLECTION;
+
+    public enum PacketDumpMethod {
+        REFLECTION,
+        BYTE_BUF,
+    }
 }

@@ -52,6 +52,8 @@ dependencies {
 	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
+
+	include api('net.fabricmc:mapping-io:0.5.1')
 }
 
 jar {

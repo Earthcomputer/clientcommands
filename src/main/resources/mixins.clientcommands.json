@@ -17,6 +17,7 @@
     "MixinChatHud",
     "MixinChatScreen",
     "MixinClientCommandSource",
+    "MixinClientConnection",
     "MixinClientPlayerEntity",
     "MixinClientPlayerInteractionManager",
     "MixinClientPlayNetworkHandler",
