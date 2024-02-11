@@ -24,7 +24,7 @@ public class UuidCommand {
 
     private static int getUuid(FabricClientCommandSource source, UUID entity) {
         String uuid = entity.toString();
-        Component uuidText = Component.literal(uuid).withStyle(style -> style
+        Component uuidComponent = Component.literal(uuid).withStyle(style -> style
             .withUnderlined(true)
             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
             .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid))
@@ -35,11 +35,11 @@ public class UuidCommand {
 
         PlayerInfo player = packetListener.getPlayerInfo(entity);
         if (player == null) {
-            source.sendFeedback(Component.translatable("commands.cuuid.success.nameless", uuidText));
+            source.sendFeedback(Component.translatable("commands.cuuid.success.nameless", uuidComponent));
             return Command.SINGLE_SUCCESS;
         }
         String name = player.getProfile().getName();
-        source.sendFeedback(Component.translatable("commands.cuuid.success", name, uuidText));
+        source.sendFeedback(Component.translatable("commands.cuuid.success", name, uuidComponent));
         return Command.SINGLE_SUCCESS;
     }
 }

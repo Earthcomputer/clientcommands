@@ -49,9 +49,9 @@ public class ClientCommandHelper {
     }
 
     public static void addOverlayMessage(Component message, int time) {
-        Gui inGameHud = Minecraft.getInstance().gui;
-        inGameHud.setOverlayMessage(message, false);
-        ((GuiAccessor) inGameHud).setOverlayMessageTime(time);
+        Gui gui = Minecraft.getInstance().gui;
+        gui.setOverlayMessage(message, false);
+        ((GuiAccessor) gui).setOverlayMessageTime(time);
     }
 
     public static Component getLookCoordsTextComponent(BlockPos pos) {
@@ -59,8 +59,8 @@ public class ClientCommandHelper {
                 String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Component getLookCoordsTextComponent(MutableComponent translatableText, BlockPos pos) {
-        return getCommandTextComponent(translatableText, String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
+    public static Component getLookCoordsTextComponent(MutableComponent component, BlockPos pos) {
+        return getCommandTextComponent(component, String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static Component getGlowCoordsTextComponent(BlockPos pos) {
@@ -68,16 +68,16 @@ public class ClientCommandHelper {
                 String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Component getGlowCoordsTextComponent(MutableComponent translatableText, BlockPos pos) {
-        return getCommandTextComponent(translatableText, String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
+    public static Component getGlowCoordsTextComponent(MutableComponent component, BlockPos pos) {
+        return getCommandTextComponent(component, String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static Component getCommandTextComponent(@Translatable String translationKey, String command) {
         return getCommandTextComponent(Component.translatable(translationKey), command);
     }
 
-    public static Component getCommandTextComponent(MutableComponent translatableText, String command) {
-        return translatableText.withStyle(style -> style.applyFormat(ChatFormatting.UNDERLINE)
+    public static Component getCommandTextComponent(MutableComponent component, String command) {
+        return component.withStyle(style -> style.applyFormat(ChatFormatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(command))));
     }

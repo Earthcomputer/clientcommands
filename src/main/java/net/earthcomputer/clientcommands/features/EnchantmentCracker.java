@@ -190,7 +190,7 @@ public class EnchantmentCracker {
         int power = getEnchantPower(level, tablePos);
 
         RandomSource rand = RandomSource.create();
-        int[] actualEnchantLevels = menu.costs;
+        int[] actualEnchantCosts = menu.costs;
         int[] actualEnchantmentClues = menu.enchantClue;
         int[] actualLevelClues = menu.levelClue;
 
@@ -206,7 +206,7 @@ public class EnchantmentCracker {
                 if (cost < slot + 1) {
                     cost = 0;
                 }
-                if (cost != actualEnchantLevels[slot]) {
+                if (cost != actualEnchantCosts[slot]) {
                     xpSeedItr.remove();
                     continue seedLoop;
                 }
@@ -214,9 +214,9 @@ public class EnchantmentCracker {
 
             // generate enchantment clues and see if they match
             for (int slot = 0; slot < 3; slot++) {
-                if (actualEnchantLevels[slot] > 0) {
+                if (actualEnchantCosts[slot] > 0) {
                     List<EnchantmentInstance> enchantments = getEnchantmentList(rand, xpSeed, itemToEnchant, slot,
-                            actualEnchantLevels[slot]);
+                            actualEnchantCosts[slot]);
                     if (enchantments == null || enchantments.isEmpty()) {
                         // check that there is indeed no enchantment clue
                         if (actualEnchantmentClues[slot] != -1 || actualLevelClues[slot] != -1) {
