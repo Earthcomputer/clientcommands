@@ -2,46 +2,45 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CalcStackCommand {
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("ccalcstack")
             .then(argument("count", integer(0))
-                .then(argument("item", itemStack(registryAccess))
+                .then(argument("item", itemStack(context))
                 .executes(ctx -> {
-                    ItemStack stack = getCItemStackArgument(ctx, "item").createStack(1, false);
+                    ItemStack stack = getCItemStackArgument(ctx, "item").createItemStack(1, false);
                     return getStackSize(ctx.getSource(), stack, getInteger(ctx, "count"));
                 }))
             .executes(ctx -> getStackSize(ctx.getSource(), getInteger(ctx, "count")))));
     }
 
     private static int getStackSize(FabricClientCommandSource source, ItemStack stack, int count) {
-        int stacks = count / stack.getMaxCount();
-        int remainder = count % stack.getMaxCount();
+        int stacks = count / stack.getMaxStackSize();
+        int remainder = count % stack.getMaxStackSize();
 
         if (stack.isEmpty()) {
             if (remainder == 0) {
-                source.sendFeedback(Text.translatable("commands.ccalcstack.success.empty.exact", count, stacks));
+                source.sendFeedback(Component.translatable("commands.ccalcstack.success.empty.exact", count, stacks));
             } else {
-                source.sendFeedback(Text.translatable("commands.ccalcstack.success.empty", count, stacks, remainder));
+                source.sendFeedback(Component.translatable("commands.ccalcstack.success.empty", count, stacks, remainder));
             }
         } else {
-            Text itemText = stack.toHoverableText();
+            Component itemText = stack.getDisplayName();
             if (remainder == 0) {
-                source.sendFeedback(Text.translatable("commands.ccalcstack.success.exact", count, itemText, stacks));
+                source.sendFeedback(Component.translatable("commands.ccalcstack.success.exact", count, itemText, stacks));
             } else {
-                source.sendFeedback(Text.translatable("commands.ccalcstack.success", count, itemText, stacks, remainder));
+                source.sendFeedback(Component.translatable("commands.ccalcstack.success", count, itemText, stacks, remainder));
             }
         }
 
@@ -49,7 +48,7 @@ public class CalcStackCommand {
     }
 
     private static int getStackSize(FabricClientCommandSource source, int count) {
-        ItemStack heldStack = source.getPlayer().getStackInHand(Hand.MAIN_HAND).copy();
+        ItemStack heldStack = source.getPlayer().getItemInHand(InteractionHand.MAIN_HAND).copy();
         return getStackSize(source, heldStack, count);
     }
 

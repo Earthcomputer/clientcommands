@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands;
 
 import net.earthcomputer.clientcommands.features.Relogger;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 public class ServerBrandManager {
 
@@ -30,9 +30,9 @@ public class ServerBrandManager {
     }
 
     public static void rngWarning() {
-        if (!isVanilla() && !hasWarnedRng && !MinecraftClient.getInstance().isIntegratedServerRunning()) {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(
-                    Text.translatable("playerManip.serverBrandWarning").formatted(Formatting.YELLOW));
+        if (!isVanilla() && !hasWarnedRng && !Minecraft.getInstance().hasSingleplayerServer()) {
+            Minecraft.getInstance().gui.getChat().addMessage(
+                    Component.translatable("playerManip.serverBrandWarning").withStyle(ChatFormatting.YELLOW));
             hasWarnedRng = true;
         }
     }

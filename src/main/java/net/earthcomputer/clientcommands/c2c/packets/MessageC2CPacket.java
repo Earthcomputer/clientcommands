@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.c2c.packets;
 
 import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.CCPacketListener;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 public class MessageC2CPacket implements C2CPacket {
 
@@ -14,15 +14,15 @@ public class MessageC2CPacket implements C2CPacket {
         this.message = message;
     }
 
-    public MessageC2CPacket(PacketByteBuf raw) {
-        this.sender = raw.readString();
-        this.message = raw.readString();
+    public MessageC2CPacket(FriendlyByteBuf raw) {
+        this.sender = raw.readUtf();
+        this.message = raw.readUtf();
     }
 
     @Override
-    public void write(PacketByteBuf buf) {
-        buf.writeString(this.sender);
-        buf.writeString(this.message);
+    public void write(FriendlyByteBuf buf) {
+        buf.writeUtf(this.sender);
+        buf.writeUtf(this.message);
     }
 
     @Override

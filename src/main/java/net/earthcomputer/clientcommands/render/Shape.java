@@ -1,18 +1,18 @@
 package net.earthcomputer.clientcommands.render;
 
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class Shape {
     int deathTime;
-    protected Vec3d prevPos;
+    protected Vec3 prevPos;
 
     public void tick() {
     }
 
-    public abstract void render(MatrixStack matrixStack, VertexConsumer vertexConsumer, float delta);
+    public abstract void render(PoseStack poseStack, VertexConsumer vertexConsumer, float delta);
 
-    public abstract Vec3d getPos();
+    public abstract Vec3 getPos();
 
 }

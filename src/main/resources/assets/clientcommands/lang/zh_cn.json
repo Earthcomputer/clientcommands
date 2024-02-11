@@ -150,9 +150,9 @@
   "commands.cping.playerNotFound": "未找到玩家",
   "commands.cping.tooManyPlayers": "你的查询最多可以匹配1名玩家",
 
-  "commands.cpos.world.overworld": "主世界",
-  "commands.cpos.world.the_end": "末地",
-  "commands.cpos.world.the_nether": "下界",
+  "commands.cpos.level.overworld": "主世界",
+  "commands.cpos.level.the_end": "末地",
+  "commands.cpos.level.the_nether": "下界",
   "commands.cpos.coords.left": "在%1$s中是",
   "commands.cpos.coords.right": "在%2$s中",
 

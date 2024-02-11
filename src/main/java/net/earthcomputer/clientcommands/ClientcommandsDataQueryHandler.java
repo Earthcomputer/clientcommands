@@ -1,10 +1,10 @@
 package net.earthcomputer.clientcommands;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.play.QueryBlockNbtC2SPacket;
-import net.minecraft.network.packet.c2s.play.QueryEntityNbtC2SPacket;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
+import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ClientcommandsDataQueryHandler {
-    private final ClientPlayNetworkHandler networkHandler;
+    private final ClientPacketListener packetListener;
     private final List<CallbackEntry> callbacks = new ArrayList<>();
 
-    public ClientcommandsDataQueryHandler(ClientPlayNetworkHandler networkHandler) {
-        this.networkHandler = networkHandler;
+    public ClientcommandsDataQueryHandler(ClientPacketListener packetListener) {
+        this.packetListener = packetListener;
     }
 
-    public static ClientcommandsDataQueryHandler get(ClientPlayNetworkHandler networkHandler) {
-        return ((IClientPlayNetworkHandler) networkHandler).clientcommands_getCCDataQueryHandler();
+    public static ClientcommandsDataQueryHandler get(ClientPacketListener packetListener) {
+        return ((IClientPlayNetworkHandler) packetListener).clientcommands_getCCDataQueryHandler();
     }
 
-    public boolean handleQueryResponse(int transactionId, @Nullable NbtCompound nbt) {
+    public boolean handleQueryResponse(int transactionId, @Nullable CompoundTag nbt) {
         Iterator<CallbackEntry> callbacks = this.callbacks.iterator();
         while (callbacks.hasNext()) {
             CallbackEntry callback = callbacks.next();
@@ -40,23 +40,23 @@ public class ClientcommandsDataQueryHandler {
         return false;
     }
 
-    private int nextQuery(Consumer<@Nullable NbtCompound> callback) {
-        int transactionId = ++networkHandler.getDataQueryHandler().expectedTransactionId;
+    private int nextQuery(Consumer<@Nullable CompoundTag> callback) {
+        int transactionId = ++packetListener.getDebugQueryHandler().transactionId;
         callbacks.add(new CallbackEntry(transactionId, callback));
         return transactionId;
     }
 
-    public void queryEntityNbt(int entityNetworkId, Consumer<@Nullable NbtCompound> callback) {
+    public void queryEntityNbt(int entityNetworkId, Consumer<@Nullable CompoundTag> callback) {
         int transactionId = nextQuery(callback);
-        networkHandler.sendPacket(new QueryEntityNbtC2SPacket(transactionId, entityNetworkId));
+        packetListener.send(new ServerboundEntityTagQuery(transactionId, entityNetworkId));
     }
 
-    public void queryBlockNbt(BlockPos pos, Consumer<@Nullable NbtCompound> callback) {
+    public void queryBlockNbt(BlockPos pos, Consumer<@Nullable CompoundTag> callback) {
         int transactionId = nextQuery(callback);
-        networkHandler.sendPacket(new QueryBlockNbtC2SPacket(transactionId, pos));
+        packetListener.send(new ServerboundBlockEntityTagQuery(transactionId, pos));
     }
 
-    private record CallbackEntry(int transactionId, Consumer<@Nullable NbtCompound> callback) {
+    private record CallbackEntry(int transactionId, Consumer<@Nullable CompoundTag> callback) {
     }
 
     public interface IClientPlayNetworkHandler {

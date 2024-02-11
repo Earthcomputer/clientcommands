@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -103,7 +103,7 @@ public class MoteCommand {
     }
 
     private static int sendEmoticon(String emoticon) {
-        MinecraftClient.getInstance().getNetworkHandler().sendChatMessage(emoticon);
+        Minecraft.getInstance().getConnection().sendChat(emoticon);
         return Command.SINGLE_SUCCESS;
     }
 

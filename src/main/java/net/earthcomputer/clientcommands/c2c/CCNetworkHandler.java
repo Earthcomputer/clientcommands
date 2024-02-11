@@ -6,23 +6,23 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.encryption.PlayerPublicKey;
-import net.minecraft.network.encryption.PublicPlayerSession;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.RemoteChatSession;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.slf4j.Logger;
 
 import java.security.PublicKey;
 
 public class CCNetworkHandler implements CCPacketListener {
 
-    private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Text.translatable("ccpacket.messageTooLong", d));
-    private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("ccpacket.publicKeyNotFound"));
-    private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("ccpacket.encryptionFailed"));
+    private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Component.translatable("ccpacket.messageTooLong", d));
+    private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("ccpacket.publicKeyNotFound"));
+    private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("ccpacket.encryptionFailed"));
 
     private static final CCNetworkHandler instance = new CCNetworkHandler();
 
@@ -35,22 +35,22 @@ public class CCNetworkHandler implements CCPacketListener {
         return instance;
     }
 
-    public void sendPacket(C2CPacket packet, PlayerListEntry recipient) throws CommandSyntaxException {
+    public void sendPacket(C2CPacket packet, PlayerInfo recipient) throws CommandSyntaxException {
         Integer id = CCPacketHandler.getId(packet.getClass());
         if (id == null) {
             LOGGER.warn("Could not send the packet because the id was not recognised");
             return;
         }
-        PublicPlayerSession session = recipient.getSession();
+        RemoteChatSession session = recipient.getChatSession();
         if (session == null) {
             throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
         }
-        PlayerPublicKey ppk = session.publicKeyData();
+        ProfilePublicKey ppk = session.profilePublicKey();
         if (ppk == null) {
             throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
         }
         PublicKey key = ppk.data().key();
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(id);
         packet.write(buf);
         byte[] uncompressed = new byte[buf.readableBytes()];
@@ -83,7 +83,7 @@ public class CCNetworkHandler implements CCPacketListener {
         if (commandString.length() >= 256) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create(commandString.length());
         }
-        MinecraftClient.getInstance().getNetworkHandler().sendChatCommand(commandString);
+        Minecraft.getInstance().getConnection().sendCommand(commandString);
         OutgoingPacketFilter.addPacket(packetString);
     }
 
@@ -91,12 +91,12 @@ public class CCNetworkHandler implements CCPacketListener {
     public void onMessageC2CPacket(MessageC2CPacket packet) {
         String sender = packet.getSender();
         String message = packet.getMessage();
-        MutableText prefix = Text.empty();
-        prefix.append(Text.literal("[").formatted(Formatting.DARK_GRAY));
-        prefix.append(Text.literal("/cwe").formatted(Formatting.AQUA));
-        prefix.append(Text.literal("]").formatted(Formatting.DARK_GRAY));
-        prefix.append(Text.literal(" "));
-        Text text = prefix.append(Text.translatable("ccpacket.messageC2CPacket.incoming", sender, message).formatted(Formatting.GRAY));
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(text);
+        MutableComponent prefix = Component.empty();
+        prefix.append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY));
+        prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
+        prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
+        prefix.append(Component.literal(" "));
+        Component component = prefix.append(Component.translatable("ccpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
+        Minecraft.getInstance().gui.getChat().addMessage(component);
     }
 }

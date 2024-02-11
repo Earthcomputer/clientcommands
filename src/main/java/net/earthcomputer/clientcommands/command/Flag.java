@@ -10,7 +10,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -101,7 +101,7 @@ public final class Flag<T> {
 
     @SuppressWarnings("unchecked")
     public static <S> S getActualSource(CommandContext<S> ctx) {
-        if (ctx.getRootNode() == Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).getCommandDispatcher().getRoot()) {
+        if (ctx.getRootNode() == Objects.requireNonNull(Minecraft.getInstance().getConnection()).getCommands().getRoot()) {
             // we're in the completion dispatcher, reparse using the real dispatcher to get the redirects
             return (S) getActualSource(Objects.requireNonNull(ClientCommandManager.getActiveDispatcher()).parse(
                 StringRange.encompassing(ctx.getRange(), ctx.getLastChild().getRange()).get(ctx.getInput()),

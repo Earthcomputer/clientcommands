@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.interfaces;
 
-import net.minecraft.inventory.Inventory;
+import net.minecraft.world.Container;
 
 public interface IDroppableInventoryContainer {
 
-    Inventory getDroppableInventory();
+    Container getDroppableInventory();
 
 }
