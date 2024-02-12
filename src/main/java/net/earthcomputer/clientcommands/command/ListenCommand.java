@@ -9,6 +9,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import net.earthcomputer.clientcommands.*;
+import net.earthcomputer.clientcommands.features.MappingsHelper;
+import net.earthcomputer.clientcommands.features.PacketDumper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
