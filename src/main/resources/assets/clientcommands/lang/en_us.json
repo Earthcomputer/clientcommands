@@ -95,6 +95,11 @@
   "commands.cfunction.limitReached": "Command limit (%d) reached",
   "commands.cfunction.success": "Ran %d commands from function %s",
 
+  "commands.cgamemode.playerNotFound": "Player not found",
+  "commands.cgamemode.playerGameMode": "Player %s is in game mode %s",
+  "commands.cgamemode.noneWithGameMode": "No players are in game mode %s",
+  "commands.cgamemode.listWithGamemode": "The following players are in game mode %s:",
+
   "commands.cgamma.success": "Set gamma to %f",
 
   "commands.cghostblock.fill.success": "%d ghost blocks filled",
