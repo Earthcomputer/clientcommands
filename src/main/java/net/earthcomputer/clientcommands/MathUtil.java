@@ -1,13 +1,20 @@
 package net.earthcomputer.clientcommands;
 
 import com.google.common.collect.Iterables;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.*;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.awt.geom.*;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,22 +22,22 @@ public class MathUtil {
 
     private static final double EPSILON = 0.001;
 
-    public static Vec3d getClosestPoint(BlockPos blockPos, VoxelShape voxel, Vec3d pos) {
+    public static Vec3 getClosestPoint(BlockPos blockPos, VoxelShape voxel, Vec3 pos) {
         return getClosestPoint(blockPos, voxel, pos, null);
     }
 
-    public static Vec3d getClosestPoint(BlockPos blockPos, VoxelShape voxel, Vec3d pos, Direction dir) {
+    public static Vec3 getClosestPoint(BlockPos blockPos, VoxelShape voxel, Vec3 pos, Direction dir) {
         ClosestPosResult result = new ClosestPosResult();
         Direction[] dirs = dir == null ? Direction.values() : new Direction[] {dir};
-        voxel.forEachBox((x1, y1, z1, x2, y2, z2) -> {
-            Box box = new Box(x1, y1, z1, x2, y2, z2).offset(blockPos);
+        voxel.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
+            AABB box = new AABB(x1, y1, z1, x2, y2, z2).move(blockPos);
             for (Direction face : dirs) {
-                Box faceBox = getFace(box, face);
+                AABB faceBox = getFace(box, face);
                 // Since the faces are axis aligned, it's a simple clamp operation
-                Vec3d val = new Vec3d(MathHelper.clamp(pos.x, faceBox.minX, faceBox.maxX),
-                        MathHelper.clamp(pos.y, faceBox.minY, faceBox.maxY),
-                        MathHelper.clamp(pos.z, faceBox.minZ, faceBox.maxZ));
-                double distanceSq = val.squaredDistanceTo(pos);
+                Vec3 val = new Vec3(Mth.clamp(pos.x, faceBox.minX, faceBox.maxX),
+                        Mth.clamp(pos.y, faceBox.minY, faceBox.maxY),
+                        Mth.clamp(pos.z, faceBox.minZ, faceBox.maxZ));
+                double distanceSq = val.distanceToSqr(pos);
                 if (distanceSq < result.distanceSq) {
                     result.val = val;
                     result.distanceSq = distanceSq;
@@ -40,47 +47,47 @@ public class MathUtil {
         return result.val;
     }
 
-    public static Vec3d getClosestVisiblePoint(World world, BlockPos targetPos, Vec3d sourcePos, Entity excludingEntity) {
-        return getClosestVisiblePoint(world, targetPos, sourcePos, excludingEntity, null);
+    public static Vec3 getClosestVisiblePoint(Level level, BlockPos targetPos, Vec3 sourcePos, Entity excludingEntity) {
+        return getClosestVisiblePoint(level, targetPos, sourcePos, excludingEntity, null);
     }
 
-    public static Vec3d getClosestVisiblePoint(World world, BlockPos targetPos, Vec3d sourcePos, Entity excludingEntity, Direction dir) {
-        if (targetPos.getSquaredDistance(sourcePos.x, sourcePos.y, sourcePos.z) > 7 * 7) {
+    public static Vec3 getClosestVisiblePoint(Level level, BlockPos targetPos, Vec3 sourcePos, Entity excludingEntity, Direction dir) {
+        if (targetPos.distToLowCornerSqr(sourcePos.x, sourcePos.y, sourcePos.z) > 7 * 7) {
             return null;
         }
 
-        Box totalArea = new Box(sourcePos, Vec3d.of(targetPos));
-        List<Box> obscurers = new ArrayList<>();
-        for (BlockPos pos : BlockPos.iterate(MathHelper.floor(totalArea.minX), MathHelper.floor(totalArea.minY), MathHelper.floor(totalArea.minZ),
-                MathHelper.ceil(totalArea.maxX), MathHelper.ceil(totalArea.maxY), MathHelper.ceil(totalArea.maxZ))) {
+        AABB totalArea = new AABB(sourcePos, Vec3.atLowerCornerOf(targetPos));
+        List<AABB> obscurers = new ArrayList<>();
+        for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(totalArea.minX), Mth.floor(totalArea.minY), Mth.floor(totalArea.minZ),
+                Mth.ceil(totalArea.maxX), Mth.ceil(totalArea.maxY), Mth.ceil(totalArea.maxZ))) {
             if (!pos.equals(targetPos)) {
-                world.getBlockState(pos).getOutlineShape(world, pos).forEachBox((x1, y1, z1, x2, y2, z2) ->
-                        obscurers.add(new Box(x1, y1, z1, x2, y2, z2).offset(pos).expand(EPSILON)));
+                level.getBlockState(pos).getShape(level, pos).forAllBoxes((x1, y1, z1, x2, y2, z2) ->
+                        obscurers.add(new AABB(x1, y1, z1, x2, y2, z2).move(pos).inflate(EPSILON)));
             }
         }
-        for (Entity entity : world.getOtherEntities(excludingEntity, totalArea, entity -> !entity.isSpectator() && entity.canHit())) {
-            obscurers.add(entity.getBoundingBox().expand(entity.getTargetingMargin() + EPSILON));
+        for (Entity entity : level.getEntities(excludingEntity, totalArea, entity -> !entity.isSpectator() && entity.isPickable())) {
+            obscurers.add(entity.getBoundingBox().inflate(entity.getPickRadius() + EPSILON));
         }
-        List<Box> targetBoxes = new ArrayList<>();
-        world.getBlockState(targetPos).getOutlineShape(world, targetPos).forEachBox((x1, y1, z1, x2, y2, z2) ->
-                targetBoxes.add(new Box(x1, y1, z1, x2, y2, z2).offset(targetPos)));
+        List<AABB> targetBoxes = new ArrayList<>();
+        level.getBlockState(targetPos).getShape(level, targetPos).forAllBoxes((x1, y1, z1, x2, y2, z2) ->
+                targetBoxes.add(new AABB(x1, y1, z1, x2, y2, z2).move(targetPos)));
 
-        Vec3d resultVal = null;
+        Vec3 resultVal = null;
         double resultDistanceSq = Double.POSITIVE_INFINITY;
         Direction[] dirs = dir == null ? Direction.values() : new Direction[] {dir};
-        for (Box box : targetBoxes) {
+        for (AABB box : targetBoxes) {
             for (Direction face : dirs) {
-                Box faceBox = getFace(box.expand(-EPSILON), face);
+                AABB faceBox = getFace(box.inflate(-EPSILON), face);
                 if (sourcePos.subtract(faceBox.minX, faceBox.minY, faceBox.minZ)
-                        .dotProduct(new Vec3d(face.getOffsetX(), face.getOffsetY(), face.getOffsetZ())) > 0) {
+                        .dot(new Vec3(face.getStepX(), face.getStepY(), face.getStepZ())) > 0) {
                     //noinspection StaticPseudoFunctionalStyleMethod
-                    Vec3d val = getClosestVisiblePoint(world,
+                    Vec3 val = getClosestVisiblePoint(level,
                             Iterables.concat(obscurers,
                                     Iterables.transform(Iterables.filter(targetBoxes, it -> it != box),
-                                            b -> b.expand(EPSILON))),
+                                            b -> b.inflate(EPSILON))),
                             faceBox, sourcePos, face);
                     if (val != null) {
-                        double distanceSq = val.squaredDistanceTo(sourcePos);
+                        double distanceSq = val.distanceToSqr(sourcePos);
                         if (distanceSq < resultDistanceSq) {
                             resultVal = val;
                             resultDistanceSq = distanceSq;
@@ -93,7 +100,7 @@ public class MathUtil {
         return resultVal;
     }
 
-    private static Vec3d getClosestVisiblePoint(BlockView world, Iterable<Box> obscurers, Box face, Vec3d sourcePos, Direction dir) {
+    private static Vec3 getClosestVisiblePoint(BlockGetter level, Iterable<AABB> obscurers, AABB face, Vec3 sourcePos, Direction dir) {
         Direction.Axis xAxis, yAxis;
         switch (dir.getAxis()) {
             case X -> {
@@ -121,9 +128,9 @@ public class MathUtil {
         double s = getComponent(sourcePos, dir.getAxis());
         double sx = getComponent(sourcePos, xAxis);
         double sy = getComponent(sourcePos, yAxis);
-        for (Box obscurer : obscurers) {
+        for (AABB obscurer : obscurers) {
             for (Direction obscurerSide : Direction.values()) {
-                Box obscurerFace = getFace(obscurer, obscurerSide);
+                AABB obscurerFace = getFace(obscurer, obscurerSide);
                 Path2D.Double path = getShadow(sourcePos, obscurerFace, obscurerSide, f, dir,
                         minX + (maxX - minX) * .5, minY + (maxY - minY) * .5, xAxis, yAxis);
                 if (path != null)
@@ -192,15 +199,15 @@ public class MathUtil {
     }
 
     /** @noinspection DuplicatedCode it's a painful truth, deal with it :) */
-    private static Path2D.Double getShadow(Vec3d sourcePos, Box obscurerFace, Direction obscurerFaceNormal, double targetPlaneCoord, Direction targetPlaneNormal, double targetCenterX, double targetCenterY, Direction.Axis xAxis, Direction.Axis yAxis) {
+    private static Path2D.Double getShadow(Vec3 sourcePos, AABB obscurerFace, Direction obscurerFaceNormal, double targetPlaneCoord, Direction targetPlaneNormal, double targetCenterX, double targetCenterY, Direction.Axis xAxis, Direction.Axis yAxis) {
         double sourceOffset = getComponent(sourcePos, targetPlaneNormal.getAxis());
         double[][] obscurer = new double[4][3];
         boolean[] behindSource = new boolean[4];
         {
-            Direction dirB = obscurerFaceNormal.getAxis() == Direction.Axis.Y ? Direction.WEST : obscurerFaceNormal.rotateYClockwise();
+            Direction dirB = obscurerFaceNormal.getAxis() == Direction.Axis.Y ? Direction.WEST : obscurerFaceNormal.getClockWise();
             Direction dirC = rotateClockwise(obscurerFaceNormal, dirB.getAxis());
             for (int i = 0; i < 4; i++) {
-                Box vertex = getFace(getFace(obscurerFace, i < 2 ? dirB : dirB.getOpposite()), i == 0 || i == 3 ? dirC : dirC.getOpposite());
+                AABB vertex = getFace(getFace(obscurerFace, i < 2 ? dirB : dirB.getOpposite()), i == 0 || i == 3 ? dirC : dirC.getOpposite());
                 obscurer[i][0] = vertex.minX;
                 obscurer[i][1] = vertex.minY;
                 obscurer[i][2] = vertex.minZ;
@@ -242,7 +249,7 @@ public class MathUtil {
                 return null; // only possible if the player is inside the obstacle
             }
             // actually find the point on the target plane
-            Vec3d projected = sourcePos.add((obscurer[i][0] - sourcePos.x) * lambda, (obscurer[i][1] - sourcePos.y) * lambda, (obscurer[i][2] - sourcePos.z) * lambda);
+            Vec3 projected = sourcePos.add((obscurer[i][0] - sourcePos.x) * lambda, (obscurer[i][1] - sourcePos.y) * lambda, (obscurer[i][2] - sourcePos.z) * lambda);
             double x = getComponent(projected, xAxis);
             double y = getComponent(projected, yAxis);
             if (i == firstInFront) {
@@ -381,7 +388,7 @@ public class MathUtil {
         return path;
     }
 
-    private static double getComponent(Vec3d vec, Direction.Axis axis) {
+    private static double getComponent(Vec3 vec, Direction.Axis axis) {
         return getComponent(vec.x, vec.y, vec.z, axis);
     }
 
@@ -394,7 +401,7 @@ public class MathUtil {
     }
 
     /** @noinspection DuplicatedCode */
-    private static Vec3d createFromComponents(double a, Direction.Axis aAxis, double b, Direction.Axis bAxis, double c, Direction.Axis cAxis) {
+    private static Vec3 createFromComponents(double a, Direction.Axis aAxis, double b, Direction.Axis bAxis, double c, Direction.Axis cAxis) {
         double x = 0, y = 0, z = 0;
         switch (aAxis) {
             case X -> x = a;
@@ -411,17 +418,17 @@ public class MathUtil {
             case Y -> y = c;
             case Z -> z = c;
         }
-        return new Vec3d(x, y, z);
+        return new Vec3(x, y, z);
     }
 
-    private static Box getFace(Box box, Direction dir) {
+    private static AABB getFace(AABB box, Direction dir) {
         return switch (dir) {
-            case WEST -> new Box(box.minX, box.minY, box.minZ, box.minX, box.maxY, box.maxZ);
-            case EAST -> new Box(box.maxX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
-            case DOWN -> new Box(box.minX, box.minY, box.minZ, box.maxX, box.minY, box.maxZ);
-            case UP -> new Box(box.minX, box.maxY, box.minZ, box.maxX, box.maxY, box.maxZ);
-            case NORTH -> new Box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ);
-            case SOUTH -> new Box(box.minX, box.minY, box.maxZ, box.maxX, box.maxY, box.maxZ);
+            case WEST -> new AABB(box.minX, box.minY, box.minZ, box.minX, box.maxY, box.maxZ);
+            case EAST -> new AABB(box.maxX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+            case DOWN -> new AABB(box.minX, box.minY, box.minZ, box.maxX, box.minY, box.maxZ);
+            case UP -> new AABB(box.minX, box.maxY, box.minZ, box.maxX, box.maxY, box.maxZ);
+            case NORTH -> new AABB(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ);
+            case SOUTH -> new AABB(box.minX, box.minY, box.maxZ, box.maxX, box.maxY, box.maxZ);
         };
     }
 
@@ -435,7 +442,7 @@ public class MathUtil {
             }
             case Y -> {
                 if (dir != Direction.UP && dir != Direction.DOWN) {
-                    return dir.rotateYClockwise();
+                    return dir.getClockWise();
                 }
                 return dir;
             }
@@ -470,7 +477,7 @@ public class MathUtil {
     }
 
     private static class ClosestPosResult {
-        Vec3d val;
+        Vec3 val;
         double distanceSq = Double.POSITIVE_INFINITY;
     }
 

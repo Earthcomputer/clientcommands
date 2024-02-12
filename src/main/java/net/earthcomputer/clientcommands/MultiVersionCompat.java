@@ -6,11 +6,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.item.Item;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.Connection;
+import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Field;
@@ -61,7 +61,7 @@ public abstract sealed class MultiVersionCompat {
 
         @Override
         public String getProtocolName() {
-            return SharedConstants.getGameVersion().getName();
+            return SharedConstants.getCurrentVersion().getName();
         }
     }
 
@@ -119,7 +119,7 @@ public abstract sealed class MultiVersionCompat {
             getProtocol = protocolVersion.getMethod("getProtocol", int.class);
 
             Field channelField = null;
-            for (Field field : ClientConnection.class.getDeclaredFields()) {
+            for (Field field : Connection.class.getDeclaredFields()) {
                 if (field.getType() == Channel.class) {
                     channelField = field;
                     channelField.setAccessible(true);
@@ -155,9 +155,9 @@ public abstract sealed class MultiVersionCompat {
             int protocolVersion = SharedConstants.getProtocolVersion();
 
             // https://github.com/ViaVersion/ViaFabric/blob/fda8d39147d46c80698d204538ede790f02589f6/viafabric-mc18/src/main/java/com/viaversion/fabric/mc18/mixin/debug/client/MixinDebugHud.java
-            ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-            if (networkHandler != null) {
-                Channel channel = (Channel) this.channel.get(networkHandler.getConnection());
+            ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+            if (packetListener != null) {
+                Channel channel = (Channel) this.channel.get(packetListener.getConnection());
                 ChannelHandler viaDecoder = channel.pipeline().get("via-decoder");
                 if (fabricDecodeHandler.isInstance(viaDecoder)) {
                     Object user = getInfo.invoke(viaDecoder);

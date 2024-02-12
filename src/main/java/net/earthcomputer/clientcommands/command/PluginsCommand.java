@@ -5,9 +5,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.CommandNode;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
-import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
+import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 
 import java.util.stream.Collectors;
 
@@ -36,7 +36,7 @@ public class PluginsCommand {
 
     private static int getPlugins(FabricClientCommandSource source, String partial) {
         awaitingSuggestionsPacket = true;
-        source.getClient().getNetworkHandler().sendPacket(new RequestCommandCompletionsC2SPacket(1, partial));
+        source.getClient().getConnection().send(new ServerboundCommandSuggestionPacket(1, partial));
         callback = packet -> {
             String plugins = packet.getSuggestions().getList().stream()
                 .map(Suggestion::getText)
@@ -45,26 +45,26 @@ public class PluginsCommand {
                 .distinct()
                 .collect(Collectors.joining(", "));
 
-            source.sendFeedback(Text.translatable("commands.cplugins.found"));
-            source.sendFeedback(Text.literal(plugins));
+            source.sendFeedback(Component.translatable("commands.cplugins.found"));
+            source.sendFeedback(Component.literal(plugins));
         };
         return Command.SINGLE_SUCCESS;
     }
 
     private static int getPluginsFromDispatcher(FabricClientCommandSource source) {
-        String plugins = source.getClient().getNetworkHandler().getCommandDispatcher().getRoot().getChildren().stream()
+        String plugins = source.getClient().getConnection().getCommands().getRoot().getChildren().stream()
             .map(CommandNode::getName)
             .filter(name -> name.contains(":"))
             .map(name -> name.substring(0, name.indexOf(":")))
             .distinct()
             .collect(Collectors.joining(", "));
 
-        source.sendFeedback(Text.translatable("commands.cplugins.found"));
-        source.sendFeedback(Text.literal(plugins));
+        source.sendFeedback(Component.translatable("commands.cplugins.found"));
+        source.sendFeedback(Component.literal(plugins));
         return Command.SINGLE_SUCCESS;
     }
 
-    public static void onCommandSuggestions(CommandSuggestionsS2CPacket packet) {
+    public static void onCommandSuggestions(ClientboundCommandSuggestionsPacket packet) {
         if (!awaitingSuggestionsPacket) {
             return;
         }
@@ -75,5 +75,5 @@ public class PluginsCommand {
 
 @FunctionalInterface
 interface SuggestionsCallback {
-    void apply(CommandSuggestionsS2CPacket packet);
+    void apply(ClientboundCommandSuggestionsPacket packet);
 }

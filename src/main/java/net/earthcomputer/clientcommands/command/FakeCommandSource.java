@@ -1,26 +1,29 @@
 package net.earthcomputer.clientcommands.command;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.RegistryAccess;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class FakeCommandSource extends ServerCommandSource {
-    public FakeCommandSource(ClientPlayerEntity player) {
-        super(player, player.getPos(), player.getRotationClient(), null, 314159265, player.getNameForScoreboard(), player.getName(), null, player);
+public class FakeCommandSource extends CommandSourceStack {
+    public FakeCommandSource(LocalPlayer player) {
+        super(player, player.position(), player.getRotationVector(), null, 314159265, player.getScoreboardName(), player.getName(), null, player);
     }
 
+    @NotNull
     @Override
-    public Collection<String> getPlayerNames() {
-        return MinecraftClient.getInstance().getNetworkHandler().getPlayerList()
+    public Collection<String> getOnlinePlayerNames() {
+        return Minecraft.getInstance().getConnection().getOnlinePlayers()
                 .stream().map(e -> e.getProfile().getName()).collect(Collectors.toList());
     }
 
+    @NotNull
     @Override
-    public DynamicRegistryManager getRegistryManager() {
-        return MinecraftClient.getInstance().getNetworkHandler().getRegistryManager();
+    public RegistryAccess registryAccess() {
+        return Minecraft.getInstance().getConnection().registryAccess();
     }
 }

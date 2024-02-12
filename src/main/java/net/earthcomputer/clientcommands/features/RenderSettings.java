@@ -1,11 +1,12 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientCommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,11 +15,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 public class RenderSettings {
 
-    private static final List<Pair<CEntitySelector, Boolean>> entityRenderSelectors = new ArrayList<>();
+    private static final List<Tuple<CEntitySelector, Boolean>> entityRenderSelectors = new ArrayList<>();
     private static final Set<UUID> disabledEntities = new HashSet<>();
 
     public static void clearEntityRenderSelectors() {
@@ -33,22 +32,22 @@ public class RenderSettings {
         if (entityRenderSelectors.size() == 16) {
             entityRenderSelectors.remove(0);
         }
-        entityRenderSelectors.add(new Pair<>(selector, shouldRender));
+        entityRenderSelectors.add(new Tuple<>(selector, shouldRender));
     }
 
     public static void preRenderEntities() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        // prevent crash from other mods trying to load entity rendering without a world (usually a fake world and no client player)
-        if (client.player == null) {
+        Minecraft minecraft = Minecraft.getInstance();
+        // prevent crash from other mods trying to load entity rendering without a level (usually a fake level and no client player)
+        if (minecraft.player == null) {
             return;
         }
-        FabricClientCommandSource source = (FabricClientCommandSource) new ClientCommandSource(client.getNetworkHandler(), client);
+        FabricClientCommandSource source = (FabricClientCommandSource) new ClientSuggestionProvider(minecraft.getConnection(), minecraft);
 
         disabledEntities.clear();
         for (var filter : entityRenderSelectors) {
             try {
-                List<UUID> entities = filter.getLeft().getEntities(source).stream().map(Entity::getUuid).collect(Collectors.toList());
-                if (filter.getRight()) {
+                List<UUID> entities = filter.getA().getEntities(source).stream().map(Entity::getUUID).collect(Collectors.toList());
+                if (filter.getB()) {
                     entities.forEach(disabledEntities::remove);
                 } else {
                     disabledEntities.addAll(entities);
@@ -60,7 +59,7 @@ public class RenderSettings {
     }
 
     public static boolean shouldRenderEntity(Entity entity) {
-        return !disabledEntities.contains(entity.getUuid());
+        return !disabledEntities.contains(entity.getUUID());
     }
 
 }

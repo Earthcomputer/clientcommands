@@ -9,8 +9,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,8 +21,8 @@ public class TranslationQueryArgumentType implements ArgumentType<TranslationQue
 
     private static final Collection<String> EXAMPLES = Arrays.asList("\"Voorbeeld\" from nl to en", "\"Non numeranda, sed ponderanda sunt argumenta\" from la", "\"Cogito, ergo sum\"");
 
-    private static final DynamicCommandExceptionType UNKNOWN_LANGUAGE_CODE_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ctranslate.unknownLanguageCode", arg));
-    private static final SimpleCommandExceptionType EXPECTED_FROM_TO_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctranslate.expectedFromTo"));
+    private static final DynamicCommandExceptionType UNKNOWN_LANGUAGE_CODE_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.ctranslate.unknownLanguageCode", arg));
+    private static final SimpleCommandExceptionType EXPECTED_FROM_TO_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctranslate.expectedFromTo"));
 
     private static final Collection<String> LANGUAGES;
 
@@ -38,7 +38,7 @@ public class TranslationQueryArgumentType implements ArgumentType<TranslationQue
 
     public static TranslationQuery getTranslationQuery(CommandContext<FabricClientCommandSource> context, String arg) {
         TranslationQuery query = context.getArgument(arg, TranslationQuery.class);
-        return new TranslationQuery(query.from() == null ? "auto" : query.from(), query.to() == null ? context.getSource().getClient().options.language : query.to(), query.query());
+        return new TranslationQuery(query.from() == null ? "auto" : query.from(), query.to() == null ? context.getSource().getClient().options.languageCode : query.to(), query.query());
     }
 
     @Override
@@ -101,7 +101,7 @@ public class TranslationQueryArgumentType implements ArgumentType<TranslationQue
             int start = reader.getCursor();
             suggestor = suggestions -> {
                 SuggestionsBuilder builder = suggestions.createOffset(start);
-                CommandSource.suggestMatching(new String[]{"from", "to"}, builder);
+                SharedSuggestionProvider.suggest(new String[]{"from", "to"}, builder);
                 suggestions.add(builder);
             };
             String option = reader.readUnquotedString();
@@ -117,7 +117,7 @@ public class TranslationQueryArgumentType implements ArgumentType<TranslationQue
             if (suggest) {
                 suggestor = suggestions -> {
                     SuggestionsBuilder builder = suggestions.createOffset(start);
-                    CommandSource.suggestMatching(LANGUAGES, builder);
+                    SharedSuggestionProvider.suggest(LANGUAGES, builder);
                     suggestions.add(builder);
                 };
             }

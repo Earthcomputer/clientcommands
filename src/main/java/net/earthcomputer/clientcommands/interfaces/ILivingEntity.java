@@ -1,11 +1,11 @@
 package net.earthcomputer.clientcommands.interfaces;
 
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 
 public interface ILivingEntity {
 
-    float getLastDamageTaken();
+    float getLastHurt();
 
-    boolean callBlockedByShield(DamageSource damageSource);
+    boolean callIsDamageSourceBlocked(DamageSource damageSource);
 
 }

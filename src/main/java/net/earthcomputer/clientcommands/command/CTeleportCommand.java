@@ -5,10 +5,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgum
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTeleportCommand {
-    private static final SimpleCommandExceptionType NOT_SPECTATOR_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctp.notSpectator"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctp.notSpectator"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctp")
@@ -29,20 +29,20 @@ public class CTeleportCommand {
             throw NOT_SPECTATOR_EXCEPTION.create();
         }
 
-        ClientPlayNetworkHandler networkHandler = source.getClient().getNetworkHandler();
-        assert networkHandler != null;
+        ClientPacketListener packetListener = source.getClient().getConnection();
+        assert packetListener != null;
 
-        networkHandler.sendPacket(new SpectatorTeleportC2SPacket(uuid));
+        packetListener.send(new ServerboundTeleportToEntityPacket(uuid));
 
-        PlayerListEntry playerListEntry = networkHandler.getPlayerListEntry(uuid);
+        PlayerInfo playerInfo = packetListener.getPlayerInfo(uuid);
         String name;
-        if (playerListEntry != null) {
-            name = playerListEntry.getProfile().getName();
+        if (playerInfo != null) {
+            name = playerInfo.getProfile().getName();
         } else {
             name = uuid.toString();
         }
 
-        source.sendFeedback(Text.translatable("commands.ctp.success", name));
+        source.sendFeedback(Component.translatable("commands.ctp.success", name));
         return Command.SINGLE_SUCCESS;
     }
 }

@@ -7,19 +7,19 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.ItemPredicateArgumentType;
-import net.minecraft.command.argument.ItemStringReader;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.commands.arguments.item.ItemPredicateArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,22 +29,22 @@ import java.util.function.Predicate;
 
 public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemPredicateArgumentType.ClientItemPredicate> {
 
-    private final RegistryWrapper<Item> registryWrapper;
+    private final HolderLookup<Item> holderLookup;
 
-    private ClientItemPredicateArgumentType(CommandRegistryAccess registryAccess) {
-        registryWrapper = registryAccess.createWrapper(RegistryKeys.ITEM);
+    private ClientItemPredicateArgumentType(CommandBuildContext context) {
+        holderLookup = context.holderLookup(Registries.ITEM);
     }
 
     /**
-     * @deprecated Use {@link #clientItemPredicate(CommandRegistryAccess)} instead
+     * @deprecated Use {@link #clientItemPredicate(CommandBuildContext)} instead
      */
     @Deprecated
-    public static ItemPredicateArgumentType itemPredicate(CommandRegistryAccess registryAccess) {
-        return ItemPredicateArgumentType.itemPredicate(registryAccess);
+    public static ItemPredicateArgument itemPredicate(CommandBuildContext context) {
+        return ItemPredicateArgument.itemPredicate(context);
     }
 
-    public static ClientItemPredicateArgumentType clientItemPredicate(CommandRegistryAccess registryAccess) {
-        return new ClientItemPredicateArgumentType(registryAccess);
+    public static ClientItemPredicateArgumentType clientItemPredicate(CommandBuildContext context) {
+        return new ClientItemPredicateArgumentType(context);
     }
 
     public static ClientItemPredicate getClientItemPredicate(CommandContext<FabricClientCommandSource> ctx, String name) {
@@ -54,7 +54,7 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
     @Override
     public ClientItemPredicate parse(StringReader reader) throws CommandSyntaxException {
         int start = reader.getCursor();
-        var result = ItemStringReader.itemOrTag(registryWrapper, reader);
+        var result = ItemParser.parseForTesting(holderLookup, reader);
         return result.map(
                 itemResult -> new ItemPredicate(itemResult.item(), itemResult.nbt()),
                 tagResult -> new TagPredicate(reader.getString().substring(start, reader.getCursor()), tagResult.tag(), tagResult.nbt())
@@ -63,7 +63,7 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ItemStringReader.getSuggestions(registryWrapper, builder, true);
+        return ItemParser.fillSuggestions(holderLookup, builder, true);
     }
 
     public sealed interface ClientItemPredicate extends Predicate<ItemStack> {
@@ -71,15 +71,15 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
         Collection<Item> getPossibleItems();
     }
 
-    record TagPredicate(String id, RegistryEntryList<Item> tag, NbtCompound compound) implements ClientItemPredicate {
+    record TagPredicate(String id, HolderSet<Item> tag, CompoundTag compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
-            return tag.contains(stack.getRegistryEntry()) && NbtHelper.matches(this.compound, stack.getNbt(), true);
+            return tag.contains(stack.getItemHolder()) && NbtUtils.compareNbt(this.compound, stack.getTag(), true);
         }
 
         @Override
         public Collection<Item> getPossibleItems() {
-            return tag.stream().map(RegistryEntry::value).toList();
+            return tag.stream().map(Holder::value).toList();
         }
 
         @Override
@@ -92,10 +92,10 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
         }
     }
 
-    record ItemPredicate(RegistryEntry<Item> item, NbtCompound compound) implements ClientItemPredicate {
+    record ItemPredicate(Holder<Item> item, CompoundTag compound) implements ClientItemPredicate {
         @Override
         public boolean test(ItemStack stack) {
-            return stack.itemMatches(item) && NbtHelper.matches(this.compound, stack.getNbt(), true);
+            return stack.is(item) && NbtUtils.compareNbt(this.compound, stack.getTag(), true);
         }
 
         @Override
@@ -105,7 +105,7 @@ public class ClientItemPredicateArgumentType implements ArgumentType<ClientItemP
 
         @Override
         public String getPrettyString() {
-            String ret = String.valueOf(Registries.ITEM.getId(item.value()));
+            String ret = String.valueOf(BuiltInRegistries.ITEM.getKey(item.value()));
             if (compound != null) {
                 ret += compound;
             }

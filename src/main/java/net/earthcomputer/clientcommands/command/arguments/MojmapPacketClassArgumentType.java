@@ -9,8 +9,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.MappingsHelper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.mappingio.tree.MappingTreeView;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.protocol.Packet;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,7 +58,7 @@ public class MojmapPacketClassArgumentType implements ArgumentType<Class<Packet<
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(mojmapPackets, builder);
+        return SharedSuggestionProvider.suggest(mojmapPackets, builder);
     }
 
     @Override

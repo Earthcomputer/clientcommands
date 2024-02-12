@@ -3,11 +3,11 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 
 import java.util.UUID;
 
@@ -24,22 +24,22 @@ public class UuidCommand {
 
     private static int getUuid(FabricClientCommandSource source, UUID entity) {
         String uuid = entity.toString();
-        Text uuidText = Text.literal(uuid).styled(style -> style
-            .withUnderline(true)
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.copy.click")))
+        Component uuidComponent = Component.literal(uuid).withStyle(style -> style
+            .withUnderlined(true)
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
             .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid))
         );
 
-        ClientPlayNetworkHandler networkHandler = source.getClient().getNetworkHandler();
-        assert networkHandler != null;
+        ClientPacketListener packetListener = source.getClient().getConnection();
+        assert packetListener != null;
 
-        PlayerListEntry player = networkHandler.getPlayerListEntry(entity);
+        PlayerInfo player = packetListener.getPlayerInfo(entity);
         if (player == null) {
-            source.sendFeedback(Text.translatable("commands.cuuid.success.nameless", uuidText));
+            source.sendFeedback(Component.translatable("commands.cuuid.success.nameless", uuidComponent));
             return Command.SINGLE_SUCCESS;
         }
         String name = player.getProfile().getName();
-        source.sendFeedback(Text.translatable("commands.cuuid.success", name, uuidText));
+        source.sendFeedback(Component.translatable("commands.cuuid.success", name, uuidComponent));
         return Command.SINGLE_SUCCESS;
     }
 }

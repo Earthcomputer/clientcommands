@@ -18,23 +18,23 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.EncoderException;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.collection.IndexedIterable;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.Util;
+import net.minecraft.core.*;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.io.function.IOBiConsumer;
 import org.apache.commons.io.function.IORunnable;
 import org.apache.commons.io.function.IOStream;
 import org.apache.commons.io.function.Uncheck;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -67,7 +67,7 @@ public class PacketDumper {
         writer.endArray();
     }
 
-    public static class PacketDumpByteBuf extends PacketByteBuf {
+    public static class PacketDumpByteBuf extends FriendlyByteBuf {
         private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
@@ -81,22 +81,22 @@ public class PacketDumper {
         private final JsonWriter writer;
 
         public PacketDumpByteBuf(JsonWriter writer) {
-            super(Unpooled.buffer(0, 0));
+            super(Unpooled.buffer(0, 0)); // Uses singleton EmptyByteBuf
             this.writer = writer;
         }
 
         @Override
         @SuppressWarnings("deprecation")
-        public <T> PacketDumpByteBuf encode(DynamicOps<NbtElement> ops, Codec<T> codec, T value) {
+        public <T> @NotNull PacketDumpByteBuf writeWithCodec(DynamicOps<Tag> ops, Codec<T> codec, T value) {
             return dump("withCodec", () -> {
                 dumpValueClass(value);
                 writer.name("value").value(Objects.toString(value));
-                writer.name("encodedNbt").value(Util.getResult(
+                writer.name("encodedNbt").value(Util.getOrThrow(
                     codec.encodeStart(ops, value),
                     message -> new EncoderException("Failed to encode: " + message + " " + value)
                 ).toString());
                 writer.name("encodedJson");
-                GSON.toJson(Util.getResult(
+                GSON.toJson(Util.getOrThrow(
                     codec.encodeStart(JsonOps.INSTANCE, value),
                     message -> new EncoderException("Failed to encode: " + message + " " + value)
                 ), writer);
@@ -104,12 +104,12 @@ public class PacketDumper {
         }
 
         @Override
-        public <T> void encodeAsJson(Codec<T> codec, T value) {
+        public <T> void writeJsonWithCodec(Codec<T> codec, T value) {
             dump("jsonWithCodec", () -> {
                 dumpValueClass(value);
                 writer.name("value").value(Objects.toString(value));
                 writer.name("encodedJson");
-                GSON.toJson(Util.getResult(
+                GSON.toJson(Util.getOrThrow(
                     codec.encodeStart(JsonOps.INSTANCE, value),
                     message -> new EncoderException("Failed to encode: " + message + " " + value)
                 ), writer);
@@ -117,25 +117,25 @@ public class PacketDumper {
         }
 
         @Override
-        public <T> void writeRegistryValue(IndexedIterable<T> indexedIterable, T value) {
+        public <T> void writeId(IdMap<T> idMap, T value) {
             dump("id", () -> {
                 dumpValueClass(value);
                 writer.name("value").value(Objects.toString(value));
-                if (indexedIterable instanceof Registry<T> registry) {
-                    writer.name("registry").value(registry.getKey().getValue().toString());
-                    writer.name("valueKey").value(Objects.toString(registry.getId(value)));
+                if (idMap instanceof Registry<T> registry) {
+                    writer.name("registry").value(registry.key().location().toString());
+                    writer.name("valueKey").value(Objects.toString(registry.getKey(value)));
                 }
-                writer.name("id").value(indexedIterable.getRawId(value));
+                writer.name("id").value(idMap.getId(value));
             });
         }
 
         @Override
-        public <T> void writeRegistryEntry(IndexedIterable<RegistryEntry<T>> idMap, RegistryEntry<T> value, PacketWriter<T> directWriter) {
+        public <T> void writeId(IdMap<Holder<T>> idMap, Holder<T> value, Writer<T> directWriter) {
             dump("idHolder", () -> {
-                writer.name("kind").value(value.getType().name());
-                value.getKeyOrValue().ifLeft(key -> Uncheck.run(() -> {
-                    writer.name("referenceKey").value(key.getValue().toString());
-                    writer.name("id").value(idMap.getRawId(value));
+                writer.name("kind").value(value.kind().name());
+                value.unwrap().ifLeft(key -> Uncheck.run(() -> {
+                    writer.name("referenceKey").value(key.location().toString());
+                    writer.name("id").value(idMap.getId(value));
                 })).ifRight(directValue -> Uncheck.run(() -> {
                     writer.name("directValue");
                     dumpValue(directValue, directWriter);
@@ -144,11 +144,11 @@ public class PacketDumper {
         }
 
         @Override
-        public <T> void writeCollection(Collection<T> collection, PacketWriter<T> elementWriter) {
+        public <T> void writeCollection(Collection<T> collection, Writer<T> elementWriter) {
             dump("collection", () -> {
                 writer.name("size").value(collection.size());
                 writer.name("elements").beginArray();
-                for (T element : collection) {
+                for (final T element : collection) {
                     dumpValue(element, elementWriter);
                 }
                 writer.endArray();
@@ -156,11 +156,11 @@ public class PacketDumper {
         }
 
         @Override
-        public void writeIntList(IntList intIdList) {
+        public void writeIntIdList(IntList intIdList) {
             dump("intIdList", () -> {
                 writer.name("size").value(intIdList.size());
                 writer.name("elements").beginArray();
-                for (int value : intIdList) {
+                for (final int value : intIdList) {
                     writer.value(value);
                 }
                 writer.endArray();
@@ -168,11 +168,11 @@ public class PacketDumper {
         }
 
         @Override
-        public <K, V> void writeMap(Map<K, V> map, PacketWriter<K> keyWriter, PacketWriter<V> valueWriter) {
+        public <K, V> void writeMap(Map<K, V> map, Writer<K> keyWriter, Writer<V> valueWriter) {
             dump("map", () -> {
                 writer.name("size").value(map.size());
                 writer.name("elements").beginArray();
-                for (var entry : map.entrySet()) {
+                for (final var entry : map.entrySet()) {
                     writer.beginObject();
                     writer.name("key");
                     dumpValue(entry.getKey(), keyWriter);
@@ -190,7 +190,7 @@ public class PacketDumper {
                 writer.name("enumClass").value(MappingsHelper.namedOrIntermediaryToMojmap_class(enumClass.getName().replace('.', '/')).orElseThrow());
                 writer.name("size").value(enumSet.size());
                 writer.name("elements").beginArray();
-                for (E element : enumSet) {
+                for (final E element : enumSet) {
                     writer.value(element.name());
                 }
                 writer.endArray();
@@ -198,16 +198,16 @@ public class PacketDumper {
         }
 
         @Override
-        public <T> void writeOptional(Optional<T> optional, PacketWriter<T> valueWriter) {
+        public <T> void writeOptional(Optional<T> optional, Writer<T> valueWriter) {
             writeNullable("optional", optional.orElse(null), valueWriter);
         }
 
         @Override
-        public <T> void writeNullable(@Nullable T value, PacketWriter<T> writer) {
+        public <T> void writeNullable(@Nullable T value, Writer<T> writer) {
             writeNullable("nullable", value, writer);
         }
 
-        private <T> void writeNullable(String type, T value, PacketWriter<T> valueWriter) {
+        private <T> void writeNullable(String type, T value, Writer<T> valueWriter) {
             dump(type, () -> {
                 writer.name("present");
                 if (value != null) {
@@ -221,7 +221,7 @@ public class PacketDumper {
         }
 
         @Override
-        public <L, R> void writeEither(Either<L, R> value, PacketWriter<L> leftWriter, PacketWriter<R> rightWriter) {
+        public <L, R> void writeEither(Either<L, R> value, Writer<L> leftWriter, Writer<R> rightWriter) {
             dump("either", () -> {
                 writer.name("either");
                 value.ifLeft(left -> Uncheck.run(() -> {
@@ -237,7 +237,7 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeByteArray(byte[] array) {
+        public @NotNull PacketDumpByteBuf writeByteArray(byte[] array) {
             return dump("byteArray", () -> writer
                 .name("length").value(array.length)
                 .name("value").value(Base64.getEncoder().encodeToString(array))
@@ -245,11 +245,11 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeIntArray(int[] array) {
+        public @NotNull PacketDumpByteBuf writeVarIntArray(int[] array) {
             return dump("varIntArray", () -> {
                 writer.name("length").value(array.length);
                 writer.name("elements").beginArray();
-                for (int element : array) {
+                for (final int element : array) {
                     writer.value(element);
                 }
                 writer.endArray();
@@ -257,11 +257,11 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeLongArray(long[] array) {
+        public @NotNull PacketDumpByteBuf writeLongArray(long[] array) {
             return dump("longArray", () -> {
                 writer.name("length").value(array.length);
                 writer.name("elements").beginArray();
-                for (long element : array) {
+                for (final long element : array) {
                     writer.value(element);
                 }
                 writer.endArray();
@@ -269,7 +269,7 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeBlockPos(BlockPos pos) {
+        public @NotNull PacketDumpByteBuf writeBlockPos(BlockPos pos) {
             return dump("blockPos", () -> writer
                 .name("x").value(pos.getX())
                 .name("y").value(pos.getY())
@@ -278,7 +278,7 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeChunkPos(ChunkPos chunkPos) {
+        public @NotNull PacketDumpByteBuf writeChunkPos(ChunkPos chunkPos) {
             return dump("chunkPos", () -> writer
                 .name("x").value(chunkPos.x)
                 .name("z").value(chunkPos.z)
@@ -286,21 +286,21 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeChunkSectionPos(ChunkSectionPos chunkSectionPos) {
+        public @NotNull PacketDumpByteBuf writeSectionPos(SectionPos sectionPos) {
             return dump("sectionPos", () -> writer
-                .name("x").value(chunkSectionPos.getSectionX())
-                .name("y").value(chunkSectionPos.getSectionY())
-                .name("z").value(chunkSectionPos.getSectionZ())
+                .name("x").value(sectionPos.x())
+                .name("y").value(sectionPos.y())
+                .name("z").value(sectionPos.z())
             );
         }
 
         @Override
         public void writeGlobalPos(GlobalPos pos) {
             dump("globalPos", () -> writer
-                .name("level").value(pos.getDimension().getValue().toString())
-                .name("x").value(pos.getPos().getX())
-                .name("y").value(pos.getPos().getY())
-                .name("z").value(pos.getPos().getZ())
+                .name("level").value(pos.dimension().location().toString())
+                .name("x").value(pos.pos().getX())
+                .name("y").value(pos.pos().getY())
+                .name("z").value(pos.pos().getZ())
             );
         }
 
@@ -314,7 +314,7 @@ public class PacketDumper {
         }
 
         @Override
-        public void writeQuaternionf(Quaternionf quaternion) {
+        public void writeQuaternion(Quaternionf quaternion) {
             dump("quaternion", () -> writer
                 .name("x").value(quaternion.x)
                 .name("y").value(quaternion.y)
@@ -324,7 +324,7 @@ public class PacketDumper {
         }
 
         @Override
-        public void writeVec3d(Vec3d vec3) {
+        public void writeVec3(Vec3 vec3) {
             dump("vec3", () -> writer
                 .name("x").value(vec3.x)
                 .name("y").value(vec3.y)
@@ -333,23 +333,23 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeText(Text text) {
+        public @NotNull PacketDumpByteBuf writeComponent(Component component) {
             return dump("component", () -> {
                 writer.name("value");
-                GSON.toJson(Text.Serialization.toJsonTree(text), writer);
+                GSON.toJson(Component.Serializer.toJsonTree(component), writer);
             });
         }
 
         @Override
-        public PacketDumpByteBuf writeEnumConstant(Enum<?> value) {
+        public @NotNull PacketDumpByteBuf writeEnum(Enum<?> value) {
             return dump("enum", () -> writer
-                .name("enum").value(value.getDeclaringClass().getName())
+                .name("enum").value(MappingsHelper.namedOrIntermediaryToMojmap_class(value.getDeclaringClass().getName().replace('.', '/')).orElseThrow())
                 .name("value").value(value.name())
             );
         }
 
         @Override
-        public <T> PacketDumpByteBuf encode(ToIntFunction<T> idGetter, T value) {
+        public <T> @NotNull PacketDumpByteBuf writeById(ToIntFunction<T> idGetter, T value) {
             return dump("byId", () -> {
                 dumpValueClass(value);
                 writer.name("value").value(Objects.toString(value));
@@ -358,43 +358,43 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeUuid(UUID uuid) {
+        public @NotNull PacketDumpByteBuf writeUUID(UUID uuid) {
             return dumpAsString("uuid", uuid);
         }
 
         @Override
-        public PacketDumpByteBuf writeVarInt(int input) {
+        public @NotNull PacketDumpByteBuf writeVarInt(int input) {
             return dumpSimple("varInt", input, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeVarLong(long value) {
+        public @NotNull PacketDumpByteBuf writeVarLong(long value) {
             return dumpSimple("varLong", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeNbt(@Nullable NbtElement NbtElement) {
-            return dumpAsString("nbt", NbtElement);
+        public @NotNull PacketDumpByteBuf writeNbt(@Nullable Tag tag) {
+            return dumpAsString("nbt", tag);
         }
 
         @Override
-        public PacketDumpByteBuf writeItemStack(ItemStack stack) {
+        public @NotNull PacketDumpByteBuf writeItem(ItemStack stack) {
             return dump("item", () -> writer
-                .name("item").value(stack.getRegistryEntry().getKey().map(k -> k.getValue().toString()).orElse(null))
+                .name("item").value(stack.getItemHolder().unwrapKey().map(k -> k.location().toString()).orElse(null))
                 .name("count").value(stack.getCount())
-                .name("tag").value(Objects.toString(stack.getNbt()))
+                .name("tag").value(Objects.toString(stack.getTag()))
             );
         }
 
         @Override
-        public PacketByteBuf writeString(String string) {
+        public @NotNull FriendlyByteBuf writeUtf(String string) {
             return dump("utf", () -> writer
                 .name("value").value(string)
             );
         }
 
         @Override
-        public PacketDumpByteBuf writeString(String string, int maxLength) {
+        public @NotNull PacketDumpByteBuf writeUtf(String string, int maxLength) {
             return dump("utf", () -> writer
                 .name("maxLength").value(maxLength)
                 .name("value").value(string)
@@ -402,20 +402,20 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeIdentifier(Identifier identifier) {
-            return dumpAsString("resourceLocation", identifier);
+        public @NotNull PacketDumpByteBuf writeResourceLocation(ResourceLocation resourceLocation) {
+            return dumpAsString("resourceLocation", resourceLocation);
         }
 
         @Override
-        public void writeRegistryKey(RegistryKey<?> registryKey) {
+        public void writeResourceKey(ResourceKey<?> resourceKey) {
             dump("resourceKey", () -> writer
-                .name("registry").value(registryKey.getRegistry().toString())
-                .name("location").value(registryKey.getValue().toString())
+                .name("registry").value(resourceKey.registry().toString())
+                .name("location").value(resourceKey.location().toString())
             );
         }
 
         @Override
-        public PacketDumpByteBuf writeDate(Date time) {
+        public @NotNull PacketDumpByteBuf writeDate(Date time) {
             return dumpSimple("date", ISO_8601.format(time), JsonWriter::value);
         }
 
@@ -425,7 +425,7 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writePublicKey(PublicKey publicKey) {
+        public @NotNull PacketDumpByteBuf writePublicKey(PublicKey publicKey) {
             return dump("publicKey", () -> writer
                 .name("encoded").value(Base64.getEncoder().encodeToString(publicKey.getEncoded()))
             );
@@ -438,12 +438,12 @@ public class PacketDumper {
                 .name("x").value(result.getBlockPos().getX())
                 .name("y").value(result.getBlockPos().getY())
                 .name("z").value(result.getBlockPos().getZ()).endObject()
-                .name("direction").value(result.getSide().getName())
+                .name("direction").value(result.getDirection().getSerializedName())
                 .name("offset").beginObject()
-                .name("x").value(result.getPos().x - result.getBlockPos().getX())
-                .name("y").value(result.getPos().y - result.getBlockPos().getY())
-                .name("z").value(result.getPos().z - result.getBlockPos().getZ()).endObject()
-                .name("isInside").value(result.isInsideBlock())
+                .name("x").value(result.getLocation().x - result.getBlockPos().getX())
+                .name("y").value(result.getLocation().y - result.getBlockPos().getY())
+                .name("z").value(result.getLocation().z - result.getBlockPos().getZ())
+                .name("isInside").value(result.isInside())
             );
         }
 
@@ -457,7 +457,7 @@ public class PacketDumper {
         }
 
         @Override
-        public void writeBitSet(BitSet bitSet, int size) {
+        public void writeFixedBitSet(BitSet bitSet, int size) {
             dump("fixedBitSet", () -> {
                 writer.name("size").value(size);
                 writer.name("bits").beginArray();
@@ -475,7 +475,7 @@ public class PacketDumper {
         }
 
         @Override
-        public void writePropertyMap(PropertyMap gameProfileProperties) {
+        public void writeGameProfileProperties(PropertyMap gameProfileProperties) {
             dump("gameProfileProperties", () -> {
                 writer.name("value");
                 GSON.toJson(gameProfileProperties, PropertyMap.class, writer);
@@ -494,133 +494,133 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf skipBytes(int length) {
+        public @NotNull PacketDumpByteBuf skipBytes(int length) {
             return dump("skipBytes", () -> writer.name("length").value(length));
         }
 
         @Override
-        public PacketDumpByteBuf writeBoolean(boolean value) {
+        public @NotNull PacketDumpByteBuf writeBoolean(boolean value) {
             return dumpSimple("boolean", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeByte(int value) {
+        public @NotNull PacketDumpByteBuf writeByte(int value) {
             return dumpSimple("byte", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeShort(int value) {
+        public @NotNull PacketDumpByteBuf writeShort(int value) {
             return dumpSimple("short", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeShortLE(int value) {
+        public @NotNull PacketDumpByteBuf writeShortLE(int value) {
             return dumpSimple("shortLE", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeMedium(int value) {
+        public @NotNull PacketDumpByteBuf writeMedium(int value) {
             return dumpSimple("medium", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeMediumLE(int value) {
+        public @NotNull PacketDumpByteBuf writeMediumLE(int value) {
             return dumpSimple("mediumLE", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeInt(int value) {
+        public @NotNull PacketDumpByteBuf writeInt(int value) {
             return dumpSimple("int", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeIntLE(int value) {
+        public @NotNull PacketDumpByteBuf writeIntLE(int value) {
             return dumpSimple("intLE", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeLong(long value) {
+        public @NotNull PacketDumpByteBuf writeLong(long value) {
             return dumpSimple("long", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeLongLE(long value) {
+        public @NotNull PacketDumpByteBuf writeLongLE(long value) {
             return dumpSimple("longLE", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeChar(int value) {
-            return dumpSimple("char", Character.toString((char) value), JsonWriter::value);
+        public @NotNull PacketDumpByteBuf writeChar(int value) {
+            return dumpSimple("char", Character.toString((char)value), JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeFloat(float value) {
+        public @NotNull PacketDumpByteBuf writeFloat(float value) {
             return dumpSimple("float", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeFloatLE(float value) {
+        public @NotNull PacketDumpByteBuf writeFloatLE(float value) {
             return dumpSimple("floatLE", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeDouble(double value) {
+        public @NotNull PacketDumpByteBuf writeDouble(double value) {
             return dumpSimple("double", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeDoubleLE(double value) {
+        public @NotNull PacketDumpByteBuf writeDoubleLE(double value) {
             return dumpSimple("doubleLE", value, JsonWriter::value);
         }
 
         @Override
-        public PacketDumpByteBuf writeBytes(ByteBuf source) {
+        public @NotNull PacketDumpByteBuf writeBytes(ByteBuf source) {
             return writeBytes(source, source.readableBytes());
         }
 
         @Override
-        public PacketDumpByteBuf writeBytes(ByteBuf source, int length) {
-            byte[] bytes = new byte[length];
+        public @NotNull PacketDumpByteBuf writeBytes(ByteBuf source, int length) {
+            final byte[] bytes = new byte[length];
             source.readBytes(bytes);
             return dumpBytes(bytes);
         }
 
         @Override
-        public PacketDumpByteBuf writeBytes(ByteBuf source, int sourceIndex, int length) {
-            byte[] bytes = new byte[length];
+        public @NotNull PacketDumpByteBuf writeBytes(ByteBuf source, int sourceIndex, int length) {
+            final byte[] bytes = new byte[length];
             source.getBytes(sourceIndex, bytes);
             return dumpBytes(bytes);
         }
 
         @Override
-        public PacketDumpByteBuf writeBytes(byte[] source) {
+        public @NotNull PacketDumpByteBuf writeBytes(byte[] source) {
             return dumpBytes(source);
         }
 
         @Override
-        public PacketDumpByteBuf writeBytes(byte[] source, int sourceIndex, int length) {
+        public @NotNull PacketDumpByteBuf writeBytes(byte[] source, int sourceIndex, int length) {
             return dumpBytes(Arrays.copyOfRange(source, sourceIndex, sourceIndex + length));
         }
 
         @Override
-        public PacketDumpByteBuf writeBytes(ByteBuffer source) {
-            byte[] bytes = new byte[source.remaining()];
+        public @NotNull PacketDumpByteBuf writeBytes(ByteBuffer source) {
+            final byte[] bytes = new byte[source.remaining()];
             source.get(bytes);
             return dumpBytes(bytes);
         }
 
         @Override
         public int writeBytes(InputStream inputStream, int i) throws IOException {
-            byte[] bytes = new byte[i];
-            int read = inputStream.read(bytes);
+            final byte[] bytes = new byte[i];
+            final int read = inputStream.read(bytes);
             dumpBytes(Arrays.copyOf(bytes, i));
             return read;
         }
 
         @Override
         public int writeBytes(ScatteringByteChannel scatteringByteChannel, int i) throws IOException {
-            ByteBuffer buffer = ByteBuffer.allocate(i);
-            int read = scatteringByteChannel.read(buffer);
+            final ByteBuffer buffer = ByteBuffer.allocate(i);
+            final int read = scatteringByteChannel.read(buffer);
             buffer.flip();
             dumpBytes(Arrays.copyOfRange(
                 buffer.array(),
@@ -643,14 +643,14 @@ public class PacketDumper {
         }
 
         @Override
-        public PacketDumpByteBuf writeZero(int length) {
+        public @NotNull PacketDumpByteBuf writeZero(int length) {
             return dump("zero", () -> writer.name("length").value(length));
         }
 
         @Override
         public int writeCharSequence(CharSequence charSequence, Charset charset) {
-            String string = charSequence.toString();
-            byte[] encoded = string.getBytes(charset);
+            final String string = charSequence.toString();
+            final byte[] encoded = string.getBytes(charset);
             dump("charSequence", () -> writer
                 .name("charset").value(charset.name())
                 .name("value").value(string)
@@ -668,7 +668,7 @@ public class PacketDumper {
             }
         }
 
-        private <T> void dumpValue(T value, PacketWriter<T> valueWriter) throws IOException {
+        private <T> void dumpValue(T value, Writer<T> valueWriter) throws IOException {
             writer.beginObject();
             dumpValueClass(value);
             writer.name("fields").beginArray();

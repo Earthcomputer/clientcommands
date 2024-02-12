@@ -5,8 +5,8 @@ import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Locale;
 
@@ -35,13 +35,13 @@ public class Configs {
         }
     }
 
-    public enum FishingManipulation implements StringIdentifiable {
+    public enum FishingManipulation implements StringRepresentable {
         OFF,
         MANUAL,
         AFK;
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return this.name().toLowerCase(Locale.ROOT);
         }
 
@@ -76,7 +76,7 @@ public class Configs {
         return maxEnchantItemThrows;
     }
     public static void setMaxEnchantItemThrows(int maxEnchantItemThrows) {
-        Configs.maxEnchantItemThrows = MathHelper.clamp(maxEnchantItemThrows, 0, 1000000);
+        Configs.maxEnchantItemThrows = Mth.clamp(maxEnchantItemThrows, 0, 1000000);
     }
 
     @Config(setter = @Config.Setter("setChorusManipulation"), temporary = true)
@@ -98,7 +98,7 @@ public class Configs {
         return maxChorusItemThrows;
     }
     public static void setMaxChorusItemThrows(int maxChorusItemThrows) {
-        Configs.maxChorusItemThrows = MathHelper.clamp(maxChorusItemThrows, 0, 1000000);
+        Configs.maxChorusItemThrows = Mth.clamp(maxChorusItemThrows, 0, 1000000);
     }
 
     @Config(temporary = true)

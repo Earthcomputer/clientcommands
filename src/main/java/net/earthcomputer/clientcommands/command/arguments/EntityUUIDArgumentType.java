@@ -11,8 +11,8 @@ import dev.xpple.clientarguments.arguments.CEntityArgumentType;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import dev.xpple.clientarguments.arguments.CEntitySelectorReader;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,7 +55,7 @@ public class EntityUUIDArgumentType implements ArgumentType<EntityUUIDArgumentTy
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (context.getSource() instanceof CommandSource commandSource) {
+        if (context.getSource() instanceof SharedSuggestionProvider commandSource) {
             StringReader stringReader = new StringReader(builder.getInput());
             stringReader.setCursor(builder.getStart());
             CEntitySelectorReader entitySelectorReader = new CEntitySelectorReader(stringReader, true);
@@ -66,9 +66,9 @@ public class EntityUUIDArgumentType implements ArgumentType<EntityUUIDArgumentTy
             }
 
             return entitySelectorReader.listSuggestions(builder, (builderx) -> {
-                Collection<String> collection = commandSource.getPlayerNames();
-                Iterable<String> iterable = Iterables.concat(collection, commandSource.getEntitySuggestions());
-                CommandSource.suggestMatching(iterable, builderx);
+                Collection<String> collection = commandSource.getOnlinePlayerNames();
+                Iterable<String> iterable = Iterables.concat(collection, commandSource.getSelectedEntities());
+                SharedSuggestionProvider.suggest(iterable, builderx);
             });
         }
         return Suggestions.empty();
@@ -86,7 +86,7 @@ public class EntityUUIDArgumentType implements ArgumentType<EntityUUIDArgumentTy
     private record NameBacked(String name) implements EntityUUIDArgument {
         @Override
         public UUID getUUID(FabricClientCommandSource source) throws CommandSyntaxException {
-            PlayerListEntry entry = source.getClient().getNetworkHandler().getPlayerListEntry(name);
+            PlayerInfo entry = source.getClient().getConnection().getPlayerInfo(name);
             if (entry == null) {
                 throw CEntityArgumentType.ENTITY_NOT_FOUND_EXCEPTION.create();
             }
@@ -104,7 +104,7 @@ public class EntityUUIDArgumentType implements ArgumentType<EntityUUIDArgumentTy
     private record SelectorBacked(CEntitySelector selector) implements EntityUUIDArgument {
         @Override
         public UUID getUUID(FabricClientCommandSource source) throws CommandSyntaxException {
-            return selector.getEntity(source).getUuid();
+            return selector.getEntity(source).getUUID();
         }
     }
 }

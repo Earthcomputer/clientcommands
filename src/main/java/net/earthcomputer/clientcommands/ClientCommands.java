@@ -14,13 +14,14 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.MinecraftVersion;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.DetectedVersion;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -37,11 +38,11 @@ public class ClientCommands implements ClientModInitializer {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static Path configDir;
     private static final Set<String> clientcommandsCommands = new HashSet<>();
-    public static final Identifier COMMAND_EXECUTION_PACKET_ID = new Identifier("clientcommands", "command_execution");
+    public static final ResourceLocation COMMAND_EXECUTION_PACKET_ID = new ResourceLocation("clientcommands", "command_execution");
     private static final Set<String> COMMANDS_TO_NOT_SEND_TO_SERVER = Set.of("cwe", "cnote"); // could contain private information
 
     public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
-        String playerUUID = String.valueOf(MinecraftClient.getInstance().getSession().getUuidOrNull());
+        String playerUUID = String.valueOf(Minecraft.getInstance().getUser().getProfileId());
 
         Set<String> victims = Set.of(
             "fa68270b-1071-46c6-ac5c-6c4a0b777a96", // Earthcomputer
@@ -67,13 +68,13 @@ public class ClientCommands implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
 
         WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-            context.matrixStack().push();
+            context.matrixStack().pushPose();
 
-            Vec3d cameraPos = context.camera().getPos();
+            Vec3 cameraPos = context.camera().getPosition();
             context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
             RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickDelta());
 
-            context.matrixStack().pop();
+            context.matrixStack().popPose();
         });
 
         configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
@@ -87,7 +88,7 @@ public class ClientCommands implements ClientModInitializer {
 
         ItemGroupCommand.registerItemGroups();
 
-        MappingsHelper.initMappings(MinecraftVersion.CURRENT.getName());
+        MappingsHelper.initMappings(DetectedVersion.BUILT_IN.getName());
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {
@@ -100,14 +101,14 @@ public class ClientCommands implements ClientModInitializer {
         String theCommand = reader.readUnquotedString();
         if (clientcommandsCommands.contains(theCommand) && !COMMANDS_TO_NOT_SEND_TO_SERVER.contains(theCommand)) {
             if (ClientPlayNetworking.canSend(COMMAND_EXECUTION_PACKET_ID)) {
-                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-                buf.writeString(command);
+                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                buf.writeUtf(command);
                 ClientPlayNetworking.send(COMMAND_EXECUTION_PACKET_ID, buf);
             }
         }
     }
 
-    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
+    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         Set<String> existingCommands = getCommands(dispatcher);
 
         AuditMixinsCommand.register(dispatcher);
@@ -116,8 +117,8 @@ public class ClientCommands implements ClientModInitializer {
         NoteCommand.register(dispatcher);
         ShrugCommand.register(dispatcher);
         FindCommand.register(dispatcher);
-        FindBlockCommand.register(dispatcher, registryAccess);
-        FindItemCommand.register(dispatcher, registryAccess);
+        FindBlockCommand.register(dispatcher, context);
+        FindItemCommand.register(dispatcher, context);
         TaskCommand.register(dispatcher);
         CalcCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
@@ -126,34 +127,34 @@ public class ClientCommands implements ClientModInitializer {
         CEnchantCommand.register(dispatcher);
         GlowCommand.register(dispatcher);
         GetDataCommand.register(dispatcher);
-        CalcStackCommand.register(dispatcher, registryAccess);
+        CalcStackCommand.register(dispatcher, context);
         GammaCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
         ChorusCommand.register(dispatcher);
-        FishCommand.register(dispatcher, registryAccess);
+        FishCommand.register(dispatcher, context);
         SignSearchCommand.register(dispatcher);
-        GhostBlockCommand.register(dispatcher, registryAccess);
+        GhostBlockCommand.register(dispatcher, context);
         RelogCommand.register(dispatcher);
-        CGiveCommand.register(dispatcher, registryAccess);
+        CGiveCommand.register(dispatcher, context);
         CPlaySoundCommand.register(dispatcher);
         CStopSoundCommand.register(dispatcher);
         FovCommand.register(dispatcher);
         HotbarCommand.register(dispatcher);
         KitCommand.register(dispatcher);
-        ItemGroupCommand.register(dispatcher, registryAccess);
+        ItemGroupCommand.register(dispatcher, context);
         CParticleCommand.register(dispatcher);
         PermissionLevelCommand.register(dispatcher);
         CTellRawCommand.register(dispatcher);
         CTimeCommand.register(dispatcher);
         AliasCommand.register(dispatcher);
-        AreaStatsCommand.register(dispatcher, registryAccess);
+        AreaStatsCommand.register(dispatcher, context);
         CTeleportCommand.register(dispatcher);
         // PlayerInfoCommand.register(dispatcher);
         PingCommand.register(dispatcher);
         UuidCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher);
-        TooltipCommand.register(dispatcher, registryAccess);
+        TooltipCommand.register(dispatcher, context);
         TranslateCommand.register(dispatcher);
         VarCommand.register(dispatcher);
         CFunctionCommand.register(dispatcher);
@@ -167,7 +168,7 @@ public class ClientCommands implements ClientModInitializer {
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;
-        registerChatCommand |= CHAT_COMMAND_USERS.contains(String.valueOf(MinecraftClient.getInstance().getSession().getUuidOrNull()));
+        registerChatCommand |= CHAT_COMMAND_USERS.contains(String.valueOf(Minecraft.getInstance().getUser().getProfileId()));
         registerChatCommand |= Boolean.getBoolean("clientcommands.debugChatCommand");
         if (registerChatCommand) {
             ChatCommand.register(dispatcher);

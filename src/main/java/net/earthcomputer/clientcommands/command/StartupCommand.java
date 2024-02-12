@@ -7,8 +7,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.ClientCommandFunctions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -22,8 +22,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class StartupCommand {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final SimpleCommandExceptionType COULD_NOT_CREATE_FILE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cstartup.couldNotCreateFile"));
-    private static final SimpleCommandExceptionType COULD_NOT_EDIT_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cstartup.couldNotEdit"));
+    private static final SimpleCommandExceptionType COULD_NOT_CREATE_FILE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cstartup.couldNotCreateFile"));
+    private static final SimpleCommandExceptionType COULD_NOT_EDIT_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cstartup.couldNotEdit"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cstartup")
@@ -56,7 +56,7 @@ public class StartupCommand {
             throw COULD_NOT_EDIT_EXCEPTION.create();
         }
 
-        source.sendFeedback(Text.translatable("commands.cstartup.add.success"));
+        source.sendFeedback(Component.translatable("commands.cstartup.add.success"));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -68,7 +68,7 @@ public class StartupCommand {
         if (file == null) {
             throw COULD_NOT_CREATE_FILE_EXCEPTION.create();
         }
-        Util.getOperatingSystem().open(file.toFile());
+        Util.getPlatform().openFile(file.toFile());
         return Command.SINGLE_SUCCESS;
     }
 

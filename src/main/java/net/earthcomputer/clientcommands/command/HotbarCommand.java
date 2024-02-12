@@ -5,20 +5,20 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.HotbarStorage;
-import net.minecraft.client.option.HotbarStorageEntry;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.client.HotbarManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.player.inventory.Hotbar;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class HotbarCommand {
 
-    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.chotbar.notCreative"));
+    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.chotbar.notCreative"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("chotbar")
@@ -32,44 +32,44 @@ public class HotbarCommand {
     }
 
     private static int save(FabricClientCommandSource source, int index) {
-        MinecraftClient client = source.getClient();
+        Minecraft minecraft = source.getClient();
 
-        HotbarStorage storage = client.getCreativeHotbarStorage();
-        HotbarStorageEntry entry = storage.getSavedHotbar(index - 1);
+        HotbarManager manager = minecraft.getHotbarManager();
+        Hotbar hotbar = manager.get(index - 1);
 
-        for (int slot = 0; slot < PlayerInventory.getHotbarSize(); slot++) {
-            entry.set(slot, source.getPlayer().getInventory().getStack(slot).copy());
+        for (int slot = 0; slot < Inventory.getSelectionSize(); slot++) {
+            hotbar.set(slot, source.getPlayer().getInventory().getItem(slot).copy());
         }
-        storage.save();
+        manager.save();
 
-        Text loadKey = client.options.loadToolbarActivatorKey.getBoundKeyLocalizedText();
-        Text hotbarKey = client.options.hotbarKeys[index - 1].getBoundKeyLocalizedText();
+        Component loadKey = minecraft.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
+        Component hotbarKey = minecraft.options.keyHotbarSlots[index - 1].getTranslatedKeyMessage();
 
-        source.sendFeedback(Text.translatable("inventory.hotbarSaved", loadKey, hotbarKey));
+        source.sendFeedback(Component.translatable("inventory.hotbarSaved", loadKey, hotbarKey));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int restore(FabricClientCommandSource source, int index) throws CommandSyntaxException {
-        MinecraftClient client = source.getClient();
+        Minecraft minecraft = source.getClient();
 
-        ClientPlayerEntity player = source.getPlayer();
-        if (!player.getAbilities().creativeMode) {
+        LocalPlayer player = source.getPlayer();
+        if (!player.getAbilities().instabuild) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-        HotbarStorage storage = client.getCreativeHotbarStorage();
-        HotbarStorageEntry entry = storage.getSavedHotbar(index - 1);
+        HotbarManager manager = minecraft.getHotbarManager();
+        Hotbar hotbar = manager.get(index - 1);
 
-        for (int slot = 0; slot < PlayerInventory.getHotbarSize(); slot++) {
-            ItemStack stack = entry.get(slot).copy();
+        for (int slot = 0; slot < Inventory.getSelectionSize(); slot++) {
+            ItemStack stack = hotbar.get(slot).copy();
 
-            player.getInventory().setStack(slot, stack);
-            client.interactionManager.clickCreativeStack(stack, 36 + slot);
+            player.getInventory().setItem(slot, stack);
+            minecraft.gameMode.handleCreativeModeItemAdd(stack, 36 + slot);
         }
 
-        player.playerScreenHandler.sendContentUpdates();
+        player.inventoryMenu.broadcastChanges();
 
-        source.sendFeedback(Text.translatable("commands.chotbar.restoredHotbar", index));
+        source.sendFeedback(Component.translatable("commands.chotbar.restoredHotbar", index));
         return Command.SINGLE_SUCCESS;
     }
 }
