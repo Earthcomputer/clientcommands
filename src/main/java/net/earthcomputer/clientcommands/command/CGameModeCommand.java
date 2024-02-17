@@ -24,7 +24,7 @@ public class CGameModeCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cgamemode")
-            .then(literal("player")
+            .then(literal("query")
                 .then(argument("player", gameProfile())
                     .executes(ctx -> getPlayerGameMode(ctx.getSource(), getCProfileArgument(ctx, "player")))))
             .then(literal("list")
