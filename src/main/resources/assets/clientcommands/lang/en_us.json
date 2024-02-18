@@ -98,7 +98,7 @@
   "commands.cgamemode.playerNotFound": "Player not found",
   "commands.cgamemode.playerGameMode": "Player %s is in game mode %s",
   "commands.cgamemode.noneWithGameMode": "No players are in game mode %s",
-  "commands.cgamemode.listWithGamemode": "The following players are in game mode %s:",
+  "commands.cgamemode.listWithGameMode": "The following players are in game mode %s:",
 
   "commands.cgamma.success": "Set gamma to %f",
 

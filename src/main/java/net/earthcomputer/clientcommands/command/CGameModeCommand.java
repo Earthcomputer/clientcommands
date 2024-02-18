@@ -53,7 +53,7 @@ public class CGameModeCommand {
         if (playersWithGameMode.isEmpty()) {
             source.sendFeedback(Component.translatable("commands.cgamemode.noneWithGameMode", gameMode.getShortDisplayName()));
         } else {
-            source.sendFeedback(Component.translatable("commands.cgamemode.listWithGamemode", gameMode.getShortDisplayName()));
+            source.sendFeedback(Component.translatable("commands.cgamemode.listWithGameMode", gameMode.getShortDisplayName()));
             playersWithGameMode.forEach(p -> source.sendFeedback(Component.literal(p.getProfile().getName())));
         }
 
