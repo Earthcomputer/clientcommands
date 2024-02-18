@@ -19,7 +19,12 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.EncoderException;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.Util;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -50,7 +55,16 @@ import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.ToIntFunction;
 
 /**
@@ -67,7 +81,7 @@ public class PacketDumper {
         writer.endArray();
     }
 
-    public static class PacketDumpByteBuf extends FriendlyByteBuf {
+    private static class PacketDumpByteBuf extends FriendlyByteBuf {
         private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())

@@ -4,61 +4,66 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.features.MappingsHelper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.mappingio.tree.MappingTreeView;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class MojmapPacketClassArgumentType implements ArgumentType<Class<Packet<?>>> {
+public class MojmapPacketClassArgumentType implements ArgumentType<Class<? extends Packet<?>>> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("ClientboundPlayerChatPacket", "ClientboundSystemChatMessage", "ServerboundContainerSlotStateChangedPacket");
 
-    public static final String MOJMAP_PACKET_PREFIX = "net/minecraft/network/protocol/game/";
+    private static final DynamicCommandExceptionType UNKNOWN_PACKET_EXCEPTION = new DynamicCommandExceptionType(packet -> Component.translatable("commands.clisten.unknownPacket", packet));
 
-    private static final Set<String> mojmapPackets = MappingsHelper.mojmapClasses().stream()
-        .map(MappingTreeView.ElementMappingView::getSrcName)
-        .filter(name -> name.startsWith(MOJMAP_PACKET_PREFIX) && name.endsWith("Packet"))
-        .map(name -> name.substring(MOJMAP_PACKET_PREFIX.length()))
-        .collect(Collectors.toSet());
+    private static final Map<String, Class<? extends Packet<?>>> mojmapPackets = Arrays.stream(ConnectionProtocol.values())
+        .flatMap(connectionProtocol -> connectionProtocol.flows.values().stream()
+            .flatMap(codecData -> codecData.packetSet.classToId.keySet().stream()))
+        .map(clazz -> {
+            Optional<String> mojmapPacket = MappingsHelper.namedOrIntermediaryToMojmap_class(clazz.getName().replace('.', '/'));
+            return mojmapPacket.map(packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz)).orElse(null);
+        })
+        .collect(Collectors.filtering(Objects::nonNull, Collectors.toUnmodifiableMap(Pair::getKey, Pair::getValue, (l, r) -> l)));
 
     public static MojmapPacketClassArgumentType packet() {
         return new MojmapPacketClassArgumentType();
     }
 
     @SuppressWarnings("unchecked")
-    public static Class<Packet<?>> getPacket(final CommandContext<FabricClientCommandSource> context, final String name) {
-        return (Class<Packet<?>>) context.getArgument(name, Class.class);
+    public static Class<? extends Packet<?>> getPacket(final CommandContext<FabricClientCommandSource> context, final String name) {
+        return (Class<? extends Packet<?>>) context.getArgument(name, Class.class);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Class<Packet<?>> parse(StringReader reader) throws CommandSyntaxException {
-        String packet = MOJMAP_PACKET_PREFIX + reader.readString();
-        Optional<String> mojmapPacketName = MappingsHelper.mojmapToNamedOrIntermediary_class(packet);
-        if (mojmapPacketName.isEmpty()) {
-            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
+    public Class<? extends Packet<?>> parse(StringReader reader) throws CommandSyntaxException {
+        final int start = reader.getCursor();
+        while (reader.canRead() && (StringReader.isAllowedInUnquotedString(reader.peek()) || reader.peek() == '$' )) {
+            reader.skip();
         }
-        String packetClass = mojmapPacketName.get().replace('/', '.');
-        try {
-            return (Class<Packet<?>>) Class.forName(packetClass);
-        } catch (ReflectiveOperationException e) {
-            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
+        String packet = reader.getString().substring(start, reader.getCursor());
+        Class<? extends Packet<?>> packetClass = mojmapPackets.get(packet);
+        if (packetClass == null) {
+            throw UNKNOWN_PACKET_EXCEPTION.create(packet);
         }
+        return packetClass;
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggest(mojmapPackets, builder);
+        return SharedSuggestionProvider.suggest(mojmapPackets.keySet(), builder);
     }
 
     @Override

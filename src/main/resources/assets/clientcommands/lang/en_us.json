@@ -137,6 +137,7 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.clisten.unknownPacket": "Unknown packet %s",
   "commands.clisten.receivedPacket": "Received the following packet: %s",
   "commands.clisten.sentPacket": "Sent the following packet: %s",
   "commands.clisten.packetError": "ERROR",

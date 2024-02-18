@@ -121,4 +121,7 @@ public class Configs {
         REFLECTION,
         BYTE_BUF,
     }
+
+    @Config
+    public static int maximumPacketFieldDepth = 10;
 }

@@ -3,7 +3,11 @@ package net.earthcomputer.clientcommands;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
-public class ReflectionUtils {
+public final class ReflectionUtils {
+
+    private ReflectionUtils() {
+    }
+
     public static Stream<Field> getAllFields(Class<?> clazz) {
         Stream.Builder<Field> builder = Stream.builder();
         Class<?> targetClass = clazz;

@@ -6,9 +6,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ReferenceSet;
-import net.earthcomputer.clientcommands.*;
+import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.ReflectionUtils;
+import net.earthcomputer.clientcommands.UnsafeUtils;
 import net.earthcomputer.clientcommands.features.MappingsHelper;
 import net.earthcomputer.clientcommands.features.PacketDumper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -24,29 +26,39 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Array;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Modifier;
 import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static net.earthcomputer.clientcommands.command.arguments.MojmapPacketClassArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class ListenCommand {
 
+    public static boolean isEnabled = true;
+
     private static final SimpleCommandExceptionType ALREADY_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.add.failed"));
     private static final SimpleCommandExceptionType NOT_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.remove.failed"));
 
-    private static final Set<Class<Packet<?>>> packets = new HashSet<>();
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final Set<Class<? extends Packet<?>>> packets = new HashSet<>();
 
     private static PacketCallback callback;
-
-    private static final ThreadLocal<ReferenceSet<Object>> SEEN = ThreadLocal.withInitial(ReferenceOpenHashSet::new);
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("clisten")
@@ -62,7 +74,7 @@ public class ListenCommand {
                 .executes(ctx -> clear(ctx.getSource()))));
     }
 
-    private static int add(FabricClientCommandSource source, Class<Packet<?>> packetClass) throws CommandSyntaxException {
+    private static int add(FabricClientCommandSource source, Class<? extends Packet<?>> packetClass) throws CommandSyntaxException {
         if (!packets.add(packetClass)) {
             throw ALREADY_LISTENING_EXCEPTION.create();
         }
@@ -81,22 +93,22 @@ public class ListenCommand {
                     try {
                         PacketDumper.dumpPacket(packet, new JsonWriter(writer));
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.error("Could not dump packet", e);
                         return;
                     }
                     packetData = writer.toString();
                     packetDataPreview = Component.literal(packetData.replace("\u00a7", "\\u00a7"));
                 } else {
                     try {
-                        packetDataPreview = serialize(packet);
+                        packetDataPreview = serialize(packet, new ReferenceOpenHashSet<>(), 0);
                         packetData = packetDataPreview.getString();
                     } catch (StackOverflowError e) {
-                        e.printStackTrace();
+                        LOGGER.error("Could not serialize packet into a Component", e);
                         return;
                     }
                 }
 
-                MutableComponent packetComponent = Component.literal(mojmapPacketName.orElseThrow().substring(MOJMAP_PACKET_PREFIX.length())).withStyle(s -> s
+                MutableComponent packetComponent = Component.literal(mojmapPacketName.map(packetName -> packetName.substring(packetName.lastIndexOf('/') + 1)).orElseThrow()).withStyle(s -> s
                     .withUnderlined(true)
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, packetDataPreview))
                     .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, packetData)));
@@ -111,7 +123,7 @@ public class ListenCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int remove(FabricClientCommandSource source, Class<Packet<?>> packetClass) throws CommandSyntaxException {
+    private static int remove(FabricClientCommandSource source, Class<? extends Packet<?>> packetClass) throws CommandSyntaxException {
         if (!packets.remove(packetClass)) {
             throw NOT_LISTENING_EXCEPTION.create();
         }
@@ -129,7 +141,7 @@ public class ListenCommand {
             packets.forEach(packetClass -> {
                 String packetClassName = packetClass.getName().replace('.', '/');
                 Optional<String> mojmapName = MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName);
-                source.sendFeedback(Component.literal(mojmapName.orElseThrow().substring(MOJMAP_PACKET_PREFIX.length())));
+                source.sendFeedback(Component.literal(mojmapName.map(name -> name.substring(name.lastIndexOf('/' + 1))).orElseThrow()));
             });
         }
 
@@ -143,21 +155,18 @@ public class ListenCommand {
         return amount;
     }
 
-    private static Component serialize(Object object) {
+    private static Component serialize(Object object, Set<Object> seen, int depth) {
         try {
-            if (SEEN.get().add(object)) {
-                return serializeInner(object);
+            if (depth <= Configs.maximumPacketFieldDepth && seen.add(object)) {
+                return serializeInner(object, seen, depth);
             }
             return Component.empty();
         } finally {
-            SEEN.get().remove(object);
-            if (SEEN.get().isEmpty()) {
-                SEEN.remove();
-            }
+            seen.remove(object);
         }
     }
 
-    private static Component serializeInner(Object object) {
+    private static Component serializeInner(Object object, Set<Object> seen, int depth) {
         if (object == null) {
             return Component.literal("null");
         }
@@ -171,7 +180,7 @@ public class ListenCommand {
             return Component.literal(object.toString());
         }
         if (object instanceof Optional<?> optional) {
-            return optional.isPresent() ? serialize(optional.get()) : Component.literal("empty");
+            return optional.isPresent() ? serialize(optional.get(), seen, depth + 1) : Component.literal("empty");
         }
         if (object instanceof Date date) {
             return Component.translationArg(date);
@@ -198,18 +207,18 @@ public class ListenCommand {
                 return component.append("]");
             }
             for (int i = 0; i < lengthMinusOne; i++) {
-                component.append(serialize(Array.get(object, i))).append(", ");
+                component.append(serialize(Array.get(object, i), seen, depth + 1)).append(", ");
             }
-            return component.append(serialize(Array.get(object, lengthMinusOne))).append("]");
+            return component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append("]");
         }
         if (object instanceof Collection<?> collection) {
             MutableComponent component = Component.literal("[");
-            component.append(collection.stream().map(e -> serialize(e).copy()).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
+            component.append(collection.stream().map(e -> serialize(e, seen, depth + 1).copy()).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
             return component.append("]");
         }
         if (object instanceof Map<?, ?> map) {
             MutableComponent component = Component.literal("{");
-            component.append(map.entrySet().stream().map(e -> serialize(e.getKey()).copy().append("=").append(serialize(e.getValue()))).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
+            component.append(map.entrySet().stream().map(e -> serialize(e.getKey(), seen, depth + 1).copy().append("=").append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
             return component.append("}");
         }
         if (object instanceof Registry<?> registry) {
@@ -217,14 +226,14 @@ public class ListenCommand {
         }
         if (object instanceof ResourceKey<?> resourceKey) {
             MutableComponent component = Component.literal("{");
-            component.append("registry=").append(serialize(resourceKey.registry())).append(", ");
-            component.append("location=").append(serialize(resourceKey.location()));
+            component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(", ");
+            component.append("location=").append(serialize(resourceKey.location(), seen, depth + 1));
             return component.append("}");
         }
         if (object instanceof Holder<?> holder) {
             MutableComponent component = Component.literal("{");
-            component.append("kind=").append(serialize(holder.kind().name())).append(", ");
-            component.append("value=").append(serialize(holder.value()));
+            component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(", ");
+            component.append("value=").append(serialize(holder.value(), seen, depth + 1));
             return component.append("}");
         }
 
@@ -240,11 +249,15 @@ public class ListenCommand {
                 Optional<String> mojmapFieldName = MappingsHelper.namedOrIntermediaryToMojmap_field(className, fieldName);
                 try {
                     field.setAccessible(true);
-                    return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(serialize(field.get(object)));
+                    return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(serialize(field.get(object), seen, depth + 1));
                 } catch (InaccessibleObjectException | ReflectiveOperationException e) {
                     try {
-                        VarHandle varHandle = UnsafeUtils.getImplLookup().findVarHandle(object.getClass(), fieldName, field.getType());
-                        return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(serialize(varHandle.get(object)));
+                        MethodHandles.Lookup implLookup = UnsafeUtils.getImplLookup();
+                        if (implLookup == null) {
+                            return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
+                        }
+                        VarHandle varHandle = implLookup.findVarHandle(object.getClass(), fieldName, field.getType());
+                        return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(serialize(varHandle.get(object), seen, depth + 1));
                     } catch (ReflectiveOperationException ex) {
                         return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
                     }

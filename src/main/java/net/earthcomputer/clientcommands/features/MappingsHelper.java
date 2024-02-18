@@ -3,12 +3,18 @@ package net.earthcomputer.clientcommands.features;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.logging.LogUtils;
+import net.earthcomputer.clientcommands.ClientCommands;
+import net.earthcomputer.clientcommands.command.ListenCommand;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
+import org.slf4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,11 +23,18 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 
 public class MappingsHelper {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final Path MAPPINGS_DIR = ClientCommands.configDir.resolve("mappings");
 
     private static final MemoryMappingTree mojmapOfficial = new MemoryMappingTree();
     private static final int SRC_OFFICIAL = 0;
@@ -35,55 +48,69 @@ public class MappingsHelper {
 
     private static final boolean IS_DEV_ENV = FabricLoader.getInstance().isDevelopmentEnvironment();
 
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
-
     public static void initMappings(String version) {
-        HttpRequest versionsRequest = HttpRequest.newBuilder()
-            .uri(URI.create("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"))
-            .GET()
-            .timeout(Duration.ofSeconds(5))
-            .build();
-        httpClient.sendAsync(versionsRequest, HttpResponse.BodyHandlers.ofString())
-            .thenApply(HttpResponse::body)
-            .thenAccept(versionsBody -> {
-                JsonObject versionsJson = JsonParser.parseString(versionsBody).getAsJsonObject();
-                String versionUrl = versionsJson.getAsJsonArray("versions").asList().stream()
-                    .map(JsonElement::getAsJsonObject)
-                    .filter(v -> v.get("id").getAsString().equals(version))
-                    .map(v -> v.get("url").getAsString())
-                    .findAny().orElseThrow();
+        try {
+            Files.createDirectories(MAPPINGS_DIR);
+        } catch (IOException e) {
+            LOGGER.error("Failed to create mappings dir", e);
+        }
+        try (BufferedReader reader = Files.newBufferedReader(MAPPINGS_DIR.resolve(version + ".txt"))) {
+            MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
+        } catch (IOException e) {
+            mojmapOfficial.reset();
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest versionsRequest = HttpRequest.newBuilder()
+                .uri(URI.create("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"))
+                .GET()
+                .timeout(Duration.ofSeconds(5))
+                .build();
+            httpClient.sendAsync(versionsRequest, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(versionsBody -> {
+                    JsonObject versionsJson = JsonParser.parseString(versionsBody).getAsJsonObject();
+                    String versionUrl = versionsJson.getAsJsonArray("versions").asList().stream()
+                        .map(JsonElement::getAsJsonObject)
+                        .filter(v -> v.get("id").getAsString().equals(version))
+                        .map(v -> v.get("url").getAsString())
+                        .findAny().orElseThrow();
 
-                HttpRequest versionRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(versionUrl))
-                    .GET()
-                    .timeout(Duration.ofSeconds(5))
-                    .build();
-                httpClient.sendAsync(versionRequest, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(HttpResponse::body)
-                    .thenAccept(versionBody -> {
-                        JsonObject versionJson = JsonParser.parseString(versionBody).getAsJsonObject();
-                        String mappingsUrl = versionJson
-                            .getAsJsonObject("downloads")
-                            .getAsJsonObject("client_mappings")
-                            .get("url").getAsString();
+                    HttpRequest versionRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(versionUrl))
+                        .GET()
+                        .timeout(Duration.ofSeconds(5))
+                        .build();
+                    httpClient.sendAsync(versionRequest, HttpResponse.BodyHandlers.ofString())
+                        .thenApply(HttpResponse::body)
+                        .thenAccept(versionBody -> {
+                            JsonObject versionJson = JsonParser.parseString(versionBody).getAsJsonObject();
+                            String mappingsUrl = versionJson
+                                .getAsJsonObject("downloads")
+                                .getAsJsonObject("client_mappings")
+                                .get("url").getAsString();
 
-                        HttpRequest mappingsRequest = HttpRequest.newBuilder()
-                            .uri(URI.create(mappingsUrl))
-                            .GET()
-                            .timeout(Duration.ofSeconds(5))
-                            .build();
-                        httpClient.sendAsync(mappingsRequest, HttpResponse.BodyHandlers.ofString())
-                            .thenApply(HttpResponse::body)
-                            .thenApply(StringReader::new)
-                            .thenAccept(reader -> {
-                                try {
-                                    MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
-                    });
-            });
+                            HttpRequest mappingsRequest = HttpRequest.newBuilder()
+                                .uri(URI.create(mappingsUrl))
+                                .GET()
+                                .timeout(Duration.ofSeconds(5))
+                                .build();
+                            httpClient.sendAsync(mappingsRequest, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(HttpResponse::body)
+                                .thenAccept(body -> {
+                                    try (StringReader reader = new StringReader(body)) {
+                                        MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
+                                    } catch (IOException ex) {
+                                        LOGGER.error("Could not read ProGuard mappings file", ex);
+                                        ListenCommand.isEnabled = false;
+                                    }
+                                    try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
+                                        writer.write(body);
+                                    } catch (IOException ex) {
+                                        LOGGER.error("Could not write ProGuard mappings file", ex);
+                                    }
+                                });
+                        });
+                });
+        }
 
         try (InputStream stream = FabricLoader.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny")) {
             if (stream == null) {
@@ -91,7 +118,8 @@ public class MappingsHelper {
             }
             MappingReader.read(new InputStreamReader(stream), IS_DEV_ENV ? MappingFormat.TINY_2_FILE : MappingFormat.TINY_FILE, officialIntermediaryNamed);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("Could not read mappings.tiny", e);
+            ListenCommand.isEnabled = false;
         }
     }
 
