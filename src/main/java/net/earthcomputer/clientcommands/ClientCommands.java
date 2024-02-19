@@ -164,6 +164,7 @@ public class ClientCommands implements ClientModInitializer {
         CrackRNGCommand.register(dispatcher);
         WeatherCommand.register(dispatcher);
         PluginsCommand.register(dispatcher);
+        CGameModeCommand.register(dispatcher);
         if (ListenCommand.isEnabled) {
             ListenCommand.register(dispatcher);
         }
