@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -94,19 +95,21 @@ public class MappingsHelper {
                 })
                 .thenApply(HttpResponse::body)
                 .thenApply(body -> {
-                    MemoryMappingTree tree = new MemoryMappingTree();
                     try (StringReader reader = new StringReader(body)) {
+                        MemoryMappingTree tree = new MemoryMappingTree();
                         MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
+                        return tree;
                     } catch (IOException ex) {
                         LOGGER.error("Could not read ProGuard mappings file", ex);
                         ListenCommand.isEnabled = false;
+                        throw new UncheckedIOException(ex);
+                    } finally {
+                        try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
+                            writer.write(body);
+                        } catch (IOException ex) {
+                            LOGGER.error("Could not write ProGuard mappings file", ex);
+                        }
                     }
-                    try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
-                        writer.write(body);
-                    } catch (IOException ex) {
-                        LOGGER.error("Could not write ProGuard mappings file", ex);
-                    }
-                    return tree;
                 });
         }
     });
