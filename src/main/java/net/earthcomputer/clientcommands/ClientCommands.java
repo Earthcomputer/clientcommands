@@ -88,7 +88,7 @@ public class ClientCommands implements ClientModInitializer {
 
         ItemGroupCommand.registerItemGroups();
 
-        MappingsHelper.initMappings(DetectedVersion.BUILT_IN.getName());
+        MappingsHelper.createMappingsDir();
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {

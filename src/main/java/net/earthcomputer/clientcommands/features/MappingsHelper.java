@@ -11,6 +11,8 @@ import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
+import net.minecraft.DetectedVersion;
+import net.minecraft.Util;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
@@ -29,7 +31,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
 
 public class MappingsHelper {
 
@@ -37,39 +39,23 @@ public class MappingsHelper {
 
     private static final Path MAPPINGS_DIR = ClientCommands.configDir.resolve("mappings");
 
-    private static final MemoryMappingTree mojmapOfficial = new MemoryMappingTree();
-    private static final int SRC_OFFICIAL = 0;
-    private static final int DEST_OFFICIAL = 0;
-
-    private static final MemoryMappingTree officialIntermediaryNamed = new MemoryMappingTree();
-    private static final int SRC_INTERMEDIARY = 0;
-    private static final int DEST_INTERMEDIARY = 0;
-    private static final int SRC_NAMED = 1;
-    private static final int DEST_NAMED = 1;
-
     private static final boolean IS_DEV_ENV = FabricLoader.getInstance().isDevelopmentEnvironment();
 
-    private static CountDownLatch latch = null;
-
-    public static void initMappings(String version) {
-        try {
-            Files.createDirectories(MAPPINGS_DIR);
-        } catch (IOException e) {
-            LOGGER.error("Failed to create mappings dir", e);
-        }
+    private static final CompletableFuture<MemoryMappingTree> mojmapOfficial = Util.make(() -> {
+        String version = DetectedVersion.BUILT_IN.getName();
+        MemoryMappingTree tree = new MemoryMappingTree();
         try (BufferedReader reader = Files.newBufferedReader(MAPPINGS_DIR.resolve(version + ".txt"))) {
-            MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
-            latch = new CountDownLatch(0);
+            MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
+            return CompletableFuture.completedFuture(tree);
         } catch (IOException e) {
-            mojmapOfficial.reset();
+            tree.reset();
             HttpClient httpClient = HttpClient.newHttpClient();
             HttpRequest versionsRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"))
                 .GET()
                 .timeout(Duration.ofSeconds(5))
                 .build();
-            latch = new CountDownLatch(1);
-            httpClient.sendAsync(versionsRequest, HttpResponse.BodyHandlers.ofString())
+            return httpClient.sendAsync(versionsRequest, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
                 .thenCompose(versionsBody -> {
                     JsonObject versionsJson = JsonParser.parseString(versionsBody).getAsJsonObject();
@@ -107,9 +93,9 @@ public class MappingsHelper {
                     return httpClient.sendAsync(mappingsRequest, HttpResponse.BodyHandlers.ofString());
                 })
                 .thenApply(HttpResponse::body)
-                .thenAccept(body -> {
+                .thenApply(body -> {
                     try (StringReader reader = new StringReader(body)) {
-                        MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
+                        MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
                     } catch (IOException ex) {
                         LOGGER.error("Could not read ProGuard mappings file", ex);
                         ListenCommand.isEnabled = false;
@@ -119,29 +105,46 @@ public class MappingsHelper {
                     } catch (IOException ex) {
                         LOGGER.error("Could not write ProGuard mappings file", ex);
                     }
-                })
-                .thenRun(() -> latch.countDown());
+                    return tree;
+                });
         }
+    });
+    private static final int SRC_OFFICIAL = 0;
+    private static final int DEST_OFFICIAL = 0;
 
+    private static final CompletableFuture<MemoryMappingTree> officialIntermediaryNamed = Util.make(() -> {
         try (InputStream stream = FabricLoader.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny")) {
             if (stream == null) {
                 throw new IOException("Could not find mappings.tiny");
             }
-            MappingReader.read(new InputStreamReader(stream), IS_DEV_ENV ? MappingFormat.TINY_2_FILE : MappingFormat.TINY_FILE, officialIntermediaryNamed);
+            MemoryMappingTree tree = new MemoryMappingTree();
+            MappingReader.read(new InputStreamReader(stream), IS_DEV_ENV ? MappingFormat.TINY_2_FILE : MappingFormat.TINY_FILE, tree);
+            return CompletableFuture.completedFuture(tree);
         } catch (IOException e) {
             LOGGER.error("Could not read mappings.tiny", e);
             ListenCommand.isEnabled = false;
+            return CompletableFuture.failedFuture(e);
+        }
+    });
+    private static final int SRC_INTERMEDIARY = 0;
+    private static final int DEST_INTERMEDIARY = 0;
+    private static final int SRC_NAMED = 1;
+    private static final int DEST_NAMED = 1;
+
+    public static void createMappingsDir() {
+        try {
+            Files.createDirectories(MAPPINGS_DIR);
+        } catch (IOException e) {
+            LOGGER.error("Failed to create mappings dir", e);
         }
     }
 
     public static Collection<? extends MappingTree.ClassMapping> mojmapClasses() {
-        block();
-        return mojmapOfficial.getClasses();
+        return mojmapOfficial.join().getClasses();
     }
 
     public static Optional<String> mojmapToOfficial_class(String mojmapClass) {
-        block();
-        MappingTree.ClassMapping officialClass = mojmapOfficial.getClass(mojmapClass);
+        MappingTree.ClassMapping officialClass = mojmapOfficial.join().getClass(mojmapClass);
         if (officialClass == null) {
             return Optional.empty();
         }
@@ -149,8 +152,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> officialToMojmap_class(String officialClass) {
-        block();
-        MappingTree.ClassMapping mojmapClass = mojmapOfficial.getClass(officialClass, SRC_OFFICIAL);
+        MappingTree.ClassMapping mojmapClass = mojmapOfficial.join().getClass(officialClass, SRC_OFFICIAL);
         if (mojmapClass == null) {
             return Optional.empty();
         }
@@ -158,12 +160,11 @@ public class MappingsHelper {
     }
 
     public static Optional<String> mojmapToNamed_class(String mojmapClass) {
-        block();
         Optional<String> officialClass = mojmapToOfficial_class(mojmapClass);
         if (officialClass.isEmpty()) {
             return Optional.empty();
         }
-        MappingTree.ClassMapping namedClass = officialIntermediaryNamed.getClass(officialClass.get());
+        MappingTree.ClassMapping namedClass = officialIntermediaryNamed.join().getClass(officialClass.get());
         if (namedClass == null) {
             return Optional.empty();
         }
@@ -171,12 +172,11 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedToMojmap_class(String namedClass) {
-        block();
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(namedClass, SRC_NAMED);
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(namedClass, SRC_NAMED);
         if (officialClass == null) {
             return Optional.empty();
         }
-        MappingTree.ClassMapping mojmapClass = mojmapOfficial.getClass(officialClass.getSrcName(), SRC_OFFICIAL);
+        MappingTree.ClassMapping mojmapClass = mojmapOfficial.join().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
         if (mojmapClass == null) {
             return Optional.empty();
         }
@@ -184,12 +184,11 @@ public class MappingsHelper {
     }
 
     public static Optional<String> mojmapToIntermediary_class(String mojmapClass) {
-        block();
         Optional<String> officialClass = mojmapToOfficial_class(mojmapClass);
         if (officialClass.isEmpty()) {
             return Optional.empty();
         }
-        MappingTree.ClassMapping intermediaryClass = officialIntermediaryNamed.getClass(officialClass.get());
+        MappingTree.ClassMapping intermediaryClass = officialIntermediaryNamed.join().getClass(officialClass.get());
         if (intermediaryClass == null) {
             return Optional.empty();
         }
@@ -197,12 +196,11 @@ public class MappingsHelper {
     }
 
     public static Optional<String> intermediaryToMojmap_class(String intermediaryClass) {
-        block();
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(intermediaryClass, SRC_INTERMEDIARY);
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(intermediaryClass, SRC_INTERMEDIARY);
         if (officialClass == null) {
             return Optional.empty();
         }
-        MappingTree.ClassMapping mojmapClass = mojmapOfficial.getClass(officialClass.getSrcName(), SRC_OFFICIAL);
+        MappingTree.ClassMapping mojmapClass = mojmapOfficial.join().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
         if (mojmapClass == null) {
             return Optional.empty();
         }
@@ -210,7 +208,6 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedOrIntermediaryToMojmap_class(String namedOrIntermediaryClass) {
-        block();
         if (IS_DEV_ENV) {
             return MappingsHelper.namedToMojmap_class(namedOrIntermediaryClass);
         }
@@ -218,7 +215,6 @@ public class MappingsHelper {
     }
 
     public static Optional<String> mojmapToNamedOrIntermediary_class(String mojmapClass) {
-        block();
         if (IS_DEV_ENV) {
             return MappingsHelper.mojmapToNamed_class(mojmapClass);
         }
@@ -226,8 +222,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> officialToMojmap_field(String officialClass, String officialField) {
-        block();
-        MappingTree.FieldMapping mojmapField = mojmapOfficial.getField(officialClass, officialField, null);
+        MappingTree.FieldMapping mojmapField = mojmapOfficial.join().getField(officialClass, officialField, null);
         if (mojmapField == null) {
             return Optional.empty();
         }
@@ -235,16 +230,15 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedToMojmap_field(String namedClass, String namedField) {
-        block();
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(namedClass, SRC_NAMED);
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(namedClass, SRC_NAMED);
         if (officialClass == null) {
             return Optional.empty();
         }
-        MappingTree.FieldMapping officialField = officialIntermediaryNamed.getField(namedClass, namedField, null, SRC_NAMED);
+        MappingTree.FieldMapping officialField = officialIntermediaryNamed.join().getField(namedClass, namedField, null, SRC_NAMED);
         if (officialField == null) {
             return Optional.empty();
         }
-        MappingTree.FieldMapping mojmapField = mojmapOfficial.getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
+        MappingTree.FieldMapping mojmapField = mojmapOfficial.join().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
         if (mojmapField == null) {
             return Optional.empty();
         }
@@ -252,16 +246,15 @@ public class MappingsHelper {
     }
 
     public static Optional<String> intermediaryToMojmap_field(String intermediaryClass, String intermediaryField) {
-        block();
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(intermediaryClass, SRC_INTERMEDIARY);
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(intermediaryClass, SRC_INTERMEDIARY);
         if (officialClass == null) {
             return Optional.empty();
         }
-        MappingTree.FieldMapping officialField = officialIntermediaryNamed.getField(intermediaryClass, intermediaryField, null, SRC_INTERMEDIARY);
+        MappingTree.FieldMapping officialField = officialIntermediaryNamed.join().getField(intermediaryClass, intermediaryField, null, SRC_INTERMEDIARY);
         if (officialField == null) {
             return Optional.empty();
         }
-        MappingTree.FieldMapping mojmapField = mojmapOfficial.getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
+        MappingTree.FieldMapping mojmapField = mojmapOfficial.join().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
         if (mojmapField == null) {
             return Optional.empty();
         }
@@ -269,22 +262,9 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedOrIntermediaryToMojmap_field(String namedOrIntermediaryClass, String namedOrIntermediaryField) {
-        block();
         if (IS_DEV_ENV) {
             return namedToMojmap_field(namedOrIntermediaryClass, namedOrIntermediaryField);
         }
         return intermediaryToMojmap_field(namedOrIntermediaryClass, namedOrIntermediaryField);
-    }
-
-    private static void block() {
-        if (latch == null) {
-            throw new IllegalStateException("Function called too early, defer calling functions in MappingsHelper");
-        }
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            LOGGER.error("Thread was interrupted while waiting", e);
-            ListenCommand.isEnabled = false;
-        }
     }
 }
