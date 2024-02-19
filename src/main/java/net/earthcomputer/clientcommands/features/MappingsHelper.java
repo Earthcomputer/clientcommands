@@ -12,6 +12,7 @@ import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.DetectedVersion;
+import net.minecraft.Optionull;
 import net.minecraft.Util;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -144,24 +145,11 @@ public class MappingsHelper {
     }
 
     public static @Nullable Collection<? extends MappingTree.ClassMapping> mojmapClasses() {
-        try {
-            return mojmapOfficial.get().getClasses();
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        return Optionull.map(getMojmapOfficial(), MemoryMappingTree::getClasses);
     }
 
     public static @Nullable String mojmapToOfficial_class(String mojmapClass) {
-        MappingTree.ClassMapping officialClass;
-        try {
-            officialClass = mojmapOfficial.get().getClass(mojmapClass);
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        MappingTree.ClassMapping officialClass = Optionull.map(getMojmapOfficial(), tree -> tree.getClass(mojmapClass));
         if (officialClass == null) {
             return null;
         }
@@ -169,14 +157,7 @@ public class MappingsHelper {
     }
 
     public static @Nullable String officialToMojmap_class(String officialClass) {
-        MappingTree.ClassMapping mojmapClass;
-        try {
-            mojmapClass = mojmapOfficial.get().getClass(officialClass, SRC_OFFICIAL);
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        MappingTree.ClassMapping mojmapClass = Optionull.map(getMojmapOfficial(), tree -> tree.getClass(officialClass, SRC_OFFICIAL));
         if (mojmapClass == null) {
             return null;
         }
@@ -200,14 +181,7 @@ public class MappingsHelper {
         if (officialClass == null) {
             return null;
         }
-        MappingTree.ClassMapping mojmapClass;
-        try {
-            mojmapClass = mojmapOfficial.get().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        MappingTree.ClassMapping mojmapClass = Optionull.map(getMojmapOfficial(), tree -> tree.getClass(officialClass.getSrcName(), SRC_OFFICIAL));
         if (mojmapClass == null) {
             return null;
         }
@@ -231,14 +205,7 @@ public class MappingsHelper {
         if (officialClass == null) {
             return null;
         }
-        MappingTree.ClassMapping mojmapClass;
-        try {
-            mojmapClass = mojmapOfficial.get().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        MappingTree.ClassMapping mojmapClass = Optionull.map(getMojmapOfficial(), tree -> tree.getClass(officialClass.getSrcName(), SRC_OFFICIAL));
         if (mojmapClass == null) {
             return null;
         }
@@ -260,14 +227,7 @@ public class MappingsHelper {
     }
 
     public static @Nullable String officialToMojmap_field(String officialClass, String officialField) {
-        MappingTree.FieldMapping mojmapField;
-        try {
-            mojmapField = mojmapOfficial.get().getField(officialClass, officialField, null);
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        MappingTree.FieldMapping mojmapField = Optionull.map(getMojmapOfficial(), tree -> tree.getField(officialClass, officialField, null));
         if (mojmapField == null) {
             return null;
         }
@@ -283,14 +243,7 @@ public class MappingsHelper {
         if (officialField == null) {
             return null;
         }
-        MappingTree.FieldMapping mojmapField;
-        try {
-            mojmapField = mojmapOfficial.get().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        MappingTree.FieldMapping mojmapField = Optionull.map(getMojmapOfficial(), tree -> tree.getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL));
         if (mojmapField == null) {
             return null;
         }
@@ -306,14 +259,7 @@ public class MappingsHelper {
         if (officialField == null) {
             return null;
         }
-        MappingTree.FieldMapping mojmapField;
-        try {
-            mojmapField = mojmapOfficial.get().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
-        } catch (ExecutionException | InterruptedException e) {
-            LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
-            return null;
-        }
+        MappingTree.FieldMapping mojmapField = Optionull.map(getMojmapOfficial(), tree -> tree.getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL));
         if (mojmapField == null) {
             return null;
         }
@@ -325,5 +271,15 @@ public class MappingsHelper {
             return namedToMojmap_field(namedOrIntermediaryClass, namedOrIntermediaryField);
         }
         return intermediaryToMojmap_field(namedOrIntermediaryClass, namedOrIntermediaryField);
+    }
+
+    private static MemoryMappingTree getMojmapOfficial() {
+        try {
+            return mojmapOfficial.get();
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
     }
 }
