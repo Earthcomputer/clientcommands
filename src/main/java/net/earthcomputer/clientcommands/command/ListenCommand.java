@@ -83,9 +83,6 @@ public class ListenCommand {
 
         if (callback == null) {
             callback = (packet, side) -> {
-                String packetClassName = packet.getClass().getName().replace('.', '/');
-                Optional<String> mojmapPacketName = MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName);
-
                 String packetData;
                 Component packetDataPreview;
                 if (Configs.packetDumpMethod == Configs.PacketDumpMethod.BYTE_BUF) {
@@ -108,7 +105,11 @@ public class ListenCommand {
                     }
                 }
 
-                MutableComponent packetComponent = Component.literal(mojmapPacketName.map(packetName -> packetName.substring(packetName.lastIndexOf('/') + 1)).orElseThrow()).withStyle(s -> s
+                String packetClassName = packet.getClass().getName().replace('.', '/');
+                String mojmapPacketName = MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName).orElse(packetClassName);
+                mojmapPacketName = mojmapPacketName.substring(mojmapPacketName.lastIndexOf('/') + 1);
+
+                MutableComponent packetComponent = Component.literal(mojmapPacketName).withStyle(s -> s
                     .withUnderlined(true)
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, packetDataPreview))
                     .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, packetData)));
@@ -140,8 +141,9 @@ public class ListenCommand {
             source.sendFeedback(Component.translatable("commands.clisten.list"));
             packets.forEach(packetClass -> {
                 String packetClassName = packetClass.getName().replace('.', '/');
-                Optional<String> mojmapName = MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName);
-                source.sendFeedback(Component.literal(mojmapName.map(name -> name.substring(name.lastIndexOf('/' + 1))).orElseThrow()));
+                String mojmapName = MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName).orElse(packetClassName);
+                mojmapName = mojmapName.substring(mojmapName.lastIndexOf('/' + 1));
+                source.sendFeedback(Component.literal(mojmapName));
             });
         }
 
@@ -246,20 +248,20 @@ public class ListenCommand {
             .filter(field -> !Modifier.isStatic(field.getModifiers()))
             .map(field -> {
                 String fieldName = field.getName();
-                Optional<String> mojmapFieldName = MappingsHelper.namedOrIntermediaryToMojmap_field(className, fieldName);
+                String mojmapFieldName = MappingsHelper.namedOrIntermediaryToMojmap_field(className, fieldName).orElse(fieldName);
                 try {
                     field.setAccessible(true);
-                    return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(serialize(field.get(object), seen, depth + 1));
+                    return Component.literal(mojmapFieldName + '=').append(serialize(field.get(object), seen, depth + 1));
                 } catch (InaccessibleObjectException | ReflectiveOperationException e) {
                     try {
                         MethodHandles.Lookup implLookup = UnsafeUtils.getImplLookup();
                         if (implLookup == null) {
-                            return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
+                            return Component.literal(mojmapFieldName + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
                         }
                         VarHandle varHandle = implLookup.findVarHandle(object.getClass(), fieldName, field.getType());
-                        return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(serialize(varHandle.get(object), seen, depth + 1));
+                        return Component.literal(mojmapFieldName + '=').append(serialize(varHandle.get(object), seen, depth + 1));
                     } catch (ReflectiveOperationException ex) {
-                        return Component.literal(mojmapFieldName.orElse(fieldName) + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
+                        return Component.literal(mojmapFieldName + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
                     }
                 }
             })

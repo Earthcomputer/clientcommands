@@ -86,6 +86,11 @@ public class MappingsHelper {
                         .build();
                     return httpClient.sendAsync(versionRequest, HttpResponse.BodyHandlers.ofString());
                 })
+                .whenComplete((result, exception) -> {
+                    if (exception != null) {
+                        ListenCommand.isEnabled = false;
+                    }
+                })
                 .thenApply(HttpResponse::body)
                 .thenCompose(versionBody -> {
                     JsonObject versionJson = JsonParser.parseString(versionBody).getAsJsonObject();

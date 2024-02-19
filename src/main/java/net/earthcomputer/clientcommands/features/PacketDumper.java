@@ -201,7 +201,10 @@ public class PacketDumper {
         @Override
         public <E extends Enum<E>> void writeEnumSet(EnumSet<E> enumSet, Class<E> enumClass) {
             dump("enumSet", () -> {
-                writer.name("enumClass").value(MappingsHelper.namedOrIntermediaryToMojmap_class(enumClass.getName().replace('.', '/')).orElseThrow());
+                String className = enumClass.getName().replace('.', '/');
+                String mojmapClassName = MappingsHelper.namedOrIntermediaryToMojmap_class(className).orElse(className);
+                mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
+                writer.name("enumClass").value(mojmapClassName);
                 writer.name("size").value(enumSet.size());
                 writer.name("elements").beginArray();
                 for (final E element : enumSet) {
@@ -356,10 +359,14 @@ public class PacketDumper {
 
         @Override
         public @NotNull PacketDumpByteBuf writeEnum(Enum<?> value) {
-            return dump("enum", () -> writer
-                .name("enum").value(MappingsHelper.namedOrIntermediaryToMojmap_class(value.getDeclaringClass().getName().replace('.', '/')).orElseThrow())
-                .name("value").value(value.name())
-            );
+            return dump("enum", () -> {
+                String className = value.getDeclaringClass().getName().replace('.', '/');
+                String mojmapClassName = MappingsHelper.namedOrIntermediaryToMojmap_class(className).orElse(className);
+                mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
+                writer
+                    .name("enum").value(mojmapClassName)
+                    .name("value").value(value.name());
+            });
         }
 
         @Override
@@ -676,7 +683,10 @@ public class PacketDumper {
         private void dumpValueClass(Object value) throws IOException {
             writer.name("valueClass");
             if (value != null) {
-                writer.value(MappingsHelper.namedOrIntermediaryToMojmap_class(value.getClass().getName().replace('.', '/')).orElseThrow());
+                String className = value.getClass().getName().replace('.', '/');
+                String mojmapClassName = MappingsHelper.namedOrIntermediaryToMojmap_class(className).orElse(className);
+                mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
+                writer.value(mojmapClassName);
             } else {
                 writer.nullValue();
             }

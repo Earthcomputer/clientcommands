@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -32,10 +31,9 @@ public class MojmapPacketClassArgumentType implements ArgumentType<Class<? exten
     private static final Map<String, Class<? extends Packet<?>>> mojmapPackets = Arrays.stream(ConnectionProtocol.values())
         .flatMap(connectionProtocol -> connectionProtocol.flows.values().stream()
             .flatMap(codecData -> codecData.packetSet.classToId.keySet().stream()))
-        .map(clazz -> {
-            Optional<String> mojmapPacket = MappingsHelper.namedOrIntermediaryToMojmap_class(clazz.getName().replace('.', '/'));
-            return mojmapPacket.map(packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz)).orElse(null);
-        })
+        .map(clazz -> MappingsHelper.namedOrIntermediaryToMojmap_class(clazz.getName().replace('.', '/'))
+            .map(packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz))
+            .orElse(null))
         .collect(Collectors.filtering(Objects::nonNull, Collectors.toUnmodifiableMap(Pair::getKey, Pair::getValue, (l, r) -> l)));
 
     public static MojmapPacketClassArgumentType packet() {
