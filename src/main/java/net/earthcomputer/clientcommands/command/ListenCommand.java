@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -106,7 +107,7 @@ public class ListenCommand {
                 }
 
                 String packetClassName = packet.getClass().getName().replace('.', '/');
-                String mojmapPacketName = MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName).orElse(packetClassName);
+                String mojmapPacketName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName), packetClassName);
                 mojmapPacketName = mojmapPacketName.substring(mojmapPacketName.lastIndexOf('/') + 1);
 
                 MutableComponent packetComponent = Component.literal(mojmapPacketName).withStyle(s -> s
@@ -141,7 +142,7 @@ public class ListenCommand {
             source.sendFeedback(Component.translatable("commands.clisten.list"));
             packets.forEach(packetClass -> {
                 String packetClassName = packetClass.getName().replace('.', '/');
-                String mojmapName = MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName).orElse(packetClassName);
+                String mojmapName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName), packetClassName);
                 mojmapName = mojmapName.substring(mojmapName.lastIndexOf('/' + 1));
                 source.sendFeedback(Component.literal(mojmapName));
             });
@@ -240,7 +241,7 @@ public class ListenCommand {
         }
 
         String className = object.getClass().getName().replace(".", "/");
-        String mojmapClassName = MappingsHelper.namedOrIntermediaryToMojmap_class(className).orElse(className);
+        String mojmapClassName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(className), className);
         mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
 
         MutableComponent component = Component.literal(mojmapClassName + '{');
@@ -248,7 +249,7 @@ public class ListenCommand {
             .filter(field -> !Modifier.isStatic(field.getModifiers()))
             .map(field -> {
                 String fieldName = field.getName();
-                String mojmapFieldName = MappingsHelper.namedOrIntermediaryToMojmap_field(className, fieldName).orElse(fieldName);
+                String mojmapFieldName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_field(className, fieldName), fieldName);
                 try {
                     field.setAccessible(true);
                     return Component.literal(mojmapFieldName + '=').append(serialize(field.get(object), seen, depth + 1));

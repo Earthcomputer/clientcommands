@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.features.MappingsHelper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.Optionull;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
@@ -31,9 +32,8 @@ public class MojmapPacketClassArgumentType implements ArgumentType<Class<? exten
     private static final Map<String, Class<? extends Packet<?>>> mojmapPackets = Arrays.stream(ConnectionProtocol.values())
         .flatMap(connectionProtocol -> connectionProtocol.flows.values().stream()
             .flatMap(codecData -> codecData.packetSet.classToId.keySet().stream()))
-        .map(clazz -> MappingsHelper.namedOrIntermediaryToMojmap_class(clazz.getName().replace('.', '/'))
-            .map(packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz))
-            .orElse(null))
+        .map(clazz -> Optionull.map(MappingsHelper.namedOrIntermediaryToMojmap_class(clazz.getName().replace('.', '/')),
+                packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz)))
         .collect(Collectors.filtering(Objects::nonNull, Collectors.toUnmodifiableMap(Pair::getKey, Pair::getValue, (l, r) -> l)));
 
     public static MojmapPacketClassArgumentType packet() {

@@ -13,6 +13,7 @@ import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.minecraft.DetectedVersion;
 import net.minecraft.Util;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
@@ -30,8 +31,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class MappingsHelper {
 
@@ -43,12 +44,11 @@ public class MappingsHelper {
 
     private static final CompletableFuture<MemoryMappingTree> mojmapOfficial = Util.make(() -> {
         String version = DetectedVersion.BUILT_IN.getName();
-        MemoryMappingTree tree = new MemoryMappingTree();
         try (BufferedReader reader = Files.newBufferedReader(MAPPINGS_DIR.resolve(version + ".txt"))) {
+            MemoryMappingTree tree = new MemoryMappingTree();
             MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
             return CompletableFuture.completedFuture(tree);
         } catch (IOException e) {
-            tree.reset();
             HttpClient httpClient = HttpClient.newHttpClient();
             HttpRequest versionsRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"))
@@ -94,6 +94,7 @@ public class MappingsHelper {
                 })
                 .thenApply(HttpResponse::body)
                 .thenApply(body -> {
+                    MemoryMappingTree tree = new MemoryMappingTree();
                     try (StringReader reader = new StringReader(body)) {
                         MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
                     } catch (IOException ex) {
@@ -112,18 +113,18 @@ public class MappingsHelper {
     private static final int SRC_OFFICIAL = 0;
     private static final int DEST_OFFICIAL = 0;
 
-    private static final CompletableFuture<MemoryMappingTree> officialIntermediaryNamed = Util.make(() -> {
+    private static final MemoryMappingTree officialIntermediaryNamed = Util.make(() -> {
         try (InputStream stream = FabricLoader.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny")) {
             if (stream == null) {
                 throw new IOException("Could not find mappings.tiny");
             }
             MemoryMappingTree tree = new MemoryMappingTree();
             MappingReader.read(new InputStreamReader(stream), IS_DEV_ENV ? MappingFormat.TINY_2_FILE : MappingFormat.TINY_FILE, tree);
-            return CompletableFuture.completedFuture(tree);
+            return tree;
         } catch (IOException e) {
             LOGGER.error("Could not read mappings.tiny", e);
             ListenCommand.isEnabled = false;
-            return CompletableFuture.failedFuture(e);
+            return null;
         }
     });
     private static final int SRC_INTERMEDIARY = 0;
@@ -139,129 +140,184 @@ public class MappingsHelper {
         }
     }
 
-    public static Collection<? extends MappingTree.ClassMapping> mojmapClasses() {
-        return mojmapOfficial.join().getClasses();
+    public static @Nullable Collection<? extends MappingTree.ClassMapping> mojmapClasses() {
+        try {
+            return mojmapOfficial.get().getClasses();
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
     }
 
-    public static Optional<String> mojmapToOfficial_class(String mojmapClass) {
-        MappingTree.ClassMapping officialClass = mojmapOfficial.join().getClass(mojmapClass);
+    public static @Nullable String mojmapToOfficial_class(String mojmapClass) {
+        MappingTree.ClassMapping officialClass;
+        try {
+            officialClass = mojmapOfficial.get().getClass(mojmapClass);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
         if (officialClass == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(officialClass.getDstName(DEST_OFFICIAL));
+        return officialClass.getDstName(DEST_OFFICIAL);
     }
 
-    public static Optional<String> officialToMojmap_class(String officialClass) {
-        MappingTree.ClassMapping mojmapClass = mojmapOfficial.join().getClass(officialClass, SRC_OFFICIAL);
+    public static @Nullable String officialToMojmap_class(String officialClass) {
+        MappingTree.ClassMapping mojmapClass;
+        try {
+            mojmapClass = mojmapOfficial.get().getClass(officialClass, SRC_OFFICIAL);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
         if (mojmapClass == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(mojmapClass.getSrcName());
+        return mojmapClass.getSrcName();
     }
 
-    public static Optional<String> mojmapToNamed_class(String mojmapClass) {
-        Optional<String> officialClass = mojmapToOfficial_class(mojmapClass);
-        if (officialClass.isEmpty()) {
-            return Optional.empty();
+    public static @Nullable String mojmapToNamed_class(String mojmapClass) {
+        String officialClass = mojmapToOfficial_class(mojmapClass);
+        if (officialClass == null) {
+            return null;
         }
-        MappingTree.ClassMapping namedClass = officialIntermediaryNamed.join().getClass(officialClass.get());
+        MappingTree.ClassMapping namedClass = officialIntermediaryNamed.getClass(officialClass);
         if (namedClass == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(namedClass.getDstName(DEST_NAMED));
+        return namedClass.getDstName(DEST_NAMED);
     }
 
-    public static Optional<String> namedToMojmap_class(String namedClass) {
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(namedClass, SRC_NAMED);
+    public static @Nullable String namedToMojmap_class(String namedClass) {
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(namedClass, SRC_NAMED);
         if (officialClass == null) {
-            return Optional.empty();
+            return null;
         }
-        MappingTree.ClassMapping mojmapClass = mojmapOfficial.join().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
+        MappingTree.ClassMapping mojmapClass;
+        try {
+            mojmapClass = mojmapOfficial.get().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
         if (mojmapClass == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(mojmapClass.getSrcName());
+        return mojmapClass.getSrcName();
     }
 
-    public static Optional<String> mojmapToIntermediary_class(String mojmapClass) {
-        Optional<String> officialClass = mojmapToOfficial_class(mojmapClass);
-        if (officialClass.isEmpty()) {
-            return Optional.empty();
+    public static @Nullable String mojmapToIntermediary_class(String mojmapClass) {
+        String officialClass = mojmapToOfficial_class(mojmapClass);
+        if (officialClass == null) {
+            return null;
         }
-        MappingTree.ClassMapping intermediaryClass = officialIntermediaryNamed.join().getClass(officialClass.get());
+        MappingTree.ClassMapping intermediaryClass = officialIntermediaryNamed.getClass(officialClass);
         if (intermediaryClass == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(intermediaryClass.getDstName(DEST_INTERMEDIARY));
+        return intermediaryClass.getDstName(DEST_INTERMEDIARY);
     }
 
-    public static Optional<String> intermediaryToMojmap_class(String intermediaryClass) {
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(intermediaryClass, SRC_INTERMEDIARY);
+    public static @Nullable String intermediaryToMojmap_class(String intermediaryClass) {
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(intermediaryClass, SRC_INTERMEDIARY);
         if (officialClass == null) {
-            return Optional.empty();
+            return null;
         }
-        MappingTree.ClassMapping mojmapClass = mojmapOfficial.join().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
+        MappingTree.ClassMapping mojmapClass;
+        try {
+            mojmapClass = mojmapOfficial.get().getClass(officialClass.getSrcName(), SRC_OFFICIAL);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
         if (mojmapClass == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(mojmapClass.getSrcName());
+        return mojmapClass.getSrcName();
     }
 
-    public static Optional<String> namedOrIntermediaryToMojmap_class(String namedOrIntermediaryClass) {
+    public static @Nullable String namedOrIntermediaryToMojmap_class(String namedOrIntermediaryClass) {
         if (IS_DEV_ENV) {
             return MappingsHelper.namedToMojmap_class(namedOrIntermediaryClass);
         }
         return MappingsHelper.intermediaryToMojmap_class(namedOrIntermediaryClass);
     }
 
-    public static Optional<String> mojmapToNamedOrIntermediary_class(String mojmapClass) {
+    public static @Nullable String mojmapToNamedOrIntermediary_class(String mojmapClass) {
         if (IS_DEV_ENV) {
             return MappingsHelper.mojmapToNamed_class(mojmapClass);
         }
         return MappingsHelper.mojmapToIntermediary_class(mojmapClass);
     }
 
-    public static Optional<String> officialToMojmap_field(String officialClass, String officialField) {
-        MappingTree.FieldMapping mojmapField = mojmapOfficial.join().getField(officialClass, officialField, null);
-        if (mojmapField == null) {
-            return Optional.empty();
+    public static @Nullable String officialToMojmap_field(String officialClass, String officialField) {
+        MappingTree.FieldMapping mojmapField;
+        try {
+            mojmapField = mojmapOfficial.get().getField(officialClass, officialField, null);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
         }
-        return Optional.ofNullable(mojmapField.getSrcName());
+        if (mojmapField == null) {
+            return null;
+        }
+        return mojmapField.getSrcName();
     }
 
-    public static Optional<String> namedToMojmap_field(String namedClass, String namedField) {
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(namedClass, SRC_NAMED);
+    public static @Nullable String namedToMojmap_field(String namedClass, String namedField) {
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(namedClass, SRC_NAMED);
         if (officialClass == null) {
-            return Optional.empty();
+            return null;
         }
-        MappingTree.FieldMapping officialField = officialIntermediaryNamed.join().getField(namedClass, namedField, null, SRC_NAMED);
+        MappingTree.FieldMapping officialField = officialIntermediaryNamed.getField(namedClass, namedField, null, SRC_NAMED);
         if (officialField == null) {
-            return Optional.empty();
+            return null;
         }
-        MappingTree.FieldMapping mojmapField = mojmapOfficial.join().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
+        MappingTree.FieldMapping mojmapField;
+        try {
+            mojmapField = mojmapOfficial.get().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
         if (mojmapField == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(mojmapField.getSrcName());
+        return mojmapField.getSrcName();
     }
 
-    public static Optional<String> intermediaryToMojmap_field(String intermediaryClass, String intermediaryField) {
-        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.join().getClass(intermediaryClass, SRC_INTERMEDIARY);
+    public static @Nullable String intermediaryToMojmap_field(String intermediaryClass, String intermediaryField) {
+        MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(intermediaryClass, SRC_INTERMEDIARY);
         if (officialClass == null) {
-            return Optional.empty();
+            return null;
         }
-        MappingTree.FieldMapping officialField = officialIntermediaryNamed.join().getField(intermediaryClass, intermediaryField, null, SRC_INTERMEDIARY);
+        MappingTree.FieldMapping officialField = officialIntermediaryNamed.getField(intermediaryClass, intermediaryField, null, SRC_INTERMEDIARY);
         if (officialField == null) {
-            return Optional.empty();
+            return null;
         }
-        MappingTree.FieldMapping mojmapField = mojmapOfficial.join().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
+        MappingTree.FieldMapping mojmapField;
+        try {
+            mojmapField = mojmapOfficial.get().getField(officialClass.getSrcName(), officialField.getSrcName(), null, SRC_OFFICIAL);
+        } catch (ExecutionException | InterruptedException e) {
+            LOGGER.error("mojmap mappings were not available", e);
+            ListenCommand.isEnabled = false;
+            return null;
+        }
         if (mojmapField == null) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.ofNullable(mojmapField.getSrcName());
+        return mojmapField.getSrcName();
     }
 
-    public static Optional<String> namedOrIntermediaryToMojmap_field(String namedOrIntermediaryClass, String namedOrIntermediaryField) {
+    public static @Nullable String namedOrIntermediaryToMojmap_field(String namedOrIntermediaryClass, String namedOrIntermediaryField) {
         if (IS_DEV_ENV) {
             return namedToMojmap_field(namedOrIntermediaryClass, namedOrIntermediaryField);
         }

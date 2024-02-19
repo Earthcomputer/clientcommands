@@ -202,7 +202,7 @@ public class PacketDumper {
         public <E extends Enum<E>> void writeEnumSet(EnumSet<E> enumSet, Class<E> enumClass) {
             dump("enumSet", () -> {
                 String className = enumClass.getName().replace('.', '/');
-                String mojmapClassName = MappingsHelper.namedOrIntermediaryToMojmap_class(className).orElse(className);
+                String mojmapClassName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(className), className);
                 mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
                 writer.name("enumClass").value(mojmapClassName);
                 writer.name("size").value(enumSet.size());
@@ -361,7 +361,7 @@ public class PacketDumper {
         public @NotNull PacketDumpByteBuf writeEnum(Enum<?> value) {
             return dump("enum", () -> {
                 String className = value.getDeclaringClass().getName().replace('.', '/');
-                String mojmapClassName = MappingsHelper.namedOrIntermediaryToMojmap_class(className).orElse(className);
+                String mojmapClassName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(className), className);
                 mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
                 writer
                     .name("enum").value(mojmapClassName)
@@ -684,7 +684,7 @@ public class PacketDumper {
             writer.name("valueClass");
             if (value != null) {
                 String className = value.getClass().getName().replace('.', '/');
-                String mojmapClassName = MappingsHelper.namedOrIntermediaryToMojmap_class(className).orElse(className);
+                String mojmapClassName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(className), className);
                 mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
                 writer.value(mojmapClassName);
             } else {
