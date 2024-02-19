@@ -29,6 +29,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 public class MappingsHelper {
 
@@ -48,6 +49,8 @@ public class MappingsHelper {
 
     private static final boolean IS_DEV_ENV = FabricLoader.getInstance().isDevelopmentEnvironment();
 
+    private static CountDownLatch latch = null;
+
     public static void initMappings(String version) {
         try {
             Files.createDirectories(MAPPINGS_DIR);
@@ -56,6 +59,7 @@ public class MappingsHelper {
         }
         try (BufferedReader reader = Files.newBufferedReader(MAPPINGS_DIR.resolve(version + ".txt"))) {
             MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
+            latch = new CountDownLatch(0);
         } catch (IOException e) {
             mojmapOfficial.reset();
             HttpClient httpClient = HttpClient.newHttpClient();
@@ -64,9 +68,10 @@ public class MappingsHelper {
                 .GET()
                 .timeout(Duration.ofSeconds(5))
                 .build();
+            latch = new CountDownLatch(1);
             httpClient.sendAsync(versionsRequest, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenAccept(versionsBody -> {
+                .thenCompose(versionsBody -> {
                     JsonObject versionsJson = JsonParser.parseString(versionsBody).getAsJsonObject();
                     String versionUrl = versionsJson.getAsJsonArray("versions").asList().stream()
                         .map(JsonElement::getAsJsonObject)
@@ -79,37 +84,38 @@ public class MappingsHelper {
                         .GET()
                         .timeout(Duration.ofSeconds(5))
                         .build();
-                    httpClient.sendAsync(versionRequest, HttpResponse.BodyHandlers.ofString())
-                        .thenApply(HttpResponse::body)
-                        .thenAccept(versionBody -> {
-                            JsonObject versionJson = JsonParser.parseString(versionBody).getAsJsonObject();
-                            String mappingsUrl = versionJson
-                                .getAsJsonObject("downloads")
-                                .getAsJsonObject("client_mappings")
-                                .get("url").getAsString();
+                    return httpClient.sendAsync(versionRequest, HttpResponse.BodyHandlers.ofString());
+                })
+                .thenApply(HttpResponse::body)
+                .thenCompose(versionBody -> {
+                    JsonObject versionJson = JsonParser.parseString(versionBody).getAsJsonObject();
+                    String mappingsUrl = versionJson
+                        .getAsJsonObject("downloads")
+                        .getAsJsonObject("client_mappings")
+                        .get("url").getAsString();
 
-                            HttpRequest mappingsRequest = HttpRequest.newBuilder()
-                                .uri(URI.create(mappingsUrl))
-                                .GET()
-                                .timeout(Duration.ofSeconds(5))
-                                .build();
-                            httpClient.sendAsync(mappingsRequest, HttpResponse.BodyHandlers.ofString())
-                                .thenApply(HttpResponse::body)
-                                .thenAccept(body -> {
-                                    try (StringReader reader = new StringReader(body)) {
-                                        MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
-                                    } catch (IOException ex) {
-                                        LOGGER.error("Could not read ProGuard mappings file", ex);
-                                        ListenCommand.isEnabled = false;
-                                    }
-                                    try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
-                                        writer.write(body);
-                                    } catch (IOException ex) {
-                                        LOGGER.error("Could not write ProGuard mappings file", ex);
-                                    }
-                                });
-                        });
-                });
+                    HttpRequest mappingsRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(mappingsUrl))
+                        .GET()
+                        .timeout(Duration.ofSeconds(5))
+                        .build();
+                    return httpClient.sendAsync(mappingsRequest, HttpResponse.BodyHandlers.ofString());
+                })
+                .thenApply(HttpResponse::body)
+                .thenAccept(body -> {
+                    try (StringReader reader = new StringReader(body)) {
+                        MappingReader.read(reader, MappingFormat.PROGUARD_FILE, mojmapOfficial);
+                    } catch (IOException ex) {
+                        LOGGER.error("Could not read ProGuard mappings file", ex);
+                        ListenCommand.isEnabled = false;
+                    }
+                    try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
+                        writer.write(body);
+                    } catch (IOException ex) {
+                        LOGGER.error("Could not write ProGuard mappings file", ex);
+                    }
+                })
+                .thenRun(() -> latch.countDown());
         }
 
         try (InputStream stream = FabricLoader.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny")) {
@@ -124,10 +130,12 @@ public class MappingsHelper {
     }
 
     public static Collection<? extends MappingTree.ClassMapping> mojmapClasses() {
+        block();
         return mojmapOfficial.getClasses();
     }
 
     public static Optional<String> mojmapToOfficial_class(String mojmapClass) {
+        block();
         MappingTree.ClassMapping officialClass = mojmapOfficial.getClass(mojmapClass);
         if (officialClass == null) {
             return Optional.empty();
@@ -136,6 +144,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> officialToMojmap_class(String officialClass) {
+        block();
         MappingTree.ClassMapping mojmapClass = mojmapOfficial.getClass(officialClass, SRC_OFFICIAL);
         if (mojmapClass == null) {
             return Optional.empty();
@@ -144,6 +153,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> mojmapToNamed_class(String mojmapClass) {
+        block();
         Optional<String> officialClass = mojmapToOfficial_class(mojmapClass);
         if (officialClass.isEmpty()) {
             return Optional.empty();
@@ -156,6 +166,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedToMojmap_class(String namedClass) {
+        block();
         MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(namedClass, SRC_NAMED);
         if (officialClass == null) {
             return Optional.empty();
@@ -168,6 +179,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> mojmapToIntermediary_class(String mojmapClass) {
+        block();
         Optional<String> officialClass = mojmapToOfficial_class(mojmapClass);
         if (officialClass.isEmpty()) {
             return Optional.empty();
@@ -180,6 +192,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> intermediaryToMojmap_class(String intermediaryClass) {
+        block();
         MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(intermediaryClass, SRC_INTERMEDIARY);
         if (officialClass == null) {
             return Optional.empty();
@@ -192,6 +205,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedOrIntermediaryToMojmap_class(String namedOrIntermediaryClass) {
+        block();
         if (IS_DEV_ENV) {
             return MappingsHelper.namedToMojmap_class(namedOrIntermediaryClass);
         }
@@ -199,6 +213,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> mojmapToNamedOrIntermediary_class(String mojmapClass) {
+        block();
         if (IS_DEV_ENV) {
             return MappingsHelper.mojmapToNamed_class(mojmapClass);
         }
@@ -206,6 +221,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> officialToMojmap_field(String officialClass, String officialField) {
+        block();
         MappingTree.FieldMapping mojmapField = mojmapOfficial.getField(officialClass, officialField, null);
         if (mojmapField == null) {
             return Optional.empty();
@@ -214,6 +230,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedToMojmap_field(String namedClass, String namedField) {
+        block();
         MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(namedClass, SRC_NAMED);
         if (officialClass == null) {
             return Optional.empty();
@@ -230,6 +247,7 @@ public class MappingsHelper {
     }
 
     public static Optional<String> intermediaryToMojmap_field(String intermediaryClass, String intermediaryField) {
+        block();
         MappingTree.ClassMapping officialClass = officialIntermediaryNamed.getClass(intermediaryClass, SRC_INTERMEDIARY);
         if (officialClass == null) {
             return Optional.empty();
@@ -246,9 +264,22 @@ public class MappingsHelper {
     }
 
     public static Optional<String> namedOrIntermediaryToMojmap_field(String namedOrIntermediaryClass, String namedOrIntermediaryField) {
+        block();
         if (IS_DEV_ENV) {
             return namedToMojmap_field(namedOrIntermediaryClass, namedOrIntermediaryField);
         }
         return intermediaryToMojmap_field(namedOrIntermediaryClass, namedOrIntermediaryField);
+    }
+
+    private static void block() {
+        if (latch == null) {
+            throw new IllegalStateException("Function called too early, defer calling functions in MappingsHelper");
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("Thread was interrupted while waiting", e);
+            ListenCommand.isEnabled = false;
+        }
     }
 }
