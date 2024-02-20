@@ -143,7 +143,7 @@ public class ListenCommand {
             packets.forEach(packetClass -> {
                 String packetClassName = packetClass.getName().replace('.', '/');
                 String mojmapName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName), packetClassName);
-                mojmapName = mojmapName.substring(mojmapName.lastIndexOf('/' + 1));
+                mojmapName = mojmapName.substring(mojmapName.lastIndexOf('/') + 1);
                 source.sendFeedback(Component.literal(mojmapName));
             });
         }
