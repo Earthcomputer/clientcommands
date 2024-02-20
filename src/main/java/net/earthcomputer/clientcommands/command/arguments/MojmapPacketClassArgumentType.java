@@ -30,10 +30,10 @@ public class MojmapPacketClassArgumentType implements ArgumentType<Class<? exten
     private static final DynamicCommandExceptionType UNKNOWN_PACKET_EXCEPTION = new DynamicCommandExceptionType(packet -> Component.translatable("commands.clisten.unknownPacket", packet));
 
     private static final Map<String, Class<? extends Packet<?>>> mojmapPackets = Arrays.stream(ConnectionProtocol.values())
-        .flatMap(connectionProtocol -> connectionProtocol.flows.values().stream()
-            .flatMap(codecData -> codecData.packetSet.classToId.keySet().stream()))
+        .flatMap(connectionProtocol -> connectionProtocol.flows.values().stream())
+        .flatMap(codecData -> codecData.packetSet.classToId.keySet().stream())
         .map(clazz -> Optionull.map(MappingsHelper.namedOrIntermediaryToMojmap_class(clazz.getName().replace('.', '/')),
-                packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz)))
+            packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz)))
         .collect(Collectors.filtering(Objects::nonNull, Collectors.toUnmodifiableMap(Pair::getKey, Pair::getValue, (l, r) -> l)));
 
     public static MojmapPacketClassArgumentType packet() {
