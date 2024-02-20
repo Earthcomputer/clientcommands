@@ -36,13 +36,27 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class MappingsHelper {
+public final class MappingsHelper {
+
+    private MappingsHelper() {
+    }
+
+    public static void load() {
+    }
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Path MAPPINGS_DIR = ClientCommands.configDir.resolve("mappings");
 
     private static final boolean IS_DEV_ENV = FabricLoader.getInstance().isDevelopmentEnvironment();
+
+    static {
+        try {
+            Files.createDirectories(MAPPINGS_DIR);
+        } catch (IOException e) {
+            LOGGER.error("Failed to create mappings dir", e);
+        }
+    }
 
     private static final CompletableFuture<MemoryMappingTree> mojmapOfficial = Util.make(() -> {
         String version = DetectedVersion.BUILT_IN.getName();
@@ -135,14 +149,6 @@ public class MappingsHelper {
     private static final int DEST_INTERMEDIARY = 0;
     private static final int SRC_NAMED = 1;
     private static final int DEST_NAMED = 1;
-
-    public static void createMappingsDir() {
-        try {
-            Files.createDirectories(MAPPINGS_DIR);
-        } catch (IOException e) {
-            LOGGER.error("Failed to create mappings dir", e);
-        }
-    }
 
     public static @Nullable Collection<? extends MappingTree.ClassMapping> mojmapClasses() {
         return Optionull.map(getMojmapOfficial(), MemoryMappingTree::getClasses);
