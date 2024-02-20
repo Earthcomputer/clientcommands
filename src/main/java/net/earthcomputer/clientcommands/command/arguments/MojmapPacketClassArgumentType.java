@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.features.MappingsHelper;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.Optionull;
+import net.minecraft.Util;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
@@ -20,7 +21,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class MojmapPacketClassArgumentType implements ArgumentType<Class<? extends Packet<?>>> {
 
@@ -35,7 +35,7 @@ public class MojmapPacketClassArgumentType implements ArgumentType<Class<? exten
             packet -> Map.entry(packet.substring(packet.lastIndexOf('/') + 1), clazz)))
         .filter(Objects::nonNull)
         .distinct()
-        .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        .collect(Util.toMap());
 
     public static MojmapPacketClassArgumentType packet() {
         return new MojmapPacketClassArgumentType();
