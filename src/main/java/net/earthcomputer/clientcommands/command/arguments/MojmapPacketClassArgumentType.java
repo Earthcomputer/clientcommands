@@ -14,7 +14,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,8 +32,10 @@ public class MojmapPacketClassArgumentType implements ArgumentType<Class<? exten
         .flatMap(connectionProtocol -> connectionProtocol.flows.values().stream())
         .flatMap(codecData -> codecData.packetSet.classToId.keySet().stream())
         .map(clazz -> Optionull.map(MappingsHelper.namedOrIntermediaryToMojmap_class(clazz.getName().replace('.', '/')),
-            packet -> Pair.of(packet.substring(packet.lastIndexOf('/') + 1), clazz)))
-        .collect(Collectors.filtering(Objects::nonNull, Collectors.toUnmodifiableMap(Pair::getKey, Pair::getValue, (l, r) -> l)));
+            packet -> Map.entry(packet.substring(packet.lastIndexOf('/') + 1), clazz)))
+        .filter(Objects::nonNull)
+        .distinct()
+        .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
 
     public static MojmapPacketClassArgumentType packet() {
         return new MojmapPacketClassArgumentType();
