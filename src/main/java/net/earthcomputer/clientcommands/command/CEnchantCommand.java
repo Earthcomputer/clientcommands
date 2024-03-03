@@ -79,7 +79,9 @@ public class CEnchantCommand {
                 source.sendFeedback(Component.literal("- ").append(ench.enchantment.getFullname(ench.level)));
             }
             if (!simulate) {
-                source.sendFeedback(Component.translatable("commands.cenchant.success"));
+                source.sendFeedback(Component.translatable("commands.cenchant.success")
+                    .append(" ")
+                    .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + result.taskName())));
             }
         }
         return Command.SINGLE_SUCCESS;

@@ -49,7 +49,7 @@
   "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Incompatible enchantments",
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
-  "commands.cenchant.success": "Starting enchantment manipulation",
+  "commands.cenchant.success": "Starting enchantment manipulation.",
   "commands.cenchant.uncracked": "Seed needs to be cracked",
 
   "commands.cfind.found.left": "Found %1$s at ",

@@ -32,6 +32,7 @@ import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EnchantmentTableBlock;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -361,7 +362,7 @@ public class EnchantmentCracker {
         }
 
         if (simulate) {
-            return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments);
+            return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments, null);
         }
 
         LongTaskList taskList = new LongTaskList();
@@ -423,9 +424,9 @@ public class EnchantmentCracker {
             }
         });
 
-        TaskManager.addTask("enchantmentCracker", taskList);
+        String taskName = TaskManager.addTask("enchantmentCracker", taskList);
 
-        return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments);
+        return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments, taskName);
     }
 
     // MISCELLANEOUS HELPER METHODS & ENCHANTING SIMULATION
@@ -505,7 +506,7 @@ public class EnchantmentCracker {
         }
     }
 
-    public record ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentInstance> enchantments) {}
+    public record ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentInstance> enchantments, @Nullable String taskName) {}
 
     public enum CrackState implements StringRepresentable {
         UNCRACKED("uncracked"), CRACKED("cracked"), CRACKING("cracking");
