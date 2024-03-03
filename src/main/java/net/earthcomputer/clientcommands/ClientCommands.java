@@ -15,7 +15,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.DetectedVersion;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
@@ -165,9 +164,7 @@ public class ClientCommands implements ClientModInitializer {
         WeatherCommand.register(dispatcher);
         PluginsCommand.register(dispatcher);
         CGameModeCommand.register(dispatcher);
-        if (ListenCommand.isEnabled) {
-            ListenCommand.register(dispatcher);
-        }
+        ListenCommand.register(dispatcher);
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;

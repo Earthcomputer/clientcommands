@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands;
 
 import com.mojang.logging.LogUtils;
-import net.earthcomputer.clientcommands.command.ListenCommand;
 import net.minecraft.Util;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import sun.misc.Unsafe;
 
@@ -19,7 +19,7 @@ public final class UnsafeUtils {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Unsafe UNSAFE = Util.make(() -> {
+    private static final @Nullable Unsafe UNSAFE = Util.make(() -> {
         try {
             final Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             unsafeField.setAccessible(true);
@@ -30,7 +30,7 @@ public final class UnsafeUtils {
         }
     });
 
-    private static final MethodHandles.Lookup IMPL_LOOKUP = Util.make(() -> {
+    private static final @Nullable MethodHandles.Lookup IMPL_LOOKUP = Util.make(() -> {
         try {
             //noinspection ConstantValue
             if (UNSAFE == null) {
@@ -44,11 +44,11 @@ public final class UnsafeUtils {
         }
     });
 
-    public static Unsafe getUnsafe() {
+    public static @Nullable Unsafe getUnsafe() {
         return UNSAFE;
     }
 
-    public static MethodHandles.Lookup getImplLookup() {
+    public static @Nullable MethodHandles.Lookup getImplLookup() {
         return IMPL_LOOKUP;
     }
 }

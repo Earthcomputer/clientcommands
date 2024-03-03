@@ -50,8 +50,13 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class ListenCommand {
 
-    public static boolean isEnabled = true;
+    private static volatile boolean isEnabled = true;
 
+    public static void disable() {
+        isEnabled = false;
+    }
+
+    private static final SimpleCommandExceptionType COMMAND_DISABLED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.commandDisabled"));
     private static final SimpleCommandExceptionType ALREADY_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.add.failed"));
     private static final SimpleCommandExceptionType NOT_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.remove.failed"));
 
@@ -76,6 +81,7 @@ public class ListenCommand {
     }
 
     private static int add(FabricClientCommandSource source, Class<? extends Packet<?>> packetClass) throws CommandSyntaxException {
+        checkEnabled();
         if (!packets.add(packetClass)) {
             throw ALREADY_LISTENING_EXCEPTION.create();
         }
@@ -126,6 +132,7 @@ public class ListenCommand {
     }
 
     private static int remove(FabricClientCommandSource source, Class<? extends Packet<?>> packetClass) throws CommandSyntaxException {
+        checkEnabled();
         if (!packets.remove(packetClass)) {
             throw NOT_LISTENING_EXCEPTION.create();
         }
@@ -134,7 +141,8 @@ public class ListenCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int list(FabricClientCommandSource source) {
+    private static int list(FabricClientCommandSource source) throws CommandSyntaxException {
+        checkEnabled();
         int amount = packets.size();
         if (amount == 0) {
             source.sendFeedback(Component.translatable("commands.clisten.list.none"));
@@ -151,11 +159,18 @@ public class ListenCommand {
         return amount;
     }
 
-    private static int clear(FabricClientCommandSource source) {
+    private static int clear(FabricClientCommandSource source) throws CommandSyntaxException {
+        checkEnabled();
         int amount = packets.size();
         packets.clear();
         source.sendFeedback(Component.translatable("commands.clisten.clear"));
         return amount;
+    }
+
+    private static void checkEnabled() throws CommandSyntaxException {
+        if (!isEnabled) {
+            throw COMMAND_DISABLED_EXCEPTION.create();
+        }
     }
 
     private static Component serialize(Object object, Set<Object> seen, int depth) {

@@ -90,7 +90,7 @@ public final class MappingsHelper {
                 })
                 .whenComplete((result, exception) -> {
                     if (exception != null) {
-                        ListenCommand.isEnabled = false;
+                        ListenCommand.disable();
                     }
                 })
                 .thenApply(HttpResponse::body)
@@ -116,7 +116,7 @@ public final class MappingsHelper {
                         return tree;
                     } catch (IOException ex) {
                         LOGGER.error("Could not read ProGuard mappings file", ex);
-                        ListenCommand.isEnabled = false;
+                        ListenCommand.disable();
                         throw new UncheckedIOException(ex);
                     } finally {
                         try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
@@ -141,7 +141,7 @@ public final class MappingsHelper {
             return tree;
         } catch (IOException e) {
             LOGGER.error("Could not read mappings.tiny", e);
-            ListenCommand.isEnabled = false;
+            ListenCommand.disable();
             return null;
         }
     });
@@ -284,7 +284,7 @@ public final class MappingsHelper {
             return mojmapOfficial.get();
         } catch (ExecutionException | InterruptedException e) {
             LOGGER.error("mojmap mappings were not available", e);
-            ListenCommand.isEnabled = false;
+            ListenCommand.disable();
             return null;
         }
     }
