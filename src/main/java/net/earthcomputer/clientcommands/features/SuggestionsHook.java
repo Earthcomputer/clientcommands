@@ -18,6 +18,10 @@ public final class SuggestionsHook {
     private static int currentSuggestionId = MAGIC_SUGGESTION_ID;
     private static final Int2ObjectMap<CompletableFuture<Suggestions>> pendingSuggestions = new Int2ObjectOpenHashMap<>();
 
+    public static CompletableFuture<Void> fence() {
+        return request("").thenAccept(suggestions -> {});
+    }
+
     public static CompletableFuture<Suggestions> request(String command) {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) {

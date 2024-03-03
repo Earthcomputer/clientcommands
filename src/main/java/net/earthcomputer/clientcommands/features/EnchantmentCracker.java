@@ -3,10 +3,10 @@ package net.earthcomputer.clientcommands.features;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;
 import net.earthcomputer.clientcommands.task.OneTickTask;
-import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -23,7 +23,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.inventory.EnchantmentMenu;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -373,33 +372,15 @@ public class EnchantmentCracker {
                 player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, player.onGround()));
                 Configs.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
             }
-            for (int i = 0; i < timesNeeded; i++) {
-                // throw the item once it's in the inventory
-                taskList.addTask(new SimpleTask() {
+            if (timesNeeded > 0) {
+                taskList.addTask(new ItemThrowTask(timesNeeded, ItemThrowTask.FLAG_WAIT_FOR_ITEMS) {
                     @Override
                     public boolean condition() {
                         if (Configs.playerCrackState != PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS) {
                             taskList._break();
                             return false;
                         }
-
-                        Slot slot = PlayerRandCracker.getBestItemThrowSlot(Minecraft.getInstance().player.containerMenu.slots);
-                        //noinspection RedundantIfStatement
-                        if (slot == null) {
-                            return true; // keep waiting
-                        } else {
-                            return false; // ready to throw an item
-                        }
-                    }
-
-                    @Override
-                    protected void onTick() {
-                    }
-
-                    @Override
-                    public void onCompleted() {
-                        PlayerRandCracker.throwItem();
-                        scheduleDelay();
+                        return super.condition();
                     }
                 });
             }

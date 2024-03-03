@@ -110,6 +110,9 @@ public class Configs {
     @Config
     public static boolean acceptC2CPackets = false;
 
+    @Config
+    public static float itemThrowsPerTick = 1;
+
     public static boolean conditionLessThan1_20() {
         return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_20;
     }

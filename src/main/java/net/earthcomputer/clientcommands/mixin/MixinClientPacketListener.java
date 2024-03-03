@@ -1,12 +1,12 @@
 package net.earthcomputer.clientcommands.mixin;
 
 import com.mojang.brigadier.StringReader;
-import net.cortex.clientAddon.cracker.SeedCracker;
 import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.SuggestionsHook;
+import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -41,7 +41,9 @@ public abstract class MixinClientPacketListener extends ClientCommonPacketListen
             return;
         }
 
-        SeedCracker.onEntityCreation(packet);
+        if (packet.getType() == EntityType.ITEM) {
+            ItemThrowTask.handleItemSpawn(packet);
+        }
 
         if (FishingCracker.canManipulateFishing()) {
             if (packet.getData() == player.getId() && packet.getType() == EntityType.FISHING_BOBBER) {

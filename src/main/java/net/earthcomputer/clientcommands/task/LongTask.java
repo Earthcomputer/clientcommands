@@ -1,10 +1,13 @@
 package net.earthcomputer.clientcommands.task;
 
+import java.util.Set;
+
 /**
  * Acts like a for loop that can delay between iterations to allow the game to continue ticking
  */
 public abstract class LongTask {
 
+    boolean isInitialized = false;
     private boolean delayScheduled;
     private boolean broken = false;
 
@@ -42,4 +45,7 @@ public abstract class LongTask {
         return true;
     }
 
+    public Set<Object> getMutexKeys() {
+        return Set.of();
+    }
 }

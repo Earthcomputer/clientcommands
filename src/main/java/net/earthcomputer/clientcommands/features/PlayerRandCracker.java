@@ -362,6 +362,10 @@ public class PlayerRandCracker {
         return true;
     }
 
+    public static void unthrowItem() {
+        seed = (seed * 0xdba6ed0471f1L + 0x25493d2c3b3cL) & MASK;
+    }
+
     public static Slot getBestItemThrowSlot(List<Slot> slots) {
         slots = slots.stream().filter(slot -> {
             if (!slot.hasItem()) {
