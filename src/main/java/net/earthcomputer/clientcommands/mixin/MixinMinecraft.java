@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.ServerBrandManager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.RenderSettings;
+import net.earthcomputer.clientcommands.features.SuggestionsHook;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.Minecraft;
@@ -72,6 +73,7 @@ public abstract class MixinMinecraft {
             BetterConfigAPI.getInstance().getModConfig("clientcommands").resetTemporaryConfigs();
         }
         RenderSettings.clearEntityRenderSelectors();
+        SuggestionsHook.onDisconnect();
     }
 
     // Earth annoying his friends <3 nothing to see here
