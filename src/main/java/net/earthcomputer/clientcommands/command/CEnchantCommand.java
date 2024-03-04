@@ -53,37 +53,39 @@ public class CEnchantCommand {
 
         boolean simulate = getFlag(source, FLAG_SIMULATE);
 
-        var result = EnchantmentCracker.manipulateEnchantments(
-                itemAndEnchantmentsPredicate.item(),
-                itemAndEnchantmentsPredicate.predicate(),
-                simulate
+        String taskName = EnchantmentCracker.manipulateEnchantments(
+            itemAndEnchantmentsPredicate.item(),
+            itemAndEnchantmentsPredicate.predicate(),
+            simulate,
+            result -> {
+                if (result == null) {
+                    source.sendFeedback(Component.translatable("commands.cenchant.failed"));
+                    if (Configs.playerCrackState != PlayerRandCracker.CrackState.CRACKED) {
+                        MutableComponent help = Component.translatable("commands.cenchant.help.uncrackedPlayerSeed")
+                            .append(" ")
+                            .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+                        sendHelp(help);
+                    }
+                } else {
+                    if (result.itemThrows() < 0) {
+                        source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows.noDummy"));
+                    } else {
+                        source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / (Configs.itemThrowsPerTick * 20)));
+                    }
+                    source.sendFeedback(Component.translatable("enchCrack.insn.bookshelves", result.bookshelves()));
+                    source.sendFeedback(Component.translatable("enchCrack.insn.slot", result.slot() + 1));
+                    source.sendFeedback(Component.translatable("enchCrack.insn.enchantments"));
+                    for (EnchantmentInstance ench : result.enchantments()) {
+                        source.sendFeedback(Component.literal("- ").append(ench.enchantment.getFullname(ench.level)));
+                    }
+                }
+            }
         );
-        if (result == null) {
-            source.sendFeedback(Component.translatable("commands.cenchant.failed"));
-            if (Configs.playerCrackState != PlayerRandCracker.CrackState.CRACKED) {
-                MutableComponent help = Component.translatable("commands.cenchant.help.uncrackedPlayerSeed")
-                    .append(" ")
-                    .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
-                sendHelp(help);
-            }
-        } else {
-            if (result.itemThrows() < 0) {
-                source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows.noDummy"));
-            } else {
-                source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / (Configs.itemThrowsPerTick * 20)));
-            }
-            source.sendFeedback(Component.translatable("enchCrack.insn.bookshelves", result.bookshelves()));
-            source.sendFeedback(Component.translatable("enchCrack.insn.slot", result.slot() + 1));
-            source.sendFeedback(Component.translatable("enchCrack.insn.enchantments"));
-            for (EnchantmentInstance ench : result.enchantments()) {
-                source.sendFeedback(Component.literal("- ").append(ench.enchantment.getFullname(ench.level)));
-            }
-            if (!simulate) {
-                source.sendFeedback(Component.translatable("commands.cenchant.success")
-                    .append(" ")
-                    .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + result.taskName())));
-            }
-        }
+
+        source.sendFeedback(Component.translatable("commands.cenchant.success")
+            .append(" ")
+            .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+
         return Command.SINGLE_SUCCESS;
     }
 

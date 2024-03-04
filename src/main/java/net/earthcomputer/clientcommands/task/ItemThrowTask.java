@@ -122,4 +122,9 @@ public class ItemThrowTask extends SimpleTask {
         task.confirmedItemThrows++;
         task.onItemSpawn(packet);
     }
+
+    @Override
+    public String toString() {
+        return "ItemThrowTask[totalItemsToThrow=" + totalItemsToThrow + ",flags=" + flags + "]";
+    }
 }

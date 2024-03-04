@@ -1,6 +1,9 @@
 package net.earthcomputer.clientcommands.task;
 
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.Relogger;
+import net.fabricmc.loader.api.FabricLoader;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TaskManager {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Map<String, LongTask> tasks = new LinkedHashMap<>();
     private static long nextTaskId = 1;
@@ -21,9 +25,11 @@ public class TaskManager {
 
         Set<Object> mutexKeys = new HashSet<>();
 
+        int iterationCount = 0;
         var iteratingTasks = new ArrayList<>(tasks.entrySet());
         while (!iteratingTasks.isEmpty()) {
             var itr = iteratingTasks.iterator();
+            boolean tickedAnyTask = false;
             while (itr.hasNext()) {
                 var taskEntry = itr.next();
                 LongTask task = taskEntry.getValue();
@@ -31,6 +37,7 @@ public class TaskManager {
                 if (mutexKeys.stream().anyMatch(taskMutexKeys::contains)) {
                     continue;
                 }
+                tickedAnyTask = true;
                 mutexKeys.addAll(taskMutexKeys);
                 if (!task.isInitialized) {
                     task.initialize();
@@ -55,6 +62,15 @@ public class TaskManager {
                     }
                 }
             }
+
+            if (!tickedAnyTask) {
+                break;
+            }
+
+            if (FabricLoader.getInstance().isDevelopmentEnvironment() && ++iterationCount == 1000) {
+                LOGGER.warn("A LongTask is taking an exceptionally long time. Task list: {}", tasks);
+                LOGGER.warn("Remember you can use ctrl+F2 in IntelliJ to terminate the game while it has your cursor grabbed.");
+            }
         }
     }
 
@@ -77,6 +93,10 @@ public class TaskManager {
                     tasks.put(oldTask.getKey(), oldTask.getValue());
                 }
             });
+        } else {
+            for (var taskEntry : oldTasks) {
+                taskEntry.getValue().onCompleted();
+            }
         }
     }
 
