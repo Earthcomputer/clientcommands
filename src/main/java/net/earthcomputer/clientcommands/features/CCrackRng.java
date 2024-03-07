@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 
 public class CCrackRng {
+    // This value was computed by brute forcing all seeds
     private static final float MAX_ERROR = 0.00883889f;
 
     @FunctionalInterface
