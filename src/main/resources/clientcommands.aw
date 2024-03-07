@@ -13,6 +13,8 @@ accessible method net/minecraft/client/Minecraft openChatScreen (Ljava/lang/Stri
 accessible method net/minecraft/network/chat/HoverEvent <init> (Lnet/minecraft/network/chat/HoverEvent$TypedHoverEvent;)V
 accessible class net/minecraft/network/chat/HoverEvent$TypedHoverEvent
 
+accessible field net/minecraft/client/gui/components/EditBox maxLength I
+
 accessible field net/minecraft/network/ConnectionProtocol flows Ljava/util/Map;
 accessible field net/minecraft/network/ConnectionProtocol$CodecData packetSet Lnet/minecraft/network/ConnectionProtocol$PacketSet;
 accessible field net/minecraft/network/ConnectionProtocol$PacketSet classToId Lit/unimi/dsi/fastutil/objects/Object2IntMap;
