@@ -107,6 +107,10 @@ public class ClientCommands implements ClientModInitializer {
         }
     }
 
+    public static boolean isClientcommandsCommand(String commandName) {
+        return clientcommandsCommands.contains(commandName);
+    }
+
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         Set<String> existingCommands = getCommands(dispatcher);
 
