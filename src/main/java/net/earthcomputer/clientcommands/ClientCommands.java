@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
 import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.command.*;
+import net.earthcomputer.clientcommands.features.MappingsHelper;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -85,6 +86,8 @@ public class ClientCommands implements ClientModInitializer {
         new ModConfigBuilder("clientcommands", Configs.class).build();
 
         ItemGroupCommand.registerItemGroups();
+
+        MappingsHelper.load();
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {
@@ -161,6 +164,7 @@ public class ClientCommands implements ClientModInitializer {
         WeatherCommand.register(dispatcher);
         PluginsCommand.register(dispatcher);
         CGameModeCommand.register(dispatcher);
+        ListenCommand.register(dispatcher);
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;
