@@ -55,6 +55,8 @@ dependencies {
 	includedLibrary "com.seedfinding:mc_core:${project.seedfinding_core_version}"
 	includedLibrary "com.seedfinding:mc_seed:${project.seedfinding_seed_version}"
 
+	includedLibrary files('libs/LattiCG-1.06-rt.jar')
+
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
 	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {

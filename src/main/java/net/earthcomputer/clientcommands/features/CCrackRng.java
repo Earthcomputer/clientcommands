@@ -1,12 +1,8 @@
-package net.cortex.clientAddon.cracker;
+package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
-import net.earthcomputer.clientcommands.features.EnchantmentCracker;
-import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.mixin.LegacyRandomSourceAccessor;
 import net.earthcomputer.clientcommands.task.ItemThrowTask;
-import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -14,29 +10,32 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.util.RandomSource;
 
-public class SeedCracker {
-    public interface OnCrack {void callback(long seed); }
+public class CCrackRng {
+    private static final float MAX_ERROR = 0.00883889f;
+
+    @FunctionalInterface
+    public interface OnCrack {
+        void callback(long seed);
+    }
 
 
     public static OnCrack callback;
-    public static long[] bits=new long[20];
+    public static float[] nextFloats = new float[10];
     public static int expectedItems=0;
-    public static LongTask currentTask;
     private static int attemptCount = 0;
-    private static final int MAX_ATTEMPTS = 10;
+    private static final int MAX_ATTEMPTS = 5;
     private static String currentTaskName = null;
 
-    private static String throwItems()
-    {
+    private static String throwItems() {
         LocalPlayer player = Minecraft.getInstance().player;
+        assert player != null;
         player.moveTo(player.getX(), player.getY(), player.getZ(), 0, 90);
-        Minecraft.getInstance().getConnection().send(new ServerboundMovePlayerPacket.Rot(0, 90, true)); // point to correct location
-        ItemThrowTask task = new ItemThrowTask(20) {
+        player.connection.send(new ServerboundMovePlayerPacket.Rot(0, 90, true)); // point to correct location
+        ItemThrowTask task = new ItemThrowTask(10) {
             @Override
             protected void onSuccess() {
-                SeedCracker.attemptCrack();
+                CCrackRng.attemptCrack();
             }
 
             @Override
@@ -62,10 +61,20 @@ public class SeedCracker {
 
     public static void attemptCrack()
     {
-        long seed= Lattice_cracker.crack(SeedCracker.bits);
+        long[] seeds = CCrackRngGen.getSeeds(
+            Math.max(0, nextFloats[0] - MAX_ERROR), Math.min(1, nextFloats[0] + MAX_ERROR),
+            Math.max(0, nextFloats[1] - MAX_ERROR), Math.min(1, nextFloats[1] + MAX_ERROR),
+            Math.max(0, nextFloats[2] - MAX_ERROR), Math.min(1, nextFloats[2] + MAX_ERROR),
+            Math.max(0, nextFloats[3] - MAX_ERROR), Math.min(1, nextFloats[3] + MAX_ERROR),
+            Math.max(0, nextFloats[4] - MAX_ERROR), Math.min(1, nextFloats[4] + MAX_ERROR),
+            Math.max(0, nextFloats[5] - MAX_ERROR), Math.min(1, nextFloats[5] + MAX_ERROR),
+            Math.max(0, nextFloats[6] - MAX_ERROR), Math.min(1, nextFloats[6] + MAX_ERROR),
+            Math.max(0, nextFloats[7] - MAX_ERROR), Math.min(1, nextFloats[7] + MAX_ERROR),
+            Math.max(0, nextFloats[8] - MAX_ERROR), Math.min(1, nextFloats[8] + MAX_ERROR),
+            Math.max(0, nextFloats[9] - MAX_ERROR), Math.min(1, nextFloats[9] + MAX_ERROR)
+        ).toArray();
 
-        if(seed==0)//Basicaly if seed is zero it means it failed to try to crack again
-        {
+        if (seeds.length != 1) {
             attemptCount++;
             if (attemptCount > MAX_ATTEMPTS) {
                 ClientCommandHelper.sendError(Component.translatable("commands.ccrackrng.failed"));
@@ -73,30 +82,13 @@ public class SeedCracker {
                 Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
                 currentTaskName = null;
             } else {
-                SeedCracker.doCrack(SeedCracker.callback);
+                CCrackRng.doCrack(CCrackRng.callback);
             }
             return;
         }
-        //Else, got a seed
 
         Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
-
-        RandomSource rand=RandomSource.create(seed ^ 0x5deece66dL);
-        rand.nextFloat();
-        rand.nextFloat();
-        //rand.nextFloat();
-
-        /*
-		for(int i=0;i<13;i++) {
-			long x = (((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL;
-			System.out.print("Expected: "+padLeftZeros(Long.toBinaryString(x), 4)+" ");
-			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" ");
-			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" ");
-			System.out.print(padLeftZeros(Long.toBinaryString((((long) (rand.nextFloat() * ((float) (1 << 24)))) >> (24 - 4))&0xFL), 4)+" \n");
-		}*/
-
-        currentTaskName = null;
-        callback.callback(((LegacyRandomSourceAccessor) rand).getSeed().get());//extract seed and call callback
+        callback.callback(seeds[0]);
     }
 
     public static void crack(OnCrack callback) {
@@ -109,7 +101,7 @@ public class SeedCracker {
         ClientCommandHelper.addOverlayMessage(Component.translatable("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         currentTaskName = throwItems();
         Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
-        expectedItems = 20;
+        expectedItems = 10;
         if (attemptCount == 1) {
             Component message = Component.translatable("commands.ccrackrng.starting")
                 .append(" ")
@@ -120,12 +112,10 @@ public class SeedCracker {
 
     public static void onEntityCreation(ClientboundAddEntityPacket packet) {
         if (Configs.playerCrackState == PlayerRandCracker.CrackState.CRACKING) {
-            if (SeedCracker.expectedItems > 0) {
-                long rand_val = (long) ((Math.atan2(packet.getZa(), packet.getXa()) + Math.PI) / (Math.PI * 2) * ((float) (1 << 24)));
-                long top_bits = rand_val;
-                short value = (short) (((top_bits >> (24 - 4)) ^ 0x8L )&0xFL);//INSTEAD OF ^0x8L MAYBE DO +math.pi OR SOMETHING ELSE
-                SeedCracker.bits[20-SeedCracker.expectedItems]=(long)value;//could be improved
-                SeedCracker.expectedItems--;
+            if (CCrackRng.expectedItems > 0) {
+                float nextFloat = (float) Math.sqrt(packet.getXa() * packet.getXa() + packet.getZa() * packet.getZa()) * 50f;
+                CCrackRng.nextFloats[10 - CCrackRng.expectedItems] = nextFloat;
+                CCrackRng.expectedItems--;
             }
         }
     }
