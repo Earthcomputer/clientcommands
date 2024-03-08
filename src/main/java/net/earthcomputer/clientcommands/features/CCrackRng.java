@@ -12,8 +12,9 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 
 public class CCrackRng {
+    public static final int NUM_THROWS = 10;
     // This value was computed by brute forcing all seeds
-    private static final float MAX_ERROR = 0.00883889f;
+    public static final float MAX_ERROR = 0.00883889f;
 
     @FunctionalInterface
     public interface OnCrack {
@@ -22,7 +23,7 @@ public class CCrackRng {
 
 
     public static OnCrack callback;
-    public static float[] nextFloats = new float[10];
+    public static float[] nextFloats = new float[NUM_THROWS];
     public static int expectedItems=0;
     private static int attemptCount = 0;
     private static final int MAX_ATTEMPTS = 5;
@@ -33,7 +34,7 @@ public class CCrackRng {
         assert player != null;
         player.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 90);
         player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, true)); // point to correct location
-        ItemThrowTask task = new ItemThrowTask(10) {
+        ItemThrowTask task = new ItemThrowTask(NUM_THROWS) {
             @Override
             protected void onSuccess() {
                 CCrackRng.attemptCrack();
@@ -60,8 +61,7 @@ public class CCrackRng {
         }
     }
 
-    public static void attemptCrack()
-    {
+    public static void attemptCrack() {
         long[] seeds = CCrackRngGen.getSeeds(
             Math.max(0, nextFloats[0] - MAX_ERROR), Math.min(1, nextFloats[0] + MAX_ERROR),
             Math.max(0, nextFloats[1] - MAX_ERROR), Math.min(1, nextFloats[1] + MAX_ERROR),
@@ -102,7 +102,7 @@ public class CCrackRng {
         ClientCommandHelper.addOverlayMessage(Component.translatable("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         currentTaskName = throwItems();
         Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKING;
-        expectedItems = 10;
+        expectedItems = NUM_THROWS;
         if (attemptCount == 1) {
             Component message = Component.translatable("commands.ccrackrng.starting")
                 .append(" ")
@@ -115,7 +115,7 @@ public class CCrackRng {
         if (Configs.playerCrackState == PlayerRandCracker.CrackState.CRACKING) {
             if (CCrackRng.expectedItems > 0) {
                 float nextFloat = (float) Math.sqrt(packet.getXa() * packet.getXa() + packet.getZa() * packet.getZa()) * 50f;
-                CCrackRng.nextFloats[10 - CCrackRng.expectedItems] = nextFloat;
+                CCrackRng.nextFloats[NUM_THROWS - CCrackRng.expectedItems] = nextFloat;
                 CCrackRng.expectedItems--;
             }
         }

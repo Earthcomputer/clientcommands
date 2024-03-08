@@ -12,6 +12,10 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+sourceSets {
+	codeGen
+}
+
 configurations {
 	includedLibrary
 	implementation.extendsFrom includedLibrary
@@ -20,6 +24,9 @@ configurations {
 repositories {
 	maven {
 		url = 'https://maven.seedfinding.com'
+	}
+	maven {
+		url = 'https://maven.latticg.com'
 	}
 	maven {
 		url = 'https://maven.xpple.dev/maven2'
@@ -55,7 +62,8 @@ dependencies {
 	includedLibrary "com.seedfinding:mc_core:${project.seedfinding_core_version}"
 	includedLibrary "com.seedfinding:mc_seed:${project.seedfinding_seed_version}"
 
-	includedLibrary files('libs/LattiCG-1.06-rt.jar')
+	includedLibrary "com.seedfinding:latticg:${project.latticg_version}:rt"
+	codeGenImplementation "com.seedfinding:latticg:${project.latticg_version}"
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
@@ -64,6 +72,8 @@ dependencies {
 	}
 
 	include api('net.fabricmc:mapping-io:0.5.1')
+
+	codeGenImplementation sourceSets.main.output
 }
 
 jar {
@@ -88,17 +98,25 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+tasks.register('sourcesJar', Jar) {
+	dependsOn classes
 	archiveClassifier.set("sources")
 	from sourceSets.main.allSource
 }
 
 jar {
 	from "LICENSE"
+}
+
+tasks.register('codeGen', JavaExec) {
+	mainClass = 'net.earthcomputer.clientcommands.codegen.CodeGenerator'
+	classpath = sourceSets.codeGen.runtimeClasspath
+	args file('src/main/java').absolutePath
+	enableAssertions = true
 }
 
 // read the changelog from the changelog.txt file, make sure the changelog is recent to avoid accidentally using the previous version's changelog.
