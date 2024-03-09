@@ -95,6 +95,11 @@
   "commands.cfunction.limitReached": "已达到命令限制（%d）",
   "commands.cfunction.success": "从函数%s中运行%d个命令",
 
+  "commands.cgamemode.playerNotFound": "Player not found",
+  "commands.cgamemode.playerGameMode": "Player %s is in game mode %s",
+  "commands.cgamemode.noneWithGameMode": "No players are in game mode %s",
+  "commands.cgamemode.listWithGameMode": "The following players are in game mode %s:",
+
   "commands.cgamma.success": "将伽马值设为%f",
 
   "commands.cghostblock.fill.success": "成功填充%d个幽灵方块",
@@ -137,6 +142,19 @@
   "commands.ckit.list": "可用背包存档：%s",
   "commands.ckit.list.empty": "无可用背包存档",
 
+  "commands.clisten.commandDisabled": "The command was disabled, check your logs",
+  "commands.clisten.unknownPacket": "Unknown packet %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.packetError": "ERROR",
+  "commands.clisten.add.success": "Successfully started listening to that packet",
+  "commands.clisten.add.failed": "Already listening to that packet",
+  "commands.clisten.remove.success": "No longer listening to that packet",
+  "commands.clisten.remove.failed": "Not listening to that packet",
+  "commands.clisten.list.none": "Not listening to any packets",
+  "commands.clisten.list": "Listening to the following packets:",
+  "commands.clisten.clear": "No longer listening to any packets",
+
   "commands.cplayerinfo.ioException": "出现错误",
   "commands.cplayerinfo.getNameHistory.success": "%s有如下名称：%s",
 
@@ -146,6 +164,8 @@
   "commands.cpermissionlevel.success": "你的权限等级为%d",
 
   "commands.cplaysound.success": "成功播放音效%s给自己",
+
+  "commands.cplugins.found": "Found the following plugins:",
 
   "commands.cping.success": "你的平均ping是%dms",
   "commands.cping.success.other": "%s的平均ping是%dms",
@@ -225,6 +245,9 @@
   "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式%s",
   "commands.client.invalidArgumentException": "无效参数‘%s’",
+  "commands.client.invalidClickAction": "Invalid click event action '%s'",
+  "commands.client.invalidHoverAction": "Invalid hover event action '%s'",
+  "commands.client.invalidHoverEvent": "Invalid hover event '%s'",
   "commands.client.notClient": "不是客户端指令",
   "commands.client.requiresRestart": "此更改将在你重新启动客户端后生效",
   "commands.client.tooFewArguments": "参数过少",
