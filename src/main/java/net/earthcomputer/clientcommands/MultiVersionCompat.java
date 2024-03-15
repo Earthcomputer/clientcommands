@@ -5,6 +5,9 @@ import com.mojang.logging.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -40,10 +43,11 @@ public abstract sealed class MultiVersionCompat {
     public static final MultiVersionCompat INSTANCE = Util.make(() -> {
         try {
             FabricLoader loader = FabricLoader.getInstance();
-            if (loader.isModLoaded("viafabric")) {
+            ModContainer modContainer;
+            if (loader.getModContainer("viafabric").orElse(null) != null) {
                 return new ViaFabric();
-            } else if (loader.isModLoaded("viafabricplus")) {
-                return new ViaFabricPlus();
+            } else if ((modContainer = loader.getModContainer("viafabricplus").orElse(null)) != null) {
+                return new ViaFabricPlus(modContainer);
             } else {
                 return new None();
             }
@@ -174,20 +178,41 @@ public abstract sealed class MultiVersionCompat {
 
     private static final class ViaFabricPlus extends AbstractViaVersion {
         private final Method getTargetVersion;
-        private final Method versionEnumGetProtocol;
         private final Method itemRegistryDiffKeepItem;
+        private Method versionEnumGetProtocol;
 
-        private ViaFabricPlus() throws ReflectiveOperationException {
-            Class<?> protocolHack = Class.forName("de.florianmichael.viafabricplus.protocolhack.ProtocolHack");
+        private static final Version V3_0_6 = Util.make(() -> {
+            try {
+                return Version.parse("3.0.6");
+            } catch (VersionParsingException e) {
+                throw new AssertionError(e);
+            }
+        });
+
+        private ViaFabricPlus(ModContainer modContainer) throws ReflectiveOperationException {
+            final boolean newerThan3_0_6 = modContainer.getMetadata().getVersion().compareTo(V3_0_6) > 0;
+            String protocolTranslatorName;
+            if (newerThan3_0_6) {
+                protocolTranslatorName = "protocoltranslator.ProtocolTranslator";
+            } else {
+                protocolTranslatorName = "protocolhack.ProtocolHack";
+            }
+            Class<?> protocolTranslator = Class.forName("de.florianmichael.viafabricplus." + protocolTranslatorName);
             Class<?> itemRegistryDiff = Class.forName("de.florianmichael.viafabricplus.fixes.data.ItemRegistryDiff");
-            getTargetVersion = protocolHack.getMethod("getTargetVersion");
-            versionEnumGetProtocol = getTargetVersion.getReturnType().getMethod("getProtocol");
+            getTargetVersion = protocolTranslator.getMethod("getTargetVersion");
             itemRegistryDiffKeepItem = itemRegistryDiff.getMethod("keepItem", Item.class);
+            if (!newerThan3_0_6) {
+                versionEnumGetProtocol = getTargetVersion.getReturnType().getMethod("getProtocol");
+            }
         }
 
         @Override
         protected Object getCurrentVersion() throws ReflectiveOperationException {
-            return versionEnumGetProtocol.invoke(getTargetVersion.invoke(null));
+            if (versionEnumGetProtocol != null) {
+                return versionEnumGetProtocol.invoke(getTargetVersion.invoke(null));
+            } else {
+                return getTargetVersion.invoke(null);
+            }
         }
 
         @Override
