@@ -95,6 +95,11 @@
   "commands.cfunction.limitReached": "已达到命令限制（%d）",
   "commands.cfunction.success": "从函数%s中运行%d个命令",
 
+  "commands.cgamemode.playerNotFound": "未找到玩家",
+  "commands.cgamemode.playerGameMode": "玩家%s处于%s游戏模式",
+  "commands.cgamemode.noneWithGameMode": "没有玩家处于%s游戏模式",
+  "commands.cgamemode.listWithGameMode": "以下玩家处于%s游戏模式：",
+
   "commands.cgamma.success": "将伽马值设为%f",
 
   "commands.cghostblock.fill.success": "成功填充%d个幽灵方块",
@@ -137,6 +142,19 @@
   "commands.ckit.list": "可用背包存档：%s",
   "commands.ckit.list.empty": "无可用背包存档",
 
+  "commands.clisten.commandDisabled": "此命令已被禁用，请查看日志",
+  "commands.clisten.unknownPacket": "未知数据包%s",
+  "commands.clisten.receivedPacket": "收到以下数据包：%s",
+  "commands.clisten.sentPacket": "发送了以下数据包：%s",
+  "commands.clisten.packetError": "错误",
+  "commands.clisten.add.success": "成功开始监听该数据包",
+  "commands.clisten.add.failed": "已经在监听该数据包",
+  "commands.clisten.remove.success": "不再监听该数据包",
+  "commands.clisten.remove.failed": "未监听该数据包",
+  "commands.clisten.list.none": "未监听任何数据包",
+  "commands.clisten.list": "正在监听以下数据包：",
+  "commands.clisten.clear": "不再监听任何数据包",
+
   "commands.cplayerinfo.ioException": "出现错误",
   "commands.cplayerinfo.getNameHistory.success": "%s有如下名称：%s",
 
@@ -146,6 +164,8 @@
   "commands.cpermissionlevel.success": "你的权限等级为%d",
 
   "commands.cplaysound.success": "成功播放音效%s给自己",
+
+  "commands.cplugins.found": "找到以下插件：",
 
   "commands.cping.success": "你的平均ping是%dms",
   "commands.cping.success.other": "%s的平均ping是%dms",
@@ -225,6 +245,9 @@
   "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式%s",
   "commands.client.invalidArgumentException": "无效参数‘%s’",
+  "commands.client.invalidClickAction": "无效的点击事件操作‘%s’",
+  "commands.client.invalidHoverAction": "无效的点击事件操作‘%s’",
+  "commands.client.invalidHoverEvent": "无效的悬浮事件‘%s’",
   "commands.client.notClient": "不是客户端指令",
   "commands.client.requiresRestart": "此更改将在你重新启动客户端后生效",
   "commands.client.tooFewArguments": "参数过少",
