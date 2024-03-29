@@ -34,7 +34,7 @@ public class MixinChatScreen {
 
     @Inject(method = "onEdited", at = @At("HEAD"))
     private void onEdited(String value, CallbackInfo ci) {
-        if (value.startsWith("/") && ClientCommands.isClientcommandsCommand(value.substring(1).split(" ")[0])) {
+        if (value.startsWith("/") && !value.startsWith("/ ") && ClientCommands.isClientcommandsCommand(value.substring(1).split(" ")[0])) {
             if (oldMaxLength == null) {
                 oldMaxLength = input.maxLength;
             }
