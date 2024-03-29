@@ -34,12 +34,18 @@ public class MixinChatScreen {
 
     @Inject(method = "onEdited", at = @At("HEAD"))
     private void onEdited(String value, CallbackInfo ci) {
-        if (value.startsWith("/") && !value.startsWith("/ ") && ClientCommands.isClientcommandsCommand(value.substring(1).split(" ")[0])) {
-            if (oldMaxLength == null) {
-                oldMaxLength = input.maxLength;
+        boolean isClientcommandsCommand = false;
+        if (value.startsWith("/")) {
+            String[] commandArgs = value.substring(1).split(" ");
+            if (commandArgs.length > 0 && ClientCommands.isClientcommandsCommand(commandArgs[0])) {
+                isClientcommandsCommand = true;
+                if (oldMaxLength == null) {
+                    oldMaxLength = input.maxLength;
+                }
+                input.setMaxLength(32767);
             }
-            input.setMaxLength(32767);
-        } else {
+        }
+        if (!isClientcommandsCommand) {
             // TODO: what if other mods try to do the same thing?
             if (oldMaxLength != null) {
                 input.setMaxLength(oldMaxLength);
