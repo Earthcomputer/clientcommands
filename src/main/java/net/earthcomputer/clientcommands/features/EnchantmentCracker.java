@@ -350,7 +350,7 @@ public class EnchantmentCracker {
 
                     int[] enchantLevels = new int[3];
                     RandomSource rand = RandomSource.create();
-                    for (int bookshelvesNeeded = 0; bookshelvesNeeded <= 15; bookshelvesNeeded++) {
+                    for (int bookshelvesNeeded = Configs.getMinEnchantBookshelves(); bookshelvesNeeded <= Configs.getMaxEnchantBookshelves(); bookshelvesNeeded++) {
                         rand.setSeed(xpSeed);
                         for (int slot = 0; slot < 3; slot++) {
                             int level = EnchantmentHelper.getEnchantmentCost(rand, slot, bookshelvesNeeded, stack);
@@ -362,7 +362,10 @@ public class EnchantmentCracker {
                         for (int slot = 0; slot < 3; slot++) {
                             List<EnchantmentInstance> enchantments = getEnchantmentList(rand, xpSeed, stack, slot,
                                 enchantLevels[slot]);
-                            if (enchantmentsPredicate.test(enchantments)) {
+                            if (enchantmentsPredicate.test(enchantments)
+                                && enchantLevels[slot] >= Configs.getMinEnchantLevels()
+                                && enchantLevels[slot] <= Configs.getMaxEnchantLevels()
+                            ) {
                                 return new ManipulateResult(times, bookshelvesNeeded, slot, enchantments);
                             }
                         }
