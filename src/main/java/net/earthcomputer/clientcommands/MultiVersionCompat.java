@@ -23,6 +23,7 @@ import java.util.Set;
 public abstract sealed class MultiVersionCompat {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    public static final int V1_7_2 = 4;
     public static final int V1_13_2 = 404;
     public static final int V1_14 = 477;
     public static final int V1_14_2 = 485;
@@ -218,13 +219,32 @@ public abstract sealed class MultiVersionCompat {
 
     private static final class ViaFabricPlus extends AbstractViaVersion {
         private final Method getTargetVersion;
+        private final Method olderThan;
         private final Method itemRegistryDiffKeepItem;
+        private final Object release1_7_2Version;
 
         private ViaFabricPlus() throws ReflectiveOperationException {
             Class<?> protocolTranslator = Class.forName("de.florianmichael.viafabricplus.protocoltranslator.ProtocolTranslator");
             Class<?> itemRegistryDiff = Class.forName("de.florianmichael.viafabricplus.fixes.data.ItemRegistryDiff");
+            Class<?> protocolVersion = Class.forName("com.viaversion.viaversion.api.protocol.version.ProtocolVersion");
             getTargetVersion = protocolTranslator.getMethod("getTargetVersion");
+            olderThan = getTargetVersion.getReturnType().getMethod("olderThan", getTargetVersion.getReturnType());
             itemRegistryDiffKeepItem = itemRegistryDiff.getMethod("keepItem", Item.class);
+            release1_7_2Version = protocolVersion.getField("v1_7_2").get(null);
+        }
+
+        @Override
+        public int getProtocolVersion() {
+            try {
+                final boolean isOlderThan1_7_2 = (boolean) olderThan.invoke(getTargetVersion.invoke(null), release1_7_2Version);
+                if (isOlderThan1_7_2) {
+                    return V1_7_2;
+                } else {
+                    return super.getProtocolVersion();
+                }
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
