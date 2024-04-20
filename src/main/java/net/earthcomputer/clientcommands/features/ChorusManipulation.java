@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.features.PlayerRandCracker.*;
@@ -22,7 +23,9 @@ import static net.earthcomputer.clientcommands.features.PlayerRandCracker.*;
 public class ChorusManipulation {
     //If the goal is relative or not to the player
     public static boolean chorusRelativeTel;
+    @Nullable
     public static Vec3 chorusGoalFrom;
+    @Nullable
     public static Vec3 chorusGoalTo;
     private static final Object GOAL_POS_KEY = new Object();
 
@@ -86,6 +89,10 @@ public class ChorusManipulation {
 
     public static boolean onEat(Vec3 pos, int particleCount, int itemUseTimeLeft) {
         AABB area = getTargetArea(pos);
+        if (area == null) {
+            return false;
+        }
+
         if (!area.inflate(8.0).contains(pos)) {
             sendError(Component.translatable("chorusManip.goalTooFar"));
             return false;
@@ -129,7 +136,12 @@ public class ChorusManipulation {
         }
     }
 
+    @Nullable
     private static AABB getTargetArea(Vec3 pos) {
+        if (chorusGoalFrom == null || chorusGoalTo == null) {
+            return null;
+        }
+
         Vec3 from;
         Vec3 to;
         if (chorusRelativeTel) {
