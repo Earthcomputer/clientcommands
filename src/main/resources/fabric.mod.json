@@ -31,6 +31,9 @@
     "fabric-api": "*",
     "clientarguments": ">=1.3.0"
   },
+  "breaks": {
+    "seedcrackerx": "*"
+  },
   "mixins": [
     "mixins.clientcommands.json"
   ],
