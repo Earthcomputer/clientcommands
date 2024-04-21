@@ -85,7 +85,7 @@ public class ClientCommands implements ClientModInitializer {
 
         new ModConfigBuilder("clientcommands", Configs.class).build();
 
-        ItemGroupCommand.registerItemGroups();
+        CreativeTabCommand.registerItemGroups();
 
         MappingsHelper.load();
     }
@@ -128,6 +128,7 @@ public class ClientCommands implements ClientModInitializer {
         CParticleCommand.register(dispatcher);
         CPlaySoundCommand.register(dispatcher);
         CrackRNGCommand.register(dispatcher);
+        CreativeTabCommand.register(dispatcher, context);
         CStopSoundCommand.register(dispatcher);
         CTeleportCommand.register(dispatcher);
         CTellRawCommand.register(dispatcher);
@@ -143,7 +144,6 @@ public class ClientCommands implements ClientModInitializer {
         GhostBlockCommand.register(dispatcher, context);
         GlowCommand.register(dispatcher);
         HotbarCommand.register(dispatcher);
-        ItemGroupCommand.register(dispatcher, context);
         KitCommand.register(dispatcher);
         ListenCommand.register(dispatcher);
         LookCommand.register(dispatcher);
