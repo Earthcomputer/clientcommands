@@ -176,7 +176,8 @@
   "commands.cpos.level.overworld": "the Overworld",
   "commands.cpos.level.the_end": "the End",
   "commands.cpos.level.the_nether": "the Nether",
-  "commands.cpos.coords.left": " in %1$s is ",
+  "commands.cpos.coords.left": "",
+  "commands.cpos.coords.middle": " in %1$s is ",
   "commands.cpos.coords.right": " in %2$s",
 
   "commands.crelog.failed": "Failed to relog",

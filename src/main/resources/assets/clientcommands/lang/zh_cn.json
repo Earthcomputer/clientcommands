@@ -176,7 +176,8 @@
   "commands.cpos.level.overworld": "主世界",
   "commands.cpos.level.the_end": "末地",
   "commands.cpos.level.the_nether": "下界",
-  "commands.cpos.coords.left": "在%1$s中是",
+  "commands.cpos.coords.left": "",
+  "commands.cpos.coords.middle": "在%1$s中是",
   "commands.cpos.coords.right": "在%2$s中",
 
   "commands.crelog.failed": "未能重新登录",

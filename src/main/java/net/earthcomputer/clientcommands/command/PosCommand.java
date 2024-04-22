@@ -80,10 +80,11 @@ public class PosCommand {
         String sourceWorldName = getLevelName(sourceLevel);
         String targetWorldName = getLevelName(targetLevel);
 
-        source.sendFeedback(getCoordsTextComponent(pos)
-                .append(Component.translatable("commands.cpos.coords.left", sourceWorldName, targetWorldName))
-                .append(getLookCoordsTextComponent(targetPos))
-                .append(Component.translatable("commands.cpos.coords.right", sourceWorldName, targetWorldName)));
+        source.sendFeedback(Component.translatable("commands.cpos.coords.left", sourceWorldName, targetWorldName)
+            .append(getCoordsTextComponent(pos))
+            .append(Component.translatable("commands.cpos.coords.middle", sourceWorldName, targetWorldName))
+            .append(getLookCoordsTextComponent(targetPos))
+            .append(Component.translatable("commands.cpos.coords.right", sourceWorldName, targetWorldName)));
 
         return Command.SINGLE_SUCCESS;
     }

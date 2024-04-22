@@ -163,7 +163,8 @@
   "commands.cpos.level.overworld": "現世",
   "commands.cpos.level.the_end": "ジ・エンド",
   "commands.cpos.level.the_nether": "ネザー",
-  "commands.cpos.coords.left": " の %1$s は ",
+  "commands.cpos.coords.left": "",
+  "commands.cpos.coords.middle": " の %1$s は ",
   "commands.cpos.coords.right": " の %2$s",
 
   "commands.crelog.failed": "再ログするのに失敗しました",
