@@ -124,7 +124,7 @@
   "commands.cglow.entity.keepSearching.success": "Glowing entities",
   "commands.cglow.entity.failed": "No entities to glow",
   "commands.cglow.entity.success": "Glowing %d entities",
-  "commands.cglow.area.success": "Glowing %d area(s)",
+  "commands.cglow.area.success": "Glowing %d area",
 
   "commands.chat.success": "Successfully opened c🎩",
 
