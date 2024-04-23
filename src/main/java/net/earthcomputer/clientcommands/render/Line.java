@@ -39,7 +39,7 @@ public class Line extends Shape {
                 (color & 0xFF) / 255.0F,
                 1.0F
         ).normal(
-                poseStack.last().normal(),
+                poseStack.last(),
                 (float) normal.x(),
                 (float) normal.y(),
                 (float) normal.z()

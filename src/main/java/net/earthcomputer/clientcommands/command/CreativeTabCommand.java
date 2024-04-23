@@ -15,7 +15,9 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -40,7 +42,7 @@ import java.util.Set;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 import static net.minecraft.commands.SharedSuggestionProvider.*;
 
@@ -65,7 +67,18 @@ public class CreativeTabCommand {
         } catch (IOException e) {
             LOGGER.error("Could not load groups file, hence /ccreativetab will not work!", e);
         }
-        tabs.forEach((key, tab) -> tab.registerItemGroup(key));
+
+        // FIXME: this is a hack because creative tabs must be registered on startup but item stacks normally can't be
+        // parsed until the world is loaded. Use the default registries for now, as most things in item stacks aren't
+        // in dynamic registries yet. Fix this once creative tabs can be registered dynamically.
+        var holderLookupProvider = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList()).freeze();
+        tabs.forEach((key, tab) -> {
+            try {
+                tab.registerItemGroup(holderLookupProvider, key);
+            } catch (Throwable e) {
+                LOGGER.error("Could not load tab {}", key, e);
+            }
+        });
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
@@ -76,8 +89,8 @@ public class CreativeTabCommand {
                     .then(literal("add")
                         .then(argument("itemstack", itemStack(context))
                             .then(argument("count", integer(1))
-                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getCItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
-                            .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getCItemStackArgument(ctx, "itemstack").createItemStack(1, false)))))
+                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
+                            .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "itemstack").createItemStack(1, false)))))
                     .then(literal("remove")
                         .then(argument("index", integer(0))
                             .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index")))))
@@ -85,18 +98,18 @@ public class CreativeTabCommand {
                         .then(argument("index", integer(0))
                             .then(argument("itemstack", itemStack(context))
                                 .then(argument("count", integer(1))
-                                    .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
-                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getCItemStackArgument(ctx, "itemstack").createItemStack(1, false))))))
+                                    .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
+                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createItemStack(1, false))))))
                     .then(literal("icon")
                         .then(argument("icon", itemStack(context))
-                            .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "tab"), getCItemStackArgument(ctx, "icon").createItemStack(1, false)))))
+                            .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "icon").createItemStack(1, false)))))
                     .then(literal("rename")
                         .then(argument("new", string())
                             .executes(ctx -> renameTab(ctx.getSource(), getString(ctx, "tab"), getString(ctx, "new")))))))
             .then(literal("add")
                 .then(argument("tab", string())
                     .then(argument("icon", itemStack(context))
-                         .executes(ctx -> addTab(ctx.getSource(), getString(ctx, "tab"), getCItemStackArgument(ctx, "icon").createItemStack(1, false))))))
+                         .executes(ctx -> addTab(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "icon").createItemStack(1, false))))))
             .then(literal("remove")
                 .then(argument("tab", string())
                     .suggests((ctx, builder) -> suggest(tabs.keySet(), builder))
@@ -113,7 +126,9 @@ public class CreativeTabCommand {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(name);
         }
 
-        tabs.put(name, new Tab(icon, new ListTag()));
+        icon.setCount(1);
+
+        tabs.put(name, new Tab((CompoundTag) icon.save(source.registryAccess()), new ListTag()));
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.addTab.success", name));
         ClientCommandHelper.sendRequiresRestart();
@@ -140,7 +155,7 @@ public class CreativeTabCommand {
 
         Tab tab = tabs.get(name);
         ListTag items = tab.items();
-        items.add(itemStack.save(new CompoundTag()));
+        items.add(itemStack.save(source.registryAccess()));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.addStack.success", itemStack.getItem().getDescription(), name));
@@ -176,7 +191,7 @@ public class CreativeTabCommand {
         if ((index < 0) || (index >= items.size())) {
             throw OUT_OF_BOUNDS_EXCEPTION.create(index);
         }
-        items.set(index, itemStack.save(new CompoundTag()));
+        items.set(index, itemStack.save(source.registryAccess()));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.setStack.success", name, index, itemStack.getItem().getDescription()));
@@ -188,12 +203,13 @@ public class CreativeTabCommand {
         if (!tabs.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
+        icon.setCount(1);
 
         Tab tab = tabs.get(name);
         ListTag items = tab.items();
-        ItemStack old = tab.icon();
+        ItemStack old = ItemStack.parseOptional(source.registryAccess(), tab.icon());
 
-        tabs.put(name, new Tab(icon, items));
+        tabs.put(name, new Tab((CompoundTag) icon.save(source.registryAccess()), items));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.changeIcon.success", name, old.getItem().getDescription(), icon.getItem().getDescription()));
@@ -225,7 +241,7 @@ public class CreativeTabCommand {
             CompoundTag compoundTag = new CompoundTag();
             tabs.forEach((key, value) -> {
                 CompoundTag tab = new CompoundTag();
-                tab.put("icon", value.icon().save(new CompoundTag()));
+                tab.put("icon", value.icon());
                 tab.put("items", value.items());
                 compoundTag.put(key, tab);
             });
@@ -271,7 +287,7 @@ public class CreativeTabCommand {
                 }
 
                 CompoundTag tab = compoundTag.getCompound(key);
-                ItemStack icon = singleItemFromNbt(tab.getCompound("icon"));
+                CompoundTag icon = tab.getCompound("icon");
                 ListTag items = tab.getList("items", Tag.TAG_COMPOUND);
                 tabs.put(key, new Tab(icon, items));
             }
@@ -285,7 +301,7 @@ public class CreativeTabCommand {
                 CompoundTag tab = compoundTag.getCompound(key);
                 Dynamic<Tag> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, tab.getCompound("icon"));
                 Dynamic<Tag> newStackDynamic = dataFixer.update(References.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
-                ItemStack icon = singleItemFromNbt((CompoundTag) newStackDynamic.getValue());
+                CompoundTag icon = (CompoundTag) newStackDynamic.getValue();
 
                 ListTag updatedListTag = new ListTag();
                 tab.getList("items", Tag.TAG_COMPOUND).forEach(tag -> {
@@ -298,23 +314,23 @@ public class CreativeTabCommand {
         }
     }
 
-    private static ItemStack singleItemFromNbt(CompoundTag nbt) {
-        ItemStack stack = ItemStack.of(nbt);
+    private static ItemStack singleItemFromNbt(HolderLookup.Provider holderLookupProvider, CompoundTag nbt) {
+        ItemStack stack = ItemStack.parseOptional(holderLookupProvider, nbt);
         if (!stack.isEmpty()) {
             stack.setCount(1);
         }
         return stack;
     }
 
-    private record Tab(ItemStack icon, ListTag items) {
-        void registerItemGroup(String key) {
+    private record Tab(CompoundTag icon, ListTag items) {
+        void registerItemGroup(HolderLookup.Provider holderLookupProvider, String key) {
             Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, new ResourceLocation("clientcommands", key), FabricItemGroup.builder()
                     .title(Component.literal(key))
-                    .icon(() -> icon)
+                    .icon(() -> singleItemFromNbt(holderLookupProvider, icon))
                     .displayItems((displayContext, entries) -> {
-                        Set<ItemStack> existingStacks = ItemStackLinkedSet.createTypeAndTagSet();
+                        Set<ItemStack> existingStacks = ItemStackLinkedSet.createTypeAndComponentsSet();
                         for (int i = 0; i < items.size(); i++) {
-                            ItemStack stack = singleItemFromNbt(items.getCompound(i));
+                            ItemStack stack = singleItemFromNbt(holderLookupProvider, items.getCompound(i));
                             if (stack.isEmpty()) {
                                 continue;
                             }

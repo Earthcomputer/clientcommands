@@ -391,7 +391,7 @@ public class PlayerRandCracker {
             return null;
         }
         //noinspection OptionalGetWithoutIsPresent
-        Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getMaxStackSize).thenComparing(itemCounts::get)).get();
+        Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getDefaultMaxStackSize).thenComparing(itemCounts::get)).get();
         //noinspection OptionalGetWithoutIsPresent
         return slots.stream().filter(slot -> slot.getItem().getItem() == preferredItem).findFirst().get();
     }

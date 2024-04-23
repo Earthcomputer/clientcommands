@@ -43,7 +43,7 @@ public class MixinServerboundContainerClosePacket {
                         itemCounts[toSlot] = Math.min(stackSize, stack.getMaxStackSize());
                         itemStacks[toSlot] = stack;
                         stackSize -= stack.getMaxStackSize();
-                    } else if (ItemStack.isSameItemSameTags(itemStacks[toSlot], stack)) {
+                    } else if (ItemStack.isSameItemSameComponents(itemStacks[toSlot], stack)) {
                         stackSize -= stack.getMaxStackSize() - itemCounts[toSlot];
                         itemCounts[toSlot] = Math.min(itemCounts[toSlot] + stackSize, stack.getMaxStackSize());
                     }

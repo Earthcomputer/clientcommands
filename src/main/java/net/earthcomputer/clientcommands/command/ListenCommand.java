@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static net.earthcomputer.clientcommands.command.arguments.MojmapPacketClassArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.PacketTypeArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class ListenCommand {
@@ -62,7 +62,7 @@ public class ListenCommand {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Set<Class<? extends Packet<?>>> packets = new HashSet<>();
+    private static final Set<ResourceLocation> packets = new HashSet<>();
 
     private static PacketCallback callback;
 
@@ -80,9 +80,9 @@ public class ListenCommand {
                 .executes(ctx -> clear(ctx.getSource()))));
     }
 
-    private static int add(FabricClientCommandSource source, Class<? extends Packet<?>> packetClass) throws CommandSyntaxException {
+    private static int add(FabricClientCommandSource source, ResourceLocation packetType) throws CommandSyntaxException {
         checkEnabled();
-        if (!packets.add(packetClass)) {
+        if (!packets.add(packetType)) {
             throw ALREADY_LISTENING_EXCEPTION.create();
         }
 
@@ -131,9 +131,9 @@ public class ListenCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int remove(FabricClientCommandSource source, Class<? extends Packet<?>> packetClass) throws CommandSyntaxException {
+    private static int remove(FabricClientCommandSource source, ResourceLocation packetType) throws CommandSyntaxException {
         checkEnabled();
-        if (!packets.remove(packetClass)) {
+        if (!packets.remove(packetType)) {
             throw NOT_LISTENING_EXCEPTION.create();
         }
 
@@ -148,12 +148,9 @@ public class ListenCommand {
             source.sendFeedback(Component.translatable("commands.clisten.list.none"));
         } else {
             source.sendFeedback(Component.translatable("commands.clisten.list"));
-            packets.forEach(packetClass -> {
-                String packetClassName = packetClass.getName().replace('.', '/');
-                String mojmapName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(packetClassName), packetClassName);
-                mojmapName = mojmapName.substring(mojmapName.lastIndexOf('/') + 1);
-                source.sendFeedback(Component.literal(mojmapName));
-            });
+            for (ResourceLocation packetType : packets) {
+                source.sendFeedback(Component.literal(packetType.toString()));
+            }
         }
 
         return amount;
@@ -287,7 +284,7 @@ public class ListenCommand {
     }
 
     public static void onPacket(Packet<?> packet, PacketFlow side) {
-        if (!packets.contains(packet.getClass())) {
+        if (!packets.contains(packet.type().id())) {
             return;
         }
         callback.apply(packet, side);

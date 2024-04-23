@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType;
+import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument;
 import net.earthcomputer.clientcommands.task.RenderDistanceScanTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -20,8 +20,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType.*;
-import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindBlockCommand {
@@ -29,8 +29,8 @@ public class FindBlockCommand {
         dispatcher.register(literal("cfindblock")
             .then(argument("block", withString(blockPredicate(context)))
                 .executes(ctx -> {
-                    var blockWithString = getWithString(ctx, "block", ClientBlockPredicateArgumentType.ParseResult.class);
-                    return findBlock(Component.translatable("commands.cfindblock.starting", blockWithString.getLeft()), getBlockPredicate(blockWithString.getRight()));
+                    var blockWithString = getWithString(ctx, "block", ClientBlockPredicateArgument.ParseResult.class);
+                    return findBlock(Component.translatable("commands.cfindblock.starting", blockWithString.string()), getBlockPredicate(blockWithString.value()));
                 })));
     }
 
@@ -56,7 +56,7 @@ public class FindBlockCommand {
             ClientLevel level = Minecraft.getInstance().level;
             assert level != null;
             Vec3 cameraPos = cameraEntity.getEyePosition(0);
-            if ((closestBlock == null || pos.distToCenterSqr(cameraPos) < closestBlock.distToCenterSqr(cameraPos)) && predicate.test(level, pos)) {
+            if ((closestBlock == null || pos.distToCenterSqr(cameraPos) < closestBlock.distToCenterSqr(cameraPos)) && predicate.test(level.registryAccess(), level, pos)) {
                 closestBlock = pos.immutable();
             }
         }

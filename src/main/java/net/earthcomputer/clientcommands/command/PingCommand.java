@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Collection;
 
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class PingCommand {
@@ -26,7 +26,7 @@ public class PingCommand {
         dispatcher.register(literal("cping")
             .executes(ctx -> printPing(ctx.getSource()))
             .then(argument("player", gameProfile())
-                .executes(ctx -> printPing(ctx.getSource(), getCProfileArgument(ctx, "player"))))
+                .executes(ctx -> printPing(ctx.getSource(), getProfileArgument(ctx, "player"))))
         );
     }
 

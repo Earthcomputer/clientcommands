@@ -10,12 +10,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CEnchantCommand {
@@ -30,7 +31,7 @@ public class CEnchantCommand {
     }
 
     private static boolean enchantmentPredicate(Item item, Enchantment ench) {
-        return !ench.isTreasureOnly() && ench.isDiscoverable() && (item == Items.BOOK || ench.category.canEnchant(item));
+        return !ench.isTreasureOnly() && ench.isDiscoverable() && (item == Items.BOOK || ench.canEnchant(new ItemStack(item)));
     }
 
     private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) {

@@ -12,26 +12,26 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class RegexArgumentType implements ArgumentType<Pattern> {
+public class RegexArgument implements ArgumentType<Pattern> {
 
     private static final DynamicCommandExceptionType EXPECTED_REGEX_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.client.expectedRegex", arg));
 
     private final RegexType type;
 
-    private RegexArgumentType(RegexType type) {
+    private RegexArgument(RegexType type) {
         this.type = type;
     }
 
-    public static RegexArgumentType wordRegex() {
-        return new RegexArgumentType(RegexType.SINGLE_WORD);
+    public static RegexArgument wordRegex() {
+        return new RegexArgument(RegexType.SINGLE_WORD);
     }
 
-    public static RegexArgumentType slashyRegex() {
-        return new RegexArgumentType(RegexType.SLASHY_PHRASE);
+    public static RegexArgument slashyRegex() {
+        return new RegexArgument(RegexType.SLASHY_PHRASE);
     }
 
-    public static RegexArgumentType greedyRegex() {
-        return new RegexArgumentType(RegexType.GREEDY_PHRASE);
+    public static RegexArgument greedyRegex() {
+        return new RegexArgument(RegexType.GREEDY_PHRASE);
     }
 
     public static Pattern getRegex(CommandContext<?> context, String name) {

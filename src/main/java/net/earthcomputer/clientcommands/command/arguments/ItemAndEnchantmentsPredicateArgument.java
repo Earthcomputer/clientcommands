@@ -12,6 +12,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -20,20 +21,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<ItemAndEnchantmentsPredicateArgumentType.ItemAndEnchantmentsPredicate> {
+public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAndEnchantmentsPredicateArgument.ItemAndEnchantmentsPredicate> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("stick with sharpness 4 without sweeping *", "minecraft:diamond_sword with sharpness *");
 
@@ -45,24 +45,24 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
     private BiPredicate<Item, Enchantment> enchantmentPredicate = (item, ench) -> true;
     private boolean constrainMaxLevel = false;
 
-    private ItemAndEnchantmentsPredicateArgumentType() {
+    private ItemAndEnchantmentsPredicateArgument() {
     }
 
-    public static ItemAndEnchantmentsPredicateArgumentType itemAndEnchantmentsPredicate() {
-        return new ItemAndEnchantmentsPredicateArgumentType();
+    public static ItemAndEnchantmentsPredicateArgument itemAndEnchantmentsPredicate() {
+        return new ItemAndEnchantmentsPredicateArgument();
     }
 
-    public ItemAndEnchantmentsPredicateArgumentType withItemPredicate(Predicate<Item> predicate) {
+    public ItemAndEnchantmentsPredicateArgument withItemPredicate(Predicate<Item> predicate) {
         this.itemPredicate = predicate;
         return this;
     }
 
-    public ItemAndEnchantmentsPredicateArgumentType withEnchantmentPredicate(BiPredicate<Item, Enchantment> predicate) {
+    public ItemAndEnchantmentsPredicateArgument withEnchantmentPredicate(BiPredicate<Item, Enchantment> predicate) {
         this.enchantmentPredicate = predicate;
         return this;
     }
 
-    public ItemAndEnchantmentsPredicateArgumentType constrainMaxLevel() {
+    public ItemAndEnchantmentsPredicateArgument constrainMaxLevel() {
         this.constrainMaxLevel = true;
         return this;
     }
@@ -137,9 +137,9 @@ public class ItemAndEnchantmentsPredicateArgumentType implements ArgumentType<It
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
                 return false;
             }
-            Map<Enchantment, Integer> enchantmentMap = EnchantmentHelper.getEnchantments(stack);
-            List<EnchantmentInstance> enchantments = new ArrayList<>(enchantmentMap.size());
-            enchantmentMap.forEach((id, lvl) -> enchantments.add(new EnchantmentInstance(id, lvl)));
+            List<EnchantmentInstance> enchantments = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet().stream()
+                .map(entry -> new EnchantmentInstance(entry.getKey().value(), entry.getIntValue()))
+                .toList();
             return predicate.test(enchantments);
         }
     }

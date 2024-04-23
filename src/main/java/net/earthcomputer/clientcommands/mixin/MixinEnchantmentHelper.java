@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.features.SeedfindingUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -26,7 +27,7 @@ import java.util.Optional;
 public class MixinEnchantmentHelper {
 
     @Inject(method = "selectEnchantment", at = @At("HEAD"), cancellable = true)
-    private static void getEnchantments1140(RandomSource rand, ItemStack stack, int level, boolean allowTreasure, CallbackInfoReturnable<List<EnchantmentInstance>> ci) {
+    private static void getEnchantments1140(FeatureFlagSet featureFlags, RandomSource rand, ItemStack stack, int level, boolean allowTreasure, CallbackInfoReturnable<List<EnchantmentInstance>> ci) {
         int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
         if (protocolVersion < MultiVersionCompat.V1_14 || protocolVersion > MultiVersionCompat.V1_14_2) {
             return;
@@ -45,14 +46,14 @@ public class MixinEnchantmentHelper {
         float change = (rand.nextFloat() + rand.nextFloat() - 1) * 0.15f;
         level = Mth.clamp(Math.round(level + level * change), 1, Integer.MAX_VALUE);
 
-        List<EnchantmentInstance> applicableEnchantments = EnchantmentHelper.getAvailableEnchantmentResults(level, stack, allowTreasure);
+        List<EnchantmentInstance> applicableEnchantments = EnchantmentHelper.getAvailableEnchantmentResults(featureFlags, level, stack, allowTreasure);
         if (!applicableEnchantments.isEmpty()) {
             Optional<EnchantmentInstance> optEnch = WeightedRandom.getRandomItem(rand, applicableEnchantments);
             optEnch.ifPresent(enchantments::add);
 
             while (rand.nextInt(50) <= level) {
                 level = level * 4 / 5 + 1;
-                applicableEnchantments = EnchantmentHelper.getAvailableEnchantmentResults(level, stack, allowTreasure);
+                applicableEnchantments = EnchantmentHelper.getAvailableEnchantmentResults(featureFlags, level, stack, allowTreasure);
                 for (EnchantmentInstance ench : enchantments) {
                     EnchantmentHelper.filterCompatibleEnchantments(applicableEnchantments, ench);
                 }

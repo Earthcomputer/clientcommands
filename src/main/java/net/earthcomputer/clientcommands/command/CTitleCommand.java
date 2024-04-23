@@ -3,30 +3,31 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CTextArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CComponentArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTitleCommand {
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("ctitle")
             .then(literal("clear")
                 .executes(ctx -> executeClear(ctx.getSource())))
             .then(literal("reset")
                 .executes(ctx -> executeReset(ctx.getSource())))
             .then(literal("title")
-                .then(argument("title", text())
-                    .executes(ctx -> executeTitle(ctx.getSource(), getCTextArgument(ctx, "title")))))
+                .then(argument("title", textComponent(context))
+                    .executes(ctx -> executeTitle(ctx.getSource(), getComponent(ctx, "title")))))
             .then(literal("subtitle")
-                .then(argument("title", text())
-                    .executes(ctx -> executeSubtitle(ctx.getSource(), getCTextArgument(ctx, "title")))))
+                .then(argument("title", textComponent(context))
+                    .executes(ctx -> executeSubtitle(ctx.getSource(), getComponent(ctx, "title")))))
             .then(literal("actionbar")
-                .then(argument("title", text())
-                    .executes(ctx -> executeActionBar(ctx.getSource(), getCTextArgument(ctx, "title")))))
+                .then(argument("title", textComponent(context))
+                    .executes(ctx -> executeActionBar(ctx.getSource(), getComponent(ctx, "title")))))
             .then(literal("times")
                 .then(argument("fadeIn", integer(0))
                     .then(argument("stay", integer(0))

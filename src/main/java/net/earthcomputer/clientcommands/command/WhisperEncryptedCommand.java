@@ -16,7 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import java.util.Collection;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class WhisperEncryptedCommand {
@@ -27,7 +27,7 @@ public class WhisperEncryptedCommand {
         dispatcher.register(literal("cwe")
                 .then(argument("player", gameProfile())
                     .then(argument("message", greedyString())
-                        .executes((ctx) -> whisper(ctx.getSource(), getCProfileArgument(ctx, "player"), getString(ctx, "message"))))));
+                        .executes((ctx) -> whisper(ctx.getSource(), getProfileArgument(ctx, "player"), getString(ctx, "message"))))));
     }
 
     private static int whisper(FabricClientCommandSource source, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {

@@ -26,6 +26,7 @@ import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +36,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.EnchantmentTableBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -223,8 +224,8 @@ public class EnchantmentCracker {
             // generate enchantment clues and see if they match
             for (int slot = 0; slot < 3; slot++) {
                 if (actualEnchantCosts[slot] > 0) {
-                    List<EnchantmentInstance> enchantments = getEnchantmentList(rand, xpSeed, itemToEnchant, slot,
-                            actualEnchantCosts[slot]);
+                    List<EnchantmentInstance> enchantments = getEnchantmentList(
+                        level.enabledFeatures(), rand, xpSeed, itemToEnchant, slot, actualEnchantCosts[slot]);
                     if (enchantments == null || enchantments.isEmpty()) {
                         // check that there is indeed no enchantment clue
                         if (actualEnchantmentClues[slot] != -1 || actualLevelClues[slot] != -1) {
@@ -332,6 +333,7 @@ public class EnchantmentCracker {
 
         ItemStack stack = new ItemStack(item);
         long playerSeed = PlayerRandCracker.getSeed();
+        FeatureFlagSet featureFlags = player.connection.enabledFeatures();
 
         List<CompletableFuture<@Nullable ManipulateResult>> futures = new ArrayList<>();
 
@@ -360,8 +362,8 @@ public class EnchantmentCracker {
                             enchantLevels[slot] = level;
                         }
                         for (int slot = 0; slot < 3; slot++) {
-                            List<EnchantmentInstance> enchantments = getEnchantmentList(rand, xpSeed, stack, slot,
-                                enchantLevels[slot]);
+                            List<EnchantmentInstance> enchantments = getEnchantmentList(
+                                featureFlags, rand, xpSeed, stack, slot, enchantLevels[slot]);
                             if (enchantmentsPredicate.test(enchantments)
                                 && enchantLevels[slot] >= Configs.getMinEnchantLevels()
                                 && enchantLevels[slot] <= Configs.getMaxEnchantLevels()
@@ -522,7 +524,7 @@ public class EnchantmentCracker {
 
         int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
 
-        for (BlockPos bookshelfOffset : EnchantmentTableBlock.BOOKSHELF_OFFSETS) {
+        for (BlockPos bookshelfOffset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
             if (protocolVersion <= MultiVersionCompat.V1_18) {
                 // old bookshelf detection method
                 BlockPos obstructionPos = tablePos.offset(Mth.clamp(bookshelfOffset.getX(), -1, 1), 0, Mth.clamp(bookshelfOffset.getZ(), -1, 1));
@@ -536,7 +538,7 @@ public class EnchantmentCracker {
                     power++;
                 }
             } else {
-                if (EnchantmentTableBlock.isValidBookShelf(level, tablePos, bookshelfOffset)) {
+                if (EnchantingTableBlock.isValidBookShelf(level, tablePos, bookshelfOffset)) {
                     power++;
                 }
             }
@@ -545,10 +547,10 @@ public class EnchantmentCracker {
         return power;
     }
 
-    private static List<EnchantmentInstance> getEnchantmentList(RandomSource rand, int xpSeed, ItemStack stack, int enchantSlot,
+    private static List<EnchantmentInstance> getEnchantmentList(FeatureFlagSet featureFlags, RandomSource rand, int xpSeed, ItemStack stack, int enchantSlot,
                                                                   int level) {
         rand.setSeed(xpSeed + enchantSlot);
-        List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(rand, stack, level, false);
+        List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(featureFlags, rand, stack, level, false);
 
         if (stack.getItem() == Items.BOOK && list.size() > 1) {
             list.remove(rand.nextInt(list.size()));
@@ -584,7 +586,7 @@ public class EnchantmentCracker {
             int xpSeed = possibleXPSeeds.iterator().next();
             ItemStack enchantingStack = enchContainer.getSlot(0).getItem();
             int enchantLevels = enchContainer.costs[slot];
-            return getEnchantmentList(rand, xpSeed, enchantingStack, slot, enchantLevels);
+            return getEnchantmentList(player.connection.enabledFeatures(), rand, xpSeed, enchantingStack, slot, enchantLevels);
         }
     }
 

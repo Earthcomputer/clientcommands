@@ -4,10 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.response.ProfileSearchResultsResponse;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
@@ -16,22 +14,22 @@ import com.mojang.util.InstantTypeAdapter;
 import com.mojang.util.UUIDTypeAdapter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.EncoderException;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.IdMap;
-import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.PacketDecoder;
+import net.minecraft.network.PacketEncoder;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -74,7 +72,13 @@ public class PacketDumper {
     public static void dumpPacket(Packet<?> packet, JsonWriter writer) throws IOException {
         writer.beginArray();
         try {
-            packet.write(new PacketDumpByteBuf(writer));
+            ChannelPipeline pipeline = Minecraft.getInstance().getConnection().getConnection().channel.pipeline();
+            @SuppressWarnings("unchecked")
+            StreamCodec<ByteBuf, Packet<?>> codec = switch (packet.type().flow()) {
+                case CLIENTBOUND -> (StreamCodec<ByteBuf, Packet<?>>) ((PacketDecoder<?>) pipeline.get("decoder")).protocolInfo.codec();
+                case SERVERBOUND -> (StreamCodec<ByteBuf, Packet<?>>) ((PacketEncoder<?>) pipeline.get("encoder")).protocolInfo.codec();
+            };
+            codec.encode(new PacketDumpByteBuf(writer), packet);
         } catch (UncheckedIOException e) {
             throw e.getCause();
         }
@@ -105,15 +109,13 @@ public class PacketDumper {
             return dump("withCodec", () -> {
                 dumpValueClass(value);
                 writer.name("value").value(Objects.toString(value));
-                writer.name("encodedNbt").value(Util.getOrThrow(
-                    codec.encodeStart(ops, value),
-                    message -> new EncoderException("Failed to encode: " + message + " " + value)
-                ).toString());
+                writer.name("encodedNbt").value(
+                    codec.encodeStart(ops, value).getOrThrow(message -> new EncoderException("Failed to encode: " + message + " " + value)).toString());
                 writer.name("encodedJson");
-                GSON.toJson(Util.getOrThrow(
-                    codec.encodeStart(JsonOps.INSTANCE, value),
-                    message -> new EncoderException("Failed to encode: " + message + " " + value)
-                ), writer);
+                GSON.toJson(
+                    codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow(message -> new EncoderException("Failed to encode: " + message + " " + value)),
+                    writer
+                );
             });
         }
 
@@ -123,47 +125,19 @@ public class PacketDumper {
                 dumpValueClass(value);
                 writer.name("value").value(Objects.toString(value));
                 writer.name("encodedJson");
-                GSON.toJson(Util.getOrThrow(
-                    codec.encodeStart(JsonOps.INSTANCE, value),
-                    message -> new EncoderException("Failed to encode: " + message + " " + value)
-                ), writer);
+                GSON.toJson(
+                    codec.encodeStart(JsonOps.INSTANCE, value).getOrThrow(message -> new EncoderException("Failed to encode: " + message + " " + value)),
+                    writer);
             });
         }
 
         @Override
-        public <T> void writeId(IdMap<T> idMap, T value) {
-            dump("id", () -> {
-                dumpValueClass(value);
-                writer.name("value").value(Objects.toString(value));
-                if (idMap instanceof Registry<T> registry) {
-                    writer.name("registry").value(registry.key().location().toString());
-                    writer.name("valueKey").value(Objects.toString(registry.getKey(value)));
-                }
-                writer.name("id").value(idMap.getId(value));
-            });
-        }
-
-        @Override
-        public <T> void writeId(IdMap<Holder<T>> idMap, Holder<T> value, Writer<T> directWriter) {
-            dump("idHolder", () -> {
-                writer.name("kind").value(value.kind().name());
-                value.unwrap().ifLeft(key -> Uncheck.run(() -> {
-                    writer.name("referenceKey").value(key.location().toString());
-                    writer.name("id").value(idMap.getId(value));
-                })).ifRight(directValue -> Uncheck.run(() -> {
-                    writer.name("directValue");
-                    dumpValue(directValue, directWriter);
-                }));
-            });
-        }
-
-        @Override
-        public <T> void writeCollection(Collection<T> collection, Writer<T> elementWriter) {
+        public <T> void writeCollection(Collection<T> collection, StreamEncoder<? super FriendlyByteBuf, T> encoder) {
             dump("collection", () -> {
                 writer.name("size").value(collection.size());
                 writer.name("elements").beginArray();
                 for (final T element : collection) {
-                    dumpValue(element, elementWriter);
+                    dumpValue(element, encoder);
                 }
                 writer.endArray();
             });
@@ -182,16 +156,16 @@ public class PacketDumper {
         }
 
         @Override
-        public <K, V> void writeMap(Map<K, V> map, Writer<K> keyWriter, Writer<V> valueWriter) {
+        public <K, V> void writeMap(Map<K, V> map, StreamEncoder<? super FriendlyByteBuf, K> keyEncoder, StreamEncoder<? super FriendlyByteBuf, V> valueEncoder) {
             dump("map", () -> {
                 writer.name("size").value(map.size());
                 writer.name("elements").beginArray();
                 for (final var entry : map.entrySet()) {
                     writer.beginObject();
                     writer.name("key");
-                    dumpValue(entry.getKey(), keyWriter);
+                    dumpValue(entry.getKey(), keyEncoder);
                     writer.name("value");
-                    dumpValue(entry.getValue(), valueWriter);
+                    dumpValue(entry.getValue(), valueEncoder);
                     writer.endObject();
                 }
                 writer.endArray();
@@ -215,41 +189,25 @@ public class PacketDumper {
         }
 
         @Override
-        public <T> void writeOptional(Optional<T> optional, Writer<T> valueWriter) {
-            writeNullable("optional", optional.orElse(null), valueWriter);
+        public <T> void writeOptional(Optional<T> optional, StreamEncoder<? super FriendlyByteBuf, T> valueEncoder) {
+            writeNullable("optional", optional.orElse(null), valueEncoder);
         }
 
         @Override
-        public <T> void writeNullable(@Nullable T value, Writer<T> writer) {
-            writeNullable("nullable", value, writer);
+        public <T> void writeNullable(@Nullable T value, StreamEncoder<? super FriendlyByteBuf, T> valueEncoder) {
+            writeNullable("nullable", value, valueEncoder);
         }
 
-        private <T> void writeNullable(String type, T value, Writer<T> valueWriter) {
+        private <T> void writeNullable(String type, T value, StreamEncoder<? super FriendlyByteBuf, T> valueEncoder) {
             dump(type, () -> {
                 writer.name("present");
                 if (value != null) {
                     writer.value(true);
                     writer.name("value");
-                    dumpValue(value, valueWriter);
+                    dumpValue(value, valueEncoder);
                 } else {
                     writer.value(false);
                 }
-            });
-        }
-
-        @Override
-        public <L, R> void writeEither(Either<L, R> value, Writer<L> leftWriter, Writer<R> rightWriter) {
-            dump("either", () -> {
-                writer.name("either");
-                value.ifLeft(left -> Uncheck.run(() -> {
-                    writer.value("left");
-                    writer.name("value");
-                    dumpValue(left, leftWriter);
-                })).ifRight(right -> Uncheck.run(() -> {
-                    writer.value("right");
-                    writer.name("value");
-                    dumpValue(right, rightWriter);
-                }));
             });
         }
 
@@ -350,14 +308,6 @@ public class PacketDumper {
         }
 
         @Override
-        public @NotNull PacketDumpByteBuf writeComponent(Component component) {
-            return dump("component", () -> {
-                writer.name("value");
-                GSON.toJson(Component.Serializer.toJsonTree(component), writer);
-            });
-        }
-
-        @Override
         public @NotNull PacketDumpByteBuf writeEnum(Enum<?> value) {
             return dump("enum", () -> {
                 String className = value.getDeclaringClass().getName().replace('.', '/');
@@ -396,15 +346,6 @@ public class PacketDumper {
         @Override
         public @NotNull PacketDumpByteBuf writeNbt(@Nullable Tag tag) {
             return dumpAsString("nbt", tag);
-        }
-
-        @Override
-        public @NotNull PacketDumpByteBuf writeItem(ItemStack stack) {
-            return dump("item", () -> writer
-                .name("item").value(stack.getItemHolder().unwrapKey().map(k -> k.location().toString()).orElse(null))
-                .name("count").value(stack.getCount())
-                .name("tag").value(Objects.toString(stack.getTag()))
-            );
         }
 
         @Override
@@ -484,33 +425,6 @@ public class PacketDumper {
                 writer.name("bits").beginArray();
                 IOStream.adapt(bitSet.stream().boxed()).forEach(writer::value);
                 writer.endArray();
-            });
-        }
-
-        @Override
-        public void writeGameProfile(GameProfile gameProfile) {
-            dump("gameProfile", () -> {
-                writer.name("value");
-                GSON.toJson(gameProfile, GameProfile.class, writer);
-            });
-        }
-
-        @Override
-        public void writeGameProfileProperties(PropertyMap gameProfileProperties) {
-            dump("gameProfileProperties", () -> {
-                writer.name("value");
-                GSON.toJson(gameProfileProperties, PropertyMap.class, writer);
-            });
-        }
-
-        @Override
-        public void writeProperty(Property property) {
-            dump("property", () -> {
-                writer.name("name").value(property.name());
-                writer.name("value").value(property.value());
-                if (property.hasSignature()) {
-                    writer.name("signature").value(property.signature());
-                }
             });
         }
 
@@ -692,11 +606,11 @@ public class PacketDumper {
             }
         }
 
-        private <T> void dumpValue(T value, Writer<T> valueWriter) throws IOException {
+        private <T> void dumpValue(T value, StreamEncoder<? super FriendlyByteBuf, T> valueEncoder) throws IOException {
             writer.beginObject();
             dumpValueClass(value);
             writer.name("fields").beginArray();
-            valueWriter.accept(this, value);
+            valueEncoder.encode(this, value);
             writer.endArray();
             writer.endObject();
         }

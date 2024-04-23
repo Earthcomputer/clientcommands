@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.features;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ServerData;
@@ -34,7 +34,7 @@ public class Relogger {
             isRelogging = true;
         }
         if (singleplayer) {
-            mc.disconnect(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+            mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
         } else {
             mc.disconnect();
         }
@@ -63,8 +63,7 @@ public class Relogger {
             if (!mc.getLevelSource().levelExists(levelName)) {
                 return false;
             }
-            mc.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("selectWorld.data_read")));
-            mc.createWorldOpenFlows().checkForBackupAndLoad(levelName, () -> mc.setScreen(new TitleScreen()));
+            mc.createWorldOpenFlows().openWorld(levelName, () -> mc.setScreen(new TitleScreen()));
             return true;
         } else {
             ServerData serverData = mc.getCurrentServer();
@@ -74,7 +73,7 @@ public class Relogger {
             if (!disconnect(true)) {
                 return false;
             }
-            ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false);
+            ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false, null);
             return true;
         }
     }

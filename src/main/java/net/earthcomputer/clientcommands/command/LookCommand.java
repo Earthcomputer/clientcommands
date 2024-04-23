@@ -2,14 +2,14 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import dev.xpple.clientarguments.arguments.CPosArgument;
+import dev.xpple.clientarguments.arguments.CCoordinates;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec2;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CRotationArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
+import static dev.xpple.clientarguments.arguments.CRotationArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class LookCommand {
@@ -18,10 +18,10 @@ public class LookCommand {
         dispatcher.register(literal("clook")
             .then(literal("block")
                 .then(argument("pos", blockPos())
-                    .executes(ctx -> lookBlock(ctx.getSource(), getCBlockPos(ctx, "pos")))))
+                    .executes(ctx -> lookBlock(ctx.getSource(), getBlockPos(ctx, "pos")))))
             .then(literal("angles")
                 .then(argument("rotation", rotation())
-                    .executes(ctx -> lookAngles(ctx.getSource(), getCRotation(ctx, "rotation")))))
+                    .executes(ctx -> lookAngles(ctx.getSource(), getRotation(ctx, "rotation")))))
             .then(literal("cardinal")
                 .then(literal("down")
                     .executes(ctx -> lookCardinal(ctx.getSource(), 90)))
@@ -48,8 +48,8 @@ public class LookCommand {
         return doLook(player, yaw, pitch);
     }
 
-    private static int lookAngles(FabricClientCommandSource source, CPosArgument rotation) {
-        Vec2 rot = rotation.toAbsoluteRotation(source);
+    private static int lookAngles(FabricClientCommandSource source, CCoordinates rotation) {
+        Vec2 rot = rotation.getRotation(source);
         return doLook(source.getPlayer(), rot.y, rot.x);
     }
 

@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import dev.xpple.clientarguments.arguments.CDimensionArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -10,9 +9,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CDimensionArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
+import static dev.xpple.clientarguments.arguments.CDimensionArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -23,38 +23,38 @@ public class PosCommand {
         dispatcher.register(literal("cpos")
             .then(argument("pos", blockPos())
                     .executes(ctx -> convertCoords(ctx.getSource(),
-                            getCBlockPos(ctx, "pos"), null, null)))
+                            getBlockPos(ctx, "pos"), null, null)))
             .then(literal("to").then(argument("targetDimension", dimension())
                     .then(argument("pos", blockPos())
                             .executes(ctx -> convertCoords(ctx.getSource(),
-                                    getCBlockPos(ctx, "pos"), null, getCDimensionArgument(ctx, "targetDimension"))))
+                                    getBlockPos(ctx, "pos"), null, getDimension(ctx, "targetDimension"))))
                     .then(literal("from").then(argument("sourceDimension", dimension())
                             .then(argument("pos", blockPos())
                                     .executes(ctx -> convertCoords(ctx.getSource(),
-                                            getCBlockPos(ctx, "pos"), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension"))))
+                                            getBlockPos(ctx, "pos"), getDimension(ctx, "sourceDimension"), getDimension(ctx, "targetDimension"))))
                             .executes(ctx -> convertCoords(ctx.getSource(),
-                                    ctx.getSource().getPlayer().blockPosition(), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension")))))
+                                    ctx.getSource().getPlayer().blockPosition(), getDimension(ctx, "sourceDimension"), getDimension(ctx, "targetDimension")))))
                     .executes(ctx -> convertCoords(ctx.getSource(),
-                            ctx.getSource().getPlayer().blockPosition(), null, getCDimensionArgument(ctx, "targetDimension")))))
+                            ctx.getSource().getPlayer().blockPosition(), null, getDimension(ctx, "targetDimension")))))
             .then(literal("from").then(argument("sourceDimension", dimension())
                     .then(argument("pos", blockPos())
                             .executes(ctx -> convertCoords(ctx.getSource(),
-                                    getCBlockPos(ctx, "pos"), getCDimensionArgument(ctx, "sourceDimension"), null)))
+                                    getBlockPos(ctx, "pos"), getDimension(ctx, "sourceDimension"), null)))
                     .then(literal("to").then(argument("targetDimension", dimension())
                             .then(argument("pos", blockPos())
                                     .executes(ctx -> convertCoords(ctx.getSource(),
-                                            getCBlockPos(ctx, "pos"), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension"))))
+                                            getBlockPos(ctx, "pos"), getDimension(ctx, "sourceDimension"), getDimension(ctx, "targetDimension"))))
                             .executes(ctx -> convertCoords(ctx.getSource(),
-                                    ctx.getSource().getPlayer().blockPosition(), getCDimensionArgument(ctx, "sourceDimension"), getCDimensionArgument(ctx, "targetDimension")))))
+                                    ctx.getSource().getPlayer().blockPosition(), getDimension(ctx, "sourceDimension"), getDimension(ctx, "targetDimension")))))
                     .executes(ctx -> convertCoords(ctx.getSource(),
-                            ctx.getSource().getPlayer().blockPosition(), getCDimensionArgument(ctx, "sourceDimension"), null))))
+                            ctx.getSource().getPlayer().blockPosition(), getDimension(ctx, "sourceDimension"), null))))
             .executes(ctx -> convertCoords(ctx.getSource(),
                     ctx.getSource().getPlayer().blockPosition(), null, null)));
     }
 
     private static int convertCoords(FabricClientCommandSource source, BlockPos pos,
-                                     CDimensionArgumentType.DimensionArgument sourceDim,
-                                     CDimensionArgumentType.DimensionArgument targetDim) {
+                                     @Nullable ResourceKey<Level> sourceDim,
+                                     @Nullable ResourceKey<Level> targetDim) {
         ResourceKey<Level> sourceLevel;
         ResourceKey<Level> targetLevel;
         if (sourceDim == null && targetDim == null) {
@@ -63,16 +63,16 @@ public class PosCommand {
             targetLevel = getOppositeLevel(sourceLevel);
         } else if (targetDim == null) {
             // If only source dimension is given, set the target to "opposite"
-            sourceLevel = sourceDim.getRegistryKey();
+            sourceLevel = sourceDim;
             targetLevel = getOppositeLevel(sourceLevel);
         } else if (sourceDim == null) {
             // If only target dimension is given, set the source to "opposite"
-            targetLevel = targetDim.getRegistryKey();
+            targetLevel = targetDim;
             sourceLevel = getOppositeLevel(targetLevel);
         } else {
             // Both dimensions are specified by the user
-            sourceLevel = sourceDim.getRegistryKey();
-            targetLevel = targetDim.getRegistryKey();
+            sourceLevel = sourceDim;
+            targetLevel = targetDim;
         }
 
         double scaleFactor = (double) getCoordinateScale(sourceLevel) / getCoordinateScale(targetLevel);

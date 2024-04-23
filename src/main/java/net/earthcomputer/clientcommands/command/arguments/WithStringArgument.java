@@ -11,29 +11,29 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public class WithStringArgumentType<T> implements ArgumentType<Pair<String, T>> {
+public class WithStringArgument<T> implements ArgumentType<WithStringArgument.Result<T>> {
 
-    private ArgumentType<T> delegate;
+    private final ArgumentType<T> delegate;
 
-    private WithStringArgumentType(ArgumentType<T> delegate) {
+    private WithStringArgument(ArgumentType<T> delegate) {
         this.delegate = delegate;
     }
 
-    public static <T> WithStringArgumentType<T> withString(ArgumentType<T> delegate) {
-        return new WithStringArgumentType<>(delegate);
+    public static <T> WithStringArgument<T> withString(ArgumentType<T> delegate) {
+        return new WithStringArgument<>(delegate);
     }
 
     @SuppressWarnings("unchecked")
-    public static <S, T> Pair<String, T> getWithString(CommandContext<S> context, String arg, Class<T> type) {
-        return context.getArgument(arg, Pair.class);
+    public static <S, T> Result<T> getWithString(CommandContext<S> context, String arg, Class<T> type) {
+        return context.getArgument(arg, Result.class);
     }
 
     @Override
-    public Pair<String, T> parse(StringReader reader) throws CommandSyntaxException {
+    public Result<T> parse(StringReader reader) throws CommandSyntaxException {
         int start = reader.getCursor();
         T thing = delegate.parse(reader);
         String str = reader.getString().substring(start, reader.getCursor());
-        return Pair.of(str, thing);
+        return new Result<>(str, thing);
     }
 
     @Override
@@ -45,4 +45,6 @@ public class WithStringArgumentType<T> implements ArgumentType<Pair<String, T>> 
     public Collection<String> getExamples() {
         return delegate.getExamples();
     }
+
+    public record Result<T>(String string, T value) {}
 }

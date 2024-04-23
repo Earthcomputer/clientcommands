@@ -36,7 +36,7 @@ public final class SuggestionsHook {
     }
 
     public static boolean onCompletions(ClientboundCommandSuggestionsPacket packet) {
-        CompletableFuture<Suggestions> future = pendingSuggestions.remove(packet.getId());
+        CompletableFuture<Suggestions> future = pendingSuggestions.remove(packet.id());
         if (future == null) {
             return false;
         }
@@ -45,7 +45,7 @@ public final class SuggestionsHook {
             currentSuggestionId = MAGIC_SUGGESTION_ID;
         }
 
-        future.complete(packet.getSuggestions());
+        future.complete(packet.toSuggestions());
         return true;
     }
 

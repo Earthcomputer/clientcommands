@@ -29,9 +29,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CNbtPathArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
+import static dev.xpple.clientarguments.arguments.CNbtPathArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GetDataCommand {
@@ -43,7 +43,7 @@ public class GetDataCommand {
     public static final Function<String, AccessorType> CLIENT_ENTITY_DATA_ACCESSOR = argName -> new AccessorType() {
         @Override
         public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
-            return new EntityDataAccessor(getCEntity(ctx, argName));
+            return new EntityDataAccessor(getEntity(ctx, argName));
         }
 
         @Override
@@ -54,7 +54,7 @@ public class GetDataCommand {
 
     public static final Function<String, AccessorType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new AccessorType() {
         public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
-            BlockPos pos = getCBlockPos(ctx, argName + "Pos");
+            BlockPos pos = getBlockPos(ctx, argName + "Pos");
             BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
             if (blockEntity == null) {
                 throw INVALID_BLOCK_EXCEPTION.create();
@@ -77,7 +77,7 @@ public class GetDataCommand {
             dispatcher.register((LiteralArgumentBuilder<FabricClientCommandSource>) objType.addArgumentsToBuilder(literal("cgetdata"), builder ->
                     builder.executes(ctx -> getData(ctx.getSource(), objType.getAccessor(ctx)))
                     .then(argument("path", nbtPath())
-                        .executes(ctx -> getData(ctx.getSource(), objType.getAccessor(ctx), getCNbtPath(ctx, "path"))))));
+                        .executes(ctx -> getData(ctx.getSource(), objType.getAccessor(ctx), getNbtPath(ctx, "path"))))));
         }
     }
 

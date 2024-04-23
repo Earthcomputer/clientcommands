@@ -15,9 +15,9 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.util.function.Predicate;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CBlockPredicateArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CBlockStateArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
+import static dev.xpple.clientarguments.arguments.CBlockPredicateArgument.*;
+import static dev.xpple.clientarguments.arguments.CBlockStateArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GhostBlockCommand {
@@ -30,15 +30,15 @@ public class GhostBlockCommand {
             .then(literal("set")
                 .then(argument("pos", blockPos())
                     .then(argument("block", blockState(context))
-                        .executes(ctx -> setGhostBlock(ctx.getSource(), getCBlockPos(ctx, "pos"), getCBlockState(ctx, "block").getBlockState())))))
+                        .executes(ctx -> setGhostBlock(ctx.getSource(), getBlockPos(ctx, "pos"), getBlockState(ctx, "block").getState())))))
             .then(literal("fill")
                 .then(argument("from", blockPos())
                     .then(argument("to", blockPos())
                         .then(argument("block", blockState(context))
-                            .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), pos -> true))
+                            .executes(ctx -> fillGhostBlocks(ctx.getSource(), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getBlockState(ctx, "block").getState(), pos -> true))
                             .then(literal("replace")
                                 .then(argument("filter", blockPredicate(context))
-                                    .executes(ctx -> fillGhostBlocks(ctx.getSource(), getCBlockPos(ctx, "from"), getCBlockPos(ctx, "to"), getCBlockState(ctx, "block").getBlockState(), getCBlockPredicate(ctx, "filter"))))))))));
+                                    .executes(ctx -> fillGhostBlocks(ctx.getSource(), getBlockPos(ctx, "from"), getBlockPos(ctx, "to"), getBlockState(ctx, "block").getState(), getBlockPredicate(ctx, "filter"))))))))));
     }
 
     private static int setGhostBlock(FabricClientCommandSource source, BlockPos pos, BlockState state) throws CommandSyntaxException {

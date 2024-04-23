@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 

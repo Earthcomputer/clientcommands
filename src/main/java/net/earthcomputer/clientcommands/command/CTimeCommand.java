@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 
-import static dev.xpple.clientarguments.arguments.CTimeArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CTimeArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CTimeCommand {
@@ -31,7 +31,7 @@ public class CTimeCommand {
                 .then(literal("midnight")
                     .executes(ctx -> executeSetTime(ctx.getSource(), 18000)))
                 .then(argument("time", time())
-                    .executes(ctx -> executeSetTime(ctx.getSource(), getCTime(ctx, "time")))))
+                    .executes(ctx -> executeSetTime(ctx.getSource(), getTime(ctx, "time")))))
              .then(literal("reset")
                      .executes(ctx -> executeResetTime(ctx.getSource())))
         );

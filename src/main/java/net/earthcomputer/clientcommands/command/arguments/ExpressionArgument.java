@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
 
-public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentType.Expression> {
+public class ExpressionArgument implements ArgumentType<ExpressionArgument.Expression> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("123", "ans", "(1+2)", "1*3");
 
@@ -37,10 +37,10 @@ public class ExpressionArgumentType implements ArgumentType<ExpressionArgumentTy
     private static final Dynamic2CommandExceptionType INVALID_ARGUMENT_COUNT = new Dynamic2CommandExceptionType((func, count) -> Component.translatable("commands.ccalc.invalidArgumentCount", func, count));
     private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED = new SimpleCommandExceptionType(Component.translatable("commands.ccalc.tooDeeplyNested"));
 
-    private ExpressionArgumentType() {}
+    private ExpressionArgument() {}
 
-    public static ExpressionArgumentType expression() {
-        return new ExpressionArgumentType();
+    public static ExpressionArgument expression() {
+        return new ExpressionArgument();
     }
 
     public static Expression getExpression(CommandContext<FabricClientCommandSource> context, String arg) {

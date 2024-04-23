@@ -4,12 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 import java.util.List;
 
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -23,16 +24,16 @@ public class TooltipCommand {
                 .executes(ctx -> showTooltip(ctx.getSource(), ctx.getSource().getPlayer().getMainHandItem(), "held")))
             .then(literal("stack")
                 .then(argument("stack", itemStack(context))
-                    .executes(ctx -> showTooltip(ctx.getSource(), getCItemStackArgument(ctx, "stack").createItemStack(1, false), "stack")))));
+                    .executes(ctx -> showTooltip(ctx.getSource(), getItemStackArgument(ctx, "stack").createItemStack(1, false), "stack")))));
         FLAG_ADVANCED.addToCommand(dispatcher, ctooltip, ctx -> true);
     }
 
     private static int showTooltip(FabricClientCommandSource source, ItemStack stack, String type) {
         source.sendFeedback(Component.translatable("commands.ctooltip.header." + type));
 
-        TooltipFlag context = getFlag(source, FLAG_ADVANCED) ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
+        TooltipFlag flag = getFlag(source, FLAG_ADVANCED) ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
 
-        List<Component> tooltip = stack.getTooltipLines(source.getPlayer(), context);
+        List<Component> tooltip = stack.getTooltipLines(Item.TooltipContext.of(source.getWorld()), source.getPlayer(), flag);
         for (Component line : tooltip) {
             source.sendFeedback(line);
         }

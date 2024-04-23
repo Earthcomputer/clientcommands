@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CResourceLocationArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CStopSoundCommand {
@@ -28,9 +28,9 @@ public class CStopSoundCommand {
     private static LiteralArgumentBuilder<FabricClientCommandSource> buildArguments(SoundSource source, String literal) {
         return literal(literal)
             .executes(ctx -> stopSound(ctx.getSource(), source, null))
-            .then(argument("sound", identifier())
+            .then(argument("sound", id())
                 .suggests(CSuggestionProviders.AVAILABLE_SOUNDS)
-                .executes(ctx -> stopSound(ctx.getSource(), source, getCIdentifier(ctx, "sound"))));
+                .executes(ctx -> stopSound(ctx.getSource(), source, getId(ctx, "sound"))));
     }
 
     private static int stopSound(FabricClientCommandSource source, SoundSource soundSource, ResourceLocation sound) {

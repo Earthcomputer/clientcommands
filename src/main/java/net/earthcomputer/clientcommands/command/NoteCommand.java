@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.MutableComponent;
 
-import static net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class NoteCommand {

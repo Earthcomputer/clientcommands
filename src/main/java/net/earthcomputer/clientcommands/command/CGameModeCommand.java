@@ -14,8 +14,8 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static dev.xpple.clientarguments.arguments.CEnumArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CEnumArgument.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CGameModeCommand {
@@ -26,7 +26,7 @@ public class CGameModeCommand {
         dispatcher.register(literal("cgamemode")
             .then(literal("query")
                 .then(argument("player", gameProfile())
-                    .executes(ctx -> getPlayerGameMode(ctx.getSource(), getCProfileArgument(ctx, "player")))))
+                    .executes(ctx -> getPlayerGameMode(ctx.getSource(), getProfileArgument(ctx, "player")))))
             .then(literal("list")
                 .then(argument("gameMode", enumArg(GameType.class))
                     .executes(ctx -> listWithGameMode(ctx.getSource(), getEnum(ctx, "gameMode"))))));

@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -14,30 +15,30 @@ import net.minecraft.world.phys.Vec3;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CParticleEffectArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CParticleArgument.*;
+import static dev.xpple.clientarguments.arguments.CVec3Argument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CParticleCommand {
 
     private static final SimpleCommandExceptionType UNSUITABLE_PARTICLE_OPTION_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cparticle.unsuitableParticleOption"));
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("cparticle")
-            .then(argument("name", particleEffect())
-                .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), ctx.getSource().getPlayer().position(), Vec3.ZERO, 1, 1, false))
+            .then(argument("name", particle(context))
+                .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), ctx.getSource().getPlayer().position(), Vec3.ZERO, 1, 1, false))
                 .then(argument("pos", vec3())
-                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), Vec3.ZERO, 1, 1, false))
+                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), Vec3.ZERO, 1, 1, false))
                     .then(argument("delta", vec3(false))
-                        .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), 1, 1, false))
+                        .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), 1, 1, false))
                         .then(argument("speed", floatArg(0))
-                            .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), 1, false))
+                            .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), 1, false))
                             .then(argument("count", integer(0))
-                                .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false))
+                                .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false))
                                 .then(literal("normal")
-                                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false)))
+                                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), false)))
                                 .then(literal("force")
-                                    .executes(ctx -> spawnParticle(ctx.getSource(), getCParticle(ctx, "name"), getCVec3(ctx, "pos"), getCVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), true)))))))));
+                                    .executes(ctx -> spawnParticle(ctx.getSource(), getParticle(ctx, "name"), getVec3(ctx, "pos"), getVec3(ctx, "delta"), getFloat(ctx, "speed"), getInteger(ctx, "count"), true)))))))));
     }
 
     private static int spawnParticle(FabricClientCommandSource source, ParticleOptions parameters, Vec3 pos, Vec3 delta, float speed, int count, boolean force) throws CommandSyntaxException {

@@ -3,8 +3,8 @@ package net.earthcomputer.clientcommands;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
-import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
+import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket;
+import net.minecraft.network.protocol.game.ServerboundEntityTagQueryPacket;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -48,12 +48,12 @@ public class ClientcommandsDataQueryHandler {
 
     public void queryEntityNbt(int entityNetworkId, Consumer<@Nullable CompoundTag> callback) {
         int transactionId = nextQuery(callback);
-        packetListener.send(new ServerboundEntityTagQuery(transactionId, entityNetworkId));
+        packetListener.send(new ServerboundEntityTagQueryPacket(transactionId, entityNetworkId));
     }
 
     public void queryBlockNbt(BlockPos pos, Consumer<@Nullable CompoundTag> callback) {
         int transactionId = nextQuery(callback);
-        packetListener.send(new ServerboundBlockEntityTagQuery(transactionId, pos));
+        packetListener.send(new ServerboundBlockEntityTagQueryPacket(transactionId, pos));
     }
 
     private record CallbackEntry(int transactionId, Consumer<@Nullable CompoundTag> callback) {

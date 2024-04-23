@@ -5,8 +5,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
-import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.command.*;
+import net.earthcomputer.clientcommands.features.CommandExecutionCustomPayload;
 import net.earthcomputer.clientcommands.features.MappingsHelper;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.api.ClientModInitializer;
@@ -14,12 +14,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
@@ -37,7 +36,6 @@ public class ClientCommands implements ClientModInitializer {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static Path configDir;
     private static final Set<String> clientcommandsCommands = new HashSet<>();
-    public static final ResourceLocation COMMAND_EXECUTION_PACKET_ID = new ResourceLocation("clientcommands", "command_execution");
     private static final Set<String> COMMANDS_TO_NOT_SEND_TO_SERVER = Set.of("cwe", "cnote"); // could contain private information
 
     public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
@@ -76,6 +74,8 @@ public class ClientCommands implements ClientModInitializer {
             context.matrixStack().popPose();
         });
 
+        PayloadTypeRegistry.playC2S().register(CommandExecutionCustomPayload.TYPE, CommandExecutionCustomPayload.CODEC);
+
         configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
         try {
             Files.createDirectories(configDir);
@@ -99,10 +99,8 @@ public class ClientCommands implements ClientModInitializer {
         reader.skipWhitespace();
         String theCommand = reader.readUnquotedString();
         if (clientcommandsCommands.contains(theCommand) && !COMMANDS_TO_NOT_SEND_TO_SERVER.contains(theCommand)) {
-            if (ClientPlayNetworking.canSend(COMMAND_EXECUTION_PACKET_ID)) {
-                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                buf.writeUtf(command);
-                ClientPlayNetworking.send(COMMAND_EXECUTION_PACKET_ID, buf);
+            if (ClientPlayNetworking.canSend(CommandExecutionCustomPayload.TYPE)) {
+                ClientPlayNetworking.send(new CommandExecutionCustomPayload(command));
             }
         }
     }
@@ -125,15 +123,15 @@ public class ClientCommands implements ClientModInitializer {
         CGameModeCommand.register(dispatcher);
         CGiveCommand.register(dispatcher, context);
         ChorusCommand.register(dispatcher);
-        CParticleCommand.register(dispatcher);
+        CParticleCommand.register(dispatcher, context);
         CPlaySoundCommand.register(dispatcher);
         CrackRNGCommand.register(dispatcher);
         CreativeTabCommand.register(dispatcher, context);
         CStopSoundCommand.register(dispatcher);
         CTeleportCommand.register(dispatcher);
-        CTellRawCommand.register(dispatcher);
+        CTellRawCommand.register(dispatcher, context);
         CTimeCommand.register(dispatcher);
-        CTitleCommand.register(dispatcher);
+        CTitleCommand.register(dispatcher, context);
         FindBlockCommand.register(dispatcher, context);
         FindCommand.register(dispatcher);
         FindItemCommand.register(dispatcher, context);

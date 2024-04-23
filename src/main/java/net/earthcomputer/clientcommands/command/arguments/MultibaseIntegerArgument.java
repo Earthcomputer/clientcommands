@@ -8,28 +8,28 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class MultibaseIntegerArgumentType implements ArgumentType<Integer> {
+public class MultibaseIntegerArgument implements ArgumentType<Integer> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("0", "123", "-123", "0xf00baa", "0xF00BAA", "0123", "0b101");
 
     private final int minimum;
     private final int maximum;
 
-    private MultibaseIntegerArgumentType(final int minimum, final int maximum) {
+    private MultibaseIntegerArgument(final int minimum, final int maximum) {
         this.minimum = minimum;
         this.maximum = maximum;
     }
 
-    public static MultibaseIntegerArgumentType multibaseInteger() {
+    public static MultibaseIntegerArgument multibaseInteger() {
         return multibaseInteger(Integer.MIN_VALUE);
     }
 
-    public static MultibaseIntegerArgumentType multibaseInteger(final int min) {
+    public static MultibaseIntegerArgument multibaseInteger(final int min) {
         return multibaseInteger(min, Integer.MAX_VALUE);
     }
 
-    public static MultibaseIntegerArgumentType multibaseInteger(final int min, final int max) {
-        return new MultibaseIntegerArgumentType(min, max);
+    public static MultibaseIntegerArgument multibaseInteger(final int min, final int max) {
+        return new MultibaseIntegerArgument(min, max);
     }
 
     public static int getMultibaseInteger(final CommandContext<?> context, final String name) {
@@ -110,7 +110,7 @@ public class MultibaseIntegerArgumentType implements ArgumentType<Integer> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof final MultibaseIntegerArgumentType that)) {
+        if (!(o instanceof final MultibaseIntegerArgument that)) {
             return false;
         }
 

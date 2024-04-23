@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
+import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.mixin.AbstractContainerMenuAccessor;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -21,6 +22,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -33,21 +35,19 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -56,9 +56,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static dev.xpple.clientarguments.arguments.CItemPredicateArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.WithStringArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindItemCommand {
@@ -78,14 +78,14 @@ public class FindItemCommand {
         FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cfinditem, ctx -> true);
     }
 
-    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, Pair<String, Predicate<ItemStack>> item) {
-        String taskName = TaskManager.addTask("cfinditem", makeFindItemsTask(item.getLeft(), item.getRight(), !noSearchShulkerBox, keepSearching));
+    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, WithStringArgument.Result<Predicate<ItemStack>> item) {
+        String taskName = TaskManager.addTask("cfinditem", makeFindItemsTask(item.string(), item.value(), !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
-            ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting.keepSearching", item.getLeft())
+            ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting.keepSearching", item.string())
                     .append(" ")
                     .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
         } else {
-            ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting", item.getLeft()));
+            ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting", item.string()));
         }
 
         return Command.SINGLE_SUCCESS;
@@ -117,17 +117,26 @@ public class FindItemCommand {
         }
 
         protected int countItems(ListTag inventory) {
+            ClientLevel level = Minecraft.getInstance().level;
+            if (level == null) {
+                return 0;
+            }
+
             int result = 0;
             for (int i = 0; i < inventory.size(); i++) {
                 CompoundTag compound = inventory.getCompound(i);
-                ItemStack stack = ItemStack.of(compound);
+                ItemStack stack = ItemStack.parseOptional(level.registryAccess(), compound);
                 if (searchingFor.test(stack)) {
                     result += stack.getCount();
                 }
-                if (searchShulkerBoxes && stack.getItem() instanceof BlockItem block && block.getBlock() instanceof ShulkerBoxBlock) {
-                    CompoundTag blockEntityNbt = BlockItem.getBlockEntityData(stack);
-                    if (blockEntityNbt != null && blockEntityNbt.contains("Items", Tag.TAG_LIST)) {
-                        result += countItems(blockEntityNbt.getList("Items", Tag.TAG_COMPOUND));
+                if (searchShulkerBoxes) {
+                    ItemContainerContents containerContents = stack.get(DataComponents.CONTAINER);
+                    if (containerContents != null) {
+                        for (ItemStack item : containerContents.nonEmptyItems()) {
+                            if (searchingFor.test(item)) {
+                                result += item.getCount();
+                            }
+                        }
                     }
                 }
             }
@@ -184,7 +193,7 @@ public class FindItemCommand {
                 return;
             }
             Vec3 origin = entity.getEyePosition(0);
-            float reachDistance = gameMode.getPickRange();
+            double reachDistance = player.blockInteractionRange();
             int minX = Mth.floor(origin.x - reachDistance);
             int minY = Mth.floor(origin.y - reachDistance);
             int minZ = Mth.floor(origin.z - reachDistance);
@@ -287,10 +296,14 @@ public class FindItemCommand {
                                 if (searchingFor.test(stack)) {
                                     matchingItems += stack.getCount();
                                 }
-                                if (searchShulkerBoxes && stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                                    CompoundTag blockEntityTag = BlockItem.getBlockEntityData(stack);
-                                    if (blockEntityTag != null && blockEntityTag.contains("Items", Tag.TAG_LIST)) {
-                                        matchingItems += countItems(blockEntityTag.getList("Items", Tag.TAG_COMPOUND));
+                                if (searchShulkerBoxes) {
+                                    ItemContainerContents containerContents = stack.get(DataComponents.CONTAINER);
+                                    if (containerContents != null) {
+                                        for (ItemStack item : containerContents.nonEmptyItems()) {
+                                            if (searchingFor.test(item)) {
+                                                matchingItems += item.getCount();
+                                            }
+                                        }
                                     }
                                 }
                             }

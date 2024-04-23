@@ -12,7 +12,7 @@ import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
@@ -51,7 +51,7 @@ public abstract class MixinMinecraft {
     @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void onOpenScreen(Screen screen, CallbackInfo ci) {
         if (screen != null
-                && !(screen instanceof GenericDirtMessageScreen)
+                && !(screen instanceof GenericMessageScreen)
                 && !(screen instanceof LevelLoadingScreen)
                 && !(screen instanceof ProgressScreen)
                 && !(screen instanceof ConnectScreen)

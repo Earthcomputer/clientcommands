@@ -1,10 +1,11 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgumentType;
+import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.SignBlock;
@@ -17,7 +18,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.earthcomputer.clientcommands.command.arguments.RegexArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.RegexArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class SignSearchCommand {
@@ -32,18 +33,18 @@ public class SignSearchCommand {
                     .executes(ctx -> FindBlockCommand.findBlock(Component.translatable("commands.csignsearch.starting"), predicate(getRegex(ctx, "query")))))));
     }
 
-    private static ClientBlockPredicateArgumentType.ClientBlockPredicate predicate(String query) {
+    private static ClientBlockPredicateArgument.ClientBlockPredicate predicate(String query) {
         return signPredicateFromLinePredicate(line -> line.contains(query));
     }
 
-    private static ClientBlockPredicateArgumentType.ClientBlockPredicate predicate(Pattern query) {
+    private static ClientBlockPredicateArgument.ClientBlockPredicate predicate(Pattern query) {
         return signPredicateFromLinePredicate(line -> query.matcher(line).find());
     }
 
-    private static ClientBlockPredicateArgumentType.ClientBlockPredicate signPredicateFromLinePredicate(Predicate<String> linePredicate) {
-        return new ClientBlockPredicateArgumentType.ClientBlockPredicate() {
+    private static ClientBlockPredicateArgument.ClientBlockPredicate signPredicateFromLinePredicate(Predicate<String> linePredicate) {
+        return new ClientBlockPredicateArgument.ClientBlockPredicate() {
             @Override
-            public boolean test(BlockGetter blockGetter, BlockPos pos) {
+            public boolean test(HolderLookup.Provider holderLookupProvider, BlockGetter blockGetter, BlockPos pos) {
                 if (!(blockGetter.getBlockState(pos).getBlock() instanceof SignBlock)) {
                     return false;
                 }

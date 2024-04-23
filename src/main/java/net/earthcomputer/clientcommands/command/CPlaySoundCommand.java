@@ -14,14 +14,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CVec3ArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CResourceLocationArgument.*;
+import static dev.xpple.clientarguments.arguments.CVec3Argument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CPlaySoundCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        var builder = argument("sound", identifier())
+        var builder = argument("sound", id())
             .suggests(CSuggestionProviders.AVAILABLE_SOUNDS);
 
         for (SoundSource source : SoundSource.values()) {
@@ -33,13 +33,13 @@ public class CPlaySoundCommand {
 
     private static LiteralArgumentBuilder<FabricClientCommandSource> buildArguments(SoundSource source) {
         return literal(source.getName())
-            .executes(ctx -> playSound(ctx.getSource(), getCIdentifier(ctx, "sound"), source, ctx.getSource().getPlayer().position(), 1, 1))
+            .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, ctx.getSource().getPlayer().position(), 1, 1))
             .then(argument("pos", vec3())
-                .executes(ctx -> playSound(ctx.getSource(), getCIdentifier(ctx, "sound"), source, getCVec3(ctx, "pos"), 1, 1))
+                .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, getVec3(ctx, "pos"), 1, 1))
                 .then(argument("volume", floatArg(0))
-                    .executes(ctx -> playSound(ctx.getSource(), getCIdentifier(ctx, "sound"), source, getCVec3(ctx, "pos"), getFloat(ctx, "volume"), 1))
+                    .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, getVec3(ctx, "pos"), getFloat(ctx, "volume"), 1))
                     .then(argument("pitch", floatArg(0, 2)))
-                        .executes(ctx -> playSound(ctx.getSource(), getCIdentifier(ctx, "sound"), source, getCVec3(ctx, "pos"), getFloat(ctx, "volume"), getFloat(ctx, "pitch")))));
+                        .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, getVec3(ctx, "pos"), getFloat(ctx, "volume"), getFloat(ctx, "pitch")))));
     }
 
     private static int playSound(FabricClientCommandSource source, ResourceLocation sound, SoundSource soundSource, Vec3 pos, float volume, float pitch) {

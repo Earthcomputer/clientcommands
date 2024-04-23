@@ -7,7 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.xpple.clientarguments.arguments.CEntityArgumentType;
+import dev.xpple.clientarguments.arguments.CEntityArgument;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import dev.xpple.clientarguments.arguments.CEntitySelectorReader;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -22,19 +22,19 @@ import java.util.concurrent.CompletableFuture;
 /**
  * An argument type that works for entities in render distance as well as all players in the player list
  */
-public class EntityUUIDArgumentType implements ArgumentType<EntityUUIDArgumentType.EntityUUIDArgument> {
+public class EntityUUIDArgument implements ArgumentType<EntityUUIDArgument.Result> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "dd12be42-52a9-4a91-a8a1-11c01849e498", "@e");
 
-    public static EntityUUIDArgumentType entityUuid() {
-        return new EntityUUIDArgumentType();
+    public static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgument entityUuid() {
+        return new net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgument();
     }
 
     public static UUID getEntityUuid(CommandContext<FabricClientCommandSource> context, String name) throws CommandSyntaxException {
-        return context.getArgument(name, EntityUUIDArgument.class).getUUID(context.getSource());
+        return context.getArgument(name, Result.class).getUUID(context.getSource());
     }
 
     @Override
-    public EntityUUIDArgument parse(StringReader reader) throws CommandSyntaxException {
+    public Result parse(StringReader reader) throws CommandSyntaxException {
         if (reader.canRead() && reader.peek() == '@') {
             CEntitySelectorReader selectorReader = new CEntitySelectorReader(reader);
             CEntitySelector selector = selectorReader.read();
@@ -79,29 +79,29 @@ public class EntityUUIDArgumentType implements ArgumentType<EntityUUIDArgumentTy
         return EXAMPLES;
     }
 
-    sealed interface EntityUUIDArgument {
+    sealed interface Result {
         UUID getUUID(FabricClientCommandSource source) throws CommandSyntaxException;
     }
 
-    private record NameBacked(String name) implements EntityUUIDArgument {
+    private record NameBacked(String name) implements Result {
         @Override
         public UUID getUUID(FabricClientCommandSource source) throws CommandSyntaxException {
             PlayerInfo entry = source.getClient().getConnection().getPlayerInfo(name);
             if (entry == null) {
-                throw CEntityArgumentType.ENTITY_NOT_FOUND_EXCEPTION.create();
+                throw CEntityArgument.ENTITY_NOT_FOUND_EXCEPTION.create();
             }
             return entry.getProfile().getId();
         }
     }
 
-    private record UuidBacked(UUID uuid) implements EntityUUIDArgument {
+    private record UuidBacked(UUID uuid) implements Result {
         @Override
         public UUID getUUID(FabricClientCommandSource source) {
             return uuid;
         }
     }
 
-    private record SelectorBacked(CEntitySelector selector) implements EntityUUIDArgument {
+    private record SelectorBacked(CEntitySelector selector) implements Result {
         @Override
         public UUID getUUID(FabricClientCommandSource source) throws CommandSyntaxException {
             return selector.getEntity(source).getUUID();

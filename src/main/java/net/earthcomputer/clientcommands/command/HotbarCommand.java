@@ -13,6 +13,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.List;
+
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -37,9 +39,7 @@ public class HotbarCommand {
         HotbarManager manager = minecraft.getHotbarManager();
         Hotbar hotbar = manager.get(index - 1);
 
-        for (int slot = 0; slot < Inventory.getSelectionSize(); slot++) {
-            hotbar.set(slot, source.getPlayer().getInventory().getItem(slot).copy());
-        }
+        hotbar.storeFrom(source.getPlayer().getInventory(), source.registryAccess());
         manager.save();
 
         Component loadKey = minecraft.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
@@ -59,9 +59,10 @@ public class HotbarCommand {
 
         HotbarManager manager = minecraft.getHotbarManager();
         Hotbar hotbar = manager.get(index - 1);
+        List<ItemStack> hotbarItems = hotbar.load(source.registryAccess());
 
         for (int slot = 0; slot < Inventory.getSelectionSize(); slot++) {
-            ItemStack stack = hotbar.get(slot).copy();
+            ItemStack stack = hotbarItems.get(slot);
 
             player.getInventory().setItem(slot, stack);
             minecraft.gameMode.handleCreativeModeItemAdd(stack, 36 + slot);

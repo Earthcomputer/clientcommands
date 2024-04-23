@@ -14,7 +14,6 @@ import com.mojang.serialization.JsonOps;
 import net.earthcomputer.clientcommands.mixin.HoverEventActionAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -36,17 +35,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class FormattedComponentArgumentType implements ArgumentType<MutableComponent> {
+public class FormattedComponentArgument implements ArgumentType<MutableComponent> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "bold{italic{red{nwex}}}");
     private static final DynamicCommandExceptionType INVALID_CLICK_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidClickAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidHoverAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_EVENT = new DynamicCommandExceptionType(event -> Component.translatable("commands.client.invalidHoverEvent", event));
 
-    private FormattedComponentArgumentType() {
+    private FormattedComponentArgument() {
     }
 
-    public static FormattedComponentArgumentType formattedComponent() {
-        return new FormattedComponentArgumentType();
+    public static FormattedComponentArgument formattedComponent() {
+        return new FormattedComponentArgument();
     }
 
     public static MutableComponent getFormattedComponent(CommandContext<FabricClientCommandSource> context, String arg) {
@@ -242,8 +241,8 @@ public class FormattedComponentArgumentType implements ArgumentType<MutableCompo
                 throw INVALID_HOVER_ACTION.create(name);
             }
 
-            JsonElement component = Util.getOrThrow(ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)), IllegalStateException::new);
-            HoverEvent.TypedHoverEvent<?> eventData = Util.getOrThrow(((HoverEventActionAccessor) action).getLegacyCodec().parse(JsonOps.INSTANCE, component), error -> INVALID_HOVER_EVENT.create(value));
+            JsonElement component = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)).getOrThrow();
+            HoverEvent.TypedHoverEvent<?> eventData = ((HoverEventActionAccessor) action).getLegacyCodec().codec().parse(JsonOps.INSTANCE, component).getOrThrow(error -> INVALID_HOVER_EVENT.create(value));
             return new HoverEvent(eventData);
         }
     }

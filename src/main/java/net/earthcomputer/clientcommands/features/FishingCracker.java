@@ -14,7 +14,8 @@ import com.seedfinding.mcfeature.loot.entry.TableEntry;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
-import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgumentType;
+import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgument;
+import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.mixin.LegacyRandomSourceAccessor;
 import net.earthcomputer.clientcommands.mixin.ProjectileAccessor;
 import net.earthcomputer.clientcommands.render.RenderQueue;
@@ -76,7 +77,7 @@ import java.util.stream.IntStream;
 
 public class FishingCracker {
     // goals
-    public static final List<ClientItemPredicateArgumentType.ClientItemPredicate> goals = new ArrayList<>();
+    public static final List<WithStringArgument.Result<ClientItemPredicateArgument.ClientItemPredicate>> goals = new ArrayList<>();
     private static boolean hasWarnedMultipleEnchants = false;
 
     // loot state
@@ -111,11 +112,11 @@ public class FishingCracker {
 
     // region LOOT SIMULATION
 
-    private static boolean isMatchingLoot(ItemStack loot, ClientItemPredicateArgumentType.ClientItemPredicate goal) {
+    private static boolean isMatchingLoot(ItemStack loot, ClientItemPredicateArgument.ClientItemPredicate goal) {
         return goal.getPossibleItems().contains(loot.getItem());
     }
 
-    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLoot(LootTable table, @Nullable LootContext context, ClientItemPredicateArgumentType.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLoot(LootTable table, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
         var result = new ArrayList<com.seedfinding.mcfeature.loot.item.ItemStack>();
         for (LootPool lootPool : table.lootPools) {
             result.addAll(generateAllMatchingLootForPool(lootPool, context, goal, failedConditions));
@@ -128,7 +129,7 @@ public class FishingCracker {
         return result;
     }
 
-    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForPool(LootPool pool, @Nullable LootContext context, ClientItemPredicateArgumentType.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForPool(LootPool pool, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
         var result = new ArrayList<com.seedfinding.mcfeature.loot.item.ItemStack>();
         for (LootEntry lootEntry : pool.lootEntries) {
             result.addAll(generateAllMatchingLootForEntry(lootEntry, context, goal, failedConditions));
@@ -141,7 +142,7 @@ public class FishingCracker {
         return result;
     }
 
-    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForEntry(LootEntry entry, @Nullable LootContext context, ClientItemPredicateArgumentType.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForEntry(LootEntry entry, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
         List<com.seedfinding.mcfeature.loot.item.ItemStack> result = Collections.emptyList();
 
         if (entry instanceof ItemEntry itemEntry) {
@@ -362,7 +363,7 @@ public class FishingCracker {
             if (fishingBobber.canCatchFish()) {
                 List<Catch> catches = fishingBobber.generateLoot();
 
-                if (ourExpectedCatchIndex == -1 && goals.stream().anyMatch(goal -> catches.stream().anyMatch(c -> goal.test(c.loot)))) {
+                if (ourExpectedCatchIndex == -1 && goals.stream().anyMatch(goal -> catches.stream().anyMatch(c -> goal.value().test(c.loot)))) {
                     bobberDestPos = fishingBobber.pos;
                     ticksUntilOurItem = ticks;
                     ourExpectedCatchIndex = possibleExpectedCatches.size();
@@ -381,15 +382,15 @@ public class FishingCracker {
             boolean impossible = true;
             LootTable fishingLootTable = MCLootTables.FISHING.get().apply(SeedfindingUtil.getMCVersion());
             for (var goal : goals) {
-                if (goal instanceof ClientItemPredicateArgumentType.EnchantedItemPredicate predicate) {
-                    if (predicate.isEnchantedBook() && predicate.predicate().numEnchantments() >= 2) {
+                if (goal.value() instanceof ClientItemPredicateArgument.EnchantedItemPredicate predicate) {
+                    if (predicate.isEnchantedBook() && predicate.predicate.numEnchantments() >= 2) {
                         if (!hasWarnedMultipleEnchants) {
                             ClientCommandHelper.sendHelp(Component.translatable("commands.cfish.help.tooManyEnchants"));
                             hasWarnedMultipleEnchants = true;
                         }
                     }
                 }
-                impossible &= generateAllMatchingLoot(fishingLootTable, fishingBobber.getLootContext(), goal, failedConditions::add).isEmpty();
+                impossible &= generateAllMatchingLoot(fishingLootTable, fishingBobber.getLootContext(), goal.value(), failedConditions::add).isEmpty();
             }
 
             if (impossible && failedConditions.isEmpty()) {
@@ -663,7 +664,7 @@ public class FishingCracker {
 
         @Override
         public int hashCode() {
-            return 7 * (31 * Objects.hash(loot.getItem(), loot.getTag()) + loot.getCount()) + experience;
+            return 7 * (31 * ItemStack.hashItemAndComponents(loot) + loot.getCount()) + experience;
         }
 
         @Override
@@ -1027,16 +1028,16 @@ public class FishingCracker {
             int j;
             double k;
             double l;
-            for(j = 0; (float)j < 1.0F + FISHING_BOBBER_DIMENSIONS.width * 20.0F; ++j) {
-                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width;
-                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width;
+            for(j = 0; (float)j < 1.0F + FISHING_BOBBER_DIMENSIONS.width() * 20.0F; ++j) {
+                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
+                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
                 random.nextDouble();
                 //this.world.addParticle(ParticleTypes.BUBBLE, this.pos.x + k, (double)(h + 1.0F), this.pos.z + l, vec3d.x, vec3d.y - this.random.nextDouble() * 0.20000000298023224D, vec3d.z);
             }
 
-            for(j = 0; (float)j < 1.0F + FISHING_BOBBER_DIMENSIONS.width * 20.0F; ++j) {
-                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width;
-                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width;
+            for(j = 0; (float)j < 1.0F + FISHING_BOBBER_DIMENSIONS.width() * 20.0F; ++j) {
+                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
+                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
                 //this.world.addParticle(ParticleTypes.SPLASH, this.getX() + k, (double)(h + 1.0F), this.getZ() + l, vec3d.x, vec3d.y, vec3d.z);
             }
         }

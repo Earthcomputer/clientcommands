@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CGiveCommand {
@@ -21,9 +21,9 @@ public class CGiveCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("cgive")
             .then(argument("item", itemStack(context))
-            .executes(ctx -> give(ctx.getSource(), getCItemStackArgument(ctx, "item"), 1))
+            .executes(ctx -> give(ctx.getSource(), getItemStackArgument(ctx, "item"), 1))
                 .then(argument("count", integer(1))
-                .executes(ctx -> give(ctx.getSource(), getCItemStackArgument(ctx, "item"), getInteger(ctx, "count"))))));
+                .executes(ctx -> give(ctx.getSource(), getItemStackArgument(ctx, "item"), getInteger(ctx, "count"))))));
     }
 
     private static int give(FabricClientCommandSource source, ItemInput itemInput, int count) throws CommandSyntaxException {
@@ -31,7 +31,7 @@ public class CGiveCommand {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-        ItemStack stack = itemInput.createItemStack(Math.min(count, itemInput.getItem().getMaxStackSize()), false);
+        ItemStack stack = itemInput.createItemStack(count, false);
         source.getClient().gameMode.handleCreativeModeItemAdd(stack, 36 + source.getPlayer().getInventory().selected);
         source.getPlayer().inventoryMenu.broadcastChanges();
 

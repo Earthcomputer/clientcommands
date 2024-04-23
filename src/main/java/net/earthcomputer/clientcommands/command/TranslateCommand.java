@@ -6,7 +6,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType;
+import net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgument;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.time.Duration;
 
-import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TranslateCommand {
@@ -40,7 +40,7 @@ public class TranslateCommand {
                         .executes(ctx -> translate(ctx.getSource(), getTranslationQuery(ctx, "query")))));
     }
 
-    private static int translate(FabricClientCommandSource source, TranslationQueryArgumentType.TranslationQuery query) throws CommandSyntaxException {
+    private static int translate(FabricClientCommandSource source, TranslationQueryArgument.TranslationQuery query) throws CommandSyntaxException {
         try {
             HttpRequest request = HttpRequest.newBuilder(createUri(query.from(), query.to(), query.query()))
                     .timeout(DURATION)

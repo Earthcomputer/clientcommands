@@ -26,7 +26,7 @@ public class MixinInventory {
             for (ItemStack item : items) {
                 if (item.isEmpty()) {
                     stackSize -= stack.getMaxStackSize();
-                } else if (ItemStack.isSameItemSameTags(item, stack)) {
+                } else if (ItemStack.isSameItemSameComponents(item, stack)) {
                     stackSize -= stack.getMaxStackSize() - item.getCount();
                 }
             }

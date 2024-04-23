@@ -9,7 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CItemStackArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CItemArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CalcStackCommand {
@@ -19,7 +19,7 @@ public class CalcStackCommand {
             .then(argument("count", integer(0))
                 .then(argument("item", itemStack(context))
                 .executes(ctx -> {
-                    ItemStack stack = getCItemStackArgument(ctx, "item").createItemStack(1, false);
+                    ItemStack stack = getItemStackArgument(ctx, "item").createItemStack(1, false);
                     return getStackSize(ctx.getSource(), stack, getInteger(ctx, "count"));
                 }))
             .executes(ctx -> getStackSize(ctx.getSource(), getInteger(ctx, "count")))));

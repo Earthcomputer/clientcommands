@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentType<List<T>> {
+public class ListArgument<T, U extends ArgumentType<T>> implements ArgumentType<List<T>> {
 
     private static final SimpleCommandExceptionType TOO_FEW_ARGUMENTS_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.tooFewArguments"));
 
@@ -25,22 +25,22 @@ public class ListArgumentType<T, U extends ArgumentType<T>> implements ArgumentT
     private final int min;
     private final int max;
 
-    private ListArgumentType(U argumentType, int min, int max) {
+    private ListArgument(U argumentType, int min, int max) {
         this.argumentType = argumentType;
         this.min = min;
         this.max = max;
     }
 
-    public static <T, U extends ArgumentType<T>> ListArgumentType<T, U> list(U argumentType) {
-        return new ListArgumentType<>(argumentType, 1, Integer.MAX_VALUE);
+    public static <T, U extends ArgumentType<T>> ListArgument<T, U> list(U argumentType) {
+        return new ListArgument<>(argumentType, 1, Integer.MAX_VALUE);
     }
 
-    public static <T, U extends ArgumentType<T>> ListArgumentType<T, U> list(U argumentType, int min) {
-        return new ListArgumentType<>(argumentType, min, Integer.MAX_VALUE);
+    public static <T, U extends ArgumentType<T>> ListArgument<T, U> list(U argumentType, int min) {
+        return new ListArgument<>(argumentType, min, Integer.MAX_VALUE);
     }
 
-    public static <T, U extends ArgumentType<T>> ListArgumentType<T, U> list(U argumentType, int min, int max) {
-        return new ListArgumentType<>(argumentType, min, max);
+    public static <T, U extends ArgumentType<T>> ListArgument<T, U> list(U argumentType, int min, int max) {
+        return new ListArgument<>(argumentType, min, max);
     }
 
     @SuppressWarnings("unchecked")
