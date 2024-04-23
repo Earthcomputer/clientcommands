@@ -71,7 +71,7 @@ public class CreativeTabCommand {
         // FIXME: this is a hack because creative tabs must be registered on startup but item stacks normally can't be
         // parsed until the world is loaded. Use the default registries for now, as most things in item stacks aren't
         // in dynamic registries yet. Fix this once creative tabs can be registered dynamically.
-        var holderLookupProvider = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList()).freeze();
+        var holderLookupProvider = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
         tabs.forEach((key, tab) -> {
             try {
                 tab.registerItemGroup(holderLookupProvider, key);
