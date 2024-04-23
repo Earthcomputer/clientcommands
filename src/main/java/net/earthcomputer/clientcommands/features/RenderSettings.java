@@ -30,7 +30,7 @@ public class RenderSettings {
 
     public static void addEntityRenderSelector(CEntitySelector selector, boolean shouldRender) {
         if (entityRenderSelectors.size() == 16) {
-            entityRenderSelectors.remove(0);
+            entityRenderSelectors.removeFirst();
         }
         entityRenderSelectors.add(new Tuple<>(selector, shouldRender));
     }

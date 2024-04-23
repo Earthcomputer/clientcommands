@@ -182,105 +182,86 @@ public class ListenCommand {
     }
 
     private static Component serializeInner(Object object, Set<Object> seen, int depth) {
-        if (object == null) {
-            return Component.literal("null");
-        }
-        if (object instanceof Component component) {
-            return component;
-        }
-        if (object instanceof String string) {
-            return Component.literal(string);
-        }
-        if (object instanceof Number || object instanceof Boolean) {
-            return Component.literal(object.toString());
-        }
-        if (object instanceof Optional<?> optional) {
-            return optional.isPresent() ? serialize(optional.get(), seen, depth + 1) : Component.literal("empty");
-        }
-        if (object instanceof Date date) {
-            return Component.translationArg(date);
-        }
-        if (object instanceof Instant instant) {
-            return Component.translationArg(Date.from(instant));
-        }
-        if (object instanceof UUID uuid) {
-            return Component.translationArg(uuid);
-        }
-        if (object instanceof ChunkPos chunkPos) {
-            return Component.translationArg(chunkPos);
-        }
-        if (object instanceof ResourceLocation resourceLocation) {
-            return Component.translationArg(resourceLocation);
-        }
-        if (object instanceof Message message) {
-            return Component.translationArg(message);
-        }
-        if (object.getClass().isArray()) {
-            MutableComponent component = Component.literal("[");
-            int lengthMinusOne = Array.getLength(object) - 1;
-            if (lengthMinusOne < 0) {
-                return component.append("]");
+        return switch (object) {
+            case null -> Component.literal("null");
+            case Component component -> component;
+            case String string -> Component.literal(string);
+            case Number number -> Component.literal(number.toString());
+            case Boolean bool -> Component.literal(bool.toString());
+            case Optional<?> optional -> optional.isPresent() ? serialize(optional.get(), seen, depth + 1) : Component.literal("empty");
+            case Date date -> Component.translationArg(date);
+            case Instant instant -> Component.translationArg(Date.from(instant));
+            case UUID uuid -> Component.translationArg(uuid);
+            case ChunkPos chunkPos -> Component.translationArg(chunkPos);
+            case ResourceLocation resourceLocation -> Component.translationArg(resourceLocation);
+            case Message message -> Component.translationArg(message);
+            case Collection<?> collection -> {
+                MutableComponent component = Component.literal("[");
+                component.append(collection.stream().map(e -> serialize(e, seen, depth + 1).copy()).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
+                yield component.append("]");
             }
-            for (int i = 0; i < lengthMinusOne; i++) {
-                component.append(serialize(Array.get(object, i), seen, depth + 1)).append(", ");
+            case Map<?, ?> map -> {
+                MutableComponent component = Component.literal("{");
+                component.append(map.entrySet().stream().map(e -> serialize(e.getKey(), seen, depth + 1).copy().append("=").append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
+                yield component.append("}");
             }
-            return component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append("]");
-        }
-        if (object instanceof Collection<?> collection) {
-            MutableComponent component = Component.literal("[");
-            component.append(collection.stream().map(e -> serialize(e, seen, depth + 1).copy()).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
-            return component.append("]");
-        }
-        if (object instanceof Map<?, ?> map) {
-            MutableComponent component = Component.literal("{");
-            component.append(map.entrySet().stream().map(e -> serialize(e.getKey(), seen, depth + 1).copy().append("=").append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
-            return component.append("}");
-        }
-        if (object instanceof Registry<?> registry) {
-            return Component.translationArg(registry.key().location());
-        }
-        if (object instanceof ResourceKey<?> resourceKey) {
-            MutableComponent component = Component.literal("{");
-            component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(", ");
-            component.append("location=").append(serialize(resourceKey.location(), seen, depth + 1));
-            return component.append("}");
-        }
-        if (object instanceof Holder<?> holder) {
-            MutableComponent component = Component.literal("{");
-            component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(", ");
-            component.append("value=").append(serialize(holder.value(), seen, depth + 1));
-            return component.append("}");
-        }
-
-        String className = object.getClass().getName().replace(".", "/");
-        String mojmapClassName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(className), className);
-        mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
-
-        MutableComponent component = Component.literal(mojmapClassName + '{');
-        component.append(ReflectionUtils.getAllFields(object.getClass())
-            .filter(field -> !Modifier.isStatic(field.getModifiers()))
-            .map(field -> {
-                String fieldName = field.getName();
-                String mojmapFieldName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_field(className, fieldName), fieldName);
-                try {
-                    field.setAccessible(true);
-                    return Component.literal(mojmapFieldName + '=').append(serialize(field.get(object), seen, depth + 1));
-                } catch (InaccessibleObjectException | ReflectiveOperationException e) {
-                    try {
-                        MethodHandles.Lookup implLookup = UnsafeUtils.getImplLookup();
-                        if (implLookup == null) {
-                            return Component.literal(mojmapFieldName + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
-                        }
-                        VarHandle varHandle = implLookup.findVarHandle(object.getClass(), fieldName, field.getType());
-                        return Component.literal(mojmapFieldName + '=').append(serialize(varHandle.get(object), seen, depth + 1));
-                    } catch (ReflectiveOperationException ex) {
-                        return Component.literal(mojmapFieldName + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
+            case Registry<?> registry -> Component.translationArg(registry.key().location());
+            case ResourceKey<?> resourceKey -> {
+                MutableComponent component = Component.literal("{");
+                component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(", ");
+                component.append("location=").append(serialize(resourceKey.location(), seen, depth + 1));
+                yield component.append("}");
+            }
+            case Holder<?> holder -> {
+                MutableComponent component = Component.literal("{");
+                component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(", ");
+                component.append("value=").append(serialize(holder.value(), seen, depth + 1));
+                yield component.append("}");
+            }
+            default -> {
+                if (object.getClass().isArray()) {
+                    MutableComponent component = Component.literal("[");
+                    int lengthMinusOne = Array.getLength(object) - 1;
+                    if (lengthMinusOne < 0) {
+                        yield component.append("]");
                     }
+                    for (int i = 0; i < lengthMinusOne; i++) {
+                        component.append(serialize(Array.get(object, i), seen, depth + 1)).append(", ");
+                    }
+                    yield component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append("]");
                 }
-            })
-            .reduce((l, r) -> l.append(", ").append(r))
-            .orElse(Component.empty()));
-        return component.append("}");
+
+                String className = object.getClass().getName().replace(".", "/");
+                String mojmapClassName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_class(className), className);
+                mojmapClassName = mojmapClassName.substring(mojmapClassName.lastIndexOf('/') + 1);
+
+                MutableComponent component = Component.literal(mojmapClassName + '{');
+                component.append(ReflectionUtils.getAllFields(object.getClass())
+                    .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                    .map(field -> {
+                        String fieldName = field.getName();
+                        String mojmapFieldName = Objects.requireNonNullElse(MappingsHelper.namedOrIntermediaryToMojmap_field(className, fieldName), fieldName);
+                        try {
+                            field.setAccessible(true);
+                            return Component.literal(mojmapFieldName + '=').append(serialize(field.get(object), seen, depth + 1));
+                        } catch (InaccessibleObjectException | ReflectiveOperationException e) {
+                            try {
+                                MethodHandles.Lookup implLookup = UnsafeUtils.getImplLookup();
+                                if (implLookup == null) {
+                                    return Component.literal(mojmapFieldName + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
+                                }
+                                VarHandle varHandle = implLookup.findVarHandle(object.getClass(), fieldName, field.getType());
+                                return Component.literal(mojmapFieldName + '=').append(serialize(varHandle.get(object), seen, depth + 1));
+                            } catch (ReflectiveOperationException ex) {
+                                return Component.literal(mojmapFieldName + '=').append(Component.translatable("commands.clisten.packetError").withStyle(ChatFormatting.DARK_RED));
+                            }
+                        }
+                    })
+                    .reduce((l, r) -> l.append(", ").append(r))
+                    .orElse(Component.empty()));
+                yield component.append("}");
+            }
+        };
     }
 
     public static void onPacket(Packet<?> packet, PacketFlow side) {

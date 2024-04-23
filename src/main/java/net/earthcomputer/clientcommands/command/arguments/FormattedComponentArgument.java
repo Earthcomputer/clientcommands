@@ -192,12 +192,12 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
                 .put("white",  new Styler((s, o) -> s.applyFormat(ChatFormatting.WHITE), 0))
                 .put("yellow", new Styler((s, o) -> s.applyFormat(ChatFormatting.YELLOW), 0))
 
-                .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.tryParse(o.get(0))), 1, "alt", "default"))
-                .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.get(0), 16))), 1))
-                .put("insert", new Styler((s, o) -> s.withInsertion(o.get(0)), 1))
+                .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.tryParse(o.getFirst())), 1, "alt", "default"))
+                .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.getFirst(), 16))), 1))
+                .put("insert", new Styler((s, o) -> s.withInsertion(o.getFirst()), 1))
 
-                .put("click", new Styler((s, o) -> s.withClickEvent(parseClickEvent(o.get(0), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
-                .put("hover", new Styler((s, o) -> s.withHoverEvent(parseHoverEvent(o.get(0), o.get(1))), 2, "show_entity", "show_item", "show_text"))
+                .put("click", new Styler((s, o) -> s.withClickEvent(parseClickEvent(o.getFirst(), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
+                .put("hover", new Styler((s, o) -> s.withHoverEvent(parseHoverEvent(o.getFirst(), o.get(1))), 2, "show_entity", "show_item", "show_text"))
 
                 // aliases
                 .put("strike", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))

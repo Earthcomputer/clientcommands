@@ -368,7 +368,7 @@ public class FishingCracker {
                     ticksUntilOurItem = ticks;
                     ourExpectedCatchIndex = possibleExpectedCatches.size();
                 }
-                possibleExpectedCatches.add(catches.get(0));
+                possibleExpectedCatches.add(catches.getFirst());
                 wasCatchingFish = true;
             } else if (wasCatchingFish) {
                 bobberNumTicks = ticks;
@@ -434,7 +434,7 @@ public class FishingCracker {
                 if (biomeCondition != null) {
                     Component error = Component.translatable(
                             "commands.cfish.error.biome",
-                            Component.translatable("biome.minecraft." + biomeCondition.biomes.get(0).getName())
+                            Component.translatable("biome.minecraft." + biomeCondition.biomes.getFirst().getName())
                     );
                     ClientCommandHelper.addOverlayMessage(error, 100);
                     reset();
@@ -509,7 +509,7 @@ public class FishingCracker {
 
         if (!indices.isEmpty()) {
             if (CombinedMedianEM.data.size() >= 10) {
-                CombinedMedianEM.data.remove(0);
+                CombinedMedianEM.data.removeFirst();
             }
             ArrayList<Double> sample = new ArrayList<>();
             for (int index : indices) {

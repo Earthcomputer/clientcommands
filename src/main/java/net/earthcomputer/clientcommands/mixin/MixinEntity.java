@@ -47,7 +47,7 @@ public abstract class MixinEntity implements IEntity {
 
     @Unique
     private int getGlowingTicketColor() {
-        return glowingTickets.isEmpty() ? 0xffffff : glowingTickets.get(glowingTickets.size() - 1).getColor();
+        return glowingTickets.isEmpty() ? 0xffffff : glowingTickets.getLast().getColor();
     }
 
     @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;random:Lnet/minecraft/util/RandomSource;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))

@@ -88,18 +88,13 @@ public class GetDataCommand {
 
     private static int getData(FabricClientCommandSource source, DataAccessor accessor, NbtPath path) throws CommandSyntaxException {
         Tag tag = getNbt(path, accessor);
-        int ret;
-        if (tag instanceof NumericTag) {
-            ret = Mth.floor(((NumericTag) tag).getAsDouble());
-        } else if (tag instanceof CollectionTag) {
-            ret = ((CollectionTag<?>) tag).size();
-        } else if (tag instanceof CompoundTag) {
-            ret = ((CompoundTag) tag).size();
-        } else if (tag instanceof StringTag) {
-            ret = tag.getAsString().length();
-        } else {
-            throw GET_UNKNOWN_EXCEPTION.create(path.toString());
-        }
+        int ret = switch (tag) {
+            case NumericTag numericTag -> Mth.floor(numericTag.getAsDouble());
+            case CollectionTag<?> collectionTag -> collectionTag.size();
+            case CompoundTag compoundTag -> compoundTag.size();
+            case StringTag ignored -> tag.getAsString().length();
+            case null, default -> throw GET_UNKNOWN_EXCEPTION.create(path.toString());
+        };
 
         source.sendFeedback(accessor.getPrintSuccess(tag));
         return ret;

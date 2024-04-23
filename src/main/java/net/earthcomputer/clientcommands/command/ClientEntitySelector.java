@@ -41,7 +41,7 @@ public class ClientEntitySelector {
         if (entities.size() > 1) {
             throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
         }
-        return entities.get(0);
+        return entities.getFirst();
     }
 
     public List<Entity> getEntities(CommandSourceStack source) {
