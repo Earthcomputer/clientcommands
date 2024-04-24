@@ -144,8 +144,8 @@
 
   "commands.clisten.commandDisabled": "此命令已被禁用，请查看日志",
   "commands.clisten.unknownPacket": "未知数据包%s",
-  "commands.clisten.receivedPacket": "收到以下数据包：%s",
   "commands.clisten.sentPacket": "发送了以下数据包：%s",
+  "commands.clisten.receivedPacket": "收到以下数据包：%s",
   "commands.clisten.packetError": "错误",
   "commands.clisten.add.success": "成功开始监听该数据包",
   "commands.clisten.add.failed": "已经在监听该数据包",

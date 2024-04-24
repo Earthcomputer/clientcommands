@@ -2,11 +2,11 @@ package net.earthcomputer.clientcommands.mixin;
 
 import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.c2c.C2CPacket;
-import net.earthcomputer.clientcommands.c2c.CCNetworkHandler;
-import net.earthcomputer.clientcommands.c2c.CCPacketHandler;
+import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
+import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.earthcomputer.clientcommands.c2c.ConversionHelper;
 import net.earthcomputer.clientcommands.c2c.OutgoingPacketFilter;
+import net.earthcomputer.clientcommands.command.ListenCommand;
 import net.earthcomputer.clientcommands.interfaces.IHasPrivateKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.GuiMessageTag;
@@ -16,6 +16,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MessageSignature;
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -102,16 +103,13 @@ public class MixinChatComponent {
         }
         byte[] uncompressed = ConversionHelper.Gzip.uncompress(decrypted);
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(uncompressed));
-        int id = buf.readInt();
-        C2CPacket c2CPacket = CCPacketHandler.createPacket(id, buf);
-        if (c2CPacket == null) {
-            return false;
-        }
+        Packet<? super C2CPacketListener> packet = C2CPacketHandler.C2C.codec().decode(buf);
         if (buf.readableBytes() > 0) {
             return false;
         }
+        ListenCommand.onPacket(packet, ListenCommand.PacketFlow.C2C_INBOUND);
         try {
-            c2CPacket.apply(CCNetworkHandler.getInstance());
+            packet.handle(C2CPacketHandler.getInstance());
         } catch (Exception e) {
             Minecraft.getInstance().gui.getChat().addMessage(Component.nullToEmpty(e.getMessage()));
             e.printStackTrace();

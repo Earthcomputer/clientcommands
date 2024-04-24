@@ -144,8 +144,10 @@
 
   "commands.clisten.commandDisabled": "The command was disabled, check your logs",
   "commands.clisten.unknownPacket": "Unknown packet %s",
-  "commands.clisten.receivedPacket": "Received the following packet: %s",
   "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
+  "commands.clisten.receivedC2CPacket": "Received the following C2C packet: %s",
   "commands.clisten.packetError": "ERROR",
   "commands.clisten.add.success": "Successfully started listening to that packet",
   "commands.clisten.add.failed": "Already listening to that packet",

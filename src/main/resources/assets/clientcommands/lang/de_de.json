@@ -144,8 +144,10 @@
 
   "commands.clisten.commandDisabled": "Der Befehl wurde deaktiviert, schau in dein Protokoll",
   "commands.clisten.unknownPacket": "Unbekanntes Paket %s",
-  "commands.clisten.receivedPacket": "Folgendes Paket erhalten: %s",
   "commands.clisten.sentPacket": "Folgendes Paket gesenden: %s",
+  "commands.clisten.receivedPacket": "Folgendes Paket erhalten: %s",
+  "commands.clisten.sentC2CPacket": "Folgendes C2C Paket gesenden: %s",
+  "commands.clisten.receivedC2CPacket": "Folgendes C2C Paket erhalten: %s",
   "commands.clisten.packetError": "FEHLER",
   "commands.clisten.add.success": "Warte auf Pakete dieses Typs",
   "commands.clisten.add.failed": "Warte bereits auf Pakete dieses Typs",

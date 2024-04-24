@@ -1,40 +1,34 @@
 package net.earthcomputer.clientcommands.c2c.packets;
 
-import net.earthcomputer.clientcommands.c2c.C2CPacket;
-import net.earthcomputer.clientcommands.c2c.CCPacketListener;
+import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.PacketType;
+import net.minecraft.resources.ResourceLocation;
 
-public class MessageC2CPacket implements C2CPacket {
+public record MessageC2CPacket(String sender, String message) implements Packet<C2CPacketListener> {
+    public static final StreamCodec<RegistryFriendlyByteBuf, MessageC2CPacket> CODEC = Packet.codec(MessageC2CPacket::write, MessageC2CPacket::new);
+    public static final PacketType<MessageC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation("clientcommands", "message"));
 
-    private final String sender;
-    private final String message;
-
-    public MessageC2CPacket(String sender, String message) {
-        this.sender = sender;
-        this.message = message;
+    public MessageC2CPacket(FriendlyByteBuf buf) {
+        this(buf.readUtf(), buf.readUtf());
     }
 
-    public MessageC2CPacket(FriendlyByteBuf raw) {
-        this.sender = raw.readUtf();
-        this.message = raw.readUtf();
-    }
-
-    @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeUtf(this.sender);
         buf.writeUtf(this.message);
     }
 
     @Override
-    public void apply(CCPacketListener listener) {
-        listener.onMessageC2CPacket(this);
+    public void handle(C2CPacketListener handler) {
+        handler.onMessageC2CPacket(this);
     }
 
-    public String getSender() {
-        return this.sender;
-    }
-
-    public String getMessage() {
-        return this.message;
+    @Override
+    public PacketType<? extends Packet<C2CPacketListener>> type() {
+        return ID;
     }
 }

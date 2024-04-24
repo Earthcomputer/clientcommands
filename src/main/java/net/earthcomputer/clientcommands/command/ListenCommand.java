@@ -22,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -122,8 +121,10 @@ public class ListenCommand {
                     .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, packetData)));
 
                 switch (side) {
-                    case CLIENTBOUND -> source.sendFeedback(Component.translatable("commands.clisten.receivedPacket", packetComponent));
                     case SERVERBOUND -> source.sendFeedback(Component.translatable("commands.clisten.sentPacket", packetComponent));
+                    case CLIENTBOUND -> source.sendFeedback(Component.translatable("commands.clisten.receivedPacket", packetComponent));
+                    case C2C_OUTBOUND -> source.sendFeedback(Component.translatable("commands.clisten.sentC2CPacket", packetComponent));
+                    case C2C_INBOUND -> source.sendFeedback(Component.translatable("commands.clisten.receivedC2CPacket", packetComponent));
                 }
             };
         }
@@ -262,6 +263,13 @@ public class ListenCommand {
                 yield component.append("}");
             }
         };
+    }
+
+    public enum PacketFlow {
+        SERVERBOUND,
+        CLIENTBOUND,
+        C2C_OUTBOUND,
+        C2C_INBOUND;
     }
 
     public static void onPacket(Packet<?> packet, PacketFlow side) {

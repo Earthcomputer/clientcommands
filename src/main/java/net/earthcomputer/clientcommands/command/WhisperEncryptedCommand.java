@@ -5,7 +5,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.earthcomputer.clientcommands.c2c.CCNetworkHandler;
+import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
@@ -25,9 +25,9 @@ public class WhisperEncryptedCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cwe")
-                .then(argument("player", gameProfile())
-                    .then(argument("message", greedyString())
-                        .executes((ctx) -> whisper(ctx.getSource(), getProfileArgument(ctx, "player"), getString(ctx, "message"))))));
+            .then(argument("player", gameProfile())
+                .then(argument("message", greedyString())
+                    .executes((ctx) -> whisper(ctx.getSource(), getProfileArgument(ctx, "player"), getString(ctx, "message"))))));
     }
 
     private static int whisper(FabricClientCommandSource source, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {
@@ -36,12 +36,12 @@ public class WhisperEncryptedCommand {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
         PlayerInfo recipient = source.getClient().getConnection().getOnlinePlayers().stream()
-                .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
-                .findFirst()
-                .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
+            .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
+            .findFirst()
+            .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
 
         MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), message);
-        CCNetworkHandler.getInstance().sendPacket(packet, recipient);
+        C2CPacketHandler.getInstance().sendPacket(packet, recipient);
         MutableComponent prefix = Component.empty();
         prefix.append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
