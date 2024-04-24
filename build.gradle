@@ -79,6 +79,10 @@ jar {
 	from(configurations.includedLibrary.collect { it.isDirectory() ? it : zipTree(it) }) {
 		include 'com/seedfinding/**'
 	}
+
+	from("LICENSE") {
+		rename { "${it}_${project.base.archivesName.get()}" }
+	}
 }
 
 processResources {
@@ -110,10 +114,6 @@ tasks.register('sourcesJar', Jar) {
 	dependsOn classes
 	archiveClassifier.set("sources")
 	from sourceSets.main.allSource
-}
-
-jar {
-	from "LICENSE"
 }
 
 tasks.register('codeGen', JavaExec) {
