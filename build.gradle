@@ -5,12 +5,11 @@ plugins {
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
+base {
+	archivesName = project.archives_base_name
+	version = project.mod_version
+	group = project.maven_group
+}
 
 sourceSets {
 	codeGen
@@ -96,6 +95,11 @@ processResources {
 	from(sourceSets.main.resources.srcDirs) {
 		exclude "fabric.mod.json"
 	}
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType(JavaCompile).configureEach {
