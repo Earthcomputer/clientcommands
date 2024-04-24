@@ -25,9 +25,9 @@ import java.security.PublicKey;
 
 public class C2CPacketHandler implements C2CPacketListener {
 
-    private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Component.translatable("ccpacket.messageTooLong", d));
-    private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("ccpacket.publicKeyNotFound"));
-    private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("ccpacket.encryptionFailed"));
+    private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Component.translatable("c2cpacket.messageTooLong", d));
+    private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.publicKeyNotFound"));
+    private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.encryptionFailed"));
 
     public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, RegistryFriendlyByteBuf>protocolUnbound(ConnectionProtocol.PLAY, PacketFlow.CLIENTBOUND, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
@@ -98,7 +98,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
         prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal(" "));
-        Component component = prefix.append(Component.translatable("ccpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
+        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
         Minecraft.getInstance().gui.getChat().addMessage(component);
     }
 

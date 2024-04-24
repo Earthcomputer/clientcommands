@@ -47,7 +47,7 @@ public class WhisperEncryptedCommand {
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
         prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal(" "));
-        Component component = prefix.append(Component.translatable("ccpacket.messageC2CPacket.outgoing", recipient.getProfile().getName(), message).withStyle(ChatFormatting.GRAY));
+        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.outgoing", recipient.getProfile().getName(), message).withStyle(ChatFormatting.GRAY));
         source.sendFeedback(component);
         return Command.SINGLE_SUCCESS;
     }

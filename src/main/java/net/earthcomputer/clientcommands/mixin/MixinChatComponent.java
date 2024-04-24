@@ -49,9 +49,9 @@ public class MixinChatComponent {
         String packetString = string.substring(index + 6);
         if (!Configs.acceptC2CPackets) {
             if (OutgoingPacketFilter.removeIfContains(packetString)) {
-                this.minecraft.gui.getChat().addMessage(Component.translatable("ccpacket.sentC2CPacket"));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("c2cpacket.sentC2CPacket"));
             } else {
-                this.minecraft.gui.getChat().addMessage(Component.translatable("ccpacket.receivedC2CPacket").withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, content))));
+                this.minecraft.gui.getChat().addMessage(Component.translatable("c2cpacket.receivedC2CPacket").withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, content))));
             }
             ci.cancel();
             return;
@@ -63,7 +63,7 @@ public class MixinChatComponent {
         if (handleC2CPacket(packetString)) {
             ci.cancel();
         } else {
-            this.minecraft.gui.getChat().addMessage(Component.translatable("ccpacket.malformedPacket").withStyle(ChatFormatting.RED));
+            this.minecraft.gui.getChat().addMessage(Component.translatable("c2cpacket.malformedPacket").withStyle(ChatFormatting.RED));
         }
     }
 
