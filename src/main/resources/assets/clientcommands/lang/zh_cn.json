@@ -144,8 +144,8 @@
 
   "commands.clisten.commandDisabled": "此命令已被禁用，请查看日志",
   "commands.clisten.unknownPacket": "未知数据包%s",
-  "commands.clisten.receivedPacket": "收到以下数据包：%s",
   "commands.clisten.sentPacket": "发送了以下数据包：%s",
+  "commands.clisten.receivedPacket": "收到以下数据包：%s",
   "commands.clisten.packetError": "错误",
   "commands.clisten.add.success": "成功开始监听该数据包",
   "commands.clisten.add.failed": "已经在监听该数据包",
@@ -330,13 +330,13 @@
   "snakeGame.title": "贪吃蛇",
   "snakeGame.score": "分数：%d",
 
-  "ccpacket.messageTooLong": "信息过长（最多255个字符）",
-  "ccpacket.publicKeyNotFound": "未找到公共密匙",
-  "ccpacket.encryptionFailed": "加密你的消息时出现问题",
-  "ccpacket.malformedPacket": "你收到了一个格式错误的客户端到客户端数据包：",
-  "ccpacket.receivedC2CPacket": "你收到了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！悬停以查看原始数据包。",
-  "ccpacket.sentC2CPacket": "你发送了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！",
+  "c2cpacket.messageTooLong": "信息过长（最多255个字符）",
+  "c2cpacket.publicKeyNotFound": "未找到公共密匙",
+  "c2cpacket.encryptionFailed": "加密你的消息时出现问题",
+  "c2cpacket.malformedPacket": "你收到了一个格式错误的客户端到客户端数据包：",
+  "c2cpacket.receivedC2CPacket": "你收到了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！悬停以查看原始数据包。",
+  "c2cpacket.sentC2CPacket": "你发送了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> 你：%s",
-  "ccpacket.messageC2CPacket.outgoing": "你 -> %s：%s"
+  "c2cpacket.messageC2CPacket.incoming": "%s -> 你：%s",
+  "c2cpacket.messageC2CPacket.outgoing": "你 -> %s：%s"
 }

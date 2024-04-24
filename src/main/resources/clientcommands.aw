@@ -19,3 +19,5 @@ accessible field net/minecraft/network/Connection channel Lio/netty/channel/Chan
 accessible field net/minecraft/network/PacketDecoder protocolInfo Lnet/minecraft/network/ProtocolInfo;
 accessible field net/minecraft/network/PacketEncoder protocolInfo Lnet/minecraft/network/ProtocolInfo;
 accessible field net/minecraft/network/codec/IdDispatchCodec toId Lit/unimi/dsi/fastutil/objects/Object2IntMap;
+
+accessible method net/minecraft/network/protocol/ProtocolInfoBuilder protocolUnbound (Lnet/minecraft/network/ConnectionProtocol;Lnet/minecraft/network/protocol/PacketFlow;Ljava/util/function/Consumer;)Lnet/minecraft/network/ProtocolInfo$Unbound;

@@ -144,8 +144,10 @@
 
   "commands.clisten.commandDisabled": "The command was disabled, check your logs",
   "commands.clisten.unknownPacket": "Unknown packet %s",
-  "commands.clisten.receivedPacket": "Received the following packet: %s",
   "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
+  "commands.clisten.receivedC2CPacket": "Received the following C2C packet: %s",
   "commands.clisten.packetError": "ERROR",
   "commands.clisten.add.success": "Successfully started listening to that packet",
   "commands.clisten.add.failed": "Already listening to that packet",
@@ -330,13 +332,13 @@
   "snakeGame.title": "Snake",
   "snakeGame.score": "Score: %d",
 
-  "ccpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
-  "ccpacket.publicKeyNotFound": "Public key not found",
-  "ccpacket.encryptionFailed": "Something failed while encrypting your message",
-  "ccpacket.malformedPacket": "You have received a malformed C2C packet:",
-  "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
-  "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+  "c2cpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
+  "c2cpacket.publicKeyNotFound": "Public key not found",
+  "c2cpacket.encryptionFailed": "Something failed while encrypting your message",
+  "c2cpacket.malformedPacket": "You have received a malformed C2C packet:",
+  "c2cpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
+  "c2cpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> you: %s",
-  "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s"
+  "c2cpacket.messageC2CPacket.incoming": "%s -> you: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s"
 }

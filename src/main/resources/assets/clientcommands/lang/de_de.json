@@ -144,8 +144,10 @@
 
   "commands.clisten.commandDisabled": "Der Befehl wurde deaktiviert, schau in dein Protokoll",
   "commands.clisten.unknownPacket": "Unbekanntes Paket %s",
-  "commands.clisten.receivedPacket": "Folgendes Paket erhalten: %s",
   "commands.clisten.sentPacket": "Folgendes Paket gesenden: %s",
+  "commands.clisten.receivedPacket": "Folgendes Paket erhalten: %s",
+  "commands.clisten.sentC2CPacket": "Folgendes C2C-Paket gesenden: %s",
+  "commands.clisten.receivedC2CPacket": "Folgendes C2C-Paket erhalten: %s",
   "commands.clisten.packetError": "FEHLER",
   "commands.clisten.add.success": "Warte auf Pakete dieses Typs",
   "commands.clisten.add.failed": "Warte bereits auf Pakete dieses Typs",
@@ -330,13 +332,13 @@
   "snakeGame.title": "Snake",
   "snakeGame.score": "Punkte: %d",
 
-  "ccpacket.messageTooLong": "Nachricht zu lange (max. 255 Zeichen) %s Zeichen gefunden",
-  "ccpacket.publicKeyNotFound": "Öffentlicher Schlüssel nicht gefunden",
-  "ccpacket.encryptionFailed": "Beim Verschlüsseln deiner Nachricht ist etwas schief gegangen",
-  "ccpacket.malformedPacket": "Du hast ein kaputtes C2C-Paket erhalten:",
-  "ccpacket.receivedC2CPacket": "Du hast ein C2C-Paket erhalten, aber du akzeptierst keine eingehenden C2C-Pakete! Hover um das rohe Paket zu sehen.",
-  "ccpacket.sentC2CPacket": "Du hast ein C2C-Paket gesendet, aber du akzeptierst keine eingehenden C2C-Pakete!",
+  "c2cpacket.messageTooLong": "Nachricht zu lange (max. 255 Zeichen) %s Zeichen gefunden",
+  "c2cpacket.publicKeyNotFound": "Öffentlicher Schlüssel nicht gefunden",
+  "c2cpacket.encryptionFailed": "Beim Verschlüsseln deiner Nachricht ist etwas schief gegangen",
+  "c2cpacket.malformedPacket": "Du hast ein kaputtes C2C-Paket erhalten:",
+  "c2cpacket.receivedC2CPacket": "Du hast ein C2C-Paket erhalten, aber du akzeptierst keine eingehenden C2C-Pakete! Hover um das rohe Paket zu sehen.",
+  "c2cpacket.sentC2CPacket": "Du hast ein C2C-Paket gesendet, aber du akzeptierst keine eingehenden C2C-Pakete!",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> du: %s",
-  "ccpacket.messageC2CPacket.outgoing": "du -> %s: %s"
+  "c2cpacket.messageC2CPacket.incoming": "%s -> du: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "du -> %s: %s"
 }

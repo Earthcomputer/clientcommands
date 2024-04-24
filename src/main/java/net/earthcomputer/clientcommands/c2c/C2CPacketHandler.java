@@ -3,44 +3,46 @@ package net.earthcomputer.clientcommands.c2c;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.earthcomputer.clientcommands.command.ListenCommand;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.ProtocolInfo;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.RemoteChatSession;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.ProtocolInfoBuilder;
 import net.minecraft.world.entity.player.ProfilePublicKey;
-import org.slf4j.Logger;
 
 import java.security.PublicKey;
 
-public class CCNetworkHandler implements CCPacketListener {
+public class C2CPacketHandler implements C2CPacketListener {
 
-    private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Component.translatable("ccpacket.messageTooLong", d));
-    private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("ccpacket.publicKeyNotFound"));
-    private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("ccpacket.encryptionFailed"));
+    private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Component.translatable("c2cpacket.messageTooLong", d));
+    private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.publicKeyNotFound"));
+    private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.encryptionFailed"));
 
-    private static final CCNetworkHandler instance = new CCNetworkHandler();
+    public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, RegistryFriendlyByteBuf>protocolUnbound(ConnectionProtocol.PLAY, PacketFlow.CLIENTBOUND, builder -> builder
+        .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
+    ).bind(RegistryFriendlyByteBuf.decorator(Minecraft.getInstance().getConnection().registryAccess()));
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final C2CPacketHandler instance = new C2CPacketHandler();
 
-    private CCNetworkHandler() {
+    private C2CPacketHandler() {
     }
 
-    public static CCNetworkHandler getInstance() {
+    public static C2CPacketHandler getInstance() {
         return instance;
     }
 
-    public void sendPacket(C2CPacket packet, PlayerInfo recipient) throws CommandSyntaxException {
-        Integer id = CCPacketHandler.getId(packet.getClass());
-        if (id == null) {
-            LOGGER.warn("Could not send the packet because the id was not recognised");
-            return;
-        }
+    public void sendPacket(Packet<C2CPacketListener> packet, PlayerInfo recipient) throws CommandSyntaxException {
         RemoteChatSession session = recipient.getChatSession();
         if (session == null) {
             throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
@@ -51,8 +53,7 @@ public class CCNetworkHandler implements CCPacketListener {
         }
         PublicKey key = ppk.data().key();
         FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeInt(id);
-        packet.write(buf);
+        C2C.codec().encode(buf, packet);
         byte[] uncompressed = new byte[buf.readableBytes()];
         buf.getBytes(0, uncompressed);
         byte[] compressed = ConversionHelper.Gzip.compress(uncompressed);
@@ -83,20 +84,40 @@ public class CCNetworkHandler implements CCPacketListener {
         if (commandString.length() >= 256) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create(commandString.length());
         }
+        ListenCommand.onPacket(packet, ListenCommand.PacketFlow.C2C_OUTBOUND);
         Minecraft.getInstance().getConnection().sendCommand(commandString);
         OutgoingPacketFilter.addPacket(packetString);
     }
 
     @Override
     public void onMessageC2CPacket(MessageC2CPacket packet) {
-        String sender = packet.getSender();
-        String message = packet.getMessage();
+        String sender = packet.sender();
+        String message = packet.message();
         MutableComponent prefix = Component.empty();
         prefix.append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
         prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal(" "));
-        Component component = prefix.append(Component.translatable("ccpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
+        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
         Minecraft.getInstance().gui.getChat().addMessage(component);
+    }
+
+    @Override
+    public PacketFlow flow() {
+        return C2C.flow();
+    }
+
+    @Override
+    public ConnectionProtocol protocol() {
+        return C2C.id();
+    }
+
+    @Override
+    public void onDisconnect(Component reason) {
+    }
+
+    @Override
+    public boolean isAcceptingMessages() {
+        return true;
     }
 }

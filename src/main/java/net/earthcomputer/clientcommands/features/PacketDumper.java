@@ -17,6 +17,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.EncoderException;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
+import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -72,13 +74,18 @@ public class PacketDumper {
     public static void dumpPacket(Packet<?> packet, JsonWriter writer) throws IOException {
         writer.beginArray();
         try {
-            ChannelPipeline pipeline = Minecraft.getInstance().getConnection().getConnection().channel.pipeline();
-            @SuppressWarnings("unchecked")
-            StreamCodec<ByteBuf, Packet<?>> codec = switch (packet.type().flow()) {
-                case CLIENTBOUND -> (StreamCodec<ByteBuf, Packet<?>>) ((PacketDecoder<?>) pipeline.get("decoder")).protocolInfo.codec();
-                case SERVERBOUND -> (StreamCodec<ByteBuf, Packet<?>>) ((PacketEncoder<?>) pipeline.get("encoder")).protocolInfo.codec();
-            };
-            codec.encode(new PacketDumpByteBuf(writer), packet);
+            if (packet.type().id().getNamespace().equals("clientcommands")) {
+                //noinspection unchecked
+                C2CPacketHandler.C2C.codec().encode(new PacketDumpByteBuf(writer), (Packet<? super C2CPacketListener>) packet);
+            } else {
+                ChannelPipeline pipeline = Minecraft.getInstance().getConnection().getConnection().channel.pipeline();
+                @SuppressWarnings("unchecked")
+                StreamCodec<ByteBuf, Packet<?>> codec = switch (packet.type().flow()) {
+                    case CLIENTBOUND -> (StreamCodec<ByteBuf, Packet<?>>) ((PacketDecoder<?>) pipeline.get("decoder")).protocolInfo.codec();
+                    case SERVERBOUND -> (StreamCodec<ByteBuf, Packet<?>>) ((PacketEncoder<?>) pipeline.get("encoder")).protocolInfo.codec();
+                };
+                codec.encode(new PacketDumpByteBuf(writer), packet);
+            }
         } catch (UncheckedIOException e) {
             throw e.getCause();
         }

@@ -317,13 +317,13 @@
   "snakeGame.title": "Game Ular",
   "snakeGame.score": "Skor: %d",
 
-  "ccpacket.messageTooLong": "Pesan terlalu panjang (max. 255 karakter) saat ini %s karakter",
-  "ccpacket.publicKeyNotFound": "Kunci publik tidak ditemukan",
-  "ccpacket.encryptionFailed": "Terjadi kegagalan saat mengenkripsi pesan Anda ",
-  "ccpacket.malformedPacket": "Anda telah menerima paket C2C yang formatnya salah:",
-  "ccpacket.receivedC2CPacket": "Anda telah menerima paket C2C, tetapi Anda tidak menerima paket C2C yang masuk! Sorot untuk melihat paket mentah.",
-  "ccpacket.sentC2CPacket": "Anda telah mengirimkan paket C2C, tetapi Anda tidak menerima paket C2C yang masuk!",
+  "c2cpacket.messageTooLong": "Pesan terlalu panjang (max. 255 karakter) saat ini %s karakter",
+  "c2cpacket.publicKeyNotFound": "Kunci publik tidak ditemukan",
+  "c2cpacket.encryptionFailed": "Terjadi kegagalan saat mengenkripsi pesan Anda ",
+  "c2cpacket.malformedPacket": "Anda telah menerima paket C2C yang formatnya salah:",
+  "c2cpacket.receivedC2CPacket": "Anda telah menerima paket C2C, tetapi Anda tidak menerima paket C2C yang masuk! Sorot untuk melihat paket mentah.",
+  "c2cpacket.sentC2CPacket": "Anda telah mengirimkan paket C2C, tetapi Anda tidak menerima paket C2C yang masuk!",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> Anda: %s",
-  "ccpacket.messageC2CPacket.outgoing": "Anda -> %s: %s"
+  "c2cpacket.messageC2CPacket.incoming": "%s -> Anda: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "Anda -> %s: %s"
 }

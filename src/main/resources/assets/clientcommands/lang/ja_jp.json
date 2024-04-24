@@ -317,13 +317,13 @@
   "snakeGame.title": "スネーク",
   "snakeGame.score": "スコア: %d",
 
-  "ccpacket.messageTooLong": "メッセージが長ぎます、 (最大. 255 文字)  %s 文字が入力されました",
-  "ccpacket.publicKeyNotFound": "パブリックキーが見つかりませんでした",
-  "ccpacket.encryptionFailed": "あなたのメッセージを暗号化するのに失敗しました",
-  "ccpacket.malformedPacket": "不正にフォーマットされたC2Cパケットを受信しました:",
-  "ccpacket.receivedC2CPacket": "C2Cパケットを受信しましたが、あなたはC2Cパケットを受け取る設定をしていません！ホバーしてパケットの内容を確認してください",
-  "ccpacket.sentC2CPacket": "C2Cパケットを送信しましたが、あなたはC2Cパケットを受け取る設定を死ていません！",
+  "c2cpacket.messageTooLong": "メッセージが長ぎます、 (最大. 255 文字)  %s 文字が入力されました",
+  "c2cpacket.publicKeyNotFound": "パブリックキーが見つかりませんでした",
+  "c2cpacket.encryptionFailed": "あなたのメッセージを暗号化するのに失敗しました",
+  "c2cpacket.malformedPacket": "不正にフォーマットされたC2Cパケットを受信しました:",
+  "c2cpacket.receivedC2CPacket": "C2Cパケットを受信しましたが、あなたはC2Cパケットを受け取る設定をしていません！ホバーしてパケットの内容を確認してください",
+  "c2cpacket.sentC2CPacket": "C2Cパケットを送信しましたが、あなたはC2Cパケットを受け取る設定を死ていません！",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> あなた: %s",
-  "ccpacket.messageC2CPacket.outgoing": "あなた -> %s: %s"
+  "c2cpacket.messageC2CPacket.incoming": "%s -> あなた: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "あなた -> %s: %s"
 }

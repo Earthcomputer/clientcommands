@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command.arguments;
 
+import com.google.common.collect.Streams;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -8,6 +9,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.netty.channel.ChannelPipeline;
+import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -28,7 +30,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
 
@@ -49,7 +50,7 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
         int start = reader.getCursor();
         ResourceLocation packetId = ResourceLocation.read(reader);
         PacketTypes types = PacketTypes.get();
-        if (types == null || (!types.clientbound.contains(packetId) && !types.serverbound.contains(packetId))) {
+        if (types == null || (!types.clientbound.contains(packetId) && !types.serverbound.contains(packetId) && !types.c2cbound.contains(packetId))) {
             reader.setCursor(start);
             throw UNKNOWN_PACKET_EXCEPTION.createWithContext(reader, packetId);
         }
@@ -62,7 +63,7 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
         if (types == null) {
             return builder.buildFuture();
         }
-        return SharedSuggestionProvider.suggestResource(Stream.concat(types.clientbound.stream(), types.serverbound.stream()), builder);
+        return SharedSuggestionProvider.suggestResource(Streams.concat(types.clientbound.stream(), types.serverbound.stream(), types.c2cbound.stream()), builder);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
         return EXAMPLES;
     }
 
-    private record PacketTypes(Set<ResourceLocation> clientbound, Set<ResourceLocation> serverbound) {
+    private record PacketTypes(Set<ResourceLocation> clientbound, Set<ResourceLocation> serverbound, Set<ResourceLocation> c2cbound) {
         private static final Map<Object, Set<ResourceLocation>> packetTypesCache = new WeakHashMap<>();
 
         private static Set<ResourceLocation> getPacketTypes(ProtocolInfo<?> protocolInfo) {
@@ -90,7 +91,8 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
             var clientbound = packetTypesCache.computeIfAbsent(decoder, k -> getPacketTypes(decoder.protocolInfo));
             var encoder = (PacketEncoder<?>) pipeline.get("encoder");
             var serverbound = packetTypesCache.computeIfAbsent(encoder, k -> getPacketTypes(encoder.protocolInfo));
-            return new PacketTypes(clientbound, serverbound);
+            var c2cbound = packetTypesCache.computeIfAbsent("c2c", k -> getPacketTypes(C2CPacketHandler.C2C));
+            return new PacketTypes(clientbound, serverbound, c2cbound);
         }
     }
 }
