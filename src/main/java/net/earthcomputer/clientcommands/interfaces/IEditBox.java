@@ -1,7 +1,5 @@
 package net.earthcomputer.clientcommands.interfaces;
 
 public interface IEditBox {
-
-    int clientcommands_getMaxLength();
-
+    void clientcommands_setClientCommandLengthExtension();
 }
