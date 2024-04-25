@@ -80,9 +80,7 @@ jar {
 		include 'com/seedfinding/**'
 	}
 
-	from("LICENSE") {
-		rename { "${it}_${project.base.archivesName.get()}" }
-	}
+	from("LICENSE")
 }
 
 processResources {
