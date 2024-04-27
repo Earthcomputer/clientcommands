@@ -2,24 +2,26 @@ package net.earthcomputer.clientcommands.mixin;
 
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.command.VarCommand;
+import net.earthcomputer.clientcommands.interfaces.IEditBox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.StringUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ChatScreen.class)
 public class MixinChatScreen {
     @Shadow protected EditBox input;
 
-    @Unique
-    @Nullable
-    private Integer oldMaxLength = null;
+    @Inject(method = "init", at = @At("TAIL"))
+    private void init(CallbackInfo ci) {
+        ((IEditBox) input).clientcommands_setClientCommandLengthExtension();
+    }
 
     // replace the text before the Fabric Command API executes it,
     // but ensure the message is added to the history in its raw form.
@@ -32,24 +34,8 @@ public class MixinChatScreen {
         return command;
     }
 
-    @Inject(method = "onEdited", at = @At("HEAD"))
-    private void onEdited(String value, CallbackInfo ci) {
-        boolean isClientcommandsCommand = false;
-        if (value.startsWith("/")) {
-            String[] commandArgs = value.substring(1).split(" ");
-            isClientcommandsCommand = commandArgs.length > 0 && ClientCommands.isClientcommandsCommand(commandArgs[0]);
-        }
-        if (isClientcommandsCommand) {
-            if (oldMaxLength == null) {
-                oldMaxLength = input.maxLength;
-            }
-            input.setMaxLength(32767);
-        } else {
-            // TODO: what if other mods try to do the same thing?
-            if (oldMaxLength != null) {
-                input.setMaxLength(oldMaxLength);
-                oldMaxLength = null;
-            }
-        }
+    @Redirect(method = "normalizeChatMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/StringUtil;trimChatMessage(Ljava/lang/String;)Ljava/lang/String;"))
+    private String normalizeChatMessage(String string) {
+        return StringUtil.truncateStringIfNecessary(string, input.maxLength, false);
     }
 }
