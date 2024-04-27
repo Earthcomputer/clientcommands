@@ -58,6 +58,7 @@
     "MixinServerLevel",
     "MixinShearsItem",
     "MixinStonecutterMenu",
+    "MixinStringUtil",
     "OptionInstanceAccessor",
     "ProjectileAccessor",
     "WalkNodeEvaluatorAccessor"

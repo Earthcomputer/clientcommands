@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin;
 
-import net.earthcomputer.clientcommands.ClientCommands;
+import net.earthcomputer.clientcommands.features.ChatLengthExtender;
 import net.earthcomputer.clientcommands.interfaces.IEditBox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.util.StringUtil;
@@ -67,16 +67,11 @@ public abstract class MixinEditBox implements IEditBox {
             return;
         }
 
-        boolean isClientcommandsCommand = false;
-        if (newValue.startsWith("/")) {
-            String[] commandArgs = newValue.substring(1).split(" ");
-            isClientcommandsCommand = commandArgs.length > 0 && ClientCommands.isClientcommandsCommand(commandArgs[0]);
-        }
-        if (isClientcommandsCommand) {
+        if (ChatLengthExtender.isClientcommandsCommand(newValue)) {
             if (oldMaxLength == null) {
                 oldMaxLength = maxLength;
             }
-            setMaxLength(32767);
+            setMaxLength(ChatLengthExtender.EXTENDED_LENGTH);
         } else {
             // TODO: what if other mods try to do the same thing?
             if (oldMaxLength != null) {
