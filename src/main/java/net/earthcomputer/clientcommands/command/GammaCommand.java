@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.mixin.OptionInstanceAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
@@ -18,7 +17,7 @@ public class GammaCommand {
     }
 
     private static int setGamma(FabricClientCommandSource source, double gamma) {
-        ((OptionInstanceAccessor) (Object) source.getClient().options.gamma()).forceSetValue(gamma);
+        source.getClient().options.gamma().value = gamma;
 
         Component feedback = Component.translatable("commands.cgamma.success", gamma);
         source.sendFeedback(feedback);

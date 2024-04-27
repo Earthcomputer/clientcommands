@@ -11,7 +11,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.JsonOps;
-import net.earthcomputer.clientcommands.mixin.HoverEventActionAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -242,7 +241,7 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
             }
 
             JsonElement component = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)).getOrThrow();
-            HoverEvent.TypedHoverEvent<?> eventData = ((HoverEventActionAccessor) action).getLegacyCodec().codec().parse(JsonOps.INSTANCE, component).getOrThrow(error -> INVALID_HOVER_EVENT.create(value));
+            HoverEvent.TypedHoverEvent<?> eventData = action.legacyCodec.codec().parse(JsonOps.INSTANCE, component).getOrThrow(error -> INVALID_HOVER_EVENT.create(value));
             return new HoverEvent(eventData);
         }
     }

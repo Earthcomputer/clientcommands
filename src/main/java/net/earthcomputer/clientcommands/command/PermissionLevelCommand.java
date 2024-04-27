@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.earthcomputer.clientcommands.interfaces.IEntity;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
@@ -15,7 +14,7 @@ public class PermissionLevelCommand {
     }
 
     private static int getPermissionLevel(FabricClientCommandSource source) {
-        int permissionLevel = ((IEntity) source.getPlayer()).callGetPermissionLevel();
+        int permissionLevel = source.getPlayer().getPermissionLevel();
         source.sendFeedback(Component.translatable("commands.cpermissionlevel.success", permissionLevel));
 
         return permissionLevel;

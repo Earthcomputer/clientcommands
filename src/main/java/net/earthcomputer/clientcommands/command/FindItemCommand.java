@@ -7,7 +7,6 @@ import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.GuiBlocker;
 import net.earthcomputer.clientcommands.MathUtil;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
-import net.earthcomputer.clientcommands.mixin.AbstractContainerMenuAccessor;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -262,7 +261,7 @@ public class FindItemCommand {
             currentlySearchingTimeout = 100;
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
-                public boolean accept(Screen screen) {
+                public boolean accept(@Nullable Screen screen) {
                     if (!(screen instanceof MenuAccess<?> menuAccess)) {
                         return true;
                     }
@@ -274,7 +273,7 @@ public class FindItemCommand {
                             playerInvSlots.add(slot.index);
                         }
                     }
-                    mc.player.containerMenu = new AbstractContainerMenu(((AbstractContainerMenuAccessor) container).getNullableType(), container.containerId) {
+                    mc.player.containerMenu = new AbstractContainerMenu(container.menuType, container.containerId) {
                         @Override
                         public boolean stillValid(Player var1) {
                             return true;

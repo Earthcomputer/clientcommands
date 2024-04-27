@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
-import net.earthcomputer.clientcommands.interfaces.IEntity;
+import net.earthcomputer.clientcommands.interfaces.IEntity_Glowable;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -89,7 +89,7 @@ public class GlowCommand {
 
                     try {
                         for (Entity entity : entitySelector.getEntities(source)) {
-                            ((IEntity) entity).addGlowingTicket(seconds * 20, color);
+                            ((IEntity_Glowable) entity).clientcommands_addGlowingTicket(seconds * 20, color);
                         }
                     } catch (CommandSyntaxException e) {
                         e.printStackTrace();
@@ -109,7 +109,7 @@ public class GlowCommand {
             }
 
             for (Entity entity : entities) {
-                ((IEntity) entity).addGlowingTicket(seconds * 20, color);
+                ((IEntity_Glowable) entity).clientcommands_addGlowingTicket(seconds * 20, color);
             }
 
             source.sendFeedback(Component.translatable("commands.cglow.entity.success", entities.size()));

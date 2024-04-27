@@ -16,8 +16,8 @@ import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgument;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
-import net.earthcomputer.clientcommands.mixin.LegacyRandomSourceAccessor;
-import net.earthcomputer.clientcommands.mixin.ProjectileAccessor;
+import net.earthcomputer.clientcommands.event.MoreClientEntityEvents;
+import net.earthcomputer.clientcommands.event.MoreClientEvents;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -48,6 +48,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -307,7 +308,41 @@ public class FishingCracker {
 
     // region EVENT HANDLERS
 
-    public static void processBobberSpawn(UUID fishingBobberUUID, Vec3 pos, Vec3 velocity) {
+    public static void registerEvents() {
+        MoreClientEntityEvents.POST_ADD.register(packet -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null && canManipulateFishing()) {
+                if (packet.getData() == player.getId() && packet.getType() == EntityType.FISHING_BOBBER) {
+                    processBobberSpawn(packet.getUUID(), new Vec3(packet.getX(), packet.getY(), packet.getZ()), new Vec3(packet.getXa(), packet.getYa(), packet.getZa()));
+                }
+            }
+        });
+        MoreClientEntityEvents.PRE_ADD_MAYBE_ON_NETWORK_THREAD.register(packet -> {
+            // Called on network thread first, FishingCracker.waitingForFishingRod
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player == null) {
+                return;
+            }
+
+            if (!canManipulateFishing() || packet.getData() != player.getId() || packet.getType() != EntityType.FISHING_BOBBER) {
+                return;
+            }
+
+            onFishingBobberEntity();
+        });
+        MoreClientEntityEvents.POST_ADD_XP_ORB.register(packet -> {
+            if (canManipulateFishing()) {
+                processExperienceOrbSpawn(packet.getX(), packet.getY(), packet.getZ(), packet.getValue());
+            }
+        });
+        MoreClientEvents.TIME_SYNC_ON_NETWORK_THREAD.register(packet -> {
+            if (Configs.getFishingManipulation().isEnabled()) {
+                onTimeSync();
+            }
+        });
+    }
+
+    private static void processBobberSpawn(UUID fishingBobberUUID, Vec3 pos, Vec3 velocity) {
         synchronized (STATE_LOCK) {
             if (state != State.WAITING_FOR_FIRST_BOBBER_TICK) {
                 return;
@@ -474,7 +509,7 @@ public class FishingCracker {
         actualLoot = stack;
     }
 
-    public static void processExperienceOrbSpawn(double x, double y, double z, int experienceAmount) {
+    private static void processExperienceOrbSpawn(double x, double y, double z, int experienceAmount) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
             return;
@@ -525,7 +560,7 @@ public class FishingCracker {
         }
     }
 
-    public static void onTimeSync() {
+    private static void onTimeSync() {
         long time = System.nanoTime();
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(timeSyncTimes, 1, timeSyncTimes, 0, timeSyncTimes.length - 1);
@@ -611,7 +646,7 @@ public class FishingCracker {
         reset();
     }
 
-    public static void onFishingBobberEntity() {
+    private static void onFishingBobberEntity() {
         bobberStartTime = System.nanoTime();
 
         synchronized (STATE_LOCK) {
@@ -907,7 +942,7 @@ public class FishingCracker {
         }
 
         private LootContext getLootContext() {
-            return new LootContext(((LegacyRandomSourceAccessor) random).getSeed().get() ^ 0x5deece66dL, SeedfindingUtil.getMCVersion())
+            return new LootContext(((LegacyRandomSource) random).seed.get() ^ 0x5deece66dL, SeedfindingUtil.getMCVersion())
                 .withBiome(SeedfindingUtil.toSeedfindingBiome(level, level.getBiome(BlockPos.containing(pos))))
                 .withOpenWater(inOpenWater)
                 .withLuck(luckLevel);
@@ -1099,7 +1134,7 @@ public class FishingCracker {
         private void checkForCollision() {
             fakeEntity.absMoveTo(pos.x, pos.y, pos.z);
             fakeEntity.setDeltaMovement(velocity);
-            HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(fakeEntity, ((ProjectileAccessor) fakeEntity)::callCanHitEntity);
+            HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(fakeEntity, fakeEntity::canHitEntity);
             if (hitResult.getType() != HitResult.Type.MISS) {
                 failedReason = "collision";
             }
