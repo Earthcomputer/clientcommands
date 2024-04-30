@@ -4,6 +4,9 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -14,6 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.OptionalDouble;
 
 public class RenderQueue {
@@ -21,6 +25,19 @@ public class RenderQueue {
     private static final List<AddQueueEntry> addQueue = new ArrayList<>();
     private static final List<RemoveQueueEntry> removeQueue = new ArrayList<>();
     private static final EnumMap<Layer, Map<Object, Shape>> queue = new EnumMap<>(Layer.class);
+
+    static {
+        ClientTickEvents.START_CLIENT_TICK.register(RenderQueue::tick);
+        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+            context.matrixStack().pushPose();
+
+            Vec3 cameraPos = context.camera().getPosition();
+            context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickDelta());
+
+            context.matrixStack().popPose();
+        });
+    }
 
     public static void add(Layer layer, Object key, Shape shape, int life) {
         addQueue.add(new AddQueueEntry(layer, key, shape, life));
@@ -54,7 +71,7 @@ public class RenderQueue {
         shapes.put(entry.key(), entry.shape());
     }
 
-    public static void tick() {
+    private static void tick(Minecraft mc) {
         for (RemoveQueueEntry entry : removeQueue) {
             Map<Object, Shape> shapes = queue.get(entry.layer());
             if (shapes != null) {

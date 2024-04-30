@@ -1,8 +1,14 @@
 package net.earthcomputer.clientcommands.features;
 
+import net.earthcomputer.clientcommands.event.MoreScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.ProgressScreen;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ServerData;
@@ -10,6 +16,7 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +24,10 @@ import java.util.List;
 public class Relogger {
     public static boolean isRelogging;
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
+
+    static {
+        MoreScreenEvents.BEFORE_ADD.register(Relogger::onAddScreen);
+    }
 
     public static boolean disconnect() {
         return disconnect(false);
@@ -78,8 +89,21 @@ public class Relogger {
         }
     }
 
-    public static void cantHaveRelogSuccess() {
-        relogSuccessTasks.clear();
+    private static boolean onAddScreen(@Nullable Screen screen) {
+        if (screen != null
+            && !(screen instanceof GenericMessageScreen)
+            && !(screen instanceof LevelLoadingScreen)
+            && !(screen instanceof ProgressScreen)
+            && !(screen instanceof ConnectScreen)
+            && !(screen instanceof PauseScreen)
+            && !(screen instanceof ReceivingLevelScreen)
+            && !(screen instanceof TitleScreen)
+            && !(screen instanceof JoinMultiplayerScreen)
+        ) {
+            relogSuccessTasks.clear();
+        }
+
+        return true;
     }
 
     public static boolean onRelogSuccess() {

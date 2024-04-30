@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands;
 
-import net.earthcomputer.clientcommands.mixin.LegacyRandomSourceAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.MinecraftServer;
@@ -8,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.jetbrains.annotations.Nullable;
 
 public final class IntegratedServerUtil {
@@ -97,6 +97,6 @@ public final class IntegratedServerUtil {
         if (player == null) {
             return 0;
         }
-        return ((LegacyRandomSourceAccessor) player.getRandom()).getSeed().get();
+        return ((LegacyRandomSource) player.getRandom()).seed.get();
     }
 }

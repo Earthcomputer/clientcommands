@@ -3,7 +3,6 @@ package net.earthcomputer.clientcommands.command;
 import com.demonwav.mcdev.annotations.Translatable;
 import com.mojang.brigadier.context.CommandContext;
 import net.earthcomputer.clientcommands.interfaces.IClientSuggestionsProvider;
-import net.earthcomputer.clientcommands.mixin.GuiAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -55,7 +54,7 @@ public class ClientCommandHelper {
     public static void addOverlayMessage(Component message, int time) {
         Gui gui = Minecraft.getInstance().gui;
         gui.setOverlayMessage(message, false);
-        ((GuiAccessor) gui).setOverlayMessageTime(time);
+        gui.overlayMessageTime = time;
     }
 
     public static Component getLookCoordsTextComponent(BlockPos pos) {

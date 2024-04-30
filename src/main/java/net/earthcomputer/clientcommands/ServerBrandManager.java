@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands;
 
+import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -9,6 +10,10 @@ public class ServerBrandManager {
 
     private static String serverBrand = "vanilla";
     private static boolean hasWarnedRng = false;
+
+    public static void registerEvents() {
+        ClientConnectionEvents.DISCONNECT.register(ServerBrandManager::onDisconnect);
+    }
 
     public static void setServerBrand(String brand) {
         serverBrand = brand;
@@ -22,7 +27,7 @@ public class ServerBrandManager {
         return "vanilla".equals(serverBrand);
     }
 
-    public static void onDisconnect() {
+    private static void onDisconnect() {
         if (hasWarnedRng && Relogger.isRelogging) {
             Relogger.relogSuccessTasks.add(() -> hasWarnedRng = true);
         }

@@ -2,11 +2,13 @@ package net.earthcomputer.clientcommands.task;
 
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.event.MoreClientEntityEvents;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.SuggestionsHook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.world.entity.EntityType;
 import org.slf4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -21,6 +23,10 @@ public class ItemThrowTask extends SimpleTask {
     public static final int FLAG_WAIT_FOR_ITEMS = 2;
 
     private static WeakReference<ItemThrowTask> currentThrowTask = null;
+
+    static {
+        MoreClientEntityEvents.POST_ADD.register(ItemThrowTask::handleItemSpawn);
+    }
 
     private final int totalItemsToThrow;
     private final int flags;
@@ -105,7 +111,11 @@ public class ItemThrowTask extends SimpleTask {
     protected void onItemSpawn(ClientboundAddEntityPacket packet) {
     }
 
-    public static void handleItemSpawn(ClientboundAddEntityPacket packet) {
+    private static void handleItemSpawn(ClientboundAddEntityPacket packet) {
+        if (packet.getType() != EntityType.ITEM) {
+            return;
+        }
+
         ItemThrowTask task = currentThrowTask == null ? null : currentThrowTask.get();
         if (task == null) {
             return;

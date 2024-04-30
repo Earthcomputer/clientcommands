@@ -1,8 +1,11 @@
 package net.earthcomputer.clientcommands.task;
 
 import com.mojang.logging.LogUtils;
+import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.features.Relogger;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -14,11 +17,16 @@ import java.util.Set;
 public class TaskManager {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    static {
+        ClientTickEvents.START_CLIENT_TICK.register(TaskManager::tick);
+        ClientLevelEvents.UNLOAD_LEVEL.register(TaskManager::onLevelUnload);
+    }
+
     private static final Map<String, LongTask> tasks = new LinkedHashMap<>();
     private static long nextTaskId = 1;
     private static String forceAddedTaskName = null;
 
-    public static void tick() {
+    private static void tick(Minecraft mc) {
         if (tasks.isEmpty()) {
             return;
         }
@@ -74,7 +82,7 @@ public class TaskManager {
         }
     }
 
-    public static void onLevelUnload(boolean isDisconnect) {
+    private static void onLevelUnload(boolean isDisconnect) {
         var oldTasks = new ArrayList<Map.Entry<String, LongTask>>();
         {
             var itr = tasks.entrySet().iterator();
