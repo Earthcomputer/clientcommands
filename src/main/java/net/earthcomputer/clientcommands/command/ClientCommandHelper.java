@@ -88,8 +88,8 @@ public class ClientCommandHelper {
     public static final Map<String, Runnable> runnables = new HashMap<>();
 
     public static String registerCode(Runnable code) {
-        String randomString = new Random().ints(48, 122 + 1)
-            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+        String randomString = new Random().ints('0', 'z' + 1)
+            .filter(i -> (i <= '9' || i >= 'A') && (i <= 'Z' || i >= 'a'))
             .limit(10)
             .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
             .toString();
