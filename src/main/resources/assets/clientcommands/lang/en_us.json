@@ -334,7 +334,7 @@
   "snakeGame.title": "Snake",
   "snakeGame.score": "Score: %d",
 
-  "ticTacToeGame.title": "Tic tac toe against %s",
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
   "ticTacToeGame.playingWith": "You are playing with %s",
   "ticTacToeGame.noughts": "noughts (O)",
   "ticTacToeGame.crosses": "crosses (X)",
@@ -349,12 +349,12 @@
   "c2cpacket.messageC2CPacket.incoming": "%s -> you: %s",
   "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s",
 
-  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic tac toe",
-  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic tac toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
   "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
   "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
   "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
   "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic tac toe and won",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic tac toe, click to make your move"
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }
