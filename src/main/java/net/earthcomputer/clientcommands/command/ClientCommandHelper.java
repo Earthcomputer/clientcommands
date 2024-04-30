@@ -14,6 +14,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 public class ClientCommandHelper {
 
     public static <T> T getFlag(CommandContext<FabricClientCommandSource> ctx, Flag<T> flag) {
@@ -56,7 +60,7 @@ public class ClientCommandHelper {
 
     public static Component getLookCoordsTextComponent(BlockPos pos) {
         return getCommandTextComponent(Component.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
-                String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
+            String.format("/clook block %d %d %d", pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static Component getLookCoordsTextComponent(MutableComponent component, BlockPos pos) {
@@ -65,7 +69,7 @@ public class ClientCommandHelper {
 
     public static Component getGlowCoordsTextComponent(BlockPos pos) {
         return getCommandTextComponent(Component.translatable("commands.client.blockpos", pos.getX(), pos.getY(), pos.getZ()),
-                String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
+            String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static Component getGlowCoordsTextComponent(MutableComponent component, BlockPos pos) {
@@ -78,8 +82,19 @@ public class ClientCommandHelper {
 
     public static Component getCommandTextComponent(MutableComponent component, String command) {
         return component.withStyle(style -> style.applyFormat(ChatFormatting.UNDERLINE)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(command))));
+            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(command))));
     }
 
+    public static final Map<String, Runnable> runnables = new HashMap<>();
+
+    public static String registerCode(Runnable code) {
+        String randomString = new Random().ints(48, 122 + 1)
+            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+            .limit(10)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
+        runnables.put(randomString, code);
+        return randomString;
+    }
 }

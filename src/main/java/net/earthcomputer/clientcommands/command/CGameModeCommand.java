@@ -36,10 +36,10 @@ public class CGameModeCommand {
         if (profiles.size() != 1) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
-        PlayerInfo player = source.getClient().getConnection().getOnlinePlayers().stream()
-            .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
-            .findAny()
-            .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
+        PlayerInfo player = source.getClient().getConnection().getPlayerInfo(profiles.iterator().next().getName());
+        if (player == null) {
+            throw PLAYER_NOT_FOUND_EXCEPTION.create();
+        }
 
         source.sendFeedback(Component.translatable("commands.cgamemode.playerGameMode", player.getProfile().getName(), player.getGameMode().getShortDisplayName()));
         return Command.SINGLE_SUCCESS;

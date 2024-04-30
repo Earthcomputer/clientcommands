@@ -158,7 +158,6 @@
   "commands.cping.success.other": "Ping rata rata %s adalah %dms",
   "commands.cping.singleplayer": "Anda berada di dunia singleplayer (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Pemain tidak ditemukan",
-  "commands.cping.tooManyPlayers": "Pencarian anda hanya dapat cocok dengan maksimal 1 pemain",
 
   "commands.cpos.level.overworld": "Overworld",
   "commands.cpos.level.the_end": "End",

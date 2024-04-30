@@ -31,14 +31,13 @@ public class WhisperEncryptedCommand {
     }
 
     private static int whisper(FabricClientCommandSource source, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {
-        assert source.getClient().getConnection() != null;
         if (profiles.size() != 1) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
-        PlayerInfo recipient = source.getClient().getConnection().getOnlinePlayers().stream()
-            .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
-            .findFirst()
-            .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
+        PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(profiles.iterator().next().getName());
+        if (recipient == null) {
+            throw PLAYER_NOT_FOUND_EXCEPTION.create();
+        }
 
         MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), message);
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);

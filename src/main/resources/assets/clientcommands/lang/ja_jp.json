@@ -158,7 +158,6 @@
   "commands.cping.success.other": " %s の平均pingは %dms です",
   "commands.cping.singleplayer": "あなたはシングルプレイヤーワールドにいます (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "プレイヤーが見つかりませんでした",
-  "commands.cping.tooManyPlayers": "あなたのクエリは最大でも1人のプレイヤーにしかマッチできません",
 
   "commands.cpos.level.overworld": "現世",
   "commands.cpos.level.the_end": "ジ・エンド",

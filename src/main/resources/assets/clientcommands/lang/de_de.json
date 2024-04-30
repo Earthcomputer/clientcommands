@@ -173,7 +173,6 @@
   "commands.cping.success.other": "Der durchschnittliche Ping von %s ist %dms",
   "commands.cping.singleplayer": "Du bist in einer Einzelspielerwelt (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Spieler nicht gefunden",
-  "commands.cping.tooManyPlayers": "Deine Abfrage kann maximal 1 Spieler betreffen",
 
   "commands.cpos.level.overworld": "die Oberwelt",
   "commands.cpos.level.the_end": "das Ende",

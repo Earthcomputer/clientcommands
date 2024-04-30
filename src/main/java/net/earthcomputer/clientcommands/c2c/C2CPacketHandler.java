@@ -4,7 +4,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.StartTicTacToeGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ListenCommand;
+import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -31,6 +34,8 @@ public class C2CPacketHandler implements C2CPacketListener {
 
     public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, RegistryFriendlyByteBuf>protocolUnbound(ConnectionProtocol.PLAY, PacketFlow.CLIENTBOUND, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
+        .addPacket(StartTicTacToeGameC2CPacket.ID, StartTicTacToeGameC2CPacket.CODEC)
+        .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
     ).bind(RegistryFriendlyByteBuf.decorator(Minecraft.getInstance().getConnection().registryAccess()));
 
     private static final C2CPacketHandler instance = new C2CPacketHandler();
@@ -100,6 +105,16 @@ public class C2CPacketHandler implements C2CPacketListener {
         prefix.append(Component.literal(" "));
         Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
         Minecraft.getInstance().gui.getChat().addMessage(component);
+    }
+
+    @Override
+    public void onStartTicTacToeGameC2CPacket(StartTicTacToeGameC2CPacket packet) {
+        TicTacToeCommand.onStartTicTacToeGameC2CPacket(packet);
+    }
+
+    @Override
+    public void onPutTicTacToeMarkC2CPacket(PutTicTacToeMarkC2CPacket packet) {
+        TicTacToeCommand.onPutTicTacToeMarkC2CPacket(packet);
     }
 
     @Override
