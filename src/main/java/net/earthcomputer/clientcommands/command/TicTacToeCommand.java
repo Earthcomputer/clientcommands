@@ -181,7 +181,7 @@ public class TicTacToeCommand {
             return null;
         }
 
-        public enum Mark {
+        private enum Mark {
             NOUGHT(Component.translatable("ticTacToeGame.noughts")),
             CROSS(Component.translatable("ticTacToeGame.crosses"));
 
