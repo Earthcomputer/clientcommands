@@ -27,7 +27,6 @@
     "events.MinecraftMixin",
     "lengthextender.EditBoxMixin",
     "lengthextender.StringUtilMixin",
-    "lengthextender.StringUtilMixin2",
     "rngevents.AnvilMenuMixin",
     "rngevents.AxeHoeAndShovelItemMixin",
     "rngevents.ClientPacketListenerMixin",
