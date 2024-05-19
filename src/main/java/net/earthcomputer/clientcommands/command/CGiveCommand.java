@@ -35,7 +35,7 @@ public class CGiveCommand {
         source.getClient().gameMode.handleCreativeModeItemAdd(stack, 36 + source.getPlayer().getInventory().selected);
         source.getPlayer().inventoryMenu.broadcastChanges();
 
-        source.sendFeedback(Component.translatable("commands.cgive.success", count, stack.getDisplayName()));
+        source.sendFeedback(Component.translatable("commands.cgive.success", stack.getCount(), stack.getDisplayName()));
         return Command.SINGLE_SUCCESS;
     }
 }
