@@ -58,7 +58,6 @@
   "commands.ccreativetab.saveFile.failed": "Could not save creative tabs file",
   "commands.ccreativetab.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
 
-  "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Incompatible enchantments",
