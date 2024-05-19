@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.google.common.cache.CacheBuilder;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -15,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -24,13 +24,12 @@ import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TicTacToeCommand {
@@ -44,22 +43,20 @@ public class TicTacToeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctictactoe")
             .then(literal("start")
-                .then(argument("opponent", gameProfile())
-                    .executes(ctx -> start(ctx.getSource(), getProfileArgument(ctx, "opponent")))))
+                .then(argument("opponent", player())
+                    .executes(ctx -> start(ctx.getSource(), getPlayer(ctx, "opponent")))))
             .then(literal("open")
                 .then(argument("opponent", word())
                     .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(activeGames.keySet(), builder))
                     .executes(ctx -> open(ctx.getSource(), getString(ctx, "opponent"))))));
     }
 
-    private static int start(FabricClientCommandSource source, Collection<GameProfile> profiles) throws CommandSyntaxException {
-        if (profiles.size() != 1) {
-            throw PLAYER_NOT_FOUND_EXCEPTION.create();
-        }
-        PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(profiles.iterator().next().getName());
+    private static int start(FabricClientCommandSource source, AbstractClientPlayer player) throws CommandSyntaxException {
+        PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(player.getUUID());
         if (recipient == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
+
         StartTicTacToeGameC2CPacket packet = new StartTicTacToeGameC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), false);
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);
         pendingInvites.add(recipient.getProfile().getName());

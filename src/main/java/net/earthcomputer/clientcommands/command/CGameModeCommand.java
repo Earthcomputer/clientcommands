@@ -1,21 +1,20 @@
 package net.earthcomputer.clientcommands.command;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameType;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static dev.xpple.clientarguments.arguments.CEnumArgument.*;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CGameModeCommand {
@@ -25,23 +24,20 @@ public class CGameModeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cgamemode")
             .then(literal("query")
-                .then(argument("player", gameProfile())
-                    .executes(ctx -> getPlayerGameMode(ctx.getSource(), getProfileArgument(ctx, "player")))))
+                .then(argument("player", player())
+                    .executes(ctx -> getPlayerGameMode(ctx.getSource(), getPlayer(ctx, "player")))))
             .then(literal("list")
                 .then(argument("gameMode", enumArg(GameType.class))
                     .executes(ctx -> listWithGameMode(ctx.getSource(), getEnum(ctx, "gameMode"))))));
     }
 
-    private static int getPlayerGameMode(FabricClientCommandSource source, Collection<GameProfile> profiles) throws CommandSyntaxException {
-        if (profiles.size() != 1) {
-            throw PLAYER_NOT_FOUND_EXCEPTION.create();
-        }
-        PlayerInfo player = source.getClient().getConnection().getPlayerInfo(profiles.iterator().next().getName());
-        if (player == null) {
+    private static int getPlayerGameMode(FabricClientCommandSource source, AbstractClientPlayer player) throws CommandSyntaxException {
+        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.getUUID());
+        if (playerInfo == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
-        source.sendFeedback(Component.translatable("commands.cgamemode.playerGameMode", player.getProfile().getName(), player.getGameMode().getShortDisplayName()));
+        source.sendFeedback(Component.translatable("commands.cgamemode.playerGameMode", playerInfo.getProfile().getName(), playerInfo.getGameMode().getShortDisplayName()));
         return Command.SINGLE_SUCCESS;
     }
 

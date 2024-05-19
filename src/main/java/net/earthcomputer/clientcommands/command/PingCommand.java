@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.command;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,11 +8,10 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 
-import java.util.Collection;
-
-import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class PingCommand {
@@ -24,8 +22,8 @@ public class PingCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cping")
             .executes(ctx -> printPing(ctx.getSource()))
-            .then(argument("player", gameProfile())
-                .executes(ctx -> printPing(ctx.getSource(), getProfileArgument(ctx, "player"))))
+            .then(argument("player", player())
+                .executes(ctx -> printPing(ctx.getSource(), getPlayer(ctx, "player"))))
         );
     }
 
@@ -43,21 +41,18 @@ public class PingCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int printPing(FabricClientCommandSource source, Collection<GameProfile> profiles) throws CommandSyntaxException {
+    private static int printPing(FabricClientCommandSource source, AbstractClientPlayer player) throws CommandSyntaxException {
         if (source.getClient().isLocalServer()) {
             throw PLAYER_IN_SINGLEPLAYER_EXCEPTION.create();
         }
 
-        if (profiles.size() != 1) {
-            throw PLAYER_NOT_FOUND_EXCEPTION.create();
-        }
-        PlayerInfo player = source.getClient().getConnection().getPlayerInfo(profiles.iterator().next().getName());
-        if (player == null) {
+        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.getUUID());
+        if (playerInfo == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
-        int ping = player.getLatency();
-        source.sendFeedback(Component.translatable("commands.cping.success.other", player.getProfile().getName(), ping));
+        int ping = playerInfo.getLatency();
+        source.sendFeedback(Component.translatable("commands.cping.success.other", playerInfo.getProfile().getName(), ping));
         return Command.SINGLE_SUCCESS;
     }
 
