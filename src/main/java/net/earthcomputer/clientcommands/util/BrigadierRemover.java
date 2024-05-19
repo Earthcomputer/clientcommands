@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands.features;
+package net.earthcomputer.clientcommands.util;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.ArgumentCommandNode;

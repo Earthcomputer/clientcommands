@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.features;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;

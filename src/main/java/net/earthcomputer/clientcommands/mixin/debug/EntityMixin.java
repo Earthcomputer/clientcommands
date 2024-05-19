@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin.debug;
 
-import net.earthcomputer.clientcommands.features.DebugRandom;
+import net.earthcomputer.clientcommands.util.DebugRandom;
 import net.earthcomputer.clientcommands.interfaces.IEntity_Debug;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;

@@ -5,7 +5,7 @@ import com.mojang.logging.LogUtils;
 import com.seedfinding.mcseed.lcg.LCG;
 import com.seedfinding.mcseed.rand.Rand;
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;

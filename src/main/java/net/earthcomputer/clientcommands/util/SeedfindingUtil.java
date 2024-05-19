@@ -1,9 +1,8 @@
-package net.earthcomputer.clientcommands.features;
+package net.earthcomputer.clientcommands.util;
 
 import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.loot.enchantment.Enchantments;
-import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;

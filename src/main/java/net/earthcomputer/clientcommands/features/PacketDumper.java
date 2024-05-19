@@ -19,6 +19,7 @@ import io.netty.handler.codec.EncoderException;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
+import net.earthcomputer.clientcommands.util.MappingsHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;

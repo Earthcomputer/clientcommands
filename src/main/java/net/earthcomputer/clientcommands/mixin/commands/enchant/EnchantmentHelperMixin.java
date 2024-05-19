@@ -2,8 +2,8 @@ package net.earthcomputer.clientcommands.mixin.commands.enchant;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import net.earthcomputer.clientcommands.MultiVersionCompat;
-import net.earthcomputer.clientcommands.features.SeedfindingUtil;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
+import net.earthcomputer.clientcommands.util.SeedfindingUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;

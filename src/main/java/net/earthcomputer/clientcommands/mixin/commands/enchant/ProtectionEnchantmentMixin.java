@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin.commands.enchant;
 
-import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import org.spongepowered.asm.mixin.Mixin;
