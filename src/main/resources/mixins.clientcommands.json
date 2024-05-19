@@ -63,6 +63,7 @@
     "requireAnnotations": true
   },
   "client": [
+    "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.generic.CommandSuggestionsMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
