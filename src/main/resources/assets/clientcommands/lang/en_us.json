@@ -8,6 +8,7 @@
   "commands.calias.addAlias.success": "Successfully added alias \"%s\"",
   "commands.calias.listAliases.noAliasesRegistered": "No aliases registered",
   "commands.calias.listAliases.success": "%s aliases registered:",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
   "commands.calias.removeAlias.success": "Successfully removed alias \"%s\"",
 
   "commands.careastats.notLoaded": "A chunk in this area is not loaded",

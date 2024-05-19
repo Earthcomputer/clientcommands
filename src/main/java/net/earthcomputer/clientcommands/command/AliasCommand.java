@@ -12,6 +12,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.BrigadierRemover;
+import net.earthcomputer.clientcommands.interfaces.IClientSuggestionsProvider_Alias;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
@@ -44,6 +45,7 @@ public class AliasCommand {
     private static final DynamicCommandExceptionType ALIAS_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.calias.addAlias.aliasAlreadyExists", arg));
     private static final DynamicCommandExceptionType COMMAND_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.calias.addAlias.commandAlreadyExists", arg));
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.calias.notFound", arg));
+    private static final DynamicCommandExceptionType RECURSIVE_ALIAS_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.calias.recursive", arg));
 
     private static final HashMap<String, String> aliasMap = loadAliases();
 
@@ -76,6 +78,12 @@ public class AliasCommand {
         if (cmd == null) {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
         }
+
+        if (((IClientSuggestionsProvider_Alias) source).clientcommands_isAliasSeen(aliasKey)) {
+            throw RECURSIVE_ALIAS_EXCEPTION.create(aliasKey);
+        }
+        ((IClientSuggestionsProvider_Alias) source).clientcommands_addSeenAlias(aliasKey);
+
         int inlineArgumentCount = (int) Pattern.compile("(?<!%)%(?:%%)*(?!%)").matcher(cmd).results().count();
         if (inlineArgumentCount > 0) {
             String[] argumentArray = arguments.split(" ", inlineArgumentCount + 1);

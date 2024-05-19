@@ -79,7 +79,7 @@ public class Configs {
         Configs.maxEnchantItemThrows = Mth.clamp(maxEnchantItemThrows, 0, 1000000);
     }
 
-    @Config(setter = @Config.Setter("setMinEnchantBookshelves"))
+    @Config(setter = @Config.Setter("setMinEnchantBookshelves"), temporary = true)
     private static int minEnchantBookshelves = 0;
     public static int getMinEnchantBookshelves() {
         return minEnchantBookshelves;
@@ -89,7 +89,7 @@ public class Configs {
         Configs.maxEnchantBookshelves = Math.max(Configs.maxEnchantBookshelves, Configs.minEnchantBookshelves);
     }
 
-    @Config(setter = @Config.Setter("setMaxEnchantBookshelves"))
+    @Config(setter = @Config.Setter("setMaxEnchantBookshelves"), temporary = true)
     private static int maxEnchantBookshelves = 15;
     public static int getMaxEnchantBookshelves() {
         return maxEnchantBookshelves;
@@ -99,7 +99,7 @@ public class Configs {
         Configs.minEnchantBookshelves = Math.min(Configs.minEnchantBookshelves, Configs.maxEnchantBookshelves);
     }
 
-    @Config(setter = @Config.Setter("setMinEnchantLevels"))
+    @Config(setter = @Config.Setter("setMinEnchantLevels"), temporary = true)
     private static int minEnchantLevels = 1;
     public static int getMinEnchantLevels() {
         return minEnchantLevels;
@@ -109,7 +109,7 @@ public class Configs {
         Configs.maxEnchantLevels = Math.max(Configs.maxEnchantLevels, Configs.minEnchantLevels);
     }
 
-    @Config(setter = @Config.Setter("setMaxEnchantLevels"))
+    @Config(setter = @Config.Setter("setMaxEnchantLevels"), temporary = true)
     private static int maxEnchantLevels = 30;
     public static int getMaxEnchantLevels() {
         return maxEnchantLevels;

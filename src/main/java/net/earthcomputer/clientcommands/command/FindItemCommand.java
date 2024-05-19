@@ -40,7 +40,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -242,8 +244,7 @@ public class FindItemCommand {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (!(blockEntity instanceof Container) && state.getBlock() != Blocks.ENDER_CHEST) {
                 return false;
-            }
-            if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
+            } else if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
                 if (ChestBlock.isChestBlockedAt(level, pos)) {
                     return false;
                 }
@@ -251,6 +252,8 @@ public class FindItemCommand {
                     BlockPos offsetPos = pos.relative(ChestBlock.getConnectedDirection(state));
                     return level.getBlockState(offsetPos).getBlock() != state.getBlock() || !ChestBlock.isChestBlockedAt(level, offsetPos);
                 }
+            } else if (state.getBlock() instanceof ShulkerBoxBlock && blockEntity instanceof ShulkerBoxBlockEntity shulkerBox) {
+                return ShulkerBoxBlock.canOpen(state, level, pos, shulkerBox);
             }
             return true;
         }
