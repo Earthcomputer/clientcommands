@@ -225,7 +225,7 @@ public class ClientBlockPredicateArgument implements ArgumentType<ClientBlockPre
     }
 
     public interface ClientBlockPredicate {
-        boolean test(HolderLookup.Provider holderLookupProvider, BlockGetter blockGetter, BlockPos pos);
+        boolean test(HolderLookup.Provider holderLookupProvider, BlockGetter blockGetter, BlockPos pos) throws CommandSyntaxException;
         boolean canEverMatch(BlockState state);
 
         static ClientBlockPredicate simple(Predicate<BlockState> delegate) {

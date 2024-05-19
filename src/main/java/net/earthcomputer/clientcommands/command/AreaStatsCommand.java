@@ -168,7 +168,7 @@ public class AreaStatsCommand {
         return blocks;
     }
 
-    private static int loop(ClientLevel level, int start1, int end1, int start2, int end2, int start3, int end3, ClientBlockPredicate predicate, LevelChunk chunk, BlockPos.MutableBlockPos mutablePos) {
+    private static int loop(ClientLevel level, int start1, int end1, int start2, int end2, int start3, int end3, ClientBlockPredicate predicate, LevelChunk chunk, BlockPos.MutableBlockPos mutablePos) throws CommandSyntaxException {
         int counter = 0;
         for (int x = start1; x <= end1; x++) {
             mutablePos.setX(x);
