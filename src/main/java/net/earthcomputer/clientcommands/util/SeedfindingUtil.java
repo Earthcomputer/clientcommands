@@ -67,7 +67,15 @@ public class SeedfindingUtil {
             return false;
         }
         String name = id.getPath();
-        return Enchantments.getFor(SeedfindingUtil.getMCVersion()).stream().anyMatch(ench -> ench.getName().equals(name));
+
+        // Hack: sweeping was renamed to sweeping_edge, do an inverse rename here.
+        // This should no longer be necessary once enchantments are data-driven in 1.21
+        if ("sweeping_edge".equals(name)) {
+            name = "sweeping";
+        }
+
+        String name_f = name;
+        return Enchantments.getFor(SeedfindingUtil.getMCVersion()).stream().anyMatch(ench -> ench.getName().equals(name_f));
     }
 
     public static MCVersion getMCVersion() {
