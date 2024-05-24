@@ -8,6 +8,7 @@
     "commands.enchant.EnchantmentHelperMixin",
     "commands.enchant.EnchantmentScreenMixin",
     "commands.enchant.ProtectionEnchantmentMixin",
+    "commands.findblock.LevelChunkMixin",
     "commands.fish.FishingHookMixin",
     "commands.fish.FishingRodItemMixin",
     "commands.fish.ItemEntityMixin",
@@ -65,6 +66,7 @@
   "client": [
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
+    "commands.findblock.ClientLevelMixin",
     "commands.generic.CommandSuggestionsMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",

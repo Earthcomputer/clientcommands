@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.task;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -17,15 +18,15 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Predicate;
 
 public abstract class RenderDistanceScanTask extends SimpleTask {
     private static final long MAX_SCAN_TIME = 30_000_000L; // 30ms
 
-    private final boolean keepSearching;
+    protected final boolean keepSearching;
 
-    private Iterator<BlockPos.MutableBlockPos> squarePosIterator;
+    private Set<ChunkPos> remainingChunks;
 
     protected RenderDistanceScanTask(boolean keepSearching) {
         this.keepSearching = keepSearching;
@@ -33,12 +34,21 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     @Override
     public void initialize() {
-        squarePosIterator = createIterator();
+        remainingChunks = new HashSet<>();
+        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+        if (cameraEntity == null) {
+            _break();
+            return;
+        }
+        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(new ChunkPos(pos.immutable())));
+        ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> remainingChunks.add(new ChunkPos(pos)));
+        ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> remainingChunks.remove(pos));
+        ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> remainingChunks.add(pos));
     }
 
     @Override
     public boolean condition() {
-        return squarePosIterator != null;
+        return hasChunksRemaining() || keepSearching;
     }
 
     @Override
@@ -48,6 +58,10 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         } catch (CommandSyntaxException e) {
             ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
         }
+    }
+
+    protected boolean hasChunksRemaining() {
+        return !remainingChunks.isEmpty();
     }
 
     protected void doTick() throws CommandSyntaxException {
@@ -61,9 +75,9 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         assert level != null;
 
         long startTime = System.nanoTime();
-        while (squarePosIterator.hasNext()) {
-            BlockPos chunkPosAsBlockPos = squarePosIterator.next();
-            ChunkPos chunkPos = new ChunkPos(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ());
+        while (!remainingChunks.isEmpty()) {
+            ChunkPos chunkPos = remainingChunks.iterator().next();
+            remainingChunks.remove(chunkPos);
 
             if (canScanChunk(cameraEntity, chunkPos)) {
                 int minSection = level.getMinSection();
@@ -81,18 +95,6 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
                 return;
             }
         }
-
-        if (keepSearching) {
-            if (canKeepSearchingNow()) {
-                squarePosIterator = createIterator();
-            }
-        } else {
-            squarePosIterator = null;
-        }
-    }
-
-    protected boolean canKeepSearchingNow() {
-        return true;
     }
 
     protected boolean canScanChunk(Entity cameraEntity, ChunkPos pos) {
@@ -142,13 +144,4 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     }
 
     protected abstract void scanBlock(Entity cameraEntity, BlockPos pos) throws CommandSyntaxException;
-
-    private Iterator<BlockPos.MutableBlockPos> createIterator() {
-        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
-        if (cameraEntity == null) {
-            _break();
-            return null;
-        }
-        return BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator();
-    }
 }

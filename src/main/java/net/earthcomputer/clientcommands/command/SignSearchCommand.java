@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
@@ -30,10 +29,10 @@ public class SignSearchCommand {
         dispatcher.register(literal("csignsearch")
             .then(literal("text")
                 .then(argument("query", greedyString())
-                    .executes(ctx -> FindBlockCommand.findBlock(Component.translatable("commands.csignsearch.starting"), predicate(getString(ctx, "query"))))))
+                    .executes(ctx -> FindBlockCommand.findBlock(ctx, Component.translatable("commands.csignsearch.starting"), predicate(getString(ctx, "query"))))))
             .then(literal("regex")
                 .then(argument("query", greedyRegex())
-                    .executes(ctx -> FindBlockCommand.findBlock(Component.translatable("commands.csignsearch.starting"), predicate(getRegex(ctx, "query")))))));
+                    .executes(ctx -> FindBlockCommand.findBlock(ctx, Component.translatable("commands.csignsearch.starting"), predicate(getRegex(ctx, "query")))))));
     }
 
     private static ClientBlockPredicateArgument.ClientBlockPredicate predicate(String query) {
