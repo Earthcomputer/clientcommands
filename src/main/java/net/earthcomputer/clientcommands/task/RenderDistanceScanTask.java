@@ -1,10 +1,13 @@
 package net.earthcomputer.clientcommands.task;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -39,7 +42,15 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     }
 
     @Override
-    protected void onTick() {
+    protected final void onTick() {
+        try {
+            doTick();
+        } catch (CommandSyntaxException e) {
+            ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
+        }
+    }
+
+    protected void doTick() throws CommandSyntaxException {
         Entity cameraEntity = Minecraft.getInstance().cameraEntity;
         if (cameraEntity == null) {
             _break();
@@ -122,7 +133,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         return section.maybeHas(stateTest);
     }
 
-    private void scanChunkSection(Entity cameraEntity, SectionPos sectionPos) {
+    private void scanChunkSection(Entity cameraEntity, SectionPos sectionPos) throws CommandSyntaxException {
         ClientLevel level = Minecraft.getInstance().level;
         assert level != null;
         for (BlockPos pos : BlockPos.betweenClosed(sectionPos.minBlockX(), sectionPos.minBlockY(), sectionPos.minBlockZ(), sectionPos.maxBlockX(), sectionPos.maxBlockY(), sectionPos.maxBlockZ())) {
@@ -130,7 +141,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         }
     }
 
-    protected abstract void scanBlock(Entity cameraEntity, BlockPos pos);
+    protected abstract void scanBlock(Entity cameraEntity, BlockPos pos) throws CommandSyntaxException;
 
     private Iterator<BlockPos.MutableBlockPos> createIterator() {
         Entity cameraEntity = Minecraft.getInstance().cameraEntity;

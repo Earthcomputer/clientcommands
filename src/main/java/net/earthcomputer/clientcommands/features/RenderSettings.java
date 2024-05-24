@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.features;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
+import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
@@ -16,11 +17,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RenderSettings {
-
     private static final List<Tuple<CEntitySelector, Boolean>> entityRenderSelectors = new ArrayList<>();
     private static final Set<UUID> disabledEntities = new HashSet<>();
 
-    public static void clearEntityRenderSelectors() {
+    static {
+        ClientConnectionEvents.DISCONNECT.register(RenderSettings::clearEntityRenderSelectors);
+    }
+
+    private static void clearEntityRenderSelectors() {
         if (Relogger.isRelogging) {
             var oldSelectors = new ArrayList<>(entityRenderSelectors);
             Relogger.relogSuccessTasks.add(() -> entityRenderSelectors.addAll(oldSelectors));

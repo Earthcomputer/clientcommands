@@ -61,7 +61,7 @@ public class CreativeTabCommand {
 
     private static final Map<String, Tab> tabs = new HashMap<>();
 
-    public static void registerItemGroups() {
+    public static void registerCreativeTabs() {
         try {
             loadFile();
         } catch (IOException e) {
@@ -74,7 +74,7 @@ public class CreativeTabCommand {
         var holderLookupProvider = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
         tabs.forEach((key, tab) -> {
             try {
-                tab.registerItemGroup(holderLookupProvider, key);
+                tab.registerCreativeTab(holderLookupProvider, key);
             } catch (Throwable e) {
                 LOGGER.error("Could not load tab {}", key, e);
             }
@@ -323,7 +323,7 @@ public class CreativeTabCommand {
     }
 
     private record Tab(CompoundTag icon, ListTag items) {
-        void registerItemGroup(HolderLookup.Provider holderLookupProvider, String key) {
+        void registerCreativeTab(HolderLookup.Provider holderLookupProvider, String key) {
             Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, new ResourceLocation("clientcommands", key), FabricItemGroup.builder()
                     .title(Component.literal(key))
                     .icon(() -> singleItemFromNbt(holderLookupProvider, icon))

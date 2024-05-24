@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import com.mojang.brigadier.suggestion.Suggestions;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -11,6 +12,10 @@ import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import java.util.concurrent.CompletableFuture;
 
 public final class SuggestionsHook {
+    static {
+        ClientConnectionEvents.DISCONNECT.register(SuggestionsHook::onDisconnect);
+    }
+
     private SuggestionsHook() {
     }
 
@@ -49,7 +54,7 @@ public final class SuggestionsHook {
         return true;
     }
 
-    public static void onDisconnect() {
+    private static void onDisconnect() {
         for (CompletableFuture<Suggestions> future : pendingSuggestions.values()) {
             future.complete(Suggestions.empty().join());
         }

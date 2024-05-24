@@ -4,22 +4,25 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
+import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
 import net.earthcomputer.clientcommands.command.*;
+import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.earthcomputer.clientcommands.features.CommandExecutionCustomPayload;
-import net.earthcomputer.clientcommands.features.MappingsHelper;
-import net.earthcomputer.clientcommands.render.RenderQueue;
+import net.earthcomputer.clientcommands.features.FishingCracker;
+import net.earthcomputer.clientcommands.features.ServerBrandManager;
+import net.earthcomputer.clientcommands.util.MappingsHelper;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.features.Relogger;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -27,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -62,20 +64,7 @@ public class ClientCommands implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
-
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-            context.matrixStack().pushPose();
-
-            Vec3 cameraPos = context.camera().getPosition();
-            context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickDelta());
-
-            context.matrixStack().popPose();
-        });
-
-        PayloadTypeRegistry.playC2S().register(CommandExecutionCustomPayload.TYPE, CommandExecutionCustomPayload.CODEC);
-
+        // Config
         configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
         try {
             Files.createDirectories(configDir);
@@ -84,10 +73,23 @@ public class ClientCommands implements ClientModInitializer {
         }
 
         new ModConfigBuilder("clientcommands", Configs.class).build();
-
-        CreativeTabCommand.registerItemGroups();
+        ClientConnectionEvents.DISCONNECT.register(() -> {
+            if (!Relogger.isRelogging) {
+                BetterConfigAPI.getInstance().getModConfig("clientcommands").resetTemporaryConfigs();
+            }
+        });
 
         MappingsHelper.load();
+
+        // Registration
+        PayloadTypeRegistry.playC2S().register(CommandExecutionCustomPayload.TYPE, CommandExecutionCustomPayload.CODEC);
+        CreativeTabCommand.registerCreativeTabs();
+
+        // Events
+        ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
+        FishingCracker.registerEvents();
+        PlayerRandCracker.registerEvents();
+        ServerBrandManager.registerEvents();
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {

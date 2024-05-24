@@ -1,8 +1,9 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -85,6 +86,12 @@ public class PlayerRandCracker {
     public static boolean isPredictingBlockBreaking = false;
     @Nullable
     private static Runnable postBlockBreakPredictAction = null;
+
+    public static void registerEvents() {
+        ClientLevelEvents.LOAD_LEVEL.register(level -> {
+            resetCracker("recreated");
+        });
+    }
 
     public static void postSendBlockBreakingPredictionPacket() {
         if (postBlockBreakPredictAction != null) {
@@ -226,10 +233,6 @@ public class PlayerRandCracker {
         } else {
             resetCracker("baneOfArthropods");
         }
-    }
-
-    public static void onRecreatePlayer() {
-        resetCracker("recreated");
     }
 
     public static void onUnbreaking(ItemStack stack, int amount, int unbreakingLevel) {

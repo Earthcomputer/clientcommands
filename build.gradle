@@ -5,12 +5,11 @@ plugins {
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
+base {
+	archivesName = project.archives_base_name
+	version = project.mod_version
+	group = project.maven_group
+}
 
 sourceSets {
 	codeGen
@@ -80,6 +79,8 @@ jar {
 	from(configurations.includedLibrary.collect { it.isDirectory() ? it : zipTree(it) }) {
 		include 'com/seedfinding/**'
 	}
+
+	from("LICENSE")
 }
 
 processResources {
@@ -98,6 +99,11 @@ processResources {
 	}
 }
 
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
@@ -106,10 +112,6 @@ tasks.register('sourcesJar', Jar) {
 	dependsOn classes
 	archiveClassifier.set("sources")
 	from sourceSets.main.allSource
-}
-
-jar {
-	from "LICENSE"
 }
 
 tasks.register('codeGen', JavaExec) {

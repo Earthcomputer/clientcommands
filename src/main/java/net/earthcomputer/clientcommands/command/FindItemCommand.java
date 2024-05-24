@@ -3,11 +3,10 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
-import net.earthcomputer.clientcommands.GuiBlocker;
-import net.earthcomputer.clientcommands.MathUtil;
+import net.earthcomputer.clientcommands.features.ClientcommandsDataQueryHandler;
+import net.earthcomputer.clientcommands.util.GuiBlocker;
+import net.earthcomputer.clientcommands.util.MathUtil;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
-import net.earthcomputer.clientcommands.mixin.AbstractContainerMenuAccessor;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -41,7 +40,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -243,8 +244,7 @@ public class FindItemCommand {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (!(blockEntity instanceof Container) && state.getBlock() != Blocks.ENDER_CHEST) {
                 return false;
-            }
-            if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
+            } else if (state.getBlock() instanceof ChestBlock || state.getBlock() == Blocks.ENDER_CHEST) {
                 if (ChestBlock.isChestBlockedAt(level, pos)) {
                     return false;
                 }
@@ -252,6 +252,8 @@ public class FindItemCommand {
                     BlockPos offsetPos = pos.relative(ChestBlock.getConnectedDirection(state));
                     return level.getBlockState(offsetPos).getBlock() != state.getBlock() || !ChestBlock.isChestBlockedAt(level, offsetPos);
                 }
+            } else if (state.getBlock() instanceof ShulkerBoxBlock && blockEntity instanceof ShulkerBoxBlockEntity shulkerBox) {
+                return ShulkerBoxBlock.canOpen(state, level, pos, shulkerBox);
             }
             return true;
         }
@@ -262,7 +264,7 @@ public class FindItemCommand {
             currentlySearchingTimeout = 100;
             GuiBlocker.addBlocker(new GuiBlocker() {
                 @Override
-                public boolean accept(Screen screen) {
+                public boolean accept(@Nullable Screen screen) {
                     if (!(screen instanceof MenuAccess<?> menuAccess)) {
                         return true;
                     }
@@ -274,7 +276,7 @@ public class FindItemCommand {
                             playerInvSlots.add(slot.index);
                         }
                     }
-                    mc.player.containerMenu = new AbstractContainerMenu(((AbstractContainerMenuAccessor) container).getNullableType(), container.containerId) {
+                    mc.player.containerMenu = new AbstractContainerMenu(container.menuType, container.containerId) {
                         @Override
                         public boolean stillValid(Player var1) {
                             return true;

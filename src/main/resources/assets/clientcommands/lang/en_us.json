@@ -8,6 +8,7 @@
   "commands.calias.addAlias.success": "Successfully added alias \"%s\"",
   "commands.calias.listAliases.noAliasesRegistered": "No aliases registered",
   "commands.calias.listAliases.success": "%s aliases registered:",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
   "commands.calias.removeAlias.success": "Successfully removed alias \"%s\"",
 
   "commands.careastats.notLoaded": "A chunk in this area is not loaded",
@@ -57,7 +58,6 @@
   "commands.ccreativetab.saveFile.failed": "Could not save creative tabs file",
   "commands.ccreativetab.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
 
-  "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Incompatible enchantments",
@@ -252,6 +252,7 @@
   "commands.client.invalidHoverAction": "Invalid hover event action '%s'",
   "commands.client.invalidHoverEvent": "Invalid hover event '%s'",
   "commands.client.notClient": "Not a client-side command",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
   "commands.client.requiresRestart": "This change will take effect after you restart your client",
   "commands.client.tooFewArguments": "Too few arguments",
 
