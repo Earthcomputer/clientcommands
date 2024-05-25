@@ -67,6 +67,7 @@
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.generic.CommandSuggestionsMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
+    "elytraswap.LocalPlayerMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",
     "scrambletitle.MinecraftMixin",

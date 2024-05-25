@@ -169,4 +169,7 @@ public class Configs {
 
     @Config
     public static int maximumPacketFieldDepth = 10;
+
+    @Config
+    public static boolean elytraSwap = false;
 }
