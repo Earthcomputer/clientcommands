@@ -40,7 +40,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             _break();
             return;
         }
-        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(new ChunkPos(pos.immutable())));
+        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(new ChunkPos(pos.getX(), pos.getZ())));
         ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> remainingChunks.add(new ChunkPos(pos)));
         ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> remainingChunks.remove(pos));
         ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> remainingChunks.add(pos));

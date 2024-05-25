@@ -80,7 +80,9 @@ public class FindBlockCommand {
 
         @Override
         public boolean condition() {
-            return hasChunksRemaining() || (keepSearching && closestBlock == null);
+            boolean condition = hasChunksRemaining() || (keepSearching && closestBlock == null);
+            System.out.println(condition);
+            return condition;
         }
 
         @Override
