@@ -57,6 +57,10 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
 
     @Inject(method = "aiStep", at = @At("HEAD"))
     private void swapFromElytra(CallbackInfo ci) {
+        if (!Configs.elytraSwap) {
+            return;
+        }
+
         ItemStack chestStack = getItemBySlot(EquipmentSlot.CHEST);
         boolean contactDisable = !isFallFlying() && !hasEffect(MobEffects.LEVITATION) && !isPassenger() && !onClimbable();
         boolean jumpDisable = input.jumping && releasedJumpKey;
@@ -75,12 +79,17 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer {
         for (int i = 0; i < getInventory().items.size(); i++) {
             ItemStack stack = getInventory().items.get(i);
             if (predicate.test(stack)) {
-                swapSlots(6, i);
+                swapSlots(6, indexToSlotIndex(i));
                 return true;
             }
         }
 
         return false;
+    }
+
+    @Unique
+    private int indexToSlotIndex(int id) {
+        return id < 9 ? id + 36 : id;
     }
 
     @Unique
