@@ -26,7 +26,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     protected final boolean keepSearching;
 
-    private Set<ChunkPos> remainingChunks;
+    private LinkedHashSet<ChunkPos> remainingChunks;
 
     protected RenderDistanceScanTask(boolean keepSearching) {
         this.keepSearching = keepSearching;
@@ -34,7 +34,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     @Override
     public void initialize() {
-        remainingChunks = new HashSet<>();
+        remainingChunks = new LinkedHashSet<>();
         Entity cameraEntity = Minecraft.getInstance().cameraEntity;
         if (cameraEntity == null) {
             _break();
@@ -75,9 +75,8 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         assert level != null;
 
         long startTime = System.nanoTime();
-        while (!remainingChunks.isEmpty()) {
-            ChunkPos chunkPos = remainingChunks.iterator().next();
-            remainingChunks.remove(chunkPos);
+        while (hasChunksRemaining()) {
+            ChunkPos chunkPos = remainingChunks.removeFirst();
 
             if (canScanChunk(cameraEntity, chunkPos)) {
                 int minSection = level.getMinSection();
