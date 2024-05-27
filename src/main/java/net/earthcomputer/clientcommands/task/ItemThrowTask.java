@@ -111,9 +111,6 @@ public class ItemThrowTask extends SimpleTask {
     protected void onItemSpawn(ClientboundAddEntityPacket packet) {
     }
 
-    protected void onItemThrown(int current, int total) {
-    }
-
     private static void handleItemSpawn(ClientboundAddEntityPacket packet) {
         if (packet.getType() != EntityType.ITEM) {
             return;
