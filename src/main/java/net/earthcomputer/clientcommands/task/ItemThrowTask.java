@@ -66,7 +66,6 @@ public class ItemThrowTask extends SimpleTask {
                 onFailedToThrowItem();
                 return;
             }
-            onItemThrown(++sentItemThrows, totalItemsToThrow);
         }
 
         if (!waitingFence && sentItemThrows == totalItemsToThrow && confirmedItemThrows < sentItemThrows) {
