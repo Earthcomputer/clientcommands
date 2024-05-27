@@ -22,11 +22,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -103,7 +99,6 @@ public class EnchantmentCracker {
      */
 
     public static final Logger LOGGER = LogUtils.getLogger();
-    private static final int PROGRESS_BAR_WIDTH = 50;
 
     // RENDERING
     /*
