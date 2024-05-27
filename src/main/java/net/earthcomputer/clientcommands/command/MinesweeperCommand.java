@@ -53,31 +53,33 @@ public class MinesweeperCommand {
 }
 
 class MinesweeperGameScreen extends Screen {
-    private static final ResourceLocation TOP_LEFT = new ResourceLocation("clientcommands:minesweeper/top_left");
-    private static final ResourceLocation TOP = new ResourceLocation("clientcommands:minesweeper/top");
-    private static final ResourceLocation TOP_RIGHT = new ResourceLocation("clientcommands:minesweeper/top_right");
-    private static final ResourceLocation LEFT = new ResourceLocation("clientcommands:minesweeper/left");
-    private static final ResourceLocation RIGHT = new ResourceLocation("clientcommands:minesweeper/right");
-    private static final ResourceLocation BOTTOM_LEFT = new ResourceLocation("clientcommands:minesweeper/bottom_left");
-    private static final ResourceLocation BOTTOM = new ResourceLocation("clientcommands:minesweeper/bottom");
-    private static final ResourceLocation BOTTOM_RIGHT = new ResourceLocation("clientcommands:minesweeper/bottom_right");
+    private static final ResourceLocation MINESWEEPER_ATLAS = new ResourceLocation("clientcommands:textures/minesweeper_atlas.png");
 
-    private static final ResourceLocation NOT_A_MINE_TILE = new ResourceLocation("clientcommands:minesweeper/not_a_mine_tile");
-    private static final ResourceLocation MINE_TILE = new ResourceLocation("clientcommands:minesweeper/mine_tile");
-    private static final ResourceLocation RED_MINE_TILE = new ResourceLocation("clientcommands:minesweeper/red_mine_tile");
-    private static final ResourceLocation EMPTY_TILE = new ResourceLocation("clientcommands:minesweeper/empty_tile");
-    private static final ResourceLocation HOVERED_TILE = new ResourceLocation("clientcommands:minesweeper/hovered_tile");
-    private static final ResourceLocation HOVERED_FLAGGED_TILE = new ResourceLocation("clientcommands:minesweeper/hovered_flagged_tile");
-    private static final ResourceLocation FLAGGED_TILE = new ResourceLocation("clientcommands:minesweeper/flagged_tile");
-    private static final ResourceLocation TILE = new ResourceLocation("clientcommands:minesweeper/tile");
-    private static final ResourceLocation ONE_TILE = new ResourceLocation("clientcommands:minesweeper/one_tile");
-    private static final ResourceLocation TWO_TILE = new ResourceLocation("clientcommands:minesweeper/two_tile");
-    private static final ResourceLocation THREE_TILE = new ResourceLocation("clientcommands:minesweeper/three_tile");
-    private static final ResourceLocation FOUR_TILE = new ResourceLocation("clientcommands:minesweeper/four_tile");
-    private static final ResourceLocation FIVE_TILE = new ResourceLocation("clientcommands:minesweeper/five_tile");
-    private static final ResourceLocation SIX_TILE = new ResourceLocation("clientcommands:minesweeper/six_tile");
-    private static final ResourceLocation SEVEN_TILE = new ResourceLocation("clientcommands:minesweeper/seven_tile");
-    private static final ResourceLocation EIGHT_TILE = new ResourceLocation("clientcommands:minesweeper/eight_tile");
+    private static final Vector2i TOP_LEFT_UV = new Vector2i(0, 0);
+    private static final Vector2i TOP_UV = new Vector2i(12, 0);
+    private static final Vector2i TOP_RIGHT_UV = new Vector2i(28, 0);
+    private static final Vector2i LEFT_UV = new Vector2i(0, 12);
+    private static final Vector2i RIGHT_UV = new Vector2i(28, 12);
+    private static final Vector2i BOTTOM_LEFT_UV = new Vector2i(0, 28);
+    private static final Vector2i BOTTOM_UV = new Vector2i(12, 28);
+    private static final Vector2i BOTTOM_RIGHT_UV = new Vector2i(28, 28);
+
+    private static final Vector2i NOT_A_MINE_TILE_UV = new Vector2i(68, 32);
+    private static final Vector2i MINE_TILE_UV = new Vector2i(52, 32);
+    private static final Vector2i RED_MINE_TILE_UV = new Vector2i(84, 16);
+    private static final Vector2i EMPTY_TILE_UV = new Vector2i(12, 12);
+    private static final Vector2i HOVERED_TILE_UV = new Vector2i(100, 16);
+    private static final Vector2i HOVERED_FLAGGED_TILE_UV = new Vector2i(36, 32);
+    private static final Vector2i FLAGGED_TILE_UV = new Vector2i(100, 32);
+    private static final Vector2i TILE_UV = new Vector2i(84, 32);
+    private static final Vector2i ONE_TILE_UV = new Vector2i(36, 0);
+    private static final Vector2i TWO_TILE_UV = new Vector2i(52, 0);
+    private static final Vector2i THREE_TILE_UV = new Vector2i(68, 0);
+    private static final Vector2i FOUR_TILE_UV = new Vector2i(84, 0);
+    private static final Vector2i FIVE_TILE_UV = new Vector2i(100, 0);
+    private static final Vector2i SIX_TILE_UV = new Vector2i(36, 16);
+    private static final Vector2i SEVEN_TILE_UV = new Vector2i(52, 16);
+    private static final Vector2i EIGHT_TILE_UV = new Vector2i(68, 16);
 
     int boardWidth;
     int boardHeight;
@@ -127,32 +129,36 @@ class MinesweeperGameScreen extends Screen {
             graphics.drawString(minecraft.font, str, topLeftX + gameWidth - minecraft.font.width(str), topLeftY - 10, deathCoords != null ? ChatFormatting.RED.getColor() : (emptyTilesRemaining == 0 ? ChatFormatting.GREEN.getColor() : ChatFormatting.WHITE.getColor()));
         }
 
-        graphics.blitSprite(TOP_LEFT, topLeftX, topLeftY, 12, 12);
+        blitSprite(graphics, TOP_LEFT_UV, 0, 0, 12, 12);
         for (int i = 0; i < boardWidth; i++) {
-            graphics.blitSprite(TOP, topLeftX + 12 + i * 16, topLeftY, 16, 12);
+            blitSprite(graphics, TOP_UV, 12 + i * 16, 0, 16, 12);
         }
-        graphics.blitSprite(TOP_RIGHT, topLeftX + 12 + boardWidth * 16, topLeftY, 8, 12);
+        blitSprite(graphics, TOP_RIGHT_UV, 12 + boardWidth * 16, 0, 8, 12);
         for (int i = 0; i < boardHeight; i++) {
-            graphics.blitSprite(LEFT, topLeftX, topLeftY + 12 + i * 16, 12, 16);
-            graphics.blitSprite(RIGHT, topLeftX + 12 + boardWidth * 16, topLeftY + 12 + i * 16, 8, 16);
+            blitSprite(graphics, LEFT_UV, 0, 12 + i * 16, 12, 16);
+            blitSprite(graphics, RIGHT_UV, 12 + boardWidth * 16, 12 + i * 16, 8, 16);
         }
-        graphics.blitSprite(BOTTOM_LEFT, topLeftX, topLeftY + 12 + boardHeight * 16, 12, 8);
+        blitSprite(graphics, BOTTOM_LEFT_UV, 0, 12 + boardHeight * 16, 12, 8);
         for (int i = 0; i < boardWidth; i++) {
-            graphics.blitSprite(BOTTOM, topLeftX + 12 + i * 16, topLeftY + 12 + boardHeight * 16, 16, 8);
+            blitSprite(graphics, BOTTOM_UV, 12 + i * 16, 12 + boardHeight * 16, 16, 8);
         }
-        graphics.blitSprite(BOTTOM_RIGHT, topLeftX + 12 + boardWidth * 16, topLeftY + 12 + boardHeight * 16, 8, 8);
+        blitSprite(graphics, BOTTOM_RIGHT_UV, 12 + boardWidth * 16, 12 + boardHeight * 16, 8, 8);
 
         for (int x = 0; x < boardWidth; x++) {
             for (int y = 0; y < boardHeight; y++) {
                 boolean hovered = Mth.floorDiv(mouseX - topLeftX - 12, 16) == x && Mth.floorDiv(mouseY - topLeftY - 12, 16) == y;
-                graphics.blitSprite(getTileSprite(x, y, hovered), topLeftX + x * 16 + 12, topLeftY + y * 16 + 12, 16, 16);
+                blitSprite(graphics, getTileSprite(x, y, hovered),  x * 16 + 12, y * 16 + 12, 16, 16);
             }
         }
     }
 
+    public void blitSprite(GuiGraphics graphics, Vector2i uv, int x, int y, int width, int height) {
+        graphics.blit(MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, width, height, uv.x, uv.y, width, height, 128, 64);
+    }
+
     @Override
     public void tick() {
-        if (ticksPlaying > 0 && !gameFinished()) {
+        if (ticksPlaying > 0 && gameActive()) {
             ticksPlaying += 1;
         }
     }
@@ -170,7 +176,7 @@ class MinesweeperGameScreen extends Screen {
         int tileX = Mth.floorDiv((int) (mouseX - topLeftX - 12), 16);
         int tileY = Mth.floorDiv((int) (mouseY - topLeftY - 12), 16);
 
-        if (isWithinBounds(tileX, tileY) && !gameFinished()) {
+        if (isWithinBounds(tileX, tileY) && gameActive()) {
             if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                 if (ticksPlaying == 0) {
                     generateMines(tileX, tileY);
@@ -179,7 +185,8 @@ class MinesweeperGameScreen extends Screen {
 
                 click(tileX, tileY);
 
-                if (emptyTilesRemaining == 0) {
+                assert minecraft != null && minecraft.player != null;
+                if (emptyTilesRemaining <= 0) {
                     minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.MASTER, 1.0f, 2.0f);
                 } else if (deathCoords != null) {
                     minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1.0f, 1.0f);
@@ -192,8 +199,8 @@ class MinesweeperGameScreen extends Screen {
         return true;
     }
 
-    private boolean gameFinished() {
-        return deathCoords != null || emptyTilesRemaining == 0;
+    private boolean gameActive() {
+        return deathCoords == null && emptyTilesRemaining > 0;
     }
 
     private void generateMines(int avoidX, int avoidY) {
@@ -314,7 +321,7 @@ class MinesweeperGameScreen extends Screen {
         minesLeft -= ((board[y * boardWidth + x] ^= 0b1_0) & 0b1_0) > 0 ? 1 : -1;
     }
 
-    private ResourceLocation getTileSprite(int x, int y, boolean hovered) {
+    private Vector2i getTileSprite(int x, int y, boolean hovered) {
         byte tile = board[y * boardWidth + x];
         boolean flagged = (tile & 2) > 0;
         boolean covered = (tile & 1) == 0;
@@ -322,29 +329,29 @@ class MinesweeperGameScreen extends Screen {
         int warning_quantity = (tile & 0b1110000) >>> 4;
 
         if (deathCoords != null && type == 2 && !flagged) {
-            return new Vector2i(x, y).equals(deathCoords) ? RED_MINE_TILE : MINE_TILE;
+            return new Vector2i(x, y).equals(deathCoords) ? RED_MINE_TILE_UV : MINE_TILE_UV;
         }
 
         if (flagged) {
-            return hovered && deathCoords == null ? HOVERED_FLAGGED_TILE : (deathCoords != null && type != 2 ? NOT_A_MINE_TILE : FLAGGED_TILE);
+            return hovered && deathCoords == null ? HOVERED_FLAGGED_TILE_UV : (deathCoords != null && type != 2 ? NOT_A_MINE_TILE_UV : FLAGGED_TILE_UV);
         }
 
         if (covered) {
-            return hovered && deathCoords == null ? (dragging != null && dragging == 0 ? EMPTY_TILE : HOVERED_TILE) : TILE;
+            return hovered && deathCoords == null ? (dragging != null && dragging == 0 ? EMPTY_TILE_UV : HOVERED_TILE_UV) : TILE_UV;
         }
 
         if (type == 0) {
-            return EMPTY_TILE;
+            return EMPTY_TILE_UV;
         } else {
             return switch (warning_quantity) {
-                case 0 -> ONE_TILE;
-                case 1 -> TWO_TILE;
-                case 2 -> THREE_TILE;
-                case 3 -> FOUR_TILE;
-                case 4 -> FIVE_TILE;
-                case 5 -> SIX_TILE;
-                case 6 -> SEVEN_TILE;
-                default -> EIGHT_TILE;
+                case 0 -> ONE_TILE_UV;
+                case 1 -> TWO_TILE_UV;
+                case 2 -> THREE_TILE_UV;
+                case 3 -> FOUR_TILE_UV;
+                case 4 -> FIVE_TILE_UV;
+                case 5 -> SIX_TILE_UV;
+                case 6 -> SEVEN_TILE_UV;
+                default -> EIGHT_TILE_UV;
             };
         }
     }
