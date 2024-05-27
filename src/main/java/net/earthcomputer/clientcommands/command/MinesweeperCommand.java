@@ -264,7 +264,7 @@ public class MinesweeperCommand {
                 incrementWarning(x + 1, y - 1);
 
                 incrementWarning(x - 1, y);
-                board[y * boardWidth + x] = 0b000_10_0_0;
+                board[y * boardWidth + x] = createTile(false, false, MINE_TILE_TYPE, null);
                 incrementWarning(x + 1, y);
 
                 incrementWarning(x - 1, y + 1);
@@ -275,14 +275,11 @@ public class MinesweeperCommand {
 
         private void incrementWarning(int x, int y) {
             if (isWithinBounds(x, y)) {
-                int idx = y * boardWidth + x;
-                byte originalTile = board[idx];
+                byte originalTile = getTile(x, y);
                 if (tileType(originalTile) == WARNING_TILE_TYPE) {
-                    // increment warning quantity
-                    board[idx] += 0b0_001_00_0_0;
+                    setTile(x, y, createTile(isCovered(originalTile), isFlagged(originalTile), WARNING_TILE_TYPE, warningQuantity(originalTile)));
                 } else if (tileType(originalTile) == EMPTY_TILE_TYPE) {
-                    // set to warning tile (and since it was empty beforehand, we make it have a quantity of 1)
-                    board[idx] = 0b0_000_01_0_0;
+                    setTile(x, y, createTile(isCovered(originalTile), isFlagged(originalTile), WARNING_TILE_TYPE, 1));
                 }
             }
         }
@@ -348,6 +345,7 @@ public class MinesweeperCommand {
                 return;
             }
 
+            // this code flips the state of the tile's flag, and then uses a ternary statement to either subtract 1, or subtract -1 from the amount of mines left.
             minesLeft -= ((board[y * boardWidth + x] ^= 0b1_0) & 0b1_0) > 0 ? 1 : -1;
         }
 
@@ -381,6 +379,10 @@ public class MinesweeperCommand {
             return board[y * boardWidth + x];
         }
 
+        private void setTile(int x, int y, byte value) {
+            board[y * boardWidth + x] = value;
+        }
+
         /**
          * @return 0 for an empty tile <br> 1 for a warning tile <br> 2 for a mine tile
          */
@@ -405,6 +407,26 @@ public class MinesweeperCommand {
 
         private boolean isFlagged(byte tile) {
             return (tile & 0b10) > 0;
+        }
+
+        private byte createTile(boolean covered, boolean flagged, int type, @Nullable Integer warningQuantity) {
+            if (!covered && flagged) {
+                throw new IllegalArgumentException("Tile cannot be uncovered and flagged at once");
+            }
+
+            if (type == WARNING_TILE_TYPE && (warningQuantity != null && 1 <= warningQuantity && warningQuantity <= 8)) {
+                throw new IllegalArgumentException("Warning tiles must have a warning quantity between 0 and 8");
+            }
+
+            if (type != WARNING_TILE_TYPE && warningQuantity != null) {
+                throw new IllegalArgumentException("Non-Warning tiles must have a null warning quantity");
+            }
+
+            if (type != EMPTY_TILE_TYPE && type != WARNING_TILE_TYPE && type != MINE_TILE_TYPE) {
+                throw new IllegalArgumentException("Tile type must be empty, warning, or mine");
+            }
+
+            return (byte) ((covered ? 1 : 0) | ((flagged ? 1 : 0) << 1) | (type << 2) | ((warningQuantity == null ? 0 : warningQuantity - 1) << 4));
         }
     }
 }
