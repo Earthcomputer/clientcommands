@@ -264,7 +264,7 @@ public class MinesweeperCommand {
                 incrementWarning(x + 1, y - 1);
 
                 incrementWarning(x - 1, y);
-                board[y * boardWidth + x] = createTile(false, false, MINE_TILE_TYPE, null);
+                setTile(x, y, createTile(false, false, MINE_TILE_TYPE, null));
                 incrementWarning(x + 1, y);
 
                 incrementWarning(x - 1, y + 1);
@@ -289,7 +289,7 @@ public class MinesweeperCommand {
         }
 
         private void click(int x, int y) {
-            byte tile = board[y * boardWidth + x];
+            byte tile = getTile(x, y);
             if (!isCovered(tile) || isFlagged(tile)) {
                 return;
             }
