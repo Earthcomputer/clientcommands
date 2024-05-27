@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.google.common.cache.CacheBuilder;
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -21,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.glfw.GLFW;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -239,7 +239,6 @@ public class TicTacToeCommand {
                     guiGraphics.blit(MARKS_TEXTURE, startX + (cellSize + borderSize) * x + padding, startY + (cellSize + borderSize) * y + padding, markSize, markSize, offset, 0, markSizeTexture, markSizeTexture, 2 * markSizeTexture, markSizeTexture);
                 }
             }
-
         }
 
         @Override
@@ -249,7 +248,7 @@ public class TicTacToeCommand {
             if (mouseX < startX || mouseX > startX + gridSize || mouseY < startY || mouseY > startY + gridSize) {
                 return super.mouseClicked(mouseX, mouseY, button);
             }
-            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (button != InputConstants.MOUSE_BUTTON_LEFT) {
                 return false;
             }
             double relativeX = mouseX - startX;
