@@ -1,11 +1,12 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -16,31 +17,28 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
-import java.util.OptionalInt;
 import java.util.Random;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class MinesweeperCommand {
     private static final SimpleCommandExceptionType TOO_MANY_MINES_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cminesweeper.too_many_mines"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cminesweeper")
-                .then(literal("beginner")
-                        .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10)))
-                .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10))
-                .then(literal("intermediate")
-                        .executes(ctx -> minesweeper(ctx.getSource(), 16, 16, 40)))
-                .then(literal("expert")
-                        .executes(ctx -> minesweeper(ctx.getSource(), 32, 16, 99)))
-                .then(literal("custom")
-                        .then(argument("width", integer(3, 128))
-                                .then(argument("height", integer(3, 128))
-                                        .then(argument("mines", integer(0, 128 * 128 - 9))
-                                                .executes(ctx -> minesweeper(ctx.getSource(), getInteger(ctx, "width"), getInteger(ctx, "height"), getInteger(ctx, "mines"))))))));
+            .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10))
+            .then(literal("beginner")
+                .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10)))
+            .then(literal("intermediate")
+                .executes(ctx -> minesweeper(ctx.getSource(), 16, 16, 40)))
+            .then(literal("expert")
+                .executes(ctx -> minesweeper(ctx.getSource(), 32, 16, 99)))
+            .then(literal("custom")
+                .then(argument("width", integer(3, 128))
+                    .then(argument("height", integer(3, 128))
+                        .then(argument("mines", integer(0, 128 * 128 - 9))
+                            .executes(ctx -> minesweeper(ctx.getSource(), getInteger(ctx, "width"), getInteger(ctx, "height"), getInteger(ctx, "mines"))))))));
     }
 
     private static int minesweeper(FabricClientCommandSource source, int width, int height, int mines) throws CommandSyntaxException {
@@ -50,7 +48,7 @@ public class MinesweeperCommand {
 
         source.getClient().tell(() -> source.getClient().setScreen(new MinesweeperGameScreen(width, height, mines)));
 
-        return 0;
+        return Command.SINGLE_SUCCESS;
     }
 }
 
@@ -90,8 +88,10 @@ class MinesweeperGameScreen extends Screen {
     int gameHeight;
     int topLeftX;
     int topLeftY;
-    @Nullable Integer dragging;
-    @Nullable Vector2i deathCoords;
+    @Nullable
+    Integer dragging;
+    @Nullable
+    Vector2i deathCoords;
     int minesLeft;
     int emptyTilesRemaining;
 
@@ -124,16 +124,22 @@ class MinesweeperGameScreen extends Screen {
         graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xff_ffffff);
         {
             String str = "Time Played: " + Math.ceilDiv(ticksPlaying, 20) + "s";
-            graphics.drawString(minecraft.font, str, topLeftX + gameWidth - minecraft.font.width(str), topLeftY - 10, deathCoords != null ? ChatFormatting.RED.getColor() : (emptyTilesRemaining == 0 ?  ChatFormatting.GREEN.getColor() : ChatFormatting.WHITE.getColor()));
+            graphics.drawString(minecraft.font, str, topLeftX + gameWidth - minecraft.font.width(str), topLeftY - 10, deathCoords != null ? ChatFormatting.RED.getColor() : (emptyTilesRemaining == 0 ? ChatFormatting.GREEN.getColor() : ChatFormatting.WHITE.getColor()));
         }
 
         graphics.blitSprite(TOP_LEFT, topLeftX, topLeftY, 12, 12);
-        for (int i = 0; i < boardWidth; i++) graphics.blitSprite(TOP, topLeftX + 12 + i * 16, topLeftY, 16, 12);
+        for (int i = 0; i < boardWidth; i++) {
+            graphics.blitSprite(TOP, topLeftX + 12 + i * 16, topLeftY, 16, 12);
+        }
         graphics.blitSprite(TOP_RIGHT, topLeftX + 12 + boardWidth * 16, topLeftY, 8, 12);
-        for (int i = 0; i < boardHeight; i++) graphics.blitSprite(LEFT, topLeftX, topLeftY + 12 + i * 16, 12, 16);
-        for (int i = 0; i < boardHeight; i++) graphics.blitSprite(RIGHT, topLeftX + 12 + boardWidth * 16, topLeftY + 12 + i * 16, 8, 16);
+        for (int i = 0; i < boardHeight; i++) {
+            graphics.blitSprite(LEFT, topLeftX, topLeftY + 12 + i * 16, 12, 16);
+            graphics.blitSprite(RIGHT, topLeftX + 12 + boardWidth * 16, topLeftY + 12 + i * 16, 8, 16);
+        }
         graphics.blitSprite(BOTTOM_LEFT, topLeftX, topLeftY + 12 + boardHeight * 16, 12, 8);
-        for (int i = 0; i < boardWidth; i++) graphics.blitSprite(BOTTOM, topLeftX + 12 + i * 16, topLeftY + 12 + boardHeight * 16, 16, 8);
+        for (int i = 0; i < boardWidth; i++) {
+            graphics.blitSprite(BOTTOM, topLeftX + 12 + i * 16, topLeftY + 12 + boardHeight * 16, 16, 8);
+        }
         graphics.blitSprite(BOTTOM_RIGHT, topLeftX + 12 + boardWidth * 16, topLeftY + 12 + boardHeight * 16, 8, 8);
 
         for (int x = 0; x < boardWidth; x++) {
@@ -164,8 +170,8 @@ class MinesweeperGameScreen extends Screen {
         int tileX = Mth.floorDiv((int) (mouseX - topLeftX - 12), 16);
         int tileY = Mth.floorDiv((int) (mouseY - topLeftY - 12), 16);
 
-        if (isWithinBounds(tileX, tileY)) {
-            if (button == 0 && !gameFinished()) {
+        if (isWithinBounds(tileX, tileY) && !gameFinished()) {
+            if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                 if (ticksPlaying == 0) {
                     generateMines(tileX, tileY);
                     ticksPlaying = 1;
@@ -178,7 +184,7 @@ class MinesweeperGameScreen extends Screen {
                 } else if (deathCoords != null) {
                     minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1.0f, 1.0f);
                 }
-            } else if (button == 1 && !gameFinished()) {
+            } else if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
                 flag(tileX, tileY);
             }
         }
@@ -268,19 +274,19 @@ class MinesweeperGameScreen extends Screen {
             queue[0] = y * boardWidth + x;
             while (queueIdx >= 0) {
                 int idx = queue[queueIdx--];
-                int x_part = idx % boardWidth;
-                int y_part = idx / boardWidth;
+                int xPart = idx % boardWidth;
+                int yPart = idx / boardWidth;
                 for (Vector2i possibleNeighbour : new Vector2i[]{
-                        new Vector2i(x_part - 1, y_part - 1),
-                        new Vector2i(x_part, y_part - 1),
-                        new Vector2i(x_part + 1, y_part - 1),
+                    new Vector2i(xPart - 1, yPart - 1),
+                    new Vector2i(xPart, yPart - 1),
+                    new Vector2i(xPart + 1, yPart - 1),
 
-                        new Vector2i(x_part - 1, y_part),
-                        new Vector2i(x_part + 1, y_part),
+                    new Vector2i(xPart - 1, yPart),
+                    new Vector2i(xPart + 1, yPart),
 
-                        new Vector2i(x_part - 1, y_part + 1),
-                        new Vector2i(x_part, y_part + 1),
-                        new Vector2i(x_part + 1, y_part + 1),
+                    new Vector2i(xPart - 1, yPart + 1),
+                    new Vector2i(xPart, yPart + 1),
+                    new Vector2i(xPart + 1, yPart + 1),
                 }) {
                     if (isWithinBounds(possibleNeighbour.x, possibleNeighbour.y)) {
                         int pos = possibleNeighbour.y * boardWidth + possibleNeighbour.x;
@@ -290,7 +296,9 @@ class MinesweeperGameScreen extends Screen {
                         if ((value & 0b1) == 0) {
                             emptyTilesRemaining -= 1;
                             // if it's an empty tile, we put it in the queue to go activate all its neighbours
-                            if ((value & 0b11_0_0) >>> 2 == 0) queue[++queueIdx] = pos;
+                            if ((value & 0b11_0_0) >>> 2 == 0) {
+                                queue[++queueIdx] = pos;
+                            }
                         }
                     }
                 }
@@ -299,7 +307,9 @@ class MinesweeperGameScreen extends Screen {
     }
 
     private void flag(int x, int y) {
-        if ((board[y * boardWidth + x] & 0b1) > 0) return;
+        if ((board[y * boardWidth + x] & 0b1) > 0) {
+            return;
+        }
 
         minesLeft -= ((board[y * boardWidth + x] ^= 0b1_0) & 0b1_0) > 0 ? 1 : -1;
     }
