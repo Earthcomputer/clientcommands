@@ -30,7 +30,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     static {
         ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> {
-            @Nullable WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
             if (currentScanTask != null) {
                 RenderDistanceScanTask scanTask = currentScanTask.get();
                 if (scanTask != null) {
@@ -39,7 +39,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             }
         });
         ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> {
-            @Nullable WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
             if (currentScanTask != null) {
                 RenderDistanceScanTask scanTask = currentScanTask.get();
                 if (scanTask != null) {
@@ -48,7 +48,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             }
         });
         ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> {
-            @Nullable WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
             if (currentScanTask != null) {
                 RenderDistanceScanTask scanTask = currentScanTask.get();
                 if (scanTask != null) {

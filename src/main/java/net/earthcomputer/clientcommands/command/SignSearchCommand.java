@@ -24,9 +24,6 @@ import static net.earthcomputer.clientcommands.command.arguments.RegexArgument.*
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class SignSearchCommand {
-    private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
-
-
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var csignsearch = dispatcher.register(literal("csignsearch")
             .then(literal("text")
@@ -35,7 +32,7 @@ public class SignSearchCommand {
             .then(literal("regex")
                 .then(argument("query", greedyRegex())
                     .executes(ctx -> FindBlockCommand.findBlock(ctx, Component.translatable("commands.csignsearch.starting"), predicate(getRegex(ctx, "query")))))));
-        FLAG_KEEP_SEARCHING.addToCommand(dispatcher, csignsearch, ctx -> true);
+        FindBlockCommand.FLAG_KEEP_SEARCHING.addToCommand(dispatcher, csignsearch, ctx -> true);
     }
 
     private static ClientBlockPredicateArgument.ClientBlockPredicate predicate(String query) {

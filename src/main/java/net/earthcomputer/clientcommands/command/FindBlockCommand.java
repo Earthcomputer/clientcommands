@@ -27,7 +27,7 @@ import static net.earthcomputer.clientcommands.command.arguments.WithStringArgum
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindBlockCommand {
-    private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
+    public static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         var cfindblock = dispatcher.register(literal("cfindblock")
