@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.task;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.minecraft.client.Minecraft;
@@ -17,16 +18,32 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.lang.ref.WeakReference;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public abstract class RenderDistanceScanTask extends SimpleTask {
     private static final long MAX_SCAN_TIME = 30_000_000L; // 30ms
+    private static final Set<Object> MUTEX_KEYS = Set.of(RenderDistanceScanTask.class);
 
-    protected final boolean keepSearching;
+    static {
+        ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> {
+            WeakReference<ClientLevelEvents.ChunkUpdate> chunkUpdateCallback = RenderDistanceScanTask.chunkUpdateCallback;
+            if (chunkUpdateCallback != null) {
+                ClientLevelEvents.ChunkUpdate callback = chunkUpdateCallback.get();
+                if (callback != null) {
+                    callback.onBlockStateUpdate(level, pos, oldState, newState);
+                }
+            }
+        });
+    }
 
-    private LinkedHashSet<ChunkPos> remainingChunks;
+    @Nullable
+    private static WeakReference<ClientLevelEvents.ChunkUpdate> chunkUpdateCallback = null;
+    protected boolean keepSearching;
+    private LongLinkedOpenHashSet remainingChunks;
 
     protected RenderDistanceScanTask(boolean keepSearching) {
         this.keepSearching = keepSearching;
@@ -34,16 +51,24 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     @Override
     public void initialize() {
-        remainingChunks = new LinkedHashSet<>();
+        remainingChunks = new LongLinkedOpenHashSet();
         Entity cameraEntity = Minecraft.getInstance().cameraEntity;
         if (cameraEntity == null) {
             _break();
             return;
         }
-        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(new ChunkPos(pos.getX(), pos.getZ())));
-        ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> remainingChunks.add(new ChunkPos(pos)));
-        ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> remainingChunks.remove(pos));
-        ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> remainingChunks.add(pos));
+        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
+        ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> remainingChunks.remove(pos.toLong()));
+        ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> remainingChunks.add(pos.toLong()));
+        chunkUpdateCallback = new WeakReference<>((level, pos, oldState, newState) -> {
+            if (keepSearching) {
+                try {
+                    scanBlock(Minecraft.getInstance().cameraEntity, pos);
+                } catch (CommandSyntaxException e) {
+                    ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
+                }
+            }
+        });
     }
 
     @Override
@@ -76,7 +101,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
         long startTime = System.nanoTime();
         while (hasChunksRemaining()) {
-            ChunkPos chunkPos = remainingChunks.removeFirst();
+            ChunkPos chunkPos = new ChunkPos(remainingChunks.removeFirst());
 
             if (canScanChunk(cameraEntity, chunkPos)) {
                 int minSection = level.getMinSection();
@@ -94,6 +119,16 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
                 return;
             }
         }
+    }
+
+    @Override
+    public void onCompleted() {
+        chunkUpdateCallback = null;
+    }
+
+    @Override
+    public Set<Object> getMutexKeys() {
+        return MUTEX_KEYS;
     }
 
     protected boolean canScanChunk(Entity cameraEntity, ChunkPos pos) {

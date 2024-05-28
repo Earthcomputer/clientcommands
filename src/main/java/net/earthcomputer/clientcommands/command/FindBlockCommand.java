@@ -64,6 +64,7 @@ public class FindBlockCommand {
             Vec3 cameraPos = cameraEntity.getEyePosition(0);
             if ((closestBlock == null || pos.distToCenterSqr(cameraPos) < closestBlock.distToCenterSqr(cameraPos)) && predicate.test(level.registryAccess(), level, pos)) {
                 closestBlock = pos.immutable();
+                keepSearching = false;
             }
         }
 
@@ -79,14 +80,8 @@ public class FindBlockCommand {
         }
 
         @Override
-        public boolean condition() {
-            boolean condition = hasChunksRemaining() || (keepSearching && closestBlock == null);
-            System.out.println(condition);
-            return condition;
-        }
-
-        @Override
         public void onCompleted() {
+            super.onCompleted();
             if (closestBlock == null) {
                 sendError(Component.translatable("commands.cfindblock.notFound"));
             } else {
