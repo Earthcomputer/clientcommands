@@ -200,14 +200,14 @@ public class TicTacToeCommand {
         private static final ResourceLocation GRID_TEXTURE = new ResourceLocation("clientcommands", "textures/tic_tac_toe/grid.png");
         private static final ResourceLocation MARKS_TEXTURE = new ResourceLocation("clientcommands", "textures/tic_tac_toe/marks.png");
 
-        private static final int gridSizeTexture = 512;
-        private static final int markSizeTexture = 152;
+        private static final int GRID_SIZE_TEXTURE = 512;
+        private static final int MARK_SIZE_TEXTURE = 152;
 
-        private static final int gridSize = 256;
-        private static final int cellSize = 80;
-        private static final int borderSize = 8;
-        private static final int markSize = 76;
-        private static final int padding = 2;
+        private static final int GRID_SIZE = 256;
+        private static final int CELL_SIZE = 80;
+        private static final int BORDER_SIZE = 8;
+        private static final int MARK_SIZE = 76;
+        private static final int PADDING = 2;
 
         private TicTacToeGameScreen(TicTacToeGame game) {
             super(Component.translatable("ticTacToeGame.title", game.opponent.getProfile().getName()));
@@ -217,13 +217,13 @@ public class TicTacToeCommand {
         @Override
         public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-            int startX = (this.width - gridSize) / 2;
-            int startY = (this.height - gridSize) / 2;
+            int startX = (this.width - GRID_SIZE) / 2;
+            int startY = (this.height - GRID_SIZE) / 2;
 
             guiGraphics.drawString(this.font, this.title, startX, startY - 20, 0xff_ffffff);
             guiGraphics.drawString(this.font, Component.translatable("ticTacToeGame.playingWith", this.game.yourMarks.name), startX, startY - 10, 0xff_ffffff);
 
-            guiGraphics.blit(GRID_TEXTURE, startX, startY, gridSize, gridSize, 0, 0, gridSizeTexture, gridSizeTexture, gridSizeTexture, gridSizeTexture);
+            guiGraphics.blit(GRID_TEXTURE, startX, startY, GRID_SIZE, GRID_SIZE, 0, 0, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE);
             TicTacToeGame.Mark[][] board = this.game.board;
 
             for (byte x = 0; x < 3; x++) {
@@ -234,31 +234,31 @@ public class TicTacToeCommand {
                     }
                     int offset = switch (mark) {
                         case NOUGHT -> 0;
-                        case CROSS -> markSizeTexture;
+                        case CROSS -> MARK_SIZE_TEXTURE;
                     };
-                    guiGraphics.blit(MARKS_TEXTURE, startX + (cellSize + borderSize) * x + padding, startY + (cellSize + borderSize) * y + padding, markSize, markSize, offset, 0, markSizeTexture, markSizeTexture, 2 * markSizeTexture, markSizeTexture);
+                    guiGraphics.blit(MARKS_TEXTURE, startX + (CELL_SIZE + BORDER_SIZE) * x + PADDING, startY + (CELL_SIZE + BORDER_SIZE) * y + PADDING, MARK_SIZE, MARK_SIZE, offset, 0, MARK_SIZE_TEXTURE, MARK_SIZE_TEXTURE, 2 * MARK_SIZE_TEXTURE, MARK_SIZE_TEXTURE);
                 }
             }
         }
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            int startX = (this.width - gridSize) / 2;
-            int startY = (this.height - gridSize) / 2;
-            if (mouseX < startX || mouseX > startX + gridSize || mouseY < startY || mouseY > startY + gridSize) {
+            int startX = (this.width - GRID_SIZE) / 2;
+            int startY = (this.height - GRID_SIZE) / 2;
+            if (mouseX < startX || mouseX > startX + GRID_SIZE || mouseY < startY || mouseY > startY + GRID_SIZE) {
                 return super.mouseClicked(mouseX, mouseY, button);
             }
             if (button != InputConstants.MOUSE_BUTTON_LEFT) {
                 return false;
             }
             double relativeX = mouseX - startX;
-            byte x = (byte) (relativeX / (cellSize + borderSize));
-            if (relativeX > (cellSize + borderSize) * (x + 1) - borderSize) {
+            byte x = (byte) (relativeX / (CELL_SIZE + BORDER_SIZE));
+            if (relativeX > (CELL_SIZE + BORDER_SIZE) * (x + 1) - BORDER_SIZE) {
                 return false;
             }
             double relativeY = mouseY - startY;
-            byte y = (byte) (relativeY / (cellSize + borderSize));
-            if (relativeY > (cellSize + borderSize) * (y + 1) - borderSize) {
+            byte y = (byte) (relativeY / (CELL_SIZE + BORDER_SIZE));
+            if (relativeY > (CELL_SIZE + BORDER_SIZE) * (y + 1) - BORDER_SIZE) {
                 return false;
             }
 
