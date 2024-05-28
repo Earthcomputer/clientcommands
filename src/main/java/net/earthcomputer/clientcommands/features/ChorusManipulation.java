@@ -30,7 +30,7 @@ public class ChorusManipulation {
     private static final Object GOAL_POS_KEY = new Object();
 
     public static void onChorusManipEnabled() {
-        TaskManager.addTask("chorusManipRenderer", new SimpleTask() {
+        TaskManager.addNonConflictingTask("chorusManipRenderer", new SimpleTask() {
             @Override
             public boolean condition() {
                 return Configs.getChorusManipulation() && Minecraft.getInstance().player != null;

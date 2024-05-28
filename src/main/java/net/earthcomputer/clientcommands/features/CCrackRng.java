@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.task.ItemThrowTask;
@@ -8,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 
@@ -29,7 +31,7 @@ public class CCrackRng {
     private static final int MAX_ATTEMPTS = 5;
     private static String currentTaskName = null;
 
-    private static String throwItems() {
+    private static String throwItems() throws CommandSyntaxException {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
         player.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 90);
@@ -37,7 +39,11 @@ public class CCrackRng {
         ItemThrowTask task = new ItemThrowTask(NUM_THROWS) {
             @Override
             protected void onSuccess() {
-                CCrackRng.attemptCrack();
+                try {
+                    CCrackRng.attemptCrack();
+                } catch (CommandSyntaxException e) {
+                    ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
+                }
             }
 
             @Override
@@ -61,7 +67,7 @@ public class CCrackRng {
         }
     }
 
-    public static void attemptCrack() {
+    public static void attemptCrack() throws CommandSyntaxException {
         long[] seeds = CCrackRngGen.getSeeds(
             Math.max(0, nextFloats[0] - MAX_ERROR), Math.min(1, nextFloats[0] + MAX_ERROR),
             Math.max(0, nextFloats[1] - MAX_ERROR), Math.min(1, nextFloats[1] + MAX_ERROR),
@@ -92,12 +98,12 @@ public class CCrackRng {
         callback.callback(seeds[0]);
     }
 
-    public static void crack(OnCrack callback) {
+    public static void crack(OnCrack callback) throws CommandSyntaxException {
         attemptCount = 1;
         doCrack(callback);
     }
 
-    private static void doCrack(OnCrack Callback){
+    private static void doCrack(OnCrack Callback) throws CommandSyntaxException {
         callback=Callback;
         ClientCommandHelper.addOverlayMessage(Component.translatable("commands.ccrackrng.retries", attemptCount, MAX_ATTEMPTS), 100);
         currentTaskName = throwItems();

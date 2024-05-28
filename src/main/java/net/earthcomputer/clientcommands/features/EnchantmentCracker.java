@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import com.seedfinding.mcseed.lcg.LCG;
 import com.seedfinding.mcseed.rand.Rand;
@@ -320,7 +321,7 @@ public class EnchantmentCracker {
      * seed
      */
 
-    public static String manipulateEnchantments(Item item, Predicate<List<EnchantmentInstance>> enchantmentsPredicate, boolean simulate, Consumer<@Nullable ManipulateResult> callback) {
+    public static String manipulateEnchantments(Item item, Predicate<List<EnchantmentInstance>> enchantmentsPredicate, boolean simulate, Consumer<@Nullable ManipulateResult> callback) throws CommandSyntaxException {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
 

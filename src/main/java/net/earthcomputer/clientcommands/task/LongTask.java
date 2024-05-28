@@ -48,4 +48,8 @@ public abstract class LongTask {
     public Set<Object> getMutexKeys() {
         return Set.of();
     }
+
+    public final boolean conflictsWith(LongTask other) {
+        return getMutexKeys().stream().anyMatch(other.getMutexKeys()::contains);
+    }
 }

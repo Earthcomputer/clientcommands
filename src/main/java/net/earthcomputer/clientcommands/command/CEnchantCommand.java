@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
@@ -34,7 +35,7 @@ public class CEnchantCommand {
         return !ench.isTreasureOnly() && ench.isDiscoverable() && (item == Items.BOOK || ench.canEnchant(new ItemStack(item)));
     }
 
-    private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) {
+    private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandSyntaxException {
         if (!Configs.getEnchantingPrediction()) {
             Component component = Component.translatable("commands.cenchant.needEnchantingPrediction")
                     .withStyle(ChatFormatting.RED)

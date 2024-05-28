@@ -197,6 +197,7 @@
   "commands.cstopsound.success.source.any": "Stopped all '%s' sounds for self",
   "commands.cstopsound.success.source.sound": "Stopped sound '%s' on source '%s' for self",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "No currently executing tasks",
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",
