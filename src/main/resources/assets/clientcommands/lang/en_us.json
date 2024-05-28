@@ -157,7 +157,7 @@
   "commands.clisten.list": "Listening to the following packets:",
   "commands.clisten.clear": "No longer listening to any packets",
 
-  "commands.cminesweeper.too_many_mines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
 
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
