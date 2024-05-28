@@ -80,13 +80,50 @@ public class MinesweeperCommand {
         private static final Vector2i SIX_TILE_UV = new Vector2i(36, 16);
         private static final Vector2i SEVEN_TILE_UV = new Vector2i(52, 16);
         private static final Vector2i EIGHT_TILE_UV = new Vector2i(68, 16);
+        private static final Vector2i[] WARNING_TILE_UV = new Vector2i[] {
+            ONE_TILE_UV,
+            TWO_TILE_UV,
+            THREE_TILE_UV,
+            FOUR_TILE_UV,
+            FIVE_TILE_UV,
+            SIX_TILE_UV,
+            SEVEN_TILE_UV,
+            EIGHT_TILE_UV
+        };
 
-        private static final Random RANDOM = new Random();
+        private static final Random random = new Random();
 
         private final int boardWidth;
         private final int boardHeight;
         private final int mines;
         private int ticksPlaying;
+        /**
+         * Each byte on the board follows a spec of what each collection of bits represents
+         * <pre>
+         * 0 0
+         * </pre>
+         * These bits are unused
+         * <p>
+         * <pre>
+         *      _ _ _
+         * </pre>
+         * These bits are used to refer to the number displayed on warning tiles (technically one less): 0b000 represents a 1 tile, 0b001 represents a 2 tile, and so on.
+         * <p>
+         * <pre>
+         *            _ _
+         * </pre>
+         * These bits represent the type of tile that is there; 0b00 means an empty tile, 0b01 means a warning tile, and 0b10 means a mine.
+         * <p>
+         * <pre>
+         *                _
+         * </pre>
+         * <p>
+         * This bit represents the flag... flag. If it is 1, the tile is flagged, if it is 0, the tile is not flagged.
+         * <pre>
+         *                  _
+         * </pre>
+         * This bit represents if the tile has been uncovered, by default, all tiles are covered.
+         */
         private final byte[] board;
         private final int gameWidth;
         private final int gameHeight;
@@ -121,10 +158,10 @@ public class MinesweeperCommand {
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
             renderBackground(graphics, mouseX, mouseY, tickDelta);
 
-            graphics.drawString(minecraft.font, "Mines Left: " + minesLeft, topLeftX, topLeftY - 10, 0xFFFFFF);
+            graphics.drawString(minecraft.font, Component.translatable("minesweeperGame.minesLeft").getString() + ": " + minesLeft, topLeftX, topLeftY - 10, 0xFFFFFF);
             graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFF);
             {
-                String str = "Time Played: " + Math.ceilDiv(ticksPlaying, 20) + "s";
+                String str = Component.translatable("minesweeperGame.timePlayed").getString() + ": " + Math.ceilDiv(ticksPlaying, 20) + "s";
                 int color;
                 if (deathCoords != null) {
                     color = 0xFF5555;
@@ -171,11 +208,6 @@ public class MinesweeperCommand {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            return false;
-        }
-
-        @Override
         public boolean mouseReleased(double mouseX, double mouseY, int button) {
 
             int tileX = Mth.floorDiv((int) (mouseX - topLeftX - 12), 16);
@@ -210,8 +242,8 @@ public class MinesweeperCommand {
 
         private void generateMines(int avoidX, int avoidY) {
             for (int i = 0; i < mines; i++) {
-                int x = RANDOM.nextInt(boardWidth);
-                int y = RANDOM.nextInt(boardHeight);
+                int x = random.nextInt(boardWidth);
+                int y = random.nextInt(boardHeight);
 
                 // too close to the clicked position
                 if (Mth.abs(avoidX - x) <= 1 && Mth.abs(avoidY - y) <= 1) {
@@ -242,11 +274,11 @@ public class MinesweeperCommand {
         private void incrementWarning(int x, int y) {
             if (isWithinBounds(x, y)) {
                 int idx = y * boardWidth + x;
-                byte original_tile = board[idx];
-                if ((original_tile & 0b1100) >>> 2 == 1) {
+                byte originalTile = board[idx];
+                if ((originalTile & 0b1100) >>> 2 == 1) {
                     // increment warning quantity
                     board[idx] += 0b0_001_00_0_0;
-                } else if ((original_tile & 0b1100) >>> 2 == 0) {
+                } else if ((originalTile & 0b1100) >>> 2 == 0) {
                     // set to warning tile (and since it was empty beforehand, we make it have a quantity of 1)
                     board[idx] = 0b0_000_01_0_0;
                 }
@@ -266,11 +298,11 @@ public class MinesweeperCommand {
                 return;
             }
 
-            if (type == 1) {
+            if (type == 0b01) {
                 // set uncovered
                 board[y * boardWidth + x] |= 0b1;
                 emptyTilesRemaining -= 1;
-            } else if (type == 2) {
+            } else if (type == 0b10) {
                 // set uncovered
                 board[y * boardWidth + x] |= 0b1;
                 deathCoords = new Vector2i(x, y);
@@ -326,37 +358,28 @@ public class MinesweeperCommand {
 
         private Vector2i getTileSprite(int x, int y, boolean hovered) {
             byte tile = board[y * boardWidth + x];
-            boolean flagged = (tile & 2) > 0;
-            boolean covered = (tile & 1) == 0;
+            boolean flagged = (tile & 0b10) > 0;
+            boolean covered = (tile & 0b1) == 0;
             int type = (tile & 0b1100) >>> 2;
-            int warning_quantity = (tile & 0b1110000) >>> 4;
+            int warningQuantity = (tile & 0b1110000) >>> 4;
 
-            if (deathCoords != null && type == 2 && !flagged) {
+            if (deathCoords != null && type == 0b10 && !flagged) {
                 return new Vector2i(x, y).equals(deathCoords) ? RED_MINE_TILE_UV : MINE_TILE_UV;
             }
 
             if (flagged) {
-                return hovered && deathCoords == null ? HOVERED_FLAGGED_TILE_UV : (deathCoords != null && type != 2 ? NOT_A_MINE_TILE_UV : FLAGGED_TILE_UV);
+                return hovered && deathCoords == null ? HOVERED_FLAGGED_TILE_UV : (deathCoords != null && type != 0b10 ? NOT_A_MINE_TILE_UV : FLAGGED_TILE_UV);
             }
 
             if (covered) {
                 return hovered && deathCoords == null ? (isDragging() ? EMPTY_TILE_UV : HOVERED_TILE_UV) : TILE_UV;
             }
 
-            if (type == 0) {
+            if (type == 0b00) {
                 return EMPTY_TILE_UV;
             }
 
-            return switch (warning_quantity) {
-                case 0 -> ONE_TILE_UV;
-                case 1 -> TWO_TILE_UV;
-                case 2 -> THREE_TILE_UV;
-                case 3 -> FOUR_TILE_UV;
-                case 4 -> FIVE_TILE_UV;
-                case 5 -> SIX_TILE_UV;
-                case 6 -> SEVEN_TILE_UV;
-                default -> EIGHT_TILE_UV;
-            };
+            return WARNING_TILE_UV[warningQuantity];
         }
     }
 }

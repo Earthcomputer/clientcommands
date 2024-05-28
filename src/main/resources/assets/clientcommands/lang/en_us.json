@@ -336,6 +336,8 @@
   "snakeGame.score": "Score: %d",
 
   "minesweeperGame.title": "Minesweeper",
+  "minesweeperGame.timePlayed": "Time Played",
+  "minesweeperGame.minesLeft": "Mines Left",
 
   "c2cpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
   "c2cpacket.publicKeyNotFound": "Public key not found",
