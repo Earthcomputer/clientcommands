@@ -464,13 +464,13 @@ public class EnchantmentCracker {
                                 protected void onItemThrown(int current, int total) {
                                     MutableComponent builder = Component.empty();
                                     int color = Mth.hsvToRgb(current / (total * 3.0f), 1.0f, 1.0f);
-                                    builder.append(Component.literal("[").withColor(ChatFormatting.GRAY.getColor()));
+                                    builder.append(Component.literal("[").withColor(0xAAAAAA));
                                     builder.append(Component.literal("~" + Math.round(100.0 * current / total) + "%").withColor(color));
-                                    builder.append(Component.literal("] ").withColor(ChatFormatting.GRAY.getColor()));
-                                    int filled_width = (int) Math.round((double) PROGRESS_BAR_WIDTH * current / total);
-                                    int unfilled_width = PROGRESS_BAR_WIDTH - filled_width;
-                                    builder.append(Component.literal("|".repeat(filled_width)).withColor(color));
-                                    builder.append(Component.literal("|".repeat(unfilled_width)).withColor(ChatFormatting.GRAY.getColor()));
+                                    builder.append(Component.literal("] ").withColor(0xAAAAAA));
+                                    int filledWidth = (int) Math.round((double) PROGRESS_BAR_WIDTH * current / total);
+                                    int unfilledWidth = PROGRESS_BAR_WIDTH - filledWidth;
+                                    builder.append(Component.literal("|".repeat(filledWidth)).withColor(color));
+                                    builder.append(Component.literal("|".repeat(unfilledWidth)).withColor(0xAAAAAA));
 
                                     Minecraft.getInstance().gui.setOverlayMessage(builder, false);
                                 }
