@@ -157,6 +157,8 @@
   "commands.clisten.list": "Listening to the following packets:",
   "commands.clisten.clear": "No longer listening to any packets",
 
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 
@@ -289,6 +291,10 @@
   "enchCrack.insn.enchantments": "Enchantments on item:",
 
   "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
+
+  "minesweeperGame.minesLeft": "Mines Left: %d",
+  "minesweeperGame.timePlayed": "Time Played: %ds",
+  "minesweeperGame.title": "Minesweeper",
 
   "playerManip.state": "Player Crack State: %s",
   "playerManip.state.uncracked": "Uncracked",
