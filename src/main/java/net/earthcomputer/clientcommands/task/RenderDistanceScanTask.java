@@ -30,18 +30,36 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     static {
         ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> {
-            WeakReference<ClientLevelEvents.ChunkUpdate> chunkUpdateCallback = RenderDistanceScanTask.chunkUpdateCallback;
-            if (chunkUpdateCallback != null) {
-                ClientLevelEvents.ChunkUpdate callback = chunkUpdateCallback.get();
-                if (callback != null) {
-                    callback.onBlockStateUpdate(level, pos, oldState, newState);
+            @Nullable WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            if (currentScanTask != null) {
+                RenderDistanceScanTask scanTask = currentScanTask.get();
+                if (scanTask != null) {
+                    scanTask.onBlockStateUpdate(level, pos, oldState, newState);
+                }
+            }
+        });
+        ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> {
+            @Nullable WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            if (currentScanTask != null) {
+                RenderDistanceScanTask scanTask = currentScanTask.get();
+                if (scanTask != null) {
+                    scanTask.onUnloadChunk(level, pos);
+                }
+            }
+        });
+        ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> {
+            @Nullable WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            if (currentScanTask != null) {
+                RenderDistanceScanTask scanTask = currentScanTask.get();
+                if (scanTask != null) {
+                    scanTask.onLoadChunk(level, pos);
                 }
             }
         });
     }
 
     @Nullable
-    private static WeakReference<ClientLevelEvents.ChunkUpdate> chunkUpdateCallback = null;
+    private static WeakReference<RenderDistanceScanTask> currentScanTask = null;
     protected boolean keepSearching;
     private LongLinkedOpenHashSet remainingChunks;
 
@@ -58,17 +76,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             return;
         }
         BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
-        ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> remainingChunks.remove(pos.toLong()));
-        ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> remainingChunks.add(pos.toLong()));
-        chunkUpdateCallback = new WeakReference<>((level, pos, oldState, newState) -> {
-            if (keepSearching) {
-                try {
-                    scanBlock(Minecraft.getInstance().cameraEntity, pos);
-                } catch (CommandSyntaxException e) {
-                    ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
-                }
-            }
-        });
+        currentScanTask = new WeakReference<>(this);
     }
 
     @Override
@@ -123,12 +131,34 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     @Override
     public void onCompleted() {
-        chunkUpdateCallback = null;
+        currentScanTask = null;
     }
 
     @Override
     public Set<Object> getMutexKeys() {
         return MUTEX_KEYS;
+    }
+
+    protected void onBlockStateUpdate(ClientLevel level, BlockPos pos, BlockState oldState, BlockState newState) {
+        if (keepSearching) {
+            try {
+                scanBlock(Minecraft.getInstance().cameraEntity, pos);
+            } catch (CommandSyntaxException e) {
+                ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
+            }
+        }
+    }
+
+    protected void onLoadChunk(ClientLevel level, ChunkPos pos) {
+        if (keepSearching) {
+            remainingChunks.add(pos.toLong());
+        }
+    }
+
+    protected void onUnloadChunk(ClientLevel level, ChunkPos pos) {
+        if (keepSearching) {
+            remainingChunks.add(pos.toLong());
+        }
     }
 
     protected boolean canScanChunk(Entity cameraEntity, ChunkPos pos) {
