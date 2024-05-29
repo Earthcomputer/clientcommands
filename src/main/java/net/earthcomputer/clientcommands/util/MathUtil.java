@@ -33,10 +33,7 @@ public class MathUtil {
             AABB box = new AABB(x1, y1, z1, x2, y2, z2).move(blockPos);
             for (Direction face : dirs) {
                 AABB faceBox = getFace(box, face);
-                // Since the faces are axis aligned, it's a simple clamp operation
-                Vec3 val = new Vec3(Mth.clamp(pos.x, faceBox.minX, faceBox.maxX),
-                        Mth.clamp(pos.y, faceBox.minY, faceBox.maxY),
-                        Mth.clamp(pos.z, faceBox.minZ, faceBox.maxZ));
+                Vec3 val = getClosestPoint(faceBox, pos);
                 double distanceSq = val.distanceToSqr(pos);
                 if (distanceSq < result.distanceSq) {
                     result.val = val;
@@ -45,6 +42,13 @@ public class MathUtil {
             }
         });
         return result.val;
+    }
+
+    public static Vec3 getClosestPoint(AABB aabb, Vec3 pos) {
+        // Since the faces are axis aligned, it's a simple clamp operation
+        return new Vec3(Mth.clamp(pos.x, aabb.minX, aabb.maxX),
+            Mth.clamp(pos.y, aabb.minY, aabb.maxY),
+            Mth.clamp(pos.z, aabb.minZ, aabb.maxZ));
     }
 
     public static Vec3 getClosestVisiblePoint(Level level, BlockPos targetPos, Vec3 sourcePos, Entity excludingEntity) {
