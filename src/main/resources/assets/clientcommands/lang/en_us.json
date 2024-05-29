@@ -173,7 +173,6 @@
   "commands.cping.success.other": "The average ping of %s is %dms",
   "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Player not found",
-  "commands.cping.tooManyPlayers": "Your query can match at most 1 player",
 
   "commands.cpos.level.overworld": "the Overworld",
   "commands.cpos.level.the_end": "the End",
@@ -202,6 +201,9 @@
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",
   "commands.ctask.stop.success": "Stopped %d tasks",
+
+  "commands.ctictactoe.playerNotFound": "Player not found",
+  "commands.ctictactoe.noGameWithPlayer": "Currently not playing a game with that player",
 
   "commands.ctime.reset.success": "The time now matches the server",
 
@@ -334,6 +336,11 @@
   "snakeGame.title": "Snake",
   "snakeGame.score": "Score: %d",
 
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
+  "ticTacToeGame.playingWith": "You are playing with %s",
+  "ticTacToeGame.noughts": "noughts (O)",
+  "ticTacToeGame.crosses": "crosses (X)",
+
   "c2cpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
   "c2cpacket.publicKeyNotFound": "Public key not found",
   "c2cpacket.encryptionFailed": "Something failed while encrypting your message",
@@ -342,5 +349,14 @@
   "c2cpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
 
   "c2cpacket.messageC2CPacket.incoming": "%s -> you: %s",
-  "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s"
+  "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }

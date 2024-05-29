@@ -25,6 +25,7 @@
     "debug.EntityMixin",
     "debug.ServerLevelMixin",
     "events.MinecraftMixin",
+    "events.ScreenMixin",
     "lengthextender.EditBoxMixin",
     "lengthextender.StringUtilMixin",
     "rngevents.AnvilMenuMixin",
