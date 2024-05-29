@@ -28,6 +28,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketDecoder;
 import net.minecraft.network.PacketEncoder;
+import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.network.protocol.Packet;
@@ -76,8 +77,12 @@ public class PacketDumper {
         writer.beginArray();
         try {
             if (packet.type().id().getNamespace().equals("clientcommands")) {
+                ProtocolInfo<C2CPacketListener> protocolInfo = C2CPacketHandler.getCurrentProtocolInfo();
+                if (protocolInfo == null) {
+                    throw new IOException("Not currently logged in");
+                }
                 //noinspection unchecked
-                C2CPacketHandler.C2C.codec().encode(new PacketDumpByteBuf(writer), (Packet<? super C2CPacketListener>) packet);
+                protocolInfo.codec().encode(new PacketDumpByteBuf(writer), (Packet<? super C2CPacketListener>) packet);
             } else {
                 ChannelPipeline pipeline = Minecraft.getInstance().getConnection().getConnection().channel.pipeline();
                 @SuppressWarnings("unchecked")

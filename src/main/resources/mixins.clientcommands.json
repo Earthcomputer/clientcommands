@@ -26,6 +26,7 @@
     "debug.EntityMixin",
     "debug.ServerLevelMixin",
     "events.MinecraftMixin",
+    "events.ScreenMixin",
     "lengthextender.EditBoxMixin",
     "lengthextender.StringUtilMixin",
     "rngevents.AnvilMenuMixin",
@@ -64,6 +65,7 @@
     "requireAnnotations": true
   },
   "client": [
+    "c2c.ClientPacketListenerMixin",
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.findblock.ClientLevelMixin",

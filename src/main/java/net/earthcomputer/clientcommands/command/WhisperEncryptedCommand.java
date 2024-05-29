@@ -13,8 +13,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-import java.util.Collection;
-
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
@@ -25,20 +23,16 @@ public class WhisperEncryptedCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cwe")
-            .then(argument("player", gameProfile())
+            .then(argument("player", gameProfile(true))
                 .then(argument("message", greedyString())
-                    .executes((ctx) -> whisper(ctx.getSource(), getProfileArgument(ctx, "player"), getString(ctx, "message"))))));
+                    .executes((ctx) -> whisper(ctx.getSource(), getSingleProfileArgument(ctx, "player"), getString(ctx, "message"))))));
     }
 
-    private static int whisper(FabricClientCommandSource source, Collection<GameProfile> profiles, String message) throws CommandSyntaxException {
-        assert source.getClient().getConnection() != null;
-        if (profiles.size() != 1) {
+    private static int whisper(FabricClientCommandSource source, GameProfile player, String message) throws CommandSyntaxException {
+        PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(player.getId());
+        if (recipient == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
-        PlayerInfo recipient = source.getClient().getConnection().getOnlinePlayers().stream()
-            .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
-            .findFirst()
-            .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
 
         MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), message);
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);

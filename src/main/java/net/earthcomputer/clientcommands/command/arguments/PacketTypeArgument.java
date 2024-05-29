@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.netty.channel.ChannelPipeline;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
+import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -86,12 +87,17 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
             if (connection == null) {
                 return null;
             }
+            ProtocolInfo<C2CPacketListener> protocolInfo = C2CPacketHandler.getCurrentProtocolInfo();
+            if (protocolInfo == null) {
+                return null;
+            }
+
             ChannelPipeline pipeline = connection.getConnection().channel.pipeline();
             var decoder = (PacketDecoder<?>) pipeline.get("decoder");
             var clientbound = packetTypesCache.computeIfAbsent(decoder, k -> getPacketTypes(decoder.protocolInfo));
             var encoder = (PacketEncoder<?>) pipeline.get("encoder");
             var serverbound = packetTypesCache.computeIfAbsent(encoder, k -> getPacketTypes(encoder.protocolInfo));
-            var c2cbound = packetTypesCache.computeIfAbsent("c2c", k -> getPacketTypes(C2CPacketHandler.C2C));
+            var c2cbound = packetTypesCache.computeIfAbsent("c2c", k -> getPacketTypes(protocolInfo));
             return new PacketTypes(clientbound, serverbound, c2cbound);
         }
     }

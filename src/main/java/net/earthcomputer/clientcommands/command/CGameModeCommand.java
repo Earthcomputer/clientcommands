@@ -10,7 +10,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameType;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,23 +24,20 @@ public class CGameModeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cgamemode")
             .then(literal("query")
-                .then(argument("player", gameProfile())
-                    .executes(ctx -> getPlayerGameMode(ctx.getSource(), getProfileArgument(ctx, "player")))))
+                .then(argument("player", gameProfile(true))
+                    .executes(ctx -> getPlayerGameMode(ctx.getSource(), getSingleProfileArgument(ctx, "player")))))
             .then(literal("list")
                 .then(argument("gameMode", enumArg(GameType.class))
                     .executes(ctx -> listWithGameMode(ctx.getSource(), getEnum(ctx, "gameMode"))))));
     }
 
-    private static int getPlayerGameMode(FabricClientCommandSource source, Collection<GameProfile> profiles) throws CommandSyntaxException {
-        if (profiles.size() != 1) {
+    private static int getPlayerGameMode(FabricClientCommandSource source, GameProfile player) throws CommandSyntaxException {
+        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.getId());
+        if (playerInfo == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
-        PlayerInfo player = source.getClient().getConnection().getOnlinePlayers().stream()
-            .filter(p -> p.getProfile().getName().equalsIgnoreCase(profiles.iterator().next().getName()))
-            .findAny()
-            .orElseThrow(PLAYER_NOT_FOUND_EXCEPTION::create);
 
-        source.sendFeedback(Component.translatable("commands.cgamemode.playerGameMode", player.getProfile().getName(), player.getGameMode().getShortDisplayName()));
+        source.sendFeedback(Component.translatable("commands.cgamemode.playerGameMode", playerInfo.getProfile().getName(), playerInfo.getGameMode().getShortDisplayName()));
         return Command.SINGLE_SUCCESS;
     }
 
