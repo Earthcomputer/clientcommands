@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument;
 import net.earthcomputer.clientcommands.task.RenderDistanceScanTask;
@@ -26,18 +27,22 @@ import static net.earthcomputer.clientcommands.command.arguments.WithStringArgum
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FindBlockCommand {
+    public static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
-        dispatcher.register(literal("cfindblock")
+        var cfindblock = dispatcher.register(literal("cfindblock")
             .then(argument("block", withString(blockPredicate(context)))
                 .executes(ctx -> {
                     var blockWithString = getWithString(ctx, "block", ClientBlockPredicateArgument.ParseResult.class);
-                    return findBlock(Component.translatable("commands.cfindblock.starting", blockWithString.string()), getBlockPredicate(blockWithString.value()));
+                    return findBlock(ctx, Component.translatable("commands.cfindblock.starting", blockWithString.string()), getBlockPredicate(blockWithString.value()));
                 })));
+        FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cfindblock, ctx -> true);
     }
 
-    public static int findBlock(Component startingMessage, ClientBlockPredicate block) throws CommandSyntaxException {
+    public static int findBlock(CommandContext<FabricClientCommandSource> ctx, Component startingMessage, ClientBlockPredicate block) throws CommandSyntaxException {
+        boolean keepSearching = getFlag(ctx, FLAG_KEEP_SEARCHING);
         sendFeedback(startingMessage);
-        TaskManager.addTask("cfindblock", new FindBlockTask(block));
+        TaskManager.addTask("cfindblock", new FindBlockTask(block, keepSearching));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -47,8 +52,8 @@ public class FindBlockCommand {
         @Nullable
         private BlockPos closestBlock;
 
-        FindBlockTask(ClientBlockPredicate predicate) {
-            super(false);
+        FindBlockTask(ClientBlockPredicate predicate, boolean keepSearching) {
+            super(keepSearching);
             this.predicate = predicate;
         }
 
@@ -59,6 +64,7 @@ public class FindBlockCommand {
             Vec3 cameraPos = cameraEntity.getEyePosition(0);
             if ((closestBlock == null || pos.distToCenterSqr(cameraPos) < closestBlock.distToCenterSqr(cameraPos)) && predicate.test(level.registryAccess(), level, pos)) {
                 closestBlock = pos.immutable();
+                keepSearching = false;
             }
         }
 
@@ -75,6 +81,7 @@ public class FindBlockCommand {
 
         @Override
         public void onCompleted() {
+            super.onCompleted();
             if (closestBlock == null) {
                 sendError(Component.translatable("commands.cfindblock.notFound"));
             } else {

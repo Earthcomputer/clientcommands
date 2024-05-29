@@ -1,7 +1,9 @@
 package net.earthcomputer.clientcommands.task;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -16,16 +18,50 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
+import java.lang.ref.WeakReference;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public abstract class RenderDistanceScanTask extends SimpleTask {
     private static final long MAX_SCAN_TIME = 30_000_000L; // 30ms
+    private static final Set<Object> MUTEX_KEYS = Set.of(RenderDistanceScanTask.class);
 
-    private final boolean keepSearching;
+    static {
+        ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> {
+            WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            if (currentScanTask != null) {
+                RenderDistanceScanTask scanTask = currentScanTask.get();
+                if (scanTask != null) {
+                    scanTask.onBlockStateUpdate(level, pos, oldState, newState);
+                }
+            }
+        });
+        ClientLevelEvents.UNLOAD_CHUNK.register((level, pos) -> {
+            WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            if (currentScanTask != null) {
+                RenderDistanceScanTask scanTask = currentScanTask.get();
+                if (scanTask != null) {
+                    scanTask.onUnloadChunk(level, pos);
+                }
+            }
+        });
+        ClientLevelEvents.LOAD_CHUNK.register((level, pos) -> {
+            WeakReference<RenderDistanceScanTask> currentScanTask = RenderDistanceScanTask.currentScanTask;
+            if (currentScanTask != null) {
+                RenderDistanceScanTask scanTask = currentScanTask.get();
+                if (scanTask != null) {
+                    scanTask.onLoadChunk(level, pos);
+                }
+            }
+        });
+    }
 
-    private Iterator<BlockPos.MutableBlockPos> squarePosIterator;
+    @Nullable
+    private static WeakReference<RenderDistanceScanTask> currentScanTask = null;
+    protected boolean keepSearching;
+    private LongLinkedOpenHashSet remainingChunks;
 
     protected RenderDistanceScanTask(boolean keepSearching) {
         this.keepSearching = keepSearching;
@@ -33,12 +69,19 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     @Override
     public void initialize() {
-        squarePosIterator = createIterator();
+        remainingChunks = new LongLinkedOpenHashSet();
+        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+        if (cameraEntity == null) {
+            _break();
+            return;
+        }
+        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
+        currentScanTask = new WeakReference<>(this);
     }
 
     @Override
     public boolean condition() {
-        return squarePosIterator != null;
+        return hasChunksRemaining() || keepSearching;
     }
 
     @Override
@@ -48,6 +91,10 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         } catch (CommandSyntaxException e) {
             ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
         }
+    }
+
+    protected boolean hasChunksRemaining() {
+        return !remainingChunks.isEmpty();
     }
 
     protected void doTick() throws CommandSyntaxException {
@@ -61,9 +108,8 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         assert level != null;
 
         long startTime = System.nanoTime();
-        while (squarePosIterator.hasNext()) {
-            BlockPos chunkPosAsBlockPos = squarePosIterator.next();
-            ChunkPos chunkPos = new ChunkPos(chunkPosAsBlockPos.getX(), chunkPosAsBlockPos.getZ());
+        while (hasChunksRemaining()) {
+            ChunkPos chunkPos = new ChunkPos(remainingChunks.removeFirst());
 
             if (canScanChunk(cameraEntity, chunkPos)) {
                 int minSection = level.getMinSection();
@@ -81,18 +127,38 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
                 return;
             }
         }
+    }
 
+    @Override
+    public void onCompleted() {
+        currentScanTask = null;
+    }
+
+    @Override
+    public Set<Object> getMutexKeys() {
+        return MUTEX_KEYS;
+    }
+
+    protected void onBlockStateUpdate(ClientLevel level, BlockPos pos, BlockState oldState, BlockState newState) {
         if (keepSearching) {
-            if (canKeepSearchingNow()) {
-                squarePosIterator = createIterator();
+            try {
+                scanBlock(Minecraft.getInstance().cameraEntity, pos);
+            } catch (CommandSyntaxException e) {
+                ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
             }
-        } else {
-            squarePosIterator = null;
         }
     }
 
-    protected boolean canKeepSearchingNow() {
-        return true;
+    protected void onLoadChunk(ClientLevel level, ChunkPos pos) {
+        if (keepSearching) {
+            remainingChunks.add(pos.toLong());
+        }
+    }
+
+    protected void onUnloadChunk(ClientLevel level, ChunkPos pos) {
+        if (keepSearching) {
+            remainingChunks.add(pos.toLong());
+        }
     }
 
     protected boolean canScanChunk(Entity cameraEntity, ChunkPos pos) {
@@ -142,13 +208,4 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     }
 
     protected abstract void scanBlock(Entity cameraEntity, BlockPos pos) throws CommandSyntaxException;
-
-    private Iterator<BlockPos.MutableBlockPos> createIterator() {
-        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
-        if (cameraEntity == null) {
-            _break();
-            return null;
-        }
-        return BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator();
-    }
 }
