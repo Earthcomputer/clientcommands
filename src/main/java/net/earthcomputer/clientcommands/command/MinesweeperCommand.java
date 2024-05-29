@@ -298,10 +298,10 @@ public class MinesweeperCommand {
             }
 
             int type = tileType(tile);
-            if (type == 0b01) {
+            if (type == WARNING_TILE_TYPE) {
                 uncover(x, y);
                 emptyTilesRemaining -= 1;
-            } else if (type == 0b10) {
+            } else if (type == MINE_TILE_TYPE) {
                 uncover(x, y);
                 deathCoords = new Vector2i(x, y);
             } else {
@@ -328,14 +328,13 @@ public class MinesweeperCommand {
                         new Vector2i(xPart + 1, yPart + 1),
                     }) {
                         if (isWithinBounds(possibleNeighbour.x, possibleNeighbour.y)) {
-                            int pos = possibleNeighbour.y * boardWidth + possibleNeighbour.x;
                             byte value = getTile(possibleNeighbour.x, possibleNeighbour.y);
                             uncover(possibleNeighbour.x, possibleNeighbour.y);
                             if (isCovered(value)) {
                                 emptyTilesRemaining -= 1;
                                 // if it's an empty tile, we put it in the queue to go activate all its neighbours
                                 if (tileType(value) == EMPTY_TILE_TYPE) {
-                                    queue[++queueIdx] = pos;
+                                    queue[++queueIdx] = possibleNeighbour.y * boardWidth + possibleNeighbour.x;
                                 }
                             }
                         }
