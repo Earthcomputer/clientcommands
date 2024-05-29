@@ -35,7 +35,7 @@ public class FindBlockCommand {
                 })));
     }
 
-    public static int findBlock(Component startingMessage, ClientBlockPredicate block) {
+    public static int findBlock(Component startingMessage, ClientBlockPredicate block) throws CommandSyntaxException {
         sendFeedback(startingMessage);
         TaskManager.addTask("cfindblock", new FindBlockTask(block));
         return Command.SINGLE_SUCCESS;

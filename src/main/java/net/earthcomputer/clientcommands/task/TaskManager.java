@@ -1,21 +1,26 @@
 package net.earthcomputer.clientcommands.task;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.logging.LogUtils;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class TaskManager {
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    private static final Dynamic2CommandExceptionType CONFLICTING_TASK_EXCEPTION =
+        new Dynamic2CommandExceptionType((conflictingTask, cancel) -> Component.translatable("commands.ctask.conflicting", conflictingTask, cancel));
 
     static {
         ClientTickEvents.START_CLIENT_TICK.register(TaskManager::tick);
@@ -31,8 +36,6 @@ public class TaskManager {
             return;
         }
 
-        Set<Object> mutexKeys = new HashSet<>();
-
         int iterationCount = 0;
         var iteratingTasks = new ArrayList<>(tasks.entrySet());
         while (!iteratingTasks.isEmpty()) {
@@ -41,12 +44,7 @@ public class TaskManager {
             while (itr.hasNext()) {
                 var taskEntry = itr.next();
                 LongTask task = taskEntry.getValue();
-                Set<Object> taskMutexKeys = task.getMutexKeys();
-                if (mutexKeys.stream().anyMatch(taskMutexKeys::contains)) {
-                    continue;
-                }
                 tickedAnyTask = true;
-                mutexKeys.addAll(taskMutexKeys);
                 if (!task.isInitialized) {
                     task.initialize();
                     task.isInitialized = true;
@@ -58,7 +56,6 @@ public class TaskManager {
                         tasks.remove(taskEntry.getKey());
                     }
                     itr.remove();
-                    mutexKeys.removeAll(taskMutexKeys);
                 } else {
                     task.body();
                     if (!task.isCompleted()) {
@@ -108,10 +105,27 @@ public class TaskManager {
         }
     }
 
-    public static String addTask(String name, LongTask task) {
+    public static String addTask(String name, LongTask task) throws CommandSyntaxException {
+        for (var otherTask : tasks.entrySet()) {
+            if (task.conflictsWith(otherTask.getValue())) {
+                throw CONFLICTING_TASK_EXCEPTION.create(
+                    otherTask.getKey(),
+                    ClientCommandHelper.getCommandTextComponent("commands.client.cancel", "/ctask stop " + otherTask.getKey())
+                );
+            }
+        }
+
         String actualName = (nextTaskId++) + "." + name;
         tasks.put(actualName, task);
         return actualName;
+    }
+
+    public static String addNonConflictingTask(String name, LongTask task) {
+        try {
+            return addTask(name, task);
+        } catch (CommandSyntaxException e) {
+            throw new AssertionError("Task " + task + " was conflicting but it was asserted that the task can't conflict");
+        }
     }
 
     public static void forceAddTask(String fullName, LongTask task) {
