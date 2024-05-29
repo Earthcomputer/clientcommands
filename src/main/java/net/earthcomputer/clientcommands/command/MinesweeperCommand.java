@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -162,10 +163,10 @@ public class MinesweeperCommand {
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
             renderBackground(graphics, mouseX, mouseY, tickDelta);
 
-            graphics.drawString(minecraft.font, Component.translatable("minesweeperGame.minesLeft", minesLeft).getString(), topLeftX, topLeftY - 10, 0xFFFFFF);
+            graphics.drawString(minecraft.font, I18n.get("minesweeperGame.minesLeft", minesLeft), topLeftX, topLeftY - 10, 0xFFFFFF);
             graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFF);
             {
-                String str = Component.translatable("minesweeperGame.timePlayed", Math.ceilDiv(ticksPlaying, 20)).getString();
+                String str = I18n.get("minesweeperGame.timePlayed", Math.ceilDiv(ticksPlaying, 20));
                 int color;
                 if (deathCoords != null) {
                     color = 0xFF5555;
