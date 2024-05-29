@@ -167,6 +167,7 @@ public class C2CPacketHandler implements C2CPacketListener {
             return false;
         }
         if (buf.readableBytes() > 0) {
+            LOGGER.error("Found extra bytes while reading C2C packet {}", packet.type());
             return false;
         }
         ListenCommand.onPacket(packet, ListenCommand.PacketFlow.C2C_INBOUND);
@@ -174,7 +175,7 @@ public class C2CPacketHandler implements C2CPacketListener {
             packet.handle(C2CPacketHandler.getInstance());
         } catch (Throwable e) {
             Minecraft.getInstance().gui.getChat().addMessage(Component.nullToEmpty(e.getMessage()));
-            LogUtils.getLogger().error("Error handling C2C packet", e);
+            LOGGER.error("Error handling C2C packet", e);
         }
         return true;
     }
