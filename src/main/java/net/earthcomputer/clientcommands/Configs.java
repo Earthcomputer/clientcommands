@@ -5,6 +5,8 @@ import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.features.ServerBrandManager;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 

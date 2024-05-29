@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;

@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands.features;
+package net.earthcomputer.clientcommands.util;
 
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;

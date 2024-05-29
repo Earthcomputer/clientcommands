@@ -3,9 +3,10 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
-import net.earthcomputer.clientcommands.GuiBlocker;
-import net.earthcomputer.clientcommands.MathUtil;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.earthcomputer.clientcommands.features.ClientcommandsDataQueryHandler;
+import net.earthcomputer.clientcommands.util.GuiBlocker;
+import net.earthcomputer.clientcommands.util.MathUtil;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -79,7 +80,7 @@ public class FindItemCommand {
         FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cfinditem, ctx -> true);
     }
 
-    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, WithStringArgument.Result<Predicate<ItemStack>> item) {
+    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, WithStringArgument.Result<Predicate<ItemStack>> item) throws CommandSyntaxException {
         String taskName = TaskManager.addTask("cfinditem", makeFindItemsTask(item.string(), item.value(), !noSearchShulkerBox, keepSearching));
         if (keepSearching) {
             ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting.keepSearching", item.string())

@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.util;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.Util;

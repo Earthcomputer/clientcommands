@@ -1,7 +1,10 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument;
+import net.earthcomputer.clientcommands.util.CUtil;
+import net.earthcomputer.clientcommands.util.ThrowingPredicate;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -38,13 +41,13 @@ public class SignSearchCommand {
     }
 
     private static ClientBlockPredicateArgument.ClientBlockPredicate predicate(Pattern query) {
-        return signPredicateFromLinePredicate(line -> query.matcher(line).find());
+        return signPredicateFromLinePredicate(line -> CUtil.regexFindSafe(query, line));
     }
 
-    private static ClientBlockPredicateArgument.ClientBlockPredicate signPredicateFromLinePredicate(Predicate<String> linePredicate) {
+    private static ClientBlockPredicateArgument.ClientBlockPredicate signPredicateFromLinePredicate(ThrowingPredicate<String> linePredicate) {
         return new ClientBlockPredicateArgument.ClientBlockPredicate() {
             @Override
-            public boolean test(HolderLookup.Provider holderLookupProvider, BlockGetter blockGetter, BlockPos pos) {
+            public boolean test(HolderLookup.Provider holderLookupProvider, BlockGetter blockGetter, BlockPos pos) throws CommandSyntaxException {
                 if (!(blockGetter.getBlockState(pos).getBlock() instanceof SignBlock)) {
                     return false;
                 }

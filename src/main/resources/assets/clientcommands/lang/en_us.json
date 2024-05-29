@@ -58,7 +58,6 @@
   "commands.ccreativetab.saveFile.failed": "Could not save creative tabs file",
   "commands.ccreativetab.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
 
-  "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Incompatible enchantments",
@@ -197,6 +196,7 @@
   "commands.cstopsound.success.source.any": "Stopped all '%s' sounds for self",
   "commands.cstopsound.success.source.sound": "Stopped sound '%s' on source '%s' for self",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "No currently executing tasks",
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",
@@ -255,6 +255,7 @@
   "commands.client.invalidHoverAction": "Invalid hover event action '%s'",
   "commands.client.invalidHoverEvent": "Invalid hover event '%s'",
   "commands.client.notClient": "Not a client-side command",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
   "commands.client.requiresRestart": "This change will take effect after you restart your client",
   "commands.client.tooFewArguments": "Too few arguments",
 

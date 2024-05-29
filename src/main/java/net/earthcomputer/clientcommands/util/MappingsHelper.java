@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands.features;
+package net.earthcomputer.clientcommands.util;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

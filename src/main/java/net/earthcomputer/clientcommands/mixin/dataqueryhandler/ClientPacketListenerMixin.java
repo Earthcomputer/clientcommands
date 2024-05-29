@@ -1,9 +1,7 @@
 package net.earthcomputer.clientcommands.mixin.dataqueryhandler;
 
-import net.earthcomputer.clientcommands.ClientcommandsDataQueryHandler;
-import net.earthcomputer.clientcommands.features.SuggestionsHook;
+import net.earthcomputer.clientcommands.features.ClientcommandsDataQueryHandler;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

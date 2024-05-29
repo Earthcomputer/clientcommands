@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.util;
 
 import net.earthcomputer.clientcommands.event.MoreScreenEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;

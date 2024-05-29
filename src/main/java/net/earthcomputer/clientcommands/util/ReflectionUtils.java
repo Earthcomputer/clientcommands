@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.util;
 
 import java.lang.reflect.Field;
 import java.util.stream.Stream;

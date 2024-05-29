@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.mixin.serverbrand;
 
-import net.earthcomputer.clientcommands.ServerBrandManager;
+import net.earthcomputer.clientcommands.features.ServerBrandManager;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import org.jetbrains.annotations.Nullable;

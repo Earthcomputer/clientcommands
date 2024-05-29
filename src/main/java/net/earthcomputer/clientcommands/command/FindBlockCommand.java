@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument;
 import net.earthcomputer.clientcommands.task.RenderDistanceScanTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -34,7 +35,7 @@ public class FindBlockCommand {
                 })));
     }
 
-    public static int findBlock(Component startingMessage, ClientBlockPredicate block) {
+    public static int findBlock(Component startingMessage, ClientBlockPredicate block) throws CommandSyntaxException {
         sendFeedback(startingMessage);
         TaskManager.addTask("cfindblock", new FindBlockTask(block));
         return Command.SINGLE_SUCCESS;
@@ -52,7 +53,7 @@ public class FindBlockCommand {
         }
 
         @Override
-        protected void scanBlock(Entity cameraEntity, BlockPos pos) {
+        protected void scanBlock(Entity cameraEntity, BlockPos pos) throws CommandSyntaxException {
             ClientLevel level = Minecraft.getInstance().level;
             assert level != null;
             Vec3 cameraPos = cameraEntity.getEyePosition(0);

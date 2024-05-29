@@ -11,7 +11,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.logging.LogUtils;
-import net.earthcomputer.clientcommands.features.BrigadierRemover;
+import net.earthcomputer.clientcommands.util.BrigadierRemover;
 import net.earthcomputer.clientcommands.interfaces.IClientSuggestionsProvider_Alias;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;

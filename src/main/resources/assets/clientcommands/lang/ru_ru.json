@@ -57,7 +57,6 @@
   "commands.ccreativetab.saveFile.failed": "Не удалось сохранить файл групп элементов",
   "commands.ccreativetab.setStack.success": "Успешно установил стак из \"%s\" с индексом %d в %s",
 
-  "commands.cenchant.expectedWithWithoutExactly": "Ожидал \"with\"/\"without\"/\"exactly\"",
   "commands.cenchant.failed": "Невозможно или это займет слишком много времени, чтобы получить эти чары",
   "commands.cenchant.incompatible": "Несовместимые чары",
   "commands.cenchant.needEnchantingPrediction": "Эта команда требует, чтобы предсказание зачарования было включено.",

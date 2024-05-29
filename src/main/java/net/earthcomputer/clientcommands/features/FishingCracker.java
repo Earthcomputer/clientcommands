@@ -21,6 +21,7 @@ import net.earthcomputer.clientcommands.event.MoreClientEvents;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.SeedfindingUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -265,7 +266,7 @@ public class FishingCracker {
 
             if (canManipulateFishing() && Configs.getFishingManipulation() == Configs.FishingManipulation.AFK) {
                 state = State.WAITING_FOR_RETRHOW;
-                TaskManager.addTask("cfishRethrow", new LongTask() {
+                TaskManager.addNonConflictingTask("cfishRethrow", new LongTask() {
                     private int counter;
                     @Override
                     public void initialize() {

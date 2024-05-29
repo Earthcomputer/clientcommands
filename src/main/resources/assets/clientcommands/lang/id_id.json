@@ -57,7 +57,6 @@
   "commands.ccreativetab.saveFile.failed": "Tidak bisa menyimpan file kelompok benda",
   "commands.ccreativetab.setStack.success": "Berhasil setel tumpukan dari \"%s\" di indeks %d",
 
-  "commands.cenchant.expectedWithWithoutExactly": "Diharapkan \"with (dengan)\"/\"without (tanpa)\"/\"exactly (tepat)\"",
   "commands.cenchant.failed": "Tidak mungkin atau akan memakan waktu yang lama untuk mendapatkan pesona tersebut",
   "commands.cenchant.help.uncrackedPlayerSeed": "Bantuan: anda belum sepenuhnya memecahkan benih pemain",
   "commands.cenchant.incompatible": "Pesona tidak kompatibel",

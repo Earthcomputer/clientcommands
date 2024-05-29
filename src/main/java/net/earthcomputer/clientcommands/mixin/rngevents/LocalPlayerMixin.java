@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.mixin.rngevents;
 
 import com.mojang.authlib.GameProfile;
-import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;

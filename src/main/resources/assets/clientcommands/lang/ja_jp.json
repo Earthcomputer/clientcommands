@@ -57,7 +57,6 @@
   "commands.ccreativetab.saveFile.failed": "アイテムグループファイルを保存できませんでした",
   "commands.ccreativetab.setStack.success": "\"%s\"からのスタックを索引%dに%sを保存するのに成功しました",
 
-  "commands.cenchant.expectedWithWithoutExactly": "\"with\"/\"without\"/\"exactly\"が予期されました",
   "commands.cenchant.failed": "それらのエンチャントを取得するのは不可能であるか、時間がかかりすぎます",
   "commands.cenchant.help.uncrackedPlayerSeed": "ヘルプ: プレイヤーのシードは完全にクラックされていません。",
   "commands.cenchant.incompatible": "競合するエンチャント",

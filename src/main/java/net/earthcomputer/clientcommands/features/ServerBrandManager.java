@@ -1,7 +1,6 @@
-package net.earthcomputer.clientcommands;
+package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
-import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;

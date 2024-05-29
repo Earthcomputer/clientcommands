@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.MultiVersionCompat;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
