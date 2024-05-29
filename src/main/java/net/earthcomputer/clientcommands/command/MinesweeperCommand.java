@@ -91,6 +91,10 @@ public class MinesweeperCommand {
             EIGHT_TILE_UV
         };
 
+        private static final byte EMPTY_TILE_TYPE = 0;
+        private static final byte WARNING_TILE_TYPE = 1;
+        private static final byte MINE_TILE_TYPE = 2;
+
         private static final Random random = new Random();
 
         private final int boardWidth;
@@ -209,7 +213,6 @@ public class MinesweeperCommand {
 
         @Override
         public boolean mouseReleased(double mouseX, double mouseY, int button) {
-
             int tileX = Mth.floorDiv((int) (mouseX - topLeftX - 12), 16);
             int tileY = Mth.floorDiv((int) (mouseY - topLeftY - 12), 16);
 
@@ -251,8 +254,7 @@ public class MinesweeperCommand {
                     continue;
                 }
 
-                // already a mine
-                if ((board[y * boardWidth + x] & 0b1100) >>> 2 == 2) {
+                if (tileType(getTile(x, y)) == MINE_TILE_TYPE) {
                     i--;
                     continue;
                 }
@@ -275,10 +277,10 @@ public class MinesweeperCommand {
             if (isWithinBounds(x, y)) {
                 int idx = y * boardWidth + x;
                 byte originalTile = board[idx];
-                if ((originalTile & 0b1100) >>> 2 == 1) {
+                if (tileType(originalTile) == WARNING_TILE_TYPE) {
                     // increment warning quantity
                     board[idx] += 0b0_001_00_0_0;
-                } else if ((originalTile & 0b1100) >>> 2 == 0) {
+                } else if (tileType(originalTile) == EMPTY_TILE_TYPE) {
                     // set to warning tile (and since it was empty beforehand, we make it have a quantity of 1)
                     board[idx] = 0b0_000_01_0_0;
                 }
@@ -291,24 +293,19 @@ public class MinesweeperCommand {
 
         private void click(int x, int y) {
             byte tile = board[y * boardWidth + x];
-            boolean flagged = (tile & 2) > 0;
-            boolean covered = (tile & 1) == 0;
-            int type = (tile & 0b1100) >>> 2;
-            if (!covered || flagged) {
+            if (!isCovered(tile) || isFlagged(tile)) {
                 return;
             }
 
+            int type = tileType(tile);
             if (type == 0b01) {
-                // set uncovered
-                board[y * boardWidth + x] |= 0b1;
+                uncover(x, y);
                 emptyTilesRemaining -= 1;
             } else if (type == 0b10) {
-                // set uncovered
-                board[y * boardWidth + x] |= 0b1;
+                uncover(x, y);
                 deathCoords = new Vector2i(x, y);
             } else {
-                // set uncovered
-                board[y * boardWidth + x] |= 0b1;
+                uncover(x, y);
                 emptyTilesRemaining -= 1;
                 // we need to leave room for the current tile in the queue
                 int[] queue = new int[emptyTilesRemaining + 1];
@@ -332,13 +329,12 @@ public class MinesweeperCommand {
                     }) {
                         if (isWithinBounds(possibleNeighbour.x, possibleNeighbour.y)) {
                             int pos = possibleNeighbour.y * boardWidth + possibleNeighbour.x;
-                            byte value = board[pos];
-                            // set uncovered
-                            board[pos] |= 0b1;
-                            if ((value & 0b1) == 0) {
+                            byte value = getTile(possibleNeighbour.x, possibleNeighbour.y);
+                            uncover(possibleNeighbour.x, possibleNeighbour.y);
+                            if (isCovered(value)) {
                                 emptyTilesRemaining -= 1;
                                 // if it's an empty tile, we put it in the queue to go activate all its neighbours
-                                if ((value & 0b11_0_0) >>> 2 == 0) {
+                                if (tileType(value) == EMPTY_TILE_TYPE) {
                                     queue[++queueIdx] = pos;
                                 }
                             }
@@ -349,7 +345,7 @@ public class MinesweeperCommand {
         }
 
         private void flag(int x, int y) {
-            if ((board[y * boardWidth + x] & 0b1) > 0) {
+            if (!isCovered(getTile(x, y))) {
                 return;
             }
 
@@ -357,29 +353,59 @@ public class MinesweeperCommand {
         }
 
         private Vector2i getTileSprite(int x, int y, boolean hovered) {
-            byte tile = board[y * boardWidth + x];
-            boolean flagged = (tile & 0b10) > 0;
-            boolean covered = (tile & 0b1) == 0;
-            int type = (tile & 0b1100) >>> 2;
-            int warningQuantity = (tile & 0b1110000) >>> 4;
+            byte tile = getTile(x, y);
+            boolean flagged = isFlagged(tile);
+            boolean covered = isCovered(tile);
+            int type = tileType(tile);
+            int warningQuantity = warningQuantity(tile);
 
-            if (deathCoords != null && type == 0b10 && !flagged) {
+            if (deathCoords != null && type == MINE_TILE_TYPE && !flagged) {
                 return new Vector2i(x, y).equals(deathCoords) ? RED_MINE_TILE_UV : MINE_TILE_UV;
             }
 
             if (flagged) {
-                return hovered && deathCoords == null ? HOVERED_FLAGGED_TILE_UV : (deathCoords != null && type != 0b10 ? NOT_A_MINE_TILE_UV : FLAGGED_TILE_UV);
+                return hovered && deathCoords == null ? HOVERED_FLAGGED_TILE_UV : (deathCoords != null && type != MINE_TILE_TYPE ? NOT_A_MINE_TILE_UV : FLAGGED_TILE_UV);
             }
 
             if (covered) {
                 return hovered && deathCoords == null ? (isDragging() ? EMPTY_TILE_UV : HOVERED_TILE_UV) : TILE_UV;
             }
 
-            if (type == 0b00) {
+            if (type == EMPTY_TILE_TYPE) {
                 return EMPTY_TILE_UV;
             }
 
             return WARNING_TILE_UV[warningQuantity];
+        }
+
+        private byte getTile(int x, int y) {
+            return board[y * boardWidth + x];
+        }
+
+        /**
+         * @return 0 for an empty tile <br> 1 for a warning tile <br> 2 for a mine tile
+         */
+        private int tileType(byte tile) {
+            return (tile & 0b1100) >>> 2;
+        }
+
+        /**
+         * @return a value between 0 and 7 (inclusive) representing one less than the amount of mines near the tile
+         */
+        private int warningQuantity(byte tile) {
+            return (tile & 0b1110000) >>> 4;
+        }
+
+        private boolean isCovered(byte tile) {
+            return (tile & 0b1) == 0;
+        }
+
+        private void uncover(int x, int y) {
+            board[y * boardWidth + x] |= 1;
+        }
+
+        private boolean isFlagged(byte tile) {
+            return (tile & 0b10) > 0;
         }
     }
 }
