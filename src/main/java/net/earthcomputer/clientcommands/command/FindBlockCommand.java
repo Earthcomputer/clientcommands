@@ -39,7 +39,7 @@ public class FindBlockCommand {
         FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cfindblock, ctx -> true);
     }
 
-    public static int findBlock(CommandContext<FabricClientCommandSource> ctx, Component startingMessage, ClientBlockPredicate block) {
+    public static int findBlock(CommandContext<FabricClientCommandSource> ctx, Component startingMessage, ClientBlockPredicate block) throws CommandSyntaxException {
         boolean keepSearching = getFlag(ctx, FLAG_KEEP_SEARCHING);
         sendFeedback(startingMessage);
         TaskManager.addTask("cfindblock", new FindBlockTask(block, keepSearching));
