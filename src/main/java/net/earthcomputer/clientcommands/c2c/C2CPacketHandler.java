@@ -3,11 +3,16 @@ package net.earthcomputer.clientcommands.c2c;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.logging.LogUtils;
+import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.earthcomputer.clientcommands.command.ListenCommand;
+import net.earthcomputer.clientcommands.interfaces.IClientPacketListener_C2C;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.AccountProfileKeyPairManager;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,19 +24,25 @@ import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.ProtocolInfoBuilder;
+import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.entity.player.ProfilePublicKey;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.Optional;
 
 public class C2CPacketHandler implements C2CPacketListener {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final DynamicCommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new DynamicCommandExceptionType(d -> Component.translatable("c2cpacket.messageTooLong", d));
     private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.publicKeyNotFound"));
     private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.encryptionFailed"));
 
-    public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, RegistryFriendlyByteBuf>protocolUnbound(ConnectionProtocol.PLAY, PacketFlow.CLIENTBOUND, builder -> builder
+    public static final ProtocolInfo.Unbound<C2CPacketListener, RegistryFriendlyByteBuf> PROTOCOL_UNBOUND = ProtocolInfoBuilder.protocolUnbound(ConnectionProtocol.PLAY, PacketFlow.CLIENTBOUND, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
-    ).bind(RegistryFriendlyByteBuf.decorator(Minecraft.getInstance().getConnection().registryAccess()));
+    );
 
     private static final C2CPacketHandler instance = new C2CPacketHandler();
 
@@ -53,7 +64,11 @@ public class C2CPacketHandler implements C2CPacketListener {
         }
         PublicKey key = ppk.data().key();
         FriendlyByteBuf buf = PacketByteBufs.create();
-        C2C.codec().encode(buf, packet);
+        ProtocolInfo<C2CPacketListener> protocolInfo = getCurrentProtocolInfo();
+        if (protocolInfo == null) {
+            return;
+        }
+        protocolInfo.codec().encode(buf, packet);
         byte[] uncompressed = new byte[buf.readableBytes()];
         buf.getBytes(0, uncompressed);
         byte[] compressed = ConversionHelper.Gzip.compress(uncompressed);
@@ -102,14 +117,85 @@ public class C2CPacketHandler implements C2CPacketListener {
         Minecraft.getInstance().gui.getChat().addMessage(component);
     }
 
+    public static boolean handleC2CPacket(String content) {
+        byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
+        // round down to multiple of 256 bytes
+        int length = encrypted.length & ~0xFF;
+        // copy to new array of arrays
+        byte[][] encryptedArrays = new byte[length / 256][];
+        for (int i = 0; i < length; i += 256) {
+            encryptedArrays[i / 256] = Arrays.copyOfRange(encrypted, i, i + 256);
+        }
+        if (!(Minecraft.getInstance().getProfileKeyPairManager() instanceof AccountProfileKeyPairManager profileKeyPairManager)) {
+            return false;
+        }
+        Optional<ProfileKeyPair> keyPair = profileKeyPairManager.keyPair.join();
+        if (keyPair.isEmpty()) {
+            return false;
+        }
+        // decrypt
+        int len = 0;
+        byte[][] decryptedArrays = new byte[encryptedArrays.length][];
+        for (int i = 0; i < encryptedArrays.length; i++) {
+            decryptedArrays[i] = ConversionHelper.RsaEcb.decrypt(encryptedArrays[i], keyPair.get().privateKey());
+            if (decryptedArrays[i] == null) {
+                return false;
+            }
+            len += decryptedArrays[i].length;
+        }
+        // copy to new array
+        byte[] decrypted = new byte[len];
+        int pos = 0;
+        for (byte[] decryptedArray : decryptedArrays) {
+            System.arraycopy(decryptedArray, 0, decrypted, pos, decryptedArray.length);
+            pos += decryptedArray.length;
+        }
+        byte[] uncompressed = ConversionHelper.Gzip.decompress(decrypted);
+        if (uncompressed == null) {
+            return false;
+        }
+        ProtocolInfo<C2CPacketListener> protocolInfo = getCurrentProtocolInfo();
+        if (protocolInfo == null) {
+            return false;
+        }
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(uncompressed));
+        Packet<? super C2CPacketListener> packet;
+        try {
+            packet = protocolInfo.codec().decode(buf);
+        } catch (Throwable e) {
+            LOGGER.error("Error decoding C2C packet", e);
+            return false;
+        }
+        if (buf.readableBytes() > 0) {
+            return false;
+        }
+        ListenCommand.onPacket(packet, ListenCommand.PacketFlow.C2C_INBOUND);
+        try {
+            packet.handle(C2CPacketHandler.getInstance());
+        } catch (Throwable e) {
+            Minecraft.getInstance().gui.getChat().addMessage(Component.nullToEmpty(e.getMessage()));
+            LogUtils.getLogger().error("Error handling C2C packet", e);
+        }
+        return true;
+    }
+
+    @Nullable
+    public static ProtocolInfo<C2CPacketListener> getCurrentProtocolInfo() {
+        ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        if (connection == null) {
+            return null;
+        }
+        return ((IClientPacketListener_C2C) connection).clientcommands_getC2CProtocolInfo();
+    }
+
     @Override
     public PacketFlow flow() {
-        return C2C.flow();
+        return PacketFlow.CLIENTBOUND;
     }
 
     @Override
     public ConnectionProtocol protocol() {
-        return C2C.id();
+        return ConnectionProtocol.PLAY;
     }
 
     @Override
