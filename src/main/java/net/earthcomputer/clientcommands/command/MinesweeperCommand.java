@@ -162,10 +162,10 @@ public class MinesweeperCommand {
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
             renderBackground(graphics, mouseX, mouseY, tickDelta);
 
-            graphics.drawString(minecraft.font, Component.translatable("minesweeperGame.minesLeft").getString() + ": " + minesLeft, topLeftX, topLeftY - 10, 0xFFFFFF);
+            graphics.drawString(minecraft.font, Component.translatable("minesweeperGame.minesLeft", minesLeft).getString(), topLeftX, topLeftY - 10, 0xFFFFFF);
             graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFF);
             {
-                String str = Component.translatable("minesweeperGame.timePlayed").getString() + ": " + Math.ceilDiv(ticksPlaying, 20) + "s";
+                String str = Component.translatable("minesweeperGame.timePlayed", Math.ceilDiv(ticksPlaying, 20)).getString();
                 int color;
                 if (deathCoords != null) {
                     color = 0xFF5555;
