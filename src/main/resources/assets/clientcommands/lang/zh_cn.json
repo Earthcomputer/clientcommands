@@ -170,7 +170,6 @@
   "commands.cping.success.other": "%s的平均ping是%dms",
   "commands.cping.singleplayer": "你在一个单人世界里(╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "未找到玩家",
-  "commands.cping.tooManyPlayers": "你的查询最多可以匹配1名玩家",
 
   "commands.cpos.level.overworld": "主世界",
   "commands.cpos.level.the_end": "末地",

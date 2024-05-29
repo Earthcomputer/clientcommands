@@ -147,6 +147,7 @@ public class ClientCommands implements ClientModInitializer {
         KitCommand.register(dispatcher);
         ListenCommand.register(dispatcher);
         LookCommand.register(dispatcher);
+        MinesweeperCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
         NoteCommand.register(dispatcher);
         PermissionLevelCommand.register(dispatcher);
@@ -161,6 +162,7 @@ public class ClientCommands implements ClientModInitializer {
         SnakeCommand.register(dispatcher);
         StartupCommand.register(dispatcher);
         TaskCommand.register(dispatcher);
+        TicTacToeCommand.register(dispatcher);
         TooltipCommand.register(dispatcher, context);
         TranslateCommand.register(dispatcher);
         UsageTreeCommand.register(dispatcher);
