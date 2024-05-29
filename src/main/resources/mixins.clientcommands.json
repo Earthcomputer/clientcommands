@@ -64,6 +64,7 @@
     "requireAnnotations": true
   },
   "client": [
+    "c2c.ClientPacketListenerMixin",
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.generic.CommandSuggestionsMixin",
