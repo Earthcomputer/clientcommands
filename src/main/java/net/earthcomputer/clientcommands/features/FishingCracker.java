@@ -266,7 +266,7 @@ public class FishingCracker {
 
             if (canManipulateFishing() && Configs.getFishingManipulation() == Configs.FishingManipulation.AFK) {
                 state = State.WAITING_FOR_RETRHOW;
-                TaskManager.addTask("cfishRethrow", new LongTask() {
+                TaskManager.addNonConflictingTask("cfishRethrow", new LongTask() {
                     private int counter;
                     @Override
                     public void initialize() {
