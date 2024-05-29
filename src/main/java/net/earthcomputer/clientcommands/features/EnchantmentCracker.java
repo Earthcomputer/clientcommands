@@ -23,7 +23,10 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -100,6 +103,7 @@ public class EnchantmentCracker {
      */
 
     public static final Logger LOGGER = LogUtils.getLogger();
+    private static final int PROGRESS_BAR_WIDTH = 50;
 
     // RENDERING
     /*
@@ -450,6 +454,26 @@ public class EnchantmentCracker {
                                         return false;
                                     }
                                     return super.condition();
+                                }
+
+                                @Override
+                                public void onCompleted() {
+                                    Minecraft.getInstance().player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
+                                }
+
+                                @Override
+                                protected void onItemThrown(int current, int total) {
+                                    MutableComponent builder = Component.empty();
+                                    int color = Mth.hsvToRgb(current / (total * 3.0f), 1.0f, 1.0f);
+                                    builder.append(Component.literal("[").withColor(0xAAAAAA));
+                                    builder.append(Component.literal("~" + Math.round(100.0 * current / total) + "%").withColor(color));
+                                    builder.append(Component.literal("] ").withColor(0xAAAAAA));
+                                    int filledWidth = (int) Math.round((double) PROGRESS_BAR_WIDTH * current / total);
+                                    int unfilledWidth = PROGRESS_BAR_WIDTH - filledWidth;
+                                    builder.append(Component.literal("|".repeat(filledWidth)).withColor(color));
+                                    builder.append(Component.literal("|".repeat(unfilledWidth)).withColor(0xAAAAAA));
+
+                                    Minecraft.getInstance().gui.setOverlayMessage(builder, false);
                                 }
                             });
                         }
