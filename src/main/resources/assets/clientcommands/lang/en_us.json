@@ -157,8 +157,6 @@
   "commands.clisten.list": "Listening to the following packets:",
   "commands.clisten.clear": "No longer listening to any packets",
 
-  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
-
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 
@@ -337,10 +335,6 @@
 
   "snakeGame.title": "Snake",
   "snakeGame.score": "Score: %d",
-
-  "minesweeperGame.title": "Minesweeper",
-  "minesweeperGame.timePlayed": "Time Played",
-  "minesweeperGame.minesLeft": "Mines Left",
 
   "ticTacToeGame.title": "Tic-tac-toe against %s",
   "ticTacToeGame.playingWith": "You are playing with %s",
