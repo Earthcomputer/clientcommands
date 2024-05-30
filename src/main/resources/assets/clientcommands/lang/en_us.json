@@ -77,6 +77,8 @@
   "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$s blocks away",
 
+  "commands.cfinditem.match.entity.left": "%dx %s found in %s at ",
+  "commands.cfinditem.match.entity.right": "",
   "commands.cfinditem.match.left": "%dx %s found at ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Searching for %s",

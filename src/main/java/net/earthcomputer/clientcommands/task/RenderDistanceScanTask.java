@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 
 public abstract class RenderDistanceScanTask extends SimpleTask {
     private static final long MAX_SCAN_TIME = 30_000_000L; // 30ms
-    private static final Set<Object> MUTEX_KEYS = Set.of(RenderDistanceScanTask.class);
+    private static final Set<Object> MUTEX_KEYS = Set.of(TaskManager.INTENSIVE_TASK_MUTEX);
 
     static {
         ClientLevelEvents.CHUNK_UPDATE.register((level, pos, oldState, newState) -> {

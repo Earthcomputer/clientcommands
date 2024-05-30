@@ -12,6 +12,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +74,10 @@ public class ClientCommandHelper {
 
     public static Component getGlowCoordsTextComponent(MutableComponent component, BlockPos pos) {
         return getCommandTextComponent(component, String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
+    }
+
+    public static Component getGlowEntityTextComponent(MutableComponent component, Entity entity) {
+        return getCommandTextComponent(component, "/cglow entities " + entity.getStringUUID());
     }
 
     public static Component getCommandTextComponent(@Translatable String translationKey, String command) {

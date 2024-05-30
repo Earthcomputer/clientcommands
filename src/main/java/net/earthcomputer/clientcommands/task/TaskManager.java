@@ -27,6 +27,11 @@ public class TaskManager {
         ClientLevelEvents.UNLOAD_LEVEL.register(TaskManager::onLevelUnload);
     }
 
+    /**
+     * The mutex for all intensive tasks, to make sure only one can run at a time
+     */
+    public static final Object INTENSIVE_TASK_MUTEX = new Object();
+
     private static final Map<String, LongTask> tasks = new LinkedHashMap<>();
     private static long nextTaskId = 1;
     private static String forceAddedTaskName = null;

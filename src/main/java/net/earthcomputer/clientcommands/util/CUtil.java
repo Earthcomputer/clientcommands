@@ -2,9 +2,11 @@ package net.earthcomputer.clientcommands.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.datafixers.util.Either;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public final class CUtil {
@@ -26,6 +28,16 @@ public final class CUtil {
     @SuppressWarnings("unchecked")
     private static <T extends Throwable> void sneakyThrowHelper(Throwable e) throws T {
         throw (T) e;
+    }
+
+    public static <L, R> void forEither(Either<L, R> either, Consumer<? super L> left, Consumer<? super R> right) {
+        either.<Void>map(l -> {
+            left.accept(l);
+            return null;
+        }, r -> {
+            right.accept(r);
+            return null;
+        });
     }
 
     private static class FusedRegexInput implements CharSequence {
