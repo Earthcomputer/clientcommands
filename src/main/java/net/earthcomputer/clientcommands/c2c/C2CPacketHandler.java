@@ -51,6 +51,8 @@ public class C2CPacketHandler implements C2CPacketListener {
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
     );
 
+    public static final String C2C_PACKET_HEADER = "CCΕNC:";
+
     private static final C2CPacketHandler instance = new C2CPacketHandler();
 
     private C2CPacketHandler() {
@@ -106,7 +108,7 @@ public class C2CPacketHandler implements C2CPacketListener {
             System.arraycopy(encrypted[i], 0, joined, i * 256, 256);
         }
         String packetString = ConversionHelper.BaseUTF8.toUnicode(joined);
-        String commandString = "w " + recipient.getProfile().getName() + " CCENC:" + packetString;
+        String commandString = "w " + recipient.getProfile().getName() + ' ' + C2C_PACKET_HEADER + packetString;
         if (commandString.length() >= SharedConstants.MAX_CHAT_LENGTH) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create(commandString.length());
         }
@@ -115,7 +117,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         OutgoingPacketFilter.addPacket(packetString);
     }
 
-    public static boolean handleC2CPacket(String content) {
+    public static boolean handleC2CPacket(String content, String sender) {
         byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
         // round down to multiple of 256 bytes
         int length = encrypted.length & ~0xFF;
@@ -157,15 +159,19 @@ public class C2CPacketHandler implements C2CPacketListener {
             return false;
         }
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(uncompressed));
-        Packet<? super C2CPacketListener> packet;
+        C2CPacket packet;
         try {
-            packet = protocolInfo.codec().decode(buf);
+            packet = (C2CPacket) protocolInfo.codec().decode(buf);
         } catch (Throwable e) {
             LOGGER.error("Error decoding C2C packet", e);
             return false;
         }
         if (buf.readableBytes() > 0) {
             LOGGER.error("Found extra bytes while reading C2C packet {}", packet.type());
+            return false;
+        }
+        if (!packet.sender().equals(sender)) {
+            LOGGER.error("Detected mismatching packet sender. Expected {}, got {}", sender, packet.sender());
             return false;
         }
         ListenCommand.onPacket(packet, ListenCommand.PacketFlow.C2C_INBOUND);
