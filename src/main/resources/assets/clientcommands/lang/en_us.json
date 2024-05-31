@@ -45,6 +45,12 @@
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
 
+  "commands.cvillager.notAVillager": "Target was not a villager",
+  "commands.cvillager.targetSet": "Target set",
+  "commands.cvillager.timerSet": "Timer block position set to %d %d %d",
+  "commands.cvillager.crackFailed": "Failed to crack villager seed",
+  "commands.cvillager.crackSuccess": "Successfully cracked villager seed: %d",
+
   "commands.ccreativetab.addStack.success": "Successfully added %s to \"%s\"",
   "commands.ccreativetab.addTab.alreadyExists": "Creative tab \"%s\" already exists",
   "commands.ccreativetab.addTab.illegalCharacter": "Creative tab can only contain [a-z0-9/._-] characters",

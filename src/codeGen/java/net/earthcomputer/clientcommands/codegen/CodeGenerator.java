@@ -19,10 +19,20 @@ public class CodeGenerator {
         }
 
         Path destDir = Path.of(args[0]);
-        genLattiCG(destDir);
+        genPlayerLattiCG(destDir);
+        genVillagerLattiCG(destDir);
     }
 
-    private static void genLattiCG(Path destDir) throws IOException {
+    private static void genVillagerLattiCG(Path destDir) throws IOException {
+        ProgramBuilder program = Program.builder(LCG.JAVA);
+
+        program.skip(-2);
+        program.add(JavaCalls.nextLong());
+
+        writeLattiCGClass(program.build(), "net.earthcomputer.clientcommands.features.CrackVillagerRngGen", destDir);
+    }
+
+    private static void genPlayerLattiCG(Path destDir) throws IOException {
         ProgramBuilder program = Program.builder(LCG.JAVA);
         program.skip(-CCrackRng.NUM_THROWS * 4);
         for (int i = 0; i < CCrackRng.NUM_THROWS; i++) {
