@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.features.VillagerCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -22,17 +21,17 @@ public class VillagerCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(
             literal("cvillager")
-                .then(literal("timer")
-                    .then(argument("value", blockPos())
-                        .executes(ctx -> setTimerBlockPos(ctx.getSource(), getBlockPos(ctx, "value")))))
+                .then(literal("clock")
+                    .then(argument("pos", blockPos())
+                        .executes(ctx -> setClockBlockPos(ctx.getSource(), getBlockPos(ctx, "pos")))))
                 .then(literal("target")
-                    .then(argument("value", entity())
-                        .executes(ctx -> setVillagerTarget(ctx.getSource(), getEntity(ctx, "value"))))));
+                    .then(argument("entity", entity())
+                        .executes(ctx -> setVillagerTarget(ctx.getSource(), getEntity(ctx, "entity"))))));
     }
 
-    private static int setTimerBlockPos(FabricClientCommandSource source, BlockPos pos) {
-        VillagerCracker.timerBlockPos = pos;
-        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("commands.cvillager.timerSet", pos.getX(), pos.getY(), pos.getZ()));
+    private static int setClockBlockPos(FabricClientCommandSource source, BlockPos pos) {
+        VillagerCracker.clockBlockPos = pos;
+        source.getPlayer().sendSystemMessage(Component.translatable("commands.cvillager.clockSet", pos.getX(), pos.getY(), pos.getZ()));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -42,7 +41,7 @@ public class VillagerCommand {
         }
 
         VillagerCracker.setTargetVillager(villager);
-        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("commands.cvillager.targetSet"));
+        source.getPlayer().sendSystemMessage(Component.translatable("commands.cvillager.targetSet"));
 
         return Command.SINGLE_SUCCESS;
     }

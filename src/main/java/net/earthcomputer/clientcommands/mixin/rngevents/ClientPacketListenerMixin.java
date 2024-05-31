@@ -40,7 +40,7 @@ public abstract class ClientPacketListenerMixin {
 
     @Inject(method = "handleBlockUpdate", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
     private void onHandleBlockUpdate(ClientboundBlockUpdatePacket packet, CallbackInfo ci) {
-        if (packet.getPos().equals(VillagerCracker.timerBlockPos)) {
+        if (packet.getPos().equals(VillagerCracker.clockBlockPos)) {
             VillagerCracker.onServerTick();
         }
     }
@@ -48,7 +48,7 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleChunkBlocksUpdate", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
     private void onHandleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket packet, CallbackInfo ci) {
         packet.runUpdates((pos, state) -> {
-            if (pos.equals(VillagerCracker.timerBlockPos)) {
+            if (pos.equals(VillagerCracker.clockBlockPos)) {
                 VillagerCracker.onServerTick();
             }
         });

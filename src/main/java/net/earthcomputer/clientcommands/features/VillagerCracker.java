@@ -21,7 +21,7 @@ public class VillagerCracker {
     private static WeakReference<Villager> cachedVillager = null;
 
     @Nullable
-    public static BlockPos timerBlockPos = null;
+    public static BlockPos clockBlockPos = null;
 
     @Nullable
     public static Villager getVillager() {
