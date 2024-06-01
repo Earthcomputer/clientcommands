@@ -71,6 +71,7 @@
     "commands.findblock.ClientLevelMixin",
     "commands.generic.CommandSuggestionsMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
+    "debug.PlayerTabOverlayMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",
     "scrambletitle.MinecraftMixin",

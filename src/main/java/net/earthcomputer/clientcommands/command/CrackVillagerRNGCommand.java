@@ -27,11 +27,11 @@ public class CrackVillagerRNGCommand {
                         .executes(ctx -> cancel(ctx.getSource())))
                 .then(literal("clock")
                         .then(argument("clockpos", blockPos())
-                                .executes(ctx -> crackVillagerRNG(ctx.getSource(), getBlockPos(ctx, "clockpos")))
-                                .then(literal("interval")
-                                        .then(argument("ticks", integer(20, 100))
-                                                .executes(ctx -> crackWithInterval(ctx.getSource(), getBlockPos(ctx, "clockpos"), getInteger(ctx, "ticks"))))))
+                                .executes(ctx -> crackVillagerRNG(ctx.getSource(), getBlockPos(ctx, "clockpos"))))
                                 )
+                .then(literal("interval")
+                        .then(argument("ticks", integer(0, 10))
+                                .executes(ctx -> setInterval(ctx.getSource(), getInteger(ctx, "ticks")))))
                 .then(literal("enchant").then(argument("name", itemAndEnchantmentsPredicate().withItemPredicate((i) -> i.equals(Items.BOOK)).constrainMaxLevel())
                         .executes(ctx -> lookingForEnchantment(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "name"))))));
     }
@@ -58,8 +58,8 @@ public class CrackVillagerRNGCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int crackWithInterval(FabricClientCommandSource source, BlockPos pos, int interval) throws CommandSyntaxException {
+    private static int setInterval(FabricClientCommandSource source, int interval) throws CommandSyntaxException {
         CCrackVillager.setInterval(interval);
-        return crackVillagerRNG(source, pos);
+        return Command.SINGLE_SUCCESS;
     }
 }

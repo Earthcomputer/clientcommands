@@ -27,7 +27,7 @@ public class CCrackVillager {
     static boolean cracked = false;
     static int validMeasures = 0;
     static boolean cracking = false;
-    static int interval = 22;
+    static int interval = 0;
     public static BlockPos clockPos;
 
     public static ItemAndEnchantmentsPredicateArgument.ItemAndEnchantmentsPredicate targetEnchantment = null;
