@@ -4,6 +4,8 @@ import com.mojang.brigadier.StringReader;
 import net.earthcomputer.clientcommands.features.CCrackVillager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.sounds.SoundEvents;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,10 +26,26 @@ public abstract class ClientPacketListenerMixin {
 
     @Inject(method = "handleSoundEvent", at = @At("TAIL"))
     private void onSoundEvent(ClientboundSoundPacket packet, CallbackInfo ci) {
-        if(packet.getSound().is(SoundEvents.AMETHYST_BLOCK_CHIME.getLocation())) {
-            CCrackVillager.onAmethyst(packet);
-        } else if (packet.getSound().is(SoundEvents.VILLAGER_AMBIENT.getLocation())) {
+        if (packet.getSound().is(SoundEvents.VILLAGER_AMBIENT.getLocation())) {
             CCrackVillager.onAmbient();
+        } else if(packet.getSound().is(SoundEvents.AMETHYST_BLOCK_CHIME.getLocation())) {
+            CCrackVillager.onAmethyst(packet);
         }
+    }
+
+    @Inject(method = "handleBlockUpdate", at = @At("TAIL"))
+    void onBlockUpdate(ClientboundBlockUpdatePacket packet, CallbackInfo ci){
+        if(packet.getPos().equals(CCrackVillager.clockPos)) {
+            CCrackVillager.onClockUpdate();
+        }
+    }
+
+    @Inject(method = "handleChunkBlocksUpdate", at = @At("TAIL"))
+    void onBlockUpdate(ClientboundSectionBlocksUpdatePacket packet, CallbackInfo ci){
+        packet.runUpdates((pos, block) -> {
+            if(pos.equals(CCrackVillager.clockPos)) {
+                CCrackVillager.onClockUpdate();
+            }
+        });
     }
 }

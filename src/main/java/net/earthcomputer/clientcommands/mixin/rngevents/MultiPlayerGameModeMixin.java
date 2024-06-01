@@ -1,10 +1,15 @@
 package net.earthcomputer.clientcommands.mixin.rngevents;
 
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.features.VillagerRNGSim;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,5 +51,10 @@ public class MultiPlayerGameModeMixin {
     @Inject(method = "startPrediction", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/prediction/BlockStatePredictionHandler;close()V"))
     private void startPredictionFinally(CallbackInfo ci) {
         PlayerRandCracker.isPredictingBlockBreaking = false;
+    }
+
+    @Inject(method = "interact", at = @At("TAIL"))
+    void onInteract(Player player, Entity target, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        VillagerRNGSim.INSTANCE.clone().onOfferTrades();
     }
 }

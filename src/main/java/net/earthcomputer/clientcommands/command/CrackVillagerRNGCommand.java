@@ -9,24 +9,31 @@ import net.earthcomputer.clientcommands.features.CCrackVillager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.ServerBrandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 
 public class CrackVillagerRNGCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ccrackvillager")
-                .executes(ctx -> crackVillagerRNG(ctx.getSource()))
                 .then(literal("cancel")
                         .executes(ctx -> cancel(ctx.getSource())))
-                .then(literal("interval")
-                        .then(argument("interval0", IntegerArgumentType.integer(20, 100))
-                                .executes(ctx -> crackWithInterval(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "interval0"))))));
+                .then(literal("clock")
+                        .then(argument("clockpos", blockPos())
+                                .executes(ctx -> crackVillagerRNG(ctx.getSource(), getBlockPos(ctx, "clockpos")))
+                                .then(literal("interval")
+                                        .then(argument("ticks", integer(20, 100))
+                                                .executes(ctx -> crackWithInterval(ctx.getSource(), getBlockPos(ctx, "clockpos"), getInteger(ctx, "ticks"))))))
+                                ));
     }
 
-    private static int crackVillagerRNG(FabricClientCommandSource source) throws CommandSyntaxException {
-        ServerBrandManager.rngWarning();
+    private static int crackVillagerRNG(FabricClientCommandSource source, BlockPos pos) throws CommandSyntaxException {
+        CCrackVillager.clockPos = pos;
         CCrackVillager.crackVillager(source.getPlayer(), seed -> {
             source.sendFeedback(Component.translatable("commands.ccrackvillager.success", Long.toHexString(seed)));
             PlayerRandCracker.setSeed(seed);
@@ -41,8 +48,8 @@ public class CrackVillagerRNGCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int crackWithInterval(FabricClientCommandSource source, int interval) throws CommandSyntaxException {
+    private static int crackWithInterval(FabricClientCommandSource source, BlockPos pos, int interval) throws CommandSyntaxException {
         CCrackVillager.setInterval(interval);
-        return crackVillagerRNG(source);
+        return crackVillagerRNG(source, pos);
     }
 }

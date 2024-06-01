@@ -4,6 +4,7 @@ import com.seedfinding.latticg.reversal.DynamicProgram;
 import com.seedfinding.latticg.util.LCG;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -26,6 +27,7 @@ public class CCrackVillager {
     static int validMeasures = 0;
     static boolean cracking = false;
     static int interval = 22;
+    public static BlockPos clockPos;
 
     public static void cancel() {
         targetVillager = null;
@@ -35,12 +37,19 @@ public class CCrackVillager {
         interval = i;
     }
 
+    public static void onClockUpdate() {
+        VillagerRNGSim.INSTANCE.onTick();
+        if(!cracked && validMeasures > 0) {
+            measurements.add(Measurement.skip(2));
+        }
+    }
+
     public static void onAmethyst(ClientboundSoundPacket packet) {
         Villager villager;
         if(targetVillager != null && (villager = targetVillager.get()) != null) {
             if(villager.distanceToSqr(packet.getX(), packet.getY(), packet.getZ()) < 1.0) {
                 if(cracked) {
-                    VillagerRNGSim.onAmethyst(packet);
+                    VillagerRNGSim.INSTANCE.onAmethyst(packet);
                 } else {
                     new Thread(() -> crack(packet)).start();
                 }
@@ -49,18 +58,17 @@ public class CCrackVillager {
     }
 
     public static void onAmbient() {
+        VillagerRNGSim.INSTANCE.onAmbient();
         if(!cracked && validMeasures > 0) {
             measurements.add(Measurement.skip(2));
-        } else if(cracked){
-            VillagerRNGSim.onAmbient();
         }
     }
 
     static void crack(ClientboundSoundPacket packet) {
         var lastChimeIntensity1_2 = (packet.getVolume() - 0.1f);
         var nextFloat = (packet.getPitch() - 0.5f) / lastChimeIntensity1_2;
-        if(validMeasures > 0)
-            measurements.add(Measurement.skip(interval * 2)); // 2 random call every ticks
+        //if(validMeasures > 0)
+        //    measurements.add(Measurement.skip(interval * 2)); // 2 random call every ticks
 
         measurements.add(Measurement.nextFloat(nextFloat, 0.0015f));
         validMeasures++;
@@ -75,11 +83,11 @@ public class CCrackVillager {
             if(seeds.length == 1) {
                 cracked = true;
                 reset();
-                VillagerRNGSim.setSeed(seeds[0]);
+                VillagerRNGSim.INSTANCE.setSeed(seeds[0]);
                 for(var measurement : cachedMeasurements) {
-                    measurement.apply(VillagerRNGSim.random);
+                    measurement.apply(VillagerRNGSim.INSTANCE.random);
                 }
-                onCrackFinished.accept(VillagerRNGSim.getSeed());
+                onCrackFinished.accept(VillagerRNGSim.INSTANCE.getSeed());
             } else {
                 Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.fail"), false);
                 reset();
@@ -108,6 +116,7 @@ public class CCrackVillager {
                 onCrackFinished = callback;
                 reset();
                 cracked = false;
+                VillagerRNGSim.INSTANCE.lastAmbientCracked = false;
             }
         }
     }
