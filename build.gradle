@@ -61,8 +61,7 @@ dependencies {
 	includedLibrary "com.seedfinding:mc_core:${project.seedfinding_core_version}"
 	includedLibrary "com.seedfinding:mc_seed:${project.seedfinding_seed_version}"
 
-	includedLibrary "com.seedfinding:latticg:${project.latticg_version}:rt"
-	implementation "com.seedfinding:latticg:${project.latticg_version}"
+	includedLibrary "com.seedfinding:latticg:${project.latticg_version}"
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
