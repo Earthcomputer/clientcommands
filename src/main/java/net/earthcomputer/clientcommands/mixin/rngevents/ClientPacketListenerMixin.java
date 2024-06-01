@@ -3,8 +3,10 @@ package net.earthcomputer.clientcommands.mixin.rngevents;
 import com.mojang.brigadier.StringReader;
 import net.earthcomputer.clientcommands.features.CCrackVillager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.features.VillagerRNGSim;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundMerchantOffersPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.sounds.SoundEvents;
@@ -47,5 +49,10 @@ public abstract class ClientPacketListenerMixin {
                 CCrackVillager.onClockUpdate();
             }
         });
+    }
+
+    @Inject(method = "handleMerchantOffers", at = @At("TAIL"))
+    void onOffers(ClientboundMerchantOffersPacket packet, CallbackInfo ci) {
+        VillagerRNGSim.INSTANCE.syncOffer(packet);
     }
 }

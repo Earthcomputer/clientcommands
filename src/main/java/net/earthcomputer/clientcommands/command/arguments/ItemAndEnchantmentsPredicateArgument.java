@@ -156,7 +156,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
             }
             var enchantmentsForCrafting = EnchantmentHelper.getEnchantmentsForCrafting(stack);
             var enchantments = enchantmentsForCrafting.keySet().stream()
-                .map(holder -> new EnchantmentInstance(holder.value(), EnchantmentHelper.getItemEnchantmentLevel(holder.value(), stack)))
+                .map(holder -> new EnchantmentInstance(holder.value(), enchantmentsForCrafting.getLevel(holder.value())))
                 .toList();
             return predicate.test(enchantments);
         }

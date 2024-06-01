@@ -270,6 +270,7 @@
   "commands.ccrackvillager.cancel": "Crack RNG cancelled",
   "commands.ccrackvillager.maintainFail": "Villager RNG maintain fail",
   "commands.ccrackvillager.syncWithLag": "set delay to %d tick(s)",
+  "commands.ccrackvillager.showEnchOnTick": "tick: %d => %s",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",

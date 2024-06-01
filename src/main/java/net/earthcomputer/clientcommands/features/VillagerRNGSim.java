@@ -19,15 +19,11 @@ import java.util.List;
 
 public class VillagerRNGSim {
     public static VillagerRNGSim INSTANCE = new VillagerRNGSim();
-    static VillagerRNGSim TenTicksBefore = new VillagerRNGSim();
-    static boolean tenTicksBeforeSet = false;
-    static int tenTickIndex = 0;
-    static int[] tenTickRandomCalls = new int[10];
-    static long[] tenTickSeeds = new long[10];
-    static long[] tenTickLastAmbient = new long[10];
-    static long[] tenTickLastAmethyst = new long[10];
     
     LegacyRandomSource random = new LegacyRandomSource(0);
+
+    static List<MerchantOffer> nextOffers = new ArrayList<>();
+    static List<Integer> nextOffersWithBooks = new ArrayList<>();
 
     int errorCount = 0;
     long lastAmbient = 0;
@@ -63,7 +59,6 @@ public class VillagerRNGSim {
             lastAmbient = forSync.lastAmbient;
             ticksToWait = forSync.ticksToWait;
             lastAmethyst = forSync.lastAmethyst;
-            tenTickLastAmethyst[tenTickIndex] = lastAmethyst;
 
             errorCount = 0;
             if(ticks == 0) {
@@ -77,7 +72,7 @@ public class VillagerRNGSim {
             ticksToWait = 10;
             errorCount++;
             Minecraft.getInstance().gui.overlayMessageTime = 0;
-            if(errorCount > 4) {
+            if(errorCount > 2) {
                 errorCount = 0;
                 CCrackVillager.cracked = false;
                 lastAmbientCracked = false;
@@ -139,13 +134,6 @@ public class VillagerRNGSim {
             nextFloat();
         }
 
-        if(CCrackVillager.cracked) {
-            tenTickIndex++;
-            tenTickIndex %= 10;
-            tenTickRandomCalls[tenTickIndex] = 0;
-            tenTickSeeds[tenTickIndex] = getSeed();
-        }
-
         if(nextInt(1000) < lastAmbient++ && CCrackVillager.cracked) {
             nextFloat();
             nextFloat();
@@ -155,9 +143,6 @@ public class VillagerRNGSim {
         } else {
             justAmbient = false;
         }
-        if(CCrackVillager.cracked) {
-            tenTickLastAmbient[tenTickIndex] = lastAmbient;
-        }
         nextInt(100);
 
         if(CCrackVillager.cracked && !sim && CCrackVillager.targetEnchantment != null && synced) {
@@ -165,13 +150,6 @@ public class VillagerRNGSim {
             var villager = CCrackVillager.targetVillager.get();
             if(player == null || player.distanceTo(villager) > 5) return;
             var simulate = clone();
-            var connection = Minecraft.getInstance().getConnection();
-            if(connection != null) {
-                var info = connection.getPlayerInfo(player.getScoreboardName());
-                if(info != null) {
-                    CCrackVillager.interval = info.getLatency() / 50;
-                }
-            }
             for(var i = 0; i < CCrackVillager.interval; i++) {
                 simulate.onTick(true);
             }
@@ -180,6 +158,7 @@ public class VillagerRNGSim {
             for(var offer : offers) {
                 if(CCrackVillager.targetEnchantment.test(offer.getResult())) {
                     assert Minecraft.getInstance().gameMode != null;
+                    printNextTrades();
                     Minecraft.getInstance().gameMode.interact(player, villager, InteractionHand.MAIN_HAND);
                     var chat = Minecraft.getInstance().gui.getChat();
                     chat.addMessage(Component.literal("I found it !"));
@@ -191,9 +170,6 @@ public class VillagerRNGSim {
     }
 
     void randomCalled() {
-        if(this == INSTANCE) {
-            tenTickRandomCalls[tenTickIndex]++;
-        }
     }
 
     float nextFloat() {
@@ -225,71 +201,94 @@ public class VillagerRNGSim {
         return offers;
     }
 
-    public void onOfferTrades() {
-        var chat = Minecraft.getInstance().gui.getChat();
-        chat.addMessage(Component.literal("client pre-trade: " + Long.toHexString(getSeed())));
-
-        for(var offer : predictOffers()) {
-
-            var first = offer.getCostA();
-            var second = offer.getCostB();
-            var result = offer.getResult();
-            var offerString = "%dx %s".formatted(first.getCount(), first.getHoverName().getString());
-            if(!second.isEmpty()) {
-                offerString += " + %dx %s".formatted(second.getCount(), second.getDisplayName().getString());
-            }
-            offerString += " => %dx %s".formatted(result.getCount(), result.getHoverName().getString());
-            if(result.is(Items.ENCHANTED_BOOK)) {
-                var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(result);
-                var enchantment = enchantments.keySet().iterator().next().value();
-                offerString += " with %s".formatted(enchantment.getFullname(EnchantmentHelper.getItemEnchantmentLevel(enchantment, result)).getString());
-            }
-            chat.addMessage(Component.literal(offerString));
+    String getOfferString(MerchantOffer offer) {
+        var first = offer.getCostA();
+        var second = offer.getCostB();
+        var result = offer.getResult();
+        var offerString = "%dx %s".formatted(first.getCount(), first.getHoverName().getString());
+        if(!second.isEmpty()) {
+            offerString += " + %dx %s".formatted(second.getCount(), second.getHoverName().getString());
         }
+        if(result.is(Items.ENCHANTED_BOOK)) {
+            var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(result);
+            var enchantment = enchantments.keySet().iterator().next().value();
 
-        chat.addMessage(Component.literal("client post-trade: " + Long.toHexString(getSeed())));
-
+            offerString += " => %s lvl.%d".formatted(Component.translatable(enchantment.getDescriptionId()).getString(), EnchantmentHelper.getEnchantmentsForCrafting(result).getLevel(enchantment));
+        } else {
+            offerString += " => %dx %s".formatted(result.getCount(), result.getHoverName().getString());
+        }
+        return offerString;
     }
 
-    public void syncOffers(ClientboundMerchantOffersPacket packet) {
-        if(CCrackVillager.cracked) {
-            var offers = packet.getOffers();
-            var tick = 0;
-            while (tick < 10) {
-                var player = Minecraft.getInstance().player;
-                var villager = CCrackVillager.targetVillager.get();
-                if(player == null || player.distanceTo(villager) > 5) return;
-                var simulate = clone();
-                var index = (tenTickIndex-tick+10) % 10;
-                simulate.setSeed(tenTickSeeds[index]);
-                var predictedOffers = simulate.predictOffers();
-                if(predictedOffers == null) return;
-                var match = true;
-                for(var i = 0; i < predictedOffers.size(); i++) {
-                    if(!checkItem(offers.get(i).getCostA(), predictedOffers.get(i).getCostA())) {
-                        match = false;
-                        break;
-                    }
-                }
-                if(match) {
-                    break;
-                }
-                tick++;
+    public void printNextTrades() {
+        nextOffers.clear();
+        nextOffersWithBooks.clear();
+        var chat = Minecraft.getInstance().gui.getChat();
+        for(var i = 0; i < 15; i++) {
+            var sim = clone();
+            for(var tick = 0; tick < i; tick++) {
+                sim.onTick(true);
             }
-            if(tick > 0 && tick < 10) {
-                CCrackVillager.interval = tick;
-                var chat = Minecraft.getInstance().gui.getChat();
-                chat.addMessage(Component.translatable("commands.ccrackvillager.syncWithLag", tick));
+            var offers = sim.predictOffers();
+            var bookIndex = -1;
+            for(var index = 0; index < 2; index++) {
+                var offer = offers.get(index);
+                nextOffers.add(offer);
+                if(offer.getResult().is(Items.ENCHANTED_BOOK)) {
+                    bookIndex = index;
+                    var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(offer.getResult());
+                    var enchantment = enchantments.keySet().iterator().next().value();
+                    //chat.addMessage(Component.translatable("commands.ccrackvillager.showEnchOnTick", i, enchantment.getFullname(enchantments.getLevel(enchantment))));
+                }
             }
+            nextOffersWithBooks.add(bookIndex);
         }
+
     }
 
     EnchantmentInstance getEnchantment(ItemStack stack) {
-
         var enchantmentsForCrafting = EnchantmentHelper.getEnchantmentsForCrafting(stack);
         if(enchantmentsForCrafting.isEmpty()) return null;
         var holder = enchantmentsForCrafting.keySet().iterator().next();
-        return new EnchantmentInstance(holder.value(), EnchantmentHelper.getItemEnchantmentLevel(holder.value(), stack));
+        return new EnchantmentInstance(holder.value(), EnchantmentHelper.getEnchantmentsForCrafting(stack).getLevel(holder.value()));
+    }
+
+    public void syncOffer(ClientboundMerchantOffersPacket packet) {
+        var offers = packet.getOffers();
+        var hasBook = -1;
+        for(var i = 0; i < 2; i++) {
+            if(offers.get(i).getResult().is(Items.ENCHANTED_BOOK)) hasBook = i;
+        }
+        if(hasBook != -1) {
+            for(var i = 0; i < nextOffers.size(); i+=2) {
+                var i2 = nextOffersWithBooks.get(i/2);
+                if(i2 != -1) {
+                    if(i2 == hasBook && checkItem(offers.get(hasBook).getResult(), nextOffers.get(i+i2).getResult())) {
+                        CCrackVillager.interval = i/2;
+                        Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.ccrackvillager.syncWithLag", CCrackVillager.interval));
+                        return;
+                    }
+                }
+            }
+        } else {
+            for(var i = 0; i < nextOffers.size(); i+=2) {
+                var same = true;
+                for(var j = 0; j < 2; j++) {
+                    var offer = nextOffers.get(i+j);
+                    var offer2 = offers.get(j);
+                    if(checkItem(offer.getResult(), offer2.getResult())
+                            && checkItem(offer.getCostA(), offer2.getCostA())
+                            && checkItem(offer.getCostB(), offer2.getCostB()))
+                        continue;
+                    same = false;
+                }
+                if(same) {
+                    CCrackVillager.interval = i/2;
+                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.ccrackvillager.syncWithLag", CCrackVillager.interval));
+                    return;
+                }
+            }
+        }
     }
 
     boolean checkItem(ItemStack stack1, ItemStack stack2){
@@ -297,13 +296,13 @@ public class VillagerRNGSim {
             var enchantment1 = getEnchantment(stack1);
             var enchantment2 = getEnchantment(stack2);
             if((enchantment1 == null) == (enchantment2 == null)) {
-                return enchantment1 == null
-                        || (enchantment1.enchantment == enchantment2.enchantment && enchantment1.level == enchantment2.level);
+                if(enchantment1 == null) return true;
+                return enchantment1.enchantment.getDescriptionId().equals(enchantment2.enchantment.getDescriptionId())
+                        && enchantment1.level == enchantment2.level;
             }
             return false;
         }
         return false;
-
     }
 
     @Override
