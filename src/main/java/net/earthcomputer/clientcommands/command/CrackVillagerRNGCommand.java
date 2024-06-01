@@ -12,11 +12,13 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
 
 public class CrackVillagerRNGCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -29,7 +31,14 @@ public class CrackVillagerRNGCommand {
                                 .then(literal("interval")
                                         .then(argument("ticks", integer(20, 100))
                                                 .executes(ctx -> crackWithInterval(ctx.getSource(), getBlockPos(ctx, "clockpos"), getInteger(ctx, "ticks"))))))
-                                ));
+                                )
+                .then(literal("enchant").then(argument("name", itemAndEnchantmentsPredicate().withItemPredicate((i) -> i.equals(Items.BOOK)).constrainMaxLevel())
+                        .executes(ctx -> lookingForEnchantment(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "name"))))));
+    }
+
+    private static int lookingForEnchantment(FabricClientCommandSource source, ItemAndEnchantmentsPredicate predicate) {
+        CCrackVillager.targetEnchantment = predicate;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int crackVillagerRNG(FabricClientCommandSource source, BlockPos pos) throws CommandSyntaxException {
@@ -44,6 +53,7 @@ public class CrackVillagerRNGCommand {
 
     private static int cancel(FabricClientCommandSource source) {
         CCrackVillager.cancel();
+        CCrackVillager.targetEnchantment = null;
         source.sendFeedback(Component.translatable("commands.ccrackvillager.cancel"));
         return Command.SINGLE_SUCCESS;
     }

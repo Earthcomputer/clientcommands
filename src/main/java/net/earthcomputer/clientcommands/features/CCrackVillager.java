@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.features;
 
 import com.seedfinding.latticg.reversal.DynamicProgram;
 import com.seedfinding.latticg.util.LCG;
+import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -28,6 +29,10 @@ public class CCrackVillager {
     static boolean cracking = false;
     static int interval = 22;
     public static BlockPos clockPos;
+
+    public static ItemAndEnchantmentsPredicateArgument.ItemAndEnchantmentsPredicate targetEnchantment = null;
+
+
 
     public static void cancel() {
         targetVillager = null;

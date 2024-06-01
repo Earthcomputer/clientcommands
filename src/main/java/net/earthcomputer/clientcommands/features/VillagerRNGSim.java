@@ -4,12 +4,16 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class VillagerRNGSim {
     public static VillagerRNGSim INSTANCE = new VillagerRNGSim(); 
@@ -78,7 +82,7 @@ public class VillagerRNGSim {
         var ticks = 0;
         while(!forSync.justAmbient) {
             ticks++;
-            forSync.onTick();
+            forSync.onTick(true);
         }
 
         if(ticks < 30) {
@@ -101,6 +105,10 @@ public class VillagerRNGSim {
     }
 
     public void onTick() {
+        onTick(false);
+    }
+
+    public void onTick(boolean sim) {
         if(ticksToWait-- > 0) {
             return;
         }
@@ -114,26 +122,53 @@ public class VillagerRNGSim {
             justAmbient = false;
         }
         random.nextInt(100);
+
+        if(CCrackVillager.cracked && !sim && CCrackVillager.targetEnchantment != null) {
+            var player = Minecraft.getInstance().player;
+            var villager = CCrackVillager.targetVillager.get();
+            if(player == null || player.distanceTo(villager) > 5) return;
+            var simulate = clone();
+            //simulate.onTick(true);
+            var offers = simulate.predictOffers();
+            if(offers == null) return;
+            for(var offer : offers) {
+                if(CCrackVillager.targetEnchantment.test(offer.getResult())) {
+                    assert Minecraft.getInstance().gameMode != null;
+                    Minecraft.getInstance().gameMode.interact(player, villager, InteractionHand.MAIN_HAND);
+                    var chat = Minecraft.getInstance().gui.getChat();
+                    chat.addMessage(Component.literal("I found it !"));
+                    CCrackVillager.targetEnchantment = null;
+                    break;
+                }
+            }
+        }
     }
 
-    public void onOfferTrades() {
-        var chat = Minecraft.getInstance().gui.getChat();
-        chat.addMessage(Component.literal("client pre-trade: " + Long.toHexString(getSeed())));
-
+    public List<MerchantOffer> predictOffers() {
         var villager = CCrackVillager.targetVillager.get();
-        if(villager == null) return;
+        if(villager == null) return null;
         var map = VillagerTrades.TRADES.get(villager.getVillagerData().getProfession());
-        if(map == null || map.isEmpty()) return;
+        if(map == null || map.isEmpty()) return null;
         var items = map.get(villager.getVillagerData().getLevel());
-        if(items == null) return;
-        var offers = new MerchantOffers();
+        if(items == null) return null;
         var itemList = Lists.newArrayList(items);
+        List<MerchantOffer> offers = new ArrayList<>();
         var i = 0;
         while (i < 2) {
             MerchantOffer offer = itemList.remove(this.random.nextInt(itemList.size())).getOffer(villager, this.random);
             if (offer == null) continue;
             offers.add(offer);
             ++i;
+        }
+        return offers;
+    }
+
+    public void onOfferTrades() {
+        var chat = Minecraft.getInstance().gui.getChat();
+        chat.addMessage(Component.literal("client pre-trade: " + Long.toHexString(getSeed())));
+
+        for(var offer : predictOffers()) {
+
             var first = offer.getCostA();
             var second = offer.getCostB();
             var result = offer.getResult();
@@ -145,10 +180,11 @@ public class VillagerRNGSim {
             if(result.is(Items.ENCHANTED_BOOK)) {
                 var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(result);
                 var enchantment = enchantments.keySet().iterator().next().value();
-                offerString += " with %s".formatted(enchantment.getFullname(EnchantmentHelper.getItemEnchantmentLevel(enchantment, result)));
+                offerString += " with %s".formatted(enchantment.getFullname(EnchantmentHelper.getItemEnchantmentLevel(enchantment, result)).getString());
             }
             chat.addMessage(Component.literal(offerString));
         }
+
         chat.addMessage(Component.literal("client post-trade: " + Long.toHexString(getSeed())));
 
     }

@@ -22,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.jetbrains.annotations.Nullable;
@@ -153,8 +154,9 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
                 return false;
             }
-            List<EnchantmentInstance> enchantments = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet().stream()
-                .map(entry -> new EnchantmentInstance(entry.getKey().value(), entry.getIntValue()))
+            var enchantmentsForCrafting = EnchantmentHelper.getEnchantmentsForCrafting(stack);
+            var enchantments = enchantmentsForCrafting.keySet().stream()
+                .map(holder -> new EnchantmentInstance(holder.value(), EnchantmentHelper.getItemEnchantmentLevel(holder.value(), stack)))
                 .toList();
             return predicate.test(enchantments);
         }

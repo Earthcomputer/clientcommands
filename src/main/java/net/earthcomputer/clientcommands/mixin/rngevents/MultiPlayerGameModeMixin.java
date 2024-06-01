@@ -53,8 +53,4 @@ public class MultiPlayerGameModeMixin {
         PlayerRandCracker.isPredictingBlockBreaking = false;
     }
 
-    @Inject(method = "interact", at = @At("TAIL"))
-    void onInteract(Player player, Entity target, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        VillagerRNGSim.INSTANCE.clone().onOfferTrades();
-    }
 }
