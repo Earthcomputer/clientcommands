@@ -169,4 +169,10 @@ public class Configs {
 
     @Config
     public static int maximumPacketFieldDepth = 10;
+
+    @Config(temporary = true, setter = @Config.Setter("setMaxVillagerSimulationTicks"))
+    public static int maxVillagerSimulationTicks = 16384;
+    public static void setMaxVillagerSimulationTicks(int maxVillagerSimulationTicks) {
+        Configs.maxVillagerSimulationTicks = Mth.clamp(maxVillagerSimulationTicks, 0, 65536);
+    }
 }

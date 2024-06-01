@@ -44,9 +44,14 @@ public class VillagerCracker {
         return null;
     }
 
-    public static void setTargetVillager(Villager villager) {
+    public static void setTargetVillager(@Nullable Villager villager) {
+        Villager oldVillager = getVillager();
+        if (oldVillager != null) {
+            ((IVillager) oldVillager).clientcommands_setCrackedRandom(null);
+        }
+
         VillagerCracker.cachedVillager = new WeakReference<>(villager);
-        VillagerCracker.villagerUuid = villager.getUUID();
+        VillagerCracker.villagerUuid = villager == null ? null : villager.getUUID();
     }
 
     public static void onSoundEventPlayed(ClientboundSoundPacket packet) {
@@ -62,7 +67,7 @@ public class VillagerCracker {
                 ClientCommandHelper.sendError(Component.translatable("commands.cvillager.crackFailed"));
             } else {
                 ((IVillager) targetVillager).clientcommands_setCrackedRandom(RandomSource.create(possible[0] ^ 0x5deece66dL));
-                Minecraft.getInstance().player.sendSystemMessage(Component.translatable("commands.cvillager.crackSuccess", Long.toHexString(possible[0])));
+                ClientCommandHelper.sendFeedback("commands.cvillager.crackSuccess", Long.toHexString(possible[0]));
             }
         }
 
@@ -79,4 +84,5 @@ public class VillagerCracker {
 
         ((IVillager) targetVillager).clientcommands_onServerTick();
     }
+
 }

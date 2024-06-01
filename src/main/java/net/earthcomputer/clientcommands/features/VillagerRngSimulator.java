@@ -1,25 +1,18 @@
 package net.earthcomputer.clientcommands.features;
 
-import com.mojang.logging.LogUtils;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.trading.MerchantOffer;
-import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class VillagerRngSimulator {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     @Nullable
     private LegacyRandomSource random;
     private int ambientSoundTime;
@@ -32,8 +25,7 @@ public class VillagerRngSimulator {
         this.ambientSoundTime = ambientSoundTime;
     }
 
-    @Override
-    public VillagerRngSimulator clone() {
+    public VillagerRngSimulator copy() {
         VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : new LegacyRandomSource(random.seed.get() ^ 0x5deece66dL), ambientSoundTime);
         that.waitingTicks = this.waitingTicks;
         that.madeSound = this.madeSound;
@@ -42,12 +34,19 @@ public class VillagerRngSimulator {
     }
 
     public void simulateTick() {
+        if (random == null) {
+            return;
+        }
+
+        simulateBaseTick();
+        simulateServerAiStep();
+    }
+
+    public void simulateBaseTick() {
         if (waitingTicks > 0) {
             waitingTicks--;
             return;
         }
-
-        LOGGER.info("Client (pre-tick): {}", this);
 
         if (random == null) {
             return;
@@ -62,44 +61,44 @@ public class VillagerRngSimulator {
         } else {
             madeSound = false;
         }
+    }
+
+    public void simulateServerAiStep() {
+        if (random == null) {
+            return;
+        }
 
         random.nextInt(100);
     }
 
-    @Nullable
-    public MerchantOffers simulateTrades(Villager villager) {
-        VillagerData villagerData = villager.getVillagerData();
-        Int2ObjectMap<VillagerTrades.ItemListing[]> map = VillagerTrades.TRADES.get(villagerData.getProfession());
-
-        if (map == null || map.isEmpty()) {
-            return null;
+    public boolean anyOffersMatch(VillagerTrades.ItemListing[] listings, Entity trader, Predicate<VillagerCommand.Offer> predicate) {
+        if (!isCracked()) {
+            return false;
         }
 
-        return simulateOffers(map.get(villagerData.getLevel()), villager);
-    }
-
-    private MerchantOffers simulateOffers(VillagerTrades.ItemListing[] listings, Entity trader) {
-        if (random == null) {
-            return null;
-        }
-
-        MerchantOffers offers = new MerchantOffers();
         ArrayList<VillagerTrades.ItemListing> newListings = new ArrayList<>(List.of(listings));
         int i = 0;
         while (i < 2 && !newListings.isEmpty()) {
             VillagerTrades.ItemListing listing = newListings.remove(random.nextInt(newListings.size()));
             MerchantOffer offer = listing.getOffer(trader, random);
             if (offer != null) {
-                offers.add(offer);
-                i++;
+                if (predicate.test(new VillagerCommand.Offer(offer.getBaseCostA(), offer.getCostB(), offer.getResult()))) {
+                    return true;
+                } else {
+                    i++;
+                }
             }
         }
-        return offers;
+        return false;
     }
 
     @Nullable
     public LegacyRandomSource getRandom() {
         return random;
+    }
+
+    public boolean isCracked() {
+        return random != null && !firstAmbientNoise;
     }
 
     public void setRandom(@Nullable LegacyRandomSource random) {
@@ -128,31 +127,30 @@ public class VillagerRngSimulator {
 
         // is in sync
         if (madeSound) {
-            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("commands.cvillager.perfectlyInSync"));
+            ClientCommandHelper.sendFeedback("commands.cvillager.perfectlyInSync");
             return;
         }
 
         // is not in sync, needs to be re-synced
-        VillagerRngSimulator clone = clone();
+        VillagerRngSimulator copy = copy();
         int i = 0;
-        while (!clone.madeSound) {
+        while (!copy.madeSound) {
             i++;
-            clone.simulateTick();
+            copy.simulateTick();
         }
-        // todo, use ping if it's meant to be used (the idea here is to sync up to when the server says the villager makes a noise)
         if (0 < i && i < 30) {
             // in this case, it's a believable jump that we're less than 30 ticks behind, so we'll advance by the amount we calculated to be what this tick should've been
-            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("commands.cvillager.tooManyTicksBehind", i));
-            this.random = clone.random;
-            this.ambientSoundTime = clone.ambientSoundTime;
-            this.waitingTicks = clone.waitingTicks;
-            this.madeSound = clone.madeSound;
+            ClientCommandHelper.sendFeedback("commands.cvillager.tooManyTicksBehind", i);
+            this.random = copy.random;
+            this.ambientSoundTime = copy.ambientSoundTime;
+            this.waitingTicks = copy.waitingTicks;
+            this.madeSound = copy.madeSound;
         } else if (i > 30) {
             // in this case, it took so many ticks to advance to rsync, that it's safe to assume we are ahead of the server, so we'll let the server catch up by 30 ticks
-            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("commands.cvillager.tooManyTicksAhead"));
+            ClientCommandHelper.sendFeedback("commands.cvillager.tooManyTicksAhead");
             waitingTicks += 30;
         } else {
-            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("commands.cvillager.perfectlyInSync"));
+            ClientCommandHelper.sendFeedback("commands.cvillager.perfectlyInSync");
         }
     }
 }
