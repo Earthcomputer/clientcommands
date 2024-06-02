@@ -1,11 +1,20 @@
 package net.earthcomputer.clientcommands.mixin.commands.villager;
 
+import com.mojang.datafixers.util.Pair;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.*;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerData;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +35,7 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
     }
 
     @Unique
-    VillagerRngSimulator rng = new VillagerRngSimulator(null, -80);
+    VillagerRngSimulator rng = new VillagerRngSimulator(null, -80, (Villager) (Object) this);
 
     @Override
     public void clientcommands_setCrackedRandom(@Nullable RandomSource random) {
@@ -34,72 +43,50 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
     }
 
     @Override
-    public VillagerRngSimulator clientcommands_getCrackedRandom() {
-        return rng;
-    }
-
-    @Override
     public void clientcommands_onAmbientSoundPlayed() {
         rng.onAmbientSoundPlayed();
     }
 
-//    public void clientcommands_onProfessionUpdate(VillagerProfession newProfession) {
-//        Villager targetVillager = VillagerCracker.getVillager();
-//        if (targetVillager instanceof IVillager iVillager && iVillager.clientcommands_getCrackedRandom().isCracked()) {
-//
-//            if (offers == null) {
-//                return;
-//            }
-//            for (MerchantOffer offer : offers) {
-//                if (offer.getItemCostB().isPresent()) {
-//                    LOGGER.info("[x{}] {} + [x{}] {} = [x{}] {} ({})",
-//                        offer.getItemCostA().count(),
-//                        Component.translatable(BuiltInRegistries.ITEM.getKey(offer.getItemCostA().item().value()).getPath()).getString(),
-//                        offer.getItemCostB().get().count(),
-//                        Component.translatable(BuiltInRegistries.ITEM.getKey(offer.getItemCostB().get().item().value()).getPath()).getString(),
-//                        offer.getResult().getCount(),
-//                        I18n.get(BuiltInRegistries.ITEM.getKey(offer.getResult().getItem()).getPath()),
-//                        offer.getResult().getTooltipLines(Item.TooltipContext.EMPTY, null, TooltipFlag.NORMAL).stream().map(Component::getString).skip(1).collect(Collectors.joining(", ")));
-//                } else {
-//                    LOGGER.info("[x{}] {} = [x{}] {} ({})",
-//                        offer.getItemCostA().count(),
-//                        Component.translatable(BuiltInRegistries.ITEM.getKey(offer.getItemCostA().item().value()).getPath()).getString(),
-//                        offer.getResult().getCount(),
-//                        Component.translatable(BuiltInRegistries.ITEM.getKey(offer.getResult().getItem()).getPath()).getString(),
-//                        offer.getResult().getTooltipLines(Item.TooltipContext.EMPTY, null, TooltipFlag.NORMAL).stream().map(Component::getString).skip(1).collect(Collectors.joining(", ")));
-//                }
-//            }
-//        }
-//    }
-
     @Override
     public void clientcommands_onServerTick() {
         rng.simulateTick();
+
+        if (rng.shouldInteractWithVillager()) {
+            Minecraft minecraft = Minecraft.getInstance();
+            minecraft.gameMode.interact(minecraft.player, this, InteractionHand.MAIN_HAND);
+            minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
+        }
     }
 
     @Override
-    public int clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int maxTicks, Predicate<VillagerCommand.Offer> predicate) {
+    public Pair<Integer, VillagerCommand.Offer> clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int maxCalls, Predicate<VillagerCommand.Offer> predicate) {
         if (this instanceof IVillager iVillager && iVillager.clientcommands_getCrackedRandom().isCracked()) {
             VillagerProfession oldProfession = getVillagerData().getProfession();
             setVillagerData(getVillagerData().setProfession(profession));
 
             VillagerRngSimulator rng = this.rng.copy();
-            int i = 0;
-            while (i < maxTicks) {
+            int startingCalls = rng.getTotalCalls();
+            while (rng.getTotalCalls() < maxCalls + startingCalls) {
                 VillagerRngSimulator randomBranch = rng.copy();
                 randomBranch.simulateBaseTick();
-                if (randomBranch.anyOffersMatch(listings, (Villager) (Object) this, predicate)) {
-                    setVillagerData(getVillagerData().setProfession(oldProfession));
-                    return i;
-                }
                 randomBranch.simulateServerAiStep();
+                VillagerCommand.Offer offer = randomBranch.anyOffersMatch(listings, (Villager) (Object) this, predicate);
+                if (offer != null) {
+                    setVillagerData(getVillagerData().setProfession(oldProfession));
+                    // we do the calls before this ticks processing so that since with 0ms ping, the server reads it next tick
+                    return Pair.of(rng.getTotalCalls() - startingCalls, offer);
+                }
                 rng.simulateTick();
-                i++;
             }
 
             setVillagerData(getVillagerData().setProfession(oldProfession));
         }
 
-        return -1;
+        return Pair.of(-1_000_000, null);
+    }
+
+    @Override
+    public VillagerRngSimulator clientcommands_getCrackedRandom() {
+        return rng;
     }
 }

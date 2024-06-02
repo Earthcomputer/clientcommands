@@ -2,7 +2,12 @@ package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
@@ -19,17 +24,25 @@ public class VillagerRngSimulator {
     private int waitingTicks = 0;
     private boolean madeSound = false;
     private boolean firstAmbientNoise = true;
+    private int callsAtStartOfBruteForce = 0;
+    private int callsInBruteForce = 0;
+    private int totalCalls = 0;
+    private Villager parent;
 
-    public VillagerRngSimulator(@Nullable LegacyRandomSource random, int ambientSoundTime) {
+    public VillagerRngSimulator(@Nullable LegacyRandomSource random, int ambientSoundTime, Villager parent) {
         this.random = random;
         this.ambientSoundTime = ambientSoundTime;
+        this.parent = parent;
     }
 
     public VillagerRngSimulator copy() {
-        VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : new LegacyRandomSource(random.seed.get() ^ 0x5deece66dL), ambientSoundTime);
+        VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : new LegacyRandomSource(random.seed.get() ^ 0x5deece66dL), ambientSoundTime, parent);
         that.waitingTicks = this.waitingTicks;
         that.madeSound = this.madeSound;
         that.firstAmbientNoise = this.firstAmbientNoise;
+        that.callsAtStartOfBruteForce = this.callsAtStartOfBruteForce;
+        that.callsInBruteForce = this.callsInBruteForce;
+        that.totalCalls = this.totalCalls;
         return that;
     }
 
@@ -40,6 +53,18 @@ public class VillagerRngSimulator {
 
         simulateBaseTick();
         simulateServerAiStep();
+
+        if (callsInBruteForce > 0) {
+            updateProgressBar();
+        }
+    }
+
+    public boolean shouldInteractWithVillager() {
+        boolean shouldInteractWithVillager = totalCalls - callsAtStartOfBruteForce >= callsInBruteForce;
+        if (shouldInteractWithVillager) {
+            reset();
+        }
+        return shouldInteractWithVillager;
     }
 
     public void simulateBaseTick() {
@@ -53,9 +78,11 @@ public class VillagerRngSimulator {
         }
 
         // we have the server receiving ambient noise tell us if we have to do this to increment the random, this is so that our ambient sound time is synced up.
+        totalCalls += 1;
         if (random.nextInt(1000) < ambientSoundTime++ && !firstAmbientNoise) {
             random.nextFloat();
             random.nextFloat();
+            totalCalls += 2;
             ambientSoundTime = -80;
             madeSound = true;
         } else {
@@ -69,11 +96,17 @@ public class VillagerRngSimulator {
         }
 
         random.nextInt(100);
+        totalCalls += 1;
     }
 
-    public boolean anyOffersMatch(VillagerTrades.ItemListing[] listings, Entity trader, Predicate<VillagerCommand.Offer> predicate) {
+    public void updateProgressBar() {
+        ClientCommandHelper.updateOverlayProgressBar(Math.min(callsInBruteForce, totalCalls - callsAtStartOfBruteForce), callsInBruteForce, 50, 60);
+    }
+
+    @Nullable
+    public VillagerCommand.Offer anyOffersMatch(VillagerTrades.ItemListing[] listings, Entity trader, Predicate<VillagerCommand.Offer> predicate) {
         if (!isCracked()) {
-            return false;
+            return null;
         }
 
         ArrayList<VillagerTrades.ItemListing> newListings = new ArrayList<>(List.of(listings));
@@ -82,19 +115,29 @@ public class VillagerRngSimulator {
             VillagerTrades.ItemListing listing = newListings.remove(random.nextInt(newListings.size()));
             MerchantOffer offer = listing.getOffer(trader, random);
             if (offer != null) {
-                if (predicate.test(new VillagerCommand.Offer(offer.getBaseCostA(), offer.getCostB(), offer.getResult()))) {
-                    return true;
+                VillagerCommand.Offer x = new VillagerCommand.Offer(offer.getBaseCostA(), offer.getCostB(), offer.getResult());
+                if (predicate.test(x)) {
+                    return x;
                 } else {
                     i++;
                 }
             }
         }
-        return false;
+        return null;
     }
 
     @Nullable
     public LegacyRandomSource getRandom() {
         return random;
+    }
+
+    public void setCallsUntilOpenGui(int calls) {
+        callsAtStartOfBruteForce = totalCalls;
+        callsInBruteForce = calls;
+    }
+
+    public int getTotalCalls() {
+        return totalCalls;
     }
 
     public boolean isCracked() {
@@ -105,11 +148,18 @@ public class VillagerRngSimulator {
         this.random = random;
     }
 
+    public void reset() {
+        random = null;
+        firstAmbientNoise = true;
+        totalCalls = 0;
+        callsAtStartOfBruteForce = 0;
+        callsInBruteForce = 0;
+    }
+
     @Override
     public String toString() {
         return "VillagerRngSimulator[" +
-            "seed=" + (random == null ? "null" : random.seed.get()) + ", " +
-            "ambientSoundTime=" + ambientSoundTime + ']';
+            "seed=" + (random == null ? "null" : random.seed.get()) + ']';
     }
 
     public void onAmbientSoundPlayed() {
@@ -125,32 +175,11 @@ public class VillagerRngSimulator {
             madeSound = true;
         }
 
-        // is in sync
         if (madeSound) {
-            ClientCommandHelper.sendFeedback("commands.cvillager.perfectlyInSync");
-            return;
-        }
-
-        // is not in sync, needs to be re-synced
-        VillagerRngSimulator copy = copy();
-        int i = 0;
-        while (!copy.madeSound) {
-            i++;
-            copy.simulateTick();
-        }
-        if (0 < i && i < 30) {
-            // in this case, it's a believable jump that we're less than 30 ticks behind, so we'll advance by the amount we calculated to be what this tick should've been
-            ClientCommandHelper.sendFeedback("commands.cvillager.tooManyTicksBehind", i);
-            this.random = copy.random;
-            this.ambientSoundTime = copy.ambientSoundTime;
-            this.waitingTicks = copy.waitingTicks;
-            this.madeSound = copy.madeSound;
-        } else if (i > 30) {
-            // in this case, it took so many ticks to advance to rsync, that it's safe to assume we are ahead of the server, so we'll let the server catch up by 30 ticks
-            ClientCommandHelper.sendFeedback("commands.cvillager.tooManyTicksAhead");
-            waitingTicks += 30;
+            ClientCommandHelper.sendFeedback("commands.cvillager.inSync");
         } else {
-            ClientCommandHelper.sendFeedback("commands.cvillager.perfectlyInSync");
+            ClientCommandHelper.sendFeedback("commands.cvillager.outOfSync");
+            reset();
         }
     }
 }

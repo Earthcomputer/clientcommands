@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.interfaces;
 
+import com.mojang.datafixers.util.Pair;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
 import net.minecraft.util.RandomSource;
@@ -18,5 +19,5 @@ public interface IVillager {
 
     void clientcommands_onServerTick();
 
-    int clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int maxTicks, Predicate<VillagerCommand.Offer> predicate);
+    Pair<Integer, VillagerCommand.Offer> clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int maxCalls, Predicate<VillagerCommand.Offer> predicate);
 }

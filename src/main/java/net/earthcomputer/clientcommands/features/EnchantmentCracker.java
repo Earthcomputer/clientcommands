@@ -6,6 +6,7 @@ import com.mojang.logging.LogUtils;
 import com.seedfinding.mcseed.lcg.LCG;
 import com.seedfinding.mcseed.rand.Rand;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.earthcomputer.clientcommands.task.LongTask;
@@ -23,7 +24,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -103,7 +103,6 @@ public class EnchantmentCracker {
      */
 
     public static final Logger LOGGER = LogUtils.getLogger();
-    private static final int PROGRESS_BAR_WIDTH = 50;
 
     // RENDERING
     /*
@@ -463,17 +462,7 @@ public class EnchantmentCracker {
 
                                 @Override
                                 protected void onItemThrown(int current, int total) {
-                                    MutableComponent builder = Component.empty();
-                                    int color = Mth.hsvToRgb(current / (total * 3.0f), 1.0f, 1.0f);
-                                    builder.append(Component.literal("[").withColor(0xAAAAAA));
-                                    builder.append(Component.literal("~" + Math.round(100.0 * current / total) + "%").withColor(color));
-                                    builder.append(Component.literal("] ").withColor(0xAAAAAA));
-                                    int filledWidth = (int) Math.round((double) PROGRESS_BAR_WIDTH * current / total);
-                                    int unfilledWidth = PROGRESS_BAR_WIDTH - filledWidth;
-                                    builder.append(Component.literal("|".repeat(filledWidth)).withColor(color));
-                                    builder.append(Component.literal("|".repeat(unfilledWidth)).withColor(0xAAAAAA));
-
-                                    Minecraft.getInstance().gui.setOverlayMessage(builder, false);
+                                    ClientCommandHelper.updateOverlayProgressBar(current, total, 50, 60);
                                 }
                             });
                         }
