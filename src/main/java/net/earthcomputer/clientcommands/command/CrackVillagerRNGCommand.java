@@ -9,7 +9,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.command.arguments.ProfessionArgument;
 import net.earthcomputer.clientcommands.features.CCrackVillager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -28,7 +27,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static net.earthcomputer.clientcommands.command.arguments.DynamicIntegerArgument.integer;
-import static net.earthcomputer.clientcommands.command.arguments.ProfessionArgument.profession;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
