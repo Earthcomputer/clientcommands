@@ -1,14 +1,14 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.jetbrains.annotations.Nullable;
@@ -27,22 +27,23 @@ public class VillagerRngSimulator {
     private int callsAtStartOfBruteForce = 0;
     private int callsInBruteForce = 0;
     private int totalCalls = 0;
-    private Villager parent;
+    @Nullable
+    private ItemStack activeGoalResult = null;
 
-    public VillagerRngSimulator(@Nullable LegacyRandomSource random, int ambientSoundTime, Villager parent) {
+    public VillagerRngSimulator(@Nullable LegacyRandomSource random, int ambientSoundTime) {
         this.random = random;
         this.ambientSoundTime = ambientSoundTime;
-        this.parent = parent;
     }
 
     public VillagerRngSimulator copy() {
-        VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : new LegacyRandomSource(random.seed.get() ^ 0x5deece66dL), ambientSoundTime, parent);
+        VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : new LegacyRandomSource(random.seed.get() ^ 0x5deece66dL), ambientSoundTime);
         that.waitingTicks = this.waitingTicks;
         that.madeSound = this.madeSound;
         that.firstAmbientNoise = this.firstAmbientNoise;
         that.callsAtStartOfBruteForce = this.callsAtStartOfBruteForce;
         that.callsInBruteForce = this.callsInBruteForce;
         that.totalCalls = this.totalCalls;
+        that.activeGoalResult = this.activeGoalResult;
         return that;
     }
 
@@ -99,6 +100,10 @@ public class VillagerRngSimulator {
         totalCalls += 1;
     }
 
+    public int currentCorrectionMs() {
+        return -PingCommand.getLocalPing() / 2;
+    }
+
     public void updateProgressBar() {
         ClientCommandHelper.updateOverlayProgressBar(Math.min(callsInBruteForce, totalCalls - callsAtStartOfBruteForce), callsInBruteForce, 50, 60);
     }
@@ -131,9 +136,10 @@ public class VillagerRngSimulator {
         return random;
     }
 
-    public void setCallsUntilOpenGui(int calls) {
+    public void setCallsUntilOpenGui(int calls, ItemStack resultStack) {
         callsAtStartOfBruteForce = totalCalls;
         callsInBruteForce = calls;
+        activeGoalResult = resultStack;
     }
 
     public int getTotalCalls() {
@@ -154,6 +160,7 @@ public class VillagerRngSimulator {
         totalCalls = 0;
         callsAtStartOfBruteForce = 0;
         callsInBruteForce = 0;
+        activeGoalResult = null;
     }
 
     @Override
@@ -173,12 +180,11 @@ public class VillagerRngSimulator {
             random.nextFloat();
             random.nextFloat();
             madeSound = true;
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.inSync").withStyle(ChatFormatting.GREEN), 100);
         }
 
-        if (madeSound) {
-            ClientCommandHelper.sendFeedback("commands.cvillager.inSync");
-        } else {
-            ClientCommandHelper.sendFeedback("commands.cvillager.outOfSync");
+        if (!madeSound) {
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
             reset();
         }
     }

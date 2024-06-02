@@ -1,10 +1,13 @@
 package net.earthcomputer.clientcommands.mixin.commands.villager;
 
 import com.mojang.datafixers.util.Pair;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -35,7 +38,7 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
     }
 
     @Unique
-    VillagerRngSimulator rng = new VillagerRngSimulator(null, -80, (Villager) (Object) this);
+    VillagerRngSimulator rng = new VillagerRngSimulator(null, -80);
 
     @Override
     public void clientcommands_setCrackedRandom(@Nullable RandomSource random) {
@@ -55,6 +58,7 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.gameMode.interact(minecraft.player, this, InteractionHand.MAIN_HAND);
             minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.success", rng.currentCorrectionMs()).withStyle(ChatFormatting.GREEN), 100);
         }
     }
 

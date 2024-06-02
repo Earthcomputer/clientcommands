@@ -41,7 +41,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class VillagerCommand {
     private static final SimpleCommandExceptionType NOT_A_VILLAGER_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.notAVillager"));
-    private static final SimpleCommandExceptionType NO_CRACKED_VILLAGER_PRESENT = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.no_cracked_villager_present"));
+    private static final SimpleCommandExceptionType NO_CRACKED_VILLAGER_PRESENT = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.noCrackedVillagerPresent"));
+    private static final SimpleCommandExceptionType NO_PROFESSION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.noProfession"));
     private static final Dynamic2CommandExceptionType INVALID_GOAL_INDEX = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.cvillager.removeGoal.invalidIndex", a, b));
     public static final List<Goal> goals = new ArrayList<>();
 
@@ -143,16 +144,26 @@ public class VillagerCommand {
             throw NO_CRACKED_VILLAGER_PRESENT.create();
         }
         VillagerProfession profession = targetVillager.getVillagerData().getProfession();
+        if (profession == VillagerProfession.NONE) {
+            throw NO_PROFESSION.create();
+        }
 
         VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(1, new VillagerTrades.ItemListing[0]);
-        // todo, ping
-        int adjustment = 1;
+        int adjustment = 1 + (iVillager.clientcommands_getCrackedRandom().currentCorrectionMs() - 25) / 50;
         Pair<Integer, Offer> pair = iVillager.clientcommands_bruteForceOffers(listings, profession, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
-        if (pair.getFirst() < 0) {
-            ClientCommandHelper.sendFeedback("commands.cvillager.bruteForce.failed", Configs.maxVillagerBruteForceSimulationCalls);
+        int ticks = pair.getFirst();
+        Offer offer = pair.getSecond();
+        if (ticks < 0) {
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.bruteForce.failed", Configs.maxVillagerBruteForceSimulationCalls).withStyle(ChatFormatting.RED), 100);
         } else {
-            ClientCommandHelper.sendFeedback("commands.cvillager.bruteForce.success", VillagerCommand.displayText(pair.getSecond().result), pair.getSecond().second() == null ? VillagerCommand.displayText(pair.getSecond().first()) : VillagerCommand.displayText(pair.getSecond().first()) + " + " + VillagerCommand.displayText(pair.getSecond().second()), pair.getFirst());
-            iVillager.clientcommands_getCrackedRandom().setCallsUntilOpenGui(pair.getFirst());
+            String price;
+            if (offer.second() == null) {
+                price = VillagerCommand.displayText(offer.first());
+            } else {
+                price = VillagerCommand.displayText(offer.first()) + " + " + VillagerCommand.displayText(offer.second());
+            }
+            ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", VillagerCommand.displayText(offer.result()), price, ticks).withStyle(ChatFormatting.GREEN));
+            iVillager.clientcommands_getCrackedRandom().setCallsUntilOpenGui(ticks, offer.result());
         }
 
         return Command.SINGLE_SUCCESS;
