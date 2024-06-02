@@ -145,7 +145,7 @@ public class VillagerRNGSim {
         }
         nextInt(100);
 
-        if(CCrackVillager.cracked && !sim && CCrackVillager.targetEnchantment != null && synced) {
+        if(CCrackVillager.cracked && !sim && CCrackVillager.findingOffers && synced) {
             var player = Minecraft.getInstance().player;
             var villager = CCrackVillager.targetVillager.get();
             if(player == null || player.distanceTo(villager) > 5) return;
@@ -156,13 +156,13 @@ public class VillagerRNGSim {
             var offers = simulate.predictOffers();
             if(offers == null) return;
             for(var offer : offers) {
-                if(CCrackVillager.targetEnchantment.test(offer.getResult())) {
+                if(CCrackVillager.goalOffers.stream().anyMatch(goalOffer -> goalOffer.test(offer))) {
                     assert Minecraft.getInstance().gameMode != null;
                     printNextTrades();
                     Minecraft.getInstance().gameMode.interact(player, villager, InteractionHand.MAIN_HAND);
                     var chat = Minecraft.getInstance().gui.getChat();
                     chat.addMessage(Component.literal("I found it !"));
-                    CCrackVillager.targetEnchantment = null;
+                    CCrackVillager.findingOffers = false;
                     break;
                 }
             }

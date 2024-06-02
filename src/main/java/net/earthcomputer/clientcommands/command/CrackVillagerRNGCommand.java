@@ -2,42 +2,89 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.command.arguments.ProfessionArgument;
 import net.earthcomputer.clientcommands.features.CCrackVillager;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.features.ServerBrandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static net.earthcomputer.clientcommands.command.arguments.DynamicIntegerArgument.integer;
+import static net.earthcomputer.clientcommands.command.arguments.ProfessionArgument.profession;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.CombinedArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.EnchantmentArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.DynamicIntegerArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
+
+import static net.earthcomputer.clientcommands.command.CrackVillagerRNGCommand.MyItemArgument.item;
 
 public class CrackVillagerRNGCommand {
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
+        //var professionArg = profession();
         dispatcher.register(literal("ccrackvillager")
-                .then(literal("cancel")
-                        .executes(ctx -> cancel(ctx.getSource())))
-                .then(literal("clock")
-                        .then(argument("clockpos", blockPos())
-                                .executes(ctx -> crackVillagerRNG(ctx.getSource(), getBlockPos(ctx, "clockpos"))))
-                                )
-                .then(literal("interval")
-                        .then(argument("ticks", integer(0, 10))
-                                .executes(ctx -> setInterval(ctx.getSource(), getInteger(ctx, "ticks")))))
-                .then(literal("enchant").then(argument("name", itemAndEnchantmentsPredicate().withItemPredicate((i) -> i.equals(Items.BOOK)).constrainMaxLevel())
-                        .executes(ctx -> lookingForEnchantment(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "name"))))));
+            .then(literal("cancel")
+                .executes(ctx -> cancel(ctx.getSource())))
+            .then(literal("clock")
+                .then(argument("clockpos", blockPos())
+                    .executes(ctx -> crackVillagerRNG(ctx.getSource(), getBlockPos(ctx, "clockpos")))))
+            .then(literal("interval")
+                .then(argument("ticks", IntegerArgumentType.integer(0, 10))
+                    .executes(ctx -> setInterval(ctx.getSource(), getInteger(ctx, "ticks")))))
+            .then(literal("addgoal")
+                .then(genFirst(context))
+                .then(genSecond(context))
+                .then(genResult(context)))
+            .then(literal("listgoals")
+                .executes(CrackVillagerRNGCommand::listGoals))
+            .then(literal("removegoal")
+                .then(argument("index", integer(1,CCrackVillager.goalOffers::size))
+                    .executes(CrackVillagerRNGCommand::removeGoal)))
+            .then(literal("cleargoals").executes(CrackVillagerRNGCommand::clearGoals))
+            .then(literal("run").executes(CrackVillagerRNGCommand::doRun)));
     }
 
-    private static int lookingForEnchantment(FabricClientCommandSource source, ItemAndEnchantmentsPredicate predicate) {
-        CCrackVillager.targetEnchantment = predicate;
+    private static int doRun(CommandContext<FabricClientCommandSource> context) {
+        CCrackVillager.findingOffers = true;
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int clearGoals(CommandContext<FabricClientCommandSource> context) {
+        CCrackVillager.goalOffers.clear();
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int removeGoal(CommandContext<FabricClientCommandSource> context) {
+        CCrackVillager.goalOffers.remove(getInteger(context, "index")-1);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int listGoals(CommandContext<FabricClientCommandSource> context) {
+        for(var i = 0; i < CCrackVillager.goalOffers.size(); i++) {
+            var offer = CCrackVillager.goalOffers.get(i);
+            context.getSource().sendFeedback(Component.literal("%d. %s".formatted(i+1, offer)));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
@@ -53,7 +100,7 @@ public class CrackVillagerRNGCommand {
 
     private static int cancel(FabricClientCommandSource source) {
         CCrackVillager.cancel();
-        CCrackVillager.targetEnchantment = null;
+        CCrackVillager.findingOffers = false;
         source.sendFeedback(Component.translatable("commands.ccrackvillager.cancel"));
         return Command.SINGLE_SUCCESS;
     }
@@ -61,5 +108,98 @@ public class CrackVillagerRNGCommand {
     private static int setInterval(FabricClientCommandSource source, int interval) throws CommandSyntaxException {
         CCrackVillager.setInterval(interval);
         return Command.SINGLE_SUCCESS;
+    }
+
+    static class MyItemArgument extends ItemArgument {
+        public ItemInput lastItem;
+
+        public MyItemArgument(CommandBuildContext context) {
+            super(context);
+        }
+
+        public static MyItemArgument item(CommandBuildContext context) {
+            return new MyItemArgument(context);
+        }
+
+        public static <S> ItemInput getItem(CommandContext<S> context, String name) {
+            return context.getArgument(name, ItemInput.class);
+        }
+
+        @Override
+        public ItemInput parse(StringReader reader) throws CommandSyntaxException {
+            return lastItem = super.parse(reader);
+        }
+    }
+
+    private static Combined<Predicate<ItemStack>, String> createPredicate(CommandContext<FabricClientCommandSource> context, String argName) {
+        try {
+            Result<Combined<ItemInput, Combined<Integer, Integer>>> result = getWithString(context, argName, null);
+            var combined = result.value();
+            var item = combined.first().getItem();
+            var min = combined.second().first();
+            var max = combined.second().second();
+            return new Combined<>((stack) -> stack.is(item)
+                && ((min > item.getDefaultMaxStackSize() || min < stack.getCount())
+                && (max > item.getDefaultMaxStackSize() || stack.getCount() < max)),
+                result.string().replaceAll("\\* \\*","*").replaceAll("([\\d*]+) ([\\d*]+)$", "$1-$2"));
+        } catch (IllegalArgumentException ignored) { }
+        return null;
+    }
+
+    private static int setGoal(CommandContext<FabricClientCommandSource> context) {
+        CCrackVillager.Offer offer = new CCrackVillager.Offer();
+
+        var combined = createPredicate(context, "firstitem");
+        if(combined != null) offer.withFirst(combined.first(), combined.second());
+        combined = createPredicate(context, "seconditem");
+        if(combined != null) offer.withSecond(combined.first(), combined.second());
+        combined = createPredicate(context, "resultitem");
+        if(combined != null) offer.withResult(combined.first(), combined.second());
+
+        try {
+            Result<Combined<Enchantment, Integer>> result2 = getWithString(context, "enchantment", null);
+            var enchantment = result2.value().first();
+            offer.andEnchantment((stack) -> {
+                var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(stack);
+                var level = enchantments.getLevel(enchantment);
+                return result2.value().second() > enchantment.getMaxLevel() || result2.value().second() == level;
+            }, result2.string());
+        } catch (IllegalArgumentException ignored) { }
+
+        context.getSource().sendFeedback(Component.literal("add goal: " + offer));
+
+        CCrackVillager.goalOffers.add(offer);
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+
+
+    static LiteralArgumentBuilder<FabricClientCommandSource> genFirst(CommandBuildContext context) {
+        var item = item(context);
+        Supplier<Integer> supplier = () -> item.lastItem.getItem().getDefaultMaxStackSize();
+        return literal("first")
+            .then(argument("seconditem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
+                .executes(CrackVillagerRNGCommand::setGoal)
+                .then(genSecond(context)) .then(genResult(context)));
+    }
+
+    static  LiteralArgumentBuilder<FabricClientCommandSource> genSecond(CommandBuildContext context) {
+        var item = item(context);
+        Supplier<Integer> supplier = () -> item.lastItem.getItem().getDefaultMaxStackSize();
+        return literal("second")
+            .then(argument("seconditem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
+                .executes(CrackVillagerRNGCommand::setGoal) .then(genResult(context)));
+    }
+
+    static LiteralArgumentBuilder<FabricClientCommandSource> genResult(CommandBuildContext context) {
+        var enchantment = enchantment();
+        var item = item(context);
+        Supplier<Integer> supplier = () -> item.lastItem.getItem().getDefaultMaxStackSize();
+        return literal("result")
+            .then(argument("resultitem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
+                .executes(CrackVillagerRNGCommand::setGoal) .then(literal("enchant")
+                    .then(argument("enchantment", withString(combined(enchantment, integer(() -> enchantment.lastParsed.getMaxLevel()).allowAny())))
+                        .executes(CrackVillagerRNGCommand::setGoal))));
     }
 }

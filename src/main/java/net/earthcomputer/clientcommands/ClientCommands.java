@@ -171,7 +171,7 @@ public class ClientCommands implements ClientModInitializer {
         WeatherCommand.register(dispatcher);
         WhisperEncryptedCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
-        CrackVillagerRNGCommand.register(dispatcher);
+        CrackVillagerRNGCommand.register(dispatcher, context);
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;
