@@ -60,7 +60,7 @@ public class VillagerRngSimulator {
     }
 
     public boolean shouldInteractWithVillager() {
-        boolean shouldInteractWithVillager = totalCalls - callsAtStartOfBruteForce >= callsInBruteForce;
+        boolean shouldInteractWithVillager = totalCalls - callsAtStartOfBruteForce >= callsInBruteForce && callsInBruteForce > 0;
         if (shouldInteractWithVillager) {
             reset();
         }
