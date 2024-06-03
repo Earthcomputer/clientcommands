@@ -7,10 +7,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.network.chat.Component;
 
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class CombinedArgument<A, B> implements ArgumentType<CombinedArgument.Combined<A, B>> {

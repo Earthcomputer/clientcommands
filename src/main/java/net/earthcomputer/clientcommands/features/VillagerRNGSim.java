@@ -160,8 +160,6 @@ public class VillagerRNGSim {
                     assert Minecraft.getInstance().gameMode != null;
                     printNextTrades();
                     Minecraft.getInstance().gameMode.interact(player, villager, InteractionHand.MAIN_HAND);
-                    var chat = Minecraft.getInstance().gui.getChat();
-                    chat.addMessage(Component.literal("I found it !"));
                     CCrackVillager.findingOffers = false;
                     break;
                 }
@@ -201,29 +199,9 @@ public class VillagerRNGSim {
         return offers;
     }
 
-    String getOfferString(MerchantOffer offer) {
-        var first = offer.getCostA();
-        var second = offer.getCostB();
-        var result = offer.getResult();
-        var offerString = "%dx %s".formatted(first.getCount(), first.getHoverName().getString());
-        if(!second.isEmpty()) {
-            offerString += " + %dx %s".formatted(second.getCount(), second.getHoverName().getString());
-        }
-        if(result.is(Items.ENCHANTED_BOOK)) {
-            var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(result);
-            var enchantment = enchantments.keySet().iterator().next().value();
-
-            offerString += " => %s lvl.%d".formatted(Component.translatable(enchantment.getDescriptionId()).getString(), EnchantmentHelper.getEnchantmentsForCrafting(result).getLevel(enchantment));
-        } else {
-            offerString += " => %dx %s".formatted(result.getCount(), result.getHoverName().getString());
-        }
-        return offerString;
-    }
-
     public void printNextTrades() {
         nextOffers.clear();
         nextOffersWithBooks.clear();
-        var chat = Minecraft.getInstance().gui.getChat();
         for(var i = 0; i < 15; i++) {
             var sim = clone();
             for(var tick = 0; tick < i; tick++) {
@@ -236,9 +214,6 @@ public class VillagerRNGSim {
                 nextOffers.add(offer);
                 if(offer.getResult().is(Items.ENCHANTED_BOOK)) {
                     bookIndex = index;
-                    var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(offer.getResult());
-                    var enchantment = enchantments.keySet().iterator().next().value();
-                    //chat.addMessage(Component.translatable("commands.ccrackvillager.showEnchOnTick", i, enchantment.getFullname(enchantments.getLevel(enchantment))));
                 }
             }
             nextOffersWithBooks.add(bookIndex);
@@ -270,6 +245,7 @@ public class VillagerRNGSim {
                     }
                 }
             }
+            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.ccrackvillager.maintainFail"));
         } else {
             for(var i = 0; i < nextOffers.size(); i+=2) {
                 var same = true;
@@ -288,6 +264,7 @@ public class VillagerRNGSim {
                     return;
                 }
             }
+            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.ccrackvillager.maintainFail"));
         }
     }
 

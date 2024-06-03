@@ -4,7 +4,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -17,9 +16,7 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
@@ -30,7 +27,6 @@ import static net.earthcomputer.clientcommands.command.arguments.DynamicIntegerA
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
-import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.CombinedArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.EnchantmentArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.DynamicIntegerArgument.*;
@@ -40,7 +36,6 @@ import static net.earthcomputer.clientcommands.command.CrackVillagerRNGCommand.M
 
 public class CrackVillagerRNGCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
-        //var professionArg = profession();
         dispatcher.register(literal("ccrackvillager")
             .then(literal("cancel")
                 .executes(ctx -> cancel(ctx.getSource())))

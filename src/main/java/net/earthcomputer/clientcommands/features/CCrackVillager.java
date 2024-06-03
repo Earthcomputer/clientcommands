@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.features;
 
 import com.seedfinding.latticg.reversal.DynamicProgram;
 import com.seedfinding.latticg.util.LCG;
-import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -18,7 +17,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class CCrackVillager {
@@ -77,8 +75,6 @@ public class CCrackVillager {
     static void crack(ClientboundSoundPacket packet) {
         var lastChimeIntensity1_2 = (packet.getVolume() - 0.1f);
         var nextFloat = (packet.getPitch() - 0.5f) / lastChimeIntensity1_2;
-        //if(validMeasures > 0)
-        //    measurements.add(Measurement.skip(interval * 2)); // 2 random call every ticks
 
         measurements.add(Measurement.nextFloat(nextFloat, 0.0015f));
         validMeasures++;

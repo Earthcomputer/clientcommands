@@ -11,9 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public class EnchantmentArgument implements ArgumentType<Enchantment> {
     public Enchantment lastParsed = null;
