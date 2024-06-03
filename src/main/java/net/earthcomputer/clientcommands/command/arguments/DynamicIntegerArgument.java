@@ -69,7 +69,9 @@ public class DynamicIntegerArgument implements ArgumentType<Integer> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        builder.suggest("*");
+        if(allowAny) {
+            builder.suggest("*");
+        }
         return builder.buildFuture();
     }
 }

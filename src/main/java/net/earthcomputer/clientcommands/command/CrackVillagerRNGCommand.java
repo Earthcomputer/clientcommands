@@ -48,7 +48,7 @@ public class CrackVillagerRNGCommand {
                 .then(argument("clockpos", blockPos())
                     .executes(ctx -> crackVillagerRNG(ctx.getSource(), getBlockPos(ctx, "clockpos")))))
             .then(literal("interval")
-                .then(argument("ticks", IntegerArgumentType.integer(0, 10))
+                .then(argument("ticks", IntegerArgumentType.integer(0, 20))
                     .executes(ctx -> setInterval(ctx.getSource(), getInteger(ctx, "ticks")))))
             .then(literal("addgoal")
                 .then(genFirst(context))
@@ -74,7 +74,7 @@ public class CrackVillagerRNGCommand {
     }
 
     private static int removeGoal(CommandContext<FabricClientCommandSource> context) {
-        CCrackVillager.goalOffers.remove(getInteger(context, "index")-1);
+        context.getSource().sendFeedback(Component.literal("remove goal: " + CCrackVillager.goalOffers.remove(getInteger(context, "index")-1)));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -137,8 +137,8 @@ public class CrackVillagerRNGCommand {
             var min = combined.second().first();
             var max = combined.second().second();
             return new Combined<>((stack) -> stack.is(item)
-                && ((min > item.getDefaultMaxStackSize() || min < stack.getCount())
-                && (max > item.getDefaultMaxStackSize() || stack.getCount() < max)),
+                && ((min > item.getDefaultMaxStackSize() || min <= stack.getCount())
+                && (max > item.getDefaultMaxStackSize() || stack.getCount() <= max)),
                 result.string().replaceAll("\\* \\*","*").replaceAll("([\\d*]+) ([\\d*]+)$", "$1-$2"));
         } catch (IllegalArgumentException ignored) { }
         return null;
@@ -164,7 +164,7 @@ public class CrackVillagerRNGCommand {
             }, result2.string());
         } catch (IllegalArgumentException ignored) { }
 
-        context.getSource().sendFeedback(Component.literal("add goal: " + offer));
+        context.getSource().sendFeedback(Component.literal((CCrackVillager.goalOffers.size()+1) + ": " + offer));
 
         CCrackVillager.goalOffers.add(offer);
 
@@ -177,7 +177,7 @@ public class CrackVillagerRNGCommand {
         var item = item(context);
         Supplier<Integer> supplier = () -> item.lastItem.getItem().getDefaultMaxStackSize();
         return literal("first")
-            .then(argument("seconditem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
+            .then(argument("firstitem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
                 .executes(CrackVillagerRNGCommand::setGoal)
                 .then(genSecond(context)) .then(genResult(context)));
     }
