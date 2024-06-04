@@ -155,7 +155,7 @@ public class CrackVillagerRNGCommand {
             offer.andEnchantment((stack) -> {
                 var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(stack);
                 var level = enchantments.getLevel(enchantment);
-                return result2.value().second() > enchantment.getMaxLevel() || result2.value().second() == level;
+                return (result2.value().second() > enchantment.getMaxLevel() && level > 0) || result2.value().second() == level;
             }, result2.string());
         } catch (IllegalArgumentException ignored) { }
 
