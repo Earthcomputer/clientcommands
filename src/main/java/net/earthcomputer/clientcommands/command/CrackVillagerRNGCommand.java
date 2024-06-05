@@ -60,6 +60,9 @@ public class CrackVillagerRNGCommand {
 
     private static int doRun(CommandContext<FabricClientCommandSource> context) {
         CCrackVillager.findingOffers = true;
+        if(CCrackVillager.goalOffers.isEmpty()) {
+            context.getSource().sendFeedback(Component.translatable("commands.ccrackvillager.emptyGoals"));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
