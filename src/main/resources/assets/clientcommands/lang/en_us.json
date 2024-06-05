@@ -271,6 +271,9 @@
   "commands.ccrackvillager.maintainFail": "Villager RNG maintain fail",
   "commands.ccrackvillager.syncWithLag": "set delay to %d tick(s)",
   "commands.ccrackvillager.showEnchOnTick": "tick: %d => %s",
+  "commands.ccrackvillager.noMatch": "cannot find any trades match any goals in 30 seconds",
+  "commands.ccrackvillager.match": "there might have a desired trade in %d ticks later",
+  "commands.ccrackvillager.progress": "crack RNG progress: %d/7",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",

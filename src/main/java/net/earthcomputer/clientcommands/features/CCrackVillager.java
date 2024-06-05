@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.npc.Villager;
@@ -99,6 +100,8 @@ public class CCrackVillager {
                 reset();
             }
             cracking = false;
+        } else {
+            Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.progress", validMeasures), false);
         }
     }
 

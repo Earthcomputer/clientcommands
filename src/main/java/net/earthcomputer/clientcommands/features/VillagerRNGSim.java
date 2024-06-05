@@ -34,6 +34,9 @@ public class VillagerRNGSim {
     int ticksToWait = 0;
     boolean synced = false;
 
+    static long lastBruteForce = 0;
+    static long bruteForceResult = 0;
+
     long tickCounter = 0;
 
     public void onAmethyst(ClientboundSoundPacket packet) {
@@ -62,6 +65,10 @@ public class VillagerRNGSim {
 
             errorCount = 0;
             if(ticks == 0) {
+                if((tickCounter - lastBruteForce > 500 || tickCounter > bruteForceResult + 10) && CCrackVillager.findingOffers) {
+                    lastBruteForce = tickCounter;
+                    bruteForce();
+                }
                 synced = true;
                 Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.synced"), false);
             } else {
@@ -76,10 +83,10 @@ public class VillagerRNGSim {
                 errorCount = 0;
                 CCrackVillager.cracked = false;
                 lastAmbientCracked = false;
+                lastBruteForce = 0;
                 Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.maintainFail"), false);
             }
         }
-
     }
 
     public void onAmbient() {
@@ -107,6 +114,7 @@ public class VillagerRNGSim {
             lastAmbient = forSync.lastAmbient;
             ticksToWait = forSync.ticksToWait;
             lastAmethyst = forSync.lastAmethyst;;
+            tickCounter = forSync.tickCounter;
         } else {
             ticksToWait = 10;
         }
@@ -165,6 +173,34 @@ public class VillagerRNGSim {
                 }
             }
         }
+    }
+
+    void bruteForce() {
+        var player = Minecraft.getInstance().player;
+        var villager = CCrackVillager.targetVillager.get();
+        if(player == null || player.distanceTo(villager) > 5) return;
+        var simulate = clone();
+
+        for(var i = 0; i < CCrackVillager.interval; i++) {
+            simulate.onTick(true);
+        }
+        for(var step = 0; step < 600; step++) {
+            simulate.onTick(true);
+            var sim2 = simulate.clone();
+
+            var offers = sim2.predictOffers();
+            if(offers == null) return;
+            for(var offer : offers) {
+                for(var goal : CCrackVillager.goalOffers) {
+                    if(goal.test(offer)) {
+                        bruteForceResult = sim2.tickCounter;
+                        Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.ccrackvillager.match", step));
+                        return;
+                    }
+                }
+            }
+        }
+        Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.ccrackvillager.noMatch"));
     }
 
     void randomCalled() {
@@ -290,6 +326,7 @@ public class VillagerRNGSim {
         result.lastAmethyst = lastAmethyst;
         result.lastAmbientCracked = lastAmbientCracked;
         result.justAmbient = justAmbient;
+        result.tickCounter = tickCounter;
         
         return result;
     }
