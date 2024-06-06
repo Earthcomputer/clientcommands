@@ -70,7 +70,11 @@ public class VillagerRNGSim {
                     bruteForce();
                 }
                 synced = true;
-                Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.synced"), false);
+                if(CCrackVillager.findingOffers) {
+                    Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.synced"), false);
+                } else {
+                    Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.syncedNotCracking"), false);
+                }
             } else {
                 Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.maintain"), false);
             }
