@@ -276,6 +276,7 @@
   "commands.ccrackvillager.match": "there might have a desired trade in %d ticks later",
   "commands.ccrackvillager.progress": "crack RNG progress: %d/7",
   "commands.ccrackvillager.emptyGoals": "warning: you haven't added any goals",
+  "commands.ccrackvillager.noClock": "warning: clock position hasn't be set",
 
   "chorusManip.landing.success": "Landing on: %d, %d, %d",
   "chorusManip.landing.failed": "Landing manipulation not possible",

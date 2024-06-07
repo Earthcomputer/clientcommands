@@ -31,7 +31,7 @@ public class CCrackVillager {
     static int validMeasures = 0;
     static boolean cracking = false;
     static int interval = 0;
-    public static BlockPos clockPos;
+    public static BlockPos clockPos = null;
 
     public static List<Offer> goalOffers = new ArrayList<>();
     public static boolean findingOffers = false;
@@ -96,7 +96,11 @@ public class CCrackVillager {
                 }
                 onCrackFinished.accept(VillagerRNGSim.INSTANCE.getSeed());
             } else {
-                Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.fail"), false);
+                var gui = Minecraft.getInstance().gui;
+                if(clockPos == null) {
+                    gui.getChat().addMessage(Component.translatable("commands.ccrackvillager.noClock"));
+                }
+                gui.setOverlayMessage(Component.translatable("commands.ccrackvillager.fail"), false);
                 reset();
             }
             cracking = false;
