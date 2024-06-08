@@ -12,7 +12,7 @@
   "commands.calias.removeAlias.success": "成功移除别名“%s”",
 
   "commands.careastats.notLoaded": "该区域的区块未加载",
-  "commands.careastats.output.chunksScanned": "扫描%d个区块，用时%dns≈%dms",
+  "commands.careastats.output.chunksScanned": "扫描%d个区块，用时%d纳秒≈%d毫秒",
   "commands.careastats.output.blocksMatched": "在一共%2$d个方块中匹配到%1$d个方块",
   "commands.careastats.output.entitiesFound": "在此区域中找到%d个实体",
 
@@ -259,7 +259,7 @@
   "commands.client.invalidHoverAction": "无效的点击事件操作‘%s’",
   "commands.client.invalidHoverEvent": "无效的悬浮事件‘%s’",
   "commands.client.notClient": "不是客户端指令",
-  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
+  "commands.client.regexTooSlow": "正则表达式“%s”太慢而无法匹配",
   "commands.client.requiresRestart": "此更改将在你重新启动客户端后生效",
   "commands.client.tooFewArguments": "参数过少",
 
@@ -294,9 +294,9 @@
 
   "itemCrack.notEnoughItems": "无法使用随机数种子破解：玩家手中物品不足",
 
-  "minesweeperGame.minesLeft": "Mines Left: %d",
-  "minesweeperGame.timePlayed": "Time Played: %ds",
-  "minesweeperGame.title": "Minesweeper",
+  "minesweeperGame.minesLeft": "剩余地雷：%d",
+  "minesweeperGame.timePlayed": "游玩时间：%d秒",
+  "minesweeperGame.title": "扫雷",
 
   "playerManip.state": "玩家种子破解状态：%s",
   "playerManip.state.uncracked": "未破解",
