@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.c2c.packets;
 
+import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -9,7 +10,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 
-public record MessageC2CPacket(String sender, String message) implements Packet<C2CPacketListener> {
+public record MessageC2CPacket(String sender, String message) implements C2CPacket {
     public static final StreamCodec<RegistryFriendlyByteBuf, MessageC2CPacket> CODEC = Packet.codec(MessageC2CPacket::write, MessageC2CPacket::new);
     public static final PacketType<MessageC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation("clientcommands", "message"));
 
