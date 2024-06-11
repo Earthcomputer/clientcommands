@@ -5,8 +5,6 @@ import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.VillagerCracker;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.phys.Vec3;
@@ -36,21 +34,5 @@ public abstract class ClientPacketListenerMixin {
         if (targetVillager != null && new Vec3(packet.getX(), packet.getY(), packet.getZ()).distanceToSqr(targetVillager.position()) <= 0.1f) {
             VillagerCracker.onSoundEventPlayed(packet);
         }
-    }
-
-    @Inject(method = "handleBlockUpdate", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
-    private void onHandleBlockUpdate(ClientboundBlockUpdatePacket packet, CallbackInfo ci) {
-        if (packet.getPos().equals(VillagerCracker.clockBlockPos)) {
-            VillagerCracker.onServerTick();
-        }
-    }
-
-    @Inject(method = "handleChunkBlocksUpdate", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
-    private void onHandleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket packet, CallbackInfo ci) {
-        packet.runUpdates((pos, state) -> {
-            if (pos.equals(VillagerCracker.clockBlockPos)) {
-                VillagerCracker.onServerTick();
-            }
-        });
     }
 }

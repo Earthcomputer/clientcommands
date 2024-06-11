@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
@@ -56,7 +57,10 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
 
         if (rng.shouldInteractWithVillager()) {
             Minecraft minecraft = Minecraft.getInstance();
-            minecraft.gameMode.interact(minecraft.player, this, InteractionHand.MAIN_HAND);
+            InteractionResult result = minecraft.gameMode.interact(minecraft.player, this, InteractionHand.MAIN_HAND);
+            if (result.consumesAction() && result.shouldSwing()) {
+                minecraft.player.swing(InteractionHand.MAIN_HAND);
+            }
             minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
             ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.success", rng.currentCorrectionMs()).withStyle(ChatFormatting.GREEN), 100);
         }
@@ -64,7 +68,7 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
 
     @Override
     public Pair<Integer, VillagerCommand.Offer> clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int maxCalls, Predicate<VillagerCommand.Offer> predicate) {
-        if (this instanceof IVillager iVillager && iVillager.clientcommands_getCrackedRandom().isCracked()) {
+        if (this instanceof IVillager iVillager && iVillager.clientcommands_getCrackedRandom().getCrackedState().isCracked()) {
             VillagerProfession oldProfession = getVillagerData().getProfession();
             setVillagerData(getVillagerData().setProfession(profession));
 

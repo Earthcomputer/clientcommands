@@ -4,7 +4,6 @@ import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -23,7 +22,7 @@ public class VillagerRngSimulator {
     private int ambientSoundTime;
     private int waitingTicks = 0;
     private boolean madeSound = false;
-    private boolean firstAmbientNoise = true;
+    private int totalAmbientSounds = 0;
     private int callsAtStartOfBruteForce = 0;
     private int callsInBruteForce = 0;
     private int totalCalls = 0;
@@ -39,7 +38,7 @@ public class VillagerRngSimulator {
         VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : new LegacyRandomSource(random.seed.get() ^ 0x5deece66dL), ambientSoundTime);
         that.waitingTicks = this.waitingTicks;
         that.madeSound = this.madeSound;
-        that.firstAmbientNoise = this.firstAmbientNoise;
+        that.totalAmbientSounds = this.totalAmbientSounds;
         that.callsAtStartOfBruteForce = this.callsAtStartOfBruteForce;
         that.callsInBruteForce = this.callsInBruteForce;
         that.totalCalls = this.totalCalls;
@@ -80,7 +79,7 @@ public class VillagerRngSimulator {
 
         // we have the server receiving ambient noise tell us if we have to do this to increment the random, this is so that our ambient sound time is synced up.
         totalCalls += 1;
-        if (random.nextInt(1000) < ambientSoundTime++ && !firstAmbientNoise) {
+        if (random.nextInt(1000) < ambientSoundTime++ && totalAmbientSounds > 0) {
             random.nextFloat();
             random.nextFloat();
             totalCalls += 2;
@@ -101,7 +100,7 @@ public class VillagerRngSimulator {
     }
 
     public int currentCorrectionMs() {
-        return -PingCommand.getLocalPing() / 2;
+        return PingCommand.getLocalPing() / 2;
     }
 
     public void updateProgressBar() {
@@ -110,7 +109,7 @@ public class VillagerRngSimulator {
 
     @Nullable
     public VillagerCommand.Offer anyOffersMatch(VillagerTrades.ItemListing[] listings, Entity trader, Predicate<VillagerCommand.Offer> predicate) {
-        if (!isCracked()) {
+        if (!getCrackedState().isCracked()) {
             return null;
         }
 
@@ -146,8 +145,20 @@ public class VillagerRngSimulator {
         return totalCalls;
     }
 
-    public boolean isCracked() {
-        return random != null && !firstAmbientNoise;
+    public CrackedState getCrackedState() {
+        if (random == null) {
+            return CrackedState.UNCRACKED;
+        }
+
+        if (totalAmbientSounds == 0) {
+            return CrackedState.PENDING_FIRST_AMBIENT_SOUND;
+        }
+
+        if (totalAmbientSounds == 1) {
+            return CrackedState.PENDING_SECOND_AMBIENT_SOUND;
+        }
+
+        return CrackedState.CRACKED;
     }
 
     public void setRandom(@Nullable LegacyRandomSource random) {
@@ -156,7 +167,7 @@ public class VillagerRngSimulator {
 
     public void reset() {
         random = null;
-        firstAmbientNoise = true;
+        totalAmbientSounds = 0;
         totalCalls = 0;
         callsAtStartOfBruteForce = 0;
         callsInBruteForce = 0;
@@ -170,22 +181,59 @@ public class VillagerRngSimulator {
     }
 
     public void onAmbientSoundPlayed() {
-        if (firstAmbientNoise) {
+        if (totalAmbientSounds == 0) {
             if (random == null) {
                 return;
             }
 
-            firstAmbientNoise = false;
+            totalAmbientSounds++;
             ambientSoundTime = -80;
             random.nextFloat();
             random.nextFloat();
             madeSound = true;
-            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.inSync").withStyle(ChatFormatting.GREEN), 100);
+            ClientCommandHelper.addOverlayMessage(getCrackedState().getMessage(true), 100);
+            return;
         }
 
         if (!madeSound) {
-            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
-            reset();
+            int i = 0;
+            VillagerRngSimulator rng = this.copy();
+            do {
+                rng.simulateTick();
+                i++;
+            } while (!rng.madeSound);
+
+            if (i <= PingCommand.getLocalPing() / 50 + 5) {
+                for (int j = 0; j < i; j++) {
+                    simulateTick();
+                }
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.resynced", i).withStyle(ChatFormatting.GREEN), 100);
+            } else {
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                reset();
+            }
+        } else if (totalAmbientSounds++ == 1) {
+            ClientCommandHelper.addOverlayMessage(getCrackedState().getMessage(true), 100);
+        }
+    }
+
+    public enum CrackedState {
+        UNCRACKED,
+        PENDING_FIRST_AMBIENT_SOUND,
+        PENDING_SECOND_AMBIENT_SOUND,
+        CRACKED;
+
+        public boolean isCracked() {
+            return this == CRACKED;
+        }
+
+        public Component getMessage(boolean addColor) {
+            return switch (this) {
+                case UNCRACKED -> Component.translatable("commands.cvillager.noCrackedVillagerPresent").withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
+                case PENDING_FIRST_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 0).withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
+                case PENDING_SECOND_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 50).withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
+                case CRACKED -> Component.translatable("commands.cvillager.inSync", 100).withStyle(addColor ? ChatFormatting.GREEN : ChatFormatting.RESET);
+            };
         }
     }
 }

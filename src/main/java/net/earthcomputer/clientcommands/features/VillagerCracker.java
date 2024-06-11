@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.util.RandomSource;
@@ -21,9 +21,6 @@ public class VillagerCracker {
     private static WeakReference<Villager> cachedVillager = null;
 
     @Nullable
-    public static BlockPos clockBlockPos = null;
-
-    @Nullable
     public static Villager getVillager() {
         if (villagerUuid == null) {
             cachedVillager = null;
@@ -35,10 +32,12 @@ public class VillagerCracker {
                 return villager;
             }
         }
-        for (Entity entity : Minecraft.getInstance().level.entitiesForRendering()) {
-            if (entity.getUUID() == villagerUuid && entity instanceof Villager villager) {
-                cachedVillager = new WeakReference<>(villager);
-                return villager;
+        if (Minecraft.getInstance().level != null) {
+            for (Entity entity : Minecraft.getInstance().level.entitiesForRendering()) {
+                if (entity.getUUID() == villagerUuid && entity instanceof Villager villager) {
+                    cachedVillager = new WeakReference<>(villager);
+                    return villager;
+                }
             }
         }
         return null;
@@ -67,6 +66,8 @@ public class VillagerCracker {
                 ClientCommandHelper.sendError(Component.translatable("commands.cvillager.crackFailed"));
             } else {
                 ((IVillager) targetVillager).clientcommands_setCrackedRandom(RandomSource.create(possible[0] ^ 0x5deece66dL));
+                // simulate a tick to advance it by one
+                ((IVillager) targetVillager).clientcommands_getCrackedRandom().simulateTick();
                 ClientCommandHelper.sendFeedback("commands.cvillager.crackSuccess", Long.toHexString(possible[0]));
             }
         }
@@ -84,5 +85,4 @@ public class VillagerCracker {
 
         ((IVillager) targetVillager).clientcommands_onServerTick();
     }
-
 }

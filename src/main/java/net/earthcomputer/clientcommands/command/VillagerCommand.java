@@ -10,12 +10,12 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.VillagerCracker;
+import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
@@ -32,7 +32,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static dev.xpple.clientarguments.arguments.CItemPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.PredicatedRangeArgument.*;
@@ -65,11 +64,8 @@ public class VillagerCommand {
             .then(literal("list-goals")
                 .executes(ctx -> listGoals(ctx.getSource())))
             .then(literal("remove-goal")
-                .then(argument("index", integer(0))
+                .then(argument("index", integer(1))
                     .executes(ctx -> removeGoal(ctx.getSource(), getInteger(ctx, "index")))))
-            .then(literal("clock")
-                .then(argument("pos", blockPos())
-                    .executes(ctx -> setClockBlockPos(getBlockPos(ctx, "pos")))))
             .then(literal("target")
                 .executes(ctx -> setVillagerTarget(null))
                 .then(argument("entity", entity())
@@ -97,7 +93,7 @@ public class VillagerCommand {
         if (goals.isEmpty()) {
             source.sendFeedback(Component.translatable("commands.cvillager.listGoals.noGoals").withStyle(style -> style.withColor(ChatFormatting.RED)));
         } else {
-            source.sendFeedback(Component.translatable("commands.cvillager.listGoals.success", FishingCracker.goals.size()));
+            source.sendFeedback(Component.translatable("commands.cvillager.listGoals.success", FishingCracker.goals.size() + 1));
             for (int i = 0; i < goals.size(); i++) {
                 Goal goal = goals.get(i);
                 source.sendFeedback(Component.literal((i + 1) + ": " + goal.toString()));
@@ -107,18 +103,13 @@ public class VillagerCommand {
     }
 
     private static int removeGoal(FabricClientCommandSource source, int index) throws CommandSyntaxException {
+        index = index - 1;
         if (index < goals.size()) {
             Goal goal = goals.remove(index);
             source.sendFeedback(Component.translatable("commands.cvillager.removeGoal.success", goal.toString()));
         } else {
-            throw INVALID_GOAL_INDEX.create(index, goals.size());
+            throw INVALID_GOAL_INDEX.create(index + 1, goals.size());
         }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int setClockBlockPos(BlockPos pos) {
-        VillagerCracker.clockBlockPos = pos;
-        ClientCommandHelper.sendFeedback("commands.cvillager.clockSet", pos.getX(), pos.getY(), pos.getZ());
         return Command.SINGLE_SUCCESS;
     }
 
@@ -149,12 +140,17 @@ public class VillagerCommand {
         }
 
         VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(1, new VillagerTrades.ItemListing[0]);
-        int adjustment = 1 + (iVillager.clientcommands_getCrackedRandom().currentCorrectionMs() - 25) / 50;
+        int adjustment = 3 + Configs.villagerAdjustment - (iVillager.clientcommands_getCrackedRandom().currentCorrectionMs() + 40) / 50;
         Pair<Integer, Offer> pair = iVillager.clientcommands_bruteForceOffers(listings, profession, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
         int ticks = pair.getFirst();
         Offer offer = pair.getSecond();
         if (ticks < 0) {
-            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.bruteForce.failed", Configs.maxVillagerBruteForceSimulationCalls).withStyle(ChatFormatting.RED), 100);
+            VillagerRngSimulator.CrackedState state = iVillager.clientcommands_getCrackedRandom().getCrackedState();
+            Component message = state.getMessage(true);
+            if (state.isCracked()) {
+                message = Component.translatable("commands.cvillager.bruteForce.failed", Configs.maxVillagerBruteForceSimulationCalls).withStyle(ChatFormatting.RED);
+            }
+            ClientCommandHelper.addOverlayMessage(message, 100);
         } else {
             String price;
             if (offer.second() == null) {

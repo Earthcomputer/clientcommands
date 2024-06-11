@@ -171,11 +171,11 @@ public class Configs {
     public static int maximumPacketFieldDepth = 10;
 
     @Config(temporary = true, setter = @Config.Setter("setMaxVillagerBruteForceSimulationCalls"))
-    public static int maxVillagerBruteForceSimulationCalls = 16384;
+    public static int maxVillagerBruteForceSimulationCalls = 12000;
     public static void setMaxVillagerBruteForceSimulationCalls(int maxVillagerBruteForceSimulationCalls) {
         Configs.maxVillagerBruteForceSimulationCalls = Mth.clamp(maxVillagerBruteForceSimulationCalls, 0, 65536);
     }
 
     @Config(temporary = true)
-    public static int villagerAdjustment = 1;
+    public static int villagerAdjustment = 0;
 }
