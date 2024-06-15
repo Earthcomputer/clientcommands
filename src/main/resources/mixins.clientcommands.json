@@ -3,10 +3,7 @@
   "package": "net.earthcomputer.clientcommands.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "commands.enchant.EnchantmentDefinitionMixin",
-    "commands.enchant.EnchantmentHelperMixin",
     "commands.enchant.EnchantmentScreenMixin",
-    "commands.enchant.ProtectionEnchantmentMixin",
     "commands.findblock.LevelChunkMixin",
     "commands.fish.FishingHookMixin",
     "commands.fish.FishingRodItemMixin",
@@ -33,7 +30,6 @@
     "rngevents.ClientPacketListenerMixin",
     "rngevents.CreeperMushroomCowSheepAndSnowGolemMixin",
     "rngevents.CustomCreativeSlotMixin",
-    "rngevents.DamageEnchantmentMixin",
     "rngevents.EntityMixin",
     "rngevents.FishingRodItemMixin",
     "rngevents.FlintAndSteelItemMixin",

@@ -33,7 +33,7 @@ public class RenderQueue {
 
             Vec3 cameraPos = context.camera().getPosition();
             context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickDelta());
+            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickCounter().getRealtimeDeltaTicks());
 
             context.matrixStack().popPose();
         });

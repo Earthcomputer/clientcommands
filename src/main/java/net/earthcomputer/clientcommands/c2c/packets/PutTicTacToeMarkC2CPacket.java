@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public record PutTicTacToeMarkC2CPacket(String sender, byte x, byte y) implements C2CPacket {
     public static final StreamCodec<RegistryFriendlyByteBuf, PutTicTacToeMarkC2CPacket> CODEC = Packet.codec(PutTicTacToeMarkC2CPacket::write, PutTicTacToeMarkC2CPacket::new);
-    public static final PacketType<PutTicTacToeMarkC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation("clientcommands", "put_tic_tac_toe_mark"));
+    public static final PacketType<PutTicTacToeMarkC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "put_tic_tac_toe_mark"));
 
     public PutTicTacToeMarkC2CPacket(FriendlyByteBuf buf) {
         this(buf.readUtf(), buf.readByte(), buf.readByte());

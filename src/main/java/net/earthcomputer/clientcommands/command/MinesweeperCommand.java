@@ -52,7 +52,7 @@ public class MinesweeperCommand {
     }
 
     private static class MinesweeperGameScreen extends Screen {
-        private static final ResourceLocation MINESWEEPER_ATLAS = new ResourceLocation("clientcommands:textures/minesweeper_atlas.png");
+        private static final ResourceLocation MINESWEEPER_ATLAS = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/minesweeper_atlas.png");
         private static final int MINESWEEPER_ATLAS_WIDTH = 128;
         private static final int MINESWEEPER_ATLAS_HEIGHT = 64;
 

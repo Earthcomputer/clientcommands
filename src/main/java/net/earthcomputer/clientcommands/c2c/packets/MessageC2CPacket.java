@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public record MessageC2CPacket(String sender, String message) implements C2CPacket {
     public static final StreamCodec<RegistryFriendlyByteBuf, MessageC2CPacket> CODEC = Packet.codec(MessageC2CPacket::write, MessageC2CPacket::new);
-    public static final PacketType<MessageC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation("clientcommands", "message"));
+    public static final PacketType<MessageC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "message"));
 
     public MessageC2CPacket(FriendlyByteBuf buf) {
         this(buf.readUtf(), buf.readUtf());

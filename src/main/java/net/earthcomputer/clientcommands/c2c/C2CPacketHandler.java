@@ -19,6 +19,7 @@ import net.minecraft.client.multiplayer.AccountProfileKeyPairManager;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -26,7 +27,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.ProtocolInfoBuilder;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.entity.player.ProfilePublicKey;
@@ -45,7 +45,7 @@ public class C2CPacketHandler implements C2CPacketListener {
     private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.publicKeyNotFound"));
     private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.encryptionFailed"));
 
-    public static final ProtocolInfo.Unbound<C2CPacketListener, RegistryFriendlyByteBuf> PROTOCOL_UNBOUND = ProtocolInfoBuilder.protocolUnbound(ConnectionProtocol.PLAY, PacketFlow.CLIENTBOUND, builder -> builder
+    public static final ProtocolInfo.Unbound<C2CPacketListener, RegistryFriendlyByteBuf> PROTOCOL_UNBOUND = ProtocolInfoBuilder.clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
         .addPacket(StartTicTacToeGameC2CPacket.ID, StartTicTacToeGameC2CPacket.CODEC)
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
@@ -217,17 +217,12 @@ public class C2CPacketHandler implements C2CPacketListener {
     }
 
     @Override
-    public @NotNull PacketFlow flow() {
-        return PacketFlow.CLIENTBOUND;
-    }
-
-    @Override
     public @NotNull ConnectionProtocol protocol() {
         return ConnectionProtocol.PLAY;
     }
 
     @Override
-    public void onDisconnect(Component reason) {
+    public void onDisconnect(DisconnectionDetails details) {
     }
 
     @Override

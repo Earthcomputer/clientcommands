@@ -3,9 +3,20 @@ package net.earthcomputer.clientcommands.util;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.datafixers.util.Either;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -38,6 +49,21 @@ public final class CUtil {
             right.accept(r);
             return null;
         });
+    }
+
+    /** @noinspection OptionalIsPresent - no boxing! */
+    public static int getEnchantmentLevel(RegistryAccess registryAccess, ResourceKey<Enchantment> enchantment, ItemStack stack) {
+        Optional<Holder.Reference<Enchantment>> enchHolder = registryAccess.registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment);
+        return enchHolder.isPresent() ? EnchantmentHelper.getItemEnchantmentLevel(enchHolder.get(), stack) : 0;
+    }
+
+    /** @noinspection OptionalIsPresent - no boxing! */
+    public static int getEnchantmentLevel(ResourceKey<Enchantment> enchantment, LivingEntity entity) {
+        Optional<Holder.Reference<Enchantment>> enchHolder = entity.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment);
+        if (enchHolder.isEmpty()) {
+            return 0;
+        }
+        return Arrays.stream(EquipmentSlot.values()).mapToInt(slot -> entity.getItemBySlot(slot).getEnchantments().getLevel(enchHolder.get())).max().orElse(0);
     }
 
     private static class FusedRegexInput implements CharSequence {

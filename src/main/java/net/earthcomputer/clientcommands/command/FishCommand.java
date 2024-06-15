@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -47,7 +48,7 @@ public class FishCommand {
                 .then(argument("goal", withString(clientItemPredicate(context)))
                     .executes(ctx -> addGoal(ctx.getSource(), getWithString(ctx, "goal", ClientItemPredicateArgument.ClientItemPredicate.class)))))
             .then(literal("add-enchanted-goal")
-                .then(argument("goal", withString(itemAndEnchantmentsPredicate().withItemPredicate(ENCHANTABLE_ITEMS::contains).withEnchantmentPredicate((item, ench) -> ench.isDiscoverable()).constrainMaxLevel()))
+                .then(argument("goal", withString(itemAndEnchantmentsPredicate(context).withItemPredicate(ENCHANTABLE_ITEMS::contains).withEnchantmentPredicate((item, ench) -> ench.is(EnchantmentTags.ON_RANDOM_LOOT)).constrainMaxLevel()))
                     .executes(ctx -> addEnchantedGoal(ctx.getSource(), getWithString(ctx, "goal", ItemAndEnchantmentsPredicate.class)))))
             .then(literal("remove-goal")
                 .then(argument("index", integer(1))

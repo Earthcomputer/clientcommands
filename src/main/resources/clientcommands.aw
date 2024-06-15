@@ -2,7 +2,7 @@ accessWidener v2 named
 
 # c2c
 accessible field net/minecraft/client/multiplayer/AccountProfileKeyPairManager keyPair Ljava/util/concurrent/CompletableFuture;
-accessible method net/minecraft/network/protocol/ProtocolInfoBuilder protocolUnbound (Lnet/minecraft/network/ConnectionProtocol;Lnet/minecraft/network/protocol/PacketFlow;Ljava/util/function/Consumer;)Lnet/minecraft/network/ProtocolInfo$Unbound;
+# accessible method net/minecraft/network/protocol/ProtocolInfoBuilder protocolUnbound (Lnet/minecraft/network/ConnectionProtocol;Lnet/minecraft/network/protocol/PacketFlow;Ljava/util/function/Consumer;)Lnet/minecraft/network/ProtocolInfo$Unbound;
 
 # Command Handling
 accessible field net/minecraft/client/gui/Gui overlayMessageTime I

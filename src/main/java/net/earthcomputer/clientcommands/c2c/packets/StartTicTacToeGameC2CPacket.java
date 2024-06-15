@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public record StartTicTacToeGameC2CPacket(String sender, boolean accept) implements C2CPacket {
     public static final StreamCodec<RegistryFriendlyByteBuf, StartTicTacToeGameC2CPacket> CODEC = Packet.codec(StartTicTacToeGameC2CPacket::write, StartTicTacToeGameC2CPacket::new);
-    public static final PacketType<StartTicTacToeGameC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation("clientcommands", "start_tic_tac_toe_game"));
+    public static final PacketType<StartTicTacToeGameC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "start_tic_tac_toe_game"));
 
     public StartTicTacToeGameC2CPacket(FriendlyByteBuf buf) {
         this(buf.readUtf(), buf.readBoolean());

@@ -45,7 +45,7 @@ public class DebugRandom extends LegacyRandomSource {
         if (debugEntityType == null) {
             DEBUG_ENTITY_TYPE = null;
         } else {
-            DEBUG_ENTITY_TYPE = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(debugEntityType));
+            DEBUG_ENTITY_TYPE = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(debugEntityType));
         }
     }
 

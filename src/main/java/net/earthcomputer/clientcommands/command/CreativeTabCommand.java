@@ -324,7 +324,7 @@ public class CreativeTabCommand {
 
     private record Tab(CompoundTag icon, ListTag items) {
         void registerCreativeTab(HolderLookup.Provider holderLookupProvider, String key) {
-            Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, new ResourceLocation("clientcommands", key), FabricItemGroup.builder()
+            Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath("clientcommands", key), FabricItemGroup.builder()
                     .title(Component.literal(key))
                     .icon(() -> singleItemFromNbt(holderLookupProvider, icon))
                     .displayItems((displayContext, entries) -> {
