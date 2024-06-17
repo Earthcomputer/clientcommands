@@ -28,22 +28,22 @@ public class Line extends Shape {
     }
 
     private void putVertex(PoseStack poseStack, VertexConsumer vertexConsumer, Vec3 pos, Vec3 normal) {
-        vertexConsumer.vertex(
+        vertexConsumer.addVertex(
                 poseStack.last().pose(),
                 (float) pos.x(),
                 (float) pos.y(),
                 (float) pos.z()
-        ).color(
+        ).setColor(
                 ((color >> 16) & 0xFF) / 255.0F,
                 ((color >> 8) & 0xFF) / 255.0F,
                 (color & 0xFF) / 255.0F,
                 1.0F
-        ).normal(
+        ).setNormal(
                 poseStack.last(),
                 (float) normal.x(),
                 (float) normal.y(),
                 (float) normal.z()
-        ).endVertex();
+        );
     }
 
     @Override

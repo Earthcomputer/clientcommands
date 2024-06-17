@@ -5,6 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import com.seedfinding.mcseed.lcg.LCG;
 import com.seedfinding.mcseed.rand.Rand;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
@@ -19,18 +21,23 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,15 +53,18 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class EnchantmentCracker {
 
@@ -110,6 +120,9 @@ public class EnchantmentCracker {
      */
 
     public static void drawEnchantmentGUIOverlay(GuiGraphics graphics) {
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
+
         CrackState crackState = Configs.enchCrackState;
 
         List<String> lines = new ArrayList<>();
@@ -128,7 +141,7 @@ public class EnchantmentCracker {
         lines.add("");
 
         if (enchantingTablePos != null) {
-            lines.add(I18n.get("enchCrack.bookshelfCount", getEnchantPower(Minecraft.getInstance().level, enchantingTablePos)));
+            lines.add(I18n.get("enchCrack.bookshelfCount", getEnchantPower(level, enchantingTablePos)));
             lines.add("");
         }
 
@@ -142,8 +155,9 @@ public class EnchantmentCracker {
             lines.add(I18n.get("enchCrack.slot", slot + 1));
             List<EnchantmentInstance> enchs = getEnchantmentsInTable(slot);
             if (enchs != null) {
+                sortIntoTooltipOrder(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT), enchs);
                 for (EnchantmentInstance ench : enchs) {
-                    lines.add("   " + ench.enchantment.getFullname(ench.level).getString());
+                    lines.add("   " + Enchantment.getFullname(ench.enchantment, ench.level).getString());
                 }
             }
         }
@@ -207,6 +221,10 @@ public class EnchantmentCracker {
         int[] actualEnchantmentClues = menu.enchantClue;
         int[] actualLevelClues = menu.levelClue;
 
+        Registry<Enchantment> enchantmentRegistry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        IdMap<Holder<Enchantment>> enchantmentIdMap = enchantmentRegistry.asHolderIdMap();
+        int version = MultiVersionCompat.INSTANCE.getProtocolVersion();
+
         // brute force the possible seeds
         Iterator<Integer> xpSeedItr = possibleXPSeeds.iterator();
         seedLoop: while (xpSeedItr.hasNext()) {
@@ -228,8 +246,7 @@ public class EnchantmentCracker {
             // generate enchantment clues and see if they match
             for (int slot = 0; slot < 3; slot++) {
                 if (actualEnchantCosts[slot] > 0) {
-                    List<EnchantmentInstance> enchantments = getEnchantmentList(
-                        level.enabledFeatures(), rand, xpSeed, itemToEnchant, slot, actualEnchantCosts[slot]);
+                    List<EnchantmentInstance> enchantments = getEnchantmentList(enchantmentRegistry, rand, xpSeed, itemToEnchant, slot, actualEnchantCosts[slot], version);
                     if (enchantments == null || enchantments.isEmpty()) {
                         // check that there is indeed no enchantment clue
                         if (actualEnchantmentClues[slot] != -1 || actualLevelClues[slot] != -1) {
@@ -239,7 +256,7 @@ public class EnchantmentCracker {
                     } else {
                         // check the right enchantment clue was generated
                         EnchantmentInstance clue = enchantments.get(rand.nextInt(enchantments.size()));
-                        if (BuiltInRegistries.ENCHANTMENT.getId(clue.enchantment) != actualEnchantmentClues[slot]
+                        if (enchantmentIdMap.getId(clue.enchantment) != actualEnchantmentClues[slot]
                                 || clue.level != actualLevelClues[slot]) {
                             xpSeedItr.remove();
                             continue seedLoop;
@@ -250,7 +267,7 @@ public class EnchantmentCracker {
         }
 
         // test the outcome, see if we need to change state
-        if (possibleXPSeeds.size() == 0) {
+        if (possibleXPSeeds.isEmpty()) {
             Configs.enchCrackState = CrackState.UNCRACKED;
             LOGGER.warn(
                     "Invalid enchantment seed information. Has the server got unknown mods, is there a desync, or is the client just bugged?");
@@ -337,7 +354,8 @@ public class EnchantmentCracker {
 
         ItemStack stack = new ItemStack(item);
         long playerSeed = PlayerRandCracker.getSeed();
-        FeatureFlagSet featureFlags = player.connection.enabledFeatures();
+        Registry<Enchantment> enchantmentRegistry = player.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        int version = MultiVersionCompat.INSTANCE.getProtocolVersion();
 
         List<CompletableFuture<@Nullable ManipulateResult>> futures = new ArrayList<>();
 
@@ -366,8 +384,7 @@ public class EnchantmentCracker {
                             enchantLevels[slot] = level;
                         }
                         for (int slot = 0; slot < 3; slot++) {
-                            List<EnchantmentInstance> enchantments = getEnchantmentList(
-                                featureFlags, rand, xpSeed, stack, slot, enchantLevels[slot]);
+                            List<EnchantmentInstance> enchantments = getEnchantmentList(enchantmentRegistry, rand, xpSeed, stack, slot, enchantLevels[slot], version);
                             if (enchantmentsPredicate.test(enchantments)
                                 && enchantLevels[slot] >= Configs.getMinEnchantLevels()
                                 && enchantLevels[slot] <= Configs.getMaxEnchantLevels()
@@ -561,10 +578,20 @@ public class EnchantmentCracker {
         return power;
     }
 
-    private static List<EnchantmentInstance> getEnchantmentList(FeatureFlagSet featureFlags, RandomSource rand, int xpSeed, ItemStack stack, int enchantSlot,
-                                                                  int level) {
+    private static List<EnchantmentInstance> getEnchantmentList(Registry<Enchantment> enchantmentRegistry, RandomSource rand, int xpSeed, ItemStack stack, int enchantSlot, int level, int version) {
         rand.setSeed(xpSeed + enchantSlot);
-        List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(featureFlags, rand, stack, level, false);
+        List<EnchantmentInstance> list;
+        if (version >= MultiVersionCompat.V1_21) {
+            list = enchantmentRegistry.getTag(EnchantmentTags.IN_ENCHANTING_TABLE)
+                .map(tag -> EnchantmentHelper.selectEnchantment(rand, stack, level, tag.stream()))
+                .orElseGet(ArrayList::new);
+        } else {
+            list = LegacyEnchantment.addRandomEnchantments(rand, stack, level, false, version).stream()
+                .flatMap(legacyEnch -> enchantmentRegistry.getHolder(legacyEnch.ench().enchantmentKey)
+                    .map(ench -> new EnchantmentInstance(ench, legacyEnch.level()))
+                    .stream())
+                .collect(Collectors.toCollection(ArrayList::new));
+        }
 
         if (stack.getItem() == Items.BOOK && list.size() > 1) {
             list.remove(rand.nextInt(list.size()));
@@ -578,6 +605,8 @@ public class EnchantmentCracker {
     public static List<EnchantmentInstance> getEnchantmentsInTable(int slot) {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
+        Registry<Enchantment> enchantmentRegistry = player.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+
         CrackState crackState = Configs.enchCrackState;
         EnchantmentMenu enchContainer = (EnchantmentMenu) player.containerMenu;
 
@@ -588,11 +617,11 @@ public class EnchantmentCracker {
                 return null;
             } else {
                 // return a list containing the clue
-                Enchantment enchantment = Enchantment.byId(enchContainer.enchantClue[slot]);
+                Holder<Enchantment> enchantment = enchantmentRegistry.asHolderIdMap().byId(enchContainer.enchantClue[slot]);
                 if (enchantment == null) {
                     return null;
                 }
-                return Collections.singletonList(new EnchantmentInstance(enchantment, enchContainer.levelClue[slot]));
+                return new ArrayList<>(Collections.singletonList(new EnchantmentInstance(enchantment, enchContainer.levelClue[slot])));
             }
         } else {
             // return the enchantments using our cracked seed
@@ -600,8 +629,27 @@ public class EnchantmentCracker {
             int xpSeed = possibleXPSeeds.iterator().next();
             ItemStack enchantingStack = enchContainer.getSlot(0).getItem();
             int enchantLevels = enchContainer.costs[slot];
-            return getEnchantmentList(player.connection.enabledFeatures(), rand, xpSeed, enchantingStack, slot, enchantLevels);
+            return getEnchantmentList(enchantmentRegistry, rand, xpSeed, enchantingStack, slot, enchantLevels, MultiVersionCompat.INSTANCE.getProtocolVersion());
         }
+    }
+
+    public static void sortIntoTooltipOrder(Registry<Enchantment> enchantmentRegistry, List<EnchantmentInstance> list) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21) {
+            return;
+        }
+
+        Optional<HolderSet.Named<Enchantment>> tooltipOrder = enchantmentRegistry.getTag(EnchantmentTags.TOOLTIP_ORDER);
+        if (tooltipOrder.isEmpty()) {
+            return;
+        }
+
+        Object2IntMap<Holder<Enchantment>> tooltipIndex = new Object2IntOpenHashMap<>(tooltipOrder.get().size());
+        int index = 0;
+        for (Holder<Enchantment> ench : tooltipOrder.get()) {
+            tooltipIndex.put(ench, index++);
+        }
+
+        list.sort(Comparator.comparingInt(ench -> tooltipIndex.getInt(ench.enchantment)));
     }
 
     public record ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentInstance> enchantments) {

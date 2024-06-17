@@ -143,7 +143,7 @@ public class Configs {
         Configs.maxChorusItemThrows = Mth.clamp(maxChorusItemThrows, 0, 1000000);
     }
 
-    @Config(temporary = true)
+    @Config(temporary = true, condition = "conditionLessThan1_21")
     public static boolean infiniteTools = false;
 
     @Config
@@ -157,6 +157,10 @@ public class Configs {
 
     public static boolean conditionLessThan1_20() {
         return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_20;
+    }
+
+    public static boolean conditionLessThan1_21() {
+        return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21;
     }
 
     @Config

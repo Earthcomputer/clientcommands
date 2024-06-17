@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.util.CUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
@@ -8,6 +9,8 @@ import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
@@ -19,6 +22,8 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.Vec3;
@@ -29,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -228,10 +234,12 @@ public class PlayerRandCracker {
     }
 
     public static void onBaneOfArthropods() {
-        if (canMaintainPlayerRNG()) {
-            nextInt();
-        } else {
-            resetCracker("baneOfArthropods");
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21) {
+            if (canMaintainPlayerRNG()) {
+                nextInt();
+            } else {
+                resetCracker("baneOfArthropods");
+            }
         }
     }
 
@@ -253,10 +261,14 @@ public class PlayerRandCracker {
 
     // TODO: update-sensitive: call hierarchy of ItemStack.damage
     public static void onItemDamage(int amount, LivingEntity holder, ItemStack stack) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21) {
+            return;
+        }
+
         if (holder instanceof LocalPlayer && !((LocalPlayer) holder).getAbilities().instabuild) {
             if (stack.isDamageableItem()) {
                 if (amount > 0) {
-                    int unbreakingLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, stack);
+                    int unbreakingLevel = CUtil.getEnchantmentLevel(holder.registryAccess(), Enchantments.UNBREAKING, stack);
                     if (unbreakingLevel > 0) {
                         onUnbreaking(stack, amount, unbreakingLevel);
                     }
@@ -275,11 +287,12 @@ public class PlayerRandCracker {
                     }
 
                     if (Configs.infiniteTools && Configs.playerCrackState.knowsSeed()) {
+                        int unbreakingLevel_f = unbreakingLevel;
                         Runnable action = () -> throwItemsUntil(rand -> {
                             for (int i = 0; i < amount; i++) {
                                 if (stack.getItem() instanceof ArmorItem && rand.nextFloat() < 0.6)
                                     return false;
-                                if (rand.nextInt(unbreakingLevel + 1) == 0)
+                                if (rand.nextInt(unbreakingLevel_f + 1) == 0)
                                     return false;
                             }
                             return true;
@@ -296,12 +309,16 @@ public class PlayerRandCracker {
     }
 
     public static void onItemDamageUncertain(int minAmount, int maxAmount, LivingEntity holder, ItemStack stack) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21) {
+            return;
+        }
         if (holder instanceof LocalPlayer && !((LocalPlayer) holder).getAbilities().instabuild) {
             if (stack.isDamageableItem()) {
                 if (maxAmount > 0) {
-                    int unbreakingLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, stack);
-                    if (unbreakingLevel > 0)
+                    int unbreakingLevel = CUtil.getEnchantmentLevel(holder.registryAccess(), Enchantments.UNBREAKING, stack);
+                    if (unbreakingLevel > 0) {
                         onUnbreakingUncertain(stack, minAmount, maxAmount, unbreakingLevel);
+                    }
                 }
             }
         }
@@ -377,7 +394,7 @@ public class PlayerRandCracker {
             if (slot instanceof ICreativeSlot) {
                 return false;
             }
-            if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BINDING_CURSE, slot.getItem()) != 0) {
+            if (EnchantmentHelper.has(slot.getItem(), EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) {
                 return false;
             }
             if (slot.getItem().getItem() == Items.CHORUS_FRUIT) {

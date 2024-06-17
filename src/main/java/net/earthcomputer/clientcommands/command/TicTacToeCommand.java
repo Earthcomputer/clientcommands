@@ -197,8 +197,8 @@ public class TicTacToeCommand {
     private static class TicTacToeGameScreen extends Screen {
         private final TicTacToeGame game;
 
-        private static final ResourceLocation GRID_TEXTURE = new ResourceLocation("clientcommands", "textures/tic_tac_toe/grid.png");
-        private static final ResourceLocation MARKS_TEXTURE = new ResourceLocation("clientcommands", "textures/tic_tac_toe/marks.png");
+        private static final ResourceLocation GRID_TEXTURE = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/tic_tac_toe/grid.png");
+        private static final ResourceLocation MARKS_TEXTURE = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/tic_tac_toe/marks.png");
 
         private static final int GRID_SIZE_TEXTURE = 512;
         private static final int MARK_SIZE_TEXTURE = 152;

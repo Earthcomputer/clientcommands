@@ -21,13 +21,16 @@ import net.earthcomputer.clientcommands.event.MoreClientEvents;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.CUtil;
 import net.earthcomputer.clientcommands.util.SeedfindingUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.tags.BlockTags;
@@ -44,7 +47,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -118,10 +121,10 @@ public class FishingCracker {
         return goal.getPossibleItems().contains(loot.getItem());
     }
 
-    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLoot(LootTable table, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLoot(RegistryAccess registryAccess, LootTable table, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
         var result = new ArrayList<com.seedfinding.mcfeature.loot.item.ItemStack>();
         for (LootPool lootPool : table.lootPools) {
-            result.addAll(generateAllMatchingLootForPool(lootPool, context, goal, failedConditions));
+            result.addAll(generateAllMatchingLootForPool(registryAccess, lootPool, context, goal, failedConditions));
         }
 
         if (!result.isEmpty() && !checkConditions(table, context, failedConditions)) {
@@ -131,10 +134,10 @@ public class FishingCracker {
         return result;
     }
 
-    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForPool(LootPool pool, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForPool(RegistryAccess registryAccess, LootPool pool, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
         var result = new ArrayList<com.seedfinding.mcfeature.loot.item.ItemStack>();
         for (LootEntry lootEntry : pool.lootEntries) {
-            result.addAll(generateAllMatchingLootForEntry(lootEntry, context, goal, failedConditions));
+            result.addAll(generateAllMatchingLootForEntry(registryAccess, lootEntry, context, goal, failedConditions));
         }
 
         if (!result.isEmpty() && !checkConditions(pool, context, failedConditions)) {
@@ -144,15 +147,15 @@ public class FishingCracker {
         return result;
     }
 
-    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForEntry(LootEntry entry, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
+    private static List<com.seedfinding.mcfeature.loot.item.ItemStack> generateAllMatchingLootForEntry(RegistryAccess registryAccess, LootEntry entry, @Nullable LootContext context, ClientItemPredicateArgument.ClientItemPredicate goal, Consumer<LootCondition> failedConditions) {
         List<com.seedfinding.mcfeature.loot.item.ItemStack> result = Collections.emptyList();
 
         if (entry instanceof ItemEntry itemEntry) {
-            if (isMatchingLoot(SeedfindingUtil.fromSeedfindingItem(itemEntry.item), goal)) {
+            if (isMatchingLoot(SeedfindingUtil.fromSeedfindingItem(itemEntry.item, registryAccess), goal)) {
                 result = Collections.singletonList(new com.seedfinding.mcfeature.loot.item.ItemStack(itemEntry.item));
             }
         } else if (entry instanceof TableEntry tableEntry) {
-            result = generateAllMatchingLoot(tableEntry.table.get().apply(SeedfindingUtil.getMCVersion()), context, goal, failedConditions);
+            result = generateAllMatchingLoot(registryAccess, tableEntry.table.get().apply(SeedfindingUtil.getMCVersion()), context, goal, failedConditions);
         }
 
         if (!result.isEmpty() && !checkConditions(entry, context, failedConditions)) {
@@ -351,6 +354,9 @@ public class FishingCracker {
             state = State.WAITING_FOR_FISH;
         }
 
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
+
         OptionalLong optionalSeed = getSeed(fishingBobberUUID);
         if (optionalSeed.isEmpty()) {
             Component error = Component.translatable("commands.cfish.error.crackFailed").withStyle(style -> style.withColor(ChatFormatting.RED));
@@ -426,7 +432,7 @@ public class FishingCracker {
                         }
                     }
                 }
-                impossible &= generateAllMatchingLoot(fishingLootTable, fishingBobber.getLootContext(), goal.value(), failedConditions::add).isEmpty();
+                impossible &= generateAllMatchingLoot(level.registryAccess(), fishingLootTable, fishingBobber.getLootContext(), goal.value(), failedConditions::add).isEmpty();
             }
 
             if (impossible && failedConditions.isEmpty()) {
@@ -596,7 +602,7 @@ public class FishingCracker {
                             }
                         }
                         FishingHook oldFishingHook = oldPlayer.fishing;
-                        packetListener.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, 0));
+                        packetListener.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, 0, oldPlayer.getYRot(), oldPlayer.getXRot()));
                         synchronized (STATE_LOCK) {
                             state = State.WAITING_FOR_ITEM;
                         }
@@ -921,8 +927,8 @@ public class FishingCracker {
             random.triangle(0, 1);
 
             this.tool = tool;
-            this.lureLevel = EnchantmentHelper.getFishingSpeedBonus(tool);
-            this.luckLevel = EnchantmentHelper.getFishingLuckBonus(tool);
+            this.lureLevel = CUtil.getEnchantmentLevel(level.registryAccess(), Enchantments.LURE, tool);
+            this.luckLevel = CUtil.getEnchantmentLevel(level.registryAccess(), Enchantments.LUCK_OF_THE_SEA, tool);
             this.pos = pos;
             this.velocity = velocity;
             this.boundingBox = FISHING_BOBBER_DIMENSIONS.makeBoundingBox(pos.x, pos.y, pos.z);
@@ -940,7 +946,7 @@ public class FishingCracker {
 
             List<Catch> catches = new ArrayList<>();
             for (var loot : MCLootTables.FISHING.get().generate(lootContext)) {
-                catches.add(new Catch(SeedfindingUtil.fromSeedfindingItem(loot), 1 + lootContext.nextInt(6)));
+                catches.add(new Catch(SeedfindingUtil.fromSeedfindingItem(loot, level.registryAccess()), 1 + lootContext.nextInt(6)));
             }
 
             return catches;

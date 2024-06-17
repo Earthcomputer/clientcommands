@@ -8,13 +8,22 @@ import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
@@ -24,15 +33,15 @@ public class CEnchantCommand {
 
     private static final Flag<Boolean> FLAG_SIMULATE = Flag.ofFlag("simulate").build();
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         var cenchant = dispatcher.register(literal("cenchant")
-            .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate().withEnchantmentPredicate(CEnchantCommand::enchantmentPredicate).constrainMaxLevel())
+            .then(argument("itemAndEnchantmentsPredicate", itemAndEnchantmentsPredicate(context).withEnchantmentPredicate(CEnchantCommand::enchantmentPredicate).constrainMaxLevel())
                     .executes(ctx -> cenchant(ctx.getSource(), getItemAndEnchantmentsPredicate(ctx, "itemAndEnchantmentsPredicate")))));
         FLAG_SIMULATE.addToCommand(dispatcher, cenchant, ctx -> true);
     }
 
-    private static boolean enchantmentPredicate(Item item, Enchantment ench) {
-        return !ench.isTreasureOnly() && ench.isDiscoverable() && (item == Items.BOOK || ench.canEnchant(new ItemStack(item)));
+    private static boolean enchantmentPredicate(Item item, Holder<Enchantment> ench) {
+        return ench.is(EnchantmentTags.IN_ENCHANTING_TABLE) && (item == Items.BOOK || ench.value().canEnchant(new ItemStack(item)));
     }
 
     private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandSyntaxException {
@@ -60,6 +69,11 @@ public class CEnchantCommand {
             itemAndEnchantmentsPredicate.predicate(),
             simulate,
             result -> {
+                ClientLevel level = Minecraft.getInstance().level;
+                if (level == null) {
+                    return;
+                }
+
                 if (result == null) {
                     source.sendFeedback(Component.translatable("commands.cenchant.failed"));
                     if (Configs.playerCrackState != PlayerRandCracker.CrackState.CRACKED) {
@@ -77,8 +91,10 @@ public class CEnchantCommand {
                     source.sendFeedback(Component.translatable("enchCrack.insn.bookshelves", result.bookshelves()));
                     source.sendFeedback(Component.translatable("enchCrack.insn.slot", result.slot() + 1));
                     source.sendFeedback(Component.translatable("enchCrack.insn.enchantments"));
-                    for (EnchantmentInstance ench : result.enchantments()) {
-                        source.sendFeedback(Component.literal("- ").append(ench.enchantment.getFullname(ench.level)));
+                    List<EnchantmentInstance> enchantments = new ArrayList<>(result.enchantments());
+                    EnchantmentCracker.sortIntoTooltipOrder(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT), enchantments);
+                    for (EnchantmentInstance ench : enchantments) {
+                        source.sendFeedback(Component.literal("- ").append(Enchantment.getFullname(ench.enchantment, ench.level)));
                     }
                 }
             }
