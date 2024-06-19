@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class VillagerCracker {
     // This value was computed by brute forcing all seeds
-    public static final float MAX_ERROR = 0x1.4p-24f;
+    public static final float MAX_ERROR = 5 * 0x1.0p-24f;
 
     @Nullable
     private static UUID villagerUuid = null;

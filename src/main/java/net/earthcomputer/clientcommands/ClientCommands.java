@@ -89,7 +89,7 @@ public class ClientCommands implements ClientModInitializer {
                 lattice_inverse.add(new LongArrayTag(inverse));
                 long[] offsets = new long[2];
                 for (int i = 0; i < 2; i++) {
-                    offsets[i] = Long.parseLong(values[i + 11]);
+                    offsets[i] = Long.parseLong(values[i + 18]);
                 }
                 offset.add(new LongArrayTag(offsets));
             }

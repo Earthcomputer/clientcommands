@@ -292,28 +292,25 @@ public class VillagerRngSimulator {
         float firstMax = Math.min(1.0f - 0x1.0p-24f, first + VillagerCracker.MAX_ERROR);
         float secondMin = Math.max(-1.0f + 0x1.0p-24f, second - VillagerCracker.MAX_ERROR);
         float secondMax = Math.min(1.0f - 0x1.0p-24f, second + VillagerCracker.MAX_ERROR);
-        int callsBetweenSounds2m = (ticksBetweenSounds - 1) * 2;
-        int callsBetweenSounds = ticksBetweenSounds * 2;
-        int callsBetweenSounds2p = (ticksBetweenSounds + 1) * 2;
-        OptionalLong seed2m = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds2m);
-        OptionalLong seed = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds);
-        OptionalLong seed2p = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds2p);
+        OptionalLong seed2m = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, ticksBetweenSounds - 1);
+        OptionalLong seed = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, ticksBetweenSounds);
+        OptionalLong seed2p = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, ticksBetweenSounds + 1);
         System.out.println("Seed 2M: " + seed2m);
         System.out.println("Seed: " + seed);
         System.out.println("Seed 2P: " + seed2p);
         return seed;
     }
 
-    private OptionalLong crackSeed0(float firstPitch, float secondPitch, float firstMin, float firstMax, float secondMin, float secondMax, int callsBetweenSounds) {
-        System.out.printf("%f, %f, %f, %f, %f, %f, %d%n", firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds);
+    private OptionalLong crackSeed0(float firstPitch, float secondPitch, float firstMin, float firstMax, float secondMin, float secondMax, int ticksBetweenSounds) {
+        System.out.println(firstPitch + ", " + secondPitch + ", " + firstMin + ", " + firstMax + ", " + secondMin + ", " + secondMax + ", " + ticksBetweenSounds);
 
-        if (!(80 <= callsBetweenSounds && callsBetweenSounds - 80 < LATTICES.length)) {
+        if (!(80 <= ticksBetweenSounds && ticksBetweenSounds - 80 < LATTICES.length)) {
             return OptionalLong.empty();
         }
         
-        BigMatrix lattice = LATTICES[callsBetweenSounds - 80];
-        BigMatrix inverseLattice = INVERSE_LATTICES[callsBetweenSounds - 80];
-        BigVector vector = OFFSETS[callsBetweenSounds - 80];
+        BigMatrix lattice = LATTICES[ticksBetweenSounds - 80];
+        BigMatrix inverseLattice = INVERSE_LATTICES[ticksBetweenSounds - 80];
+        BigVector offset = OFFSETS[ticksBetweenSounds - 80];
         
         firstMax = Math.nextUp(firstMax);
         secondMax = Math.nextUp(secondMax);
@@ -345,13 +342,13 @@ public class VillagerRngSimulator {
             .withUpperBound(2, secondCombinationModMax)
             .build();
 
-        System.out.printf("%s, %s, %d, %d, %d, %d, %s, %s%n", lattice, vector, firstCombinationModMin, firstCombinationModMax, secondCombinationModMin, secondCombinationModMax, inverseLattice, inverseLattice.multiply(vector));
+        System.out.printf("%s, %s, %d, %d, %d, %d, %s, %s%n", lattice, offset, firstCombinationModMin, firstCombinationModMax, secondCombinationModMin, secondCombinationModMax, inverseLattice, inverseLattice.multiply(offset));
 
-        return EnumerateRt.enumerate(lattice, vector, optimize, inverseLattice, inverseLattice.multiply(vector)).mapToLong(vec -> vec.get(0).getNumerator().longValue() & ((1L << 48) - 1)).flatMap(seed -> {
+        return EnumerateRt.enumerate(lattice, offset, optimize, inverseLattice, inverseLattice.multiply(offset)).mapToLong(vec -> vec.get(0).getNumerator().longValue() & ((1L << 48) - 1)).flatMap(seed -> {
             System.out.println(seed);
             JRand rand = JRand.ofInternalSeed(seed);
             float simulatedFirstPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;
-            rand.advance(callsBetweenSounds);
+            rand.advance(ticksBetweenSounds * 2L);
             float simulatedSecondPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;
             if (simulatedFirstPitch == firstPitch && simulatedSecondPitch == secondPitch) {
                 return LongStream.of(rand.getSeed());
