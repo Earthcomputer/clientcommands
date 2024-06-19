@@ -244,7 +244,7 @@
 
   "commands.cvillager.bruteForce.failed": "Could not find a match for any goals within %d calls.",
   "commands.cvillager.bruteForce.success": "Found a match for %s priced at %s. Will open villager gui in %d calls.",
-  "commands.cvillager.crackFailed": "Failed to crack villager seed",
+  "commands.cvillager.crackFailed": "Failed to crack villager seed, re-cracking.",
   "commands.cvillager.crackSuccess": "Villager RNG cracked: %d",
   "commands.cvillager.goalAdded": "Added goal successfully.",
   "commands.cvillager.inSync": "Your villager's RNG is %d%% synced",
@@ -253,8 +253,7 @@
   "commands.cvillager.noCrackedVillagerPresent": "There was no cracked villager available to use",
   "commands.cvillager.noProfession": "The targeted villager has no profession.",
   "commands.cvillager.notAVillager": "Target was not a villager",
-  "commands.cvillager.outOfSync": "Your Villager's RNG was out of sync, please re-crack.",
-  "commands.cvillager.resynced": "Your Villager's RNG was resynced, skipped %d ticks.",
+  "commands.cvillager.outOfSync": "Your Villager's RNG was out of sync, re-cracking.",
   "commands.cvillager.removeGoal.invalidIndex": "Unable to remove goal %d, you only have %d goals.",
   "commands.cvillager.removeGoal.success": "Successfully removed goal %s",
   "commands.cvillager.success": "Got the correct trade with correction of %dms",

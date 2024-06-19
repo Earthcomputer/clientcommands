@@ -47,8 +47,8 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
     }
 
     @Override
-    public void clientcommands_onAmbientSoundPlayed() {
-        rng.onAmbientSoundPlayed();
+    public void clientcommands_onAmbientSoundPlayed(float pitch) {
+        rng.onAmbientSoundPlayed(pitch);
     }
 
     @Override

@@ -1,10 +1,20 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.seedfinding.latticg.math.component.BigFraction;
+import com.seedfinding.latticg.math.component.BigMatrix;
+import com.seedfinding.latticg.math.component.BigVector;
+import com.seedfinding.latticg.math.lattice.enumerate.EnumerateRt;
+import com.seedfinding.latticg.math.optimize.Optimize;
+import com.seedfinding.mcseed.lcg.LCG;
+import com.seedfinding.mcseed.rand.JRand;
+import com.seedfinding.mcseed.rand.Rand;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
@@ -12,22 +22,81 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.OptionalLong;
 import java.util.function.Predicate;
+import java.util.stream.LongStream;
 
 public class VillagerRngSimulator {
+    private static final BigMatrix[] LATTICES;
+    private static final BigMatrix[] INVERSE_LATTICES;
+    private static final BigVector[] OFFSETS;
+
     @Nullable
     private LegacyRandomSource random;
     private int ambientSoundTime;
-    private int waitingTicks = 0;
     private boolean madeSound = false;
     private int totalAmbientSounds = 0;
     private int callsAtStartOfBruteForce = 0;
     private int callsInBruteForce = 0;
     private int totalCalls = 0;
+    private float firstPitch = Float.NaN;
+    private int ticksBetweenSounds = 0;
+    private float secondPitch = Float.NaN;
     @Nullable
     private ItemStack activeGoalResult = null;
+
+    static {
+        try {
+            CompoundTag root = NbtIo.read(new DataInputStream(Objects.requireNonNull(VillagerRngSimulator.class.getResourceAsStream("/villager_lattice_data.nbt"))));
+            ListTag lattices = root.getList("lattices", Tag.TAG_LONG_ARRAY);
+            LATTICES = new BigMatrix[lattices.size()];
+            ListTag lattice_inverses = root.getList("lattice_inverses", Tag.TAG_LONG_ARRAY);
+            INVERSE_LATTICES = new BigMatrix[lattices.size()];
+            ListTag offsets = root.getList("offsets", Tag.TAG_LONG_ARRAY);
+            OFFSETS = new BigVector[offsets.size()];
+            for (int i = 0; i < lattices.size(); i++) {
+                long[] lattice = lattices.getLongArray(i);
+                BigMatrix matrix = new BigMatrix(3, 3);
+                matrix.set(0, 0, new BigFraction(lattice[0]));
+                matrix.set(0, 1, new BigFraction(lattice[1]));
+                matrix.set(0, 2, new BigFraction(lattice[2]));
+                matrix.set(1, 0, new BigFraction(lattice[3]));
+                matrix.set(1, 1, new BigFraction(lattice[4]));
+                matrix.set(1, 2, new BigFraction(lattice[5]));
+                matrix.set(2, 0, new BigFraction(lattice[6]));
+                matrix.set(2, 1, new BigFraction(lattice[7]));
+                matrix.set(2, 2, new BigFraction(lattice[8]));
+                LATTICES[i] = matrix;
+            }
+            for (int i = 0; i < lattice_inverses.size(); i++) {
+                long[] lattice_inverse = lattice_inverses.getLongArray(i);
+                BigMatrix matrix = new BigMatrix(3, 3);
+                matrix.set(0, 0, new BigFraction(lattice_inverse[0], 1L << 48));
+                matrix.set(0, 1, new BigFraction(lattice_inverse[1], 1L << 48));
+                matrix.set(0, 2, new BigFraction(lattice_inverse[2], 1L << 48));
+                matrix.set(1, 0, new BigFraction(lattice_inverse[3], 1L << 48));
+                matrix.set(1, 1, new BigFraction(lattice_inverse[4], 1L << 48));
+                matrix.set(1, 2, new BigFraction(lattice_inverse[5], 1L << 48));
+                matrix.set(2, 0, new BigFraction(lattice_inverse[6], 1L << 48));
+                matrix.set(2, 1, new BigFraction(lattice_inverse[7], 1L << 48));
+                matrix.set(2, 2, new BigFraction(lattice_inverse[8], 1L << 48));
+                INVERSE_LATTICES[i] = matrix;
+            }
+            for (int i = 0; i < offsets.size(); i++) {
+                long[] offset = offsets.getLongArray(i);
+                OFFSETS[i] = new BigVector(0, offset[0], offset[1]);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public VillagerRngSimulator(@Nullable LegacyRandomSource random, int ambientSoundTime) {
         this.random = random;
@@ -36,18 +105,21 @@ public class VillagerRngSimulator {
 
     public VillagerRngSimulator copy() {
         VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : new LegacyRandomSource(random.seed.get() ^ 0x5deece66dL), ambientSoundTime);
-        that.waitingTicks = this.waitingTicks;
         that.madeSound = this.madeSound;
         that.totalAmbientSounds = this.totalAmbientSounds;
         that.callsAtStartOfBruteForce = this.callsAtStartOfBruteForce;
         that.callsInBruteForce = this.callsInBruteForce;
         that.totalCalls = this.totalCalls;
+        that.firstPitch = this.firstPitch;
+        that.ticksBetweenSounds = this.ticksBetweenSounds;
+        that.secondPitch = this.secondPitch;
         that.activeGoalResult = this.activeGoalResult;
         return that;
     }
 
     public void simulateTick() {
         if (random == null) {
+            ambientSoundTime++;
             return;
         }
 
@@ -68,11 +140,6 @@ public class VillagerRngSimulator {
     }
 
     public void simulateBaseTick() {
-        if (waitingTicks > 0) {
-            waitingTicks--;
-            return;
-        }
-
         if (random == null) {
             return;
         }
@@ -146,16 +213,16 @@ public class VillagerRngSimulator {
     }
 
     public CrackedState getCrackedState() {
-        if (random == null) {
-            return CrackedState.UNCRACKED;
-        }
-
         if (totalAmbientSounds == 0) {
             return CrackedState.PENDING_FIRST_AMBIENT_SOUND;
         }
 
         if (totalAmbientSounds == 1) {
             return CrackedState.PENDING_SECOND_AMBIENT_SOUND;
+        }
+
+        if (random == null) {
+            return CrackedState.UNCRACKED;
         }
 
         return CrackedState.CRACKED;
@@ -171,6 +238,9 @@ public class VillagerRngSimulator {
         totalCalls = 0;
         callsAtStartOfBruteForce = 0;
         callsInBruteForce = 0;
+        firstPitch = Float.NaN;
+        ticksBetweenSounds = 0;
+        secondPitch = Float.NaN;
         activeGoalResult = null;
     }
 
@@ -180,41 +250,115 @@ public class VillagerRngSimulator {
             "seed=" + (random == null ? "null" : random.seed.get()) + ']';
     }
 
-    public void onAmbientSoundPlayed() {
+    public void onAmbientSoundPlayed(float pitch) {
         if (totalAmbientSounds == 0) {
-            if (random == null) {
-                return;
-            }
-
             totalAmbientSounds++;
+            firstPitch = pitch;
             ambientSoundTime = -80;
-            random.nextFloat();
-            random.nextFloat();
             madeSound = true;
             ClientCommandHelper.addOverlayMessage(getCrackedState().getMessage(true), 100);
             return;
         }
 
-        if (!madeSound) {
-            int i = 0;
-            VillagerRngSimulator rng = this.copy();
-            do {
-                rng.simulateTick();
-                i++;
-            } while (!rng.madeSound);
-
-            if (i <= PingCommand.getLocalPing() / 50 + 5) {
-                for (int j = 0; j < i; j++) {
-                    simulateTick();
-                }
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.resynced", i).withStyle(ChatFormatting.GREEN), 100);
+        if (totalAmbientSounds == 1) {
+            totalAmbientSounds++;
+            ticksBetweenSounds = ambientSoundTime - (-80);
+            secondPitch = pitch;
+            ambientSoundTime = -80;
+            madeSound = true;
+            OptionalLong seed = crackSeed();
+            if (seed.isPresent()) {
+                random = new LegacyRandomSource(seed.getAsLong() ^ 0x5deece66dL);
+                // simulate a tick to advance it by one
+                simulateTick();
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crackSuccess", Long.toHexString(seed.getAsLong())).withStyle(ChatFormatting.GREEN), 100);
             } else {
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
                 reset();
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crackFailed").withStyle(ChatFormatting.RED), 100);
             }
-        } else if (totalAmbientSounds++ == 1) {
-            ClientCommandHelper.addOverlayMessage(getCrackedState().getMessage(true), 100);
+            return;
         }
+
+        if (!madeSound) {
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+            reset();
+        }
+    }
+
+    public OptionalLong crackSeed() {
+        float first = (firstPitch - 1.0f) / 0.2f;
+        float second = (secondPitch - 1.0f) / 0.2f;
+        float firstMin = Math.max(-1.0f + 0x1.0p-24f, first - VillagerCracker.MAX_ERROR);
+        float firstMax = Math.min(1.0f - 0x1.0p-24f, first + VillagerCracker.MAX_ERROR);
+        float secondMin = Math.max(-1.0f + 0x1.0p-24f, second - VillagerCracker.MAX_ERROR);
+        float secondMax = Math.min(1.0f - 0x1.0p-24f, second + VillagerCracker.MAX_ERROR);
+        int callsBetweenSounds2m = (ticksBetweenSounds - 1) * 2;
+        int callsBetweenSounds = ticksBetweenSounds * 2;
+        int callsBetweenSounds2p = (ticksBetweenSounds + 1) * 2;
+        OptionalLong seed2m = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds2m);
+        OptionalLong seed = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds);
+        OptionalLong seed2p = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds2p);
+        System.out.println("Seed 2M: " + seed2m);
+        System.out.println("Seed: " + seed);
+        System.out.println("Seed 2P: " + seed2p);
+        return seed;
+    }
+
+    private OptionalLong crackSeed0(float firstPitch, float secondPitch, float firstMin, float firstMax, float secondMin, float secondMax, int callsBetweenSounds) {
+        System.out.printf("%f, %f, %f, %f, %f, %f, %d%n", firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, callsBetweenSounds);
+
+        if (!(80 <= callsBetweenSounds && callsBetweenSounds - 80 < LATTICES.length)) {
+            return OptionalLong.empty();
+        }
+        
+        BigMatrix lattice = LATTICES[callsBetweenSounds - 80];
+        BigMatrix inverseLattice = INVERSE_LATTICES[callsBetweenSounds - 80];
+        BigVector vector = OFFSETS[callsBetweenSounds - 80];
+        
+        firstMax = Math.nextUp(firstMax);
+        secondMax = Math.nextUp(secondMax);
+        
+        long firstMinLong = (long) Math.ceil(firstMin * 0x1.0p24f);
+        long firstMaxLong = (long) Math.ceil(firstMax * 0x1.0p24f) - 1;
+        long secondMinLong = (long) Math.ceil(secondMin * 0x1.0p24f);
+        long secondMaxLong = (long) Math.ceil(secondMax * 0x1.0p24f) - 1;
+        
+        long firstMinSeedDiff = (firstMinLong << 24) - 0xFFFFFF;
+        long firstMaxSeedDiff = (firstMaxLong << 24) + 0xFFFFFF;
+        long secondMinSeedDiff = (secondMinLong << 24) - 0xFFFFFF;
+        long secondMaxSeedDiff = (secondMaxLong << 24) + 0xFFFFFF;
+
+        long firstCombinationModMin = firstMinSeedDiff & 0xFFFFFFFFFFFFL;
+        long firstCombinationModMax = firstMaxSeedDiff & 0xFFFFFFFFFFFFL;
+        long secondCombinationModMin = secondMinSeedDiff & 0xFFFFFFFFFFFFL;
+        long secondCombinationModMax = secondMaxSeedDiff & 0xFFFFFFFFFFFFL;
+
+        firstCombinationModMax = firstCombinationModMax < firstCombinationModMin ? firstCombinationModMax + (1L << 48) : firstCombinationModMax;
+        secondCombinationModMax = secondCombinationModMax < secondCombinationModMin ? secondCombinationModMax + (1L << 48) : secondCombinationModMax;
+
+        Optimize optimize = Optimize.Builder.ofSize(3)
+            .withLowerBound(0, 0)
+            .withUpperBound(0, 0xFFFFFFFFFFFFL)
+            .withLowerBound(1, firstCombinationModMin)
+            .withUpperBound(1, firstCombinationModMax)
+            .withLowerBound(2, secondCombinationModMin)
+            .withUpperBound(2, secondCombinationModMax)
+            .build();
+
+        System.out.printf("%s, %s, %d, %d, %d, %d, %s, %s%n", lattice, vector, firstCombinationModMin, firstCombinationModMax, secondCombinationModMin, secondCombinationModMax, inverseLattice, inverseLattice.multiply(vector));
+
+        return EnumerateRt.enumerate(lattice, vector, optimize, inverseLattice, inverseLattice.multiply(vector)).mapToLong(vec -> vec.get(0).getNumerator().longValue() & ((1L << 48) - 1)).flatMap(seed -> {
+            System.out.println(seed);
+            JRand rand = JRand.ofInternalSeed(seed);
+            float simulatedFirstPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;
+            rand.advance(callsBetweenSounds);
+            float simulatedSecondPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;
+            if (simulatedFirstPitch == firstPitch && simulatedSecondPitch == secondPitch) {
+                return LongStream.of(rand.getSeed());
+            } else {
+                return LongStream.empty();
+            }
+        }).findAny();
     }
 
     public enum CrackedState {
@@ -230,8 +374,8 @@ public class VillagerRngSimulator {
         public Component getMessage(boolean addColor) {
             return switch (this) {
                 case UNCRACKED -> Component.translatable("commands.cvillager.noCrackedVillagerPresent").withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
-                case PENDING_FIRST_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 0).withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
-                case PENDING_SECOND_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 50).withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
+                case PENDING_FIRST_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 0).withStyle(addColor ? ChatFormatting.GREEN : ChatFormatting.RESET);
+                case PENDING_SECOND_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 50).withStyle(addColor ? ChatFormatting.GREEN : ChatFormatting.RESET);
                 case CRACKED -> Component.translatable("commands.cvillager.inSync", 100).withStyle(addColor ? ChatFormatting.GREEN : ChatFormatting.RESET);
             };
         }

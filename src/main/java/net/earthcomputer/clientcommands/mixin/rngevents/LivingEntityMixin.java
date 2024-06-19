@@ -2,14 +2,17 @@ package net.earthcomputer.clientcommands.mixin.rngevents;
 
 import com.google.common.base.Objects;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.features.VillagerCracker;
 import net.earthcomputer.clientcommands.util.CUtil;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -126,5 +129,13 @@ public abstract class LivingEntityMixin extends Entity {
     @Unique
     private boolean isThePlayer() {
         return (Object) this instanceof LocalPlayer;
+    }
+
+    @Inject(method = "makeSound", at = @At("TAIL"))
+    private void onMakeSound(SoundEvent sound, CallbackInfo ci) {
+        Villager targetVillager = VillagerCracker.getVillager();
+        if (!level().isClientSide && targetVillager != null && targetVillager.getUUID().equals(uuid)) {
+            System.out.println("(Server) Post-call seed: 0x" + Long.toHexString(((LegacyRandomSource) random).seed.get()));
+        }
     }
 }

@@ -15,7 +15,7 @@ public interface IVillager {
 
     VillagerRngSimulator clientcommands_getCrackedRandom();
 
-    void clientcommands_onAmbientSoundPlayed();
+    void clientcommands_onAmbientSoundPlayed(float pitch);
 
     void clientcommands_onServerTick();
 
