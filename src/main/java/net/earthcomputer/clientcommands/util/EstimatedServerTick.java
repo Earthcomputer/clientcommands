@@ -43,6 +43,6 @@ public class EstimatedServerTick {
             }
         }, "Estimated Server Tick Thread").start();
 
-        MoreClientEvents.ESTIMATED_SERVER_TICK.register(VillagerCracker::onServerTick);
+//        MoreClientEvents.ESTIMATED_SERVER_TICK.register(VillagerCracker::onServerTick);
     }
 }

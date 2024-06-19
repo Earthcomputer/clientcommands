@@ -70,6 +70,7 @@
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",
+    "rngevents.MerchantScreenMixin",
     "scrambletitle.MinecraftMixin",
     "serverbrand.ClientCommonPacketListenerImplMixin",
     "suggestionshook.ClientPacketListenerMixin"

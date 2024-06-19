@@ -1,11 +1,10 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +20,10 @@ public class VillagerCracker {
     private static UUID villagerUuid = null;
     @Nullable
     private static WeakReference<Villager> cachedVillager = null;
+    @Nullable
+    private static GlobalPos clockPos = null;
+    @Nullable
+    public static VillagerCommand.Offer targetOffer = null;
 
     @Nullable
     public static Villager getVillager() {
@@ -45,6 +48,11 @@ public class VillagerCracker {
         return null;
     }
 
+    @Nullable
+    public static GlobalPos getClockPos() {
+        return clockPos;
+    }
+
     public static void setTargetVillager(@Nullable Villager villager) {
         Villager oldVillager = getVillager();
         if (oldVillager != null) {
@@ -53,6 +61,10 @@ public class VillagerCracker {
 
         VillagerCracker.cachedVillager = new WeakReference<>(villager);
         VillagerCracker.villagerUuid = villager == null ? null : villager.getUUID();
+    }
+
+    public static void setClockPos(@Nullable GlobalPos pos) {
+        VillagerCracker.clockPos = pos;
     }
 
     public static void onSoundEventPlayed(ClientboundSoundPacket packet) {

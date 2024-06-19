@@ -130,12 +130,4 @@ public abstract class LivingEntityMixin extends Entity {
     private boolean isThePlayer() {
         return (Object) this instanceof LocalPlayer;
     }
-
-    @Inject(method = "makeSound", at = @At("TAIL"))
-    private void onMakeSound(SoundEvent sound, CallbackInfo ci) {
-        Villager targetVillager = VillagerCracker.getVillager();
-        if (!level().isClientSide && targetVillager != null && targetVillager.getUUID().equals(uuid)) {
-            System.out.println("(Server) Post-call seed: 0x" + Long.toHexString(((LegacyRandomSource) random).seed.get()));
-        }
-    }
 }

@@ -244,8 +244,10 @@
 
   "commands.cvillager.bruteForce.failed": "Could not find a match for any goals within %d calls.",
   "commands.cvillager.bruteForce.success": "Found a match for %s priced at %s. Will open villager gui in %d calls.",
-  "commands.cvillager.crackFailed": "Failed to crack villager seed, re-cracking.",
-  "commands.cvillager.crackSuccess": "Villager RNG cracked: %d",
+  "commands.cvillager.clock.cleared": "Clock cleared",
+  "commands.cvillager.clock.set": "Clock set",
+  "commands.cvillager.crack.failed": "Failed to crack villager seed (found %d seeds), re-cracking.",
+  "commands.cvillager.crack.success": "Villager RNG cracked: %d",
   "commands.cvillager.goalAdded": "Added goal successfully.",
   "commands.cvillager.inSync": "Your villager's RNG is %d%% synced",
   "commands.cvillager.listGoals.noGoals": "There are no villager goals.",
@@ -257,8 +259,9 @@
   "commands.cvillager.removeGoal.invalidIndex": "Unable to remove goal %d, you only have %d goals.",
   "commands.cvillager.removeGoal.success": "Successfully removed goal %s",
   "commands.cvillager.success": "Got the correct trade with correction of %dms",
-  "commands.cvillager.targetCleared": "Target entity cleared",
-  "commands.cvillager.targetSet": "Target entity set",
+  "commands.cvillager.failure": "Got the incorrect trade with correction of %dms",
+  "commands.cvillager.target.cleared": "Target entity cleared",
+  "commands.cvillager.target.set": "Target entity set",
 
   "commands.cwe.playerNotFound": "Player not found",
 

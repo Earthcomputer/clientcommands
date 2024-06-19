@@ -68,38 +68,6 @@ public class ClientCommands implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        try {
-            String file = new String(ClientCommands.class.getResourceAsStream("/villager_lattice_data.csv").readAllBytes());
-            file = file.substring(file.indexOf('\n') + 1);
-            CompoundTag root = new CompoundTag();
-            ListTag lattice = new ListTag();
-            ListTag lattice_inverse = new ListTag();
-            ListTag offset = new ListTag();
-            for (String line : file.split("\n")) {
-                String[] values = line.split(",");
-                long[] longs = new long[9];
-                for (int i = 0; i < 9; i++) {
-                    longs[i] = Long.parseLong(values[i]);
-                }
-                lattice.add(new LongArrayTag(longs));
-                long[] inverse = new long[9];
-                for (int i = 0; i < 9; i++) {
-                    inverse[i] = Long.parseLong(values[i + 9]);
-                }
-                lattice_inverse.add(new LongArrayTag(inverse));
-                long[] offsets = new long[2];
-                for (int i = 0; i < 2; i++) {
-                    offsets[i] = Long.parseLong(values[i + 18]);
-                }
-                offset.add(new LongArrayTag(offsets));
-            }
-            root.put("lattices", lattice);
-            root.put("lattice_inverses", lattice_inverse);
-            root.put("offsets", offset);
-            NbtIo.write(root, Path.of("villager_lattice_data.nbt"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         // Config
         configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
         try {

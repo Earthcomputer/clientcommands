@@ -61,8 +61,6 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
             if (result.consumesAction() && result.shouldSwing()) {
                 minecraft.player.swing(InteractionHand.MAIN_HAND);
             }
-            minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
-            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.success", rng.currentCorrectionMs()).withStyle(ChatFormatting.GREEN), 100);
         }
     }
 

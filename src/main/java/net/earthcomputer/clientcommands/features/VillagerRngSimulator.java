@@ -5,16 +5,15 @@ import com.seedfinding.latticg.math.component.BigMatrix;
 import com.seedfinding.latticg.math.component.BigVector;
 import com.seedfinding.latticg.math.lattice.enumerate.EnumerateRt;
 import com.seedfinding.latticg.math.optimize.Optimize;
-import com.seedfinding.mcseed.lcg.LCG;
 import com.seedfinding.mcseed.rand.JRand;
-import com.seedfinding.mcseed.rand.Rand;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
-import net.earthcomputer.clientcommands.command.PingCommand;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
@@ -24,12 +23,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.OptionalLong;
 import java.util.function.Predicate;
 import java.util.stream.LongStream;
 
@@ -166,10 +162,6 @@ public class VillagerRngSimulator {
         totalCalls += 1;
     }
 
-    public int currentCorrectionMs() {
-        return PingCommand.getLocalPing() / 2;
-    }
-
     public void updateProgressBar() {
         ClientCommandHelper.updateOverlayProgressBar(Math.min(callsInBruteForce, totalCalls - callsAtStartOfBruteForce), callsInBruteForce, 50, 60);
     }
@@ -266,15 +258,17 @@ public class VillagerRngSimulator {
             secondPitch = pitch;
             ambientSoundTime = -80;
             madeSound = true;
-            OptionalLong seed = crackSeed();
-            if (seed.isPresent()) {
-                random = new LegacyRandomSource(seed.getAsLong() ^ 0x5deece66dL);
-                // simulate a tick to advance it by one
-                simulateTick();
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crackSuccess", Long.toHexString(seed.getAsLong())).withStyle(ChatFormatting.GREEN), 100);
+            long[] seeds = crackSeed();
+            if (seeds.length == 1) {
+                random = new LegacyRandomSource(seeds[0] ^ 0x5deece66dL);
+                random.nextInt(100);
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crack.success", Long.toHexString(seeds[0])).withStyle(ChatFormatting.GREEN), 100);
             } else {
-                reset();
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crackFailed").withStyle(ChatFormatting.RED), 100);
+                totalAmbientSounds = 1;
+                firstPitch = pitch;
+                secondPitch = Float.NaN;
+                ambientSoundTime = -80;
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crack.failed", seeds.length).withStyle(ChatFormatting.RED), 100);
             }
             return;
         }
@@ -285,41 +279,28 @@ public class VillagerRngSimulator {
         }
     }
 
-    public OptionalLong crackSeed() {
-        float first = (firstPitch - 1.0f) / 0.2f;
-        float second = (secondPitch - 1.0f) / 0.2f;
-        float firstMin = Math.max(-1.0f + 0x1.0p-24f, first - VillagerCracker.MAX_ERROR);
-        float firstMax = Math.min(1.0f - 0x1.0p-24f, first + VillagerCracker.MAX_ERROR);
-        float secondMin = Math.max(-1.0f + 0x1.0p-24f, second - VillagerCracker.MAX_ERROR);
-        float secondMax = Math.min(1.0f - 0x1.0p-24f, second + VillagerCracker.MAX_ERROR);
-        OptionalLong seed2m = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, ticksBetweenSounds - 1);
-        OptionalLong seed = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, ticksBetweenSounds);
-        OptionalLong seed2p = crackSeed0(firstPitch, secondPitch, firstMin, firstMax, secondMin, secondMax, ticksBetweenSounds + 1);
-        System.out.println("Seed 2M: " + seed2m);
-        System.out.println("Seed: " + seed);
-        System.out.println("Seed 2P: " + seed2p);
-        return seed;
-    }
-
-    private OptionalLong crackSeed0(float firstPitch, float secondPitch, float firstMin, float firstMax, float secondMin, float secondMax, int ticksBetweenSounds) {
-        System.out.println(firstPitch + ", " + secondPitch + ", " + firstMin + ", " + firstMax + ", " + secondMin + ", " + secondMax + ", " + ticksBetweenSounds);
-
+    public long[] crackSeed() {
         if (!(80 <= ticksBetweenSounds && ticksBetweenSounds - 80 < LATTICES.length)) {
-            return OptionalLong.empty();
+            return new long[0];
         }
-        
+
         BigMatrix lattice = LATTICES[ticksBetweenSounds - 80];
         BigMatrix inverseLattice = INVERSE_LATTICES[ticksBetweenSounds - 80];
         BigVector offset = OFFSETS[ticksBetweenSounds - 80];
-        
+
+        float firstMin = Math.max(-1.0f + 0x1.0p-24f, (firstPitch - 1.0f) / 0.2f - VillagerCracker.MAX_ERROR);
+        float firstMax = Math.min(1.0f - 0x1.0p-24f, (firstPitch - 1.0f) / 0.2f + VillagerCracker.MAX_ERROR);
+        float secondMin = Math.max(-1.0f + 0x1.0p-24f, (secondPitch - 1.0f) / 0.2f - VillagerCracker.MAX_ERROR);
+        float secondMax = Math.min(1.0f - 0x1.0p-24f, (secondPitch - 1.0f) / 0.2f + VillagerCracker.MAX_ERROR);
+
         firstMax = Math.nextUp(firstMax);
         secondMax = Math.nextUp(secondMax);
-        
+
         long firstMinLong = (long) Math.ceil(firstMin * 0x1.0p24f);
         long firstMaxLong = (long) Math.ceil(firstMax * 0x1.0p24f) - 1;
         long secondMinLong = (long) Math.ceil(secondMin * 0x1.0p24f);
         long secondMaxLong = (long) Math.ceil(secondMax * 0x1.0p24f) - 1;
-        
+
         long firstMinSeedDiff = (firstMinLong << 24) - 0xFFFFFF;
         long firstMaxSeedDiff = (firstMaxLong << 24) + 0xFFFFFF;
         long secondMinSeedDiff = (secondMinLong << 24) - 0xFFFFFF;
@@ -342,20 +323,26 @@ public class VillagerRngSimulator {
             .withUpperBound(2, secondCombinationModMax)
             .build();
 
-        System.out.printf("%s, %s, %d, %d, %d, %d, %s, %s%n", lattice, offset, firstCombinationModMin, firstCombinationModMax, secondCombinationModMin, secondCombinationModMax, inverseLattice, inverseLattice.multiply(offset));
-
         return EnumerateRt.enumerate(lattice, offset, optimize, inverseLattice, inverseLattice.multiply(offset)).mapToLong(vec -> vec.get(0).getNumerator().longValue() & ((1L << 48) - 1)).flatMap(seed -> {
-            System.out.println(seed);
             JRand rand = JRand.ofInternalSeed(seed);
             float simulatedFirstPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;
-            rand.advance(ticksBetweenSounds * 2L);
+            rand.nextInt(100);
+            for (int i = -80; i < ticksBetweenSounds - 80 - 1; i++) {
+                if (rand.nextInt(1000) < i) {
+                    return LongStream.empty();
+                }
+                rand.nextInt(100);
+            }
+            if (rand.nextInt(1000) >= ticksBetweenSounds) {
+                return LongStream.empty();
+            }
             float simulatedSecondPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;
             if (simulatedFirstPitch == firstPitch && simulatedSecondPitch == secondPitch) {
                 return LongStream.of(rand.getSeed());
             } else {
                 return LongStream.empty();
             }
-        }).findAny();
+        }).toArray();
     }
 
     public enum CrackedState {

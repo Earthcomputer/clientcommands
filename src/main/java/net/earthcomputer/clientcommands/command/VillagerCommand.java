@@ -15,7 +15,10 @@ import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
@@ -28,10 +31,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static dev.xpple.clientarguments.arguments.CItemPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.PredicatedRangeArgument.*;
@@ -70,6 +75,9 @@ public class VillagerCommand {
                 .executes(ctx -> setVillagerTarget(null))
                 .then(argument("entity", entity())
                     .executes(ctx -> setVillagerTarget(getEntity(ctx, "entity")))))
+            .then(literal("clock")
+                .then(argument("pos", blockPos())
+                    .executes(ctx -> setClockPos(getBlockPos(ctx, "pos")))))
             .then(literal("brute-force")
                 .executes(ctx -> bruteForce())));
     }
@@ -120,11 +128,21 @@ public class VillagerCommand {
 
         VillagerCracker.setTargetVillager((Villager) target);
         if (target == null) {
-            ClientCommandHelper.sendFeedback("commands.cvillager.targetCleared");
+            ClientCommandHelper.sendFeedback("commands.cvillager.target.cleared");
         } else {
-            ClientCommandHelper.sendFeedback("commands.cvillager.targetSet");
+            ClientCommandHelper.sendFeedback("commands.cvillager.target.set");
         }
 
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int setClockPos(BlockPos pos) {
+        VillagerCracker.setClockPos(pos == null ? null : new GlobalPos(Minecraft.getInstance().player.level().dimension(), pos));
+        if (pos == null) {
+            ClientCommandHelper.sendFeedback("commands.cvillager.clock.cleared");
+        } else {
+            ClientCommandHelper.sendFeedback("commands.cvillager.clock.set");
+        }
         return Command.SINGLE_SUCCESS;
     }
 
@@ -140,7 +158,7 @@ public class VillagerCommand {
         }
 
         VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(1, new VillagerTrades.ItemListing[0]);
-        int adjustment = 3 + Configs.villagerAdjustment - (iVillager.clientcommands_getCrackedRandom().currentCorrectionMs() + 40) / 50;
+        int adjustment = 2 + Configs.villagerAdjustment;
         Pair<Integer, Offer> pair = iVillager.clientcommands_bruteForceOffers(listings, profession, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
         int ticks = pair.getFirst();
         Offer offer = pair.getSecond();
@@ -159,6 +177,8 @@ public class VillagerCommand {
                 price = VillagerCommand.displayText(offer.first()) + " + " + VillagerCommand.displayText(offer.second());
             }
             ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", VillagerCommand.displayText(offer.result()), price, ticks).withStyle(ChatFormatting.GREEN));
+            VillagerCracker.targetOffer = offer;
+            System.out.println(offer);
             iVillager.clientcommands_getCrackedRandom().setCallsUntilOpenGui(ticks, offer.result());
         }
 
@@ -182,7 +202,26 @@ public class VillagerCommand {
         }
     }
 
-    public record Offer(ItemStack first, @Nullable ItemStack second, ItemStack result) {}
+    public record Offer(ItemStack first, @Nullable ItemStack second, ItemStack result) {
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Offer other)) {
+                return false;
+            }
+            return ItemStack.isSameItemSameComponents(this.first, other.first) && this.first.getCount() == other.first.getCount()
+                && (this.second == other.second || this.second != null && other.second != null && ItemStack.isSameItemSameComponents(this.second, other.second) && this.second.getCount() == other.second.getCount())
+                && ItemStack.isSameItemSameComponents(this.result, other.result) && this.result.getCount() == other.result.getCount();
+        }
+
+        @Override
+        public String toString() {
+            if (second == null) {
+                return String.format("%s = %s", displayText(first), displayText(result));
+            } else {
+                return String.format("%s + %s = %s", displayText(first), displayText(second), displayText(result));
+            }
+        }
+    }
 
     public static String displayText(ItemStack stack) {
         String quantityPrefix;
