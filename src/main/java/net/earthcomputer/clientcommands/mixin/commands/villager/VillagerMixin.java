@@ -1,15 +1,11 @@
 package net.earthcomputer.clientcommands.mixin.commands.villager;
 
 import com.mojang.datafixers.util.Pair;
-import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -53,7 +49,13 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
 
     @Override
     public void clientcommands_onNoSoundPlayed(float pitch) {
-        rng.onNoSoundPlayed(pitch);
+        VillagerProfession profession = this.getVillagerData().getProfession();
+        rng.onNoSoundPlayed(pitch, profession != VillagerProfession.NONE && profession != VillagerProfession.NITWIT);
+    }
+
+    @Override
+    public void clientcommands_onYesSoundPlayed(float pitch) {
+        rng.onYesSoundPlayed(pitch);
     }
 
     @Override
@@ -62,26 +64,41 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
     }
 
     @Override
+    public void clientcommands_onXpOrbSpawned(int value) {
+        rng.onXpOrbSpawned(value);
+    }
+
+    @Override
     public void clientcommands_onServerTick() {
         rng.simulateTick();
 
         if (rng.shouldInteractWithVillager()) {
             Minecraft minecraft = Minecraft.getInstance();
-            InteractionResult result = minecraft.gameMode.interact(minecraft.player, this, InteractionHand.MAIN_HAND);
-            if (result.consumesAction() && result.shouldSwing()) {
-                minecraft.player.swing(InteractionHand.MAIN_HAND);
+            if (minecraft.screen instanceof MerchantScreen) {
+                minecraft.screen.onClose();
+            } else {
+                InteractionResult result = minecraft.gameMode.interact(minecraft.player, this, InteractionHand.MAIN_HAND);
+                if (result.consumesAction() && result.shouldSwing()) {
+                    minecraft.player.swing(InteractionHand.MAIN_HAND);
+                }
             }
         }
     }
 
     @Override
-    public Pair<Integer, VillagerCommand.Offer> clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int maxCalls, Predicate<VillagerCommand.Offer> predicate) {
+    public Pair<Integer, VillagerCommand.Offer> clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int minTicks, int maxCalls, Predicate<VillagerCommand.Offer> predicate) {
         if (this instanceof IVillager iVillager && iVillager.clientcommands_getCrackedRandom().getCrackedState().isCracked()) {
             VillagerProfession oldProfession = getVillagerData().getProfession();
             setVillagerData(getVillagerData().setProfession(profession));
 
             VillagerRngSimulator rng = this.rng.copy();
+
             int startingCalls = rng.getTotalCalls();
+
+            for (int i = 0; i < minTicks; i++) {
+                rng.simulateTick();
+            }
+
             while (rng.getTotalCalls() < maxCalls + startingCalls) {
                 VillagerRngSimulator randomBranch = rng.copy();
                 randomBranch.simulateTick();

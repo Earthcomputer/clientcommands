@@ -47,6 +47,7 @@ public class VillagerCommand {
     private static final SimpleCommandExceptionType NOT_A_VILLAGER_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.notAVillager"));
     private static final SimpleCommandExceptionType NO_CRACKED_VILLAGER_PRESENT = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.noCrackedVillagerPresent"));
     private static final SimpleCommandExceptionType NO_PROFESSION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.noProfession"));
+    private static final SimpleCommandExceptionType NOT_LEVEL_1 = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.notLevel1"));
     private static final Dynamic2CommandExceptionType INVALID_GOAL_INDEX = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.cvillager.removeGoal.invalidIndex", a, b));
     public static final List<Goal> goals = new ArrayList<>();
 
@@ -79,7 +80,10 @@ public class VillagerCommand {
                 .then(argument("pos", blockPos())
                     .executes(ctx -> setClockPos(getBlockPos(ctx, "pos")))))
             .then(literal("brute-force")
-                .executes(ctx -> bruteForce())));
+                .then(literal("first-level")
+                    .executes(ctx -> bruteForce(false)))
+                .then(literal("next-level")
+                    .executes(ctx -> bruteForce(true)))));
     }
 
     private static int addGoal(WithStringArgument.Result<CItemStackPredicateArgument> firstPredicate, WithStringArgument.Result<MinMaxBounds.Ints> firstItemQuantityRange, @Nullable WithStringArgument.Result<CItemStackPredicateArgument> secondPredicate, @Nullable WithStringArgument.Result<MinMaxBounds.Ints> secondItemQuantityRange, WithStringArgument.Result<CItemStackPredicateArgument> resultPredicate, WithStringArgument.Result<MinMaxBounds.Ints> resultItemQuantityRange) {
@@ -146,7 +150,7 @@ public class VillagerCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int bruteForce() throws CommandSyntaxException {
+    private static int bruteForce(boolean levelUp) throws CommandSyntaxException {
         Villager targetVillager = VillagerCracker.getVillager();
 
         if (!(targetVillager instanceof IVillager iVillager) || iVillager.clientcommands_getCrackedRandom() == null) {
@@ -157,12 +161,19 @@ public class VillagerCommand {
             throw NO_PROFESSION.create();
         }
 
-        VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(1, new VillagerTrades.ItemListing[0]);
-        int adjustment = 2 + Configs.villagerAdjustment;
-        Pair<Integer, Offer> pair = iVillager.clientcommands_bruteForceOffers(listings, profession, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
-        int ticks = pair.getFirst();
+        int currentLevel = targetVillager.getVillagerData().getLevel();
+        if (!levelUp && currentLevel != 1) {
+            throw NOT_LEVEL_1.create();
+        }
+
+        int crackedLevel = levelUp ? currentLevel + 1 : currentLevel;
+
+        VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(crackedLevel, new VillagerTrades.ItemListing[0]);
+        int adjustment = 2 + Configs.villagerAdjustment + (levelUp ? -80 : 0);
+        Pair<Integer, Offer> pair = iVillager.clientcommands_bruteForceOffers(listings, profession, levelUp ? 240 : 0, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
+        int calls = pair.getFirst();
         Offer offer = pair.getSecond();
-        if (ticks < 0) {
+        if (calls < 0) {
             VillagerRngSimulator.CrackedState state = iVillager.clientcommands_getCrackedRandom().getCrackedState();
             Component message = state.getMessage(true);
             if (state.isCracked()) {
@@ -176,10 +187,10 @@ public class VillagerCommand {
             } else {
                 price = VillagerCommand.displayText(offer.first()) + " + " + VillagerCommand.displayText(offer.second());
             }
-            ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", VillagerCommand.displayText(offer.result()), price, ticks).withStyle(ChatFormatting.GREEN));
+            ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", VillagerCommand.displayText(offer.result()), price, calls).withStyle(ChatFormatting.GREEN));
             VillagerCracker.targetOffer = offer;
             System.out.println(offer);
-            iVillager.clientcommands_getCrackedRandom().setCallsUntilOpenGui(ticks, offer.result());
+            iVillager.clientcommands_getCrackedRandom().setCallsUntilToggleGui(calls, offer.result());
         }
 
         return Command.SINGLE_SUCCESS;

@@ -205,7 +205,7 @@ public class VillagerRngSimulator {
         return random;
     }
 
-    public void setCallsUntilOpenGui(int calls, ItemStack resultStack) {
+    public void setCallsUntilToggleGui(int calls, ItemStack resultStack) {
         callsAtStartOfBruteForce = totalCalls;
         callsInBruteForce = calls;
         activeGoalResult = resultStack;
@@ -323,11 +323,30 @@ public class VillagerRngSimulator {
         }
     }
 
-    public void onNoSoundPlayed(float pitch) {
+    public void onNoSoundPlayed(float pitch, boolean fromGuiInteract) {
         // the last received action before the next tick's clock
+        // played both when interacting with a villager without a profession and when using the villager gui
 
         if (random != null) {
             totalCalls += 2;
+            if (fromGuiInteract) {
+                ambientSoundTime = -80;
+            }
+            float simulatedPitch = (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f;
+            if (pitch != simulatedPitch) {
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                reset();
+            }
+        }
+    }
+
+    public void onYesSoundPlayed(float pitch) {
+        // the last received action before the next tick's clock
+        // played when using the villager gui
+
+        if (random != null) {
+            totalCalls += 2;
+            ambientSoundTime = -80;
             float simulatedPitch = (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f;
             if (pitch != simulatedPitch) {
                 ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
@@ -356,6 +375,22 @@ public class VillagerRngSimulator {
             random.consumeCount(iters * 10);
 
             simulateTick();
+        }
+    }
+
+    public void onXpOrbSpawned(int value) {
+        // the last received action before the next tick's clock
+
+        if (random != null) {
+            totalCalls += 1;
+            ambientSoundTime = -80;
+            int simulatedValue = 3 + this.random.nextInt(4);
+            boolean leveledUp = value > 3 + 3;
+            if (leveledUp) simulatedValue += 5;
+            if (value != simulatedValue) {
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                reset();
+            }
         }
     }
 
