@@ -16,21 +16,9 @@ public final class MoreClientEvents {
             listener.onTimeSync(packet);
         }
     });
-    public static final Event<EstimatedServerTickEvent> ESTIMATED_SERVER_TICK = EventFactory.createArrayBacked(EstimatedServerTickEvent.class, listeners -> () -> {
-        Minecraft.getInstance().tell(() -> {
-            for (EstimatedServerTickEvent listener : listeners) {
-                listener.onEstimatedServerTick();
-            }
-        });
-    });
 
     @FunctionalInterface
     public interface TimeSync {
         void onTimeSync(ClientboundSetTimePacket packet);
-    }
-
-    @FunctionalInterface
-    public interface EstimatedServerTickEvent {
-        void onEstimatedServerTick();
     }
 }

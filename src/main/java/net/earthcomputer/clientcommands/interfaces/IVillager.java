@@ -1,19 +1,13 @@
 package net.earthcomputer.clientcommands.interfaces;
 
-import com.mojang.datafixers.util.Pair;
-import net.earthcomputer.clientcommands.command.VillagerCommand;
+import com.seedfinding.mcseed.rand.JRand;
 import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Predicate;
-
 public interface IVillager {
-    void clientcommands_setCrackedRandom(@Nullable RandomSource random);
+    void clientcommands_setRandom(@Nullable JRand random);
 
-    VillagerRngSimulator clientcommands_getCrackedRandom();
+    VillagerRngSimulator clientcommands_getVillagerRngSimulator();
 
     void clientcommands_onAmbientSoundPlayed(float pitch);
 
@@ -26,6 +20,4 @@ public interface IVillager {
     void clientcommands_onXpOrbSpawned(int value);
 
     void clientcommands_onServerTick();
-
-    Pair<Integer, VillagerCommand.Offer> clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int minTicks, int maxCalls, Predicate<VillagerCommand.Offer> predicate);
 }

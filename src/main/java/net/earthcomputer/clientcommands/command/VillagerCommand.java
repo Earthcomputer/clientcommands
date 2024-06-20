@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -153,7 +152,7 @@ public class VillagerCommand {
     private static int bruteForce(boolean levelUp) throws CommandSyntaxException {
         Villager targetVillager = VillagerCracker.getVillager();
 
-        if (!(targetVillager instanceof IVillager iVillager) || iVillager.clientcommands_getCrackedRandom() == null) {
+        if (!(targetVillager instanceof IVillager iVillager) || !iVillager.clientcommands_getVillagerRngSimulator().getCrackedState().isCracked()) {
             throw NO_CRACKED_VILLAGER_PRESENT.create();
         }
         VillagerProfession profession = targetVillager.getVillagerData().getProfession();
@@ -169,17 +168,12 @@ public class VillagerCommand {
         int crackedLevel = levelUp ? currentLevel + 1 : currentLevel;
 
         VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(crackedLevel, new VillagerTrades.ItemListing[0]);
-        int adjustment = 2 + Configs.villagerAdjustment + (levelUp ? -80 : 0);
-        Pair<Integer, Offer> pair = iVillager.clientcommands_bruteForceOffers(listings, profession, levelUp ? 240 : 0, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
+        int adjustment = 2 +  + (levelUp ? -80 : 0);
+        Pair<Integer, Offer> pair = iVillager.clientcommands_getVillagerRngSimulator().bruteForceOffers(listings, profession, levelUp ? 240 : 10, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
         int calls = pair.getFirst();
         Offer offer = pair.getSecond();
         if (calls < 0) {
-            VillagerRngSimulator.CrackedState state = iVillager.clientcommands_getCrackedRandom().getCrackedState();
-            Component message = state.getMessage(true);
-            if (state.isCracked()) {
-                message = Component.translatable("commands.cvillager.bruteForce.failed", Configs.maxVillagerBruteForceSimulationCalls).withStyle(ChatFormatting.RED);
-            }
-            ClientCommandHelper.addOverlayMessage(message, 100);
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.bruteForce.failed", Configs.maxVillagerBruteForceSimulationCalls).withStyle(ChatFormatting.RED), 100);
         } else {
             String price;
             if (offer.second() == null) {
@@ -190,7 +184,7 @@ public class VillagerCommand {
             ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", VillagerCommand.displayText(offer.result()), price, calls).withStyle(ChatFormatting.GREEN));
             VillagerCracker.targetOffer = offer;
             System.out.println(offer);
-            iVillager.clientcommands_getCrackedRandom().setCallsUntilToggleGui(calls, offer.result());
+            iVillager.clientcommands_getVillagerRngSimulator().setCallsUntilToggleGui(calls, offer.result());
         }
 
         return Command.SINGLE_SUCCESS;

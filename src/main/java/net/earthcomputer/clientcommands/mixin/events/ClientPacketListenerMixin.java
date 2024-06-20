@@ -2,14 +2,12 @@ package net.earthcomputer.clientcommands.mixin.events;
 
 import net.earthcomputer.clientcommands.event.MoreClientEntityEvents;
 import net.earthcomputer.clientcommands.event.MoreClientEvents;
-import net.earthcomputer.clientcommands.util.EstimatedServerTick;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -34,7 +32,6 @@ public class ClientPacketListenerMixin {
     @Inject(method = "handleSetTime", at = @At("HEAD"))
     private void onHandleSetTime(ClientboundSetTimePacket packet, CallbackInfo ci) {
         if (Minecraft.getInstance().isSameThread()) {
-            EstimatedServerTick.onSetTime(packet.getGameTime());
             MoreClientEvents.TIME_SYNC.invoker().onTimeSync(packet);
         } else {
             MoreClientEvents.TIME_SYNC_ON_NETWORK_THREAD.invoker().onTimeSync(packet);

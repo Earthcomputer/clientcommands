@@ -57,7 +57,7 @@ public class VillagerCracker {
     public static void setTargetVillager(@Nullable Villager villager) {
         Villager oldVillager = getVillager();
         if (oldVillager != null) {
-            ((IVillager) oldVillager).clientcommands_setCrackedRandom(null);
+            ((IVillager) oldVillager).clientcommands_setRandom(null);
         }
 
         VillagerCracker.cachedVillager = new WeakReference<>(villager);

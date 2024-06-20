@@ -177,7 +177,7 @@ public class Configs {
     @Config(temporary = true, setter = @Config.Setter("setMaxVillagerBruteForceSimulationCalls"))
     public static int maxVillagerBruteForceSimulationCalls = 12000;
     public static void setMaxVillagerBruteForceSimulationCalls(int maxVillagerBruteForceSimulationCalls) {
-        Configs.maxVillagerBruteForceSimulationCalls = Mth.clamp(maxVillagerBruteForceSimulationCalls, 0, 65536);
+        Configs.maxVillagerBruteForceSimulationCalls = Mth.clamp(maxVillagerBruteForceSimulationCalls, 0, 1_000_000);
     }
 
     @Config(temporary = true)
