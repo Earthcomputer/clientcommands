@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 
 public final class MoreClientEvents {

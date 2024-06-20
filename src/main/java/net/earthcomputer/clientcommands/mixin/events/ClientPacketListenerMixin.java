@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerMixin {
+
     @Inject(method = "handleAddEntity", at = @At("HEAD"))
     public void onHandleAddEntityPre(ClientboundAddEntityPacket packet, CallbackInfo ci) {
         MoreClientEntityEvents.PRE_ADD_MAYBE_ON_NETWORK_THREAD.invoker().onAddEntity(packet);

@@ -635,10 +635,6 @@ public class FishingCracker {
         }
     }
 
-    public static int getMagicMillisecondsCorrection() {
-        return magicMillisecondsCorrection;
-    }
-
     public static void onThrownFishingRod(ItemStack stack) {
         if (expectedFishingRodUses > 0) {
             expectedFishingRodUses--;

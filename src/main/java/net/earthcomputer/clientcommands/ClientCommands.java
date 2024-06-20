@@ -23,10 +23,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.LongArrayTag;
-import net.minecraft.nbt.NbtIo;
 import org.slf4j.Logger;
 
 import java.io.IOException;

@@ -10,7 +10,6 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.VillagerCracker;
-import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
