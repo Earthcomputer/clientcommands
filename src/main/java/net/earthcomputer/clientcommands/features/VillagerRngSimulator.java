@@ -14,7 +14,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
@@ -36,15 +38,20 @@ public class VillagerRngSimulator {
 
     @Nullable
     private LegacyRandomSource random;
+    private long prevRandomSeed;
     private int ambientSoundTime;
+    private int prevAmbientSoundTime;
     private boolean madeSound = false;
     private int totalAmbientSounds = 0;
     private int callsAtStartOfBruteForce = 0;
     private int callsInBruteForce = 0;
     private int totalCalls = 0;
+    private int prevTotalCalls;
     private float firstPitch = Float.NaN;
     private int ticksBetweenSounds = 0;
     private float secondPitch = Float.NaN;
+    @Nullable
+    private long[] seedsFromTwoPitches = null;
     @Nullable
     private ItemStack activeGoalResult = null;
 
@@ -114,10 +121,16 @@ public class VillagerRngSimulator {
     }
 
     public void simulateTick() {
+        // called on receiving clock packet at the beginning of the tick, simulates the rest of the tick
+
         if (random == null) {
             ambientSoundTime++;
             return;
         }
+
+        prevRandomSeed = random.seed.get();
+        prevAmbientSoundTime = ambientSoundTime;
+        prevTotalCalls = totalCalls;
 
         simulateBaseTick();
         simulateServerAiStep();
@@ -125,6 +138,12 @@ public class VillagerRngSimulator {
         if (callsInBruteForce > 0) {
             updateProgressBar();
         }
+    }
+
+    private void revertSimulatedTick() {
+        random.seed.set(prevRandomSeed);
+        ambientSoundTime = prevAmbientSoundTime;
+        totalCalls = prevTotalCalls;
     }
 
     public boolean shouldInteractWithVillager() {
@@ -135,11 +154,7 @@ public class VillagerRngSimulator {
         return shouldInteractWithVillager;
     }
 
-    public void simulateBaseTick() {
-        if (random == null) {
-            return;
-        }
-
+    private void simulateBaseTick() {
         // we have the server receiving ambient noise tell us if we have to do this to increment the random, this is so that our ambient sound time is synced up.
         totalCalls += 1;
         if (random.nextInt(1000) < ambientSoundTime++ && totalAmbientSounds > 0) {
@@ -153,11 +168,7 @@ public class VillagerRngSimulator {
         }
     }
 
-    public void simulateServerAiStep() {
-        if (random == null) {
-            return;
-        }
-
+    private void simulateServerAiStep() {
         random.nextInt(100);
         totalCalls += 1;
     }
@@ -233,6 +244,7 @@ public class VillagerRngSimulator {
         firstPitch = Float.NaN;
         ticksBetweenSounds = 0;
         secondPitch = Float.NaN;
+        seedsFromTwoPitches = null;
         activeGoalResult = null;
     }
 
@@ -258,6 +270,37 @@ public class VillagerRngSimulator {
             secondPitch = pitch;
             ambientSoundTime = -80;
             madeSound = true;
+
+            if (seedsFromTwoPitches != null) {
+                int matchingSeeds = 0;
+                long matchingSeed = 0;
+                nextSeed: for (long seed : seedsFromTwoPitches) {
+                    JRand rand = JRand.ofInternalSeed(seed);
+                    rand.nextInt(100);
+                    for (int i = -80; i < ticksBetweenSounds - 80 - 1; i++) {
+                        if (rand.nextInt(1000) < i) {
+                            continue nextSeed;
+                        }
+                        rand.nextInt(100);
+                    }
+                    if (rand.nextInt(1000) >= ticksBetweenSounds - 80 - 1) {
+                        continue;
+                    }
+                    float simulatedThirdPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;
+                    if (simulatedThirdPitch == pitch) {
+                        matchingSeeds++;
+                        matchingSeed = rand.getSeed();
+                    }
+                }
+                seedsFromTwoPitches = null;
+                if (matchingSeeds == 1) {
+                    random = new LegacyRandomSource(matchingSeed ^ 0x5deece66dL);
+                    random.nextInt(100);
+                    ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crack.success", Long.toHexString(matchingSeed)).withStyle(ChatFormatting.GREEN), 100);
+                    return;
+                }
+            }
+
             long[] seeds = crackSeed();
             if (seeds.length == 1) {
                 random = new LegacyRandomSource(seeds[0] ^ 0x5deece66dL);
@@ -267,6 +310,7 @@ public class VillagerRngSimulator {
                 totalAmbientSounds = 1;
                 firstPitch = pitch;
                 secondPitch = Float.NaN;
+                seedsFromTwoPitches = seeds.length > 0 ? seeds : null;
                 ambientSoundTime = -80;
                 ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crack.failed", seeds.length).withStyle(ChatFormatting.RED), 100);
             }
@@ -276,6 +320,42 @@ public class VillagerRngSimulator {
         if (!madeSound) {
             ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
             reset();
+        }
+    }
+
+    public void onNoSoundPlayed(float pitch) {
+        // the last received action before the next tick's clock
+
+        if (random != null) {
+            totalCalls += 2;
+            float simulatedPitch = (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f;
+            if (pitch != simulatedPitch) {
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                reset();
+            }
+        }
+    }
+
+    public void onSplashSoundPlayed(float pitch) {
+        // the first received action after this tick's clock
+
+        if (random != null) {
+            // simulateTick() was already called for this tick assuming no splash happened, so revert it and rerun it with the splash
+            revertSimulatedTick();
+
+            totalCalls += 2;
+            float simulatedPitch = (random.nextFloat() - random.nextFloat()) * 0.4f + 1.0f;
+            if (pitch != simulatedPitch) {
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                reset();
+                return;
+            }
+
+            int iters = Mth.ceil(1.0f + EntityType.VILLAGER.getDimensions().width() * 20.0f);
+            totalCalls += iters * 10;
+            random.consumeCount(iters * 10);
+
+            simulateTick();
         }
     }
 
@@ -333,7 +413,7 @@ public class VillagerRngSimulator {
                 }
                 rand.nextInt(100);
             }
-            if (rand.nextInt(1000) >= ticksBetweenSounds) {
+            if (rand.nextInt(1000) >= ticksBetweenSounds - 80 - 1) {
                 return LongStream.empty();
             }
             float simulatedSecondPitch = (rand.nextFloat() - rand.nextFloat()) * 0.2f + 1.0f;

@@ -17,6 +17,10 @@ public interface IVillager {
 
     void clientcommands_onAmbientSoundPlayed(float pitch);
 
+    void clientcommands_onNoSoundPlayed(float pitch);
+
+    void clientcommands_onSplashSoundPlayed(float pitch);
+
     void clientcommands_onServerTick();
 
     Pair<Integer, VillagerCommand.Offer> clientcommands_bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int maxCalls, Predicate<VillagerCommand.Offer> predicate);

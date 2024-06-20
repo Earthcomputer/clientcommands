@@ -52,6 +52,16 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
     }
 
     @Override
+    public void clientcommands_onNoSoundPlayed(float pitch) {
+        rng.onNoSoundPlayed(pitch);
+    }
+
+    @Override
+    public void clientcommands_onSplashSoundPlayed(float pitch) {
+        rng.onSplashSoundPlayed(pitch);
+    }
+
+    @Override
     public void clientcommands_onServerTick() {
         rng.simulateTick();
 
@@ -74,8 +84,7 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
             int startingCalls = rng.getTotalCalls();
             while (rng.getTotalCalls() < maxCalls + startingCalls) {
                 VillagerRngSimulator randomBranch = rng.copy();
-                randomBranch.simulateBaseTick();
-                randomBranch.simulateServerAiStep();
+                randomBranch.simulateTick();
                 VillagerCommand.Offer offer = randomBranch.anyOffersMatch(listings, (Villager) (Object) this, predicate);
                 if (offer != null) {
                     setVillagerData(getVillagerData().setProfession(oldProfession));

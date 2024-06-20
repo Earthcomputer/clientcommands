@@ -73,8 +73,10 @@ public class VillagerCracker {
             return;
         }
 
-        if (packet.getSound().value().getLocation().toString().equals("minecraft:entity.villager.ambient")) {
-            ((IVillager) targetVillager).clientcommands_onAmbientSoundPlayed(packet.getPitch());
+        switch (packet.getSound().value().getLocation().toString()) {
+            case "minecraft:entity.villager.ambient" -> ((IVillager) targetVillager).clientcommands_onAmbientSoundPlayed(packet.getPitch());
+            case "minecraft:entity.villager.no" -> ((IVillager) targetVillager).clientcommands_onNoSoundPlayed(packet.getPitch());
+            case "minecraft:entity.generic.splash" -> ((IVillager) targetVillager).clientcommands_onSplashSoundPlayed(packet.getPitch());
         }
     }
 
