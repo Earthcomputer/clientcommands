@@ -4,6 +4,7 @@ import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
@@ -74,10 +75,20 @@ public class VillagerCracker {
         }
 
         switch (packet.getSound().value().getLocation().toString()) {
-            case "minecraft:entity.villager.ambient" -> ((IVillager) targetVillager).clientcommands_onAmbientSoundPlayed(packet.getPitch());
+            case "minecraft:entity.villager.ambient", "minecraft:entity.villager.trade" -> ((IVillager) targetVillager).clientcommands_onAmbientSoundPlayed(packet.getPitch());
             case "minecraft:entity.villager.no" -> ((IVillager) targetVillager).clientcommands_onNoSoundPlayed(packet.getPitch());
+            case "minecraft:entity.villager.yes" -> ((IVillager) targetVillager).clientcommands_onYesSoundPlayed(packet.getPitch());
             case "minecraft:entity.generic.splash" -> ((IVillager) targetVillager).clientcommands_onSplashSoundPlayed(packet.getPitch());
         }
+    }
+
+    public static void onXpOrbSpawned(ClientboundAddExperienceOrbPacket packet) {
+        Villager targetVillager = getVillager();
+        if (targetVillager == null) {
+            return;
+        }
+
+        ((IVillager) targetVillager).clientcommands_onXpOrbSpawned(packet.getValue());
     }
 
     public static void onServerTick() {

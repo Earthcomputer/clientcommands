@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -51,6 +52,14 @@ public abstract class ClientPacketListenerMixin {
                     VillagerCracker.onServerTick();
                 }
             });
+        }
+    }
+
+    @Inject(method = "handleAddExperienceOrb", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
+    private void onHandleAddExperienceOrb(ClientboundAddExperienceOrbPacket packet, CallbackInfo ci) {
+        Villager targetVillager = VillagerCracker.getVillager();
+        if (targetVillager != null && new Vec3(packet.getX(), packet.getY() - 0.5, packet.getZ()).distanceToSqr(targetVillager.position()) <= 0.1f) {
+            VillagerCracker.onXpOrbSpawned(packet);
         }
     }
 

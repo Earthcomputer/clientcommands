@@ -254,6 +254,7 @@
   "commands.cvillager.listGoals.success": "There are %d villager goals:",
   "commands.cvillager.noCrackedVillagerPresent": "There was no cracked villager available to use",
   "commands.cvillager.noProfession": "The targeted villager has no profession.",
+  "commands.cvillager.notLevel1": "The targeted villager has level above 1.",
   "commands.cvillager.notAVillager": "Target was not a villager",
   "commands.cvillager.outOfSync": "Your Villager's RNG was out of sync, re-cracking.",
   "commands.cvillager.removeGoal.invalidIndex": "Unable to remove goal %d, you only have %d goals.",
