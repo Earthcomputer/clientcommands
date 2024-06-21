@@ -1,13 +1,18 @@
 package net.earthcomputer.clientcommands.features;
 
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -25,6 +30,9 @@ public class VillagerCracker {
     private static GlobalPos clockPos = null;
     @Nullable
     public static VillagerCommand.Offer targetOffer = null;
+    @Nullable
+    private static Long lastServerTick = null;
+    private static boolean receivedClockRateWarning = false;
 
     @Nullable
     public static Villager getVillager() {
@@ -57,7 +65,17 @@ public class VillagerCracker {
     public static void setTargetVillager(@Nullable Villager villager) {
         Villager oldVillager = getVillager();
         if (oldVillager != null) {
-            ((IVillager) oldVillager).clientcommands_setRandom(null);
+            ((IVillager) oldVillager).clientcommands_getVillagerRngSimulator().reset();
+        }
+
+        if (clockPos == null) {
+            ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.noClock"));
+        }
+
+        ClientLevel level = Minecraft.getInstance().level;
+
+        if (level.getDayTime() < 12000 || (level.dimensionType().fixedTime().isPresent() && level.dimensionType().fixedTime().getAsLong() < 12000)) {
+            ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.day"));
         }
 
         VillagerCracker.cachedVillager = new WeakReference<>(villager);
@@ -92,11 +110,25 @@ public class VillagerCracker {
     }
 
     public static void onServerTick() {
+        long now = System.currentTimeMillis();
+
         Villager targetVillager = getVillager();
         if (targetVillager == null) {
+            lastServerTick = now;
             return;
         }
 
+        if (lastServerTick != null && now - lastServerTick > 50L && !receivedClockRateWarning) {
+            ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.tooSlow"));
+            receivedClockRateWarning = true;
+        }
+
+        if (targetVillager.getVillagerData().getProfession() != VillagerProfession.NONE && targetVillager.getVillagerData().getProfession() != VillagerProfession.NITWIT && !Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
+            ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.heldItem"));
+        }
+
         ((IVillager) targetVillager).clientcommands_onServerTick();
+
+        lastServerTick = now;
     }
 }

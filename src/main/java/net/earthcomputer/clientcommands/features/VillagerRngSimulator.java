@@ -10,7 +10,6 @@ import com.seedfinding.mcseed.rand.JRand;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.VillagerCommand;
-import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,7 +22,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
@@ -148,7 +146,7 @@ public class VillagerRngSimulator {
     }
 
     private void revertSimulatedTick() {
-        random.setSeed(prevRandomSeed);
+        random.setSeed(prevRandomSeed, false);
         ambientSoundTime = prevAmbientSoundTime;
         totalCalls = prevTotalCalls;
     }
@@ -220,15 +218,7 @@ public class VillagerRngSimulator {
     }
 
     public CrackedState getCrackedState() {
-        if (totalAmbientSounds == 0) {
-            return CrackedState.PENDING_FIRST_AMBIENT_SOUND;
-        }
-
-        if (totalAmbientSounds == 1) {
-            return CrackedState.PENDING_SECOND_AMBIENT_SOUND;
-        }
-
-        if (random == null) {
+        if (random == null || totalAmbientSounds < 2) {
             return CrackedState.UNCRACKED;
         }
 
@@ -241,6 +231,9 @@ public class VillagerRngSimulator {
 
     public void reset() {
         random = null;
+        prevRandomSeed = 0;
+        prevAmbientSoundTime = 0;
+        prevTotalCalls = 0;
         totalAmbientSounds = 0;
         totalCalls = 0;
         callsAtStartOfBruteForce = 0;
@@ -321,7 +314,7 @@ public class VillagerRngSimulator {
         }
 
         if (!madeSound) {
-            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.generic").withStyle(ChatFormatting.RED), 100);
             reset();
         }
     }
@@ -337,7 +330,7 @@ public class VillagerRngSimulator {
             }
             float simulatedPitch = (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f;
             if (pitch != simulatedPitch) {
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.generic").withStyle(ChatFormatting.RED), 100);
                 reset();
             }
         }
@@ -352,7 +345,7 @@ public class VillagerRngSimulator {
             ambientSoundTime = -80;
             float simulatedPitch = (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f;
             if (pitch != simulatedPitch) {
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.generic").withStyle(ChatFormatting.RED), 100);
                 reset();
             }
         }
@@ -368,7 +361,7 @@ public class VillagerRngSimulator {
             totalCalls += 2;
             float simulatedPitch = (random.nextFloat() - random.nextFloat()) * 0.4f + 1.0f;
             if (pitch != simulatedPitch) {
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.generic").withStyle(ChatFormatting.RED), 100);
                 reset();
                 return;
             }
@@ -391,18 +384,15 @@ public class VillagerRngSimulator {
             boolean leveledUp = value > 3 + 3;
             if (leveledUp) simulatedValue += 5;
             if (value != simulatedValue) {
-                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync").withStyle(ChatFormatting.RED), 100);
+                ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.generic").withStyle(ChatFormatting.RED), 100);
                 reset();
             }
         }
     }
 
-    public Pair<Integer, VillagerCommand.Offer> bruteForceOffers(VillagerTrades.ItemListing[] listings, VillagerProfession profession, int minTicks, int maxCalls, Predicate<VillagerCommand.Offer> predicate) {
+    public Pair<Integer, VillagerCommand.Offer> bruteForceOffers(VillagerTrades.ItemListing[] listings, int minTicks, int maxCalls, Predicate<VillagerCommand.Offer> predicate) {
         Villager targetVillager = VillagerCracker.getVillager();
         if (targetVillager != null && getCrackedState().isCracked()) {
-            VillagerProfession oldProfession = targetVillager.getVillagerData().getProfession();
-            targetVillager.setVillagerData(targetVillager.getVillagerData().setProfession(profession));
-
             VillagerRngSimulator rng = this.copy();
             int startingCalls = rng.getTotalCalls();
 
@@ -415,14 +405,11 @@ public class VillagerRngSimulator {
                 randomBranch.simulateTick();
                 VillagerCommand.Offer offer = randomBranch.anyOffersMatch(listings, targetVillager, predicate);
                 if (offer != null) {
-                    targetVillager.setVillagerData(targetVillager.getVillagerData().setProfession(oldProfession));
                     // we do the calls before this ticks processing so that since with 0ms ping, the server reads it next tick
                     return Pair.of(rng.getTotalCalls() - startingCalls, offer);
                 }
                 rng.simulateTick();
             }
-
-            targetVillager.setVillagerData(targetVillager.getVillagerData().setProfession(oldProfession));
         }
 
         return Pair.of(-1_000_000, null);
@@ -496,8 +483,6 @@ public class VillagerRngSimulator {
 
     public enum CrackedState {
         UNCRACKED,
-        PENDING_FIRST_AMBIENT_SOUND,
-        PENDING_SECOND_AMBIENT_SOUND,
         CRACKED;
 
         public boolean isCracked() {
@@ -507,9 +492,7 @@ public class VillagerRngSimulator {
         public Component getMessage(boolean addColor) {
             return switch (this) {
                 case UNCRACKED -> Component.translatable("commands.cvillager.noCrackedVillagerPresent").withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
-                case PENDING_FIRST_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 0).withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
-                case PENDING_SECOND_AMBIENT_SOUND -> Component.translatable("commands.cvillager.inSync", 50).withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
-                case CRACKED -> Component.translatable("commands.cvillager.inSync", 100).withStyle(addColor ? ChatFormatting.GREEN : ChatFormatting.RESET);
+                case CRACKED -> Component.translatable("commands.cvillager.inSync").withStyle(addColor ? ChatFormatting.GREEN : ChatFormatting.RESET);
             };
         }
     }

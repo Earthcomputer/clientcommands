@@ -27,7 +27,7 @@ public abstract class MerchantScreenMixin extends AbstractContainerScreen<Mercha
     @Inject(method = "render", at = @At("HEAD"))
     private void onRender(CallbackInfo ci) {
         if (VillagerCracker.targetOffer != null) {
-            if (menu.getOffers().stream().map(offer -> new VillagerCommand.Offer(offer.getBaseCostA(), offer.getItemCostB().map(ItemCost::itemStack).orElse(null), offer.getResult())).peek(offer -> System.out.println("offer: " + offer)).anyMatch(offer -> offer.toString().equals(VillagerCracker.targetOffer.toString()))) {
+            if (menu.getOffers().stream().map(offer -> new VillagerCommand.Offer(offer.getBaseCostA(), offer.getItemCostB().map(ItemCost::itemStack).orElse(null), offer.getResult())).anyMatch(offer -> offer.equals(VillagerCracker.targetOffer))) {
                 ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.success", Configs.villagerAdjustment * 50).withStyle(ChatFormatting.GREEN), 100);
                 minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
             } else {

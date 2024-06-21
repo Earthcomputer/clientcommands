@@ -1,16 +1,15 @@
 package net.earthcomputer.clientcommands.mixin.rngevents;
 
 import com.mojang.brigadier.StringReader;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.VillagerCracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.Level;
@@ -67,6 +66,16 @@ public abstract class ClientPacketListenerMixin {
     private void onHandleBlockUpdate(ClientboundBlockUpdatePacket packet, CallbackInfo ci) {
         if (Minecraft.getInstance().level != null && new GlobalPos(Minecraft.getInstance().level.dimension(), packet.getPos()).equals(VillagerCracker.getClockPos())) {
             VillagerCracker.onServerTick();
+        }
+    }
+
+    @Inject(method = "handleSetTime", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
+    private void handleSetTime(ClientboundSetTimePacket packet, CallbackInfo ci) {
+        if (level.getDayTime() < 12000 && packet.getDayTime() >= 12000) {
+            Villager targetVillager = VillagerCracker.getVillager();
+            if (targetVillager != null) {
+                ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.day"));
+            }
         }
     }
 }

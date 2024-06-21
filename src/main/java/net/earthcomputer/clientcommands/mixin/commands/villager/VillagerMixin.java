@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.mixin.commands.villager;
 
-import com.seedfinding.mcseed.rand.JRand;
 import net.earthcomputer.clientcommands.features.VillagerRngSimulator;
 import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.minecraft.client.Minecraft;
@@ -12,7 +11,6 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -24,11 +22,6 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
 
     @Unique
     VillagerRngSimulator rng = new VillagerRngSimulator(null, -80);
-
-    @Override
-    public void clientcommands_setRandom(@Nullable JRand random) {
-        rng.setRandom(random);
-    }
 
     @Override
     public void clientcommands_onAmbientSoundPlayed(float pitch) {

@@ -46,6 +46,7 @@ public class VillagerCommand {
     private static final SimpleCommandExceptionType NO_CRACKED_VILLAGER_PRESENT = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.noCrackedVillagerPresent"));
     private static final SimpleCommandExceptionType NO_PROFESSION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.noProfession"));
     private static final SimpleCommandExceptionType NOT_LEVEL_1 = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.notLevel1"));
+    private static final SimpleCommandExceptionType NO_GOALS = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.listGoals.noGoals"));
     private static final Dynamic2CommandExceptionType INVALID_GOAL_INDEX = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.cvillager.removeGoal.invalidIndex", a, b));
     public static final List<Goal> goals = new ArrayList<>();
 
@@ -77,7 +78,10 @@ public class VillagerCommand {
             .then(literal("clock")
                 .then(argument("pos", blockPos())
                     .executes(ctx -> setClockPos(getBlockPos(ctx, "pos")))))
+            .then(literal("reset-cracker")
+                .executes(ctx -> resetCracker()))
             .then(literal("brute-force")
+                .executes(ctx -> bruteForce(false))
                 .then(literal("first-level")
                     .executes(ctx -> bruteForce(false)))
                 .then(literal("next-level")
@@ -103,7 +107,11 @@ public class VillagerCommand {
         if (goals.isEmpty()) {
             source.sendFeedback(Component.translatable("commands.cvillager.listGoals.noGoals").withStyle(style -> style.withColor(ChatFormatting.RED)));
         } else {
-            source.sendFeedback(Component.translatable("commands.cvillager.listGoals.success", FishingCracker.goals.size() + 1));
+            if (FishingCracker.goals.size() == 1) {
+                source.sendFeedback(Component.translatable("commands.cvillager.listGoal.success"));
+            } else {
+                source.sendFeedback(Component.translatable("commands.cvillager.listGoals.success", FishingCracker.goals.size() + 1));
+            }
             for (int i = 0; i < goals.size(); i++) {
                 Goal goal = goals.get(i);
                 source.sendFeedback(Component.literal((i + 1) + ": " + goal.toString()));
@@ -148,8 +156,22 @@ public class VillagerCommand {
         return Command.SINGLE_SUCCESS;
     }
 
+    private static int resetCracker() {
+        Villager targetVillager = VillagerCracker.getVillager();
+        if (targetVillager instanceof IVillager iVillager) {
+            iVillager.clientcommands_getVillagerRngSimulator().reset();
+            ClientCommandHelper.sendFeedback("commands.cvillager.resetCracker");
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
     private static int bruteForce(boolean levelUp) throws CommandSyntaxException {
         Villager targetVillager = VillagerCracker.getVillager();
+
+        if (goals.isEmpty()) {
+            throw NO_GOALS.create();
+        }
 
         if (!(targetVillager instanceof IVillager iVillager) || !iVillager.clientcommands_getVillagerRngSimulator().getCrackedState().isCracked()) {
             throw NO_CRACKED_VILLAGER_PRESENT.create();
@@ -167,8 +189,8 @@ public class VillagerCommand {
         int crackedLevel = levelUp ? currentLevel + 1 : currentLevel;
 
         VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(crackedLevel, new VillagerTrades.ItemListing[0]);
-        int adjustment = 2 +  + (levelUp ? -80 : 0);
-        Pair<Integer, Offer> pair = iVillager.clientcommands_getVillagerRngSimulator().bruteForceOffers(listings, profession, levelUp ? 240 : 10, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustment);
+        int adjustmentTicks = 1 + (levelUp ? -40 : 0);
+        Pair<Integer, Offer> pair = iVillager.clientcommands_getVillagerRngSimulator().bruteForceOffers(listings, levelUp ? 240 : 10, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustmentTicks * 2);
         int calls = pair.getFirst();
         Offer offer = pair.getSecond();
         if (calls < 0) {
@@ -182,7 +204,6 @@ public class VillagerCommand {
             }
             ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", VillagerCommand.displayText(offer.result()), price, calls).withStyle(ChatFormatting.GREEN));
             VillagerCracker.targetOffer = offer;
-            System.out.println(offer);
             iVillager.clientcommands_getVillagerRngSimulator().setCallsUntilToggleGui(calls, offer.result());
         }
 
