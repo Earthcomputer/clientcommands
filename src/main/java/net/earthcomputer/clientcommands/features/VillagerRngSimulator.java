@@ -24,6 +24,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import org.jetbrains.annotations.Nullable;
@@ -196,7 +197,7 @@ public class VillagerRngSimulator {
             VillagerTrades.ItemListing listing = newListings.remove(rand.nextInt(newListings.size()));
             MerchantOffer offer = listing.getOffer(trader, rand);
             if (offer != null) {
-                VillagerCommand.Offer x = new VillagerCommand.Offer(offer.getBaseCostA(), offer.getCostB(), offer.getResult());
+                VillagerCommand.Offer x = new VillagerCommand.Offer(offer.getBaseCostA(), offer.getItemCostB().map(ItemCost::itemStack).orElse(null), offer.getResult());
                 if (predicate.test(x)) {
                     return x;
                 } else {
