@@ -252,12 +252,20 @@ public class VillagerRngSimulator {
     }
 
     public void onAmbientSoundPlayed(float pitch) {
+        boolean justReset = false;
+        if (totalAmbientSounds == 2 && !madeSound) {
+            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.generic").withStyle(ChatFormatting.RED), 100);
+            reset();
+            justReset = true;
+        }
+
         if (totalAmbientSounds == 0) {
             totalAmbientSounds++;
             firstPitch = pitch;
             ambientSoundTime = -80;
-            madeSound = true;
-            ClientCommandHelper.addOverlayMessage(((MutableComponent) getCrackedState().getMessage(false)).withStyle(ChatFormatting.RED), 100);
+            if (!justReset) {
+                ClientCommandHelper.addOverlayMessage(((MutableComponent) getCrackedState().getMessage(false)).withStyle(ChatFormatting.RED), 100);
+            }
             return;
         }
 
@@ -266,7 +274,6 @@ public class VillagerRngSimulator {
             ticksBetweenSounds = ambientSoundTime - (-80);
             secondPitch = pitch;
             ambientSoundTime = -80;
-            madeSound = true;
 
             if (seedsFromTwoPitches != null) {
                 int matchingSeeds = 0;
@@ -311,12 +318,6 @@ public class VillagerRngSimulator {
                 ambientSoundTime = -80;
                 ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.crack.failed", seeds.length).withStyle(ChatFormatting.RED), 100);
             }
-            return;
-        }
-
-        if (!madeSound) {
-            ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.generic").withStyle(ChatFormatting.RED), 100);
-            reset();
         }
     }
 
