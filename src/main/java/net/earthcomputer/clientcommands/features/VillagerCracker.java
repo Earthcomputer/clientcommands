@@ -74,7 +74,7 @@ public class VillagerCracker {
 
         ClientLevel level = Minecraft.getInstance().level;
 
-        if (level.getDayTime() < 12000 || (level.dimensionType().fixedTime().isPresent() && level.dimensionType().fixedTime().getAsLong() < 12000)) {
+        if (level.getDayTime() % 24000 < 12000) {
             ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.day"));
         }
 
