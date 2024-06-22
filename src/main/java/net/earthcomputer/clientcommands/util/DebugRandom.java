@@ -95,7 +95,7 @@ public class DebugRandom extends LegacyRandomSource {
     private void handleStackTrace(int stackTrace) {
         this.stackTracesThisTick.add(stackTrace);
         try {
-            NbtIo.writeUnnamedTagWithFallback(firstTick ? new CompoundTag() : entity.saveWithoutId(new CompoundTag()), nbtStream);
+            NbtIo.writeUnnamedTagWithFallback(/*firstTick ? */new CompoundTag()/* : entity.saveWithoutId(new CompoundTag())*/, nbtStream);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -269,7 +269,7 @@ class DebugRandomSourcePanel extends JPanel {
             }
         });
         bottomPanel.add(dumpStackTraceButton);
-        JButton dumpStackTracesWithQuantitiesButton = new JButton("Dump stack traces with quantities");
+        JButton dumpStackTracesWithQuantitiesButton = new JButton("Dump unique stack traces with quantities");
         dumpStackTracesWithQuantitiesButton.addActionListener(e -> {
             if (selectedTick == null) {
                 return;

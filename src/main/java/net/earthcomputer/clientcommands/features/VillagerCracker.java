@@ -9,10 +9,8 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
@@ -88,7 +86,7 @@ public class VillagerCracker {
 
     public static void onSoundEventPlayed(ClientboundSoundPacket packet) {
         Villager targetVillager = getVillager();
-        if (targetVillager == null) {
+        if (targetVillager == null || getClockPos() == null) {
             return;
         }
 
@@ -118,13 +116,9 @@ public class VillagerCracker {
             return;
         }
 
-        if (lastServerTick != null && now - lastServerTick > 50L && !receivedClockRateWarning) {
+        if (lastServerTick != null && now - lastServerTick > 80L && !receivedClockRateWarning) {
             ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.tooSlow"));
             receivedClockRateWarning = true;
-        }
-
-        if (targetVillager.getVillagerData().getProfession() != VillagerProfession.NONE && targetVillager.getVillagerData().getProfession() != VillagerProfession.NITWIT && !Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
-            ClientCommandHelper.sendHelp(Component.translatable("commands.cvillager.help.heldItem"));
         }
 
         ((IVillager) targetVillager).clientcommands_onServerTick();

@@ -23,7 +23,7 @@ public interface PredicatedRangeArgument<T extends MinMaxBounds<?>> extends Argu
     static Floats floatRange(@Nullable Double min, @Nullable Double max) {
         return new Floats(min, max);
     }
-    
+
     class Ints implements PredicatedRangeArgument<MinMaxBounds.Ints> {
         @Nullable
         private final Integer min;

@@ -7,6 +7,8 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.util.Pair;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument;
+import net.earthcomputer.clientcommands.command.arguments.PredicatedRangeArgument;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.VillagerCracker;
@@ -37,6 +39,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static dev.xpple.clientarguments.arguments.CItemPredicateArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.PredicatedRangeArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
@@ -47,6 +50,7 @@ public class VillagerCommand {
     private static final SimpleCommandExceptionType NO_PROFESSION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.noProfession"));
     private static final SimpleCommandExceptionType NOT_LEVEL_1 = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.notLevel1"));
     private static final SimpleCommandExceptionType NO_GOALS = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.listGoals.noGoals"));
+    private static final SimpleCommandExceptionType ALREADY_BRUTE_FORCING = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.alreadyBruteForcing"));
     private static final Dynamic2CommandExceptionType INVALID_GOAL_INDEX = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.cvillager.removeGoal.invalidIndex", a, b));
     public static final List<Goal> goals = new ArrayList<>();
 
@@ -58,14 +62,13 @@ public class VillagerCommand {
                         .then(argument("result-item", withString(itemPredicate(context)))
                             .then(argument("result-item-quantity", withString(intRange(1, 64)))
                                 .executes(ctx -> addGoal(getWithString(ctx, "first-item", CItemStackPredicateArgument.class), getWithString(ctx, "first-item-quantity", MinMaxBounds.Ints.class), null, null, getWithString(ctx, "result-item", CItemStackPredicateArgument.class), getWithString(ctx, "result-item-quantity", MinMaxBounds.Ints.class))))))))
-            .then(literal("add-three-item-goal")
+            .then(literal("add-enchanted-goal")
                 .then(argument("first-item", withString(itemPredicate(context)))
                     .then(argument("first-item-quantity", withString(intRange(1, 64)))
                         .then(argument("second-item", withString(itemPredicate(context)))
                             .then(argument("second-item-quantity", withString(intRange(1, 64)))
-                                .then(argument("result-item", withString(itemPredicate(context)))
-                                    .then(argument("result-item-quantity", withString(intRange(1, 64)))
-                                        .executes(ctx -> addGoal(getWithString(ctx, "first-item", CItemStackPredicateArgument.class), getWithString(ctx, "first-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "second-item", CItemStackPredicateArgument.class), getWithString(ctx, "second-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "result-item", CItemStackPredicateArgument.class), getWithString(ctx, "result-item-quantity", MinMaxBounds.Ints.class))))))))))
+                                .then(argument("result-item", withString(itemAndEnchantmentsPredicate(context)))
+                                    .executes(ctx -> addGoal(getWithString(ctx, "first-item", CItemStackPredicateArgument.class), getWithString(ctx, "first-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "second-item", CItemStackPredicateArgument.class), getWithString(ctx, "second-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "result-item", ItemAndEnchantmentsPredicate.class), new WithStringArgument.Result<>("1..1", MinMaxBounds.Ints.between(1, 1))))))))))
             .then(literal("list-goals")
                 .executes(ctx -> listGoals(ctx.getSource())))
             .then(literal("remove-goal")
@@ -88,7 +91,7 @@ public class VillagerCommand {
                     .executes(ctx -> bruteForce(true)))));
     }
 
-    private static int addGoal(WithStringArgument.Result<CItemStackPredicateArgument> firstPredicate, WithStringArgument.Result<MinMaxBounds.Ints> firstItemQuantityRange, @Nullable WithStringArgument.Result<CItemStackPredicateArgument> secondPredicate, @Nullable WithStringArgument.Result<MinMaxBounds.Ints> secondItemQuantityRange, WithStringArgument.Result<CItemStackPredicateArgument> resultPredicate, WithStringArgument.Result<MinMaxBounds.Ints> resultItemQuantityRange) {
+    private static int addGoal(WithStringArgument.Result<CItemStackPredicateArgument> firstPredicate, WithStringArgument.Result<MinMaxBounds.Ints> firstItemQuantityRange, @Nullable WithStringArgument.Result<CItemStackPredicateArgument> secondPredicate, @Nullable WithStringArgument.Result<MinMaxBounds.Ints> secondItemQuantityRange, WithStringArgument.Result<? extends Predicate<ItemStack>> resultPredicate, WithStringArgument.Result<MinMaxBounds.Ints> resultItemQuantityRange) {
         goals.add(new Goal(
             String.format("%s %s", firstItemQuantityRange.string(), firstPredicate.string()),
             item -> firstPredicate.value().test(item) && firstItemQuantityRange.value().matches(item.getCount()),
@@ -176,9 +179,14 @@ public class VillagerCommand {
         if (!(targetVillager instanceof IVillager iVillager) || !iVillager.clientcommands_getVillagerRngSimulator().getCrackedState().isCracked()) {
             throw NO_CRACKED_VILLAGER_PRESENT.create();
         }
+
         VillagerProfession profession = targetVillager.getVillagerData().getProfession();
         if (profession == VillagerProfession.NONE) {
             throw NO_PROFESSION.create();
+        }
+
+        if (iVillager.clientcommands_getVillagerRngSimulator().isCracking()) {
+            throw ALREADY_BRUTE_FORCING.create();
         }
 
         int currentLevel = targetVillager.getVillagerData().getLevel();
