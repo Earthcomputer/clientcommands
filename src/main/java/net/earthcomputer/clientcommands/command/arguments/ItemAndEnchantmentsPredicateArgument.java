@@ -38,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAndEnchantmentsPredicateArgument.ItemAndEnchantmentsPredicate> {
@@ -127,7 +128,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
             return true;
         };
 
-        return new ItemAndEnchantmentsPredicate(parser.item, predicate, parser.with.size());
+        return new ItemAndEnchantmentsPredicate(parser.item, predicate, parser.with, parser.without, parser.exact, parser.ordered);
     }
 
     @Override
@@ -153,7 +154,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         return EXAMPLES;
     }
 
-    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentInstance>> predicate, int numEnchantments) implements Predicate<ItemStack> {
+    public record ItemAndEnchantmentsPredicate(Item item, Predicate<List<EnchantmentInstance>> predicate, List<EnchantmentInstancePredicate> with, List<EnchantmentInstancePredicate> without, boolean exact, boolean ordered) implements Predicate<ItemStack> {
         @Override
         public boolean test(ItemStack stack) {
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
@@ -163,6 +164,30 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
                 .map(entry -> new EnchantmentInstance(entry.getKey(), entry.getIntValue()))
                 .toList();
             return predicate.test(enchantments);
+        }
+
+        @Override
+        public String toString() {
+            String itemName = item.getName(new ItemStack(item)).getString();
+
+            StringBuilder flagsBuilder = new StringBuilder();
+            if (exact) {
+                flagsBuilder.append("Exactly");
+            }
+            if (ordered) {
+                flagsBuilder.append("Ordered");
+            }
+            String flags = flagsBuilder.isEmpty() ? "" : " [" + flagsBuilder + ')';
+
+            String enchantments = Stream.concat(
+                with.stream().filter(enchantment -> enchantment.enchantment().unwrapKey().isPresent()).map(EnchantmentInstancePredicate::toString),
+                without.stream().filter(enchantment -> enchantment.enchantment().unwrapKey().isPresent()).map(enchantment -> "!" + enchantment)
+            ).collect(Collectors.joining(", "));
+            if (!enchantments.isEmpty()) {
+                enchantments = '(' + enchantments + ')';
+            }
+
+            return String.format("%s%s %s", itemName, flags, enchantments);
         }
     }
 
@@ -456,10 +481,38 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         }
     }
 
-    private record EnchantmentInstancePredicate(Holder<Enchantment> enchantment, MinMaxBounds.Ints level) implements Predicate<EnchantmentInstance> {
+    public record EnchantmentInstancePredicate(Holder<Enchantment> enchantment, MinMaxBounds.Ints level) implements Predicate<EnchantmentInstance> {
         @Override
         public boolean test(EnchantmentInstance enchInstance) {
             return enchantment.equals(enchInstance.enchantment) && level.matches(enchInstance.level);
+        }
+
+        @Override
+        public String toString() {
+            String name = Component.translatable(enchantment.unwrapKey().get().location().toLanguageKey("enchantment")).getString();
+
+            int maxLevel = enchantment.value().getMaxLevel();
+            String levelString;
+            if (maxLevel == 1) {
+                levelString = "";
+            } else if ((level.min().isEmpty() || level.min().get() == 1) && (level.max().isPresent() && level.max().get() == maxLevel)) {
+                levelString = " *";
+            } else if (level.min().equals(level.max()) && level.min().isPresent()) {
+                levelString = " " + level.min().get();
+            } else {
+                levelString = " ";
+                if (level.min().isPresent()) {
+                    levelString = levelString + level.min().get();
+                }
+                if (!levelString.equals(" ") || level.max().isPresent()) {
+                    levelString = levelString + "..";
+                }
+                if (level.max().isPresent()) {
+                    levelString = levelString + level.max().get();
+                }
+            }
+
+            return name + levelString;
         }
     }
 }

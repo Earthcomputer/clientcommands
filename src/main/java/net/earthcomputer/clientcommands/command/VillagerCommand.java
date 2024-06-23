@@ -112,11 +112,15 @@ public class VillagerCommand {
             }
         }
         String resultItemString;
-        try {
-            ItemParser.ItemResult resultItemResult = new ItemParser(registries).parse(new StringReader(resultPredicate.string()));
-            resultItemString = displayText(new ItemStack(resultItemResult.item(), 1, resultItemResult.components()), true);
-        } catch (CommandSyntaxException e) {
-            resultItemString = resultPredicate.string();
+        if (resultPredicate.value() instanceof ItemAndEnchantmentsPredicate predicate) {
+            resultItemString = predicate.toString();
+        } else {
+            try {
+                ItemParser.ItemResult resultItemResult = new ItemParser(registries).parse(new StringReader(resultPredicate.string()));
+                resultItemString = displayText(new ItemStack(resultItemResult.item(), 1, resultItemResult.components()), true);
+            } catch (CommandSyntaxException e) {
+                resultItemString = resultPredicate.string();
+            }
         }
 
         goals.add(new Goal(
