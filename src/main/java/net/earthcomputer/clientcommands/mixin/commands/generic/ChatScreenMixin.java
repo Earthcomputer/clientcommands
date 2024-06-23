@@ -12,14 +12,13 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public class ChatScreenMixin {
     // replace the text before the Fabric Command API executes it,
     // but ensure the message is added to the history in its raw form.
-    @ModifyVariable(method = "handleChatInput", at = @At(value = "INVOKE", target = "Ljava/lang/String;startsWith(Ljava/lang/String;)Z", remap = false), argsOnly = true)
+    @ModifyVariable(method = "handleChatInput", at = @At(value = "INVOKE", target = "Ljava/lang/String;startsWith(Ljava/lang/String;)Z", remap = false, shift = At.Shift.BY, by = -2), argsOnly = true)
     private String onHandleChatInput(String message) {
         String prefix = AutoPrefixCommand.getCurrentPrefix();
         if (prefix == null || message.startsWith("/")) {
             prefix = "";
         } else {
             prefix = prefix + " ";
-            System.out.println(prefix.charAt(0));
         }
 
         String command = VarCommand.replaceVariables(prefix + message);
