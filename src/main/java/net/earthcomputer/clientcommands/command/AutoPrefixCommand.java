@@ -6,15 +6,12 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
 
-import static dev.xpple.clientarguments.arguments.CComponentArgument.getComponent;
-import static dev.xpple.clientarguments.arguments.CComponentArgument.textComponent;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgument.gameProfile;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgument.getSingleProfileArgument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class AutoPrefixCommand {
-    private static String currentPrefix = null;
+    private static String currentPrefix = "";
 
     public static String getCurrentPrefix() {
         return currentPrefix;
@@ -22,18 +19,18 @@ public class AutoPrefixCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         dispatcher.register(literal("cautoprefix")
-                .then(literal("set")
-                        .then(literal("tmsg")
-                                .executes(ctx -> prefix(ctx.getSource(), "/tm")))
-                        .then(literal("msg")
-                                .then(argument("player", gameProfile(true))
-                                    .executes(ctx -> prefix(ctx.getSource(), "/w " + getSingleProfileArgument(ctx, "player").getName()))))
-                        .then(argument("prefix", textComponent(context))
-                                .executes(ctx -> prefix(ctx.getSource(), getComponent(ctx, "prefix").getString()))))
-                .then(literal("reset")
-                    .executes(ctx -> clear(ctx.getSource())))
-                .then(literal("query")
-                    .executes(ctx -> current(ctx.getSource())))
+            .then(literal("set")
+                .then(literal("tmsg")
+                    .executes(ctx -> prefix(ctx.getSource(), "/tm")))
+                .then(literal("msg")
+                    .then(argument("player", gameProfile(true))
+                        .executes(ctx -> prefix(ctx.getSource(), "/w " + getSingleProfileArgument(ctx, "player").getName()))))
+                .then(argument("prefix", greedyString())
+                    .executes(ctx -> prefix(ctx.getSource(), getString(ctx, "prefix")))))
+            .then(literal("reset")
+                .executes(ctx -> clear(ctx.getSource())))
+            .then(literal("query")
+                .executes(ctx -> current(ctx.getSource())))
         );
     }
 
@@ -44,13 +41,13 @@ public class AutoPrefixCommand {
     }
 
     private static int clear(FabricClientCommandSource source) {
-        currentPrefix = null;
+        currentPrefix = "";
         source.sendFeedback(Component.translatable("commands.cautoprefix.reset"));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int current(FabricClientCommandSource source) {
-        if (currentPrefix != null) {
+        if (!currentPrefix.isEmpty()) {
             source.sendFeedback(Component.translatable("commands.cautoprefix.current", currentPrefix));
         } else {
             source.sendFeedback(Component.translatable("commands.cautoprefix.none"));
