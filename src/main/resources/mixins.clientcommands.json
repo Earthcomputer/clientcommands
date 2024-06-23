@@ -65,6 +65,7 @@
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.findblock.ClientLevelMixin",
+    "commands.generic.ClientPacketListenerMixin",
     "commands.generic.CommandSuggestionsMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",
