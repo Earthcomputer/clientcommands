@@ -95,7 +95,7 @@ public class DebugRandom extends LegacyRandomSource {
     private void handleStackTrace(int stackTrace) {
         this.stackTracesThisTick.add(stackTrace);
         try {
-            NbtIo.writeUnnamedTagWithFallback(/*firstTick ? */new CompoundTag()/* : entity.saveWithoutId(new CompoundTag())*/, nbtStream);
+            NbtIo.writeUnnamedTagWithFallback(firstTick ? new CompoundTag() : entity.saveWithoutId(new CompoundTag()), nbtStream);
         } catch (IOException e) {
             throw new AssertionError(e);
         }

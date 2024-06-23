@@ -2,13 +2,12 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.util.Pair;
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument;
-import net.earthcomputer.clientcommands.command.arguments.PredicatedRangeArgument;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.VillagerCracker;
@@ -18,9 +17,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -67,8 +69,8 @@ public class VillagerCommand {
                     .then(argument("first-item-quantity", withString(intRange(1, 64)))
                         .then(argument("second-item", withString(itemPredicate(context)))
                             .then(argument("second-item-quantity", withString(intRange(1, 64)))
-                                .then(argument("result-item", withString(itemAndEnchantmentsPredicate(context)))
-                                    .executes(ctx -> addGoal(getWithString(ctx, "first-item", CItemStackPredicateArgument.class), getWithString(ctx, "first-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "second-item", CItemStackPredicateArgument.class), getWithString(ctx, "second-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "result-item", ItemAndEnchantmentsPredicate.class), new WithStringArgument.Result<>("1..1", MinMaxBounds.Ints.between(1, 1))))))))))
+                                .then(argument("result-item", withString(itemAndEnchantmentsPredicate(context).withEnchantmentPredicate((item, enchantment) -> enchantment.is(EnchantmentTags.TRADEABLE))))
+                                    .executes(ctx -> addGoal(getWithString(ctx, "first-item", CItemStackPredicateArgument.class), getWithString(ctx, "first-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "second-item", CItemStackPredicateArgument.class), getWithString(ctx, "second-item-quantity", MinMaxBounds.Ints.class), getWithString(ctx, "result-item", ItemAndEnchantmentsPredicate.class), new WithStringArgument.Result<>("1", MinMaxBounds.Ints.between(1, 1))))))))))
             .then(literal("list-goals")
                 .executes(ctx -> listGoals(ctx.getSource())))
             .then(literal("remove-goal")
@@ -91,15 +93,40 @@ public class VillagerCommand {
                     .executes(ctx -> bruteForce(true)))));
     }
 
-    private static int addGoal(WithStringArgument.Result<CItemStackPredicateArgument> firstPredicate, WithStringArgument.Result<MinMaxBounds.Ints> firstItemQuantityRange, @Nullable WithStringArgument.Result<CItemStackPredicateArgument> secondPredicate, @Nullable WithStringArgument.Result<MinMaxBounds.Ints> secondItemQuantityRange, WithStringArgument.Result<? extends Predicate<ItemStack>> resultPredicate, WithStringArgument.Result<MinMaxBounds.Ints> resultItemQuantityRange) {
+    private static int addGoal(Result<CItemStackPredicateArgument> firstPredicate, Result<MinMaxBounds.Ints> firstItemQuantityRange, @Nullable Result<CItemStackPredicateArgument> secondPredicate, @Nullable Result<MinMaxBounds.Ints> secondItemQuantityRange, Result<? extends Predicate<ItemStack>> resultPredicate, Result<MinMaxBounds.Ints> resultItemQuantityRange) {
+        HolderLookup.Provider registries = Minecraft.getInstance().level.registryAccess();
+        String firstItemString;
+        try {
+            ItemParser.ItemResult firstItemResult = new ItemParser(registries).parse(new StringReader(firstPredicate.string()));
+            firstItemString = displayText(new ItemStack(firstItemResult.item(), 1, firstItemResult.components()), true);
+        } catch (CommandSyntaxException e) {
+            firstItemString = firstPredicate.string();
+        }
+        String secondItemString = null;
+        if (secondPredicate != null) {
+            try {
+                ItemParser.ItemResult secondItemResult = new ItemParser(registries).parse(new StringReader(secondPredicate.string()));
+                secondItemString = displayText(new ItemStack(secondItemResult.item(), 1, secondItemResult.components()), true);
+            } catch (CommandSyntaxException e) {
+                secondItemString = secondPredicate.string();
+            }
+        }
+        String resultItemString;
+        try {
+            ItemParser.ItemResult resultItemResult = new ItemParser(registries).parse(new StringReader(resultPredicate.string()));
+            resultItemString = displayText(new ItemStack(resultItemResult.item(), 1, resultItemResult.components()), true);
+        } catch (CommandSyntaxException e) {
+            resultItemString = resultPredicate.string();
+        }
+
         goals.add(new Goal(
-            String.format("%s %s", firstItemQuantityRange.string(), firstPredicate.string()),
+            String.format("%sx %s", firstItemQuantityRange.string(), firstItemString),
             item -> firstPredicate.value().test(item) && firstItemQuantityRange.value().matches(item.getCount()),
 
-            secondPredicate == null ? null : String.format("%s %s", secondItemQuantityRange.string(), secondPredicate.string()),
-            secondPredicate == null ? null : item -> secondPredicate.value().test(item) && secondItemQuantityRange.value().matches(item.getCount()),
+            secondPredicate == null || secondItemQuantityRange == null ? null : String.format("%sx %s", secondItemQuantityRange.string(), secondItemString),
+            secondPredicate == null || secondItemQuantityRange == null ? null : item -> secondPredicate.value().test(item) && secondItemQuantityRange.value().matches(item.getCount()),
 
-            String.format("%s %s", resultItemQuantityRange.string(), resultPredicate.string()),
+            String.format("%sx %s", resultItemQuantityRange.string(), resultItemString),
             item -> resultPredicate.value().test(item) && resultItemQuantityRange.value().matches(item.getCount())));
         ClientCommandHelper.sendFeedback("commands.cvillager.goalAdded");
 
@@ -110,7 +137,7 @@ public class VillagerCommand {
         if (goals.isEmpty()) {
             source.sendFeedback(Component.translatable("commands.cvillager.listGoals.noGoals").withStyle(style -> style.withColor(ChatFormatting.RED)));
         } else {
-            if (FishingCracker.goals.size() == 1) {
+            if (goals.size() == 1) {
                 source.sendFeedback(Component.translatable("commands.cvillager.listGoal.success"));
             } else {
                 source.sendFeedback(Component.translatable("commands.cvillager.listGoals.success", FishingCracker.goals.size() + 1));
@@ -206,11 +233,11 @@ public class VillagerCommand {
         } else {
             String price;
             if (offer.second() == null) {
-                price = VillagerCommand.displayText(offer.first());
+                price = displayText(offer.first(), false);
             } else {
-                price = VillagerCommand.displayText(offer.first()) + " + " + VillagerCommand.displayText(offer.second());
+                price = displayText(offer.first(), false) + " + " + displayText(offer.second(), false);
             }
-            ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", VillagerCommand.displayText(offer.result()), price, calls).withStyle(ChatFormatting.GREEN));
+            ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", displayText(offer.result(), false), price, calls).withStyle(ChatFormatting.GREEN));
             VillagerCracker.targetOffer = offer;
             iVillager.clientcommands_getVillagerRngSimulator().setCallsUntilToggleGui(calls, offer.result());
         }
@@ -249,16 +276,16 @@ public class VillagerCommand {
         @Override
         public String toString() {
             if (second == null) {
-                return String.format("%s = %s", displayText(first), displayText(result));
+                return String.format("%s = %s", displayText(first, false), displayText(result, false));
             } else {
-                return String.format("%s + %s = %s", displayText(first), displayText(second), displayText(result));
+                return String.format("%s + %s = %s", displayText(first, false), displayText(second, false), displayText(result, false));
             }
         }
     }
 
-    public static String displayText(ItemStack stack) {
+    public static String displayText(ItemStack stack, boolean ignoreCount) {
         String quantityPrefix;
-        if (stack.getCount() == 1) {
+        if (stack.getCount() == 1 || ignoreCount) {
             quantityPrefix = "";
         } else if (stack.getCount() < 64) {
             quantityPrefix = stack.getCount() + " ";

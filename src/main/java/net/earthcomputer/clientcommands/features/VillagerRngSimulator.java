@@ -44,15 +44,15 @@ public class VillagerRngSimulator {
 
     @Nullable
     private JRand random;
-    private long prevRandomSeed;
-    private int ambientSoundTime;
-    private int prevAmbientSoundTime;
+    private long prevRandomSeed = 0;
+    private int ambientSoundTime = -80;
+    private int prevAmbientSoundTime = -80;
     private boolean madeSound = false;
     private int totalAmbientSounds = 0;
     private int callsAtStartOfBruteForce = 0;
     private int callsInBruteForce = 0;
     private int totalCalls = 0;
-    private int prevTotalCalls;
+    private int prevTotalCalls = 0;
     private float firstPitch = Float.NaN;
     private int ticksBetweenSounds = 0;
     private float secondPitch = Float.NaN;
@@ -107,28 +107,18 @@ public class VillagerRngSimulator {
         }
     }
 
-    public VillagerRngSimulator(@Nullable JRand random, int ambientSoundTime) {
+    public VillagerRngSimulator(@Nullable JRand random) {
         this.random = random;
-        this.ambientSoundTime = ambientSoundTime;
     }
 
     public VillagerRngSimulator copy() {
-        VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : random.copy(), ambientSoundTime);
-        that.random = this.random;
-        that.prevRandomSeed = this.prevRandomSeed;
+        VillagerRngSimulator that = new VillagerRngSimulator(random == null ? null : random.copy());
         that.ambientSoundTime = this.ambientSoundTime;
         that.prevAmbientSoundTime = this.prevAmbientSoundTime;
         that.madeSound = this.madeSound;
         that.totalAmbientSounds = this.totalAmbientSounds;
-        that.callsAtStartOfBruteForce = this.callsAtStartOfBruteForce;
-        that.callsInBruteForce = this.callsInBruteForce;
         that.totalCalls = this.totalCalls;
         that.prevTotalCalls = this.prevTotalCalls;
-        that.firstPitch = this.firstPitch;
-        that.ticksBetweenSounds = this.ticksBetweenSounds;
-        that.secondPitch = this.secondPitch;
-        that.seedsFromTwoPitches = this.seedsFromTwoPitches;
-        that.activeGoalResult = this.activeGoalResult;
         return that;
     }
 
@@ -230,10 +220,6 @@ public class VillagerRngSimulator {
         }
 
         return CrackedState.CRACKED;
-    }
-
-    public void setRandom(@Nullable JRand random) {
-        this.random = random;
     }
 
     public boolean isCracking() {
@@ -503,7 +489,7 @@ public class VillagerRngSimulator {
 
         public Component getMessage(boolean addColor) {
             return switch (this) {
-                case UNCRACKED -> Component.translatable("commands.cvillager.halfCracked").withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
+                case UNCRACKED -> Component.translatable("commands.cvillager.partiallyCracked").withStyle(addColor ? ChatFormatting.RED : ChatFormatting.RESET);
                 case CRACKED -> Component.translatable("commands.cvillager.inSync").withStyle(addColor ? ChatFormatting.GREEN : ChatFormatting.RESET);
             };
         }

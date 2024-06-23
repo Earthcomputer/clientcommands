@@ -21,7 +21,7 @@ public abstract class VillagerMixin extends AbstractVillager implements IVillage
     }
 
     @Unique
-    VillagerRngSimulator rng = new VillagerRngSimulator(null, -80);
+    VillagerRngSimulator rng = new VillagerRngSimulator(null);
 
     @Override
     public void clientcommands_onAmbientSoundPlayed(float pitch) {

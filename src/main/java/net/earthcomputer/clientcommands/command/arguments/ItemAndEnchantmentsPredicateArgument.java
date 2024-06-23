@@ -38,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAndEnchantmentsPredicateArgument.ItemAndEnchantmentsPredicate> {
 
@@ -158,7 +159,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
             if (item != stack.getItem() && (item != Items.BOOK || stack.getItem() != Items.ENCHANTED_BOOK)) {
                 return false;
             }
-            List<EnchantmentInstance> enchantments = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet().stream()
+            List<EnchantmentInstance> enchantments = Stream.concat(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet().stream(), stack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet().stream())
                 .map(entry -> new EnchantmentInstance(entry.getKey(), entry.getIntValue()))
                 .toList();
             return predicate.test(enchantments);

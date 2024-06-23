@@ -30,7 +30,7 @@ public abstract class MerchantScreenMixin extends AbstractContainerScreen<Mercha
     @Inject(method = "render", at = @At("HEAD"))
     private void onRender(CallbackInfo ci) {
         Villager targetVillager = VillagerCracker.getVillager();
-        if (targetVillager != null && ((IVillager) targetVillager).clientcommands_getVillagerRngSimulator().getCrackedState().isCracked()) {
+        if (targetVillager != null) {
             if (Minecraft.getInstance().player.distanceToSqr(targetVillager) > 2.0) {
                 ClientCommandHelper.addOverlayMessage(Component.translatable("commands.cvillager.outOfSync.distance").withStyle(ChatFormatting.RED), 100);
                 ((IVillager) targetVillager).clientcommands_getVillagerRngSimulator().reset();
