@@ -25,9 +25,3 @@ run/
 logs/
 
 /changelog.txt
-
-# nixos files
-*.nix
-flake.lock
-.envrc
-.direnv/
