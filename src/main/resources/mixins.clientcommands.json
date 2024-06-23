@@ -67,6 +67,7 @@
     "commands.findblock.ClientLevelMixin",
     "commands.generic.ClientPacketListenerMixin",
     "commands.generic.CommandSuggestionsMixin",
+    "commands.reply.ChatScreenMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",

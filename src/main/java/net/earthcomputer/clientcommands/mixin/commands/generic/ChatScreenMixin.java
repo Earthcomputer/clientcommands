@@ -1,14 +1,11 @@
 package net.earthcomputer.clientcommands.mixin.commands.generic;
 
 import net.earthcomputer.clientcommands.ClientCommands;
-import net.earthcomputer.clientcommands.command.ReplyCommand;
 import net.earthcomputer.clientcommands.command.VarCommand;
 import net.minecraft.client.gui.screens.ChatScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin {
@@ -21,10 +18,5 @@ public class ChatScreenMixin {
             ClientCommands.sendCommandExecutionToServer(command.substring(1));
         }
         return command;
-    }
-
-    @Inject(method = "init", at = @At("TAIL"))
-    private void onInit(CallbackInfo ci) {
-        ReplyCommand.onChatOpened();
     }
 }
