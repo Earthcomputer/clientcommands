@@ -78,40 +78,45 @@ public class AliasCommand {
         if (cmd == null) {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
         }
-
+        
         if (((IClientSuggestionsProvider_Alias) source).clientcommands_isAliasSeen(aliasKey)) {
             throw RECURSIVE_ALIAS_EXCEPTION.create(aliasKey);
         }
         ((IClientSuggestionsProvider_Alias) source).clientcommands_addSeenAlias(aliasKey);
 
-        int inlineArgumentCount = (int) Pattern.compile("(?<!%)%(?:%%)*(?!%)").matcher(cmd).results().count();
-        if (inlineArgumentCount > 0) {
-            String[] argumentArray = arguments.split(" ", inlineArgumentCount + 1);
+        try {
+            int inlineArgumentCount = (int) Pattern.compile("(?<!%)%(?:%%)*(?!%)").matcher(cmd).results().count();
+            if (inlineArgumentCount > 0) {
+                String[] argumentArray = arguments.split(" ", inlineArgumentCount + 1);
 
-            String trailingArguments = "";
-            if (argumentArray.length > inlineArgumentCount) {
-                trailingArguments = " " + argumentArray[inlineArgumentCount];
+                String trailingArguments = "";
+                if (argumentArray.length > inlineArgumentCount) {
+                    trailingArguments = " " + argumentArray[inlineArgumentCount];
+                }
+                try {
+                    cmd = String.format(cmd, (Object[]) argumentArray) + trailingArguments;
+                } catch (IllegalFormatException e) {
+                    throw ILLEGAL_FORMAT_EXCEPTION.create();
+                }
+            } else if (arguments != null) {
+                cmd += " " + arguments;
             }
-            try {
-                cmd = String.format(cmd, (Object[]) argumentArray) + trailingArguments;
-            } catch (IllegalFormatException e) {
-                throw ILLEGAL_FORMAT_EXCEPTION.create();
+            ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+            if (packetListener == null) {
+                return Command.SINGLE_SUCCESS;
             }
-        } else if (arguments != null) {
-            cmd += " " + arguments;
-        }
-        ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
-        if (packetListener == null) {
+            if (cmd.startsWith("/")) {
+                cmd = cmd.substring(1);
+                packetListener.sendCommand(cmd);
+            } else {
+                packetListener.sendChat(cmd);
+            }
+
             return Command.SINGLE_SUCCESS;
         }
-        if (cmd.startsWith("/")) {
-            cmd = cmd.substring(1);
-            packetListener.sendCommand(cmd);
-        } else {
-            packetListener.sendChat(cmd);
+        finally {
+            ((IClientSuggestionsProvider_Alias) source).clientcommands_removeSeenAlias(aliasKey); 
         }
-
-        return Command.SINGLE_SUCCESS;
     }
 
     @SuppressWarnings("unchecked")
