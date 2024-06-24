@@ -78,7 +78,7 @@ public class AliasCommand {
         if (cmd == null) {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
         }
-        
+
         if (((IClientSuggestionsProvider_Alias) source).clientcommands_isAliasSeen(aliasKey)) {
             throw RECURSIVE_ALIAS_EXCEPTION.create(aliasKey);
         }
