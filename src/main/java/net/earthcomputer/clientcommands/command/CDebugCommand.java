@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
@@ -29,6 +30,6 @@ public class CDebugCommand {
             case "profiler":
                 debugScreenOverlay.toggleProfilerChart(); break;
         }
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 }
