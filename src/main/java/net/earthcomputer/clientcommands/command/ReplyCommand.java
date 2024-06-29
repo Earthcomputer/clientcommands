@@ -40,7 +40,7 @@ public class ReplyCommand {
             throw NO_TARGET_FOUND.create();
         }
 
-        source.getClient().getConnection().sendCommand(String.format("msg %s %s", currentTarget, message.getString()));
+        source.getClient().getConnection().sendCommand(String.format("w %s %s", currentTarget, message.getString()));
 
         return Command.SINGLE_SUCCESS;
     }
