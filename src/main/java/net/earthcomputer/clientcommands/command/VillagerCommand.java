@@ -243,7 +243,7 @@ public class VillagerCommand {
             }
             ClientCommandHelper.sendFeedback(Component.translatable("commands.cvillager.bruteForce.success", displayText(offer.result(), false), price, calls).withStyle(ChatFormatting.GREEN));
             VillagerCracker.targetOffer = offer;
-            iVillager.clientcommands_getVillagerRngSimulator().setCallsUntilToggleGui(calls, offer.result());
+            iVillager.clientcommands_getVillagerRngSimulator().setCallsUntilToggleGui(calls);
         }
 
         return Command.SINGLE_SUCCESS;

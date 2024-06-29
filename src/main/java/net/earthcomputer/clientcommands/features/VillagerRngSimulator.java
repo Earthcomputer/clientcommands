@@ -23,7 +23,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerTrades;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
@@ -58,8 +57,6 @@ public class VillagerRngSimulator {
     private float secondPitch = Float.NaN;
     @Nullable
     private long[] seedsFromTwoPitches = null;
-    @Nullable
-    private ItemStack activeGoalResult = null;
 
     static {
         try {
@@ -204,10 +201,9 @@ public class VillagerRngSimulator {
         return null;
     }
 
-    public void setCallsUntilToggleGui(int calls, ItemStack resultStack) {
+    public void setCallsUntilToggleGui(int calls) {
         callsAtStartOfBruteForce = totalCalls;
         callsInBruteForce = calls;
-        activeGoalResult = resultStack;
     }
 
     public int getTotalCalls() {
@@ -239,7 +235,6 @@ public class VillagerRngSimulator {
         ticksBetweenSounds = 0;
         secondPitch = Float.NaN;
         seedsFromTwoPitches = null;
-        activeGoalResult = null;
     }
 
     @Override

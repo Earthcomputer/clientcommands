@@ -425,7 +425,7 @@ public class FishingCracker {
             LootTable fishingLootTable = MCLootTables.FISHING.get().apply(SeedfindingUtil.getMCVersion());
             for (var goal : goals) {
                 if (goal.value() instanceof ClientItemPredicateArgument.EnchantedItemPredicate predicate) {
-                    if (predicate.isEnchantedBook() && predicate.predicate.numEnchantments() >= 2) {
+                    if (predicate.isEnchantedBook() && predicate.predicate.with().size() >= 2) {
                         if (!hasWarnedMultipleEnchants) {
                             ClientCommandHelper.sendHelp(Component.translatable("commands.cfish.help.tooManyEnchants"));
                             hasWarnedMultipleEnchants = true;
