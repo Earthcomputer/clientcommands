@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands.mixin.commands.generic;
+package net.earthcomputer.clientcommands.mixin.commands.reply;
 
 import net.earthcomputer.clientcommands.command.ReplyCommand;
 import net.minecraft.client.multiplayer.ClientPacketListener;
