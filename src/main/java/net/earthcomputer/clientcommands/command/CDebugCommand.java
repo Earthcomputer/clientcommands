@@ -7,29 +7,37 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.earthcomputer.clientcommands.command.CDebugCommand.DebugScreenType.*;
 
 public class CDebugCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cdebug")
-            .executes(context -> execute("overlay"))
+            .executes(context -> execute(OVERLAY))
             .then(literal("overlay")
-                .executes(context -> execute("overlay")))
+                .executes(context -> execute(OVERLAY)))
             .then(literal("fps")
-                .executes(context -> execute("fps")))
+                .executes(context -> execute(FPS)))
             .then(literal("network")
-                .executes(context -> execute("network")))
+                .executes(context -> execute(NETWORK)))
             .then(literal("profiler")
-                .executes(context -> execute("profiler"))));
+                .executes(context -> execute(PROFILER))));
     }
 
-    private static int execute(String type) {
+    private static int execute(DebugScreenType type) {
         DebugScreenOverlay debugScreenOverlay = Minecraft.getInstance().getDebugOverlay();
         switch (type) {
-            case "overlay" -> debugScreenOverlay.toggleOverlay();
-            case "fps" -> debugScreenOverlay.toggleFpsCharts();
-            case "network" -> debugScreenOverlay.toggleNetworkCharts();
-            case "profiler" -> debugScreenOverlay.toggleProfilerChart();
+            case OVERLAY -> debugScreenOverlay.toggleOverlay();
+            case FPS -> debugScreenOverlay.toggleFpsCharts();
+            case NETWORK -> debugScreenOverlay.toggleNetworkCharts();
+            case PROFILER -> debugScreenOverlay.toggleProfilerChart();
         }
         return Command.SINGLE_SUCCESS;
+    }
+    
+    enum DebugScreenType {
+        OVERLAY,
+        FPS,
+        NETWORK,
+        PROFILER
     }
 }
