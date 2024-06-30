@@ -2,29 +2,28 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 
+import static dev.xpple.clientarguments.arguments.CEnumArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
-import static net.earthcomputer.clientcommands.command.CDebugCommand.DebugScreenType.*;
 
 public class CDebugCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cdebug")
-            .executes(context -> execute(OVERLAY))
-            .then(literal("overlay")
-                .executes(context -> execute(OVERLAY)))
-            .then(literal("fps")
-                .executes(context -> execute(FPS)))
-            .then(literal("network")
-                .executes(context -> execute(NETWORK)))
-            .then(literal("profiler")
-                .executes(context -> execute(PROFILER))));
+            .executes(context -> executeOverlay())
+            .then(argument("type", enumArg(DebugScreenType.class))
+                .executes(CDebugCommand::execute))
+        );
     }
 
-    private static int execute(DebugScreenType type) {
+    private static int execute(CommandContext<FabricClientCommandSource> ctx) {
         DebugScreenOverlay debugScreenOverlay = Minecraft.getInstance().getDebugOverlay();
+        DebugScreenType type = getEnum(ctx, "type");
         switch (type) {
             case OVERLAY -> debugScreenOverlay.toggleOverlay();
             case FPS -> debugScreenOverlay.toggleFpsCharts();
@@ -34,10 +33,25 @@ public class CDebugCommand {
         return Command.SINGLE_SUCCESS;
     }
     
-    enum DebugScreenType {
-        OVERLAY,
-        FPS,
-        NETWORK,
-        PROFILER
+    private static int executeOverlay() {
+        Minecraft.getInstance().getDebugOverlay().toggleOverlay();
+        return Command.SINGLE_SUCCESS;
+    }
+    
+    public enum DebugScreenType implements StringRepresentable {
+        OVERLAY("overlay"),
+        FPS("fps"),
+        NETWORK("network"),
+        PROFILER("profiler");
+        
+        private final String name;
+        
+        DebugScreenType(String name) {
+            this.name = name;
+        }
+        
+        public @NotNull String getSerializedName() {
+            return this.name;
+        }
     }
 }
