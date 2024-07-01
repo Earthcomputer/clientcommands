@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.earthcomputer.clientcommands.command.VillagerCommand;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -29,11 +30,7 @@ import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -489,30 +486,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
 
         @Override
         public String toString() {
-            String name = Component.translatable(enchantment.unwrapKey().get().location().toLanguageKey("enchantment")).getString();
-
-            int maxLevel = enchantment.value().getMaxLevel();
-            String levelString;
-            if (maxLevel == 1) {
-                levelString = "";
-            } else if ((level.min().isEmpty() || level.min().get() == 1) && (level.max().isPresent() && level.max().get() == maxLevel)) {
-                levelString = " *";
-            } else if (level.min().equals(level.max()) && level.min().isPresent()) {
-                levelString = " " + level.min().get();
-            } else {
-                levelString = " ";
-                if (level.min().isPresent()) {
-                    levelString = levelString + level.min().get();
-                }
-                if (!levelString.equals(" ") || level.max().isPresent()) {
-                    levelString = levelString + "..";
-                }
-                if (level.max().isPresent()) {
-                    levelString = levelString + level.max().get();
-                }
-            }
-
-            return name + levelString;
+            return Component.translatable(enchantment.unwrapKey().get().location().toLanguageKey("enchantment")).getString() + " " + Objects.requireNonNullElse(VillagerCommand.displayRange(enchantment.value().getMaxLevel(), level), "*");
         }
     }
 }
