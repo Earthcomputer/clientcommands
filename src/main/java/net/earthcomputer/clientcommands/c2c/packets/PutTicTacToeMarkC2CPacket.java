@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.c2c.packets;
 
+import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -9,9 +10,9 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 
-public record PutTicTacToeMarkC2CPacket(String sender, byte x, byte y) implements Packet<C2CPacketListener> {
+public record PutTicTacToeMarkC2CPacket(String sender, byte x, byte y) implements C2CPacket {
     public static final StreamCodec<RegistryFriendlyByteBuf, PutTicTacToeMarkC2CPacket> CODEC = Packet.codec(PutTicTacToeMarkC2CPacket::write, PutTicTacToeMarkC2CPacket::new);
-    public static final PacketType<PutTicTacToeMarkC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation("clientcommands", "put_tic_tac_toe_mark"));
+    public static final PacketType<PutTicTacToeMarkC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "put_tic_tac_toe_mark"));
 
     public PutTicTacToeMarkC2CPacket(FriendlyByteBuf buf) {
         this(buf.readUtf(), buf.readByte(), buf.readByte());

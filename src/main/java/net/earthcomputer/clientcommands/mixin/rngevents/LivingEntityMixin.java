@@ -2,8 +2,10 @@ package net.earthcomputer.clientcommands.mixin.rngevents;
 
 import com.google.common.base.Objects;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.util.CUtil;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,9 +31,6 @@ public abstract class LivingEntityMixin extends Entity {
     private BlockPos lastPos;
     @Shadow
     protected int useItemRemaining;
-
-    @Shadow
-    protected abstract boolean onSoulSpeedBlock();
 
     public LivingEntityMixin(EntityType<?> entityType_1, Level level_1) {
         super(entityType_1, level_1);
@@ -91,7 +90,7 @@ public abstract class LivingEntityMixin extends Entity {
         if (!Objects.equal(pos, this.lastPos)) {
             this.lastPos = pos;
             if (onGround()) {
-                int frostWalkerLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FROST_WALKER, (LivingEntity) (Object) this);
+                int frostWalkerLevel = CUtil.getEnchantmentLevel(Enchantments.FROST_WALKER, (LivingEntity) (Object) this);
                 if (frostWalkerLevel > 0) {
                     BlockState frostedIce = Blocks.FROSTED_ICE.defaultBlockState();
                     int radius = Math.min(16, frostWalkerLevel + 2);
@@ -110,14 +109,14 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;canSpawnSoulSpeedParticle()Z"))
+    @Inject(method = "baseTick", at = @At("RETURN"))
     private void testSoulSpeed(CallbackInfo ci) {
         if (!isThePlayer()) {
             return;
         }
 
-        boolean hasSoulSpeed = EnchantmentHelper.hasSoulSpeed((LivingEntity) (Object) this);
-        if (hasSoulSpeed && onSoulSpeedBlock()) {
+        boolean hasSoulSpeed = CUtil.getEnchantmentLevel(Enchantments.SOUL_SPEED, (LivingEntity) (Object) this) > 0;
+        if (hasSoulSpeed && level().getBlockState(getBlockPosBelowThatAffectsMyMovement()).is(BlockTags.SOUL_SPEED_BLOCKS)) {
             PlayerRandCracker.onSoulSpeed();
         }
     }

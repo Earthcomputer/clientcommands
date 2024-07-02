@@ -8,10 +8,11 @@
   "commands.calias.addAlias.success": "成功加入别名“%s”",
   "commands.calias.listAliases.noAliasesRegistered": "没有已注册的别名",
   "commands.calias.listAliases.success": "%s已注册的别名：",
+  "commands.calias.recursive": "递归别名“%s”",
   "commands.calias.removeAlias.success": "成功移除别名“%s”",
 
   "commands.careastats.notLoaded": "该区域的区块未加载",
-  "commands.careastats.output.chunksScanned": "扫描%d个区块，用时%dns≈%dms",
+  "commands.careastats.output.chunksScanned": "扫描%d个区块，用时%d纳秒≈%d毫秒",
   "commands.careastats.output.blocksMatched": "在一共%2$d个方块中匹配到%1$d个方块",
   "commands.careastats.output.entitiesFound": "在此区域中找到%d个实体",
 
@@ -64,8 +65,8 @@
   "commands.cenchant.success": "正在开始操控附魔",
   "commands.cenchant.uncracked": "你需要先破解随机种子",
 
-  "commands.cfind.found.left": "在 ",
-  "commands.cfind.found.right": " 找到%1$s, 距离你%2$s格",
+  "commands.cfind.found.left": "在",
+  "commands.cfind.found.right": "找到%1$s, 距离你%2$s格",
   "commands.cfind.keepSearching.success": "正在搜寻实体",
   "commands.cfind.noMatch": "未找到匹配查找条件的实体",
   "commands.cfind.success": "找到%d个匹配查找条件的实体",
@@ -76,11 +77,13 @@
   "commands.cfindblock.success.glow": "[发光]",
   "commands.cfindblock.success.right": "，距离你%1$s格",
 
+  "commands.cfinditem.match.entity.left": "%d个%s在%s中被找到，位于",
+  "commands.cfinditem.match.entity.right": "",
   "commands.cfinditem.match.left": "在",
-  "commands.cfinditem.match.right": "找到%dx %s",
+  "commands.cfinditem.match.right": "找到了%d个%s",
   "commands.cfinditem.starting": "正在搜索%s",
   "commands.cfinditem.starting.keepSearching": "正在持续搜索%s",
-  "commands.cfinditem.total": "一共找到了%d个%s ",
+  "commands.cfinditem.total": "一共找到了%d个%s",
 
   "commands.cfish.addGoal.success": "成功添加目标%s",
   "commands.cfish.correctLoot": "校正%dms后得到了目标战利品",
@@ -144,7 +147,9 @@
   "commands.clisten.commandDisabled": "此命令已被禁用，请查看日志",
   "commands.clisten.unknownPacket": "未知数据包%s",
   "commands.clisten.sentPacket": "发送了以下数据包：%s",
-  "commands.clisten.receivedPacket": "收到以下数据包：%s",
+  "commands.clisten.receivedPacket": "收到了以下数据包：%s",
+  "commands.clisten.sentC2CPacket": "发送了以下C2C数据包：%s",
+  "commands.clisten.receivedC2CPacket": "收到了以下C2C数据包：%s",
   "commands.clisten.packetError": "错误",
   "commands.clisten.add.success": "成功开始监听该数据包",
   "commands.clisten.add.failed": "已经在监听该数据包",
@@ -153,6 +158,8 @@
   "commands.clisten.list.none": "未监听任何数据包",
   "commands.clisten.list": "正在监听以下数据包：",
   "commands.clisten.clear": "不再监听任何数据包",
+
+  "commands.cminesweeper.tooManyMines": "地雷数量过多，必须在0到9之间并小于砖块总数",
 
   "commands.cplayerinfo.ioException": "出现错误",
   "commands.cplayerinfo.getNameHistory.success": "%s有如下名称：%s",
@@ -168,7 +175,7 @@
 
   "commands.cping.success": "你的平均ping是%dms",
   "commands.cping.success.other": "%s的平均ping是%dms",
-  "commands.cping.singleplayer": "你在一个单人世界里(╯°□°）╯︵ ┻━┻",
+  "commands.cping.singleplayer": "你在一个单人游戏世界里(╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "未找到玩家",
 
   "commands.cpos.level.overworld": "主世界",
@@ -193,10 +200,14 @@
   "commands.cstopsound.success.source.any": "已为自身停止播放所有%s声音",
   "commands.cstopsound.success.source.sound": "已为自身停止播放来自%2$s音源的%1$s声音",
 
+  "commands.ctask.conflicting": "一个有冲突的任务‘%s’已在运行。%s",
   "commands.ctask.list.noTasks": "当前没有正在执行的任务",
   "commands.ctask.list.success": "%d个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
   "commands.ctask.stop.success": "已停止%d个任务",
+
+  "commands.ctictactoe.playerNotFound": "未找到玩家",
+  "commands.ctictactoe.noGameWithPlayer": "目前没有与该玩家一起进行游戏",
 
   "commands.ctime.reset.success": "当前时间与服务器相同",
 
@@ -248,6 +259,7 @@
   "commands.client.invalidHoverAction": "无效的点击事件操作‘%s’",
   "commands.client.invalidHoverEvent": "无效的悬浮事件‘%s’",
   "commands.client.notClient": "不是客户端指令",
+  "commands.client.regexTooSlow": "正则表达式“%s”太慢而无法匹配",
   "commands.client.requiresRestart": "此更改将在你重新启动客户端后生效",
   "commands.client.tooFewArguments": "参数过少",
 
@@ -281,6 +293,10 @@
   "enchCrack.insn.enchantments": "最终获得的附魔：",
 
   "itemCrack.notEnoughItems": "无法使用随机数种子破解：玩家手中物品不足",
+
+  "minesweeperGame.minesLeft": "剩余地雷：%d",
+  "minesweeperGame.timePlayed": "游玩时间：%d秒",
+  "minesweeperGame.title": "扫雷",
 
   "playerManip.state": "玩家种子破解状态：%s",
   "playerManip.state.uncracked": "未破解",
@@ -328,6 +344,11 @@
   "snakeGame.title": "贪吃蛇",
   "snakeGame.score": "分数：%d",
 
+  "ticTacToeGame.title": "井字棋对手：%s",
+  "ticTacToeGame.playingWith": "你正在与%s玩",
+  "ticTacToeGame.noughts": "圈（O）",
+  "ticTacToeGame.crosses": "叉（X）",
+
   "c2cpacket.messageTooLong": "信息过长（最多255个字符）",
   "c2cpacket.publicKeyNotFound": "未找到公共密匙",
   "c2cpacket.encryptionFailed": "加密你的消息时出现问题",
@@ -336,5 +357,14 @@
   "c2cpacket.sentC2CPacket": "你发送了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！",
 
   "c2cpacket.messageC2CPacket.incoming": "%s -> 你：%s",
-  "c2cpacket.messageC2CPacket.outgoing": "你 -> %s：%s"
+  "c2cpacket.messageC2CPacket.outgoing": "你 -> %s：%s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "你邀请%s参加井字棋",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s邀请你参加井字棋",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "接受",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "点击以接受",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s已接受你的邀请，点击即可开始下棋",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "接受了邀请，你的对手将先走",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s走了一步棋并赢了",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s已下棋，点击来下你的棋"
 }

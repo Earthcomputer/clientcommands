@@ -43,7 +43,7 @@ class SnakeGameScreen extends Screen {
 
     private static final Minecraft minecraft = Minecraft.getInstance();
 
-    private static final ResourceLocation GRID_TEXTURE = new ResourceLocation("clientcommands:textures/snake_grid.png");
+    private static final ResourceLocation GRID_TEXTURE = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/snake_grid.png");
 
     private static final Random random = new Random();
 
