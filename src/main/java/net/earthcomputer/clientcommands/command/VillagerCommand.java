@@ -65,6 +65,19 @@ public class VillagerCommand {
                         .then(argument("result-item", withString(itemPredicate(context)))
                             .then(argument("result-count", intRange())
                                 .executes(ctx -> addGoal(ctx.getSource(), getWithString(ctx, "first-item", CItemStackPredicateArgument.class), CRangeArgument.Ints.getRangeArgument(ctx, "first-count"), null, null, getWithString(ctx, "result-item", CItemStackPredicateArgument.class), CRangeArgument.Ints.getRangeArgument(ctx, "result-count"))))))))
+            .then(literal("add-three-item-goal")
+                .then(argument("first-item", withString(itemPredicate(context)))
+                    .then(argument("first-count", intRange())
+                        .then(argument("second-item", withString(itemPredicate(context)))
+                            .then(argument("second-count", intRange())
+                                .then(argument("result-item", withString(itemPredicate(context)))
+                                    .then(argument("result-count", intRange())
+                                        .executes(ctx -> addGoal(ctx.getSource(), getWithString(ctx, "first-item", CItemStackPredicateArgument.class), CRangeArgument.Ints.getRangeArgument(ctx, "first-count"), getWithString(ctx, "second-item", CItemStackPredicateArgument.class), CRangeArgument.Ints.getRangeArgument(ctx, "second-count"), getWithString(ctx, "result-item", CItemStackPredicateArgument.class), CRangeArgument.Ints.getRangeArgument(ctx, "result-count"))))))))))
+            .then(literal("add-two-item-enchanted-goal")
+                .then(argument("first-item", withString(itemPredicate(context)))
+                    .then(argument("first-count", intRange())
+                        .then(argument("result-item", withString(itemAndEnchantmentsPredicate(context).withEnchantmentPredicate((item, enchantment) -> enchantment.is(EnchantmentTags.TRADEABLE))))
+                            .executes(ctx -> addGoal(ctx.getSource(), getWithString(ctx, "first-item", CItemStackPredicateArgument.class), CRangeArgument.Ints.getRangeArgument(ctx, "first-count"), null, null, getWithString(ctx, "result-item", ItemAndEnchantmentsPredicate.class), MinMaxBounds.Ints.between(1, 1)))))))
             .then(literal("add-three-item-enchanted-goal")
                 .then(argument("first-item", withString(itemPredicate(context)))
                     .then(argument("first-count", intRange())
@@ -205,7 +218,7 @@ public class VillagerCommand {
 
         VillagerTrades.ItemListing[] listings = VillagerTrades.TRADES.get(profession).getOrDefault(crackedLevel, new VillagerTrades.ItemListing[0]);
         int adjustmentTicks = 1 + (levelUp ? -40 : 0);
-        Pair<Integer, Offer> pair = iVillager.clientcommands_getVillagerRngSimulator().bruteForceOffers(listings, levelUp ? 240 : 10, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer.first(), offer.second(), offer.result()))).mapFirst(x -> x + adjustmentTicks * 2);
+        Pair<Integer, Offer> pair = iVillager.clientcommands_getVillagerRngSimulator().bruteForceOffers(listings, levelUp ? 240 : 10, Configs.maxVillagerBruteForceSimulationCalls, offer -> VillagerCommand.goals.stream().anyMatch(goal -> goal.matches(offer))).mapFirst(x -> x + adjustmentTicks * 2);
         int calls = pair.getFirst();
         Offer offer = pair.getSecond();
         if (calls < 0) {
@@ -226,10 +239,10 @@ public class VillagerCommand {
     }
 
     public record Goal(String firstString, Predicate<ItemStack> first, @Nullable String secondString, @Nullable Predicate<ItemStack> second, String resultString, Predicate<ItemStack> result) {
-        public boolean matches(ItemStack firstItem, @Nullable ItemStack secondItem, ItemStack resultItem) {
-            return first.test(firstItem)
-                && ((second == null && secondItem == null) || secondItem != null && second != null && second.test(secondItem))
-                && result.test(resultItem);
+        public boolean matches(Offer offer) {
+            return first.test(offer.first)
+                && ((second == null && offer.second == null) || offer.second != null && second != null && second.test(offer.second))
+                && result.test(offer.result);
         }
 
         @Override
