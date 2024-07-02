@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.npc.Villager;
@@ -66,10 +65,15 @@ public class CCrackVillager {
         }
     }
 
-    public static void onAmbient() {
-        VillagerRNGSim.INSTANCE.onAmbient();
-        if(!cracked && validMeasures > 0) {
-            measurements.add(Measurement.skip(2));
+    public static void onAmbient(ClientboundSoundPacket packet) {
+        Villager villager;
+        if(targetVillager != null && (villager = targetVillager.get()) != null) {
+            if(villager.distanceToSqr(packet.getX(), packet.getY(), packet.getZ()) < 1.0) {
+                VillagerRNGSim.INSTANCE.onAmbient();
+                if(!cracked && validMeasures > 0) {
+                    measurements.add(Measurement.skip(2));
+                }
+            }
         }
     }
 
@@ -140,7 +144,6 @@ public class CCrackVillager {
     }
 
     public static class Offer implements Predicate<MerchantOffer> {
-
         Predicate<ItemStack> first = null;
         Predicate<ItemStack> second = null;
         Predicate<ItemStack> result = null;
@@ -155,16 +158,19 @@ public class CCrackVillager {
             firstDescription = description;
             return this;
         }
+
         public Offer withSecond(Predicate<ItemStack> predicate, String description) {
             second = predicate;
             secondDescription = description;
             return this;
         }
+
         public Offer withResult(Predicate<ItemStack> predicate, String description) {
             result = predicate;
             resultDescription = description;
             return this;
         }
+
         public Offer andEnchantment(Predicate<ItemStack> predicate, String description) {
             result = result.and(predicate);
             enchantmentDescription = description;
@@ -173,8 +179,8 @@ public class CCrackVillager {
 
         @Override
         public boolean test(MerchantOffer offer) {
-            if(first != null && !first.test(offer.getItemCostA().itemStack())) return false;
-            if(second != null && !second.test(offer.getItemCostB().isPresent() ? offer.getItemCostB().get().itemStack() : null)) {
+            if (first != null && !first.test(offer.getItemCostA().itemStack())) return false;
+            if (second != null && !second.test(offer.getItemCostB().isPresent() ? offer.getItemCostB().get().itemStack() : null)) {
                 return false;
             }
             return result == null || result.test(offer.getResult());
@@ -183,15 +189,15 @@ public class CCrackVillager {
         @Override
         public String toString() {
             StringBuilder result = new StringBuilder(firstDescription);
-            if(!secondDescription.isEmpty() && !result.isEmpty()) {
+            if (!secondDescription.isEmpty() && !result.isEmpty()) {
                 result.append(" + ");
             }
             result.append(secondDescription);
-            if(!resultDescription.isEmpty() && !result.isEmpty()) {
+            if (!resultDescription.isEmpty() && !result.isEmpty()) {
                 result.append(" => ");
             }
             result.append(resultDescription);
-            if(!enchantmentDescription.isEmpty()) {
+            if (!enchantmentDescription.isEmpty()) {
                 result.append(" with ").append(enchantmentDescription);
             }
 

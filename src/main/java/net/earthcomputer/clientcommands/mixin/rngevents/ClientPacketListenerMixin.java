@@ -29,7 +29,7 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleSoundEvent", at = @At("TAIL"))
     private void onSoundEvent(ClientboundSoundPacket packet, CallbackInfo ci) {
         if (packet.getSound().is(SoundEvents.VILLAGER_AMBIENT.getLocation())) {
-            CCrackVillager.onAmbient();
+            CCrackVillager.onAmbient(packet);
         } else if(packet.getSound().is(SoundEvents.AMETHYST_BLOCK_CHIME.getLocation())) {
             CCrackVillager.onAmethyst(packet);
         }

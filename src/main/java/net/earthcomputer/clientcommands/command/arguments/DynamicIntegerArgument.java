@@ -47,7 +47,7 @@ public class DynamicIntegerArgument implements ArgumentType<Integer> {
     @Override
     public Integer parse(final StringReader reader) throws CommandSyntaxException {
         final int start = reader.getCursor();
-        if(allowAny && reader.canRead() && reader.peek() == '*') {
+        if (allowAny && reader.canRead() && reader.peek() == '*') {
             reader.read();
             return Integer.MAX_VALUE;
         }
@@ -69,7 +69,7 @@ public class DynamicIntegerArgument implements ArgumentType<Integer> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if(allowAny) {
+        if (allowAny) {
             builder.suggest("*");
         }
         return builder.buildFuture();

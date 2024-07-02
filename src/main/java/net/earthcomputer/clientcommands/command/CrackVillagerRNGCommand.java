@@ -2,17 +2,14 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.CCrackVillager;
-import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.features.VillagerRNGSim;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -32,7 +29,7 @@ import static net.earthcomputer.clientcommands.command.arguments.EnchantmentArgu
 import static net.earthcomputer.clientcommands.command.arguments.DynamicIntegerArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
 
-import static net.earthcomputer.clientcommands.command.CrackVillagerRNGCommand.MyItemArgument.item;
+import static net.earthcomputer.clientcommands.command.arguments.CachedItemArgument.item;
 
 public class CrackVillagerRNGCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
@@ -45,16 +42,16 @@ public class CrackVillagerRNGCommand {
             .then(literal("interval")
                 .then(argument("ticks", IntegerArgumentType.integer(0, 20))
                     .executes(ctx -> setInterval(ctx.getSource(), getInteger(ctx, "ticks")))))
-            .then(literal("addgoal")
+            .then(literal("add-goal")
                 .then(genFirst(context))
                 .then(genSecond(context))
                 .then(genResult(context)))
-            .then(literal("listgoals")
+            .then(literal("list-goals")
                 .executes(CrackVillagerRNGCommand::listGoals))
-            .then(literal("removegoal")
+            .then(literal("remove-goal")
                 .then(argument("index", integer(1,CCrackVillager.goalOffers::size))
                     .executes(CrackVillagerRNGCommand::removeGoal)))
-            .then(literal("cleargoals").executes(CrackVillagerRNGCommand::clearGoals))
+            .then(literal("clear-goals").executes(CrackVillagerRNGCommand::clearGoals))
             .then(literal("run").executes(CrackVillagerRNGCommand::doRun)));
     }
 
@@ -72,24 +69,23 @@ public class CrackVillagerRNGCommand {
     }
 
     private static int removeGoal(CommandContext<FabricClientCommandSource> context) {
-        context.getSource().sendFeedback(Component.literal("remove goal: " + CCrackVillager.goalOffers.remove(getInteger(context, "index")-1)));
+        context.getSource().sendFeedback(Component.translatable("commands.ccrackvillager.removeGoal", CCrackVillager.goalOffers.remove(getInteger(context, "index") - 1)));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int listGoals(CommandContext<FabricClientCommandSource> context) {
         for(var i = 0; i < CCrackVillager.goalOffers.size(); i++) {
             var offer = CCrackVillager.goalOffers.get(i);
-            context.getSource().sendFeedback(Component.literal("%d. %s".formatted(i+1, offer)));
+            context.getSource().sendFeedback(Component.translatable("commands.ccrackvillager.listGoal", i + 1, offer));
         }
         return Command.SINGLE_SUCCESS;
     }
 
     private static int crackVillagerRNG(FabricClientCommandSource source, BlockPos pos) throws CommandSyntaxException {
         CCrackVillager.clockPos = pos;
+        VillagerRNGSim.commandSource = source;
         CCrackVillager.crackVillager(source.getPlayer(), seed -> {
             source.sendFeedback(Component.translatable("commands.ccrackvillager.success", Long.toHexString(seed)));
-            PlayerRandCracker.setSeed(seed);
-            Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
         });
         return Command.SINGLE_SUCCESS;
     }
@@ -104,27 +100,6 @@ public class CrackVillagerRNGCommand {
     private static int setInterval(FabricClientCommandSource source, int interval) throws CommandSyntaxException {
         CCrackVillager.setInterval(interval);
         return Command.SINGLE_SUCCESS;
-    }
-
-    static class MyItemArgument extends ItemArgument {
-        public ItemInput lastItem;
-
-        public MyItemArgument(CommandBuildContext context) {
-            super(context);
-        }
-
-        public static MyItemArgument item(CommandBuildContext context) {
-            return new MyItemArgument(context);
-        }
-
-        public static <S> ItemInput getItem(CommandContext<S> context, String name) {
-            return context.getArgument(name, ItemInput.class);
-        }
-
-        @Override
-        public ItemInput parse(StringReader reader) throws CommandSyntaxException {
-            return lastItem = super.parse(reader);
-        }
     }
 
     private static Combined<Predicate<ItemStack>, String> createPredicate(CommandContext<FabricClientCommandSource> context, String argName) {
@@ -175,7 +150,7 @@ public class CrackVillagerRNGCommand {
         var item = item(context);
         Supplier<Integer> supplier = () -> item.lastItem.getItem().getDefaultMaxStackSize();
         return literal("first")
-            .then(argument("firstitem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
+            .then(argument("firstitem", withString(combined(item, combined(integer(1, supplier).allowAny(), integer(1, supplier).allowAny()))))
                 .executes(CrackVillagerRNGCommand::setGoal)
                 .then(genSecond(context)) .then(genResult(context)));
     }
@@ -184,7 +159,7 @@ public class CrackVillagerRNGCommand {
         var item = item(context);
         Supplier<Integer> supplier = () -> item.lastItem.getItem().getDefaultMaxStackSize();
         return literal("second")
-            .then(argument("seconditem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
+            .then(argument("seconditem", withString(combined(item, combined(integer(1, supplier).allowAny(), integer(1, supplier).allowAny()))))
                 .executes(CrackVillagerRNGCommand::setGoal) .then(genResult(context)));
     }
 
@@ -193,7 +168,7 @@ public class CrackVillagerRNGCommand {
         var item = item(context);
         Supplier<Integer> supplier = () -> item.lastItem.getItem().getDefaultMaxStackSize();
         return literal("result")
-            .then(argument("resultitem", withString(combined(item, combined(integer(1,supplier).allowAny(), integer(1,supplier).allowAny()))))
+            .then(argument("resultitem", withString(combined(item, combined(integer(1, supplier).allowAny(), integer(1, supplier).allowAny()))))
                 .executes(CrackVillagerRNGCommand::setGoal) .then(literal("enchant")
                     .then(argument("enchantment", withString(combined(enchantment, integer(() -> enchantment.lastParsed.getMaxLevel()).allowAny())))
                         .executes(CrackVillagerRNGCommand::setGoal))));
