@@ -54,7 +54,7 @@ public class VillagerCommand {
     private static final SimpleCommandExceptionType NO_GOALS_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.listGoals.noGoals"));
     private static final SimpleCommandExceptionType ALREADY_BRUTE_FORCING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cvillager.alreadyBruteForcing"));
     private static final Dynamic2CommandExceptionType INVALID_GOAL_INDEX_EXCEPTION = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.cvillager.removeGoal.invalidIndex", a, b));
-    private static final Dynamic2CommandExceptionType ITEM_QUANTITY_OUT_OF_RANGE_EXCEPTION = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.cvillager.removeGoal.invalidIndex", a, b));
+    private static final Dynamic2CommandExceptionType ITEM_QUANTITY_OUT_OF_RANGE_EXCEPTION = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.cvillager.itemCountOutOfRange", a, b));
     private static final List<Goal> goals = new ArrayList<>();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
