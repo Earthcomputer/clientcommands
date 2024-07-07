@@ -2,9 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
@@ -15,15 +13,14 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class CDebugCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cdebug")
-            .executes(context -> executeOverlay())
+            .executes(ctx -> execute(ctx.getSource(), DebugScreenType.OVERLAY))
             .then(argument("type", enumArg(DebugScreenType.class))
-                .executes(CDebugCommand::execute))
+                .executes(ctx -> execute(ctx.getSource(), getEnum(ctx, "type"))))
         );
     }
 
-    private static int execute(CommandContext<FabricClientCommandSource> ctx) {
-        DebugScreenOverlay debugScreenOverlay = Minecraft.getInstance().getDebugOverlay();
-        DebugScreenType type = getEnum(ctx, "type");
+    private static int execute(FabricClientCommandSource source, DebugScreenType type) {
+        DebugScreenOverlay debugScreenOverlay = source.getClient().getDebugOverlay();
         switch (type) {
             case OVERLAY -> debugScreenOverlay.toggleOverlay();
             case FPS -> debugScreenOverlay.toggleFpsCharts();
@@ -32,12 +29,7 @@ public class CDebugCommand {
         }
         return Command.SINGLE_SUCCESS;
     }
-    
-    private static int executeOverlay() {
-        Minecraft.getInstance().getDebugOverlay().toggleOverlay();
-        return Command.SINGLE_SUCCESS;
-    }
-    
+
     public enum DebugScreenType implements StringRepresentable {
         OVERLAY("overlay"),
         FPS("fps"),
