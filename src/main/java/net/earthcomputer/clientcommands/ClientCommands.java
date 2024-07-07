@@ -120,6 +120,7 @@ public class ClientCommands implements ClientModInitializer {
         BookCommand.register(dispatcher);
         CalcCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher, context);
+        CDebugCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher, context);
         CFunctionCommand.register(dispatcher);
         CGameModeCommand.register(dispatcher);
