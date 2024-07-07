@@ -30,7 +30,7 @@ public class CDebugCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    public enum DebugScreenType implements StringRepresentable {
+    private enum DebugScreenType implements StringRepresentable {
         OVERLAY("overlay"),
         FPS("fps"),
         NETWORK("network"),
