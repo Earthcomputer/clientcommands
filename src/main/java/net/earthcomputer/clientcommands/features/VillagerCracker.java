@@ -44,8 +44,9 @@ public class VillagerCracker {
                 return villager;
             }
         }
-        if (Minecraft.getInstance().level != null) {
-            for (Entity entity : Minecraft.getInstance().level.entitiesForRendering()) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level != null) {
+            for (Entity entity : level.entitiesForRendering()) {
                 if (entity.getUUID() == villagerUuid && entity instanceof Villager villager) {
                     cachedVillager = new WeakReference<>(villager);
                     return villager;

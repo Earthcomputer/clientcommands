@@ -15,13 +15,13 @@ import net.earthcomputer.clientcommands.interfaces.IVillager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
@@ -30,6 +30,7 @@ import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -95,8 +96,9 @@ public class VillagerCommand {
                 .then(argument("entity", entity())
                     .executes(ctx -> setVillagerTarget(getEntity(ctx, "entity")))))
             .then(literal("clock")
+                .executes(ctx -> getClockPos())
                 .then(argument("pos", blockPos())
-                    .executes(ctx -> setClockPos(getBlockPos(ctx, "pos")))))
+                    .executes(ctx -> setClockPos(ctx.getSource(), getBlockPos(ctx, "pos")))))
             .then(literal("reset-cracker")
                 .executes(ctx -> resetCracker()))
             .then(literal("brute-force")
@@ -169,12 +171,23 @@ public class VillagerCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int setClockPos(BlockPos pos) {
-        VillagerCracker.setClockPos(pos == null ? null : new GlobalPos(Minecraft.getInstance().player.level().dimension(), pos));
+    private static int getClockPos() {
+        GlobalPos pos = VillagerCracker.getClockPos();
         if (pos == null) {
             ClientCommandHelper.sendFeedback("commands.cvillager.clock.cleared");
         } else {
-            ClientCommandHelper.sendFeedback("commands.cvillager.clock.set");
+            ClientCommandHelper.sendFeedback("commands.cvillager.clock.set", pos.pos().getX(), pos.pos().getY(), pos.pos().getZ(), pos.dimension().location());
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int setClockPos(FabricClientCommandSource ctx, BlockPos pos) {
+        ResourceKey<Level> dimension = ctx.getWorld().dimension();
+        VillagerCracker.setClockPos(pos == null ? null : new GlobalPos(dimension, pos));
+        if (pos == null) {
+            ClientCommandHelper.sendFeedback("commands.cvillager.clock.set.cleared");
+        } else {
+            ClientCommandHelper.sendFeedback("commands.cvillager.clock.set", pos.getX(), pos.getY(), pos.getZ(), dimension.location());
         }
         return Command.SINGLE_SUCCESS;
     }
