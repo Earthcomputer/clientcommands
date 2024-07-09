@@ -19,6 +19,11 @@ public class ClientSuggestionProviderMixin implements IClientSuggestionsProvider
     }
 
     @Override
+    public void clientcommands_removeSeenAlias(String alias) {
+        seenAliases.remove(alias);
+    }
+
+    @Override
     public boolean clientcommands_isAliasSeen(String alias) {
         return seenAliases.contains(alias);
     }
