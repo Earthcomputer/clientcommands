@@ -267,19 +267,6 @@ class DebugRandomSourcePanel extends JPanel {
             }
         });
         bottomPanel.add(dumpStackTraceButton);
-        JButton dumpStackTracesWithQuantitiesButton = new JButton("Dump unique stack traces with quantities");
-        dumpStackTracesWithQuantitiesButton.addActionListener(e -> {
-            if (selectedTick == null) {
-                return;
-            }
-
-            LinkedHashMap<RandomCall, MutableInt> map = new LinkedHashMap<>();
-            for (RandomCall call : selectedTick) {
-                map.computeIfAbsent(call, k -> new MutableInt(1)).add(1);
-            }
-            DebugRandom.LOGGER.info(String.join("\n\n", map.entrySet().stream().map(entry -> String.format("[x%d] %s", entry.getValue().getValue(), DebugRandom.stackTraceById.get(entry.getKey().stackTrace()))).toArray(String[]::new)));
-        });
-        bottomPanel.add(dumpStackTracesWithQuantitiesButton);
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
