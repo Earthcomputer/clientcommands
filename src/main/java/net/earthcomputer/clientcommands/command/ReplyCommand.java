@@ -38,7 +38,7 @@ public class ReplyCommand {
 
     public static int reply(FabricClientCommandSource source, Component message) throws CommandSyntaxException {
         if (currentTarget == null) {
-            throw NO_TARGET_FOUND.create();
+            throw NO_TARGET_FOUND_EXCEPTION.create();
         }
 
         source.getClient().getConnection().sendCommand(String.format("w %s %s", currentTarget, message.getString()));
