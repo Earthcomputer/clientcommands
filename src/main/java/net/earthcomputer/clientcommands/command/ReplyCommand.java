@@ -13,7 +13,8 @@ import static dev.xpple.clientarguments.arguments.CMessageArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class ReplyCommand {
-    private static final SimpleCommandExceptionType NO_TARGET_FOUND = new SimpleCommandExceptionType(Component.translatable("commands.creply.noTargetFound"));
+    private static final SimpleCommandExceptionType NO_TARGET_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.creply.noTargetFound"));
+    private static final Dyanmic2ExceptionType MESSAGE_TOO_LONG_EXCEPTION = new Dyanmic2CommandExceptionType((a, b) -> Component.translatable("commands.creply.messageTooLong", a, b));
 
     @Nullable
     private static String mostRecentWhisper = null;
