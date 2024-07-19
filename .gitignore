@@ -6,7 +6,8 @@ out/
 
 # idea
 
-.idea/
+.idea/*
+!.idea/icon.svg
 *.iml
 *.ipr
 *.iws
