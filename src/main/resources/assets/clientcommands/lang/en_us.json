@@ -190,6 +190,7 @@
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
   "commands.creply.noTargetFound": "Could not find a target to reply to",
+  "commands.creply.messageTooLong": "Your reply was too long (maximum: %d, given: %d)",
 
   "commands.csignsearch.starting": "Searching signs",
 
