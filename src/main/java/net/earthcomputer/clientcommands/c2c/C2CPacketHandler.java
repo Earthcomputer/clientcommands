@@ -6,9 +6,12 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
-import net.earthcomputer.clientcommands.c2c.packets.StartTicTacToeGameC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
+import net.earthcomputer.clientcommands.command.ConnectFourCommand;
 import net.earthcomputer.clientcommands.command.ListenCommand;
+import net.earthcomputer.clientcommands.features.TwoPlayerGameType;
 import net.earthcomputer.clientcommands.interfaces.IClientPacketListener_C2C;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -47,8 +50,9 @@ public class C2CPacketHandler implements C2CPacketListener {
 
     public static final ProtocolInfo.Unbound<C2CPacketListener, RegistryFriendlyByteBuf> PROTOCOL_UNBOUND = ProtocolInfoBuilder.clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
-        .addPacket(StartTicTacToeGameC2CPacket.ID, StartTicTacToeGameC2CPacket.CODEC)
+        .addPacket(StartTwoPlayerGameC2CPacket.ID, StartTwoPlayerGameC2CPacket.CODEC)
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
+        .addPacket(PutConnectFourPieceC2CPacket.ID, PutConnectFourPieceC2CPacket.CODEC)
     );
 
     public static final String C2C_PACKET_HEADER = "CCΕNC:";
@@ -198,13 +202,18 @@ public class C2CPacketHandler implements C2CPacketListener {
     }
 
     @Override
-    public void onStartTicTacToeGameC2CPacket(StartTicTacToeGameC2CPacket packet) {
-        TicTacToeCommand.onStartTicTacToeGameC2CPacket(packet);
+    public void onStartTwoPlayerGameC2CPacket(StartTwoPlayerGameC2CPacket packet) {
+        TwoPlayerGameType.onStartTwoPlayerGame(packet);
     }
 
     @Override
     public void onPutTicTacToeMarkC2CPacket(PutTicTacToeMarkC2CPacket packet) {
         TicTacToeCommand.onPutTicTacToeMarkC2CPacket(packet);
+    }
+
+    @Override
+    public void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
+        ConnectFourCommand.onPutConnectFourPieceC2CPacket(packet);
     }
 
     @Nullable

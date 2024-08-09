@@ -126,6 +126,7 @@ public class ClientCommands implements ClientModInitializer {
         CGameModeCommand.register(dispatcher);
         CGiveCommand.register(dispatcher, context);
         ChorusCommand.register(dispatcher);
+        ConnectFourCommand.register(dispatcher);
         CParticleCommand.register(dispatcher, context);
         CPlaySoundCommand.register(dispatcher);
         CrackRNGCommand.register(dispatcher);
