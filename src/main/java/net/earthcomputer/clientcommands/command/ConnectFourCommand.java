@@ -43,10 +43,10 @@ public class ConnectFourCommand {
         public final PlayerInfo opponent;
         public final byte yourPiece;
         public byte activePiece;
-        public byte[][] board;
+        public final byte[][] board;
         /**
-         * -1 for tie
-         * 0 for draw
+         * -1 for draw
+         * 0 for undecided
          * 1 for red
          * 2 for yellow
         */
@@ -165,7 +165,7 @@ public class ConnectFourCommand {
             }
 
             for (int x = 0; x < WIDTH; x++) {
-                for (int y = 3; y < HEIGHT; y++) {
+                for (int y = 0; y < HEIGHT; y++) {
                     if (board[x][y] == 0) {
                         // still a space to play
                         return 0;
