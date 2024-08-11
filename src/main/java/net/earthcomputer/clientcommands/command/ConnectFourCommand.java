@@ -45,10 +45,10 @@ public class ConnectFourCommand {
         public byte activePiece;
         public final byte[][] board;
         /**
-         * -1 for draw
          * 0 for undecided
          * 1 for red
          * 2 for yellow
+         * 3 for draw
         */
         public byte winner;
 
@@ -89,7 +89,7 @@ public class ConnectFourCommand {
                 } else if (winner == Piece.opposite(yourPiece)) {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("c2cpacket.putConnectFourPieceC2CPacket.incoming.lost", sender));
                     TwoPlayerGameType.CONNECT_FOUR_GAME_TYPE.getActiveGames().remove(sender);
-                } else if (winner == -1) {
+                } else if (winner == 3) {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("connectFourGame.draw", sender));
                     TwoPlayerGameType.CONNECT_FOUR_GAME_TYPE.getActiveGames().remove(sender);
                 }
@@ -174,7 +174,7 @@ public class ConnectFourCommand {
             }
 
             // no spaces left, game ends in a draw
-            return -1;
+            return Piece.RED | Piece.YELLOW;
         }
 
         @Override
