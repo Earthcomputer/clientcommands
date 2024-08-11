@@ -39,7 +39,7 @@
   "commands.ccalcstack.success.empty.exact": "%d items is exactly %d stacks",
   "commands.ccalcstack.success.exact": "%d %s is exactly %d stacks",
 
-  "commands.cconnectfour.name": "Connect Four",
+  "commands.cfourinarow.name": "Four in a Row",
 
   "commands.ccrackrng.failed": "Failed to crack player seed",
   "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper.",
@@ -350,14 +350,14 @@
   "ticTacToeGame.noughts": "noughts (O)",
   "ticTacToeGame.crosses": "crosses (X)",
 
-  "connectFourGame.title": "Connect Four against %s",
-  "connectFourGame.pieceSet": "You are playing with the %s pieces",
-  "connectFourGame.pieceRed": "red",
-  "connectFourGame.pieceYellow": "yellow",
-  "connectFourGame.won": "You made a move in Connect Four and beat %s!",
-  "connectFourGame.draw": "You've made a move and drawn against %s in Connect Four",
-  "connectFourGame.yourMove": "It is your move",
-  "connectFourGame.opponentMove": "You are waiting for your opponent...",
+  "fourInARowGame.title": "Four in a Row against %s",
+  "fourInARowGame.pieceSet": "You are playing with the %s pieces",
+  "fourInARowGame.pieceRed": "red",
+  "fourInARowGame.pieceYellow": "yellow",
+  "fourInARowGame.won": "You made a move in Four in a Row and beat %s!",
+  "fourInARowGame.draw": "You've made a move and drawn against %s in Four in a Row",
+  "fourInARowGame.yourMove": "It is your move",
+  "fourInARowGame.opponentMove": "You are waiting for your opponent...",
 
   "twoPlayerGame.playerNotFound": "Player not found",
   "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player",
@@ -382,6 +382,6 @@
   "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
   "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move",
 
-  "c2cpacket.putConnectFourPieceC2CPacket.incoming.lost": "%s has made a move in connect four and won",
-  "c2cpacket.putConnectFourPieceC2CPacket.incoming": "%s has made a move in connect four, click to make your move"
+  "c2cpacket.putFourInARowPieceC2CPacket.incoming.lost": "%s has made a move in Four in a Row and won",
+  "c2cpacket.putFourInARowPieceC2CPacket.incoming": "%s has made a move in Four in a Row, click to make your move"
 }

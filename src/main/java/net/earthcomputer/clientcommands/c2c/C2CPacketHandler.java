@@ -6,10 +6,10 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
-import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.PutFourInARowPieceC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
-import net.earthcomputer.clientcommands.command.ConnectFourCommand;
+import net.earthcomputer.clientcommands.command.FourInARowCommand;
 import net.earthcomputer.clientcommands.command.ListenCommand;
 import net.earthcomputer.clientcommands.features.TwoPlayerGameType;
 import net.earthcomputer.clientcommands.interfaces.IClientPacketListener_C2C;
@@ -52,7 +52,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
         .addPacket(StartTwoPlayerGameC2CPacket.ID, StartTwoPlayerGameC2CPacket.CODEC)
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
-        .addPacket(PutConnectFourPieceC2CPacket.ID, PutConnectFourPieceC2CPacket.CODEC)
+        .addPacket(PutFourInARowPieceC2CPacket.ID, PutFourInARowPieceC2CPacket.CODEC)
     );
 
     public static final String C2C_PACKET_HEADER = "CCΕNC:";
@@ -212,8 +212,8 @@ public class C2CPacketHandler implements C2CPacketListener {
     }
 
     @Override
-    public void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
-        ConnectFourCommand.onPutConnectFourPieceC2CPacket(packet);
+    public void onPutFourInARowPieceC2CPacket(PutFourInARowPieceC2CPacket packet) {
+        FourInARowCommand.onPutFourInARowPieceC2CPacket(packet);
     }
 
     @Nullable

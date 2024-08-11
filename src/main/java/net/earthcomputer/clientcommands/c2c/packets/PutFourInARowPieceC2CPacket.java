@@ -10,11 +10,11 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 
-public record PutConnectFourPieceC2CPacket(String sender, int x) implements C2CPacket {
-    public static final StreamCodec<RegistryFriendlyByteBuf, PutConnectFourPieceC2CPacket> CODEC = Packet.codec(PutConnectFourPieceC2CPacket::write, PutConnectFourPieceC2CPacket::new);
-    public static final PacketType<PutConnectFourPieceC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "put_connect_four_piece"));
+public record PutFourInARowPieceC2CPacket(String sender, int x) implements C2CPacket {
+    public static final StreamCodec<RegistryFriendlyByteBuf, PutFourInARowPieceC2CPacket> CODEC = Packet.codec(PutFourInARowPieceC2CPacket::write, PutFourInARowPieceC2CPacket::new);
+    public static final PacketType<PutFourInARowPieceC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "put_four_in_a_row_piece"));
 
-    public PutConnectFourPieceC2CPacket(FriendlyByteBuf buf) {
+    public PutFourInARowPieceC2CPacket(FriendlyByteBuf buf) {
         this(buf.readUtf(), buf.readVarInt());
     }
 
@@ -30,6 +30,6 @@ public record PutConnectFourPieceC2CPacket(String sender, int x) implements C2CP
 
     @Override
     public void handle(C2CPacketListener handler) {
-        handler.onPutConnectFourPieceC2CPacket(this);
+        handler.onPutFourInARowPieceC2CPacket(this);
     }
 }

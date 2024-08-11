@@ -9,7 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
-import net.earthcomputer.clientcommands.command.ConnectFourCommand;
+import net.earthcomputer.clientcommands.command.FourInARowCommand;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
@@ -42,7 +42,7 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
     private static final SimpleCommandExceptionType NO_GAME_WITH_PLAYER_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("twoPlayerGame.noGameWithPlayer"));
 
     public static final TwoPlayerGameType<TicTacToeCommand.TicTacToeGame> TIC_TAC_TOE_GAME_TYPE = register(new TwoPlayerGameType<>("commands.ctictactoe.name", "ctictactoe", ResourceLocation.fromNamespaceAndPath("clientcommands", "tictactoe"), (opponent, player1) -> new TicTacToeCommand.TicTacToeGame(opponent, player1 ? TicTacToeCommand.TicTacToeGame.Mark.CROSS : TicTacToeCommand.TicTacToeGame.Mark.NOUGHT)));
-    public static final TwoPlayerGameType<ConnectFourCommand.ConnectFourGame> CONNECT_FOUR_GAME_TYPE = register(new TwoPlayerGameType<>("commands.cconnectfour.name", "cconnectfour", ResourceLocation.fromNamespaceAndPath("clientcommands", "connectfour"), (opponent, player1) -> new ConnectFourCommand.ConnectFourGame(opponent, player1 ? ConnectFourCommand.Piece.RED : ConnectFourCommand.Piece.YELLOW)));
+    public static final TwoPlayerGameType<FourInARowCommand.FourInARowGame> FOUR_IN_A_ROW_GAME_TYPE = register(new TwoPlayerGameType<>("commands.cfourinarow.name", "cfourinarow", ResourceLocation.fromNamespaceAndPath("clientcommands", "fourinarow"), (opponent, player1) -> new FourInARowCommand.FourInARowGame(opponent, player1 ? FourInARowCommand.Piece.RED : FourInARowCommand.Piece.YELLOW)));
 
     private static <G extends TwoPlayerGame<?>> TwoPlayerGameType<G> register(TwoPlayerGameType<G> instance) {
         TYPE_BY_NAME.put(instance.id, instance);
