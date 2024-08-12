@@ -170,7 +170,7 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
     }
 
     @FunctionalInterface
-    public interface GameFactory<T extends TwoPlayerGame> {
+    public interface GameFactory<T extends TwoPlayerGame<?>> {
         T create(PlayerInfo opponent, boolean isPlayer1);
     }
 }
