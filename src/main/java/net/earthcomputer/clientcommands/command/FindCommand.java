@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
+import net.earthcomputer.clientcommands.interfaces.IEntity_Glowable;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -25,6 +26,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 public class FindCommand {
 
     private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
+    private static final Flag<Boolean> FLAG_GLOW = Flag.ofFlag("glow").build();
 
     private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cfind.noMatch"));
 
@@ -33,10 +35,12 @@ public class FindCommand {
             .then(argument("filter", entities())
                 .executes(ctx -> listEntities(ctx.getSource(), ctx.getArgument("filter", CEntitySelector.class)))));
         FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cfind, ctx -> true);
+        FLAG_GLOW.addToCommand(dispatcher, cfind, ctx -> true);
     }
 
     private static int listEntities(FabricClientCommandSource source, CEntitySelector selector) throws CommandSyntaxException {
         boolean keepSearching = getFlag(source, FLAG_KEEP_SEARCHING);
+        boolean glow = getFlag(source, FLAG_GLOW);
         if (keepSearching) {
             String taskName = TaskManager.addTask("cfind", new FindTask(source, selector));
 
@@ -55,6 +59,12 @@ public class FindCommand {
             source.sendFeedback(Component.translatable("commands.cfind.success", entities.size()).withStyle(ChatFormatting.BOLD));
             for (Entity entity : entities) {
                 sendEntityFoundMessage(source, entity);
+            }
+            if (glow) {
+                for (Entity entity : entities) {
+                    //noinspection DataFlowIssue
+                    ((IEntity_Glowable) entity).clientcommands_addGlowingTicket(20 * 30, ChatFormatting.WHITE.getColor());
+                }
             }
 
             return entities.size();
@@ -97,6 +107,11 @@ public class FindCommand {
                 for (Entity entity : selector.getEntities(this.source)) {
                     if (foundEntities.add(entity.getUUID())) {
                         sendEntityFoundMessage(source, entity);
+                        boolean glow = getFlag(source, FLAG_GLOW);
+                        if (glow) {
+                            //noinspection DataFlowIssue
+                            ((IEntity_Glowable) entity).clientcommands_addGlowingTicket(20 * 30, ChatFormatting.WHITE.getColor());
+                        }
                     }
                 }
             } catch (CommandSyntaxException e) {
@@ -106,5 +121,4 @@ public class FindCommand {
             scheduleDelay();
         }
     }
-
 }
