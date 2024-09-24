@@ -29,12 +29,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgument.gameProfile;
-import static dev.xpple.clientarguments.arguments.CGameProfileArgument.getSingleProfileArgument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
     public static final Map<ResourceLocation, TwoPlayerGameType<?>> TYPE_BY_NAME = new LinkedHashMap<>();
