@@ -61,40 +61,40 @@ public class FourInARowCommand {
         }
 
         public void onMove(int x) {
-            if (!isGameActive()) {
-                LOGGER.warn("Tried to add piece to the already completed game with {}.", opponent.getProfile().getName());
+            if (!this.isGameActive()) {
+                LOGGER.warn("Tried to add piece to the already completed game with {}.", this.opponent.getProfile().getName());
                 return;
             }
 
-            if (!addPiece(x, activePiece)) {
-                LOGGER.warn("Failed to add piece to your Four in a Row game with {}.", opponent.getProfile().getName());
+            if (!this.addPiece(x, this.activePiece)) {
+                LOGGER.warn("Failed to add piece to your Four in a Row game with {}.", this.opponent.getProfile().getName());
                 return;
             }
 
-            if (isYourTurn()) {
+            if (this.isYourTurn()) {
                 try {
                     PutFourInARowPieceC2CPacket packet = new PutFourInARowPieceC2CPacket(Minecraft.getInstance().getConnection().getLocalGameProfile().getName(), x);
-                    C2CPacketHandler.getInstance().sendPacket(packet, opponent);
+                    C2CPacketHandler.getInstance().sendPacket(packet, this.opponent);
                 } catch (CommandSyntaxException e) {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translationArg(e.getRawMessage()));
                 }
             }
 
-            String sender = opponent.getProfile().getName();
-            activePiece = Piece.opposite(activePiece);
-            if ((winner = getWinner()) != 0) {
-                if (winner == yourPiece) {
+            String sender = this.opponent.getProfile().getName();
+            this.activePiece = Piece.opposite(this.activePiece);
+            if ((this.winner = this.getWinner()) != 0) {
+                if (this.winner == this.yourPiece) {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("fourInARowGame.won", sender));
                     TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
-                } else if (winner == Piece.opposite(yourPiece)) {
+                } else if (this.winner == Piece.opposite(this.yourPiece)) {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("c2cpacket.putFourInARowPieceC2CPacket.incoming.lost", sender));
                     TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
-                } else if (winner == 3) {
+                } else if (this.winner == 3) {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("fourInARowGame.draw", sender));
                     TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
                 }
             } else {
-                if (isYourTurn()) {
+                if (this.isYourTurn()) {
                     MutableComponent component = Component.translatable("c2cpacket.putFourInARowPieceC2CPacket.incoming", sender);
                     component.withStyle(style -> style
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cfourinarow open " + sender))
@@ -105,22 +105,22 @@ public class FourInARowCommand {
         }
 
         public boolean isYourTurn() {
-            return activePiece == yourPiece;
+            return this.activePiece == this.yourPiece;
         }
 
         public boolean isGameActive() {
-            return winner == 0;
+            return this.winner == 0;
         }
 
         public boolean canMove() {
-            return isYourTurn() && isGameActive();
+            return this.isYourTurn() && this.isGameActive();
         }
 
         public boolean addPiece(int x, byte piece) {
             int y;
-            if (isValidRow(x) && (y = getPlacementY(x)) < HEIGHT) {
+            if (isValidRow(x) && (y = this.getPlacementY(x)) < HEIGHT) {
                 // this only exists to signify that each bit represents a different piece
-                board[x][y] |= piece;
+                this.board[x][y] |= piece;
                 return true;
             }
             return false;
@@ -131,8 +131,8 @@ public class FourInARowCommand {
             // check horizontally
             for (int x = 0; x < WIDTH - 3; x++) {
                 for (int y = 0; y < HEIGHT; y++) {
-                    if ((board[x][y] & board[x + 1][y] & board[x + 2][y] & board[x + 3][y]) > 0) {
-                        return board[x][y];
+                    if ((this.board[x][y] & this.board[x + 1][y] & this.board[x + 2][y] & this.board[x + 3][y]) > 0) {
+                        return this.board[x][y];
                     }
                 }
             }
@@ -140,8 +140,8 @@ public class FourInARowCommand {
             // check vertically
             for (int x = 0; x < WIDTH; x++) {
                 for (int y = 0; y < HEIGHT - 3; y++) {
-                    if ((board[x][y] & board[x][y + 1] & board[x][y + 2] & board[x][y + 3]) > 0) {
-                        return board[x][y];
+                    if ((this.board[x][y] & this.board[x][y + 1] & this.board[x][y + 2] & this.board[x][y + 3]) > 0) {
+                        return this.board[x][y];
                     }
                 }
             }
@@ -149,8 +149,8 @@ public class FourInARowCommand {
             // check horizontally (northeast)
             for (int x = 0; x < WIDTH - 3; x++) {
                 for (int y = 0; y < HEIGHT - 3; y++) {
-                    if ((board[x][y] & board[x + 1][y + 1] & board[x + 2][y + 2] & board[x + 3][y + 3]) > 0) {
-                        return board[x][y];
+                    if ((this.board[x][y] & this.board[x + 1][y + 1] & this.board[x + 2][y + 2] & this.board[x + 3][y + 3]) > 0) {
+                        return this.board[x][y];
                     }
                 }
             }
@@ -158,15 +158,15 @@ public class FourInARowCommand {
             // check horizontally (southeast)
             for (int x = 0; x < WIDTH - 3; x++) {
                 for (int y = 3; y < HEIGHT; y++) {
-                    if ((board[x][y] & board[x + 1][y - 1] & board[x + 2][y - 2] & board[x + 3][y - 3]) > 0) {
-                        return board[x][y];
+                    if ((this.board[x][y] & this.board[x + 1][y - 1] & this.board[x + 2][y - 2] & this.board[x + 3][y - 3]) > 0) {
+                        return this.board[x][y];
                     }
                 }
             }
 
             for (int x = 0; x < WIDTH; x++) {
                 for (int y = 0; y < HEIGHT; y++) {
-                    if (board[x][y] == 0) {
+                    if (this.board[x][y] == 0) {
                         // still a space to play
                         return 0;
                     }
@@ -188,12 +188,11 @@ public class FourInARowCommand {
 
         public int getPlacementY(int x) {
             int y = 0;
-            for (byte piece : board[x]) {
+            for (byte piece : this.board[x]) {
                 if (piece == 0) {
                     break;
-                } else {
-                    y++;
                 }
+                y++;
             }
 
             return y;
@@ -288,13 +287,13 @@ public class FourInARowCommand {
         @Override
         public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             super.renderBackground(graphics, mouseX, mouseY, partialTick);
-            int startX = (width - BOARD_WIDTH) / 2;
-            int startY = (height - BOARD_HEIGHT) / 2;
+            int startX = (this.width - BOARD_WIDTH) / 2;
+            int startY = (this.height - BOARD_HEIGHT) / 2;
 
-            graphics.drawString(font, Component.translatable("fourInARowGame.pieceSet", Piece.name(game.yourPiece)), startX, startY - 20, 0xff_ffffff);
-            graphics.drawString(font, title, startX, startY - 10, 0xff_ffffff);
-            Component moveTranslate = game.isYourTurn() ? Component.translatable("fourInARowGame.yourMove") : Component.translatable("fourInARowGame.opponentMove");
-            graphics.drawString(font, moveTranslate, startX + BOARD_WIDTH - font.width(moveTranslate), startY - 10, 0xff_ffffff);
+            graphics.drawString(this.font, Component.translatable("fourInARowGame.pieceSet", Piece.name(this.game.yourPiece)), startX, startY - 20, 0xff_ffffff);
+            graphics.drawString(this.font, this.title, startX, startY - 10, 0xff_ffffff);
+            Component moveTranslate = this.game.isYourTurn() ? Component.translatable("fourInARowGame.yourMove") : Component.translatable("fourInARowGame.opponentMove");
+            graphics.drawString(this.font, moveTranslate, startX + BOARD_WIDTH - this.font.width(moveTranslate), startY - 10, 0xff_ffffff);
 
             graphics.blit(
                 BOARD_TEXTURE,
@@ -312,26 +311,26 @@ public class FourInARowCommand {
 
             for (int x = 0; x < FourInARowGame.WIDTH; x++) {
                 for (int y = 0; y < FourInARowGame.HEIGHT; y++) {
-                    Piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (FourInARowGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, game.board[x][y], false);
+                    Piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (FourInARowGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, this.game.board[x][y], false);
                 }
             }
 
             int boardMinX = startX + BOARD_BORDER_WIDTH;
             int boardMaxX = startX + BOARD_WIDTH - BOARD_BORDER_WIDTH * 2;
             int boardMaxY = startY + BOARD_HEIGHT;
-            if (game.canMove() && boardMinX <= mouseX && mouseX < boardMaxX && mouseY < boardMaxY) {
+            if (this.game.canMove() && boardMinX <= mouseX && mouseX < boardMaxX && mouseY < boardMaxY) {
                 int x = (mouseX - boardMinX) / SLOT_WIDTH;
-                int y = game.getPlacementY(x);
+                int y = this.game.getPlacementY(x);
                 if (y < FourInARowGame.HEIGHT) {
-                    Piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (FourInARowGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, game.yourPiece, true);
+                    Piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (FourInARowGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, this.game.yourPiece, true);
                 }
             }
         }
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            int startX = (width - BOARD_WIDTH) / 2;
-            int startY = (height - BOARD_HEIGHT) / 2;
+            int startX = (this.width - BOARD_WIDTH) / 2;
+            int startY = (this.height - BOARD_HEIGHT) / 2;
 
             int boardMinX = startX + BOARD_BORDER_WIDTH;
             int boardMaxX = startX + BOARD_WIDTH - BOARD_BORDER_WIDTH * 2;
@@ -346,8 +345,8 @@ public class FourInARowCommand {
             }
             
             int x = (int) ((mouseX - boardMinX) / SLOT_WIDTH);
-            if (game.canMove()) {
-                game.onMove(x);
+            if (this.game.canMove()) {
+                this.game.onMove(x);
                 return true;
             }
 

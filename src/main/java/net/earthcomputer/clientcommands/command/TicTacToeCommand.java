@@ -18,7 +18,6 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
-
 public class TicTacToeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(TwoPlayerGameType.TIC_TAC_TOE_GAME_TYPE.createCommandTree());

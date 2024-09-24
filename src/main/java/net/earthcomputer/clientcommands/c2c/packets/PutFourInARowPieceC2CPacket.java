@@ -19,8 +19,8 @@ public record PutFourInARowPieceC2CPacket(String sender, int x) implements C2CPa
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeUtf(sender);
-        buf.writeVarInt(x);
+        buf.writeUtf(this.sender);
+        buf.writeVarInt(this.x);
     }
 
     @Override

@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.c2c.packets;
 
 import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
-import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.earthcomputer.clientcommands.features.TwoPlayerGameType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -23,7 +22,7 @@ public record StartTwoPlayerGameC2CPacket(String sender, boolean accept, TwoPlay
     public void write(FriendlyByteBuf buf) {
         buf.writeUtf(this.sender);
         buf.writeBoolean(this.accept);
-        buf.writeResourceLocation(game.getId());
+        buf.writeResourceLocation(this.game.getId());
     }
 
     @Override

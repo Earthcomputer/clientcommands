@@ -70,32 +70,32 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
     }
 
     public Component translate() {
-        return Component.translatable(translationKey);
+        return Component.translatable(this.translationKey);
     }
 
     public ResourceLocation getId() {
-        return id;
+        return this.id;
     }
 
     public Set<String> getPendingInvites() {
-        return pendingInvites;
+        return this.pendingInvites;
     }
 
     public Map<String, T> getActiveGames() {
-        return activeGames;
+        return this.activeGames;
     }
 
     @Nullable
     public T getActiveGame(String game) {
-        return activeGames.get(game);
+        return this.activeGames.get(game);
     }
 
     public void addNewGame(PlayerInfo opponent, boolean isPlayer1) {
-        activeGames.put(opponent.getProfile().getName(), gameFactory.create(opponent, isPlayer1));
+        this.activeGames.put(opponent.getProfile().getName(), this.gameFactory.create(opponent, isPlayer1));
     }
 
     public LiteralArgumentBuilder<FabricClientCommandSource> createCommandTree() {
-        return literal(command)
+        return literal(this.command)
             .then(literal("start")
                 .then(argument("opponent", gameProfile(true))
                     .executes(ctx -> this.start(ctx.getSource(), getSingleProfileArgument(ctx, "opponent")))))
@@ -113,13 +113,13 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
 
         StartTwoPlayerGameC2CPacket packet = new StartTwoPlayerGameC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), false, this);
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);
-        pendingInvites.add(recipient.getProfile().getName());
+        this.pendingInvites.add(recipient.getProfile().getName());
         source.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited", recipient.getProfile().getName(), translate()));
         return Command.SINGLE_SUCCESS;
     }
 
     public int open(FabricClientCommandSource source, String name) throws CommandSyntaxException {
-        T game = activeGames.get(name);
+        T game = this.activeGames.get(name);
         if (game == null) {
             throw NO_GAME_WITH_PLAYER_EXCEPTION.create();
         }
