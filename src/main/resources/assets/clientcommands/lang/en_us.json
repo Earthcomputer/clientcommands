@@ -208,7 +208,7 @@
   "commands.ctask.stop.noMatch": "No matching tasks",
   "commands.ctask.stop.success": "Stopped %d tasks",
 
-  "commands.ctictactoe.name": "tic-tac-toe",
+  "commands.ctictactoe.name": "Tic-tac-toe",
 
   "commands.ctime.reset.success": "The time now matches the server",
 
