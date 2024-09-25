@@ -61,7 +61,6 @@
   },
   "client": [
     "c2c.ChatListenerMixin",
-    "c2c.ClientPacketListenerMixin",
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.findblock.ClientLevelMixin",
