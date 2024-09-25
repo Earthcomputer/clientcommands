@@ -69,17 +69,17 @@ public class TicTacToeCommand {
 
         public Mark getWinner() {
             for (byte x = 0; x < 3; x++) {
-                if (this.board[x][0] == this.board[x][1] && this.board[x][1] == this.board[x][2]) {
+                if (this.board[x][0] == this.board[x][1] && this.board[x][1] == this.board[x][2] && this.board[x][0] != null) {
                     return this.board[x][0];
                 }
-                if (this.board[0][x] == this.board[1][x] && this.board[1][x] == this.board[2][x]) {
+                if (this.board[0][x] == this.board[1][x] && this.board[1][x] == this.board[2][x] && this.board[0][x] != null) {
                     return this.board[0][x];
                 }
             }
-            if (this.board[0][0] == this.board[1][1] && this.board[1][1] == this.board[2][2]) {
+            if (this.board[0][0] == this.board[1][1] && this.board[1][1] == this.board[2][2] && this.board[0][0] != null) {
                 return this.board[0][0];
             }
-            if (this.board[0][2] == this.board[1][1] && this.board[1][1] == this.board[2][0]) {
+            if (this.board[0][2] == this.board[1][1] && this.board[1][1] == this.board[2][0] && this.board[0][2] != null) {
                 return this.board[0][2];
             }
             return null;
