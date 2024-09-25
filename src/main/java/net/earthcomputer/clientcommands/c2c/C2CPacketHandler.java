@@ -190,11 +190,11 @@ public class C2CPacketHandler implements C2CPacketListener {
     public void onMessageC2CPacket(MessageC2CPacket packet) {
         String sender = packet.sender();
         String message = packet.message();
-        MutableComponent formattedComponent;
+        Component formattedComponent;
         try {
             formattedComponent = FormattedComponentArgument.formattedComponent().parse(new StringReader(message));
         } catch (CommandSyntaxException e) {
-            formattedComponent = Component.literal(message);
+            formattedComponent = Component.nullToEmpty(message);
         }
         MutableComponent prefix = Component.empty();
         prefix.append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY));
