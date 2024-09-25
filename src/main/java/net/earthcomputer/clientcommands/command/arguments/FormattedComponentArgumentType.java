@@ -8,36 +8,37 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public class FormattedTextArgumentType implements ArgumentType<Text> {
+public class FormattedComponentArgumentType implements ArgumentType<MutableComponent> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "&lxpple", "&l&o#fb8919nwex");
 
-    private static final SimpleCommandExceptionType EXPECTED_FORMATTING_CODE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.expectedFormattingCode"));
-    private static final SimpleCommandExceptionType UNKNOWN_FORMATTING_CODE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.unknownFormattingCode"));
-    private static final SimpleCommandExceptionType EXPECTED_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.expectedHexValue"));
-    private static final SimpleCommandExceptionType INVALID_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.client.invalidHexValue"));
+    private static final SimpleCommandExceptionType EXPECTED_FORMATTING_CODE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.expectedFormattingCode"));
+    private static final SimpleCommandExceptionType UNKNOWN_FORMATTING_CODE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.unknownFormattingCode"));
+    private static final SimpleCommandExceptionType EXPECTED_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.expectedHexValue"));
+    private static final SimpleCommandExceptionType INVALID_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.invalidHexValue"));
 
-    public static FormattedTextArgumentType formattedText() {
-        return new FormattedTextArgumentType();
+    public static FormattedComponentArgumentType formattedComponent() {
+        return new FormattedComponentArgumentType();
     }
 
-    public static Text getFormattedText(CommandContext<FabricClientCommandSource> context, String arg) {
-        return context.getArgument(arg, Text.class);
+    public static MutableComponent getFormattedComponent(CommandContext<FabricClientCommandSource> context, String arg) {
+        return context.getArgument(arg, MutableComponent.class);
     }
 
     @Override
-    public Text parse(StringReader reader) throws CommandSyntaxException {
+    public MutableComponent parse(StringReader reader) throws CommandSyntaxException {
         return new Parser(reader).parse();
     }
 
@@ -72,27 +73,27 @@ public class FormattedTextArgumentType implements ArgumentType<Text> {
             this.reader = reader;
         }
 
-        public Text parse() throws CommandSyntaxException {
-            MutableText text = Text.empty();
+        public MutableComponent parse() throws CommandSyntaxException {
+            MutableComponent text = Component.empty();
             Style style = Style.EMPTY;
             while (reader.canRead()) {
                 char c = reader.read();
-                if (c == '&') { // Formatting.FORMATTING_CODE_PREFIX is not writable in chat
+                if (c == '&') { // ChatFormatting.PREFIX_CODE is not writable in chat
                     suggestor = suggestions -> {
                         SuggestionsBuilder builder = suggestions.createOffset(reader.getCursor());
-                        CommandSource.suggestMatching(Arrays.stream(Formatting.values()).map(f -> String.valueOf(f.getCode())), builder);
+                        SharedSuggestionProvider.suggest(Arrays.stream(ChatFormatting.values()).map(f -> String.valueOf(f.getChar())), builder);
                         suggestions.add(builder);
                     };
                     if (!reader.canRead()) {
                         throw EXPECTED_FORMATTING_CODE_EXCEPTION.create();
                     }
                     char code = reader.read();
-                    Formatting formatting = Formatting.byCode(code);
+                    ChatFormatting formatting = ChatFormatting.getByCode(code);
                     if (formatting == null) {
                         throw UNKNOWN_FORMATTING_CODE_EXCEPTION.create();
                     }
-                    style = style.withFormatting(formatting);
-                } else if (c == '#') { // TextColor.RGB_PREFIX is private
+                    style = style.applyFormat(formatting);
+                } else if (c == TextColor.CUSTOM_COLOR_PREFIX.charAt(0)) {
                     if (!reader.canRead()) {
                         throw EXPECTED_HEX_VALUE_EXCEPTION.create();
                     }
@@ -112,7 +113,7 @@ public class FormattedTextArgumentType implements ArgumentType<Text> {
                     }
                     style = style.withColor(hex);
                 } else {
-                    text.append(Text.literal(String.valueOf(c)).setStyle(style));
+                    text.append(Component.literal(String.valueOf(c)).setStyle(style));
                 }
                 suggestor = null;
             }

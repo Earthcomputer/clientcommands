@@ -34,20 +34,20 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class FormattedComponentArgument implements ArgumentType<MutableComponent> {
+public class StyledComponentArgument implements ArgumentType<MutableComponent> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "bold{italic{red{nwex}}}");
     private static final DynamicCommandExceptionType INVALID_CLICK_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidClickAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidHoverAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_EVENT = new DynamicCommandExceptionType(event -> Component.translatable("commands.client.invalidHoverEvent", event));
 
-    private FormattedComponentArgument() {
+    private StyledComponentArgument() {
     }
 
-    public static FormattedComponentArgument formattedComponent() {
-        return new FormattedComponentArgument();
+    public static StyledComponentArgument styledComponent() {
+        return new StyledComponentArgument();
     }
 
-    public static MutableComponent getFormattedComponent(CommandContext<FabricClientCommandSource> context, String arg) {
+    public static MutableComponent getStyledComponent(CommandContext<FabricClientCommandSource> context, String arg) {
         return context.getArgument(arg, MutableComponent.class);
     }
 
@@ -92,14 +92,14 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
             int cursor = reader.getCursor();
             suggestor = builder -> {
                 SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                SharedSuggestionProvider.suggest(FormattedText.FORMATTING.keySet(), newBuilder);
+                SharedSuggestionProvider.suggest(StyledComponent.FORMATTING.keySet(), newBuilder);
                 builder.add(newBuilder);
             };
 
             String word = reader.readUnquotedString();
 
-            if (FormattedText.FORMATTING.containsKey(word.toLowerCase(Locale.ROOT))) {
-                FormattedText.Styler styler = FormattedText.FORMATTING.get(word.toLowerCase(Locale.ROOT));
+            if (StyledComponent.FORMATTING.containsKey(word.toLowerCase(Locale.ROOT))) {
+                StyledComponent.Styler styler = StyledComponent.FORMATTING.get(word.toLowerCase(Locale.ROOT));
                 suggestor = null;
                 reader.skipWhitespace();
 
@@ -147,7 +147,7 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
                     reader.readUnquotedString();
                     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
                 }
-                return new FormattedText(styler.operator, literalText, arguments).style();
+                return new StyledComponent(styler.operator, literalText, arguments).style();
             } else {
                 return Component.literal(word + readArgument());
             }
@@ -166,48 +166,48 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
         }
     }
 
-    static class FormattedText {
+    static class StyledComponent {
         private static final Map<String, Styler> FORMATTING = ImmutableMap.<String, Styler>builder()
-                .put("aqua", new Styler((s, o) -> s.applyFormat(ChatFormatting.AQUA), 0))
-                .put("black", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLACK), 0))
-                .put("blue", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLUE), 0))
-                .put("bold", new Styler((s, o) -> s.applyFormat(ChatFormatting.BOLD), 0))
-                .put("dark_aqua", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_AQUA), 0))
-                .put("dark_blue", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_BLUE), 0))
-                .put("dark_gray", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_GRAY), 0))
-                .put("dark_green", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_GREEN), 0))
-                .put("dark_purple", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_PURPLE), 0))
-                .put("dark_red", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_RED), 0))
-                .put("gold", new Styler((s, o) -> s.applyFormat(ChatFormatting.GOLD), 0))
-                .put("gray", new Styler((s, o) -> s.applyFormat(ChatFormatting.GRAY), 0))
-                .put("green", new Styler((s, o) -> s.applyFormat(ChatFormatting.GREEN), 0))
-                .put("italic", new Styler((s, o) -> s.applyFormat(ChatFormatting.ITALIC), 0))
-                .put("light_purple", new Styler((s, o) -> s.applyFormat(ChatFormatting.LIGHT_PURPLE), 0))
-                .put("obfuscated", new Styler((s, o) -> s.applyFormat(ChatFormatting.OBFUSCATED), 0))
-                .put("red", new Styler((s, o) -> s.applyFormat(ChatFormatting.RED), 0))
-                .put("reset", new Styler((s, o) -> s.applyFormat(ChatFormatting.RESET), 0))
-                .put("strikethrough", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
-                .put("underline", new Styler((s, o) -> s.applyFormat(ChatFormatting.UNDERLINE), 0))
-                .put("white",  new Styler((s, o) -> s.applyFormat(ChatFormatting.WHITE), 0))
-                .put("yellow", new Styler((s, o) -> s.applyFormat(ChatFormatting.YELLOW), 0))
+            .put("aqua", new Styler((s, o) -> s.applyFormat(ChatFormatting.AQUA), 0))
+            .put("black", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLACK), 0))
+            .put("blue", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLUE), 0))
+            .put("bold", new Styler((s, o) -> s.applyFormat(ChatFormatting.BOLD), 0))
+            .put("dark_aqua", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_AQUA), 0))
+            .put("dark_blue", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_BLUE), 0))
+            .put("dark_gray", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_GRAY), 0))
+            .put("dark_green", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_GREEN), 0))
+            .put("dark_purple", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_PURPLE), 0))
+            .put("dark_red", new Styler((s, o) -> s.applyFormat(ChatFormatting.DARK_RED), 0))
+            .put("gold", new Styler((s, o) -> s.applyFormat(ChatFormatting.GOLD), 0))
+            .put("gray", new Styler((s, o) -> s.applyFormat(ChatFormatting.GRAY), 0))
+            .put("green", new Styler((s, o) -> s.applyFormat(ChatFormatting.GREEN), 0))
+            .put("italic", new Styler((s, o) -> s.applyFormat(ChatFormatting.ITALIC), 0))
+            .put("light_purple", new Styler((s, o) -> s.applyFormat(ChatFormatting.LIGHT_PURPLE), 0))
+            .put("obfuscated", new Styler((s, o) -> s.applyFormat(ChatFormatting.OBFUSCATED), 0))
+            .put("red", new Styler((s, o) -> s.applyFormat(ChatFormatting.RED), 0))
+            .put("reset", new Styler((s, o) -> s.applyFormat(ChatFormatting.RESET), 0))
+            .put("strikethrough", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
+            .put("underline", new Styler((s, o) -> s.applyFormat(ChatFormatting.UNDERLINE), 0))
+            .put("white",  new Styler((s, o) -> s.applyFormat(ChatFormatting.WHITE), 0))
+            .put("yellow", new Styler((s, o) -> s.applyFormat(ChatFormatting.YELLOW), 0))
 
-                .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.tryParse(o.getFirst())), 1, "alt", "default"))
-                .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.getFirst(), 16))), 1))
-                .put("insert", new Styler((s, o) -> s.withInsertion(o.getFirst()), 1))
+            .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.tryParse(o.getFirst())), 1, "alt", "default"))
+            .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.getFirst(), 16))), 1))
+            .put("insert", new Styler((s, o) -> s.withInsertion(o.getFirst()), 1))
 
-                .put("click", new Styler((s, o) -> s.withClickEvent(parseClickEvent(o.getFirst(), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
-                .put("hover", new Styler((s, o) -> s.withHoverEvent(parseHoverEvent(o.getFirst(), o.get(1))), 2, "show_entity", "show_item", "show_text"))
+            .put("click", new Styler((s, o) -> s.withClickEvent(parseClickEvent(o.getFirst(), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
+            .put("hover", new Styler((s, o) -> s.withHoverEvent(parseHoverEvent(o.getFirst(), o.get(1))), 2, "show_entity", "show_item", "show_text"))
 
-                // aliases
-                .put("strike", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
-                .put("magic", new Styler((s, o) -> s.applyFormat(ChatFormatting.OBFUSCATED), 0))
-                .build();
+            // aliases
+            .put("strike", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
+            .put("magic", new Styler((s, o) -> s.applyFormat(ChatFormatting.OBFUSCATED), 0))
+            .build();
 
         private final StylerFunc styler;
         private final MutableComponent argument;
         private final List<String> args;
 
-        public FormattedText(StylerFunc styler, MutableComponent argument, List<String> args) {
+        public StyledComponent(StylerFunc styler, MutableComponent argument, List<String> args) {
             this.styler = styler;
             this.argument = argument;
             this.args = args;

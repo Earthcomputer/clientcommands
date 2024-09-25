@@ -13,8 +13,9 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class WhisperEncryptedCommand {
@@ -24,24 +25,24 @@ public class WhisperEncryptedCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cwe")
             .then(argument("player", gameProfile(true))
-                .then(argument("message", greedyString())
-                    .executes((ctx) -> whisper(ctx.getSource(), getSingleProfileArgument(ctx, "player"), getString(ctx, "message"))))));
+                .then(argument("message", withString(formattedComponent()))
+                    .executes((ctx) -> whisper(ctx.getSource(), getSingleProfileArgument(ctx, "player"), getWithString(ctx, "message", MutableComponent.class))))));
     }
 
-    private static int whisper(FabricClientCommandSource source, GameProfile player, String message) throws CommandSyntaxException {
+    private static int whisper(FabricClientCommandSource source, GameProfile player, Result<MutableComponent> result) throws CommandSyntaxException {
         PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(player.getId());
         if (recipient == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
-        MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), message);
+        MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), result.string());
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);
         MutableComponent prefix = Component.empty();
         prefix.append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
         prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal(" "));
-        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.outgoing", recipient.getProfile().getName(), message).withStyle(ChatFormatting.GRAY));
+        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.outgoing", recipient.getProfile().getName(), result.value()));
         source.sendFeedback(component);
         return Command.SINGLE_SUCCESS;
     }
