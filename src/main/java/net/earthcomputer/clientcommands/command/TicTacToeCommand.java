@@ -5,7 +5,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
-import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.earthcomputer.clientcommands.features.TwoPlayerGameType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
@@ -43,7 +42,7 @@ public class TicTacToeCommand {
         }
     }
 
-    public static class TicTacToeGame extends TwoPlayerGame<TicTacToeGameScreen> {
+    public static class TicTacToeGame {
         public final PlayerInfo opponent;
 
         private final Mark[][] board = new Mark[3][3];
@@ -85,11 +84,6 @@ public class TicTacToeCommand {
             return null;
         }
 
-        @Override
-        public TicTacToeGameScreen createScreen() {
-            return new TicTacToeGameScreen(this);
-        }
-
         public enum Mark {
             NOUGHT(Component.translatable("ticTacToeGame.noughts")),
             CROSS(Component.translatable("ticTacToeGame.crosses"));
@@ -121,7 +115,7 @@ public class TicTacToeCommand {
         private static final int MARK_SIZE = 76;
         private static final int PADDING = 2;
 
-        private TicTacToeGameScreen(TicTacToeGame game) {
+        public TicTacToeGameScreen(TicTacToeGame game) {
             super(Component.translatable("ticTacToeGame.title", game.opponent.getProfile().getName()));
             this.game = game;
         }

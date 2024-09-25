@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 
-public record StartTwoPlayerGameC2CPacket(String sender, boolean accept, TwoPlayerGameType<?> game) implements C2CPacket {
+public record StartTwoPlayerGameC2CPacket(String sender, boolean accept, TwoPlayerGameType<?, ?> game) implements C2CPacket {
     public static final StreamCodec<RegistryFriendlyByteBuf, StartTwoPlayerGameC2CPacket> CODEC = Packet.codec(StartTwoPlayerGameC2CPacket::write, StartTwoPlayerGameC2CPacket::new);
     public static final PacketType<StartTwoPlayerGameC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "start_two_player_game"));
 

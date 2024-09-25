@@ -9,11 +9,12 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
-import net.earthcomputer.clientcommands.command.FourInARowCommand;
+import net.earthcomputer.clientcommands.command.ConnectFourCommand;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
@@ -33,21 +34,22 @@ import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
-public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
-    public static final Map<ResourceLocation, TwoPlayerGameType<?>> TYPE_BY_NAME = new LinkedHashMap<>();
+public class TwoPlayerGameType<T, S extends Screen> {
+    public static final Map<ResourceLocation, TwoPlayerGameType<?, ?>> TYPE_BY_NAME = new LinkedHashMap<>();
     private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("twoPlayerGame.playerNotFound"));
     private static final SimpleCommandExceptionType NO_GAME_WITH_PLAYER_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("twoPlayerGame.noGameWithPlayer"));
 
-    public static final TwoPlayerGameType<TicTacToeCommand.TicTacToeGame> TIC_TAC_TOE_GAME_TYPE = register(new TwoPlayerGameType<>("commands.ctictactoe.name", "ctictactoe", ResourceLocation.fromNamespaceAndPath("clientcommands", "tictactoe"), (opponent, player1) -> new TicTacToeCommand.TicTacToeGame(opponent, player1 ? TicTacToeCommand.TicTacToeGame.Mark.CROSS : TicTacToeCommand.TicTacToeGame.Mark.NOUGHT)));
-    public static final TwoPlayerGameType<FourInARowCommand.FourInARowGame> FOUR_IN_A_ROW_GAME_TYPE = register(new TwoPlayerGameType<>("commands.cfourinarow.name", "cfourinarow", ResourceLocation.fromNamespaceAndPath("clientcommands", "fourinarow"), (opponent, player1) -> new FourInARowCommand.FourInARowGame(opponent, player1 ? FourInARowCommand.Piece.RED : FourInARowCommand.Piece.YELLOW)));
+    public static final TwoPlayerGameType<TicTacToeCommand.TicTacToeGame, TicTacToeCommand.TicTacToeGameScreen> TIC_TAC_TOE_GAME_TYPE = register(new TwoPlayerGameType<>("commands.ctictactoe.name", "ctictactoe", ResourceLocation.fromNamespaceAndPath("clientcommands", "tictactoe"), (opponent, firstPlayer) -> new TicTacToeCommand.TicTacToeGame(opponent, firstPlayer ? TicTacToeCommand.TicTacToeGame.Mark.CROSS : TicTacToeCommand.TicTacToeGame.Mark.NOUGHT), TicTacToeCommand.TicTacToeGameScreen::new));
+    public static final TwoPlayerGameType<ConnectFourCommand.ConnectFourGame, ConnectFourCommand.ConnectFourGameScreen > FOUR_IN_A_ROW_GAME_TYPE = register(new TwoPlayerGameType<>("commands.cconnectfour.name", "cconnectfour", ResourceLocation.fromNamespaceAndPath("clientcommands", "connectfour"), (opponent, firstPlayer) -> new ConnectFourCommand.ConnectFourGame(opponent, firstPlayer ? ConnectFourCommand.Piece.RED : ConnectFourCommand.Piece.YELLOW), ConnectFourCommand.ConnectFourGameScreen::new));
 
-    private static <G extends TwoPlayerGame<?>> TwoPlayerGameType<G> register(TwoPlayerGameType<G> instance) {
+    private static <T, S extends Screen> TwoPlayerGameType<T, S> register(TwoPlayerGameType<T, S> instance) {
         TYPE_BY_NAME.put(instance.id, instance);
         return instance;
     }
 
-    public static TwoPlayerGameType<?> getById(ResourceLocation id) {
-        return TYPE_BY_NAME.getOrDefault(id, TIC_TAC_TOE_GAME_TYPE);
+    @Nullable
+    public static TwoPlayerGameType<?, ?> getById(ResourceLocation id) {
+        return TYPE_BY_NAME.get(id);
     }
 
     private final String translationKey;
@@ -56,14 +58,16 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
     private final Set<String> pendingInvites;
     private final Map<String, T> activeGames;
     private final GameFactory<T> gameFactory;
+    private final ScreenFactory<T, S> screenFactory;
 
-    TwoPlayerGameType(String translationKey, String command, ResourceLocation id, GameFactory<T> gameFactory) {
+    TwoPlayerGameType(String translationKey, String command, ResourceLocation id, GameFactory<T> gameFactory, ScreenFactory<T, S> screenFactory) {
         this.translationKey = translationKey;
         this.command = command;
         this.id = id;
         this.pendingInvites = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<String, Boolean>build().asMap());
         this.activeGames = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(15)).<String, T>build().asMap();
         this.gameFactory = gameFactory;
+        this.screenFactory = screenFactory;
     }
 
     public Component translate() {
@@ -83,12 +87,12 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
     }
 
     @Nullable
-    public T getActiveGame(String game) {
-        return this.activeGames.get(game);
+    public T getActiveGame(String opponent) {
+        return this.activeGames.get(opponent);
     }
 
-    public void addNewGame(PlayerInfo opponent, boolean isPlayer1) {
-        this.activeGames.put(opponent.getProfile().getName(), this.gameFactory.create(opponent, isPlayer1));
+    public void addNewGame(PlayerInfo opponent, boolean isFirstPlayer) {
+        this.activeGames.put(opponent.getProfile().getName(), this.gameFactory.create(opponent, isFirstPlayer));
     }
 
     public LiteralArgumentBuilder<FabricClientCommandSource> createCommandTree() {
@@ -121,13 +125,13 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
             throw NO_GAME_WITH_PLAYER_EXCEPTION.create();
         }
 
-        source.getClient().tell(() -> source.getClient().setScreen(game.createScreen()));
+        source.getClient().tell(() -> source.getClient().setScreen(this.screenFactory.createScreen(game)));
         return Command.SINGLE_SUCCESS;
     }
 
     public static void onStartTwoPlayerGame(StartTwoPlayerGameC2CPacket packet) {
         String sender = packet.sender();
-        TwoPlayerGameType<?> game = packet.game();
+        TwoPlayerGameType<?, ?> game = packet.game();
         PlayerInfo opponent = Minecraft.getInstance().getConnection().getPlayerInfo(sender);
         if (opponent == null) {
             return;
@@ -167,7 +171,12 @@ public class TwoPlayerGameType<T extends TwoPlayerGame<?>> {
     }
 
     @FunctionalInterface
-    public interface GameFactory<T extends TwoPlayerGame<?>> {
-        T create(PlayerInfo opponent, boolean isPlayer1);
+    public interface GameFactory<T> {
+        T create(PlayerInfo opponent, boolean isFirstPlayer);
+    }
+
+    @FunctionalInterface
+    public interface ScreenFactory<T, S extends Screen> {
+        S createScreen(T t);
     }
 }

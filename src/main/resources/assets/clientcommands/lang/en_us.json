@@ -39,7 +39,7 @@
   "commands.ccalcstack.success.empty.exact": "%d items is exactly %d stacks",
   "commands.ccalcstack.success.exact": "%d %s is exactly %d stacks",
 
-  "commands.cfourinarow.name": "Four in a Row",
+  "commands.cconnectfour.name": "Four in a Row",
 
   "commands.ccrackrng.failed": "Failed to crack player seed",
   "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper.",
@@ -382,6 +382,6 @@
   "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
   "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move",
 
-  "c2cpacket.putFourInARowPieceC2CPacket.incoming.lost": "%s has made a move in Four in a Row and won",
-  "c2cpacket.putFourInARowPieceC2CPacket.incoming": "%s has made a move in Four in a Row, click to make your move"
+  "c2cpacket.putConnectFourPieceC2CPacket.incoming.lost": "%s has made a move in Four in a Row and won",
+  "c2cpacket.putConnectFourPieceC2CPacket.incoming": "%s has made a move in Four in a Row, click to make your move"
 }

@@ -51,5 +51,5 @@ accessible field net/minecraft/world/entity/LivingEntity lastHurt F
 accessible field net/minecraft/world/entity/decoration/ArmorStand invisible Z
 accessible field net/minecraft/world/level/levelgen/LegacyRandomSource seed Ljava/util/concurrent/atomic/AtomicLong;
 
-# cfourinarow
+# cconnectfour
 accessible method net/minecraft/client/gui/GuiGraphics innerBlit (Lnet/minecraft/resources/ResourceLocation;IIIIIFFFFFFFF)V
