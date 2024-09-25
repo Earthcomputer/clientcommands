@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public class FormattedComponentArgumentType implements ArgumentType<MutableComponent> {
+public class FormattedComponentArgument implements ArgumentType<MutableComponent> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "&lxpple", "&l&o#fb8919nwex");
 
@@ -29,8 +29,8 @@ public class FormattedComponentArgumentType implements ArgumentType<MutableCompo
     private static final SimpleCommandExceptionType EXPECTED_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.expectedHexValue"));
     private static final SimpleCommandExceptionType INVALID_HEX_VALUE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.invalidHexValue"));
 
-    public static FormattedComponentArgumentType formattedComponent() {
-        return new FormattedComponentArgumentType();
+    public static FormattedComponentArgument formattedComponent() {
+        return new FormattedComponentArgument();
     }
 
     public static MutableComponent getFormattedComponent(CommandContext<FabricClientCommandSource> context, String arg) {

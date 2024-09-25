@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
-import static net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 

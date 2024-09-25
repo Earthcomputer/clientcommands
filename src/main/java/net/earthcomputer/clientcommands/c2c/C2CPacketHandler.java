@@ -10,7 +10,7 @@ import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StartTicTacToeGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ListenCommand;
-import net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgumentType;
+import net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgument;
 import net.earthcomputer.clientcommands.interfaces.IClientPacketListener_C2C;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -192,7 +192,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         String message = packet.message();
         MutableComponent formattedComponent;
         try {
-            formattedComponent = FormattedComponentArgumentType.formattedComponent().parse(new StringReader(message));
+            formattedComponent = FormattedComponentArgument.formattedComponent().parse(new StringReader(message));
         } catch (CommandSyntaxException e) {
             formattedComponent = Component.literal(message);
         }
