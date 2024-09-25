@@ -1,14 +1,24 @@
 package net.earthcomputer.clientcommands.render;
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.OptionalDouble;
 
 public class RenderQueue {
     private static int tickCounter = 0;
@@ -16,19 +26,32 @@ public class RenderQueue {
     private static final List<RemoveQueueEntry> removeQueue = new ArrayList<>();
     private static final EnumMap<Layer, Map<Object, Shape>> queue = new EnumMap<>(Layer.class);
 
+    static {
+        ClientTickEvents.START_CLIENT_TICK.register(RenderQueue::tick);
+        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+            context.matrixStack().pushPose();
+
+            Vec3 cameraPos = context.camera().getPosition();
+            context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.NO_DEPTH_LAYER), context.matrixStack(), context.tickCounter().getRealtimeDeltaTicks());
+
+            context.matrixStack().popPose();
+        });
+    }
+
     public static void add(Layer layer, Object key, Shape shape, int life) {
         addQueue.add(new AddQueueEntry(layer, key, shape, life));
     }
 
-    public static void addCuboid(Layer layer, Object key, Vec3d from, Vec3d to, int color, int life) {
+    public static void addCuboid(Layer layer, Object key, Vec3 from, Vec3 to, int color, int life) {
         add(layer, key, new Cuboid(from, to, color), life);
     }
 
-    public static void addCuboid(Layer layer, Object key, Box cuboid, int color, int life) {
+    public static void addCuboid(Layer layer, Object key, AABB cuboid, int color, int life) {
         add(layer, key, new Cuboid(cuboid, color), life);
     }
 
-    public static void addLine(Layer layer, Object key, Vec3d from, Vec3d to, int color, int life) {
+    public static void addLine(Layer layer, Object key, Vec3 from, Vec3 to, int color, int life) {
         add(layer, key, new Line(from, to, color), life);
     }
 
@@ -48,7 +71,7 @@ public class RenderQueue {
         shapes.put(entry.key(), entry.shape());
     }
 
-    public static void tick() {
+    private static void tick(Minecraft mc) {
         for (RemoveQueueEntry entry : removeQueue) {
             Map<Object, Shape> shapes = queue.get(entry.layer());
             if (shapes != null) {
@@ -75,11 +98,11 @@ public class RenderQueue {
         }
     }
 
-    public static void render(Layer layer, VertexConsumer vertexConsumer, MatrixStack matrixStack, float delta) {
+    public static void render(Layer layer, VertexConsumer vertexConsumer, PoseStack poseStack, float delta) {
         if (!queue.containsKey(layer)) {
             return;
         }
-        queue.get(layer).values().forEach(shape -> shape.render(matrixStack, vertexConsumer, delta));
+        queue.get(layer).values().forEach(shape -> shape.render(poseStack, vertexConsumer, delta));
     }
 
     public enum Layer {
@@ -90,12 +113,12 @@ public class RenderQueue {
 
     private record RemoveQueueEntry(Layer layer, Object key) {}
 
-    public static RenderLayer NO_DEPTH_LAYER = RenderLayer.of("clientcommands_no_depth", VertexFormats.LINES, VertexFormat.DrawMode.LINES, 256, true, true, RenderLayer.MultiPhaseParameters.builder()
-            .program(RenderLayer.LINES_PROGRAM)
-            .writeMaskState(RenderLayer.COLOR_MASK)
-            .cull(RenderLayer.DISABLE_CULLING)
-            .depthTest(RenderLayer.ALWAYS_DEPTH_TEST)
-            .layering(RenderLayer.VIEW_OFFSET_Z_LAYERING)
-            .lineWidth(new RenderLayer.LineWidth(OptionalDouble.of(Line.THICKNESS)))
-            .build(true));
+    public static RenderType NO_DEPTH_LAYER = RenderType.create("clientcommands_no_depth", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, true, true, RenderType.CompositeState.builder()
+            .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
+            .setWriteMaskState(RenderType.COLOR_WRITE)
+            .setCullState(RenderType.NO_CULL)
+            .setDepthTestState(RenderType.NO_DEPTH_TEST)
+            .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
+            .setLineState(new RenderType.LineStateShard(OptionalDouble.of(Line.THICKNESS)))
+            .createCompositeState(true));
 }

@@ -10,19 +10,23 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.datafixer.TypeReferences;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -34,22 +38,22 @@ import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
-import static net.minecraft.command.CommandSource.*;
+import static net.minecraft.commands.SharedSuggestionProvider.*;
 
 public class KitCommand {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ckit.saveFile.failed"));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ckit.saveFile.failed"));
 
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ckit.create.alreadyExists", arg));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.ckit.create.alreadyExists", arg));
 
-    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ckit.load.notCreative"));
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.ckit.notFound", arg));
+    private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ckit.load.notCreative"));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.ckit.notFound", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
 
-    private static final Map<String, NbtList> kits = new HashMap<>();
+    private static final Map<String, ListTag> kits = new HashMap<>();
 
     static {
         try {
@@ -66,15 +70,15 @@ public class KitCommand {
                                 .executes(ctx -> create(ctx.getSource(), getString(ctx, "name")))))
                 .then(literal("delete")
                         .then(argument("name", string())
-                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
+                                .suggests((ctx, builder) -> suggest(kits.keySet(), builder))
                                 .executes(ctx -> delete(ctx.getSource(), getString(ctx, "name")))))
                 .then(literal("edit")
                         .then(argument("name", string())
-                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
+                                .suggests((ctx, builder) -> suggest(kits.keySet(), builder))
                                 .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name")))))
                 .then(literal("load")
                         .then(argument("name", string())
-                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
+                                .suggests((ctx, builder) -> suggest(kits.keySet(), builder))
                                 .then(literal("--override")
                                         .executes(ctx -> load(ctx.getSource(), getString(ctx, "name"), true)))
                                 .executes(ctx -> load(ctx.getSource(), getString(ctx, "name"), false))))
@@ -82,7 +86,7 @@ public class KitCommand {
                         .executes(ctx -> list(ctx.getSource())))
                 .then(literal("preview")
                         .then(argument("name", string())
-                                .suggests((ctx, builder) -> suggestMatching(kits.keySet(), builder))
+                                .suggests((ctx, builder) -> suggest(kits.keySet(), builder))
                                 .executes(ctx -> preview(ctx.getSource(), getString(ctx, "name"))))));
     }
 
@@ -90,9 +94,9 @@ public class KitCommand {
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
-        kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
+        kits.put(name, source.getPlayer().getInventory().save(new ListTag()));
         saveFile();
-        source.sendFeedback(Text.translatable("commands.ckit.create.success", name));
+        source.sendFeedback(Component.translatable("commands.ckit.create.success", name));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -101,7 +105,7 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
         saveFile();
-        source.sendFeedback(Text.translatable("commands.ckit.delete.success", name));
+        source.sendFeedback(Component.translatable("commands.ckit.delete.success", name));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -109,79 +113,79 @@ public class KitCommand {
         if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        kits.put(name, source.getPlayer().getInventory().writeNbt(new NbtList()));
+        kits.put(name, source.getPlayer().getInventory().save(new ListTag()));
         saveFile();
-        source.sendFeedback(Text.translatable("commands.ckit.edit.success", name));
+        source.sendFeedback(Component.translatable("commands.ckit.edit.success", name));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int load(FabricClientCommandSource source, String name, boolean override) throws CommandSyntaxException {
-        if (!source.getPlayer().getAbilities().creativeMode) {
+        if (!source.getPlayer().getAbilities().instabuild) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
-        NbtList kit = kits.get(name);
+        ListTag kit = kits.get(name);
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        PlayerInventory tempInv = new PlayerInventory(source.getPlayer());
-        tempInv.readNbt(kit);
-        List<Slot> slots = source.getPlayer().playerScreenHandler.slots;
+        Inventory tempInv = new Inventory(source.getPlayer());
+        tempInv.load(kit);
+        List<Slot> slots = source.getPlayer().inventoryMenu.slots;
         for (int i = 0; i < slots.size(); i++) {
-            if (slots.get(i).inventory == source.getPlayer().getInventory()) {
-                ItemStack itemStack = tempInv.getStack(slots.get(i).getIndex());
+            if (slots.get(i).container == source.getPlayer().getInventory()) {
+                ItemStack itemStack = tempInv.getItem(slots.get(i).getContainerSlot());
                 if (!itemStack.isEmpty() || override) {
-                    source.getClient().interactionManager.clickCreativeStack(itemStack, i);
+                    source.getClient().gameMode.handleCreativeModeItemAdd(itemStack, i);
                 }
             }
         }
 
-        source.getPlayer().playerScreenHandler.sendContentUpdates();
-        source.sendFeedback(Text.translatable("commands.ckit.load.success", name));
+        source.getPlayer().inventoryMenu.broadcastChanges();
+        source.sendFeedback(Component.translatable("commands.ckit.load.success", name));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int list(FabricClientCommandSource source) {
         if (kits.isEmpty()) {
-            source.sendFeedback(Text.translatable("commands.ckit.list.empty"));
+            source.sendFeedback(Component.translatable("commands.ckit.list.empty"));
         } else {
             String list = String.join(", ", kits.keySet());
-            source.sendFeedback(Text.translatable("commands.ckit.list", list));
+            source.sendFeedback(Component.translatable("commands.ckit.list", list));
         }
         return kits.size();
     }
 
     private static int preview(FabricClientCommandSource source, String name) throws CommandSyntaxException {
-        NbtList kit = kits.get(name);
+        ListTag kit = kits.get(name);
         if (kit == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        PlayerInventory tempInv = new PlayerInventory(source.getPlayer());
-        tempInv.readNbt(kit);
+        Inventory tempInv = new Inventory(source.getPlayer());
+        tempInv.load(kit);
         /*
             After executing a command, the current screen will be closed (the chat hud).
             And if you open a new screen in a command, that new screen will be closed
             instantly along with the chat hud. Slightly delaying the opening of the
             screen fixes this issue.
          */
-        source.getClient().send(() -> source.getClient().setScreen(new PreviewScreen(new PlayerScreenHandler(tempInv, true, source.getPlayer()), tempInv, name)));
+        source.getClient().tell(() -> source.getClient().setScreen(new PreviewScreen(new InventoryMenu(tempInv, true, source.getPlayer()), tempInv, name)));
         return Command.SINGLE_SUCCESS;
     }
 
     private static void saveFile() throws CommandSyntaxException {
         try {
-            NbtCompound rootTag = new NbtCompound();
-            NbtCompound compoundTag = new NbtCompound();
+            CompoundTag rootTag = new CompoundTag();
+            CompoundTag compoundTag = new CompoundTag();
             kits.forEach(compoundTag::put);
-            rootTag.putInt("DataVersion", SharedConstants.getGameVersion().getSaveVersion().getId());
+            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
             rootTag.put("Kits", compoundTag);
-            File newFile = File.createTempFile("kits", ".dat", configPath.toFile());
+            Path newFile = File.createTempFile("kits", ".dat", configPath.toFile()).toPath();
             NbtIo.write(rootTag, newFile);
-            File backupFile = new File(configPath.toFile(), "kits.dat_old");
-            File currentFile = new File(configPath.toFile(), "kits.dat");
-            Util.backupAndReplace(currentFile, newFile, backupFile);
+            Path backupFile = configPath.resolve("kits.dat_old");
+            Path currentFile = configPath.resolve("kits.dat");;
+            Util.safeReplaceFile(currentFile, newFile, backupFile);
         } catch (IOException e) {
             throw SAVE_FAILED_EXCEPTION.create();
         }
@@ -189,22 +193,22 @@ public class KitCommand {
 
     private static void loadFile() throws IOException {
         kits.clear();
-        NbtCompound rootTag = NbtIo.read(new File(configPath.toFile(), "kits.dat"));
+        CompoundTag rootTag = NbtIo.read(configPath.resolve("kits.dat"));
         if (rootTag == null) {
             return;
         }
-        final int currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
+        final int currentVersion = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
         final int fileVersion = rootTag.getInt("DataVersion");
-        NbtCompound compoundTag = rootTag.getCompound("Kits");
-        DataFixer dataFixer = MinecraftClient.getInstance().getDataFixer();
+        CompoundTag compoundTag = rootTag.getCompound("Kits");
+        DataFixer dataFixer = Minecraft.getInstance().getFixerUpper();
         if (fileVersion >= currentVersion) {
-            compoundTag.getKeys().forEach(key -> kits.put(key, compoundTag.getList(key, NbtElement.COMPOUND_TYPE)));
+            compoundTag.getAllKeys().forEach(key -> kits.put(key, compoundTag.getList(key, Tag.TAG_COMPOUND)));
         } else {
-            compoundTag.getKeys().forEach(key -> {
-                NbtList updatedListTag = new NbtList();
-                compoundTag.getList(key, NbtElement.COMPOUND_TYPE).forEach(tag -> {
-                    Dynamic<NbtElement> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
-                    Dynamic<NbtElement> newTagDynamic = dataFixer.update(TypeReferences.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
+            compoundTag.getAllKeys().forEach(key -> {
+                ListTag updatedListTag = new ListTag();
+                compoundTag.getList(key, Tag.TAG_COMPOUND).forEach(tag -> {
+                    Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
+                    Dynamic<Tag> newTagDynamic = dataFixer.update(References.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 kits.put(key, updatedListTag);
@@ -213,34 +217,34 @@ public class KitCommand {
     }
 }
 
-class PreviewScreen extends AbstractInventoryScreen<PlayerScreenHandler> {
+class PreviewScreen extends EffectRenderingInventoryScreen<InventoryMenu> {
 
-    public PreviewScreen(PlayerScreenHandler playerScreenHandler, PlayerInventory inventory, String name) {
-        super(playerScreenHandler, inventory, Text.literal(name).styled(style -> style.withColor(Formatting.RED)));
-        this.titleX = 80;
+    public PreviewScreen(InventoryMenu menu, Inventory inventory, String name) {
+        super(menu, inventory, Component.literal(name).withStyle(style -> style.withColor(ChatFormatting.RED)));
+        this.titleLabelX = 80;
     }
 
     @Override
-    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-        context.drawText(this.textRenderer, this.title, this.titleX, this.titleY, 0x404040, false);
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0x404040, false);
     }
 
     @Override
-    public void render(DrawContext DrawContext, int mouseX, int mouseY, float delta) {
-        this.renderBackground(DrawContext);
-        super.render(DrawContext, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.renderBackground(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
 
-        this.drawMouseoverTooltip(DrawContext, mouseX, mouseY);
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
-    protected void drawStatusEffects(DrawContext context, int mouseX, int mouseY) {
+    protected void renderEffects(GuiGraphics graphics, int mouseX, int mouseY) {
         // nop
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(BACKGROUND_TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+    protected void renderBg(GuiGraphics graphics, float delta, int mouseX, int mouseY) {
+        graphics.blit(INVENTORY_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override

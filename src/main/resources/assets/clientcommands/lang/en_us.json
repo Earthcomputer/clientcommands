@@ -8,6 +8,7 @@
   "commands.calias.addAlias.success": "Successfully added alias \"%s\"",
   "commands.calias.listAliases.noAliasesRegistered": "No aliases registered",
   "commands.calias.listAliases.success": "%s aliases registered:",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
   "commands.calias.removeAlias.success": "Successfully removed alias \"%s\"",
 
   "commands.careastats.notLoaded": "A chunk in this area is not loaded",
@@ -44,12 +45,24 @@
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %d",
 
-  "commands.cenchant.expectedWithWithoutExactly": "Expected \"with\"/\"without\"/\"exactly\"",
+  "commands.ccreativetab.addStack.success": "Successfully added %s to \"%s\"",
+  "commands.ccreativetab.addTab.alreadyExists": "Creative tab \"%s\" already exists",
+  "commands.ccreativetab.addTab.illegalCharacter": "Creative tab can only contain [a-z0-9/._-] characters",
+  "commands.ccreativetab.addTab.success": "Successfully added creative tab \"%s\"",
+  "commands.ccreativetab.changeIcon.success": "Successfully changed the icon of \"%s\" from %s to %s",
+  "commands.ccreativetab.notFound": "Creative tab \"%s\" not found",
+  "commands.ccreativetab.outOfBounds": "Index %d is out of bounds",
+  "commands.ccreativetab.removeStack.success": "Successfully removed stack from \"%s\" at index %d",
+  "commands.ccreativetab.removeTab.success": "Successfully removed creative tab \"%s\"",
+  "commands.ccreativetab.renameTab.success": "Successfully renamed creative tab \"%s\" to \"%s\"",
+  "commands.ccreativetab.saveFile.failed": "Could not save creative tabs file",
+  "commands.ccreativetab.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
+
   "commands.cenchant.failed": "It's impossible or would take too long to get those enchantments",
   "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Incompatible enchantments",
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
-  "commands.cenchant.success": "Starting enchantment manipulation",
+  "commands.cenchant.success": "Starting enchantment manipulation.",
   "commands.cenchant.uncracked": "Seed needs to be cracked",
 
   "commands.cfind.found.left": "Found %1$s at ",
@@ -59,10 +72,13 @@
   "commands.cfind.success": "%d entities matched your query",
 
   "commands.cfindblock.notFound": "No such block found",
+  "commands.cfindblock.starting": "Searching for %s",
   "commands.cfindblock.success.left": "Closest match is at ",
   "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$s blocks away",
 
+  "commands.cfinditem.match.entity.left": "%dx %s found in %s at ",
+  "commands.cfinditem.match.entity.right": "",
   "commands.cfinditem.match.left": "%dx %s found at ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Searching for %s",
@@ -94,6 +110,11 @@
   "commands.cfunction.limitReached": "Command limit (%d) reached",
   "commands.cfunction.success": "Ran %d commands from function %s",
 
+  "commands.cgamemode.playerNotFound": "Player not found",
+  "commands.cgamemode.playerGameMode": "Player %s is in game mode %s",
+  "commands.cgamemode.noneWithGameMode": "No players are in game mode %s",
+  "commands.cgamemode.listWithGameMode": "The following players are in game mode %s:",
+
   "commands.cgamma.success": "Set gamma to %f",
 
   "commands.cghostblock.fill.success": "%d ghost blocks filled",
@@ -105,23 +126,12 @@
   "commands.cglow.entity.keepSearching.success": "Glowing entities",
   "commands.cglow.entity.failed": "No entities to glow",
   "commands.cglow.entity.success": "Glowing %d entities",
-  "commands.cglow.area.success": "Glowing %d area(s)",
+  "commands.cglow.area.success": "Glowing %d area",
+
+  "commands.chat.success": "Successfully opened c🎩",
 
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
   "commands.chotbar.restoredHotbar": "Restored item hotbar %d",
-
-  "commands.citemgroup.notFound": "Item group \"%s\" not found",
-  "commands.citemgroup.outOfBounds": "Index %d is out of bounds",
-  "commands.citemgroup.saveFile.failed": "Could not save item groups file",
-  "commands.citemgroup.addGroup.success": "Successfully added item group \"%s\"",
-  "commands.citemgroup.addGroup.illegalCharacter": "Item groups can only contain [a-z0-9/._-] characters",
-  "commands.citemgroup.addGroup.alreadyExists": "Item group \"%s\" already exists",
-  "commands.citemgroup.removeGroup.success": "Successfully removed item group \"%s\"",
-  "commands.citemgroup.addStack.success": "Successfully added %s to \"%s\"",
-  "commands.citemgroup.removeStack.success": "Successfully removed stack from \"%s\" at index %d",
-  "commands.citemgroup.setStack.success": "Successfully set the stack from \"%s\" at index %d to %s",
-  "commands.citemgroup.changeIcon.success": "Successfully changed the icon of \"%s\" from %s to %s",
-  "commands.citemgroup.renameGroup.success": "Successfully renamed item group \"%s\" to \"%s\"",
 
   "commands.ckit.notFound": "Kit \"%s\" not found",
   "commands.ckit.saveFile.failed": "Could not save kits file",
@@ -134,6 +144,23 @@
   "commands.ckit.list": "Available kits: %s",
   "commands.ckit.list.empty": "No available kits",
 
+  "commands.clisten.commandDisabled": "The command was disabled, check your logs",
+  "commands.clisten.unknownPacket": "Unknown packet %s",
+  "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
+  "commands.clisten.receivedC2CPacket": "Received the following C2C packet: %s",
+  "commands.clisten.packetError": "ERROR",
+  "commands.clisten.add.success": "Successfully started listening to that packet",
+  "commands.clisten.add.failed": "Already listening to that packet",
+  "commands.clisten.remove.success": "No longer listening to that packet",
+  "commands.clisten.remove.failed": "Not listening to that packet",
+  "commands.clisten.list.none": "Not listening to any packets",
+  "commands.clisten.list": "Listening to the following packets:",
+  "commands.clisten.clear": "No longer listening to any packets",
+
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+
   "commands.cplayerinfo.ioException": "An error occurred",
   "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
 
@@ -144,21 +171,25 @@
 
   "commands.cplaysound.success": "Played sound %s to self",
 
+  "commands.cplugins.found": "Found the following plugins:",
+
   "commands.cping.success": "Your average ping is %dms",
   "commands.cping.success.other": "The average ping of %s is %dms",
   "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Player not found",
-  "commands.cping.tooManyPlayers": "Your query can match at most 1 player",
 
-  "commands.cpos.world.overworld": "the Overworld",
-  "commands.cpos.world.the_end": "the End",
-  "commands.cpos.world.the_nether": "the Nether",
-  "commands.cpos.coords.left": " in %1$s is ",
+  "commands.cpos.level.overworld": "the Overworld",
+  "commands.cpos.level.the_end": "the End",
+  "commands.cpos.level.the_nether": "the Nether",
+  "commands.cpos.coords.left": "",
+  "commands.cpos.coords.middle": " in %1$s is ",
   "commands.cpos.coords.right": " in %2$s",
 
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
+
+  "commands.csignsearch.starting": "Searching signs",
 
   "commands.cstartup.add.success": "Added command to startup file",
   "commands.cstartup.couldNotCreateFile": "Couldn't create startup file",
@@ -169,10 +200,16 @@
   "commands.cstopsound.success.source.any": "Stopped all '%s' sounds for self",
   "commands.cstopsound.success.source.sound": "Stopped sound '%s' on source '%s' for self",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "No currently executing tasks",
   "commands.ctask.list.success": "%d currently executing tasks",
   "commands.ctask.stop.noMatch": "No matching tasks",
   "commands.ctask.stop.success": "Stopped %d tasks",
+
+  "commands.ctictactoe.playerNotFound": "Player not found",
+  "commands.ctictactoe.noGameWithPlayer": "Currently not playing a game with that player",
+
+  "commands.ctime.reset.success": "The time now matches the server",
 
   "commands.ctitle.cleared": "Cleared titles",
   "commands.ctitle.reset": "Reset title options",
@@ -190,6 +227,7 @@
   "commands.ctranslate.unknownError": "An error occurred",
   "commands.ctranslate.unknownLanguageCode": "Unknown language code \"%s\"",
   "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
+  "commands.ctranslate.hoverText": "Click to copy, shift-click to insert in chat field",
 
   "commands.cuuid.success": "The UUID of %s is %s",
   "commands.cuuid.success.nameless": "The UUID of that entity is %s",
@@ -219,8 +257,12 @@
   "commands.client.expectedHexValue": "Expected a hex value",
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.invalidArgumentException": "Invalid argument '%s'",
+  "commands.client.invalidClickAction": "Invalid click event action '%s'",
   "commands.client.invalidHexValue": "Invalid hex value",
+  "commands.client.invalidHoverAction": "Invalid hover event action '%s'",
+  "commands.client.invalidHoverEvent": "Invalid hover event '%s'",
   "commands.client.notClient": "Not a client-side command",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
   "commands.client.requiresRestart": "This change will take effect after you restart your client",
   "commands.client.tooFewArguments": "Too few arguments",
   "commands.client.unknownFormattingCode": "Unknown formatting code",
@@ -239,6 +281,7 @@
   "enchCrack.enchantments": "Enchantments:",
   "enchCrack.clues": "Clues:",
   "enchCrack.slot": "Slot %d:",
+  "enchCrack.bookshelfCount": "Bookshelf Count: %d",
 
   "enchCrack.xpSeed.one": "XP Seed: %08X",
   "enchCrack.xpSeed.many": "Possible XP seeds: %d",
@@ -254,6 +297,10 @@
   "enchCrack.insn.enchantments": "Enchantments on item:",
 
   "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
+
+  "minesweeperGame.minesLeft": "Mines Left: %d",
+  "minesweeperGame.timePlayed": "Time Played: %ds",
+  "minesweeperGame.title": "Minesweeper",
 
   "playerManip.state": "Player Crack State: %s",
   "playerManip.state.uncracked": "Uncracked",
@@ -301,13 +348,27 @@
   "snakeGame.title": "Snake",
   "snakeGame.score": "Score: %d",
 
-  "ccpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
-  "ccpacket.publicKeyNotFound": "Public key not found",
-  "ccpacket.encryptionFailed": "Something failed while encrypting your message",
-  "ccpacket.malformedPacket": "You have received a malformed C2C packet:",
-  "ccpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
-  "ccpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
+  "ticTacToeGame.playingWith": "You are playing with %s",
+  "ticTacToeGame.noughts": "noughts (O)",
+  "ticTacToeGame.crosses": "crosses (X)",
 
-  "ccpacket.messageC2CPacket.incoming": "%s -> you: %s",
-  "ccpacket.messageC2CPacket.outgoing": "you -> %s: %s"
+  "c2cpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
+  "c2cpacket.publicKeyNotFound": "Public key not found",
+  "c2cpacket.encryptionFailed": "Something failed while encrypting your message",
+  "c2cpacket.malformedPacket": "You have received a malformed C2C packet:",
+  "c2cpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
+  "c2cpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+
+  "c2cpacket.messageC2CPacket.incoming": "%s -> you: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }

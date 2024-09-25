@@ -1,8 +1,8 @@
 package net.earthcomputer.clientcommands.features;
 
 import com.google.gson.Gson;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.language.I18n;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -19,10 +19,10 @@ import java.util.regex.Pattern;
 
 public class WikiRetriever {
 
-    private static final String WIKI_HOST = "https://minecraft.gamepedia.com/";
+    private static final String WIKI_HOST = "https://minecraft.wiki/";
     private static final String PAGE_SUMMARY_QUERY = WIKI_HOST + "api.php?action=query&prop=extracts&exintro=true&format=json&titles=%s";
     private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<\\s*(/)?\\s*(\\w+).*?>|<!--.*?-->|\n", Pattern.DOTALL);
-    private static final Formatting CODE_COLOR = Formatting.DARK_GREEN;
+    private static final ChatFormatting CODE_COLOR = ChatFormatting.DARK_GREEN;
     private static final Gson GSON = new Gson();
 
     public static String decode(String html) {
@@ -48,28 +48,28 @@ public class WikiRetriever {
             if (!endTag) {
                 switch (tagName) {
                     case "b":
-                        raw.append(Formatting.BOLD);
+                        raw.append(ChatFormatting.BOLD);
                         bold = true;
                         break;
                     case "i":
-                        raw.append(Formatting.ITALIC);
+                        raw.append(ChatFormatting.ITALIC);
                         italic = true;
                         break;
                     case "u":
                     case "dt":
-                        raw.append(Formatting.UNDERLINE);
+                        raw.append(ChatFormatting.UNDERLINE);
                         underline = true;
                         break;
                     case "code":
                         raw.append(CODE_COLOR);
                         if (bold) {
-                            raw.append(Formatting.BOLD);
+                            raw.append(ChatFormatting.BOLD);
                         }
                         if (italic) {
-                            raw.append(Formatting.ITALIC);
+                            raw.append(ChatFormatting.ITALIC);
                         }
                         if (underline) {
-                            raw.append(Formatting.UNDERLINE);
+                            raw.append(ChatFormatting.UNDERLINE);
                         }
                         code = true;
                         break;
@@ -99,13 +99,13 @@ public class WikiRetriever {
                         if (code) {
                             raw.append(CODE_COLOR);
                         } else {
-                            raw.append(Formatting.RESET);
+                            raw.append(ChatFormatting.RESET);
                         }
                         if (italic) {
-                            raw.append(Formatting.ITALIC);
+                            raw.append(ChatFormatting.ITALIC);
                         }
                         if (underline) {
-                            raw.append(Formatting.UNDERLINE);
+                            raw.append(ChatFormatting.UNDERLINE);
                         }
                         bold = false;
                         break;
@@ -113,13 +113,13 @@ public class WikiRetriever {
                         if (code) {
                             raw.append(CODE_COLOR);
                         } else {
-                            raw.append(Formatting.RESET);
+                            raw.append(ChatFormatting.RESET);
                         }
                         if (bold) {
-                            raw.append(Formatting.BOLD);
+                            raw.append(ChatFormatting.BOLD);
                         }
                         if (underline) {
-                            raw.append(Formatting.UNDERLINE);
+                            raw.append(ChatFormatting.UNDERLINE);
                         }
                         italic = false;
                         break;
@@ -130,26 +130,26 @@ public class WikiRetriever {
                         if (code) {
                             raw.append(CODE_COLOR);
                         } else {
-                            raw.append(Formatting.RESET);
+                            raw.append(ChatFormatting.RESET);
                         }
                         if (bold) {
-                            raw.append(Formatting.BOLD);
+                            raw.append(ChatFormatting.BOLD);
                         }
                         if (italic) {
-                            raw.append(Formatting.ITALIC);
+                            raw.append(ChatFormatting.ITALIC);
                         }
                         underline = false;
                         break;
                     case "code":
-                        raw.append(Formatting.RESET);
+                        raw.append(ChatFormatting.RESET);
                         if (bold) {
-                            raw.append(Formatting.BOLD);
+                            raw.append(ChatFormatting.BOLD);
                         }
                         if (italic) {
-                            raw.append(Formatting.ITALIC);
+                            raw.append(ChatFormatting.ITALIC);
                         }
                         if (underline) {
-                            raw.append(Formatting.UNDERLINE);
+                            raw.append(ChatFormatting.UNDERLINE);
                         }
                         code = false;
                         break;
@@ -169,7 +169,7 @@ public class WikiRetriever {
         matcher.appendTail(raw);
 
         if (raw.length() == 0) {
-            return Formatting.ITALIC + I18n.translate("commands.cwiki.noContent");
+            return ChatFormatting.ITALIC + I18n.get("commands.cwiki.noContent");
         }
 
         String rawStr = raw.toString();

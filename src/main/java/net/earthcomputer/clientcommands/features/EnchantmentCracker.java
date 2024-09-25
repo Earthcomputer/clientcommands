@@ -1,47 +1,70 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
-import net.earthcomputer.clientcommands.MultiVersionCompat;
+import com.seedfinding.mcseed.lcg.LCG;
+import com.seedfinding.mcseed.rand.Rand;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
+import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;
 import net.earthcomputer.clientcommands.task.OneTickTask;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.EnchantingTableBlock;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentLevelEntry;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.EnchantmentScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EnchantingTableBlock;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class EnchantmentCracker {
 
@@ -90,51 +113,61 @@ public class EnchantmentCracker {
      */
 
     public static final Logger LOGGER = LogUtils.getLogger();
+    private static final int PROGRESS_BAR_WIDTH = 50;
 
     // RENDERING
     /*
      * This section is in charge of rendering the overlay on the enchantment GUI
      */
 
-    public static void drawEnchantmentGUIOverlay(DrawContext context) {
+    public static void drawEnchantmentGUIOverlay(GuiGraphics graphics) {
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
+
         CrackState crackState = Configs.enchCrackState;
 
         List<String> lines = new ArrayList<>();
 
-        lines.add(I18n.translate("enchCrack.state", I18n.translate("enchCrack.state." + crackState.asString())));
-        lines.add(I18n.translate("playerManip.state", I18n.translate("playerManip.state." + Configs.playerCrackState.asString())));
+        lines.add(I18n.get("enchCrack.state", I18n.get("enchCrack.state." + crackState.getSerializedName())));
+        lines.add(I18n.get("playerManip.state", I18n.get("playerManip.state." + Configs.playerCrackState.getSerializedName())));
 
         lines.add("");
 
         if (crackState == CrackState.CRACKED) {
-            lines.add(I18n.translate("enchCrack.xpSeed.one", possibleXPSeeds.iterator().next()));
+            lines.add(I18n.get("enchCrack.xpSeed.one", possibleXPSeeds.iterator().next()));
         } else if (crackState == CrackState.CRACKING) {
-            lines.add(I18n.translate("enchCrack.xpSeed.many", possibleXPSeeds.size()));
+            lines.add(I18n.get("enchCrack.xpSeed.many", possibleXPSeeds.size()));
         }
 
         lines.add("");
 
+        if (enchantingTablePos != null) {
+            lines.add(I18n.get("enchCrack.bookshelfCount", getEnchantPower(level, enchantingTablePos)));
+            lines.add("");
+        }
+
         if (crackState == CrackState.CRACKED) {
-            lines.add(I18n.translate("enchCrack.enchantments"));
+            lines.add(I18n.get("enchCrack.enchantments"));
         } else {
-            lines.add(I18n.translate("enchCrack.clues"));
+            lines.add(I18n.get("enchCrack.clues"));
         }
 
         for (int slot = 0; slot < 3; slot++) {
-            lines.add(I18n.translate("enchCrack.slot", slot + 1));
-            List<EnchantmentLevelEntry> enchs = getEnchantmentsInTable(slot);
+            lines.add(I18n.get("enchCrack.slot", slot + 1));
+            List<EnchantmentInstance> enchs = getEnchantmentsInTable(slot);
             if (enchs != null) {
-                for (EnchantmentLevelEntry ench : enchs) {
-                    lines.add("   " + ench.enchantment.getName(ench.level).getString());
+                sortIntoTooltipOrder(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT), enchs);
+                for (EnchantmentInstance ench : enchs) {
+                    lines.add("   " + Enchantment.getFullname(ench.enchantment, ench.level).getString());
                 }
             }
         }
 
-        TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
+        Font font = Minecraft.getInstance().font;
         int y = 0;
         for (String line : lines) {
-            context.drawText(fontRenderer, line, 0, y, 0xffffff, false);
-            y += fontRenderer.fontHeight;
+            graphics.drawString(font, line, 0, y, 0xffffff, false);
+            y += font.lineHeight;
         }
     }
 
@@ -162,13 +195,13 @@ public class EnchantmentCracker {
         }
     }
 
-    public static void addEnchantmentSeedInfo(World world, EnchantmentScreenHandler container) {
+    public static void addEnchantmentSeedInfo(Level level, EnchantmentMenu menu) {
         CrackState crackState = Configs.enchCrackState;
         if (crackState == CrackState.CRACKED) {
             return;
         }
 
-        ItemStack itemToEnchant = container.getSlot(0).getStack();
+        ItemStack itemToEnchant = menu.getSlot(0).getItem();
         if (itemToEnchant.isEmpty() || !itemToEnchant.isEnchantable()) {
             return;
         }
@@ -180,14 +213,18 @@ public class EnchantmentCracker {
 
         if (crackState == CrackState.UNCRACKED) {
             Configs.enchCrackState = CrackState.CRACKING;
-            prepareForNextEnchantmentSeedCrack(container.getSeed());
+            prepareForNextEnchantmentSeedCrack(menu.getEnchantmentSeed());
         }
-        int power = getEnchantPower(world, tablePos);
+        int power = getEnchantPower(level, tablePos);
 
-        Random rand = Random.create();
-        int[] actualEnchantLevels = container.enchantmentPower;
-        int[] actualEnchantmentClues = container.enchantmentId;
-        int[] actualLevelClues = container.enchantmentLevel;
+        RandomSource rand = RandomSource.create();
+        int[] actualEnchantCosts = menu.costs;
+        int[] actualEnchantmentClues = menu.enchantClue;
+        int[] actualLevelClues = menu.levelClue;
+
+        Registry<Enchantment> enchantmentRegistry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        IdMap<Holder<Enchantment>> enchantmentIdMap = enchantmentRegistry.asHolderIdMap();
+        int version = MultiVersionCompat.INSTANCE.getProtocolVersion();
 
         // brute force the possible seeds
         Iterator<Integer> xpSeedItr = possibleXPSeeds.iterator();
@@ -197,11 +234,11 @@ public class EnchantmentCracker {
 
             // check enchantment levels match
             for (int slot = 0; slot < 3; slot++) {
-                int level = EnchantmentHelper.calculateRequiredExperienceLevel(rand, slot, power, itemToEnchant);
-                if (level < slot + 1) {
-                    level = 0;
+                int cost = EnchantmentHelper.getEnchantmentCost(rand, slot, power, itemToEnchant);
+                if (cost < slot + 1) {
+                    cost = 0;
                 }
-                if (level != actualEnchantLevels[slot]) {
+                if (cost != actualEnchantCosts[slot]) {
                     xpSeedItr.remove();
                     continue seedLoop;
                 }
@@ -209,9 +246,8 @@ public class EnchantmentCracker {
 
             // generate enchantment clues and see if they match
             for (int slot = 0; slot < 3; slot++) {
-                if (actualEnchantLevels[slot] > 0) {
-                    List<EnchantmentLevelEntry> enchantments = getEnchantmentList(rand, xpSeed, itemToEnchant, slot,
-                            actualEnchantLevels[slot]);
+                if (actualEnchantCosts[slot] > 0) {
+                    List<EnchantmentInstance> enchantments = getEnchantmentList(enchantmentRegistry, rand, xpSeed, itemToEnchant, slot, actualEnchantCosts[slot], version);
                     if (enchantments == null || enchantments.isEmpty()) {
                         // check that there is indeed no enchantment clue
                         if (actualEnchantmentClues[slot] != -1 || actualLevelClues[slot] != -1) {
@@ -220,8 +256,8 @@ public class EnchantmentCracker {
                         }
                     } else {
                         // check the right enchantment clue was generated
-                        EnchantmentLevelEntry clue = enchantments.get(rand.nextInt(enchantments.size()));
-                        if (Registries.ENCHANTMENT.getRawId(clue.enchantment) != actualEnchantmentClues[slot]
+                        EnchantmentInstance clue = enchantments.get(rand.nextInt(enchantments.size()));
+                        if (enchantmentIdMap.getId(clue.enchantment) != actualEnchantmentClues[slot]
                                 || clue.level != actualLevelClues[slot]) {
                             xpSeedItr.remove();
                             continue seedLoop;
@@ -232,7 +268,7 @@ public class EnchantmentCracker {
         }
 
         // test the outcome, see if we need to change state
-        if (possibleXPSeeds.size() == 0) {
+        if (possibleXPSeeds.isEmpty()) {
             Configs.enchCrackState = CrackState.UNCRACKED;
             LOGGER.warn(
                     "Invalid enchantment seed information. Has the server got unknown mods, is there a desync, or is the client just bugged?");
@@ -306,140 +342,217 @@ public class EnchantmentCracker {
      * seed
      */
 
-    public static ManipulateResult manipulateEnchantments(Item item, Predicate<List<EnchantmentLevelEntry>> enchantmentsPredicate, boolean simulate) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+    public static String manipulateEnchantments(Item item, Predicate<List<EnchantmentInstance>> enchantmentsPredicate, boolean simulate, Consumer<@Nullable ManipulateResult> callback) throws CommandSyntaxException {
+        LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
 
+        ExecutorService threadPool = Executors.newFixedThreadPool(
+            Math.max(1, Runtime.getRuntime().availableProcessors() - (Minecraft.getInstance().hasSingleplayerServer() ? 2 : 1)),
+            new ThreadFactoryBuilder().setNameFormat("Enchantment Cracker #%d").build()
+        );
+
+        int noDummyXpSeed = Configs.enchCrackState == CrackState.CRACKED ? possibleXPSeeds.iterator().next() : 0;
+
         ItemStack stack = new ItemStack(item);
-        long seed = PlayerRandCracker.getSeed();
-        // -2: not found; -1: no dummy enchantment needed; >= 0: number of times needed
-        // to throw out item before dummy enchantment
-        int timesNeeded = -2;
-        int bookshelvesNeeded = 0;
-        int slot = 0;
-        List<EnchantmentLevelEntry> enchantments = null;
-        int[] enchantLevels = new int[3];
-        outerLoop:
-        for (int i = Configs.enchCrackState == CrackState.CRACKED ? -1 : 0;
+        long playerSeed = PlayerRandCracker.getSeed();
+        Registry<Enchantment> enchantmentRegistry = player.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        int version = MultiVersionCompat.INSTANCE.getProtocolVersion();
+
+        List<CompletableFuture<@Nullable ManipulateResult>> futures = new ArrayList<>();
+
+        for (int i = Configs.enchCrackState == CrackState.CRACKED ? ManipulateResult.NO_DUMMY : 0;
              i < (Configs.playerCrackState.knowsSeed() ? Configs.getMaxEnchantItemThrows() : 0);
-             i++) {
-            int xpSeed = i == -1 ?
-                    possibleXPSeeds.iterator().next()
-                    : (int) (((seed * PlayerRandCracker.MULTIPLIER + PlayerRandCracker.ADDEND) & PlayerRandCracker.MASK) >>> 16);
-            Random rand = Random.create();
-            for (bookshelvesNeeded = 0; bookshelvesNeeded <= 15; bookshelvesNeeded++) {
-                rand.setSeed(xpSeed);
-                for (slot = 0; slot < 3; slot++) {
-                    int level = EnchantmentHelper.calculateRequiredExperienceLevel(rand, slot, bookshelvesNeeded, stack);
-                    if (level < slot + 1) {
-                        level = 0;
-                    }
-                    enchantLevels[slot] = level;
-                }
-                for (slot = 0; slot < 3; slot++) {
-                    enchantments = getEnchantmentList(rand, xpSeed, stack, slot,
-                            enchantLevels[slot]);
-                    if (enchantmentsPredicate.test(enchantments)) {
-                        timesNeeded = i;
-                        break outerLoop;
-                    }
-                }
-            }
+             i++
+        ) {
+            int times = i;
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                try {
+                    Rand playerRand = new Rand(LCG.JAVA, playerSeed);
+                    playerRand.advance(Math.max(times, 0) * 4L);
+                    int xpSeed = times == ManipulateResult.NO_DUMMY ?
+                        noDummyXpSeed
+                        : (int) playerRand.nextBits(32);
 
-            if (i != -1) {
-                for (int j = 0; j < 4; j++) {
-                    seed = (seed * PlayerRandCracker.MULTIPLIER + PlayerRandCracker.ADDEND) & PlayerRandCracker.MASK;
-                }
-            }
-        }
-        if (timesNeeded == -2) {
-            return null;
-        }
-
-        if (simulate) {
-            return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments);
-        }
-
-        LongTaskList taskList = new LongTaskList();
-        if (timesNeeded != -1) {
-            if (timesNeeded != 0) {
-                player.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), 90);
-                // sync rotation to server before we throw any items
-                player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(player.getYaw(), 90, player.isOnGround()));
-                Configs.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
-            }
-            for (int i = 0; i < timesNeeded; i++) {
-                // throw the item once it's in the inventory
-                taskList.addTask(new SimpleTask() {
-                    @Override
-                    public boolean condition() {
-                        if (Configs.playerCrackState != PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS) {
-                            taskList._break();
-                            return false;
+                    int[] enchantLevels = new int[3];
+                    RandomSource rand = RandomSource.create();
+                    for (int bookshelvesNeeded = Configs.getMinEnchantBookshelves(); bookshelvesNeeded <= Configs.getMaxEnchantBookshelves(); bookshelvesNeeded++) {
+                        rand.setSeed(xpSeed);
+                        for (int slot = 0; slot < 3; slot++) {
+                            int level = EnchantmentHelper.getEnchantmentCost(rand, slot, bookshelvesNeeded, stack);
+                            if (level < slot + 1) {
+                                level = 0;
+                            }
+                            enchantLevels[slot] = level;
                         }
-
-                        Slot slot = PlayerRandCracker.getBestItemThrowSlot(MinecraftClient.getInstance().player.currentScreenHandler.slots);
-                        //noinspection RedundantIfStatement
-                        if (slot == null) {
-                            return true; // keep waiting
-                        } else {
-                            return false; // ready to throw an item
+                        for (int slot = 0; slot < 3; slot++) {
+                            List<EnchantmentInstance> enchantments = getEnchantmentList(enchantmentRegistry, rand, xpSeed, stack, slot, enchantLevels[slot], version);
+                            if (enchantmentsPredicate.test(enchantments)
+                                && enchantLevels[slot] >= Configs.getMinEnchantLevels()
+                                && enchantLevels[slot] <= Configs.getMaxEnchantLevels()
+                            ) {
+                                return new ManipulateResult(times, bookshelvesNeeded, slot, enchantments);
+                            }
                         }
                     }
-
-                    @Override
-                    protected void onTick() {
-                    }
-
-                    @Override
-                    public void onCompleted() {
-                        PlayerRandCracker.throwItem();
-                        scheduleDelay();
-                    }
-                });
-            }
-            // dummy enchantment
-            taskList.addTask(new LongTask() {
-                @Override
-                public void initialize() {
-                    Configs.playerCrackState = PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("enchCrack.insn.dummy"));
-                    doneEnchantment = false;
+                } catch (Throwable e) {
+                    LOGGER.error("An error occurred simulating enchantments", e);
                 }
 
-                @Override
-                public boolean condition() {
-                    return Configs.playerCrackState == PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
-                }
-
-                @Override
-                public void increment() {
-                }
-
-                @Override
-                public void body() {
-                    scheduleDelay();
-                }
-            });
+                return null;
+            }, threadPool));
         }
-        final int bookshelvesNeeded_f = bookshelvesNeeded;
-        final int slot_f = slot;
-        doneEnchantment = true;
-        taskList.addTask(new OneTickTask() {
+
+        LongTaskList taskList = new LongTaskList() {
             @Override
-            public void run() {
-                if (Configs.enchCrackState == CrackState.CRACKED && doneEnchantment) {
-                    ChatHud chatHud = MinecraftClient.getInstance().inGameHud.getChatHud();
-                    chatHud.addMessage(Text.translatable("enchCrack.insn.ready").formatted(Formatting.BOLD));
-                    chatHud.addMessage(Text.translatable("enchCrack.insn.bookshelves", bookshelvesNeeded_f));
-                    chatHud.addMessage(Text.translatable("enchCrack.insn.slot", slot_f + 1));
+            public Set<Object> getMutexKeys() {
+                return simulate ? Set.of() : Set.of(ItemThrowTask.class);
+            }
+        };
+
+        taskList.addTask(new SimpleTask() {
+            private int index = 0;
+            ManipulateResult finalResult = null;
+            private boolean hasShutDown = false;
+
+            @Override
+            protected void onTick() {
+                while (index < futures.size()) {
+                    var future = futures.get(index);
+                    if (!future.isDone()) {
+                        break;
+                    }
+                    ManipulateResult result = future.join();
+                    if (result != null) {
+                        finalResult = result;
+                        _break();
+                        return;
+                    }
+
+                    index++;
                 }
+            }
+
+            @Override
+            public boolean condition() {
+                return index < futures.size();
+            }
+
+            @Override
+            public boolean stopOnLevelUnload(boolean isDisconnect) {
+                if (!hasShutDown) {
+                    threadPool.shutdownNow();
+                    hasShutDown = true;
+                }
+                return true;
+            }
+
+            @Override
+            public void onCompleted() {
+                if (!hasShutDown) {
+                    threadPool.shutdownNow();
+                    hasShutDown = true;
+                }
+
+                if (!simulate && finalResult != null) {
+                    int timesNeeded = finalResult.itemThrows();
+                    if (timesNeeded != ManipulateResult.NO_DUMMY) {
+                        if (timesNeeded != 0) {
+                            player.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 90);
+                            // sync rotation to server before we throw any items
+                            player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, player.onGround()));
+                            Configs.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
+                        }
+                        if (timesNeeded > 0) {
+                            taskList.addTask(new ItemThrowTask(timesNeeded, ItemThrowTask.FLAG_WAIT_FOR_ITEMS) {
+                                @Override
+                                public boolean condition() {
+                                    if (Configs.playerCrackState != PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS) {
+                                        taskList._break();
+                                        return false;
+                                    }
+                                    return super.condition();
+                                }
+
+                                @Override
+                                public void onCompleted() {
+                                    Minecraft.getInstance().player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
+                                }
+
+                                @Override
+                                protected void onItemThrown(int current, int total) {
+                                    MutableComponent builder = Component.empty();
+                                    int color = Mth.hsvToRgb(current / (total * 3.0f), 1.0f, 1.0f);
+                                    builder.append(Component.literal("[").withColor(0xAAAAAA));
+                                    builder.append(Component.literal("~" + Math.round(100.0 * current / total) + "%").withColor(color));
+                                    builder.append(Component.literal("] ").withColor(0xAAAAAA));
+                                    int filledWidth = (int) Math.round((double) PROGRESS_BAR_WIDTH * current / total);
+                                    int unfilledWidth = PROGRESS_BAR_WIDTH - filledWidth;
+                                    builder.append(Component.literal("|".repeat(filledWidth)).withColor(color));
+                                    builder.append(Component.literal("|".repeat(unfilledWidth)).withColor(0xAAAAAA));
+
+                                    Minecraft.getInstance().gui.setOverlayMessage(builder, false);
+                                }
+                            });
+                        }
+                        // dummy enchantment
+                        taskList.addTask(new LongTask() {
+                            @Override
+                            public void initialize() {
+                                Configs.playerCrackState = PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
+                                Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("enchCrack.insn.dummy"));
+                                doneEnchantment = false;
+                            }
+
+                            @Override
+                            public boolean condition() {
+                                return Configs.playerCrackState == PlayerRandCracker.CrackState.WAITING_DUMMY_ENCHANT;
+                            }
+
+                            @Override
+                            public void increment() {
+                            }
+
+                            @Override
+                            public void body() {
+                                scheduleDelay();
+                            }
+
+                            @Override
+                            public String toString() {
+                                return "Enchantment Cracker Wait Dummy";
+                            }
+                        });
+                    }
+
+                    doneEnchantment = true;
+                    taskList.addTask(new OneTickTask() {
+                        @Override
+                        public void run() {
+                            if (Configs.enchCrackState == CrackState.CRACKED && doneEnchantment) {
+                                ChatComponent chat = Minecraft.getInstance().gui.getChat();
+                                chat.addMessage(Component.translatable("enchCrack.insn.ready").withStyle(ChatFormatting.BOLD));
+                                chat.addMessage(Component.translatable("enchCrack.insn.bookshelves", finalResult.bookshelves));
+                                chat.addMessage(Component.translatable("enchCrack.insn.slot", finalResult.slot + 1));
+                            }
+                        }
+
+                        @Override
+                        public String toString() {
+                            return "Enchantment Cracker Done Message";
+                        }
+                    });
+                }
+
+                callback.accept(finalResult);
+            }
+
+            @Override
+            public String toString() {
+                return "Enchantment Cracker Worker Poller";
             }
         });
 
-        TaskManager.addTask("enchantmentCracker", taskList);
-
-        return new ManipulateResult(timesNeeded, bookshelvesNeeded, slot, enchantments);
+        return TaskManager.addTask("enchantmentCracker", taskList);
     }
 
     // MISCELLANEOUS HELPER METHODS & ENCHANTING SIMULATION
@@ -448,18 +561,26 @@ public class EnchantmentCracker {
         return Configs.getEnchantingPrediction();
     }
 
-    private static int getEnchantPower(World world, BlockPos tablePos) {
+    private static int getEnchantPower(Level level, BlockPos tablePos) {
         int power = 0;
 
-        for (BlockPos bookshelfOffset : EnchantingTableBlock.POWER_PROVIDER_OFFSETS) {
-            if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18) {
+        int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+
+        for (BlockPos bookshelfOffset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
+            if (protocolVersion <= MultiVersionCompat.V1_18) {
                 // old bookshelf detection method
-                BlockPos obstructionPos = tablePos.add(MathHelper.clamp(bookshelfOffset.getX(), -1, 1), 0, MathHelper.clamp(bookshelfOffset.getZ(), -1, 1));
-                if (world.getBlockState(tablePos.add(bookshelfOffset)).isOf(Blocks.BOOKSHELF) && world.getBlockState(obstructionPos).isAir()) {
+                BlockPos obstructionPos = tablePos.offset(Mth.clamp(bookshelfOffset.getX(), -1, 1), 0, Mth.clamp(bookshelfOffset.getZ(), -1, 1));
+                if (level.getBlockState(tablePos.offset(bookshelfOffset)).is(Blocks.BOOKSHELF) && level.getBlockState(obstructionPos).isAir()) {
+                    power++;
+                }
+            } else if (protocolVersion < MultiVersionCompat.V1_20) {
+                // any non-air block used to obstruct bookshelves
+                BlockPos obstructionPos = tablePos.offset(bookshelfOffset.getX() / 2, bookshelfOffset.getY(), bookshelfOffset.getZ() / 2);
+                if (level.getBlockState(tablePos.offset(bookshelfOffset)).is(Blocks.BOOKSHELF) && level.getBlockState(obstructionPos).isAir()) {
                     power++;
                 }
             } else {
-                if (EnchantingTableBlock.canAccessPowerProvider(world, tablePos, bookshelfOffset)) {
+                if (EnchantingTableBlock.isValidBookShelf(level, tablePos, bookshelfOffset)) {
                     power++;
                 }
             }
@@ -468,10 +589,20 @@ public class EnchantmentCracker {
         return power;
     }
 
-    private static List<EnchantmentLevelEntry> getEnchantmentList(Random rand, int xpSeed, ItemStack stack, int enchantSlot,
-                                                                  int level) {
+    private static List<EnchantmentInstance> getEnchantmentList(Registry<Enchantment> enchantmentRegistry, RandomSource rand, int xpSeed, ItemStack stack, int enchantSlot, int level, int version) {
         rand.setSeed(xpSeed + enchantSlot);
-        List<EnchantmentLevelEntry> list = EnchantmentHelper.generateEnchantments(rand, stack, level, false);
+        List<EnchantmentInstance> list;
+        if (version >= MultiVersionCompat.V1_21) {
+            list = enchantmentRegistry.getTag(EnchantmentTags.IN_ENCHANTING_TABLE)
+                .map(tag -> EnchantmentHelper.selectEnchantment(rand, stack, level, tag.stream()))
+                .orElseGet(ArrayList::new);
+        } else {
+            list = LegacyEnchantment.addRandomEnchantments(rand, stack, level, false, version).stream()
+                .flatMap(legacyEnch -> enchantmentRegistry.getHolder(legacyEnch.ench().enchantmentKey)
+                    .map(ench -> new EnchantmentInstance(ench, legacyEnch.level()))
+                    .stream())
+                .collect(Collectors.toCollection(ArrayList::new));
+        }
 
         if (stack.getItem() == Items.BOOK && list.size() > 1) {
             list.remove(rand.nextInt(list.size()));
@@ -482,38 +613,61 @@ public class EnchantmentCracker {
 
     // Same as above method, except does not assume the seed has been cracked. If it
     // hasn't returns the clue given by the server
-    public static List<EnchantmentLevelEntry> getEnchantmentsInTable(int slot) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+    public static List<EnchantmentInstance> getEnchantmentsInTable(int slot) {
+        LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
+        Registry<Enchantment> enchantmentRegistry = player.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+
         CrackState crackState = Configs.enchCrackState;
-        EnchantmentScreenHandler enchContainer = (EnchantmentScreenHandler) player.currentScreenHandler;
+        EnchantmentMenu enchContainer = (EnchantmentMenu) player.containerMenu;
 
         if (crackState != CrackState.CRACKED) {
-            if (enchContainer.enchantmentId[slot] == -1) {
+            if (enchContainer.enchantClue[slot] == -1) {
                 // if we haven't cracked it, and there's no clue, then we can't give any
                 // information about the enchantment
                 return null;
             } else {
                 // return a list containing the clue
-                Enchantment enchantment = Enchantment.byRawId(enchContainer.enchantmentId[slot]);
+                Holder<Enchantment> enchantment = enchantmentRegistry.asHolderIdMap().byId(enchContainer.enchantClue[slot]);
                 if (enchantment == null) {
                     return null;
                 }
-                return Collections.singletonList(new EnchantmentLevelEntry(enchantment, enchContainer.enchantmentLevel[slot]));
+                return new ArrayList<>(Collections.singletonList(new EnchantmentInstance(enchantment, enchContainer.levelClue[slot])));
             }
         } else {
             // return the enchantments using our cracked seed
-            Random rand = Random.create();
+            RandomSource rand = RandomSource.create();
             int xpSeed = possibleXPSeeds.iterator().next();
-            ItemStack enchantingStack = enchContainer.getSlot(0).getStack();
-            int enchantLevels = enchContainer.enchantmentPower[slot];
-            return getEnchantmentList(rand, xpSeed, enchantingStack, slot, enchantLevels);
+            ItemStack enchantingStack = enchContainer.getSlot(0).getItem();
+            int enchantLevels = enchContainer.costs[slot];
+            return getEnchantmentList(enchantmentRegistry, rand, xpSeed, enchantingStack, slot, enchantLevels, MultiVersionCompat.INSTANCE.getProtocolVersion());
         }
     }
 
-    public record ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentLevelEntry> enchantments) {}
+    public static void sortIntoTooltipOrder(Registry<Enchantment> enchantmentRegistry, List<EnchantmentInstance> list) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21) {
+            return;
+        }
 
-    public enum CrackState implements StringIdentifiable {
+        Optional<HolderSet.Named<Enchantment>> tooltipOrder = enchantmentRegistry.getTag(EnchantmentTags.TOOLTIP_ORDER);
+        if (tooltipOrder.isEmpty()) {
+            return;
+        }
+
+        Object2IntMap<Holder<Enchantment>> tooltipIndex = new Object2IntOpenHashMap<>(tooltipOrder.get().size());
+        int index = 0;
+        for (Holder<Enchantment> ench : tooltipOrder.get()) {
+            tooltipIndex.put(ench, index++);
+        }
+
+        list.sort(Comparator.comparingInt(ench -> tooltipIndex.getInt(ench.enchantment)));
+    }
+
+    public record ManipulateResult(int itemThrows, int bookshelves, int slot, List<EnchantmentInstance> enchantments) {
+        public static final int NO_DUMMY = -1;
+    }
+
+    public enum CrackState implements StringRepresentable {
         UNCRACKED("uncracked"), CRACKED("cracked"), CRACKING("cracking");
 
         private final String name;
@@ -522,7 +676,7 @@ public class EnchantmentCracker {
         }
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return name;
         }
     }

@@ -11,9 +11,9 @@ Patreon: https://www.patreon.com/earthcomputer
      and click "download installer".
    - Note: this step may vary if you aren't using the vanilla launcher
      or an old version of Minecraft.
-1. Download the [Fabric API](https://minecraft.curseforge.com/projects/fabric)
+1. Download [Fabric API](https://minecraft.curseforge.com/projects/fabric)
    and move it to the mods folder (`.minecraft/mods`).
-1. Download clientcommands from the [releases page](https://github.com/Earthcomputer/clientcommands/releases)
+1. Download clientcommands from the [releases page](https://github.com/Earthcomputer/clientcommands/releases) or from [Modrinth](https://modrinth.com/mod/client-commands)
    and move it to the mods folder (`.minecraft/mods`).
 
 ## Contributing
@@ -40,4 +40,3 @@ Patreon: https://www.patreon.com/earthcomputer
    so that your changes can be integrated into clientcommands
    - Note: for large contributions, create an issue before doing all that
      work, to ask whether your pull request is likely to be accepted
-1. Note: by default, these steps will install a development environment for clientcommands only, and not its scripting submodule. If you want to work on the scripting submodule, follow the instructions in the [Clientcommands Scripting readme](https://github.com/Earthcomputer/clientcommands-scripting#readme).

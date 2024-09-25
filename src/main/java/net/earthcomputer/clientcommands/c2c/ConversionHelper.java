@@ -1,5 +1,9 @@
 package net.earthcomputer.clientcommands.c2c;
 
+import com.mojang.logging.LogUtils;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
 import javax.crypto.Cipher;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,6 +16,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class ConversionHelper {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     /**
      * @author Wagyourtail
@@ -91,7 +96,7 @@ public class ConversionHelper {
      * @author Wagyourtail
      */
     public static class Gzip {
-        public static byte[] compress(byte[] bytes) {
+        public static byte @Nullable [] compress(byte[] bytes) {
             if (bytes == null || bytes.length == 0) {
                 return null;
             }
@@ -99,12 +104,13 @@ public class ConversionHelper {
             try (GZIPOutputStream gzip = new GZIPOutputStream(out)) {
                 gzip.write(bytes);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Error compressing", e);
+                return null;
             }
             return out.toByteArray();
         }
 
-        public static byte[] uncompress(byte[] bytes) {
+        public static byte @Nullable [] decompress(byte[] bytes) {
             if (bytes == null || bytes.length == 0) {
                 return null;
             }
@@ -117,7 +123,8 @@ public class ConversionHelper {
                     out.write(buffer, 0, n);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Error decompressing", e);
+                return null;
             }
             return out.toByteArray();
         }
@@ -130,7 +137,7 @@ public class ConversionHelper {
                 cipher.init(Cipher.ENCRYPT_MODE, key);
                 return cipher.doFinal(bytes);
             } catch (GeneralSecurityException e) {
-                e.printStackTrace();
+                LOGGER.error("Error encrypting", e);
                 return null;
             }
         }
@@ -141,7 +148,7 @@ public class ConversionHelper {
                 cipher.init(Cipher.DECRYPT_MODE, key);
                 return cipher.doFinal(bytes);
             } catch (GeneralSecurityException e) {
-                e.printStackTrace();
+                LOGGER.error("Error decrypting", e);
                 return null;
             }
         }

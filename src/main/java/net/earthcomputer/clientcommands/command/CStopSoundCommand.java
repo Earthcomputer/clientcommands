@@ -5,11 +5,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.xpple.clientarguments.arguments.CSuggestionProviders;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 
-import static dev.xpple.clientarguments.arguments.CIdentifierArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CResourceLocationArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CStopSoundCommand {
@@ -17,33 +17,33 @@ public class CStopSoundCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var builder = literal("cstopsound");
 
-        for (SoundCategory category : SoundCategory.values()) {
-            builder.then(buildArguments(category, category.getName()));
+        for (SoundSource source : SoundSource.values()) {
+            builder.then(buildArguments(source, source.getName()));
         }
         builder.then(buildArguments(null, "*"));
 
         dispatcher.register(builder);
     }
 
-    private static LiteralArgumentBuilder<FabricClientCommandSource> buildArguments(SoundCategory category, String literal) {
+    private static LiteralArgumentBuilder<FabricClientCommandSource> buildArguments(SoundSource source, String literal) {
         return literal(literal)
-            .executes(ctx -> stopSound(ctx.getSource(), category, null))
-            .then(argument("sound", identifier())
+            .executes(ctx -> stopSound(ctx.getSource(), source, null))
+            .then(argument("sound", id())
                 .suggests(CSuggestionProviders.AVAILABLE_SOUNDS)
-                .executes(ctx -> stopSound(ctx.getSource(), category, getCIdentifier(ctx, "sound"))));
+                .executes(ctx -> stopSound(ctx.getSource(), source, getId(ctx, "sound"))));
     }
 
-    private static int stopSound(FabricClientCommandSource source, SoundCategory category, Identifier sound) {
-        source.getClient().getSoundManager().stopSounds(sound, category);
+    private static int stopSound(FabricClientCommandSource source, SoundSource soundSource, ResourceLocation sound) {
+        source.getClient().getSoundManager().stop(sound, soundSource);
 
-        if (category == null && sound == null) {
-            source.sendFeedback(Text.translatable("commands.cstopsound.success.sourceless.any"));
-        } else if (category == null) {
-            source.sendFeedback(Text.translatable("commands.cstopsound.success.sourceless.sound", sound));
+        if (soundSource == null && sound == null) {
+            source.sendFeedback(Component.translatable("commands.cstopsound.success.sourceless.any"));
+        } else if (soundSource == null) {
+            source.sendFeedback(Component.translatable("commands.cstopsound.success.sourceless.sound", sound));
         } else if (sound == null) {
-            source.sendFeedback(Text.translatable("commands.cstopsound.success.source.any", category.getName()));
+            source.sendFeedback(Component.translatable("commands.cstopsound.success.source.any", soundSource.getName()));
         } else {
-            source.sendFeedback(Text.translatable("commands.cstopsound.success.source.sound", sound, category.getName()));
+            source.sendFeedback(Component.translatable("commands.cstopsound.success.source.sound", sound, soundSource.getName()));
         }
         return Command.SINGLE_SUCCESS;
     }

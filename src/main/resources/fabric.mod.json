@@ -5,7 +5,7 @@
   "description": "Useful client-side commands",
   "version": "${version}",
   "environment": "client",
-  "license": "LGPL",
+  "license": "LGPL-3.0-or-later",
   "icon": "assets/clientcommands/icon.png",
   "contact": {
     "homepage": "https://earthcomputer.net/",
@@ -34,5 +34,10 @@
   "mixins": [
     "mixins.clientcommands.json"
   ],
-  "accessWidener": "clientcommands.aw"
+  "accessWidener": "clientcommands.aw",
+  "custom": {
+    "modmenu": {
+      "update_checker": true
+    }
+  }
 }

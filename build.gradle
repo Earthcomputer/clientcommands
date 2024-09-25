@@ -1,19 +1,23 @@
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
+	id 'fabric-loom' version '1.6-SNAPSHOT'
 	id 'maven-publish'
+	id 'com.modrinth.minotaur' version '2.+'
+	id 'com.github.breadmoirai.github-release' version '2.4.1'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+base {
+	archivesName = project.archives_base_name
+	version = project.mod_version
+	group = project.maven_group
+}
 
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
+sourceSets {
+	codeGen
+}
 
 configurations {
 	includedLibrary
-	modImplementation.extendsFrom includedLibrary
+	implementation.extendsFrom includedLibrary
 }
 
 repositories {
@@ -21,10 +25,16 @@ repositories {
 		url = 'https://maven.seedfinding.com'
 	}
 	maven {
+		url = 'https://maven.latticg.com'
+	}
+	maven {
 		url = 'https://maven.xpple.dev/maven2'
 	}
 	maven {
 		url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"
+	}
+	maven {
+		url = "https://maven.parchmentmc.org"
 	}
 }
 
@@ -34,21 +44,43 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	mappings loom.layered {
+		officialMojangMappings {
+			nameSyntheticMembers = true
+		}
+		parchment("org.parchmentmc.data:parchment-${project.parchment_mcversion}:${project.parchment_version}@zip")
+	}
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include modImplementation("dev.xpple:betterconfig:${project.betterconfig_version}")
-	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_version}"
 
-	modRuntimeOnly 'me.djtheredstoner:DevAuth-fabric:1.1.0'
+	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_feature_version}"
+	includedLibrary "com.seedfinding:mc_biome:${project.seedfinding_biome_version}"
+	includedLibrary "com.seedfinding:mc_core:${project.seedfinding_core_version}"
+	includedLibrary "com.seedfinding:mc_seed:${project.seedfinding_seed_version}"
+
+	includedLibrary "com.seedfinding:latticg:${project.latticg_version}:rt"
+	codeGenImplementation "com.seedfinding:latticg:${project.latticg_version}"
+
+	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
+
+	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
+
+	include api('net.fabricmc:mapping-io:0.5.1')
+
+	codeGenImplementation sourceSets.main.output
 }
 
 jar {
 	from(configurations.includedLibrary.collect { it.isDirectory() ? it : zipTree(it) }) {
 		include 'com/seedfinding/**'
 	}
+
+	from("LICENSE")
 }
 
 processResources {
@@ -67,17 +99,60 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile) {
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+tasks.register('sourcesJar', Jar) {
+	dependsOn classes
 	archiveClassifier.set("sources")
 	from sourceSets.main.allSource
 }
 
-jar {
-	from "LICENSE"
+tasks.register('codeGen', JavaExec) {
+	mainClass = 'net.earthcomputer.clientcommands.codegen.CodeGenerator'
+	classpath = sourceSets.codeGen.runtimeClasspath
+	args file('src/main/java').absolutePath
+	enableAssertions = true
+}
+
+// read the changelog from the changelog.txt file, make sure the changelog is recent to avoid accidentally using the previous version's changelog.
+def changelogFile = file('changelog.txt')
+def changelogText = changelogFile.exists() && System.currentTimeMillis() - changelogFile.lastModified() <= 1000 * 60 * 60 ?
+		changelogFile.readLines('UTF-8').join('\n') : ''
+
+modrinth {
+	token = project.hasProperty('modrinthKey') ? project.modrinthKey : System.getenv("MODRINTH_TOKEN")
+	projectId = 'client-commands'
+	uploadFile = remapJar
+	gameVersions.set(project.minecraft_version_list.split('\\s*,\\s*').toList())
+	loaders.set(['fabric', 'quilt'])
+	changelog = changelogText
+	dependencies {
+		required.project 'fabric-api'
+		embedded.project 'betterconfig'
+	}
+}
+tasks.modrinth.onlyIf {
+	!changelogText.isBlank()
+}
+
+githubRelease {
+	token(project.hasProperty('githubKey') ? project.githubKey : (System.getenv("GITHUB_TOKEN") ?: ''))
+	owner 'Earthcomputer'
+	repo 'clientcommands'
+	targetCommitish 'fabric'
+	releaseName "Version ${project.version} for Minecraft ${project.minecraft_version_list_presentable}"
+	body changelogText
+	releaseAssets remapJar.outputs
+}
+tasks.githubRelease.onlyIf {
+	!changelogText.isBlank()
 }
 
 publishing {

@@ -6,9 +6,11 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType;
+import net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgument;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
@@ -19,12 +21,12 @@ import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.time.Duration;
 
-import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TranslateCommand {
 
-    private static final SimpleCommandExceptionType UNKNOWN_ERROR_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctranslate.unknownError"));
+    private static final SimpleCommandExceptionType UNKNOWN_ERROR_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctranslate.unknownError"));
 
     private static final String URL = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t";
 
@@ -38,7 +40,7 @@ public class TranslateCommand {
                         .executes(ctx -> translate(ctx.getSource(), getTranslationQuery(ctx, "query")))));
     }
 
-    private static int translate(FabricClientCommandSource source, TranslationQueryArgumentType.TranslationQuery query) throws CommandSyntaxException {
+    private static int translate(FabricClientCommandSource source, TranslationQueryArgument.TranslationQuery query) throws CommandSyntaxException {
         try {
             HttpRequest request = HttpRequest.newBuilder(createUri(query.from(), query.to(), query.query()))
                     .timeout(DURATION)
@@ -46,9 +48,9 @@ public class TranslateCommand {
                     .build();
             httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenApply(HttpResponse::body)
-                    .thenAccept(response -> source.getClient().send(() -> {
+                    .thenAccept(response -> source.getClient().tell(() -> {
                         JsonArray result = JsonParser.parseString(response).getAsJsonArray();
-                        source.sendFeedback(Text.of(result.get(0).getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString()));
+                        source.sendFeedback(createText(result.get(0).getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString()));
                     }));
         } catch (Exception e) {
             throw UNKNOWN_ERROR_EXCEPTION.create();
@@ -62,5 +64,14 @@ public class TranslateCommand {
         builder.addParameter("tl", to);
         builder.addParameter("q", query);
         return builder.build();
+    }
+
+    private static Component createText(String translation) {
+        return Component.literal(translation).withStyle(s -> s
+            .withUnderlined(true)
+            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, translation))
+            .withInsertion(translation)
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.ctranslate.hoverText")))
+        );
     }
 }

@@ -3,41 +3,39 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType;
+import net.earthcomputer.clientcommands.command.arguments.ExpressionArgument;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.earthcomputer.clientcommands.command.arguments.ExpressionArgumentType.*;
+import static net.earthcomputer.clientcommands.command.arguments.ExpressionArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class CalcCommand {
 
-    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ccalc.tooDeeplyNested"));
+    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ccalc.tooDeeplyNested"));
 
-    private static final int FLAG_PARSE = 1;
+    private static final Flag<Boolean> FLAG_PARSE = Flag.ofFlag("parse").build();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        var ccalc = dispatcher.register(literal("ccalc"));
-        dispatcher.register(literal("ccalc")
-            .then(literal("--parse")
-                .redirect(ccalc, ctx -> withFlags(ctx.getSource(), FLAG_PARSE, true)))
+        var ccalc = dispatcher.register(literal("ccalc")
             .then(argument("expr", expression())
                 .executes(ctx -> evaluateExpression(ctx.getSource(), getExpression(ctx, "expr")))));
+        FLAG_PARSE.addToCommand(dispatcher, ccalc, ctx -> true);
     }
 
-    private static int evaluateExpression(FabricClientCommandSource source, ExpressionArgumentType.Expression expression) throws CommandSyntaxException {
+    private static int evaluateExpression(FabricClientCommandSource source, ExpressionArgument.Expression expression) throws CommandSyntaxException {
         if (getFlag(source, FLAG_PARSE)) {
-            Text parsedTree;
+            Component parsedTree;
             try {
                 parsedTree = expression.getParsedTree(0);
             } catch (StackOverflowError e) {
                 throw TOO_DEEPLY_NESTED_EXCEPTION.create();
             }
-            source.sendFeedback(Text.translatable("commands.ccalc.parse", parsedTree));
+            source.sendFeedback(Component.translatable("commands.ccalc.parse", parsedTree));
         }
 
         double result;
@@ -49,11 +47,11 @@ public class CalcCommand {
         Configs.calcAnswer = result;
         int iresult = 0;
 
-        MutableText feedback = Text.literal(expression.strVal + " = ");
+        MutableComponent feedback = Component.literal(expression.strVal + " = ");
 
         if (Math.round(result) == result) {
             String strResult = String.valueOf(result);
-            feedback.append(Text.literal(strResult.contains("E") ? strResult : strResult.substring(0, strResult.length() - 2)).formatted(Formatting.BOLD));
+            feedback.append(Component.literal(strResult.contains("E") ? strResult : strResult.substring(0, strResult.length() - 2)).withStyle(ChatFormatting.BOLD));
             iresult = (int) result;
             if (iresult == result && iresult > 0) {
                 int stacks = iresult / 64;
@@ -61,7 +59,7 @@ public class CalcCommand {
                 feedback.append(" = " + stacks + " * 64 + " + remainder);
             }
         } else {
-            feedback.append(Text.literal(String.valueOf(result)).formatted(Formatting.BOLD));
+            feedback.append(Component.literal(String.valueOf(result)).withStyle(ChatFormatting.BOLD));
         }
 
         source.sendFeedback(feedback);

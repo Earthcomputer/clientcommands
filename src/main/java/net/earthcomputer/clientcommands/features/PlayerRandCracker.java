@@ -1,30 +1,42 @@
 package net.earthcomputer.clientcommands.features;
 
-import net.earthcomputer.clientcommands.MultiVersionCompat;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.util.CUtil;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
+import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -81,6 +93,12 @@ public class PlayerRandCracker {
     @Nullable
     private static Runnable postBlockBreakPredictAction = null;
 
+    public static void registerEvents() {
+        ClientLevelEvents.LOAD_LEVEL.register(level -> {
+            resetCracker("recreated");
+        });
+    }
+
     public static void postSendBlockBreakingPredictionPacket() {
         if (postBlockBreakPredictAction != null) {
             postBlockBreakPredictAction.run();
@@ -88,7 +106,7 @@ public class PlayerRandCracker {
         }
     }
 
-    // TODO: update-sensitive: call hierarchy of PlayerEntity.random and PlayerEntity.getRandom()
+    // TODO: update-sensitive: call hierarchy of Player.random and Player.getRandom()
 
     private static int expectedThrows = 0;
 
@@ -98,8 +116,8 @@ public class PlayerRandCracker {
 
     public static void resetCracker(String reason) {
         if (Configs.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
-            ClientCommandHelper.sendFeedback(Text.translatable("playerManip.reset", Text.translatable("playerManip.reset." + reason))
-                    .formatted(Formatting.RED));
+            ClientCommandHelper.sendFeedback(Component.translatable("playerManip.reset", Component.translatable("playerManip.reset." + reason))
+                    .withStyle(ChatFormatting.RED));
         }
         resetCracker();
     }
@@ -126,7 +144,7 @@ public class PlayerRandCracker {
         //resetCracker("drink");
     }
 
-    public static void onEat(ItemStack stack, Vec3d pos, int particleCount, int itemUseTimeLeft) {
+    public static void onEat(ItemStack stack, Vec3 pos, int particleCount, int itemUseTimeLeft) {
         if (canMaintainPlayerRNG()) {
 
             if (itemUseTimeLeft < 0 && particleCount != 16) {
@@ -216,15 +234,13 @@ public class PlayerRandCracker {
     }
 
     public static void onBaneOfArthropods() {
-        if (canMaintainPlayerRNG()) {
-            nextInt();
-        } else {
-            resetCracker("baneOfArthropods");
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21) {
+            if (canMaintainPlayerRNG()) {
+                nextInt();
+            } else {
+                resetCracker("baneOfArthropods");
+            }
         }
-    }
-
-    public static void onRecreatePlayer() {
-        resetCracker("recreated");
     }
 
     public static void onUnbreaking(ItemStack stack, int amount, int unbreakingLevel) {
@@ -245,33 +261,38 @@ public class PlayerRandCracker {
 
     // TODO: update-sensitive: call hierarchy of ItemStack.damage
     public static void onItemDamage(int amount, LivingEntity holder, ItemStack stack) {
-        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).getAbilities().creativeMode) {
-            if (stack.isDamageable()) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21) {
+            return;
+        }
+
+        if (holder instanceof LocalPlayer && !((LocalPlayer) holder).getAbilities().instabuild) {
+            if (stack.isDamageableItem()) {
                 if (amount > 0) {
-                    int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
+                    int unbreakingLevel = CUtil.getEnchantmentLevel(holder.registryAccess(), Enchantments.UNBREAKING, stack);
                     if (unbreakingLevel > 0) {
                         onUnbreaking(stack, amount, unbreakingLevel);
                     }
 
-                    if (Configs.toolBreakWarning && stack.getDamage() + amount >= stack.getMaxDamage() - 30) {
+                    if (Configs.toolBreakWarning && stack.getDamageValue() + amount >= stack.getMaxDamage() - 30) {
 
-                        if(stack.getDamage() + amount >= stack.getMaxDamage() - 15) {
-                            MinecraftClient.getInstance().player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 10,0.1f);
+                        if(stack.getDamageValue() + amount >= stack.getMaxDamage() - 15) {
+                            Minecraft.getInstance().player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 10,0.1f);
                         }
 
-                        MutableText durability = Text.literal(String.valueOf(stack.getMaxDamage() - stack.getDamage() - 1)).formatted(Formatting.RED);
+                        MutableComponent durability = Component.literal(String.valueOf(stack.getMaxDamage() - stack.getDamageValue() - 1)).withStyle(ChatFormatting.RED);
 
-                        MinecraftClient.getInstance().inGameHud.setOverlayMessage(
-                                Text.translatable("playerManip.toolBreakWarning", durability).formatted(Formatting.GOLD),
+                        Minecraft.getInstance().gui.setOverlayMessage(
+                                Component.translatable("playerManip.toolBreakWarning", durability).withStyle(ChatFormatting.GOLD),
                                 false);
                     }
 
                     if (Configs.infiniteTools && Configs.playerCrackState.knowsSeed()) {
+                        int unbreakingLevel_f = unbreakingLevel;
                         Runnable action = () -> throwItemsUntil(rand -> {
                             for (int i = 0; i < amount; i++) {
                                 if (stack.getItem() instanceof ArmorItem && rand.nextFloat() < 0.6)
                                     return false;
-                                if (rand.nextInt(unbreakingLevel + 1) == 0)
+                                if (rand.nextInt(unbreakingLevel_f + 1) == 0)
                                     return false;
                             }
                             return true;
@@ -288,12 +309,16 @@ public class PlayerRandCracker {
     }
 
     public static void onItemDamageUncertain(int minAmount, int maxAmount, LivingEntity holder, ItemStack stack) {
-        if (holder instanceof ClientPlayerEntity && !((ClientPlayerEntity) holder).getAbilities().creativeMode) {
-            if (stack.isDamageable()) {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21) {
+            return;
+        }
+        if (holder instanceof LocalPlayer && !((LocalPlayer) holder).getAbilities().instabuild) {
+            if (stack.isDamageableItem()) {
                 if (maxAmount > 0) {
-                    int unbreakingLevel = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack);
-                    if (unbreakingLevel > 0)
+                    int unbreakingLevel = CUtil.getEnchantmentLevel(holder.registryAccess(), Enchantments.UNBREAKING, stack);
+                    if (unbreakingLevel > 0) {
                         onUnbreakingUncertain(stack, minAmount, maxAmount, unbreakingLevel);
+                    }
                 }
             }
         }
@@ -344,31 +369,35 @@ public class PlayerRandCracker {
     }
 
     public static boolean throwItem() {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
 
-        Slot matchingSlot = getBestItemThrowSlot(player.currentScreenHandler.slots);
+        Slot matchingSlot = getBestItemThrowSlot(player.containerMenu.slots);
         if (matchingSlot == null) {
             return false;
         }
         expectedThrows++;
-        MinecraftClient.getInstance().interactionManager.clickSlot(player.currentScreenHandler.syncId,
-                matchingSlot.id, 0, SlotActionType.THROW, player);
+        Minecraft.getInstance().gameMode.handleInventoryMouseClick(player.containerMenu.containerId,
+                matchingSlot.index, 0, ClickType.THROW, player);
 
         return true;
     }
 
+    public static void unthrowItem() {
+        seed = (seed * 0xdba6ed0471f1L + 0x25493d2c3b3cL) & MASK;
+    }
+
     public static Slot getBestItemThrowSlot(List<Slot> slots) {
         slots = slots.stream().filter(slot -> {
-            if (!slot.hasStack()) {
+            if (!slot.hasItem()) {
                 return false;
             }
             if (slot instanceof ICreativeSlot) {
                 return false;
             }
-            if (EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, slot.getStack()) != 0) {
+            if (EnchantmentHelper.has(slot.getItem(), EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) {
                 return false;
             }
-            if (slot.getStack().getItem() == Items.CHORUS_FRUIT) {
+            if (slot.getItem().getItem() == Items.CHORUS_FRUIT) {
                 return false;
             }
             return true;
@@ -376,15 +405,15 @@ public class PlayerRandCracker {
 
         Map<Item, Integer> itemCounts = new HashMap<>();
         for (Slot slot : slots) {
-            itemCounts.put(slot.getStack().getItem(), itemCounts.getOrDefault(slot.getStack().getItem(), 0) + slot.getStack().getCount());
+            itemCounts.put(slot.getItem().getItem(), itemCounts.getOrDefault(slot.getItem().getItem(), 0) + slot.getItem().getCount());
         }
         if (itemCounts.isEmpty()) {
             return null;
         }
         //noinspection OptionalGetWithoutIsPresent
-        Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getMaxCount).thenComparing(itemCounts::get)).get();
+        Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getDefaultMaxStackSize).thenComparing(itemCounts::get)).get();
         //noinspection OptionalGetWithoutIsPresent
-        return slots.stream().filter(slot -> slot.getStack().getItem() == preferredItem).findFirst().get();
+        return slots.stream().filter(slot -> slot.getItem().getItem() == preferredItem).findFirst().get();
     }
 
     private static final Field RANDOM_SEED;
@@ -416,18 +445,18 @@ public class PlayerRandCracker {
 
     public static class ThrowItemsResult {
         private final Type type;
-        private final MutableText message;
+        private final MutableComponent message;
 
         public ThrowItemsResult(Type type, Object... args) {
             this.type = type;
-            this.message = Text.translatable(type.getTranslationKey(), args);
+            this.message = Component.translatable(type.getTranslationKey(), args);
         }
 
         public Type getType() {
             return type;
         }
 
-        public MutableText getMessage() {
+        public MutableComponent getMessage() {
             return message;
         }
 
@@ -456,7 +485,7 @@ public class PlayerRandCracker {
         }
     }
 
-    public static enum CrackState implements StringIdentifiable {
+    public static enum CrackState implements StringRepresentable {
         UNCRACKED("uncracked"),
         CRACKED("cracked", true),
         ENCH_CRACKING_1("ench_cracking_1"),
@@ -479,7 +508,7 @@ public class PlayerRandCracker {
         }
 
         @Override
-        public String asString() {
+        public String getSerializedName() {
             return name;
         }
 

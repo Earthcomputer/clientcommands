@@ -3,8 +3,8 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -16,9 +16,9 @@ public class ShrugCommand {
     }
 
     private static int shrug(FabricClientCommandSource source) {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        if (networkHandler != null) {
-            networkHandler.sendChatMessage("¯\\_(ツ)_/¯");
+        ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+        if (packetListener != null) {
+            packetListener.sendChat("¯\\_(ツ)_/¯");
         }
         return Command.SINGLE_SUCCESS;
     }
