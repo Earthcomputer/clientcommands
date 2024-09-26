@@ -13,7 +13,6 @@ public class RawPacketInfo extends RegistryFriendlyByteBuf {
     }
 
     public String getSender() {
-        return sender;
+        return this.sender;
     }
-
 }

@@ -4,7 +4,6 @@ import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StartTicTacToeGameC2CPacket;
 import net.minecraft.network.ClientboundPacketListener;
-import net.minecraft.network.PacketListener;
 
 public interface C2CPacketListener extends ClientboundPacketListener {
     void onMessageC2CPacket(MessageC2CPacket packet);

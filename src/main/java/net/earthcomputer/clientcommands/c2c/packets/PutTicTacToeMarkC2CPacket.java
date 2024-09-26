@@ -3,8 +3,6 @@ package net.earthcomputer.clientcommands.c2c.packets;
 import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.earthcomputer.clientcommands.c2c.RawPacketInfo;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
@@ -19,9 +17,9 @@ public record PutTicTacToeMarkC2CPacket(String sender, byte x, byte y) implement
         this(buf.getSender(), buf.readByte(), buf.readByte());
     }
 
-    public void write(RawPacketInfo buf) {
-        buf.writeByte(this.x);
-        buf.writeByte(this.y);
+    public void write(RawPacketInfo info) {
+        info.writeByte(this.x);
+        info.writeByte(this.y);
     }
 
     @Override

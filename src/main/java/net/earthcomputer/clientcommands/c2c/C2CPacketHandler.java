@@ -44,13 +44,11 @@ public class C2CPacketHandler implements C2CPacketListener {
     private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.publicKeyNotFound"));
     private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.encryptionFailed"));
 
-    public static final ProtocolInfo.Unbound<C2CPacketListener, RawPacketInfo> PROTOCOL_UNBOUND = ProtocolInfoBuilder.clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
+    public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, RawPacketInfo>clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
         .addPacket(StartTicTacToeGameC2CPacket.ID, StartTicTacToeGameC2CPacket.CODEC)
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
-    );
-
-    private static final ProtocolInfo<C2CPacketListener> c2cProtocolInfo = C2CPacketHandler.PROTOCOL_UNBOUND.bind((b) -> ((RawPacketInfo) b));
+    ).bind(b -> (RawPacketInfo) b);
 
     public static final String C2C_PACKET_HEADER = "CCΕNC:";
 
@@ -78,7 +76,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         if (buf == null) {
             return;
         }
-        c2cProtocolInfo.codec().encode(buf, packet);
+        C2C.codec().encode(buf, packet);
         byte[] uncompressed = new byte[buf.readableBytes()];
         buf.getBytes(0, uncompressed);
         byte[] compressed = ConversionHelper.Gzip.compress(uncompressed);
@@ -160,7 +158,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         }
         C2CPacket packet;
         try {
-            packet = (C2CPacket) c2cProtocolInfo.codec().decode(buf);
+            packet = (C2CPacket) C2C.codec().decode(buf);
         } catch (Throwable e) {
             LOGGER.error("Error decoding C2C packet", e);
             return false;
