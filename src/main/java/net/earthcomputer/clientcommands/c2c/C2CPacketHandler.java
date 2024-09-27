@@ -11,7 +11,7 @@ import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ConnectFourCommand;
 import net.earthcomputer.clientcommands.command.ListenCommand;
-import net.earthcomputer.clientcommands.features.TwoPlayerGameType;
+import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.earthcomputer.clientcommands.interfaces.IClientPacketListener_C2C;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -203,7 +203,7 @@ public class C2CPacketHandler implements C2CPacketListener {
 
     @Override
     public void onStartTwoPlayerGameC2CPacket(StartTwoPlayerGameC2CPacket packet) {
-        TwoPlayerGameType.onStartTwoPlayerGame(packet);
+        TwoPlayerGame.onStartTwoPlayerGame(packet);
     }
 
     @Override

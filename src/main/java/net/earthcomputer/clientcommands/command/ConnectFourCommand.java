@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
-import net.earthcomputer.clientcommands.features.TwoPlayerGameType;
+import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,12 +23,12 @@ public class ConnectFourCommand {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.createCommandTree());
+        dispatcher.register(TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.createCommandTree());
     }
 
     public static void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
         String sender = packet.sender();
-        ConnectFourGame game = TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.getActiveGame(sender);
+        ConnectFourGame game = TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGame(sender);
         if (game == null) {
             return;
         }
@@ -88,14 +88,14 @@ public class ConnectFourCommand {
             this.activePiece = Piece.opposite(piece);
             if ((this.winner = this.getWinner()) != 0) {
                 if (this.winner == this.yourPiece) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("fourInARowGame.won", sender));
-                    TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
+                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("connectFourGame.won", sender));
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
                 } else if (this.winner == Piece.opposite(this.yourPiece)) {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("c2cpacket.putConnectFourPieceC2CPacket.incoming.lost", sender));
-                    TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
                 } else if (this.winner == 3) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("fourInARowGame.draw", sender));
-                    TwoPlayerGameType.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
+                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("connectFourGame.draw", sender));
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
                 }
             } else {
                 if (this.isYourTurn()) {
@@ -220,8 +220,8 @@ public class ConnectFourCommand {
 
         public static Component name(byte piece) {
             return switch (piece) {
-                case RED -> Component.translatable("fourInARowGame.pieceRed");
-                case YELLOW -> Component.translatable("fourInARowGame.pieceYellow");
+                case RED -> Component.translatable("connectFourGame.pieceRed");
+                case YELLOW -> Component.translatable("connectFourGame.pieceYellow");
                 default -> throw new IllegalStateException("Unexpected value: " + piece);
             };
         }
@@ -287,7 +287,7 @@ public class ConnectFourCommand {
         private static final int SLOT_HEIGHT = SCALE * TEXTURE_SLOT_HEIGHT;
         
         public ConnectFourGameScreen(ConnectFourGame game) {
-            super(Component.translatable("fourInARowGame.title", game.opponent.getProfile().getName()));
+            super(Component.translatable("connectFourGame.title", game.opponent.getProfile().getName()));
             this.game = game;
         }
 
@@ -297,9 +297,9 @@ public class ConnectFourCommand {
             int startX = (this.width - BOARD_WIDTH) / 2;
             int startY = (this.height - BOARD_HEIGHT) / 2;
 
-            graphics.drawString(this.font, Component.translatable("fourInARowGame.pieceSet", Piece.name(this.game.yourPiece)), startX, startY - 20, 0xff_ffffff);
+            graphics.drawString(this.font, Component.translatable("connectFourGame.pieceSet", Piece.name(this.game.yourPiece)), startX, startY - 20, 0xff_ffffff);
             graphics.drawString(this.font, this.title, startX, startY - 10, 0xff_ffffff);
-            Component moveTranslate = this.game.isYourTurn() ? Component.translatable("fourInARowGame.yourMove") : Component.translatable("fourInARowGame.opponentMove");
+            Component moveTranslate = this.game.isYourTurn() ? Component.translatable("connectFourGame.yourMove") : Component.translatable("connectFourGame.opponentMove");
             graphics.drawString(this.font, moveTranslate, startX + BOARD_WIDTH - this.font.width(moveTranslate), startY - 10, 0xff_ffffff);
 
             graphics.blit(

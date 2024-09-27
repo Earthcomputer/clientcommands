@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
-import net.earthcomputer.clientcommands.features.TwoPlayerGameType;
+import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,19 +19,19 @@ import net.minecraft.resources.ResourceLocation;
 
 public class TicTacToeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(TwoPlayerGameType.TIC_TAC_TOE_GAME_TYPE.createCommandTree());
+        dispatcher.register(TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.createCommandTree());
     }
 
     public static void onPutTicTacToeMarkC2CPacket(PutTicTacToeMarkC2CPacket packet) {
         String sender = packet.sender();
-        TicTacToeGame game = TwoPlayerGameType.TIC_TAC_TOE_GAME_TYPE.getActiveGame(sender);
+        TicTacToeGame game = TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.getActiveGame(sender);
         if (game == null) {
             return;
         }
         if (game.putMark(packet.x(), packet.y(), game.yourMarks.opposite())) {
             if (game.getWinner() == game.yourMarks.opposite()) {
                 Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost", sender));
-                TwoPlayerGameType.TIC_TAC_TOE_GAME_TYPE.getActiveGames().remove(sender);
+                TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.getActiveGames().remove(sender);
                 return;
             }
             MutableComponent component = Component.translatable("c2cpacket.putTicTacToeMarkC2CPacket.incoming", sender);
@@ -176,7 +176,7 @@ public class TicTacToeCommand {
                     Minecraft.getInstance().gui.getChat().addMessage(Component.translationArg(e.getRawMessage()));
                 }
                 if (this.game.getWinner() == this.game.yourMarks) {
-                    TwoPlayerGameType.TIC_TAC_TOE_GAME_TYPE.getActiveGames().remove(this.game.opponent.getProfile().getName());
+                    TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.getActiveGames().remove(this.game.opponent.getProfile().getName());
                 }
                 return true;
             }
