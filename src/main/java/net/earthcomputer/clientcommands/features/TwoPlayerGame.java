@@ -52,7 +52,7 @@ public class TwoPlayerGame<T, S extends Screen> {
         return TYPE_BY_NAME.get(id);
     }
 
-    private final String translationKey;
+    private final Component translation;
     private final String command;
     private final ResourceLocation id;
     private final Set<String> pendingInvites;
@@ -61,7 +61,7 @@ public class TwoPlayerGame<T, S extends Screen> {
     private final ScreenFactory<T, S> screenFactory;
 
     TwoPlayerGame(String translationKey, String command, ResourceLocation id, GameFactory<T> gameFactory, ScreenFactory<T, S> screenFactory) {
-        this.translationKey = translationKey;
+        this.translation = Component.translatable(translationKey);
         this.command = command;
         this.id = id;
         this.pendingInvites = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<String, Boolean>build().asMap());
@@ -71,7 +71,7 @@ public class TwoPlayerGame<T, S extends Screen> {
     }
 
     public Component translate() {
-        return Component.translatable(this.translationKey);
+        return this.translation;
     }
 
     public ResourceLocation getId() {
