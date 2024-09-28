@@ -42,11 +42,11 @@ public class ReplyCommand {
             throw NO_TARGET_FOUND_EXCEPTION.create();
         }
 
-    String text = message.getString();
+        String text = message.getString();
 
-    if (3 + currentTarget.length() + 1 + text.length() > 256) {
-        throw MESSAGE_TOO_LONG_EXCEPTION.create(256 - (3 + currentTarget.length() + 1), text.length());
-    }
+        if (3 + currentTarget.length() + 1 + text.length() > 256) {
+            throw MESSAGE_TOO_LONG_EXCEPTION.create(256 - (3 + currentTarget.length() + 1), text.length());
+        }
 
         source.getClient().getConnection().sendCommand(String.format("w %s %s", currentTarget, text));
 
