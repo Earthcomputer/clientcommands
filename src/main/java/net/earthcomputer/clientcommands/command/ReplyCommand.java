@@ -43,12 +43,13 @@ public class ReplyCommand {
         }
 
         String text = message.getString();
+        String command = String.format("w %s %s", currentTarget, text);
 
-        if (3 + currentTarget.length() + 1 + text.length() > 256) {
-            throw MESSAGE_TOO_LONG_EXCEPTION.create(256 - (3 + currentTarget.length() + 1), text.length());
+        if (command.length() > 256) {
+            throw MESSAGE_TOO_LONG_EXCEPTION.create(256 - (command.length() - text.length()), text.length());
         }
 
-        source.getClient().getConnection().sendCommand(String.format("w %s %s", currentTarget, text));
+        source.getClient().getConnection().sendCommand(command);
 
         return Command.SINGLE_SUCCESS;
     }
