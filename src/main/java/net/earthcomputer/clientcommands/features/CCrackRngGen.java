@@ -26,7 +26,7 @@ public final class CCrackRngGen {
     private static final BigVector ORIGIN = DeserializeRt.vec(
         "\u0a00ʈ뒦벎츖ʐ駗질긾ʘ뾖黱덪ʠ뚊ꃪ쀆ʨ躛\ue6d4锦ʰ힒볩ﱁʸꆽ\uaaf8葉ˀﲈ쎉錏ˈ\uf8a5\uf19e똠Ȁ");
     private static final BigVector ROOT_ORIGIN = DeserializeRt.vec(
-        "\u0ad7醌뗤ꪜހ肀肀耠횑貵\ue4aaﰃ肀肀肀‟ࣞ뚂\uf1e0뮚Ҁ肀肀耠骤蟓ꊳ輆肀肀肀⃟뚂\uf1e0뭲肀肀肀ဦ࢚ꒇ펢뎧ڀ肀肀耠\udeb6英\ue0bb㺀肀肀耐\udfb6英\ue0bbʀ肀肀耠");
+        "\u0ad7醌뗤ꪜހ肀肀耠횑貵\ue4aaﰃ肀肀肀‟ࣞ뚂\uf1e0뮚Ҁ肀肀耠骤蟓ꊳ輆肀肀肀⃟뚂\uf1e0뭲肀肀肀ဦ\u089aꒇ펢뎧ڀ肀肀耠\udeb6英\ue0bb㺀肀肀耐\udfb6英\ue0bbʀ肀肀耠");
 
     /**
      * Finds all values of {@code seed} that could produce the given results in the following code:
