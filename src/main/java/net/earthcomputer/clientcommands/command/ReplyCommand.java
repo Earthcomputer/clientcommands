@@ -23,7 +23,7 @@ public class ReplyCommand {
     @Nullable
     private static String currentTarget = null;
 
-    public static void onChatOpened() {
+    public static void refreshCurrentTarget() {
         currentTarget = mostRecentWhisper;
     }
 

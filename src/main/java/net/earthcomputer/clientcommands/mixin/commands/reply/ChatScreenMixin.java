@@ -11,6 +11,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ChatScreenMixin {
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
-        ReplyCommand.onChatOpened();
+        ReplyCommand.refreshCurrentTarget();
     }
 }
