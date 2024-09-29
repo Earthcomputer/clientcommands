@@ -46,7 +46,7 @@ public class ReplyCommand {
         String text = message.getString();
         String command = String.format("w %s %s", currentTarget, text);
 
-        if (command.length() > 256) {
+        if (command.length() > SharedConstants.MAX_CHAT_LENGTH) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create(SharedConstants.MAX_CHAT_LENGTH - (command.length() - text.length()), text.length());
         }
 
