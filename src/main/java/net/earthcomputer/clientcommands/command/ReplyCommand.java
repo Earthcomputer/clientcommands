@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +47,7 @@ public class ReplyCommand {
         String command = String.format("w %s %s", currentTarget, text);
 
         if (command.length() > 256) {
-            throw MESSAGE_TOO_LONG_EXCEPTION.create(256 - (command.length() - text.length()), text.length());
+            throw MESSAGE_TOO_LONG_EXCEPTION.create(SharedConstants.MAX_CHAT_LENGTH - (command.length() - text.length()), text.length());
         }
 
         source.getClient().getConnection().sendCommand(command);
