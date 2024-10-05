@@ -6,6 +6,7 @@ import net.earthcomputer.clientcommands.util.CUtil;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,7 +22,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
@@ -30,6 +30,8 @@ public abstract class LivingEntityMixin extends Entity {
     private BlockPos lastPos;
     @Shadow
     protected int useItemRemaining;
+
+    @Shadow public abstract boolean isAlive();
 
     public LivingEntityMixin(EntityType<?> entityType_1, Level level_1) {
         super(entityType_1, level_1);
@@ -56,11 +58,9 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
 
-    @Inject(method = "baseTick",
-            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/tags/FluidTags;WATER:Lnet/minecraft/tags/TagKey;", ordinal = 0)),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", ordinal = 0))
+    @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isAlive()Z", ordinal = 0))
     public void onUnderwater(CallbackInfo ci) {
-        if (isThePlayer()) {
+        if (isThePlayer() && isAlive() && isEyeInFluid(FluidTags.WATER)) {
             PlayerRandCracker.onUnderwater();
         }
     }
