@@ -12,20 +12,20 @@
   "commands.calias.removeAlias.success": "成功移除别名“%s”",
 
   "commands.careastats.notLoaded": "该区域的区块未加载",
-  "commands.careastats.output.chunksScanned": "扫描%d个区块，用时%d纳秒≈%d毫秒",
-  "commands.careastats.output.blocksMatched": "在一共%2$d个方块中匹配到%1$d个方块",
-  "commands.careastats.output.entitiesFound": "在此区域中找到%d个实体",
+  "commands.careastats.output.chunksScanned": "扫描%s个区块，用时%s纳秒≈%s毫秒",
+  "commands.careastats.output.blocksMatched": "在一共%2$s个方块中匹配到%1$s个方块",
+  "commands.careastats.output.entitiesFound": "在此区域中找到%s个实体",
 
   "commands.cbook.success": "成功编辑书本",
   "commands.cbook.commandException": "你没有手握书本",
 
   "commands.ccalc.expected": "期望的标识符%s",
-  "commands.ccalc.invalidArgumentCount": "函数“%s”无法接受%d个自变量",
+  "commands.ccalc.invalidArgumentCount": "函数“%s”无法接受%s个自变量",
   "commands.ccalc.parse": "表达式解析结果：%s",
   "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
   "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
   "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
-  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s %% %s)",
   "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
   "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
   "commands.ccalc.parse.constant": "(常量‘%s’)",
@@ -34,16 +34,16 @@
   "commands.ccalc.parse.negate": "(负值：%s)",
   "commands.ccalc.tooDeeplyNested": "表达式嵌套过深",
 
-  "commands.ccalcstack.success": "%d个%s是%d组余%d个",
-  "commands.ccalcstack.success.empty": "%d个物品是%d组余%d个",
-  "commands.ccalcstack.success.empty.exact": "%d个物品是正好%d组",
-  "commands.ccalcstack.success.exact": "%d个%s是正好%d组",
+  "commands.ccalcstack.success": "%s个%s是%s组余%s个",
+  "commands.ccalcstack.success.empty": "%s个物品是%s组余%s个",
+  "commands.ccalcstack.success.empty.exact": "%s个物品是正好%s组",
+  "commands.ccalcstack.success.exact": "%s个%s是正好%s组",
 
   "commands.ccrackrng.failed": "破解玩家随机种子失败",
   "commands.ccrackrng.failed.help": "提示：RNG控制并不在一些被修改过的服务器有效，特别是Paper端。",
-  "commands.ccrackrng.retries": "正在破解玩家随机种子，尝试次数：%d/%d",
+  "commands.ccrackrng.retries": "正在破解玩家随机种子，尝试次数：%s/%s",
   "commands.ccrackrng.starting": "正在破解玩家随机种子",
-  "commands.ccrackrng.success": "成功破解玩家随机种子：%d",
+  "commands.ccrackrng.success": "成功破解玩家随机种子：%s",
 
   "commands.ccreativetab.addStack.success": "成功将%s添加到“%s”",
   "commands.ccreativetab.addTab.alreadyExists": "创造模式物品栏“%s”已经存在",
@@ -51,12 +51,12 @@
   "commands.ccreativetab.addTab.success": "成功添加创造模式物品栏“%s”",
   "commands.ccreativetab.changeIcon.success": "成功将“%s”的图标由%s替换为%s",
   "commands.ccreativetab.notFound": "未找到创造模式物品栏“%s”",
-  "commands.ccreativetab.outOfBounds": "索引%d越界",
-  "commands.ccreativetab.removeStack.success": "成功将“%s”中第%d个物品移除",
+  "commands.ccreativetab.outOfBounds": "索引%s越界",
+  "commands.ccreativetab.removeStack.success": "成功将“%s”中第%s个物品移除",
   "commands.ccreativetab.removeTab.success": "成功移除创造模式物品栏“%s”",
   "commands.ccreativetab.renameTab.success": "成功将“%s”重命名为“%s”",
   "commands.ccreativetab.saveFile.failed": "无法保存创造模式物品栏文件",
-  "commands.ccreativetab.setStack.success": "成功将“%s”中第%d个物品设为%s",
+  "commands.ccreativetab.setStack.success": "成功将“%s”中第%s个物品设为%s",
 
   "commands.cenchant.failed": "你请求的附魔无法获得或者需要太长时间",
   "commands.cenchant.help.uncrackedPlayerSeed": "提示：你还没有完全破解玩家种子",
@@ -69,7 +69,7 @@
   "commands.cfind.found.right": "找到%1$s, 距离你%2$s格",
   "commands.cfind.keepSearching.success": "正在搜寻实体",
   "commands.cfind.noMatch": "未找到匹配查找条件的实体",
-  "commands.cfind.success": "找到%d个匹配查找条件的实体",
+  "commands.cfind.success": "找到%s个匹配查找条件的实体",
 
   "commands.cfindblock.notFound": "未发现此方块",
   "commands.cfindblock.starting": "正在搜索：%s",
@@ -77,16 +77,16 @@
   "commands.cfindblock.success.glow": "[发光]",
   "commands.cfindblock.success.right": "，距离你%1$s格",
 
-  "commands.cfinditem.match.entity.left": "%d个%s在%s中被找到，位于",
+  "commands.cfinditem.match.entity.left": "%s个%s在%s中被找到，位于",
   "commands.cfinditem.match.entity.right": "",
   "commands.cfinditem.match.left": "在",
-  "commands.cfinditem.match.right": "找到了%d个%s",
+  "commands.cfinditem.match.right": "找到了%s个%s",
   "commands.cfinditem.starting": "正在搜索%s",
   "commands.cfinditem.starting.keepSearching": "正在持续搜索%s",
-  "commands.cfinditem.total": "一共找到了%d个%s",
+  "commands.cfinditem.total": "一共找到了%s个%s",
 
   "commands.cfish.addGoal.success": "成功添加目标%s",
-  "commands.cfish.correctLoot": "校正%dms后得到了目标战利品",
+  "commands.cfish.correctLoot": "校正%sms后得到了目标战利品",
   "commands.cfish.error.biome": "无法在这个区块得到目标战利品，需要%s ",
   "commands.cfish.error.crackFailed": "无法破解浮标随机种子，服务器是否受到修改？",
   "commands.cfish.error.collision": "浮标撞到了奇怪的东西",
@@ -100,38 +100,38 @@
   "commands.cfish.error.outOfWater": "浮标不在水中, 自动控制无法工作",
   "commands.cfish.help.tooManyEnchants": "提示：把多个附魔放在一起获得会很难且可能需要很长时间",
   "commands.cfish.listGoals.noGoals": "没有钓鱼目标",
-  "commands.cfish.listGoals.success": "有%d个钓鱼目标：",
+  "commands.cfish.listGoals.success": "有%s个钓鱼目标：",
   "commands.cfish.needFishingManipulation": "本命令需要启用钓鱼控制",
   "commands.cfish.removeGoal.success": "成功移除目标%s",
-  "commands.cfish.wrongLoot": "校正%dms后未获得目标战利品，可能超前了%s刻",
+  "commands.cfish.wrongLoot": "校正%sms后未获得目标战利品，可能超前了%s刻",
 
-  "commands.cfov.success": "将视场角设为%f",
+  "commands.cfov.success": "将视场角设为%s",
 
-  "commands.cfunction.limitReached": "已达到命令限制（%d）",
-  "commands.cfunction.success": "从函数%s中运行%d个命令",
+  "commands.cfunction.limitReached": "已达到命令限制（%s）",
+  "commands.cfunction.success": "从函数%s中运行%s个命令",
 
   "commands.cgamemode.playerNotFound": "未找到玩家",
   "commands.cgamemode.playerGameMode": "玩家%s处于%s游戏模式",
   "commands.cgamemode.noneWithGameMode": "没有玩家处于%s游戏模式",
   "commands.cgamemode.listWithGameMode": "以下玩家处于%s游戏模式：",
 
-  "commands.cgamma.success": "将伽马值设为%f",
+  "commands.cgamma.success": "将伽马值设为%s",
 
-  "commands.cghostblock.fill.success": "成功填充%d个幽灵方块",
+  "commands.cghostblock.fill.success": "成功填充%s个幽灵方块",
   "commands.cghostblock.set.success": "成功放置幽灵方块",
 
-  "commands.cgive.success": "成功给予%d个%s给自己",
+  "commands.cgive.success": "成功给予%s个%s给自己",
   "commands.cgive.notCreative": "仅创造模式玩家可以将物品给予自己",
 
   "commands.cglow.entity.keepSearching.success": "正在使实体发光",
   "commands.cglow.entity.failed": "没有目标实体可以发光",
-  "commands.cglow.entity.success": "成功使%d个实体发光",
-  "commands.cglow.area.success": "成功使%d个区域发光",
+  "commands.cglow.entity.success": "成功使%s个实体发光",
+  "commands.cglow.area.success": "成功使%s个区域发光",
 
   "commands.chat.success": "喜报：已经成功地打开了聊天窗口!!",
 
   "commands.chotbar.notCreative": "仅创造模式玩家可以恢复物品栏",
-  "commands.chotbar.restoredHotbar": "成功恢复物品栏%d",
+  "commands.chotbar.restoredHotbar": "成功恢复物品栏%s",
 
   "commands.ckit.notFound": "未找到背包存档“%s”",
   "commands.ckit.saveFile.failed": "无法保存背包存档文件",
@@ -167,14 +167,14 @@
   "commands.cparticle.unsuitableParticleOption": "无法在视频设置中“粒子效果”一项为“最少”时播放粒子效果,",
   "commands.cparticle.success": "成功显示粒子效果%s",
 
-  "commands.cpermissionlevel.success": "你的权限等级为%d",
+  "commands.cpermissionlevel.success": "你的权限等级为%s",
 
   "commands.cplaysound.success": "成功播放音效%s给自己",
 
   "commands.cplugins.found": "找到以下插件：",
 
-  "commands.cping.success": "你的平均ping是%dms",
-  "commands.cping.success.other": "%s的平均ping是%dms",
+  "commands.cping.success": "你的平均ping是%sms",
+  "commands.cping.success.other": "%s的平均ping是%sms",
   "commands.cping.singleplayer": "你在一个单人游戏世界里(╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "未找到玩家",
 
@@ -202,9 +202,9 @@
 
   "commands.ctask.conflicting": "一个有冲突的任务‘%s’已在运行。%s",
   "commands.ctask.list.noTasks": "当前没有正在执行的任务",
-  "commands.ctask.list.success": "%d个任务正在执行",
+  "commands.ctask.list.success": "%s个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
-  "commands.ctask.stop.success": "已停止%d个任务",
+  "commands.ctask.stop.success": "已停止%s个任务",
 
   "commands.ctictactoe.playerNotFound": "未找到玩家",
   "commands.ctictactoe.noGameWithPlayer": "目前没有与该玩家一起进行游戏",
@@ -249,7 +249,7 @@
   "commands.cwiki.failed": "未能获取维基内容",
   "commands.cwiki.noContent": "那篇文章中没有用于介绍的段落",
 
-  "commands.client.blockpos": "(%d，%d，%d)",
+  "commands.client.blockpos": "(%s，%s，%s)",
   "commands.client.cancel": "取消",
   "commands.client.crack": "破解",
   "commands.client.enable": "启用",
@@ -263,7 +263,7 @@
   "commands.client.requiresRestart": "此更改将在你重新启动客户端后生效",
   "commands.client.tooFewArguments": "参数过少",
 
-  "chorusManip.landing.success": "成功降落在：%d，%d，%d",
+  "chorusManip.landing.success": "成功降落在：%s，%s，%s",
   "chorusManip.landing.failed": "降落操作不可用",
   "chorusManip.goalTooFar": "目标过远！",
   "chorusManip.needChorusManipulation": "本命令需要启用紫颂果操作",
@@ -276,26 +276,26 @@
 
   "enchCrack.enchantments": "附魔：",
   "enchCrack.clues": "提示：",
-  "enchCrack.slot": "第%d行：",
-  "enchCrack.bookshelfCount": "书架数量：%d",
+  "enchCrack.slot": "第%s行：",
+  "enchCrack.bookshelfCount": "书架数量：%s",
 
-  "enchCrack.xpSeed.one": "经验值种子：%08X",
-  "enchCrack.xpSeed.many": "可能的经验值种子数量：%d",
-  "enchCrack.playerRNGSeed.many": "可能的玩家随机种子数量：%d",
+  "enchCrack.xpSeed.one": "经验值种子：%s",
+  "enchCrack.xpSeed.many": "可能的经验值种子数量：%s",
+  "enchCrack.playerRNGSeed.many": "可能的玩家随机种子数量：%s",
   "enchCrack.addInfo": "添加信息",
 
   "enchCrack.insn.dummy": "附魔一件其他物品",
   "enchCrack.insn.ready": "你的附魔已就绪",
-  "enchCrack.insn.bookshelves": "需要的书架数：%d",
-  "enchCrack.insn.slot": "在附魔台的第%d行",
-  "enchCrack.insn.itemThrows": "需要扔出物品：%d次（大约%f秒）",
+  "enchCrack.insn.bookshelves": "需要的书架数：%s",
+  "enchCrack.insn.slot": "在附魔台的第%s行",
+  "enchCrack.insn.itemThrows": "需要扔出物品：%s次（大约%s秒）",
   "enchCrack.insn.itemThrows.noDummy": "无需附魔其他物品",
   "enchCrack.insn.enchantments": "最终获得的附魔：",
 
   "itemCrack.notEnoughItems": "无法使用随机数种子破解：玩家手中物品不足",
 
-  "minesweeperGame.minesLeft": "剩余地雷：%d",
-  "minesweeperGame.timePlayed": "游玩时间：%d秒",
+  "minesweeperGame.minesLeft": "剩余地雷：%s",
+  "minesweeperGame.timePlayed": "游玩时间：%s秒",
   "minesweeperGame.title": "扫雷",
 
   "playerManip.state": "玩家种子破解状态：%s",
@@ -336,13 +336,13 @@
   "playerManip.reset.recreated": "重新创建了玩家",
 
   "playerManip.serverBrandWarning": "警告：你所在的服务器受到修改。随机数相关功能不保证正常可用！",
-  "playerManip.toolBreakWarning": "警告：工具还有%d耐久度",
-  "playerManip.throwError": "条件不可达成，或者需要丢出大于%d个物品",
-  "playerManip.notEnoughItems": "物品数量（%d，共%d）不足以破解玩家种子",
+  "playerManip.toolBreakWarning": "警告：工具还有%s耐久度",
+  "playerManip.throwError": "条件不可达成，或者需要丢出大于%s个物品",
+  "playerManip.notEnoughItems": "物品数量（%s，共%s）不足以破解玩家种子",
   "playerManip.uncracked": "需要破解玩家种子",
 
   "snakeGame.title": "贪吃蛇",
-  "snakeGame.score": "分数：%d",
+  "snakeGame.score": "分数：%s",
 
   "ticTacToeGame.title": "井字棋对手：%s",
   "ticTacToeGame.playingWith": "你正在与%s玩",
