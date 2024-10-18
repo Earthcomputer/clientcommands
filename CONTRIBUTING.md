@@ -60,6 +60,11 @@ You may see old code that doesn't adhere to these guidelines, but all new code m
 ### Miscellaneous
 * Any message the player may receive should be translated
     * Except for debugging (log messages, debug HUD)
+    * Any substitutions should use `%s`, or the positioned `%1$s`, `%2$s` etc. format specifiers, and not
+      other format specifiers such as `%d` and `%f`. If any special formatting is required, this should be
+      done in code.
+        * This is because Mojang doesn't always handle format specifiers properly, so we stick to a few
+          ones which are known to work. This is what Mojang themselves do in their own translation files.
 * Don't use Java features only available in Java versions newer than the one Minecraft uses, if applicable
 * All files should have a newline at the end of the file
 * Do not use AWT at all
