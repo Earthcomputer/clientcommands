@@ -134,7 +134,7 @@ public class EnchantmentCracker {
         lines.add("");
 
         if (crackState == CrackState.CRACKED) {
-            lines.add(I18n.get("enchCrack.xpSeed.one", possibleXPSeeds.iterator().next()));
+            lines.add(I18n.get("enchCrack.xpSeed.one", String.format("%08X", possibleXPSeeds.iterator().next())));
         } else if (crackState == CrackState.CRACKING) {
             lines.add(I18n.get("enchCrack.xpSeed.many", possibleXPSeeds.size()));
         }
