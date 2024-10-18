@@ -191,10 +191,13 @@
 
   "commands.csignsearch.starting": "Searching signs",
 
-  "commands.csnap.success": "Snapped to %f %f %f",
-  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away!",
+  "commands.csnap.airborne": "You cannot snap while airborne",
+  "commands.csnap.cannotFit": "The player cannot fit at that location",
   "commands.csnap.clickToTeleportEnabled": "Enabled click to teleport",
   "commands.csnap.clickToTeleportDisabled": "Disabled click to teleport",
+  "commands.csnap.success": "Snapped to %s %s %s",
+  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away",
+  "commands.csnap.wall": "You cannot snap onto walls",
 
   "commands.cstartup.add.success": "Added command to startup file",
   "commands.cstartup.couldNotCreateFile": "Couldn't create startup file",
