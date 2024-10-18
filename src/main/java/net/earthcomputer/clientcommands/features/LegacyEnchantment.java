@@ -134,12 +134,21 @@ public enum LegacyEnchantment {
         this.flags = combinedFlags;
     }
 
+    @Nullable
+    public static LegacyEnchantment byEnchantmentKey(ResourceKey<Enchantment> enchantmentKey) {
+        return BY_KEY.get(enchantmentKey);
+    }
+
     public boolean isTreasure() {
         return (flags & Flags.TREASURE) != 0;
     }
 
     public boolean isDiscoverable() {
         return (flags & Flags.NON_DISCOVERABLE) == 0;
+    }
+
+    public boolean inEnchantmentTable() {
+        return !isTreasure() && isDiscoverable();
     }
 
     public boolean isCompatible(LegacyEnchantment other, int version) {
