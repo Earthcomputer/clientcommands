@@ -53,13 +53,13 @@ public final class CUtil {
 
     /** @noinspection OptionalIsPresent - no boxing! */
     public static int getEnchantmentLevel(RegistryAccess registryAccess, ResourceKey<Enchantment> enchantment, ItemStack stack) {
-        Optional<Holder.Reference<Enchantment>> enchHolder = registryAccess.registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment);
+        Optional<Holder.Reference<Enchantment>> enchHolder = registryAccess.lookupOrThrow(Registries.ENCHANTMENT).get(enchantment);
         return enchHolder.isPresent() ? EnchantmentHelper.getItemEnchantmentLevel(enchHolder.get(), stack) : 0;
     }
 
     /** @noinspection OptionalIsPresent - no boxing! */
     public static int getEnchantmentLevel(ResourceKey<Enchantment> enchantment, LivingEntity entity) {
-        Optional<Holder.Reference<Enchantment>> enchHolder = entity.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(enchantment);
+        Optional<Holder.Reference<Enchantment>> enchHolder = entity.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(enchantment);
         if (enchHolder.isEmpty()) {
             return 0;
         }

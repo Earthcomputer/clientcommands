@@ -331,6 +331,7 @@
   "playerManip.reset.anvil": "Anvil Used",
   "playerManip.reset.food": "Eaten",
   "playerManip.reset.drink": "Drunk",
+  "playerManip.reset.consume": "Consumed",
   "playerManip.reset.baneOfArthropods": "Hit Arthropod with Bane of Arthropods",
   "playerManip.reset.advancement": "Gained Advancement",
   "playerManip.reset.shield": "Blocked with Shield",

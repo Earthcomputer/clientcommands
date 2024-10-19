@@ -101,7 +101,7 @@ public class CEnchantCommand {
                     source.sendFeedback(Component.translatable("enchCrack.insn.slot", result.slot() + 1));
                     source.sendFeedback(Component.translatable("enchCrack.insn.enchantments"));
                     List<EnchantmentInstance> enchantments = new ArrayList<>(result.enchantments());
-                    EnchantmentCracker.sortIntoTooltipOrder(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT), enchantments);
+                    EnchantmentCracker.sortIntoTooltipOrder(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), enchantments);
                     for (EnchantmentInstance ench : enchantments) {
                         source.sendFeedback(Component.literal("- ").append(Enchantment.getFullname(ench.enchantment, ench.level)));
                     }

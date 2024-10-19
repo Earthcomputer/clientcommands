@@ -371,7 +371,7 @@ public class FindItemCommand {
                     mc.player,
                     InteractionHand.MAIN_HAND,
                     new BlockHitResult(clickPos,
-                        Direction.getNearest((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
+                        Direction.getApproximateNearest((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
                         pos, false)),
                 entity -> mc.gameMode.interact(
                     mc.player,
@@ -506,8 +506,8 @@ public class FindItemCommand {
 
             LevelChunk chunk = level.getChunk(chunkToScan.x, chunkToScan.z);
 
-            int minSection = chunk.getMinSection();
-            int maxSection = chunk.getMaxSection();
+            int minSection = chunk.getMinSectionY();
+            int maxSection = chunk.getMaxSectionY();
             for (int sectionY = minSection; sectionY < maxSection; sectionY++) {
                 if (!chunk.getSection(chunk.getSectionIndexFromSectionY(sectionY)).maybeHas(state -> state.is(Blocks.ENDER_CHEST) || state.hasBlockEntity())) {
                     continue;

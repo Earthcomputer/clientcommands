@@ -24,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -199,7 +200,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
                 reader.setCursor(start);
                 return ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
             });
-            if ((item.getEnchantmentValue() <= 0 || !itemPredicate.test(item)) && (item != Items.ENCHANTED_BOOK || !itemPredicate.test(Items.BOOK))) {
+            if ((!item.components().has(DataComponents.ENCHANTABLE) || !itemPredicate.test(item)) && (item != Items.ENCHANTED_BOOK || !itemPredicate.test(Items.BOOK))) {
                 reader.setCursor(start);
                 throw INCOMPATIBLE_ENCHANTMENT_EXCEPTION.createWithContext(reader);
             }
@@ -330,7 +331,8 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         private MinMaxBounds.Ints parseEnchantmentLevel(boolean suggest, Option option, ItemStack stack, Holder<Enchantment> enchantment) throws CommandSyntaxException {
             int maxLevel;
             if (constrainMaxLevel) {
-                int enchantability = stack.getItem().getEnchantmentValue();
+                Enchantable enchantable = stack.get(DataComponents.ENCHANTABLE);
+                int enchantability = enchantable == null ? 0 : enchantable.value();
                 int level = 30 + 1 + enchantability / 4 + enchantability / 4;
                 level += Math.round(level * 0.15f);
                 for (maxLevel = enchantment.value().getMaxLevel(); maxLevel >= 1; maxLevel--) {
@@ -417,7 +419,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         private void suggestEnchantableItem() {
             List<ResourceLocation> allowed = new ArrayList<>();
             for (Item item : BuiltInRegistries.ITEM) {
-                if (item.getEnchantmentValue() > 0 && itemPredicate.test(item)) {
+                if (item.components().has(DataComponents.ENCHANTABLE) && itemPredicate.test(item)) {
                     if (MultiVersionCompat.INSTANCE.doesItemExist(item)) {
                         allowed.add(BuiltInRegistries.ITEM.getKey(item));
                     }

@@ -25,7 +25,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -57,7 +56,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -65,6 +63,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class EnchantmentCracker {
 
@@ -156,7 +155,7 @@ public class EnchantmentCracker {
             lines.add(I18n.get("enchCrack.slot", slot + 1));
             List<EnchantmentInstance> enchs = getEnchantmentsInTable(slot);
             if (enchs != null) {
-                sortIntoTooltipOrder(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT), enchs);
+                sortIntoTooltipOrder(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), enchs);
                 for (EnchantmentInstance ench : enchs) {
                     lines.add("   " + Enchantment.getFullname(ench.enchantment, ench.level).getString());
                 }
@@ -222,7 +221,7 @@ public class EnchantmentCracker {
         int[] actualEnchantmentClues = menu.enchantClue;
         int[] actualLevelClues = menu.levelClue;
 
-        Registry<Enchantment> enchantmentRegistry = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         IdMap<Holder<Enchantment>> enchantmentIdMap = enchantmentRegistry.asHolderIdMap();
         int version = MultiVersionCompat.INSTANCE.getProtocolVersion();
 
@@ -355,7 +354,7 @@ public class EnchantmentCracker {
 
         ItemStack stack = new ItemStack(item);
         long playerSeed = PlayerRandCracker.getSeed();
-        Registry<Enchantment> enchantmentRegistry = player.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         int version = MultiVersionCompat.INSTANCE.getProtocolVersion();
 
         List<CompletableFuture<@Nullable ManipulateResult>> futures = new ArrayList<>();
@@ -459,7 +458,7 @@ public class EnchantmentCracker {
                         if (timesNeeded != 0) {
                             player.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 90);
                             // sync rotation to server before we throw any items
-                            player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, player.onGround()));
+                            player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, player.onGround(), player.horizontalCollision));
                             Configs.playerCrackState = PlayerRandCracker.CrackState.MANIPULATING_ENCHANTMENTS;
                         }
                         if (timesNeeded > 0) {
@@ -593,12 +592,11 @@ public class EnchantmentCracker {
         rand.setSeed(xpSeed + enchantSlot);
         List<EnchantmentInstance> list;
         if (version >= MultiVersionCompat.V1_21) {
-            list = enchantmentRegistry.getTag(EnchantmentTags.IN_ENCHANTING_TABLE)
-                .map(tag -> EnchantmentHelper.selectEnchantment(rand, stack, level, tag.stream()))
-                .orElseGet(ArrayList::new);
+            var tag = enchantmentRegistry.getTagOrEmpty(EnchantmentTags.IN_ENCHANTING_TABLE);
+            list = EnchantmentHelper.selectEnchantment(rand, stack, level, StreamSupport.stream(tag.spliterator(), false));
         } else {
             list = LegacyEnchantment.addRandomEnchantments(rand, stack, level, false, version).stream()
-                .flatMap(legacyEnch -> enchantmentRegistry.getHolder(legacyEnch.ench().enchantmentKey)
+                .flatMap(legacyEnch -> enchantmentRegistry.get(legacyEnch.ench().enchantmentKey)
                     .map(ench -> new EnchantmentInstance(ench, legacyEnch.level()))
                     .stream())
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -616,7 +614,7 @@ public class EnchantmentCracker {
     public static List<EnchantmentInstance> getEnchantmentsInTable(int slot) {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
-        Registry<Enchantment> enchantmentRegistry = player.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
         CrackState crackState = Configs.enchCrackState;
         EnchantmentMenu enchContainer = (EnchantmentMenu) player.containerMenu;
@@ -649,14 +647,10 @@ public class EnchantmentCracker {
             return;
         }
 
-        Optional<HolderSet.Named<Enchantment>> tooltipOrder = enchantmentRegistry.getTag(EnchantmentTags.TOOLTIP_ORDER);
-        if (tooltipOrder.isEmpty()) {
-            return;
-        }
-
-        Object2IntMap<Holder<Enchantment>> tooltipIndex = new Object2IntOpenHashMap<>(tooltipOrder.get().size());
+        var tooltipOrder = enchantmentRegistry.getTagOrEmpty(EnchantmentTags.TOOLTIP_ORDER);
+        Object2IntMap<Holder<Enchantment>> tooltipIndex = new Object2IntOpenHashMap<>();
         int index = 0;
-        for (Holder<Enchantment> ench : tooltipOrder.get()) {
+        for (Holder<Enchantment> ench : tooltipOrder) {
             tooltipIndex.put(ench, index++);
         }
 

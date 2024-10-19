@@ -35,7 +35,8 @@ public class CCrackRng {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
         player.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 90);
-        player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, true)); // point to correct location
+        // point to correct location
+        player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, player.onGround(), player.horizontalCollision));
         ItemThrowTask task = new ItemThrowTask(NUM_THROWS) {
             @Override
             protected void onSuccess() {

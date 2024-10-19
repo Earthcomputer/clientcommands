@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.demonwav.mcdev.annotations.Translatable;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.util.CUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
@@ -9,8 +10,6 @@ import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
@@ -21,8 +20,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -34,7 +34,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -114,7 +113,7 @@ public class PlayerRandCracker {
         Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
     }
 
-    public static void resetCracker(String reason) {
+    public static void resetCracker(@Translatable(prefix = "playerManip.reset.") String reason) {
         if (Configs.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
             ClientCommandHelper.sendFeedback(Component.translatable("playerManip.reset", Component.translatable("playerManip.reset." + reason))
                     .withStyle(ChatFormatting.RED));
@@ -139,23 +138,28 @@ public class PlayerRandCracker {
         resetCracker("entityCramming");
     }
 
-    public static void onDrink() {
-        // TODO: was this ever a thing?
-        //resetCracker("drink");
-    }
+    public static void onConsume(ItemStack stack, Vec3 pos, int particleCount, int itemUseTimeLeft, Consumable consumable) {
+        if (consumable.animation() != ItemUseAnimation.EAT && MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21_2) {
+            // non-eating actions (e.g. drinking) have no random calls prior to 1.21.2
+            return;
+        }
 
-    public static void onEat(ItemStack stack, Vec3 pos, int particleCount, int itemUseTimeLeft) {
         if (canMaintainPlayerRNG()) {
-
             if (itemUseTimeLeft < 0 && particleCount != 16) {
                 // We have accounted for all eating ticks, that on the server should be calculated
                 // Sometimes if the connection is laggy we eat more than 24 ticks so just hope for the best
                 return;
             }
 
-            //Every time a person eats, the particles are random, and when finished more particles spawn(16)
-            for (int i = 0; i < particleCount * 3 + 3; i++) {
+            // random calls for the consume sounds
+            for (int i = 0; i < 3; i++) {
                 nextInt();
+            }
+            if (consumable.hasConsumeParticles()) {
+                // random calls for the particles
+                for (int i = 0; i < particleCount * 3; i++) {
+                    nextInt();
+                }
             }
 
             if (Configs.getChorusManipulation() && stack.getItem() == Items.CHORUS_FRUIT) {
@@ -168,7 +172,11 @@ public class PlayerRandCracker {
                 }
             }
         } else {
-            resetCracker("food");
+            resetCracker(switch (consumable.animation()) {
+                case EAT -> "food";
+                case DRINK -> "drink";
+                default -> "consume";
+            });
         }
     }
 
