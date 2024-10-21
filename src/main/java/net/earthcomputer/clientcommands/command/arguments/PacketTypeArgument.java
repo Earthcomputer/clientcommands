@@ -87,17 +87,13 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
             if (connection == null) {
                 return null;
             }
-            ProtocolInfo<C2CPacketListener> protocolInfo = C2CPacketHandler.getCurrentProtocolInfo();
-            if (protocolInfo == null) {
-                return null;
-            }
 
             ChannelPipeline pipeline = connection.getConnection().channel.pipeline();
             var decoder = (PacketDecoder<?>) pipeline.get("decoder");
             var clientbound = packetTypesCache.computeIfAbsent(decoder, k -> getPacketTypes(decoder.protocolInfo));
             var encoder = (PacketEncoder<?>) pipeline.get("encoder");
             var serverbound = packetTypesCache.computeIfAbsent(encoder, k -> getPacketTypes(encoder.protocolInfo));
-            var c2cbound = packetTypesCache.computeIfAbsent("c2c", k -> getPacketTypes(protocolInfo));
+            var c2cbound = packetTypesCache.computeIfAbsent("c2c", k -> getPacketTypes(C2CPacketHandler.C2C));
             return new PacketTypes(clientbound, serverbound, c2cbound);
         }
     }
