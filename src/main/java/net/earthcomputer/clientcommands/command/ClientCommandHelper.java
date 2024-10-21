@@ -12,6 +12,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 import java.util.HashMap;
@@ -100,5 +101,19 @@ public class ClientCommandHelper {
             .toString();
         runnables.put(randomString, code);
         return randomString;
+    }
+
+    public static void updateOverlayProgressBar(int current, int total, int width, int time) {
+        MutableComponent builder = Component.empty();
+        int color = Mth.hsvToRgb(current / (total * 3.0f), 1.0f, 1.0f);
+        builder.append(Component.literal("[").withColor(0xAAAAAA));
+        builder.append(Component.literal("~" + Math.round(100.0 * current / total) + "%").withColor(color));
+        builder.append(Component.literal("] ").withColor(0xAAAAAA));
+        int filledWidth = (int) Math.round((double) width * current / total);
+        int unfilledWidth = width - filledWidth;
+        builder.append(Component.literal("|".repeat(filledWidth)).withColor(color));
+        builder.append(Component.literal("|".repeat(unfilledWidth)).withColor(0xAAAAAA));
+
+        addOverlayMessage(builder, time);
     }
 }

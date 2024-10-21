@@ -18,6 +18,7 @@
     "commands.relog.ClientPacketListenerMixin",
     "commands.render.EntityRendererDispatcherMixin",
     "commands.time.ClientLevelDataMixin",
+    "commands.villager.VillagerMixin",
     "commands.weather.LevelMixin",
     "debug.EntityMixin",
     "debug.ServerLevelMixin",
@@ -72,6 +73,7 @@
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",
+    "rngevents.MerchantScreenMixin",
     "scrambletitle.MinecraftMixin",
     "serverbrand.ClientCommonPacketListenerImplMixin",
     "suggestionshook.ClientPacketListenerMixin"
