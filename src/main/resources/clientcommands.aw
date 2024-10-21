@@ -22,6 +22,7 @@ accessible method net/minecraft/world/entity/projectile/FishingHook canHitEntity
 
 # chat
 accessible method net/minecraft/client/Minecraft openChatScreen (Ljava/lang/String;)V
+accessible field net/minecraft/network/chat/TextColor CUSTOM_COLOR_PREFIX Ljava/lang/String;
 
 # clisten
 accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
