@@ -203,7 +203,7 @@ public class MinesweeperCommand {
         }
 
         public void blitSprite(GuiGraphics graphics, Vector2i uv, int x, int y, int width, int height) {
-            graphics.blit(RenderType::guiTextured, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, width, height, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
+            graphics.blit(RenderType::guiTextured, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
         }
 
         @Override
