@@ -11,20 +11,20 @@
   "commands.calias.removeAlias.success": "Alias \"%s\" erfolgreich entfernt",
 
   "commands.careastats.notLoaded": "Ein Chunk in diesem Bereich ist nicht geladen",
-  "commands.careastats.output.chunksScanned": "%d Chunks in %dns ≈ %dms gescannt",
-  "commands.careastats.output.blocksMatched": "%d von %d Blöcken stimmen überein",
-  "commands.careastats.output.entitiesFound": "%d Objekte in diesem Bereich gefunden",
+  "commands.careastats.output.chunksScanned": "%s Chunks in %sns ≈ %sms gescannt",
+  "commands.careastats.output.blocksMatched": "%s von %s Blöcken stimmen überein",
+  "commands.careastats.output.entitiesFound": "%s Objekte in diesem Bereich gefunden",
 
   "commands.cbook.success": "Das Buch wurde bearbeitet",
   "commands.cbook.commandException": "Du hältst kein Buch in deiner Hand",
 
   "commands.ccalc.expected": "%s erwartet",
-  "commands.ccalc.invalidArgumentCount": "Funktion \"%s\" kann %d Argumente nicht annehmen",
+  "commands.ccalc.invalidArgumentCount": "Funktion \"%s\" kann %s Argumente nicht annehmen",
   "commands.ccalc.parse": "Analysierter Ausdruck: %s",
   "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
   "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
   "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
-  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s %% %s)",
   "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
   "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
   "commands.ccalc.parse.constant": "(Konstante '%s')",
@@ -33,16 +33,16 @@
   "commands.ccalc.parse.negate": "(Verneint: %s)",
   "commands.ccalc.tooDeeplyNested": "Ausdruck ist zu tief verschachtelt",
 
-  "commands.ccalcstack.success": "%d %s sind %d Stapel plus %d Gegenstände",
-  "commands.ccalcstack.success.empty": "%d Gegenstände sind %d Stapel plus %d Gegenstände",
-  "commands.ccalcstack.success.empty.exact": "%d Gegenstände sind genau %d Stapel",
-  "commands.ccalcstack.success.exact": "%d %s sind genau %d Stapel",
+  "commands.ccalcstack.success": "%s %s sind %s Stapel plus %s Gegenstände",
+  "commands.ccalcstack.success.empty": "%s Gegenstände sind %s Stapel plus %s Gegenstände",
+  "commands.ccalcstack.success.empty.exact": "%s Gegenstände sind genau %s Stapel",
+  "commands.ccalcstack.success.exact": "%s %s sind genau %s Stapel",
 
   "commands.ccrackrng.failed": "Knacken des Spielerseeds gescheitert",
   "commands.ccrackrng.failed.help": "Hilfe: RNG-Manipulation funktioniert nicht auf manchen modifizierten Servern, im Besonderen nicht auf Paper.",
-  "commands.ccrackrng.retries": "Knacke Spielerseed, Versuch %d/%d",
+  "commands.ccrackrng.retries": "Knacke Spielerseed, Versuch %s/%s",
   "commands.ccrackrng.starting": "Knacke Spielerseed",
-  "commands.ccrackrng.success": "Spieler-RNG geknackt: %d",
+  "commands.ccrackrng.success": "Spieler-RNG geknackt: %s",
 
   "commands.ccreativetab.addStack.success": "%s erfolgreich zu \"%s\" hinzugefügt",
   "commands.ccreativetab.addTab.alreadyExists": "Kreativtab \"%s\" existiert bereits",
@@ -50,12 +50,12 @@
   "commands.ccreativetab.addTab.success": "Kreativtab \"%s\" erfolgreich hinzugefügt",
   "commands.ccreativetab.changeIcon.success": "Symbol für \"%s\" erfolgreich von %s zu %s geändert",
   "commands.ccreativetab.notFound": "Kreativtab \"%s\" nicht gefunden",
-  "commands.ccreativetab.outOfBounds": "Position %d ist außer Reichweite",
-  "commands.ccreativetab.removeStack.success": "Stapel erfolgreich von \"%s\" an Position %d entfernt",
+  "commands.ccreativetab.outOfBounds": "Position %s ist außer Reichweite",
+  "commands.ccreativetab.removeStack.success": "Stapel erfolgreich von \"%s\" an Position %s entfernt",
   "commands.ccreativetab.removeTab.success": "Kreativtab \"%s\" erfolgreich entfernt",
   "commands.ccreativetab.renameTab.success": "Kreativtab \"%s\" erfolgreich auf \"%s\" umbenannt",
   "commands.ccreativetab.saveFile.failed": "Konnte Kreativtab-Datei nicht speichern",
-  "commands.ccreativetab.setStack.success": "Stapel in Kreativtab \"%s\" an Position %d erfolgreich auf %s geändert",
+  "commands.ccreativetab.setStack.success": "Stapel in Kreativtab \"%s\" an Position %s erfolgreich auf %s geändert",
 
   "commands.cenchant.failed": "Es ist unmöglich oder würde zu lange brauchen, diese Verzauberungen zu bekommen",
   "commands.cenchant.help.uncrackedPlayerSeed": "Hilfe: du hast den Spielerseed nicht vollständig geknackt",
@@ -68,7 +68,7 @@
   "commands.cfind.found.right": ", %2$s Blöcke entfernt",
   "commands.cfind.keepSearching.success": "Finde Objekte",
   "commands.cfind.noMatch": "Keine Objekte haben der Abfrage entsprochen",
-  "commands.cfind.success": "%d Objekte haben der Abfrage entsprochen",
+  "commands.cfind.success": "%s Objekte haben der Abfrage entsprochen",
 
   "commands.cfindblock.notFound": "Kein passender Block gefunden",
   "commands.cfindblock.starting": "Suche nach %s",
@@ -76,14 +76,14 @@
   "commands.cfindblock.success.glow": "[Leuchten]",
   "commands.cfindblock.success.right": ", %1$s Blöcke entfernt",
 
-  "commands.cfinditem.match.left": "%dx %s wurden an ",
+  "commands.cfinditem.match.left": "%sx %s wurden an ",
   "commands.cfinditem.match.right": " gefunden",
   "commands.cfinditem.starting": "Suche nach %s",
   "commands.cfinditem.starting.keepSearching": "Suche unendlich lange nach %s.",
-  "commands.cfinditem.total": "Fand insgesamt %dx %s",
+  "commands.cfinditem.total": "Fand insgesamt %sx %s",
 
   "commands.cfish.addGoal.success": "Ziel %s erfolgreich hinzugefügt",
-  "commands.cfish.correctLoot": "Richtige Ausbeute mit Korrektur von %dms erhalten",
+  "commands.cfish.correctLoot": "Richtige Ausbeute mit Korrektur von %sms erhalten",
   "commands.cfish.error.biome": "Kann die gewünschte Ausbeute in diesem Biom nicht erhalten, sondern nur in %s",
   "commands.cfish.error.crackFailed": "Knacken der Schwimmer-RNG gescheitert, ist der Server modifiziert?",
   "commands.cfish.error.collision": "Schwimmer ist an etwas angestoßen",
@@ -97,38 +97,38 @@
   "commands.cfish.error.outOfWater": "Schwimmer außerhalb des Wassers, Manipulation wird nicht funktioniert",
   "commands.cfish.help.tooManyEnchants": "Hilfe: mehrere Verzauberungen gleichzeitig sind unwahrscheinlich und es kann sehr lange dauern, sie zu erhalten",
   "commands.cfish.listGoals.noGoals": "Es gibt keine Angelziele",
-  "commands.cfish.listGoals.success": "Es gibt %d Angelziele:",
+  "commands.cfish.listGoals.success": "Es gibt %s Angelziele:",
   "commands.cfish.needFishingManipulation": "Angel-Manipulation ist nicht aktiviert",
   "commands.cfish.removeGoal.success": "Ziel %s erfolgreich entfernt",
-  "commands.cfish.wrongLoot": "Konnte richtige Ausbeute mit Korrektur von %dms nicht erhalten, war möglicherweise %s Ticks vorne",
+  "commands.cfish.wrongLoot": "Konnte richtige Ausbeute mit Korrektur von %sms nicht erhalten, war möglicherweise %s Ticks vorne",
 
-  "commands.cfov.success": "Sichtfeld auf %f gesetzt",
+  "commands.cfov.success": "Sichtfeld auf %s gesetzt",
 
-  "commands.cfunction.limitReached": "Befehlslimit (%d) erreicht",
-  "commands.cfunction.success": "%d Befehle von Funktion %s ausgeführt",
+  "commands.cfunction.limitReached": "Befehlslimit (%s) erreicht",
+  "commands.cfunction.success": "%s Befehle von Funktion %s ausgeführt",
 
   "commands.cgamemode.playerNotFound": "Spieler nicht gefunden",
   "commands.cgamemode.playerGameMode": "Spieler %s ist im Spielmodus %s",
   "commands.cgamemode.noneWithGameMode": "Keine Spieler sind im Spielmodus %s",
   "commands.cgamemode.listWithGameMode": "Die folgenden Spieler sind im Spielmodus %s:",
 
-  "commands.cgamma.success": "Gamma auf %f gesetzt",
+  "commands.cgamma.success": "Gamma auf %s gesetzt",
 
-  "commands.cghostblock.fill.success": "%d Geisterblöcke eingesetzt",
+  "commands.cghostblock.fill.success": "%s Geisterblöcke eingesetzt",
   "commands.cghostblock.set.success": "Geisterblock eingesetzt",
 
-  "commands.cgive.success": "Gab dir selbst %d %s",
+  "commands.cgive.success": "Gab dir selbst %s %s",
   "commands.cgive.notCreative": "Spieler muss im Kreativmodus sein, um sich selbst Gegenstände zu geben",
 
   "commands.cglow.entity.keepSearching.success": "Beleuchte Objekte",
   "commands.cglow.entity.failed": "Es gibt keine Objekte zu beleuchten",
-  "commands.cglow.entity.success": "Beleuchte %d Objekte",
-  "commands.cglow.area.success": "Beleuchte %d Bereiche",
+  "commands.cglow.entity.success": "Beleuchte %s Objekte",
+  "commands.cglow.area.success": "Beleuchte %s Bereiche",
 
   "commands.chat.success": "Gute Nachrichten: das Chatfenster wurde geöffnet",
 
   "commands.chotbar.notCreative": "Spieler muss im Kreativmodus sein, um gespeicherte Schnellzugriffsleisten zu laden",
-  "commands.chotbar.restoredHotbar": "Schnellzugriffsleiste %d geladen",
+  "commands.chotbar.restoredHotbar": "Schnellzugriffsleiste %s geladen",
 
   "commands.ckit.notFound": "Kit \"%s\" nicht gefunden",
   "commands.ckit.saveFile.failed": "Konnte Kit-Datei nicht speichern",
@@ -162,14 +162,14 @@
   "commands.cparticle.unsuitableParticleOption": "Zeige keine Partikel an, weil die Partikel-Grafikeinstellung ungeeignet ist",
   "commands.cparticle.success": "Zeige Partikel %s an",
 
-  "commands.cpermissionlevel.success": "Deine Berechtigungsstufe ist %d",
+  "commands.cpermissionlevel.success": "Deine Berechtigungsstufe ist %s",
 
   "commands.cplaysound.success": "Geräusch %s wurde für dich selbst abgespielt",
 
   "commands.cplugins.found": "Folgende Plugins gefunden:",
 
-  "commands.cping.success": "Dein durchschnittlicher Ping ist %dms",
-  "commands.cping.success.other": "Der durchschnittliche Ping von %s ist %dms",
+  "commands.cping.success": "Dein durchschnittlicher Ping ist %sms",
+  "commands.cping.success.other": "Der durchschnittliche Ping von %s ist %sms",
   "commands.cping.singleplayer": "Du bist in einer Einzelspielerwelt (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Spieler nicht gefunden",
 
@@ -196,9 +196,9 @@
   "commands.cstopsound.success.source.sound": "Gräusch '%s' von der Quelle '%s' wurde für dich selbst gestoppt",
 
   "commands.ctask.list.noTasks": "Derzeit werden keine Aufgaben ausgeführt",
-  "commands.ctask.list.success": "Derzeit werden %d Aufgaben ausgeführt",
+  "commands.ctask.list.success": "Derzeit werden %s Aufgaben ausgeführt",
   "commands.ctask.stop.noMatch": "Keine passenden Aufgaben",
-  "commands.ctask.stop.success": "%d Aufgaben wurden beendet",
+  "commands.ctask.stop.success": "%s Aufgaben wurden beendet",
 
   "commands.ctime.reset.success": "Die Zeit ist jetzt mit dem Server synchronisiert",
 
@@ -240,7 +240,7 @@
   "commands.cwiki.failed": "Konnte Wiki-Inhalt nicht abrufen",
   "commands.cwiki.noContent": "Dieser Artikel hat keinen Einleitungsabsatz",
 
-  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Abbrechen",
   "commands.client.crack": "Knacken",
   "commands.client.enable": "Aktivieren",
@@ -253,7 +253,7 @@
   "commands.client.requiresRestart": "Diese Änderung wird erst nach einem Neustart verfügbar",
   "commands.client.tooFewArguments": "Zu wenige Argumente",
 
-  "chorusManip.landing.success": "Landung auf: %d, %d, %d",
+  "chorusManip.landing.success": "Landung auf: %s, %s, %s",
   "chorusManip.landing.failed": "Landungsmanipulation nicht möglich",
   "chorusManip.goalTooFar": "Ziel ist zu weit entfernt!",
   "chorusManip.needChorusManipulation": "Chorusfruchtmanipulation muss aktiviert sein, um diesen Befehl auszuführen.",
@@ -266,19 +266,19 @@
 
   "enchCrack.enchantments": "Verzauberungen:",
   "enchCrack.clues": "Hinweise:",
-  "enchCrack.slot": "Position %d:",
-  "enchCrack.bookshelfCount": "Anzahl Bücherregale: %d",
+  "enchCrack.slot": "Position %s:",
+  "enchCrack.bookshelfCount": "Anzahl Bücherregale: %s",
 
-  "enchCrack.xpSeed.one": "XP-Seed: %08X",
-  "enchCrack.xpSeed.many": "Anzahl der möglichen XP-Seeds: %d",
-  "enchCrack.playerRNGSeed.many": "Anzahl der möglichen Spielerseeds: %d",
+  "enchCrack.xpSeed.one": "XP-Seed: %s",
+  "enchCrack.xpSeed.many": "Anzahl der möglichen XP-Seeds: %s",
+  "enchCrack.playerRNGSeed.many": "Anzahl der möglichen Spielerseeds: %s",
   "enchCrack.addInfo": "Information hinzufügen",
 
   "enchCrack.insn.dummy": "Mach eine Dummy-Verzauberung",
   "enchCrack.insn.ready": "Dein Zauberseed ist bereit",
-  "enchCrack.insn.bookshelves": "Erforderliche Bücherregale: %d",
-  "enchCrack.insn.slot": "In Position: %d",
-  "enchCrack.insn.itemThrows": "Erforderliche Gegenstände: %d (ungefähr %f Sekunden)",
+  "enchCrack.insn.bookshelves": "Erforderliche Bücherregale: %s",
+  "enchCrack.insn.slot": "In Position: %s",
+  "enchCrack.insn.itemThrows": "Erforderliche Gegenstände: %s (ungefähr %s Sekunden)",
   "enchCrack.insn.itemThrows.noDummy": "Keine Dummy-Verzauberung",
   "enchCrack.insn.enchantments": "Verzauberungen auf dem Gegenstand:",
 
@@ -322,13 +322,13 @@
   "playerManip.reset.recreated": "Spieler neu erstellt",
 
   "playerManip.serverBrandWarning": "Warnung: der Server, auf dem du spielst, ist modifiziert. Es gibt keine Garantie dafür, dass RNG-Features in diesem Mod richtig funktionieren werden!",
-  "playerManip.toolBreakWarning": "Warnung: Werkzeug hat nur mehr %d Haltbarkeit übrig",
-  "playerManip.throwError": "Bedingung nicht möglich oder würde mehr als %d Würfe von Gegenstände erfordern",
-  "playerManip.notEnoughItems": "Nicht genug Gegenstände (%d von %d), um Seed zu manipulieren",
+  "playerManip.toolBreakWarning": "Warnung: Werkzeug hat nur mehr %s Haltbarkeit übrig",
+  "playerManip.throwError": "Bedingung nicht möglich oder würde mehr als %s Würfe von Gegenstände erfordern",
+  "playerManip.notEnoughItems": "Nicht genug Gegenstände (%s von %s), um Seed zu manipulieren",
   "playerManip.uncracked": "Spieler-Seed muss geknackt sein.",
 
   "snakeGame.title": "Snake",
-  "snakeGame.score": "Punkte: %d",
+  "snakeGame.score": "Punkte: %s",
 
   "c2cpacket.messageTooLong": "Nachricht zu lange (max. 255 Zeichen) %s Zeichen gefunden",
   "c2cpacket.publicKeyNotFound": "Öffentlicher Schlüssel nicht gefunden",

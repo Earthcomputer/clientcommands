@@ -11,20 +11,20 @@
   "commands.calias.removeAlias.success": "Pomyślnie usunięto alias \"%s\"",
 
   "commands.careastats.notLoaded": "Chunk w tym obszarze nie jest załadowany",
-  "commands.careastats.output.chunksScanned": "Przeskanowano %d chunków w %dns ≈ %dms",
-  "commands.careastats.output.blocksMatched": "Dopasowano %d z %d bloków łącznie",
-  "commands.careastats.output.entitiesFound": "Znaleziono %d obiektów w tym obszarze",
+  "commands.careastats.output.chunksScanned": "Przeskanowano %s chunków w %sns ≈ %sms",
+  "commands.careastats.output.blocksMatched": "Dopasowano %s z %s bloków łącznie",
+  "commands.careastats.output.entitiesFound": "Znaleziono %s obiektów w tym obszarze",
 
   "commands.cbook.success": "Pomyślnie nadpisano książkę",
   "commands.cbook.commandException": "Nie trzymasz książki",
 
   "commands.ccalc.expected": "Spodziewane %s",
-  "commands.ccalc.invalidArgumentCount": "Funkcja \"%s\" nie może mieć %d argumentów",
+  "commands.ccalc.invalidArgumentCount": "Funkcja \"%s\" nie może mieć %s argumentów",
   "commands.ccalc.parse": "Przeanalizowane wyrażenie: %s",
   "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
   "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
   "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
-  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s %% %s)",
   "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
   "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
   "commands.ccalc.parse.constant": "(stała '%s')",
@@ -33,13 +33,13 @@
   "commands.ccalc.parse.negate": "(zanegowane: %s)",
   "commands.ccalc.tooDeeplyNested": "Wyrażenie jest zbyt głęboko zagnieżdżone",
 
-  "commands.ccalcstack.success": "%d %s to %d staki i %d dodatkowe",
-  "commands.ccalcstack.success.empty": "%d przedmiotów to %d staki i %d dodatkowe",
-  "commands.ccalcstack.success.empty.exact": "%d przedmiotów to dokładnie %d staki",
-  "commands.ccalcstack.success.exact": "%d %s to dokładnie %d staki",
+  "commands.ccalcstack.success": "%s %s to %s staki i %s dodatkowe",
+  "commands.ccalcstack.success.empty": "%s przedmiotów to %s staki i %s dodatkowe",
+  "commands.ccalcstack.success.empty.exact": "%s przedmiotów to dokładnie %s staki",
+  "commands.ccalcstack.success.exact": "%s %s to dokładnie %s staki",
 
   "commands.ccrackrng.starting": "Łamanie ziarna gracza",
-  "commands.ccrackrng.success": "RNG gracza złamane: %d",
+  "commands.ccrackrng.success": "RNG gracza złamane: %s",
 
   "commands.ccreativetab.addStack.success": "Pomyślnie dodano %s do \"%s\"",
   "commands.ccreativetab.addTab.alreadyExists": "Grupa \"%s\" już istnieje",
@@ -47,12 +47,12 @@
   "commands.ccreativetab.addTab.success": "Pomyślnie dodano grupę \"%s\"",
   "commands.ccreativetab.changeIcon.success": "Pomyślnie zmieniono ikonę grupy \"%s\" z %s na %s",
   "commands.ccreativetab.notFound": "Nie znaleziono grupy \"%s\"",
-  "commands.ccreativetab.outOfBounds": "Indeks %d wykroczył poza wyznaczone granice",
-  "commands.ccreativetab.removeStack.success": "Usunięto stos w \"%s\" o indeksie %d",
+  "commands.ccreativetab.outOfBounds": "Indeks %s wykroczył poza wyznaczone granice",
+  "commands.ccreativetab.removeStack.success": "Usunięto stos w \"%s\" o indeksie %s",
   "commands.ccreativetab.removeTab.success": "Pomyślnie usunięto grupę \"%s\"",
   "commands.ccreativetab.renameTab.success": "Pomyślnie zmieniono nazwę grupy \"%s\" na \"%s\"",
   "commands.ccreativetab.saveFile.failed": "Błąd zapisu do pliku grup",
-  "commands.ccreativetab.setStack.success": "Ustawiono stos w \"%s\" o indeksie %d na %s",
+  "commands.ccreativetab.setStack.success": "Ustawiono stos w \"%s\" o indeksie %s na %s",
 
   "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otrzymać te zaklęcia",
   "commands.cenchant.incompatible": "Niekompatybilne zaklęcia",
@@ -64,21 +64,21 @@
   "commands.cfind.found.right": ", %2$s bloków dalej",
   "commands.cfind.keepSearching.success": "Szukam obiektów",
   "commands.cfind.noMatch": "Żadne obiekty nie pasują twoim wymaganiom",
-  "commands.cfind.success": "%d obiektów pasuje twoim wymaganiom",
+  "commands.cfind.success": "%s obiektów pasuje twoim wymaganiom",
 
   "commands.cfindblock.notFound": "Nie znaleziono takiego bloku",
   "commands.cfindblock.success.left": "Najbliższe trafienie jest na ",
   "commands.cfindblock.success.glow": "[Podświetl]",
   "commands.cfindblock.success.right": ", %1$s bloków dalej",
 
-  "commands.cfinditem.match.left": "%dx %s znaleziono na ",
+  "commands.cfinditem.match.left": "%sx %s znaleziono na ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Szukam %s",
   "commands.cfinditem.starting.keepSearching": "Będę szukać %s",
-  "commands.cfinditem.total": "Znaleziono %dx %s",
+  "commands.cfinditem.total": "Znaleziono %sx %s",
 
   "commands.cfish.addGoal.success": "Ustawiono cel %s",
-  "commands.cfish.correctLoot": "Otrzymano prawidłowy przedmiot z dokładnością do %dms",
+  "commands.cfish.correctLoot": "Otrzymano prawidłowy przedmiot z dokładnością do %sms",
   "commands.cfish.error.biome": "Przedmiot jest niedostępny na tym biomie. Potrzeba %s",
   "commands.cfish.error.crackFailed": "Nie udało się złamać RNG spławika, czy serwer jest zmodowany?",
   "commands.cfish.error.collision": "Spławik o coś zahaczył",
@@ -90,28 +90,28 @@
   "commands.cfish.error.outOfWater": "Spławik jest poza wodą, manipulacja się nie uda",
   "commands.cfish.help.tooManyEnchants": "Pomoc: Im wiecej zakleć na wędce, tym trudniej jest zdobyć porządane przedmioty",
   "commands.cfish.listGoals.noGoals": "Nie mam żadnego celu",
-  "commands.cfish.listGoals.success": "Są %d cele:",
+  "commands.cfish.listGoals.success": "Są %s cele:",
   "commands.cfish.needFishingManipulation": "Manipulacja łowienia jest wyłączona",
   "commands.cfish.removeGoal.success": "Pomyślnie usunięto cel %s",
-  "commands.cfish.wrongLoot": "Nie mogłem otrzymać przedmiotu z dokładnością do %dms, mogłem wyprzedzić %s ticków w przód",
+  "commands.cfish.wrongLoot": "Nie mogłem otrzymać przedmiotu z dokładnością do %sms, mogłem wyprzedzić %s ticków w przód",
 
-  "commands.cfov.success": "Ustawiono pole widzenia na %f",
+  "commands.cfov.success": "Ustawiono pole widzenia na %s",
 
-  "commands.cgamma.success": "Ustawiono gamma na %f",
+  "commands.cgamma.success": "Ustawiono gamma na %s",
 
-  "commands.cghostblock.fill.success": "Zapełniono %d \"ghost blocks\"",
+  "commands.cghostblock.fill.success": "Zapełniono %s \"ghost blocks\"",
   "commands.cghostblock.set.success": "Położono \"ghost block\"",
 
-  "commands.cgive.success": "Wręczono %d %s",
+  "commands.cgive.success": "Wręczono %s %s",
   "commands.cgive.notCreative": "Gracz musi być w trybie kreatywnym aby użyć tej komendy",
 
   "commands.cglow.entity.keepSearching.success": "Podświetlono obiekty",
   "commands.cglow.entity.failed": "Brak obiektów do podświetlenia",
-  "commands.cglow.entity.success": "Podświetlono %d obiekty",
-  "commands.cglow.area.success": "Podświetlono %d terenów",
+  "commands.cglow.entity.success": "Podświetlono %s obiekty",
+  "commands.cglow.area.success": "Podświetlono %s terenów",
 
   "commands.chotbar.notCreative": "Gracz musi byc w trybie kreatywnym aby przywrócić pasek dostępu",
-  "commands.chotbar.restoredHotbar": "Przywrócono pasek dostępu %d",
+  "commands.chotbar.restoredHotbar": "Przywrócono pasek dostępu %s",
 
   "commands.ckit.notFound": "Zestaw \"%s\" nie istnieje",
   "commands.ckit.saveFile.failed": "Nie można zapisać pliku zestawów",
@@ -130,7 +130,7 @@
   "commands.cparticle.unsuitableParticleOption": "Nie można wyświetlić cząsteczki ponieważ opcje cząsteczek są ustawione na \"minimalne\"",
   "commands.cparticle.success": "Pokazuję cząsteczkę %s",
 
-  "commands.cpermissionlevel.success": "Twój poziom uprawnień to %d",
+  "commands.cpermissionlevel.success": "Twój poziom uprawnień to %s",
 
   "commands.cplaysound.success": "Odtworzono dźwięk %s",
 
@@ -144,16 +144,16 @@
   "commands.cstopsound.success.source.sound": "Zatrzymano dźwięk '%s' na źródle '%s'",
 
   "commands.ctask.list.noTasks": "Nie ma w tej chwili działających zadań.",
-  "commands.ctask.list.success": "Działające zadania: %d",
+  "commands.ctask.list.success": "Działające zadania: %s",
   "commands.ctask.stop.noMatch": "Żadnych pasujących zadań",
-  "commands.ctask.stop.success": "Zatrzymano %d zadań",
+  "commands.ctask.stop.success": "Zatrzymano %s zadań",
 
   "commands.ctp.notSpectator": "Gracz musi być w trybie obserwatora by się przeteleportować",
   "commands.ctp.success": "Przeteleportowano gracza do %s",
 
   "commands.cwiki.failed": "Nie można było otrzymać zawartości z wiki",
 
-  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Anuluj",
   "commands.client.crack": "Złam",
   "commands.client.enable": "Włącz",
@@ -162,7 +162,7 @@
   "commands.client.tooFewArguments": "Zbyt mało argumentów",
   "commands.client.invalidArgumentException": "Nieprawidłowy argument '%s'",
 
-  "chorusManip.landing.success": "Ląduję na: %d, %d, %d",
+  "chorusManip.landing.success": "Ląduję na: %s, %s, %s",
   "chorusManip.landing.failed": "Manipulacja pozycjonowania jest niemożliwa",
   "chorusManip.goalTooFar": "Cel jest zbyt daleko!",
   "chorusManip.needChorusManipulation": "Manipulacja kwiatu Chorus'a jest wyłączona",
@@ -175,18 +175,18 @@
 
   "enchCrack.enchantments": "Zaklęcia:",
   "enchCrack.clues": "Podpowiedzi:",
-  "enchCrack.slot": "Slot %d:",
+  "enchCrack.slot": "Slot %s:",
 
-  "enchCrack.xpSeed.one": "Ziarno XP: %08X",
-  "enchCrack.xpSeed.many": "Liczba możliwych ziarn XP: %d",
-  "enchCrack.playerRNGSeed.many": "Liczba możliwych ziaren RNG gracza: %d",
+  "enchCrack.xpSeed.one": "Ziarno XP: %s",
+  "enchCrack.xpSeed.many": "Liczba możliwych ziarn XP: %s",
+  "enchCrack.playerRNGSeed.many": "Liczba możliwych ziaren RNG gracza: %s",
   "enchCrack.addInfo": "Dodaj Informacje",
 
   "enchCrack.insn.dummy": "Rzuć słabe zaklęcie na zbędny przedmiot",
   "enchCrack.insn.ready": "Twoje ziarno zaklęcia jest gotowe",
-  "enchCrack.insn.bookshelves": "Półki na książki: %d",
-  "enchCrack.insn.slot": "W Slocie: %d",
-  "enchCrack.insn.itemThrows": "Ile musisz wyrzucić przedmiotów: %d (około %f sekund)",
+  "enchCrack.insn.bookshelves": "Półki na książki: %s",
+  "enchCrack.insn.slot": "W Slocie: %s",
+  "enchCrack.insn.itemThrows": "Ile musisz wyrzucić przedmiotów: %s (około %s sekund)",
   "enchCrack.insn.itemThrows.noDummy": "Nie rzucaj zaklęcia na zbędny przedmiot",
   "enchCrack.insn.enchantments": "Zaklęcia na przedmiocie:",
 
@@ -226,9 +226,9 @@
   "playerManip.reset.recreated": "Player Recreated",
 
   "playerManip.serverBrandWarning": "Ostrzeżenie: Serwer na którym grasz jest zmodyfikowany. Nie ma gwarancji że funkcje RNG będą działać na tym serwerze",
-  "playerManip.toolBreakWarning": "Ostrzeżenie: Narzędzie ma %d wytrzymałości",
-  "playerManip.throwError": "Czynność jest niemożliwa lub wymagała by więcej niż %d rzutów przedmiotami",
-  "playerManip.notEnoughItems": "Nie wystarczająca ilość przedmiotów (%d of %d) by manipulować ziarnem",
+  "playerManip.toolBreakWarning": "Ostrzeżenie: Narzędzie ma %s wytrzymałości",
+  "playerManip.throwError": "Czynność jest niemożliwa lub wymagała by więcej niż %s rzutów przedmiotami",
+  "playerManip.notEnoughItems": "Nie wystarczająca ilość przedmiotów (%s of %s) by manipulować ziarnem",
   "playerManip.uncracked": "Ziarno gracza musi być złamane",
 
   "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: niewystarczająca ilość przedmiotów w ekwipunku"

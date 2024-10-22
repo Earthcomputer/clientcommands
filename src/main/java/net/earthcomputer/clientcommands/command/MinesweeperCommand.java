@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +47,7 @@ public class MinesweeperCommand {
             throw TOO_MANY_MINES_EXCEPTION.create();
         }
 
-        source.getClient().tell(() -> source.getClient().setScreen(new MinesweeperGameScreen(width, height, mines)));
+        source.getClient().schedule(() -> source.getClient().setScreen(new MinesweeperGameScreen(width, height, mines)));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -202,7 +203,7 @@ public class MinesweeperCommand {
         }
 
         public void blitSprite(GuiGraphics graphics, Vector2i uv, int x, int y, int width, int height) {
-            graphics.blit(MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, width, height, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
+            graphics.blit(RenderType::guiTextured, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, width, height, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
         }
 
         @Override

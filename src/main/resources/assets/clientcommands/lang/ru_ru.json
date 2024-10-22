@@ -11,20 +11,20 @@
   "commands.calias.removeAlias.success": "Псевдоним успешно удален \"%s\"",
 
   "commands.careastats.notLoaded": "Чанк в этой области не загружен",
-  "commands.careastats.output.chunksScanned": "Просканировано %d чанков в %dns ≈ %dms",
-  "commands.careastats.output.blocksMatched": "Совпало %d из %d блоков",
-  "commands.careastats.output.entitiesFound": "Найденно %d сущностей в этой области",
+  "commands.careastats.output.chunksScanned": "Просканировано %s чанков в %sns ≈ %sms",
+  "commands.careastats.output.blocksMatched": "Совпало %s из %s блоков",
+  "commands.careastats.output.entitiesFound": "Найденно %s сущностей в этой области",
 
   "commands.cbook.success": "Книга успешно отредактирована",
   "commands.cbook.commandException": "Вы не держите книгу",
 
   "commands.ccalc.expected": "Ожидал %s",
-  "commands.ccalc.invalidArgumentCount": "Функция \"%s\" не может принимать %d аргументов",
+  "commands.ccalc.invalidArgumentCount": "Функция \"%s\" не может принимать %s аргументов",
   "commands.ccalc.parse": "Разобранное выражение: %s",
   "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
   "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
   "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
-  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s %% %s)",
   "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
   "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
   "commands.ccalc.parse.constant": "(постоянный '%s')",
@@ -33,16 +33,16 @@
   "commands.ccalc.parse.negate": "(отрицал: %s)",
   "commands.ccalc.tooDeeplyNested": "Выражение вложено слишком глубоко",
 
-  "commands.ccalcstack.success": "%d %s это %d стаков и %d дополнительных",
-  "commands.ccalcstack.success.empty": "%d предметов составляет %d стаков и %d дополнительных",
-  "commands.ccalcstack.success.empty.exact": "%d предметов это ровно %d стаков",
-  "commands.ccalcstack.success.exact": "%d %s это ровно %d стаков",
+  "commands.ccalcstack.success": "%s %s это %s стаков и %s дополнительных",
+  "commands.ccalcstack.success.empty": "%s предметов составляет %s стаков и %s дополнительных",
+  "commands.ccalcstack.success.empty.exact": "%s предметов это ровно %s стаков",
+  "commands.ccalcstack.success.exact": "%s %s это ровно %s стаков",
 
   "commands.ccrackrng.failed": "Не удалось взломать сид игрока",
   "commands.ccrackrng.failed.help": "Справка: Работа с Манипуляцией Рандомного Генератора Чисел не работает на некоторых модифицированных серверах, в частности на Paper.",
-  "commands.ccrackrng.retries": "Взлом сида игрока, попытка %d/%d",
+  "commands.ccrackrng.retries": "Взлом сида игрока, попытка %s/%s",
   "commands.ccrackrng.starting": "Взлом сида игрока",
-  "commands.ccrackrng.success": "Player RNG взломан: %d",
+  "commands.ccrackrng.success": "Player RNG взломан: %s",
 
   "commands.ccreativetab.addStack.success": "Успешно добавлено %s в \"%s\"",
   "commands.ccreativetab.addTab.alreadyExists": "Группа элементов \"%s\" уже существует",
@@ -50,12 +50,12 @@
   "commands.ccreativetab.addTab.success": "Группа предметов успешно добавлена \"%s\"",
   "commands.ccreativetab.changeIcon.success": "Значок \"%s\" успешно изменен с %s на %s",
   "commands.ccreativetab.notFound": "Группа предметов \"%s\" не найдена",
-  "commands.ccreativetab.outOfBounds": "Индекс %d выходит за допустимые пределы",
-  "commands.ccreativetab.removeStack.success": "Успешно удален стак из \"%s\" по индексу %d",
+  "commands.ccreativetab.outOfBounds": "Индекс %s выходит за допустимые пределы",
+  "commands.ccreativetab.removeStack.success": "Успешно удален стак из \"%s\" по индексу %s",
   "commands.ccreativetab.removeTab.success": "Группа элементов удалена \"%s\"",
   "commands.ccreativetab.renameTab.success": "Группа элементов \"%s\" успешно переименована в \"%s\"",
   "commands.ccreativetab.saveFile.failed": "Не удалось сохранить файл групп элементов",
-  "commands.ccreativetab.setStack.success": "Успешно установил стак из \"%s\" с индексом %d в %s",
+  "commands.ccreativetab.setStack.success": "Успешно установил стак из \"%s\" с индексом %s в %s",
 
   "commands.cenchant.failed": "Невозможно или это займет слишком много времени, чтобы получить эти чары",
   "commands.cenchant.incompatible": "Несовместимые чары",
@@ -67,21 +67,21 @@
   "commands.cfind.found.right": ", %2$s блоков от вас",
   "commands.cfind.keepSearching.success": "Поиск сущностей",
   "commands.cfind.noMatch": "Нет объектов, соответствующих вашему запросу",
-  "commands.cfind.success": "%d сущностей соответствуют вашему запросу",
+  "commands.cfind.success": "%s сущностей соответствуют вашему запросу",
 
   "commands.cfindblock.notFound": "Такой блок не найден",
   "commands.cfindblock.success.left": "Ближайший в ",
   "commands.cfindblock.success.glow": "[Подсветить]",
   "commands.cfindblock.success.right": ", %1$s блоков от вас",
 
-  "commands.cfinditem.match.left": "%dx %s найдено в ",
+  "commands.cfinditem.match.left": "%sx %s найдено в ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Поиск %s",
   "commands.cfinditem.starting.keepSearching": "Бесконечный поиск %s",
-  "commands.cfinditem.total": "Всего найдено %dx %s",
+  "commands.cfinditem.total": "Всего найдено %sx %s",
 
   "commands.cfish.addGoal.success": "Цель добавлена %s",
-  "commands.cfish.correctLoot": "Получил корректный лут с поправкой %dms",
+  "commands.cfish.correctLoot": "Получил корректный лут с поправкой %sms",
   "commands.cfish.error.biome": "Вещь не может быть получена в этом биоме, требуется %s",
   "commands.cfish.error.crackFailed": "Не удалось взломать Рандомный Генератор Чисел поплавка, сервер модифицирован?",
   "commands.cfish.error.collision": "Поплавок столкнулся с чем-то",
@@ -93,28 +93,28 @@
   "commands.cfish.error.outOfWater": "Поплавок не в воде, манипуляции не сработают",
   "commands.cfish.help.tooManyEnchants": "Справка: несколько зачарований одновременно маловероятны, и их получение может занять много времени",
   "commands.cfish.listGoals.noGoals": "Нет целей для рыбалки",
-  "commands.cfish.listGoals.success": "Есть цели для рыбалки: %d",
+  "commands.cfish.listGoals.success": "Есть цели для рыбалки: %s",
   "commands.cfish.needFishingManipulation": "Манипуляции с рыбалкой не включены",
   "commands.cfish.removeGoal.success": "Цель успешно удалена %s",
-  "commands.cfish.wrongLoot": "Не получил корректный лут с исправлением %dms, мог быть на %s тиков впереди",
+  "commands.cfish.wrongLoot": "Не получил корректный лут с исправлением %sms, мог быть на %s тиков впереди",
 
-  "commands.cfov.success": "Установлен поле зрения %f",
+  "commands.cfov.success": "Установлен поле зрения %s",
 
-  "commands.cgamma.success": "Установленна яркость %f",
+  "commands.cgamma.success": "Установленна яркость %s",
 
-  "commands.cghostblock.fill.success": "%d блоки-призраки заполнены",
+  "commands.cghostblock.fill.success": "%s блоки-призраки заполнены",
   "commands.cghostblock.set.success": "Блок-призрак размещен",
 
-  "commands.cgive.success": "Дал %d %s себе",
+  "commands.cgive.success": "Дал %s %s себе",
   "commands.cgive.notCreative": "Игрок должен быть в творческом режиме, чтобы выдать себе предметы",
 
   "commands.cglow.entity.keepSearching.success": "Сущности подсвечены",
   "commands.cglow.entity.failed": "Нет объектов для свечения",
-  "commands.cglow.entity.success": "Светящиеся объекты: %d",
-  "commands.cglow.area.success": "Светящаяся область %d(s)",
+  "commands.cglow.entity.success": "Светящиеся объекты: %s",
+  "commands.cglow.area.success": "Светящаяся область %s(s)",
 
   "commands.chotbar.notCreative": "Игрок должен быть в творческом режиме, чтобы восстановить панели быстрого доступа к предметам.",
-  "commands.chotbar.restoredHotbar": "Панели быстрого доступа восстановленно предметов %d",
+  "commands.chotbar.restoredHotbar": "Панели быстрого доступа восстановленно предметов %s",
 
   "commands.ckit.notFound": "Набор \"%s\" не найден",
   "commands.ckit.saveFile.failed": "Не удалось сохранить файл набора",
@@ -133,12 +133,12 @@
   "commands.cparticle.unsuitableParticleOption": "Частицы не отображаются, так как настройки видео частиц не подходят.",
   "commands.cparticle.success": "Отображение частицы %s",
 
-  "commands.cpermissionlevel.success": "Ваш уровень разрешений %d",
+  "commands.cpermissionlevel.success": "Ваш уровень разрешений %s",
 
   "commands.cplaysound.success": "Проиграл звук %s самому себе",
 
   "commands.cping.singleplayer": "Вы находитесь в одиночном мире (╯°□°）╯︵ ┻━┻",
-  "commands.cping.success": "Ваш средний пинг %dms",
+  "commands.cping.success": "Ваш средний пинг %sms",
 
   "commands.crelog.failed": "Не удалось повторно войти",
 
@@ -150,9 +150,9 @@
   "commands.cstopsound.success.source.sound": "Остановлен звук '%s' в источнике '%s' ",
 
   "commands.ctask.list.noTasks": "В настоящее время нет выполняемых задач",
-  "commands.ctask.list.success": "%d в настоящее время выполняет задачи",
+  "commands.ctask.list.success": "%s в настоящее время выполняет задачи",
   "commands.ctask.stop.noMatch": "Нет подходящих задач",
-  "commands.ctask.stop.success": "Остановлено %d задач",
+  "commands.ctask.stop.success": "Остановлено %s задач",
 
   "commands.ctitle.cleared": "Очищенные заголовки",
   "commands.ctitle.reset": "Сбросить параметры заголовка",
@@ -171,7 +171,7 @@
 
   "commands.cwiki.failed": "Не удалось получить содержимое вики.",
 
-  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Отменить",
   "commands.client.crack": "Взломать",
   "commands.client.enable": "Включить",
@@ -180,7 +180,7 @@
   "commands.client.tooFewArguments": "Слишком мало аргументов",
   "commands.client.invalidArgumentException": "Недействительным аргумент '%s'",
 
-  "chorusManip.landing.success": "Посадка на: %d, %d, %d",
+  "chorusManip.landing.success": "Посадка на: %s, %s, %s",
   "chorusManip.landing.failed": "Манипуляции с местом посадки невозможны",
   "chorusManip.goalTooFar": "Цель слишком далека!",
   "chorusManip.needChorusManipulation": "Манипуляции с Плодом хоруса не включены",
@@ -193,18 +193,18 @@
 
   "enchCrack.enchantments": "Чары:",
   "enchCrack.clues": "Улики:",
-  "enchCrack.slot": "Слот %d:",
+  "enchCrack.slot": "Слот %s:",
 
-  "enchCrack.xpSeed.one": "Сид Опыта: %08X",
-  "enchCrack.xpSeed.many": "Возможный Сид Опыта: %d",
-  "enchCrack.playerRNGSeed.many": "Возможные сиды Рандомного Генератора Чисел игрока: %d",
+  "enchCrack.xpSeed.one": "Сид Опыта: %s",
+  "enchCrack.xpSeed.many": "Возможный Сид Опыта: %s",
+  "enchCrack.playerRNGSeed.many": "Возможные сиды Рандомного Генератора Чисел игрока: %s",
   "enchCrack.addInfo": "Добавить информацию",
 
   "enchCrack.insn.dummy": "Сделать тестовое зачарование",
   "enchCrack.insn.ready": "Ваш сид зачарования готов",
-  "enchCrack.insn.bookshelves": "Нужно книжных полок: %d",
-  "enchCrack.insn.slot": "В слоте: %d",
-  "enchCrack.insn.itemThrows": "Требуется бросков предметов: %d (около %f секунд)",
+  "enchCrack.insn.bookshelves": "Нужно книжных полок: %s",
+  "enchCrack.insn.slot": "В слоте: %s",
+  "enchCrack.insn.itemThrows": "Требуется бросков предметов: %s (около %s секунд)",
   "enchCrack.insn.itemThrows.noDummy": "Нет тестовых чар",
   "enchCrack.insn.enchantments": "Чары на предмете:",
 
@@ -248,11 +248,11 @@
   "playerManip.reset.recreated": "Игрок воссоздан",
 
   "playerManip.serverBrandWarning": "Предупреждение: сервер, на котором вы играете, модифицирован. Работоспособность функций на этом сервере не гарантируются!",
-  "playerManip.toolBreakWarning": "Предупреждение: у инструмента осталось %d прочности",
-  "playerManip.throwError": "Условие невозможно или потребует более %d бросков предметов",
-  "playerManip.notEnoughItems": "Недостаточно элементов (%d из %d) для манипуляций с seed",
+  "playerManip.toolBreakWarning": "Предупреждение: у инструмента осталось %s прочности",
+  "playerManip.throwError": "Условие невозможно или потребует более %s бросков предметов",
+  "playerManip.notEnoughItems": "Недостаточно элементов (%s из %s) для манипуляций с seed",
   "playerManip.uncracked": "Сид-Игрока нуждается в взломе",
 
   "snakeGame.title": "Змейка",
-  "snakeGame.score": "Счёт: %d"
+  "snakeGame.score": "Счёт: %s"
 }

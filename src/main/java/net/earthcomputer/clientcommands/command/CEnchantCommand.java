@@ -5,7 +5,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.LegacyEnchantment;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -41,7 +43,14 @@ public class CEnchantCommand {
     }
 
     private static boolean enchantmentPredicate(Item item, Holder<Enchantment> ench) {
-        return ench.is(EnchantmentTags.IN_ENCHANTING_TABLE) && (item == Items.BOOK || ench.value().canEnchant(new ItemStack(item)));
+        boolean inEnchantingTable;
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21) {
+            LegacyEnchantment legacyEnch = LegacyEnchantment.byEnchantmentKey(ench.unwrapKey().orElseThrow());
+            inEnchantingTable = legacyEnch != null && legacyEnch.inEnchantmentTable();
+        } else {
+            inEnchantingTable = ench.is(EnchantmentTags.IN_ENCHANTING_TABLE);
+        }
+        return inEnchantingTable && (item == Items.BOOK || ench.value().canEnchant(new ItemStack(item)));
     }
 
     private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandSyntaxException {
@@ -92,7 +101,7 @@ public class CEnchantCommand {
                     source.sendFeedback(Component.translatable("enchCrack.insn.slot", result.slot() + 1));
                     source.sendFeedback(Component.translatable("enchCrack.insn.enchantments"));
                     List<EnchantmentInstance> enchantments = new ArrayList<>(result.enchantments());
-                    EnchantmentCracker.sortIntoTooltipOrder(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT), enchantments);
+                    EnchantmentCracker.sortIntoTooltipOrder(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), enchantments);
                     for (EnchantmentInstance ench : enchantments) {
                         source.sendFeedback(Component.literal("- ").append(Enchantment.getFullname(ench.enchantment, ench.level)));
                     }

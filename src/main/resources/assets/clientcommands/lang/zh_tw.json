@@ -12,15 +12,15 @@
   "commands.calias.removeAlias.success": "成功移除別名「%s」",
 
   "commands.careastats.notLoaded": "此區域的區塊尚未載入",
-  "commands.careastats.output.chunksScanned": "在 %dns ≈ %dms 內掃描了 %d 個區塊",
-  "commands.careastats.output.blocksMatched": "匹配了 %d 個方塊（總共 %d 個）",
-  "commands.careastats.output.entitiesFound": "在此區域找到 %d 個實體",
+  "commands.careastats.output.chunksScanned": "在 %sns ≈ %sms 內掃描了 %s 個區塊",
+  "commands.careastats.output.blocksMatched": "匹配了 %s 個方塊（總共 %s 個）",
+  "commands.careastats.output.entitiesFound": "在此區域找到 %s 個實體",
 
   "commands.cbook.success": "成功編輯書本",
   "commands.cbook.commandException": "您沒有手握書本",
 
   "commands.ccalc.expected": "期望值 %s",
-  "commands.ccalc.invalidArgumentCount": "函數「%s」無法接受 %d 個參數",
+  "commands.ccalc.invalidArgumentCount": "函數「%s」無法接受 %s 個參數",
   "commands.ccalc.parse": "已解析的表達式： %s",
   "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
   "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
@@ -34,16 +34,16 @@
   "commands.ccalc.parse.negate": "(否定： %s)",
   "commands.ccalc.tooDeeplyNested": "表達式巢狀過深",
 
-  "commands.ccalcstack.success": "%d 個 %s 是 %d 組餘 %d 個",
-  "commands.ccalcstack.success.empty": "%d 個物品是 %d 組餘 %d 個",
-  "commands.ccalcstack.success.empty.exact": "%d 個物品是正好 %d 組",
-  "commands.ccalcstack.success.exact": "%d 個 %s 是正好 %d 組",
+  "commands.ccalcstack.success": "%s 個 %s 是 %s 組餘 %s 個",
+  "commands.ccalcstack.success.empty": "%s 個物品是 %s 組餘 %s 個",
+  "commands.ccalcstack.success.empty.exact": "%s 個物品是正好 %s 組",
+  "commands.ccalcstack.success.exact": "%s 個 %s 是正好 %s 組",
 
   "commands.ccrackrng.failed": "破譯玩家隨機種子失敗",
   "commands.ccrackrng.failed.help": "說明： 隨機數操控在某些模組伺服器上無法運作，尤其是 Paper。",
-  "commands.ccrackrng.retries": "正在破譯玩家隨機種子，嘗試 %d/%d",
+  "commands.ccrackrng.retries": "正在破譯玩家隨機種子，嘗試 %s/%s",
   "commands.ccrackrng.starting": "正在破譯玩家隨機種子",
-  "commands.ccrackrng.success": "玩家隨機種子已破譯： %d",
+  "commands.ccrackrng.success": "玩家隨機種子已破譯： %s",
 
   "commands.ccreativetab.addStack.success": "成功將 %s 新增至「%s」",
   "commands.ccreativetab.addTab.alreadyExists": "創造模式標籤頁「%s」已存在",
@@ -51,12 +51,12 @@
   "commands.ccreativetab.addTab.success": "成功新增創造模式標籤頁「%s」",
   "commands.ccreativetab.changeIcon.success": "成功將「%s」的圖示從 %s 變更為 %s",
   "commands.ccreativetab.notFound": "找不到創造模式標籤頁「%s」",
-  "commands.ccreativetab.outOfBounds": "索引 %d 超出範圍",
-  "commands.ccreativetab.removeStack.success": "成功從「%s」的索引 %d 移除堆疊",
+  "commands.ccreativetab.outOfBounds": "索引 %s 超出範圍",
+  "commands.ccreativetab.removeStack.success": "成功從「%s」的索引 %s 移除堆疊",
   "commands.ccreativetab.removeTab.success": "成功移除創造模式標籤頁「%s」",
   "commands.ccreativetab.renameTab.success": "成功將創造模式標籤頁「%s」重新命名為「%s」",
   "commands.ccreativetab.saveFile.failed": "無法儲存創造模式標籤頁檔案",
-  "commands.ccreativetab.setStack.success": "成功將「%s」的索引 %d 的堆疊設定為 %s",
+  "commands.ccreativetab.setStack.success": "成功將「%s」的索引 %s 的堆疊設定為 %s",
 
   "commands.cenchant.failed": "您請求的附魔無法獲得，或者需要太長時間",
   "commands.cenchant.help.uncrackedPlayerSeed": "說明： 您尚未完全破譯玩家隨機種子",
@@ -69,7 +69,7 @@
   "commands.cfind.found.right": " 找到 %1$s，距離您 %2$s 格",
   "commands.cfind.keepSearching.success": "找尋實體中。",
   "commands.cfind.noMatch": "沒有實體符合您的搜尋條件",
-  "commands.cfind.success": "%d 個實體符合您的搜尋條件",
+  "commands.cfind.success": "%s 個實體符合您的搜尋條件",
 
   "commands.cfindblock.notFound": "沒有發現此方塊",
   "commands.cfindblock.starting": "正在搜尋 %s",
@@ -78,15 +78,15 @@
   "commands.cfindblock.success.right": "，距離您 %1$s 格",
 
   "commands.cfinditem.match.entity.left": "在 %s 的 ",
-  "commands.cfinditem.match.entity.right": " 找到 %dx %s",
+  "commands.cfinditem.match.entity.right": " 找到 %sx %s",
   "commands.cfinditem.match.left": "在 ",
-  "commands.cfinditem.match.right": " 找到 %dx %s",
+  "commands.cfinditem.match.right": " 找到 %sx %s",
   "commands.cfinditem.starting": "正在搜尋 %s",
   "commands.cfinditem.starting.keepSearching": "正在持續搜尋 %s。",
-  "commands.cfinditem.total": "一共找到了 %d 個 %s 。",
+  "commands.cfinditem.total": "一共找到了 %s 個 %s 。",
 
   "commands.cfish.addGoal.success": "成功新增目標 %s",
-  "commands.cfish.correctLoot": "使用 %dms 校正得到目標戰利品",
+  "commands.cfish.correctLoot": "使用 %sms 校正得到目標戰利品",
   "commands.cfish.error.biome": "在此生態域無法獲得戰利品，需要 %s",
   "commands.cfish.error.crackFailed": "無法破譯釣魚氣泡隨機數，這是個模組伺服器？",
   "commands.cfish.error.collision": "釣魚浮標與某物發生碰撞",
@@ -100,38 +100,38 @@
   "commands.cfish.error.outOfWater": "釣魚浮標在水域外，操控將無法工作",
   "commands.cfish.help.tooManyEnchants": "說明： 一次使用多個附魔的可能性很小，並且可能需要很長時間才能獲得",
   "commands.cfish.listGoals.noGoals": "沒有設定釣魚目標",
-  "commands.cfish.listGoals.success": "已設定 %d 個釣魚目標：",
+  "commands.cfish.listGoals.success": "已設定 %s 個釣魚目標：",
   "commands.cfish.needFishingManipulation": "本指令需要啟用釣魚操控。",
   "commands.cfish.removeGoal.success": "成功移除目標 %s",
-  "commands.cfish.wrongLoot": "使用 %dms 校正沒有得到目標戰利品，大約有 %s 個遊戲刻在前面",
+  "commands.cfish.wrongLoot": "使用 %sms 校正沒有得到目標戰利品，大約有 %s 個遊戲刻在前面",
 
-  "commands.cfov.success": "將 FOV 設定為 %f",
+  "commands.cfov.success": "將 FOV 設定為 %s",
 
-  "commands.cfunction.limitReached": "已達到指令限制（%d）",
-  "commands.cfunction.success": "從函數 %s 執行了 %d 個指令",
+  "commands.cfunction.limitReached": "已達到指令限制（%s）",
+  "commands.cfunction.success": "從函數 %s 執行了 %s 個指令",
 
   "commands.cgamemode.playerNotFound": "找不到玩家",
   "commands.cgamemode.playerGameMode": "玩家 %s 的遊戲模式為 %s",
   "commands.cgamemode.noneWithGameMode": "沒有玩家的遊戲模式為 %s",
   "commands.cgamemode.listWithGameMode": "以下玩家的遊戲模式為 %s：",
 
-  "commands.cgamma.success": "將伽瑪值設定為 %f",
+  "commands.cgamma.success": "將伽瑪值設定為 %s",
 
-  "commands.cghostblock.fill.success": "%d 個幽靈方塊已被填充",
+  "commands.cghostblock.fill.success": "%s 個幽靈方塊已被填充",
   "commands.cghostblock.set.success": "幽靈方塊已放置",
 
-  "commands.cgive.success": "給予自己 %d 個 %s",
+  "commands.cgive.success": "給予自己 %s 個 %s",
   "commands.cgive.notCreative": "玩家必須在創造模式才能給予自己物品",
 
   "commands.cglow.entity.keepSearching.success": "發光的實體",
   "commands.cglow.entity.failed": "沒有實體可以發光",
-  "commands.cglow.entity.success": "%d 個實體正在發光",
-  "commands.cglow.area.success": "%d 個區域正在發光",
+  "commands.cglow.entity.success": "%s 個實體正在發光",
+  "commands.cglow.area.success": "%s 個區域正在發光",
 
   "commands.chat.success": "成功開啟 c🎩",
 
   "commands.chotbar.notCreative": "玩家必須在創造模式才能還原物品快捷欄",
-  "commands.chotbar.restoredHotbar": "已還原物品快捷欄 %d",
+  "commands.chotbar.restoredHotbar": "已還原物品快捷欄 %s",
 
   "commands.ckit.notFound": "找不到套件「%s」",
   "commands.ckit.saveFile.failed": "無法儲存套件檔案",
@@ -167,14 +167,14 @@
   "commands.cparticle.unsuitableParticleOption": "由於粒子顯示設定不適合，因此無法顯示粒子",
   "commands.cparticle.success": "正在顯示粒子 %s",
 
-  "commands.cpermissionlevel.success": "您的權限等級為 %d",
+  "commands.cpermissionlevel.success": "您的權限等級為 %s",
 
   "commands.cplaysound.success": "播放音效 %s 給自己",
 
   "commands.cplugins.found": "找到以下外掛：",
 
-  "commands.cping.success": "您的平均 Ping 值為 %dms",
-  "commands.cping.success.other": "%s 的平均 Ping 值為 %dms",
+  "commands.cping.success": "您的平均 Ping 值為 %sms",
+  "commands.cping.success.other": "%s 的平均 Ping 值為 %sms",
   "commands.cping.singleplayer": "您在單人遊戲世界中 (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "找不到玩家",
 
@@ -202,9 +202,9 @@
 
   "commands.ctask.conflicting": "衝突的任務「%s」已在執行中。 %s",
   "commands.ctask.list.noTasks": "目前沒有正在執行的任務",
-  "commands.ctask.list.success": "%d 個任務正在執行",
+  "commands.ctask.list.success": "%s 個任務正在執行",
   "commands.ctask.stop.noMatch": "沒有符合的任務",
-  "commands.ctask.stop.success": "已停止 %d 個任務",
+  "commands.ctask.stop.success": "已停止 %s 個任務",
 
   "commands.ctictactoe.playerNotFound": "找不到玩家",
   "commands.ctictactoe.noGameWithPlayer": "目前沒有與該玩家進行遊戲",
@@ -249,7 +249,7 @@
   "commands.cwiki.failed": "無法取得 wiki 內容",
   "commands.cwiki.noContent": "該條目中沒有引言段落",
 
-  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "取消",
   "commands.client.crack": "破譯",
   "commands.client.enable": "啟用",
@@ -263,7 +263,7 @@
   "commands.client.requiresRestart": "此變更將在您重新啟動用戶端後生效",
   "commands.client.tooFewArguments": "參數過少",
 
-  "chorusManip.landing.success": "著陸於： %d, %d, %d",
+  "chorusManip.landing.success": "著陸於： %s, %s, %s",
   "chorusManip.landing.failed": "無法操控著陸",
   "chorusManip.goalTooFar": "目標距離過遠！",
   "chorusManip.needChorusManipulation": "未啟用紫頌果操控",
@@ -276,26 +276,26 @@
 
   "enchCrack.enchantments": "附魔：",
   "enchCrack.clues": "線索：",
-  "enchCrack.slot": "第 %d 行：",
-  "enchCrack.bookshelfCount": "書架數量： %d",
+  "enchCrack.slot": "第 %s 行：",
+  "enchCrack.bookshelfCount": "書架數量： %s",
 
-  "enchCrack.xpSeed.one": "經驗值種子： %08X",
-  "enchCrack.xpSeed.many": "可能的經驗值種子數量： %d",
-  "enchCrack.playerRNGSeed.many": "可能的玩家隨機種子數量： %d",
+  "enchCrack.xpSeed.one": "經驗值種子： %s",
+  "enchCrack.xpSeed.many": "可能的經驗值種子數量： %s",
+  "enchCrack.playerRNGSeed.many": "可能的玩家隨機種子數量： %s",
   "enchCrack.addInfo": "新增資訊",
 
   "enchCrack.insn.dummy": "附魔一件其他物品",
   "enchCrack.insn.ready": "您的附魔已就緒",
-  "enchCrack.insn.bookshelves": "需要的書架數量： %d",
-  "enchCrack.insn.slot": "在附魔台的第 %d 行",
-  "enchCrack.insn.itemThrows": "需要丟出物品： %d 次（大約 %f 秒）",
+  "enchCrack.insn.bookshelves": "需要的書架數量： %s",
+  "enchCrack.insn.slot": "在附魔台的第 %s 行",
+  "enchCrack.insn.itemThrows": "需要丟出物品： %s 次（大約 %s 秒）",
   "enchCrack.insn.itemThrows.noDummy": "無需附魔其他物品",
   "enchCrack.insn.enchantments": "最終獲得的附魔：",
 
   "itemCrack.notEnoughItems": "無法使用隨機種子破譯： 玩家手中沒有足夠的物品",
 
-  "minesweeperGame.minesLeft": "剩餘地雷： %d",
-  "minesweeperGame.timePlayed": "遊戲時間： %ds",
+  "minesweeperGame.minesLeft": "剩餘地雷： %s",
+  "minesweeperGame.timePlayed": "遊戲時間： %ss",
   "minesweeperGame.title": "踩地雷",
 
   "playerManip.state": "玩家種子破譯狀態： %s",
@@ -336,13 +336,13 @@
   "playerManip.reset.recreated": "重新建立了玩家",
 
   "playerManip.serverBrandWarning": "警告： 您正在遊玩的伺服器包含模組。隨機數相關的功能並不保證能夠正常運作！",
-  "playerManip.toolBreakWarning": "警告： 工具還有 %d 耐久度。",
-  "playerManip.throwError": "條件不可行，或需要超過 %d 個物品拋出",
-  "playerManip.notEnoughItems": "物品數量不足（%d 的 %d）來操控種子",
+  "playerManip.toolBreakWarning": "警告： 工具還有 %s 耐久度。",
+  "playerManip.throwError": "條件不可行，或需要超過 %s 個物品拋出",
+  "playerManip.notEnoughItems": "物品數量不足（%s 的 %s）來操控種子",
   "playerManip.uncracked": "需要先破譯玩家隨機種子",
 
   "snakeGame.title": "貪吃蛇",
-  "snakeGame.score": "分數： %d",
+  "snakeGame.score": "分數： %s",
 
   "ticTacToeGame.title": "與 %s 玩井字遊戲",
   "ticTacToeGame.playingWith": "您正在與 %s 遊玩",

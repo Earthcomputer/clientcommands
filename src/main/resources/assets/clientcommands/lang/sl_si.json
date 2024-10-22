@@ -2,10 +2,10 @@
     "commands.cbook.success": "Knjiga je bila uspešno urejena",
   
     "commands.ccalc.expected": "Pričakovano %s",
-    "commands.ccalc.invalidArgumentCount": "Funkcija \"%s\" ne more vzeti %d argumentov",
+    "commands.ccalc.invalidArgumentCount": "Funkcija \"%s\" ne more vzeti %s argumentov",
   
     "commands.ccrackrng.starting": "Ugotavljanje semena igralca",
-    "commands.ccrackrng.success": "RNG seme igralca uspešno ugotovljeno: %d",
+    "commands.ccrackrng.success": "RNG seme igralca uspešno ugotovljeno: %s",
 
     "commands.cenchant.failed": "Nemogoče je ali bi trajalo pre dolgo, da bi dobile te čare",
     "commands.cenchant.incompatible": "Nezdružljivi čari",
@@ -16,27 +16,27 @@
     "commands.cfind.found.left": "Najdeno %1$s ob ",
     "commands.cfind.found.right": ", %2$s blokov proč",
     "commands.cfind.noMatch": "Nič se ne ujema z vašo poizvedbo",
-    "commands.cfind.success": "%d entitet se ujema z vašo poizvedbo",
+    "commands.cfind.success": "%s entitet se ujema z vašo poizvedbo",
   
     "commands.cfindblock.notFound": "Takega bloka ni mogoče najti",
     "commands.cfindblock.success.left": "Najbližje ujemanje je ob ",
     "commands.cfindblock.success.right": ", %1$s blokov vstran",
   
-    "commands.cfinditem.match.left": "%dx %s najdeno ob ",
+    "commands.cfinditem.match.left": "%sx %s najdeno ob ",
     "commands.cfinditem.match.right": "",
     "commands.cfinditem.starting": "Iskati %s",
     "commands.cfinditem.starting.keepSearching": "Neskončno iskanje za %s.",
-    "commands.cfinditem.total": "Skupno najdeno %dx %s",
+    "commands.cfinditem.total": "Skupno najdeno %sx %s",
   
     "commands.crender.entities.success": "Pravila za upodabljanje entitet so bila posodobljena",
   
     "commands.ctask.list.noTasks": "Nič trenutno izvajajočih nalog",
-    "commands.ctask.list.success": "%d trenutno izvajajočih nalog",
+    "commands.ctask.list.success": "%s trenutno izvajajočih nalog",
     "commands.ctask.stop.noMatch": "Ni ujemajočih se nalog",
   
     "commands.cwiki.failed": "Vsebine wikija ni bilo mogoče pridobiti",
   
-    "commands.client.blockpos": "(%d, %d, %d)",
+    "commands.client.blockpos": "(%s, %s, %s)",
     "commands.client.cancel": "Prekliči",
     "commands.client.crack": "Ugotovi",
     "commands.client.enable": "Omogoči",
@@ -49,18 +49,18 @@
   
     "enchCrack.enchantments": "Uroki:",
     "enchCrack.clues": "Namigi:",
-    "enchCrack.slot": "Mesto %d:",
+    "enchCrack.slot": "Mesto %s:",
   
-    "enchCrack.xpSeed.one": "XP Seme: %08X",
-    "enchCrack.xpSeed.many": "Možna XP semena: %d",
-    "enchCrack.playerRNGSeed.many": "Možna RNG semena igralci: %d",
+    "enchCrack.xpSeed.one": "XP Seme: %s",
+    "enchCrack.xpSeed.many": "Možna XP semena: %s",
+    "enchCrack.playerRNGSeed.many": "Možna RNG semena igralci: %s",
     "enchCrack.addInfo": "Dodaj informacije",
   
     "enchCrack.insn.dummy": "Opravite poskusno čaranje",
     "enchCrack.insn.ready": "Vaše seme čaranje je pripravljeno",
-    "enchCrack.insn.bookshelves": "Knjižne police potrebovane: %d",
-    "enchCrack.insn.slot": "V mestu: %d",
-    "enchCrack.insn.itemThrows": "Potrebovanih metanj: %d (V priblžno %f sekundah)",
+    "enchCrack.insn.bookshelves": "Knjižne police potrebovane: %s",
+    "enchCrack.insn.slot": "V mestu: %s",
+    "enchCrack.insn.itemThrows": "Potrebovanih metanj: %s (V priblžno %s sekundah)",
     "enchCrack.insn.itemThrows.noDummy": "Brez poskusnega čaranja",
     "enchCrack.insn.enchantments": "Čari na predmetu:",
   
@@ -99,7 +99,7 @@
     "playerManip.reset.recreated": "Igralec Obnovljen",
 
     "playerManip.serverBrandWarning": "Opozorilo: Strežnik na katerem igrate je modiran. Funkcije RNG morda ne bodo delovale!",
-    "playerManip.toolBreakWarning": "Opozorilo: orodju ostaja %d trajnosti",
+    "playerManip.toolBreakWarning": "Opozorilo: orodju ostaja %s trajnosti",
   
     "itemCrack.notEnoughItems": "Ni mogoče uporabiti RNG UgotavljalcaSemena: Ni dovolj predmetov v roki igralca"
   

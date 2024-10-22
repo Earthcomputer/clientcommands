@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.minecraft.Util;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
@@ -10,6 +11,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.intellij.lang.annotations.MagicConstant;
@@ -134,12 +136,21 @@ public enum LegacyEnchantment {
         this.flags = combinedFlags;
     }
 
+    @Nullable
+    public static LegacyEnchantment byEnchantmentKey(ResourceKey<Enchantment> enchantmentKey) {
+        return BY_KEY.get(enchantmentKey);
+    }
+
     public boolean isTreasure() {
         return (flags & Flags.TREASURE) != 0;
     }
 
     public boolean isDiscoverable() {
         return (flags & Flags.NON_DISCOVERABLE) == 0;
+    }
+
+    public boolean inEnchantmentTable() {
+        return !isTreasure() && isDiscoverable();
     }
 
     public boolean isCompatible(LegacyEnchantment other, int version) {
@@ -175,7 +186,8 @@ public enum LegacyEnchantment {
     }
 
     public static List<Instance> addRandomEnchantments(RandomSource rand, ItemStack item, int level, boolean treasure, int version) {
-        int enchantability = item.getItem().getEnchantmentValue();
+        Enchantable enchantable = item.get(DataComponents.ENCHANTABLE);
+        int enchantability = enchantable == null ? 0 : enchantable.value();
         List<Instance> enchantments = new ArrayList<>();
 
         if (enchantability <= 0) {

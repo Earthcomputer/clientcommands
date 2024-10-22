@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
@@ -54,7 +54,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
-	include modImplementation("dev.xpple:betterconfig:${project.betterconfig_version}")
+	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
 
 	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_feature_version}"
 	includedLibrary "com.seedfinding:mc_biome:${project.seedfinding_biome_version}"
