@@ -11,20 +11,20 @@
   "commands.calias.removeAlias.success": "次のエイリアスの削除に成功しました: \"%s\"",
 
   "commands.careastats.notLoaded": "このエリアのチャンクはまだロードされていません",
-  "commands.careastats.output.chunksScanned": "%dns ≈ %dms の範囲の %d 個のチャンクをスキャンしました",
-  "commands.careastats.output.blocksMatched": " %d 個 / %d 個のブロックがマッチしました",
-  "commands.careastats.output.entitiesFound": " %d エンティティをこのエリアに発見しました",
+  "commands.careastats.output.chunksScanned": "%sns ≈ %sms の範囲の %s 個のチャンクをスキャンしました",
+  "commands.careastats.output.blocksMatched": " %s 個 / %s 個のブロックがマッチしました",
+  "commands.careastats.output.entitiesFound": " %s エンティティをこのエリアに発見しました",
 
   "commands.cbook.success": "本の編集に成功しました",
   "commands.cbook.commandException": "あなたは利き手に本を持っていません",
 
   "commands.ccalc.expected": "次が予期されています: %s",
-  "commands.ccalc.invalidArgumentCount": "関数 \"%s\" は %d の引数を処理できません",
+  "commands.ccalc.invalidArgumentCount": "関数 \"%s\" は %s の引数を処理できません",
   "commands.ccalc.parse": "処理された表現: %s",
   "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
   "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
   "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
-  "commands.ccalc.parse.binaryOperator.modulo": "(%s % %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s %% %s)",
   "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
   "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
   "commands.ccalc.parse.constant": "(定数 '%s')",
@@ -33,16 +33,16 @@
   "commands.ccalc.parse.negate": "(否定: %s)",
   "commands.ccalc.tooDeeplyNested": "表現が深くネストされすぎています",
 
-  "commands.ccalcstack.success": "%d %s は %d スタックで、 %d 個余りです",
-  "commands.ccalcstack.success.empty": "%d は %d スタックで、  %d 余りです",
-  "commands.ccalcstack.success.empty.exact": "%d はちょうど %d スタックです",
-  "commands.ccalcstack.success.exact": "%d %s はちょうど %d スタックです",
+  "commands.ccalcstack.success": "%s %s は %s スタックで、 %s 個余りです",
+  "commands.ccalcstack.success.empty": "%s は %s スタックで、  %s 余りです",
+  "commands.ccalcstack.success.empty.exact": "%s はちょうど %s スタックです",
+  "commands.ccalcstack.success.exact": "%s %s はちょうど %s スタックです",
 
   "commands.ccrackrng.failed": "プレイヤーのシードをクラックするのに失敗しました",
   "commands.ccrackrng.failed.help": "ヘルプ: RNG操作は一部のサーバーでは動作不可能です。特にPaperベースのサーバーでは動きません。",
-  "commands.ccrackrng.retries": "プレイヤーシードをクラックしています: 試行回数 %d/%d",
+  "commands.ccrackrng.retries": "プレイヤーシードをクラックしています: 試行回数 %s/%s",
   "commands.ccrackrng.starting": "プレイヤーシードをクラックしています",
-  "commands.ccrackrng.success": "プレイヤーシードのクラックに成功しました: %d",
+  "commands.ccrackrng.success": "プレイヤーシードのクラックに成功しました: %s",
 
   "commands.ccreativetab.addStack.success": "%s を \"%s\" に追加するのに成功しました",
   "commands.ccreativetab.addTab.alreadyExists": "アイテムグループ \"%s\" はすでに存在します",
@@ -50,12 +50,12 @@
   "commands.ccreativetab.addTab.success": "アイテムグループの追加に成功しました \"%s\"",
   "commands.ccreativetab.changeIcon.success": "\"%s\"のアイコンを %s から %s に変更するのに成功しました",
   "commands.ccreativetab.notFound": "アイテムグループ \"%s\" は見つかりませんでした",
-  "commands.ccreativetab.outOfBounds": "索引 %d は範囲外です",
-  "commands.ccreativetab.removeStack.success": "\"%s\"を索引%dより削除するのに成功しました",
+  "commands.ccreativetab.outOfBounds": "索引 %s は範囲外です",
+  "commands.ccreativetab.removeStack.success": "\"%s\"を索引%sより削除するのに成功しました",
   "commands.ccreativetab.removeTab.success": "アイテムグループ \"%s\" を削除しました",
   "commands.ccreativetab.renameTab.success": "アイテムグループ \"%s\"を \"%s\" に変更するのに成功しました",
   "commands.ccreativetab.saveFile.failed": "アイテムグループファイルを保存できませんでした",
-  "commands.ccreativetab.setStack.success": "\"%s\"からのスタックを索引%dに%sを保存するのに成功しました",
+  "commands.ccreativetab.setStack.success": "\"%s\"からのスタックを索引%sに%sを保存するのに成功しました",
 
   "commands.cenchant.failed": "それらのエンチャントを取得するのは不可能であるか、時間がかかりすぎます",
   "commands.cenchant.help.uncrackedPlayerSeed": "ヘルプ: プレイヤーのシードは完全にクラックされていません。",
@@ -68,7 +68,7 @@
   "commands.cfind.found.right": ", %2$s ブロック分離れています",
   "commands.cfind.keepSearching.success": "エンティティを検索しています",
   "commands.cfind.noMatch": "あなたのクエリにマッチしたエンティティが存在しませんでした",
-  "commands.cfind.success": "%d のエンティティがマッチしました",
+  "commands.cfind.success": "%s のエンティティがマッチしました",
 
   "commands.cfindblock.notFound": "そのようなブロックは見つかりませんでした",
   "commands.cfindblock.starting": "%s を探しています",
@@ -76,14 +76,14 @@
   "commands.cfindblock.success.glow": "[Glow]",
   "commands.cfindblock.success.right": ", %1$s ブロック分離れています",
 
-  "commands.cfinditem.match.left": "%dx %s が次の場所で見つかりました ",
+  "commands.cfinditem.match.left": "%sx %s が次の場所で見つかりました ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "%s を検索しています",
   "commands.cfinditem.starting.keepSearching": "次のブロックをエンドレスに検索しています %s",
-  "commands.cfinditem.total": "%dx %s がトータルで見つかりました",
+  "commands.cfinditem.total": "%sx %s がトータルで見つかりました",
 
   "commands.cfish.addGoal.success": "次のゴールを追加するのに成功しました: %s",
-  "commands.cfish.correctLoot": "正しい釣果を得ることに成功しました: %dms",
+  "commands.cfish.correctLoot": "正しい釣果を得ることに成功しました: %sms",
   "commands.cfish.error.biome": "その釣果はこのバイオームでは入手できません、 %s で釣りをする事が必要です",
   "commands.cfish.error.crackFailed": "釣りの浮きのRNGシードをクラックするのに失敗しました、サーバーが異なるソフトウェアで動いている可能性があります",
   "commands.cfish.error.collision": "釣りの浮きが何らかの物体とぶつかりました",
@@ -97,38 +97,38 @@
   "commands.cfish.error.outOfWater": "釣りの浮きが水の外であるため、釣りの内容操作は不可能です",
   "commands.cfish.help.tooManyEnchants": "ヘルプ: 複数のエンチャントが付いている釣果は入手が難しいか、入手に非常に時間がかかる場合があります",
   "commands.cfish.listGoals.noGoals": "釣りの目標がありません",
-  "commands.cfish.listGoals.success": " %d 個の釣りの目標があります: ",
+  "commands.cfish.listGoals.success": " %s 個の釣りの目標があります: ",
   "commands.cfish.needFishingManipulation": "Fishing manipulationは無効化されています",
   "commands.cfish.removeGoal.success": "次の目標の削除に成功しました: %s",
-  "commands.cfish.wrongLoot": "正しい釣果を次で得ることに失敗しました: %dms 、 %s ティック前でした",
+  "commands.cfish.wrongLoot": "正しい釣果を次で得ることに失敗しました: %sms 、 %s ティック前でした",
 
-  "commands.cfov.success": "FOVを次に設定しました: %f",
+  "commands.cfov.success": "FOVを次に設定しました: %s",
 
-  "commands.cfunction.limitReached": "コマンド制限 (%d) に達しました",
-  "commands.cfunction.success": "%d 個のコマンドを関数 %s から実行しました",
+  "commands.cfunction.limitReached": "コマンド制限 (%s) に達しました",
+  "commands.cfunction.success": "%s 個のコマンドを関数 %s から実行しました",
 
   "commands.cgamemode.playerNotFound": "プレイヤーが見つかりませんでした",
   "commands.cgamemode.playerGameMode": "プレイヤー名 %s はゲームモード %s です",
   "commands.cgamemode.noneWithGameMode": "次のゲームモードのプレイヤーは見つかりませんでした %s",
   "commands.cgamemode.listWithGameMode": "以下のプレイヤーは次のゲームモードです %s:",
 
-  "commands.cgamma.success": "ガンマ値を %f に設定しました",
+  "commands.cgamma.success": "ガンマ値を %s に設定しました",
 
-  "commands.cghostblock.fill.success": "%d 個のゴーストブロックで埋めました",
+  "commands.cghostblock.fill.success": "%s 個のゴーストブロックで埋めました",
   "commands.cghostblock.set.success": "ゴーストブロックが置かれました",
 
-  "commands.cgive.success": "%d を %s 自身に与えました",
+  "commands.cgive.success": "%s を %s 自身に与えました",
   "commands.cgive.notCreative": "アイテムを自分自身に与えるためには、クリエイティブモードである必要があります",
 
   "commands.cglow.entity.keepSearching.success": "エンティティ発光中",
   "commands.cglow.entity.failed": "光らせるべきエンティティが存在しません",
-  "commands.cglow.entity.success": "%d 体のエンティティを発光させています",
-  "commands.cglow.area.success": "%d エリア(s)を発行させています",
+  "commands.cglow.entity.success": "%s 体のエンティティを発光させています",
+  "commands.cglow.area.success": "%s エリア(s)を発行させています",
 
   "commands.chat.success": "チャットを開くのに成功しました 🎩",
 
   "commands.chotbar.notCreative": "ホットバーを復活させるためにはクリエイティブモードにいる必要があります",
-  "commands.chotbar.restoredHotbar": "ホットバーのアイテムを復活させました %d",
+  "commands.chotbar.restoredHotbar": "ホットバーのアイテムを復活させました %s",
 
   "commands.ckit.notFound": "キット \"%s\" が見つかりました",
   "commands.ckit.saveFile.failed": "キットファイルを保存できませんでした",
@@ -147,14 +147,14 @@
   "commands.cparticle.unsuitableParticleOption": "パーティクルの設定が不適当であるためパーティクルを表示しません",
   "commands.cparticle.success": "%s としてパーティクルを表示しています",
 
-  "commands.cpermissionlevel.success": "あなたの権限レベルは %d です",
+  "commands.cpermissionlevel.success": "あなたの権限レベルは %s です",
 
   "commands.cplaysound.success": "%s の音を自身に再生しました",
 
   "commands.cplugins.found": "次のプラグインが見つかりました:",
 
-  "commands.cping.success": "平均ピングは %dms です",
-  "commands.cping.success.other": " %s の平均pingは %dms です",
+  "commands.cping.success": "平均ピングは %sms です",
+  "commands.cping.success.other": " %s の平均pingは %sms です",
   "commands.cping.singleplayer": "あなたはシングルプレイヤーワールドにいます (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "プレイヤーが見つかりませんでした",
 
@@ -181,9 +181,9 @@
   "commands.cstopsound.success.source.sound": "音 '%s' の音源 '%s' からの再生を停止しました",
 
   "commands.ctask.list.noTasks": "現在実行しているタスクはありません",
-  "commands.ctask.list.success": "%d 現在実行中のタスク",
+  "commands.ctask.list.success": "%s 現在実行中のタスク",
   "commands.ctask.stop.noMatch": "マッチするタスクがありません",
-  "commands.ctask.stop.success": "%d のタスクを停止しました",
+  "commands.ctask.stop.success": "%s のタスクを停止しました",
 
   "commands.ctime.reset.success": "時刻がサーバーに同期されました",
 
@@ -225,7 +225,7 @@
   "commands.cwiki.failed": "Wikiのコンテンツを取得するのに失敗しました",
   "commands.cwiki.noContent": "このアーティクルに導入部分は存在しません",
 
-  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "キャンセル",
   "commands.client.crack": "クラック",
   "commands.client.enable": "有効化",
@@ -238,7 +238,7 @@
   "commands.client.requiresRestart": "この変更はクライアントの再起動後に影響を及ぼし始めます",
   "commands.client.tooFewArguments": "引数が少なすぎます",
 
-  "chorusManip.landing.success": "着地点: %d, %d, %d",
+  "chorusManip.landing.success": "着地点: %s, %s, %s",
   "chorusManip.landing.failed": "着地点操作に失敗しました",
   "chorusManip.goalTooFar": "ゴール地点が遠すぎます！",
   "chorusManip.needChorusManipulation": "Chorus Fruit Manipulationは無効化されています",
@@ -251,19 +251,19 @@
 
   "enchCrack.enchantments": "エンチャント:",
   "enchCrack.clues": "手がかり:",
-  "enchCrack.slot": "スロット %d:",
-  "enchCrack.bookshelfCount": "本棚の個数: %d",
+  "enchCrack.slot": "スロット %s:",
+  "enchCrack.bookshelfCount": "本棚の個数: %s",
 
-  "enchCrack.xpSeed.one": "XPシード: %08X",
-  "enchCrack.xpSeed.many": "可能性のあるXPシード: %d",
-  "enchCrack.playerRNGSeed.many": "可能性のあるプレイヤーRNGシード: %d",
+  "enchCrack.xpSeed.one": "XPシード: %s",
+  "enchCrack.xpSeed.many": "可能性のあるXPシード: %s",
+  "enchCrack.playerRNGSeed.many": "可能性のあるプレイヤーRNGシード: %s",
   "enchCrack.addInfo": "情報を追加",
 
   "enchCrack.insn.dummy": "ダミーエンチャントをしてください",
   "enchCrack.insn.ready": "エンチャントシードの準備ができました",
-  "enchCrack.insn.bookshelves": "必要本棚数: %d",
-  "enchCrack.insn.slot": "スロット: %d",
-  "enchCrack.insn.itemThrows": "アイテムを投げることが必要です: %d (約 %f 秒)",
+  "enchCrack.insn.bookshelves": "必要本棚数: %s",
+  "enchCrack.insn.slot": "スロット: %s",
+  "enchCrack.insn.itemThrows": "アイテムを投げることが必要です: %s (約 %s 秒)",
   "enchCrack.insn.itemThrows.noDummy": "ダミーエンチャントは不要です",
   "enchCrack.insn.enchantments": "アイテムのエンチャント:",
 
@@ -307,13 +307,13 @@
   "playerManip.reset.recreated": "プレイヤーの再作成",
 
   "playerManip.serverBrandWarning": "警告:現在あなたがプレイしているサーバーはModで変更されています。このようなサーバーではRNG操作が無効化されている可能性があります",
-  "playerManip.toolBreakWarning": "警告: ツールはあと %d の耐久値しかありません",
-  "playerManip.throwError": "その状態は不可能であるか %d 回以上のアイテムを投げることが必要です",
-  "playerManip.notEnoughItems": "シードを操作するためのアイテムが不足しています (%d 分の %d)",
+  "playerManip.toolBreakWarning": "警告: ツールはあと %s の耐久値しかありません",
+  "playerManip.throwError": "その状態は不可能であるか %s 回以上のアイテムを投げることが必要です",
+  "playerManip.notEnoughItems": "シードを操作するためのアイテムが不足しています (%s 分の %s)",
   "playerManip.uncracked": "プレイヤーシードがクラックされている必要があります",
 
   "snakeGame.title": "スネーク",
-  "snakeGame.score": "スコア: %d",
+  "snakeGame.score": "スコア: %s",
 
   "c2cpacket.messageTooLong": "メッセージが長ぎます、 (最大. 255 文字)  %s 文字が入力されました",
   "c2cpacket.publicKeyNotFound": "パブリックキーが見つかりませんでした",

@@ -158,7 +158,7 @@ public class CreativeTabCommand {
         items.add(itemStack.save(source.registryAccess()));
 
         saveFile();
-        source.sendFeedback(Component.translatable("commands.ccreativetab.addStack.success", itemStack.getItem().getDescription(), name));
+        source.sendFeedback(Component.translatable("commands.ccreativetab.addStack.success", itemStack.getDisplayName(), name));
         ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
@@ -194,7 +194,7 @@ public class CreativeTabCommand {
         items.set(index, itemStack.save(source.registryAccess()));
 
         saveFile();
-        source.sendFeedback(Component.translatable("commands.ccreativetab.setStack.success", name, index, itemStack.getItem().getDescription()));
+        source.sendFeedback(Component.translatable("commands.ccreativetab.setStack.success", name, index, itemStack.getDisplayName()));
         ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }
@@ -212,7 +212,7 @@ public class CreativeTabCommand {
         tabs.put(name, new Tab((CompoundTag) icon.save(source.registryAccess()), items));
 
         saveFile();
-        source.sendFeedback(Component.translatable("commands.ccreativetab.changeIcon.success", name, old.getItem().getDescription(), icon.getItem().getDescription()));
+        source.sendFeedback(Component.translatable("commands.ccreativetab.changeIcon.success", name, old.getDisplayName(), icon.getDisplayName()));
         ClientCommandHelper.sendRequiresRestart();
         return Command.SINGLE_SUCCESS;
     }

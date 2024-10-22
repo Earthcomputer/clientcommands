@@ -70,7 +70,7 @@ public class SeedfindingUtil {
 
     @Nullable
     public static com.seedfinding.mcbiome.biome.Biome toSeedfindingBiome(Level level, Holder<Biome> biome) {
-        ResourceLocation name = level.registryAccess().registryOrThrow(Registries.BIOME).getKey(biome.value());
+        ResourceLocation name = level.registryAccess().lookupOrThrow(Registries.BIOME).getKey(biome.value());
         if (name == null || !"minecraft".equals(name.getNamespace())) {
             return null;
         }
@@ -87,17 +87,17 @@ public class SeedfindingUtil {
     }
 
     public static ItemStack fromSeedfindingItem(com.seedfinding.mcfeature.loot.item.ItemStack stack, RegistryAccess registryAccess) {
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(stack.getItem().getName()));
+        Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.withDefaultNamespace(stack.getItem().getName()));
         if (!stack.getItem().getEnchantments().isEmpty() && item == Items.BOOK) {
             item = Items.ENCHANTED_BOOK;
         }
 
-        Registry<Enchantment> enchantmentRegistry = registryAccess.registryOrThrow(Registries.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = registryAccess.lookupOrThrow(Registries.ENCHANTMENT);
 
         ItemStack ret = new ItemStack(item, stack.getCount());
         for (var enchAndLevel : stack.getItem().getEnchantments()) {
             ResourceKey<Enchantment> enchKey = Objects.requireNonNull(SEEDFINDING_ENCHANTMENTS.inverse().get(enchAndLevel.getFirst()), () -> "missing seedfinding enchantment " + enchAndLevel.getFirst());
-            enchantmentRegistry.getHolder(enchKey).ifPresent(enchantment -> {
+            enchantmentRegistry.get(enchKey).ifPresent(enchantment -> {
                 ret.enchant(enchantment, enchAndLevel.getSecond());
             });
         }

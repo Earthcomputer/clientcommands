@@ -3,15 +3,15 @@
   "commands.cbook.commandException": "Je houdt geen boek vast",
 
   "commands.ccalc.expected": "Verwachtte %s",
-  "commands.ccalc.invalidArgumentCount": "Functie \"%s\" kan niet %d argumenten krijgen",
+  "commands.ccalc.invalidArgumentCount": "Functie \"%s\" kan niet %s argumenten krijgen",
 
-  "commands.ccalcstack.success": "%d %s zijn %d stacks en %d extra",
-  "commands.ccalcstack.success.empty": "%d items zijn %d stacks en %d extra",
-  "commands.ccalcstack.success.empty.exact": "%d zijn precies %d stacks",
-  "commands.ccalcstack.success.exact": "%d %s zijn precies %d stacks",
+  "commands.ccalcstack.success": "%s %s zijn %s stacks en %s extra",
+  "commands.ccalcstack.success.empty": "%s items zijn %s stacks en %s extra",
+  "commands.ccalcstack.success.empty.exact": "%s zijn precies %s stacks",
+  "commands.ccalcstack.success.exact": "%s %s zijn precies %s stacks",
 
   "commands.ccrackrng.starting": "Spelersseed aan het kraken",
-  "commands.ccrackrng.success": "Spelers RNG gekraakt: %d",
+  "commands.ccrackrng.success": "Spelers RNG gekraakt: %s",
 
   "commands.cenchant.failed": "Het is onmogelijk of het zou te lang duren om deze betoveringen te krijgen",
   "commands.cenchant.incompatible": "Onverenigbare betoveringen",
@@ -23,40 +23,40 @@
   "commands.cfind.found.right": ", %2$s blokken verwijderd",
   "commands.cfind.keepSearching.success": "Entiteiten aan het vinden.",
   "commands.cfind.noMatch": "Geen enkele entiteit matchte jouw query",
-  "commands.cfind.success": "%d entiteiten matchten jouw query",
+  "commands.cfind.success": "%s entiteiten matchten jouw query",
 
   "commands.cfindblock.notFound": "Een dergelijk blok is niet gevonden",
   "commands.cfindblock.success.left": "De dichtstbijzijnde match is op ",
   "commands.cfindblock.success.right": ", %1$s blokken verwijderd",
 
-  "commands.cfinditem.match.left": "%dx %s gevonden op ",
+  "commands.cfinditem.match.left": "%sx %s gevonden op ",
   "commands.cfinditem.match.right": "",
   "commands.cfinditem.starting": "Aan het zoeken naar %s",
   "commands.cfinditem.starting.keepSearching": "Oneindig zoekend naar %s.",
-  "commands.cfinditem.total": "In totaal %dx %s gevonden",
+  "commands.cfinditem.total": "In totaal %sx %s gevonden",
 
   "commands.cfish.addGoal.success": "doel %s succesvol toegevoegd",
-  "commands.cfish.correctLoot": "De correcte buit is verkregen met een correctie van %dms",
+  "commands.cfish.correctLoot": "De correcte buit is verkregen met een correctie van %sms",
   "commands.cfish.error.crackFailed": "Gefaald om de dobber RNG te kraken, is de server gemodificeerd?",
   "commands.cfish.error.outOfWater": "Dobber uit het water, de manipulatie zal niet werken",
   "commands.cfish.listGoals.noGoals": "Er zijn geen visdoelen",
-  "commands.cfish.listGoals.success": "Er zijn %d visdoelen:",
+  "commands.cfish.listGoals.success": "Er zijn %s visdoelen:",
   "commands.cfish.needFishingManipulation": "Vismanipulatie is niet geactiveerd.",
   "commands.cfish.removeGoal.success": "doel %s succesvol verwijderd",
-  "commands.cfish.wrongLoot": "Kreeg niet de correcte buit met een correctie van %dms, zou %s ticks verder kunnen zijn",
+  "commands.cfish.wrongLoot": "Kreeg niet de correcte buit met een correctie van %sms, zou %s ticks verder kunnen zijn",
 
-  "commands.cgamma.success": "Gamma ingesteld op %f",
+  "commands.cgamma.success": "Gamma ingesteld op %s",
 
-  "commands.cghostblock.fill.success": "%d geestblokken gevuld",
+  "commands.cghostblock.fill.success": "%s geestblokken gevuld",
   "commands.cghostblock.set.success": "Geestblok geplaatst",
 
-  "commands.cgive.success": "%d %s gegeven",
+  "commands.cgive.success": "%s %s gegeven",
   "commands.cgive.notCreative": "Speler moet in spelmodus creatief zijn om blokken aan zichzelf te geven",
 
   "commands.cglow.entity.keepSearching.success": "Entiteiten aan het gloeien.",
   "commands.cglow.entity.failed": "Geen entiteiten om te gloeien",
-  "commands.cglow.entity.success": "%d entiteiten aan het gloeien",
-  "commands.cglow.area.success": "%d oppervlakte(s) aan het gloeien",
+  "commands.cglow.entity.success": "%s entiteiten aan het gloeien",
+  "commands.cglow.area.success": "%s oppervlakte(s) aan het gloeien",
 
   "commands.cplaysound.success": "Geluid %s afgespeeld",
 
@@ -70,20 +70,20 @@
   "commands.cstopsound.success.source.sound": "Geluid '%s' gestopt van bron '%s'",
 
   "commands.ctask.list.noTasks": "Geen taken die momenteel worden uitgevoerd",
-  "commands.ctask.list.success": "%d taken die momenteel worden uitgevoerd",
+  "commands.ctask.list.success": "%s taken die momenteel worden uitgevoerd",
   "commands.ctask.stop.noMatch": "Geen overeenkomende taken",
-  "commands.ctask.stop.success": "%d taken gestopt",
+  "commands.ctask.stop.success": "%s taken gestopt",
 
   "commands.cwiki.failed": "Kon wiki-inhoud niet ophalen",
 
-  "commands.client.blockpos": "(%d, %d, %d)",
+  "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Annuleren",
   "commands.client.crack": "Kraken",
   "commands.client.enable": "Activeren",
   "commands.client.expectedRegex": "Ongeldige regex %s",
   "commands.client.notClient": "Geen client-side commando",
 
-  "chorusManip.landing.success": "Landen op: %d, %d, %d",
+  "chorusManip.landing.success": "Landen op: %s, %s, %s",
   "chorusManip.landing.failed": "Landingsmanipulatie niet mogelijk",
   "chorusManip.goalTooFar": "Doel is te ver weg!",
   "chorusManip.needChorusManipulation": "Chorusfruitmanipulatie is niet geactiveerd.",
@@ -96,18 +96,18 @@
 
   "enchCrack.enchantments": "Betoveringen:",
   "enchCrack.clues": "Aanwijzingen:",
-  "enchCrack.slot": "Slot %d:",
+  "enchCrack.slot": "Slot %s:",
 
-  "enchCrack.xpSeed.one": "XP Seed: %08X",
-  "enchCrack.xpSeed.many": "Mogelijke XP seeds: %d",
-  "enchCrack.playerRNGSeed.many": "Mogelijke speler RNG seeds: %d",
+  "enchCrack.xpSeed.one": "XP Seed: %s",
+  "enchCrack.xpSeed.many": "Mogelijke XP seeds: %s",
+  "enchCrack.playerRNGSeed.many": "Mogelijke speler RNG seeds: %s",
   "enchCrack.addInfo": "Voeg info toe",
 
   "enchCrack.insn.dummy": "Doe een dummy betovering",
   "enchCrack.insn.ready": "Je betoveringsseed is gereed",
-  "enchCrack.insn.bookshelves": "Boekenkasten nodig: %d",
-  "enchCrack.insn.slot": "In slot: %d",
-  "enchCrack.insn.itemThrows": "Itemworpen modig: %d (about %f seconds)",
+  "enchCrack.insn.bookshelves": "Boekenkasten nodig: %s",
+  "enchCrack.insn.slot": "In slot: %s",
+  "enchCrack.insn.itemThrows": "Itemworpen modig: %s (about %s seconds)",
   "enchCrack.insn.itemThrows.noDummy": "Geen dummy betovering",
   "enchCrack.insn.enchantments": "Betoveringen op item:",
 
@@ -147,9 +147,9 @@
   "playerManip.reset.recreated": "Speler hergemaakt",
 
   "playerManip.serverBrandWarning": "Waarschuwing: de server waarop je speelt is gemodificeerd. Het is niet gegarandeerd dat RNG-functies in deze mod werken!",
-  "playerManip.toolBreakWarning": "Waarschuwing: gereedschap heeft %d levensduur over",
-  "playerManip.throwError": "Conditie niet mogelijk of zou meer dan %d itemworpen nodig hebben",
-  "playerManip.notEnoughItems": "Niet genoeg items(%d van %d) om seed te manipuleren",
+  "playerManip.toolBreakWarning": "Waarschuwing: gereedschap heeft %s levensduur over",
+  "playerManip.throwError": "Conditie niet mogelijk of zou meer dan %s itemworpen nodig hebben",
+  "playerManip.notEnoughItems": "Niet genoeg items(%s van %s) om seed te manipuleren",
   "playerManip.uncracked": "Spelersseed moet gekraakt zijn.",
 
   "itemCrack.notEnoughItems": "RNG SeedCracker kan niet worden gebruikt: niet genoeg items in spelershand"

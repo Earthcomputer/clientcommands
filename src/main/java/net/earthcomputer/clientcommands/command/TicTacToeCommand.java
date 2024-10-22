@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -112,7 +113,7 @@ public class TicTacToeCommand {
             throw NO_GAME_WITH_PLAYER_EXCEPTION.create();
         }
 
-        source.getClient().tell(() -> source.getClient().setScreen(new TicTacToeGameScreen(game)));
+        source.getClient().schedule(() -> source.getClient().setScreen(new TicTacToeGameScreen(game)));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -223,7 +224,7 @@ public class TicTacToeCommand {
             guiGraphics.drawString(this.font, this.title, startX, startY - 20, 0xff_ffffff);
             guiGraphics.drawString(this.font, Component.translatable("ticTacToeGame.playingWith", this.game.yourMarks.name), startX, startY - 10, 0xff_ffffff);
 
-            guiGraphics.blit(GRID_TEXTURE, startX, startY, GRID_SIZE, GRID_SIZE, 0, 0, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE);
+            guiGraphics.blit(RenderType::guiTextured, GRID_TEXTURE, startX, startY, GRID_SIZE, GRID_SIZE, 0, 0, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE, GRID_SIZE_TEXTURE);
             TicTacToeGame.Mark[][] board = this.game.board;
 
             for (byte x = 0; x < 3; x++) {
@@ -236,7 +237,7 @@ public class TicTacToeCommand {
                         case NOUGHT -> 0;
                         case CROSS -> MARK_SIZE_TEXTURE;
                     };
-                    guiGraphics.blit(MARKS_TEXTURE, startX + (CELL_SIZE + BORDER_SIZE) * x + PADDING, startY + (CELL_SIZE + BORDER_SIZE) * y + PADDING, MARK_SIZE, MARK_SIZE, offset, 0, MARK_SIZE_TEXTURE, MARK_SIZE_TEXTURE, 2 * MARK_SIZE_TEXTURE, MARK_SIZE_TEXTURE);
+                    guiGraphics.blit(RenderType::guiTextured, MARKS_TEXTURE, startX + (CELL_SIZE + BORDER_SIZE) * x + PADDING, startY + (CELL_SIZE + BORDER_SIZE) * y + PADDING, MARK_SIZE, MARK_SIZE, offset, 0, MARK_SIZE_TEXTURE, MARK_SIZE_TEXTURE, 2 * MARK_SIZE_TEXTURE, MARK_SIZE_TEXTURE);
                 }
             }
         }

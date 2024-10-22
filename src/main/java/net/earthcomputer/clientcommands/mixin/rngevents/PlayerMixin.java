@@ -1,8 +1,9 @@
 package net.earthcomputer.clientcommands.mixin.rngevents;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,7 +21,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -28,7 +28,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Player.class)
@@ -46,10 +45,10 @@ public abstract class PlayerMixin extends LivingEntity {
     }
 
     // TODO: update-sensitive: type hierarchy of Entity.damage
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", ordinal = 0))
-    public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount) {
+    @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z", ordinal = 0))
+    public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount, Operation<Boolean> original) {
         if (!level().isClientSide || !isThePlayer()) {
-            return target.hurt(source, amount);
+            return original.call(target, source, amount);
         }
 
         Player _this = (Player) (Object) this;
@@ -61,7 +60,7 @@ public abstract class PlayerMixin extends LivingEntity {
         if (target instanceof ArmorStand armorStand) {
             if (armorStand.isRemoved()) {
                 canAttack = false;
-            } else if (armorStand.isInvulnerableTo(source) || armorStand.invisible || armorStand.isMarker()) {
+            } else if (armorStand.isInvulnerableToBase(source) || armorStand.invisible || armorStand.isMarker()) {
                 canAttack = false;
             } else if (!_this.getAbilities().mayBuild) {
                 canAttack = false;
@@ -92,7 +91,7 @@ public abstract class PlayerMixin extends LivingEntity {
             }
         }
 
-        if (target.isInvulnerableTo(source)) {
+        if (target.isInvulnerableToBase(source)) {
             canAttack = false;
         }
 
@@ -107,7 +106,7 @@ public abstract class PlayerMixin extends LivingEntity {
                 }
 
                 if (target.getType().is(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS)) {
-                    registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(Enchantments.BANE_OF_ARTHROPODS).ifPresent(baneOfArthropods -> {
+                    registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.BANE_OF_ARTHROPODS).ifPresent(baneOfArthropods -> {
                         if (EnchantmentHelper.getItemEnchantmentLevel(baneOfArthropods, heldStack) > 0) {
                             PlayerRandCracker.onBaneOfArthropods();
                         }
@@ -116,7 +115,7 @@ public abstract class PlayerMixin extends LivingEntity {
             }
         }
 
-        return target.hurt(source, amount);
+        return original.call(target, source, amount);
     }
 
     @Unique
