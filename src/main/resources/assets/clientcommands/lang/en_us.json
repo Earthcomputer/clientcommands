@@ -16,6 +16,11 @@
   "commands.careastats.output.blocksMatched": "Matched %s out of %s total blocks",
   "commands.careastats.output.entitiesFound": "Found %s entities in this area",
 
+  "commands.cautoprefix.success": "Prefixing \"%s\" in all the messages you send from now on",
+  "commands.cautoprefix.reset": "Cleared the currently used prefix",
+  "commands.cautoprefix.none": "There is no prefix currently being used",
+  "commands.cautoprefix.current": "The current prefix is \"%s\"",
+
   "commands.cbook.success": "Successfully edited book",
   "commands.cbook.commandException": "You are not holding a book",
 
