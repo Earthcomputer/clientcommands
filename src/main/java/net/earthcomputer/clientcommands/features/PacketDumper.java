@@ -77,12 +77,8 @@ public class PacketDumper {
         writer.beginArray();
         try {
             if (packet.type().id().getNamespace().equals("clientcommands")) {
-                ProtocolInfo<C2CPacketListener> protocolInfo = C2CPacketHandler.getCurrentProtocolInfo();
-                if (protocolInfo == null) {
-                    throw new IOException("Not currently logged in");
-                }
                 //noinspection unchecked
-                protocolInfo.codec().encode(new PacketDumpByteBuf(writer), (Packet<? super C2CPacketListener>) packet);
+                C2CPacketHandler.C2C.codec().encode(new PacketDumpByteBuf(writer), (Packet<? super C2CPacketListener>) packet);
             } else {
                 ChannelPipeline pipeline = Minecraft.getInstance().getConnection().getConnection().channel.pipeline();
                 @SuppressWarnings("unchecked")
