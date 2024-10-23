@@ -158,6 +158,7 @@ public class ClientCommands implements ClientModInitializer {
         PosCommand.register(dispatcher);
         RelogCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
+        ReplyCommand.register(dispatcher);
         ShrugCommand.register(dispatcher);
         SignSearchCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
