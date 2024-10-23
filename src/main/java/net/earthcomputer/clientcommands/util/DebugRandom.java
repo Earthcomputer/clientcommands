@@ -260,14 +260,6 @@ class DebugRandomSourcePanel extends JPanel {
         add(tabbedPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel();
-        JButton dumpStackTraceButton = new JButton("Dump stack trace");
-        dumpStackTraceButton.addActionListener(e -> {
-            if (selectedStackTrace >= 0 && selectedStackTrace < DebugRandom.stackTraceById.size()) {
-                DebugRandom.LOGGER.info(DebugRandom.stackTraceById.get(selectedStackTrace));
-            }
-        });
-        bottomPanel.add(dumpStackTraceButton);
-
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
