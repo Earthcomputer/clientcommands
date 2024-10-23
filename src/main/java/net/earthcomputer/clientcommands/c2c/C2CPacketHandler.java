@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.c2c;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -9,6 +10,7 @@ import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StartTicTacToeGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ListenCommand;
+import net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgument;
 import net.earthcomputer.clientcommands.interfaces.IClientPacketListener_C2C;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -188,12 +190,18 @@ public class C2CPacketHandler implements C2CPacketListener {
     public void onMessageC2CPacket(MessageC2CPacket packet) {
         String sender = packet.sender();
         String message = packet.message();
+        Component formattedComponent;
+        try {
+            formattedComponent = FormattedComponentArgument.formattedComponent().parse(new StringReader(message));
+        } catch (CommandSyntaxException e) {
+            formattedComponent = Component.nullToEmpty(message);
+        }
         MutableComponent prefix = Component.empty();
         prefix.append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
         prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal(" "));
-        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.incoming", sender, message).withStyle(ChatFormatting.GRAY));
+        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.incoming", sender, formattedComponent));
         Minecraft.getInstance().gui.getChat().addMessage(component);
     }
 
