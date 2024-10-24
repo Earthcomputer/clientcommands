@@ -383,7 +383,8 @@ public class EnchantmentCracker {
                             }
                             enchantLevels[slot] = level;
                         }
-                        for (int slot = 0; slot < 3; slot++) {
+                        int maxExperienceConsumed = Configs.getMaxExperienceConsumed();
+                        for (int slot = 0; slot < maxExperienceConsumed; slot++) {
                             List<EnchantmentInstance> enchantments = getEnchantmentList(enchantmentRegistry, rand, xpSeed, stack, slot, enchantLevels[slot], version);
                             if (enchantmentsPredicate.test(enchantments)
                                 && enchantLevels[slot] >= Configs.getMinEnchantLevels()
