@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.xpple.clientarguments.arguments.CEntityArgument;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
-import dev.xpple.clientarguments.arguments.CEntitySelectorReader;
+import dev.xpple.clientarguments.arguments.CEntitySelectorParser;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -36,8 +36,8 @@ public class EntityUUIDArgument implements ArgumentType<EntityUUIDArgument.Resul
     @Override
     public Result parse(StringReader reader) throws CommandSyntaxException {
         if (reader.canRead() && reader.peek() == '@') {
-            CEntitySelectorReader selectorReader = new CEntitySelectorReader(reader);
-            CEntitySelector selector = selectorReader.read();
+            CEntitySelectorParser selectorParser = new CEntitySelectorParser(reader, true);
+            CEntitySelector selector = selectorParser.parse();
             return new SelectorBacked(selector);
         }
         int start = reader.getCursor();
@@ -58,14 +58,14 @@ public class EntityUUIDArgument implements ArgumentType<EntityUUIDArgument.Resul
         if (context.getSource() instanceof SharedSuggestionProvider commandSource) {
             StringReader stringReader = new StringReader(builder.getInput());
             stringReader.setCursor(builder.getStart());
-            CEntitySelectorReader entitySelectorReader = new CEntitySelectorReader(stringReader, true);
+            CEntitySelectorParser entitySelectorParser = new CEntitySelectorParser(stringReader, true);
 
             try {
-                entitySelectorReader.read();
+                entitySelectorParser.parse();
             } catch (CommandSyntaxException ignored) {
             }
 
-            return entitySelectorReader.listSuggestions(builder, (builderx) -> {
+            return entitySelectorParser.fillSuggestions(builder, builderx -> {
                 Collection<String> collection = commandSource.getOnlinePlayerNames();
                 Iterable<String> iterable = Iterables.concat(collection, commandSource.getSelectedEntities());
                 SharedSuggestionProvider.suggest(iterable, builderx);
@@ -104,7 +104,7 @@ public class EntityUUIDArgument implements ArgumentType<EntityUUIDArgument.Resul
     private record SelectorBacked(CEntitySelector selector) implements Result {
         @Override
         public UUID getUUID(FabricClientCommandSource source) throws CommandSyntaxException {
-            return selector.getEntity(source).getUUID();
+            return selector.findSingleEntity(source).getUUID();
         }
     }
 }

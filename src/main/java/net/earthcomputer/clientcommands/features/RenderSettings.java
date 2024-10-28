@@ -50,7 +50,7 @@ public class RenderSettings {
         disabledEntities.clear();
         for (var filter : entityRenderSelectors) {
             try {
-                List<UUID> entities = filter.getA().getEntities(source).stream().map(Entity::getUUID).collect(Collectors.toList());
+                List<UUID> entities = filter.getA().findEntities(source).stream().map(Entity::getUUID).toList();
                 if (filter.getB()) {
                     entities.forEach(disabledEntities::remove);
                 } else {

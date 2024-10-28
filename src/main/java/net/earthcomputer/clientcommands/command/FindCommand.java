@@ -46,7 +46,7 @@ public class FindCommand {
 
             return Command.SINGLE_SUCCESS;
         } else {
-            List<? extends Entity> entities = selector.getEntities(source);
+            List<? extends Entity> entities = selector.findEntities(source);
 
             if (entities.isEmpty()) {
                 throw NO_MATCH_EXCEPTION.create();
@@ -94,7 +94,7 @@ public class FindCommand {
         @Override
         public void body() {
             try {
-                for (Entity entity : selector.getEntities(this.source)) {
+                for (Entity entity : selector.findEntities(this.source)) {
                     if (foundEntities.add(entity.getUUID())) {
                         sendEntityFoundMessage(source, entity);
                     }
