@@ -15,7 +15,8 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -170,7 +171,7 @@ public class KitCommand {
             instantly along with the chat hud. Slightly delaying the opening of the
             screen fixes this issue.
          */
-        source.getClient().tell(() -> source.getClient().setScreen(new PreviewScreen(new InventoryMenu(tempInv, true, source.getPlayer()), tempInv, name)));
+        source.getClient().schedule(() -> source.getClient().setScreen(new PreviewScreen(new InventoryMenu(tempInv, true, source.getPlayer()), tempInv, name)));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -217,8 +218,7 @@ public class KitCommand {
     }
 }
 
-class PreviewScreen extends EffectRenderingInventoryScreen<InventoryMenu> {
-
+class PreviewScreen extends AbstractContainerScreen<InventoryMenu> {
     public PreviewScreen(InventoryMenu menu, Inventory inventory, String name) {
         super(menu, inventory, Component.literal(name).withStyle(style -> style.withColor(ChatFormatting.RED)));
         this.titleLabelX = 80;
@@ -238,13 +238,8 @@ class PreviewScreen extends EffectRenderingInventoryScreen<InventoryMenu> {
     }
 
     @Override
-    protected void renderEffects(GuiGraphics graphics, int mouseX, int mouseY) {
-        // nop
-    }
-
-    @Override
     protected void renderBg(GuiGraphics graphics, float delta, int mouseX, int mouseY) {
-        graphics.blit(INVENTORY_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
     }
 
     @Override

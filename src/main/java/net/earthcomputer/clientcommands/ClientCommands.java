@@ -161,6 +161,7 @@ public class ClientCommands implements ClientModInitializer {
         ShrugCommand.register(dispatcher);
         SignSearchCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
+        SnapCommand.register(dispatcher);
         StartupCommand.register(dispatcher);
         TaskCommand.register(dispatcher);
         TicTacToeCommand.register(dispatcher);
