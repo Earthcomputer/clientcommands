@@ -8,6 +8,7 @@
   "commands.calias.addAlias.success": "Pomyślnie dodano alias \"%s\"",
   "commands.calias.listAliases.noAliasesRegistered": "Nie zarejestrowano aliasów",
   "commands.calias.listAliases.success": "%s aliasów zarejestrowano:",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
   "commands.calias.removeAlias.success": "Pomyślnie usunięto alias \"%s\"",
 
   "commands.careastats.notLoaded": "Chunk w tym obszarze nie jest załadowany",
@@ -38,6 +39,9 @@
   "commands.ccalcstack.success.empty.exact": "%s przedmiotów to dokładnie %s staki",
   "commands.ccalcstack.success.exact": "%s %s to dokładnie %s staki",
 
+  "commands.ccrackrng.failed": "Failed to crack player seed",
+  "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper.",
+  "commands.ccrackrng.retries": "Cracking player seed, attempt %s/%s",
   "commands.ccrackrng.starting": "Łamanie ziarna gracza",
   "commands.ccrackrng.success": "RNG gracza złamane: %s",
 
@@ -55,6 +59,7 @@
   "commands.ccreativetab.setStack.success": "Ustawiono stos w \"%s\" o indeksie %s na %s",
 
   "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otrzymać te zaklęcia",
+  "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Niekompatybilne zaklęcia",
   "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączonego \"Enchanting prediction\"",
   "commands.cenchant.success": "Rozpoczynam manipulowanie zaklęciami",
@@ -66,8 +71,10 @@
   "commands.cfind.success": "%s obiektów pasuje twoim wymaganiom",
 
   "commands.cfindblock.notFound": "Nie znaleziono takiego bloku",
+  "commands.cfindblock.starting": "Szukam %s",
   "commands.cfindblock.success": "Najbliższe trafienie jest na %s, %s bloków dalej",
 
+  "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
   "commands.cfinditem.match": "%sx %s znaleziono na %s",
   "commands.cfinditem.starting": "Szukam %s",
   "commands.cfinditem.starting.keepSearching": "Będę szukać %s",
@@ -82,6 +89,8 @@
   "commands.cfish.error.impossibleLoot": "Ten przedmiot nie wypada z wędkowania",
   "commands.cfish.error.onGround": "Spławik uderzył o ziemię",
   "commands.cfish.error.openWater": "Spławik musi znajdować się na otwartych wodach żeby móc łowić skarby",
+  "commands.cfish.error.openWater.flowingWater": "Help: the water around the bobber must be still water, flowing water does not work",
+  "commands.cfish.error.openWater.help": "Help: the red cubes show the blocks which are preventing the open water condition from being met",
   "commands.cfish.error.openWater.lilyPad": "Pomoc: spróbuj zanurzyć spławik pod lilią wodną",
   "commands.cfish.error.outOfWater": "Spławik jest poza wodą, manipulacja się nie uda",
   "commands.cfish.help.tooManyEnchants": "Pomoc: Im wiecej zakleć na wędce, tym trudniej jest zdobyć porządane przedmioty",
@@ -92,6 +101,14 @@
   "commands.cfish.wrongLoot": "Nie mogłem otrzymać przedmiotu z dokładnością do %sms, mogłem wyprzedzić %s ticków w przód",
 
   "commands.cfov.success": "Ustawiono pole widzenia na %s",
+
+  "commands.cfunction.limitReached": "Command limit (%s) reached",
+  "commands.cfunction.success": "Ran %s commands from function %s",
+
+  "commands.cgamemode.playerNotFound": "Player not found",
+  "commands.cgamemode.playerGameMode": "Player %s is in game mode %s",
+  "commands.cgamemode.noneWithGameMode": "No players are in game mode %s",
+  "commands.cgamemode.listWithGameMode": "The following players are in game mode %s:",
 
   "commands.cgamma.success": "Ustawiono gamma na %s",
 
@@ -105,6 +122,8 @@
   "commands.cglow.entity.failed": "Brak obiektów do podświetlenia",
   "commands.cglow.entity.success": "Podświetlono %s obiekty",
   "commands.cglow.area.success": "Podświetlono %s terenów",
+
+  "commands.chat.success": "Successfully opened c🎩",
 
   "commands.chotbar.notCreative": "Gracz musi byc w trybie kreatywnym aby przywrócić pasek dostępu",
   "commands.chotbar.restoredHotbar": "Przywrócono pasek dostępu %s",
@@ -120,6 +139,23 @@
   "commands.ckit.list": "Dostępne zestawy: %s",
   "commands.ckit.list.empty": "Brak dostępnych zestawów",
 
+  "commands.clisten.commandDisabled": "The command was disabled, check your logs",
+  "commands.clisten.unknownPacket": "Unknown packet %s",
+  "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
+  "commands.clisten.receivedC2CPacket": "Received the following C2C packet: %s",
+  "commands.clisten.packetError": "ERROR",
+  "commands.clisten.add.success": "Successfully started listening to that packet",
+  "commands.clisten.add.failed": "Already listening to that packet",
+  "commands.clisten.remove.success": "No longer listening to that packet",
+  "commands.clisten.remove.failed": "Not listening to that packet",
+  "commands.clisten.list.none": "Not listening to any packets",
+  "commands.clisten.list": "Listening to the following packets:",
+  "commands.clisten.clear": "No longer listening to any packets",
+
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+
   "commands.cplayerinfo.ioException": "Wystąpił błąd",
   "commands.cplayerinfo.getNameHistory.success": "%s był znany również jako: %s",
 
@@ -130,24 +166,89 @@
 
   "commands.cplaysound.success": "Odtworzono dźwięk %s",
 
+  "commands.cplugins.found": "Found the following plugins:",
+
+  "commands.cping.success": "Your average ping is %sms",
+  "commands.cping.success.other": "The average ping of %s is %sms",
+  "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
+  "commands.cping.playerNotFound": "Player not found",
+
+  "commands.cpos.coords": "%s in %s is %s in %s",
+  "commands.cpos.level.overworld": "the Overworld",
+  "commands.cpos.level.the_end": "the End",
+  "commands.cpos.level.the_nether": "the Nether",
+
   "commands.crelog.failed": "Nie udało się połączyć ponownie",
 
   "commands.crender.entities.success": "Reguła renderowania obiektu została zaktualizowana",
+
+  "commands.csignsearch.starting": "Searching signs",
+
+  "commands.csnap.airborne": "You cannot snap while airborne",
+  "commands.csnap.cannotFit": "The player cannot fit at that location",
+  "commands.csnap.clickToTeleportEnabled": "Enabled click to teleport",
+  "commands.csnap.clickToTeleportDisabled": "Disabled click to teleport",
+  "commands.csnap.success": "Snapped to %s %s %s",
+  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away",
+  "commands.csnap.wall": "You cannot snap onto walls",
+
+  "commands.cstartup.add.success": "Added command to startup file",
+  "commands.cstartup.couldNotCreateFile": "Couldn't create startup file",
+  "commands.cstartup.couldNotEdit": "Couldn't edit startup file",
 
   "commands.cstopsound.success.sourceless.any": "Zatrzymano wszystkie dźwięki",
   "commands.cstopsound.success.sourceless.sound": "Zatrzymano dźwięk '%s'",
   "commands.cstopsound.success.source.any": "Zatrzymano wszystkie '%s' dźwięki",
   "commands.cstopsound.success.source.sound": "Zatrzymano dźwięk '%s' na źródle '%s'",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "Nie ma w tej chwili działających zadań.",
   "commands.ctask.list.success": "Działające zadania: %s",
   "commands.ctask.stop.noMatch": "Żadnych pasujących zadań",
   "commands.ctask.stop.success": "Zatrzymano %s zadań",
 
+  "commands.ctictactoe.playerNotFound": "Player not found",
+  "commands.ctictactoe.noGameWithPlayer": "Currently not playing a game with that player",
+
+  "commands.ctime.reset.success": "The time now matches the server",
+
+  "commands.ctitle.cleared": "Cleared titles",
+  "commands.ctitle.reset": "Reset title options",
+  "commands.ctitle.show.title": "Showing new title",
+  "commands.ctitle.show.subtitle": "Showing new subtitle",
+  "commands.ctitle.show.actionbar": "Showing new actionbar title",
+  "commands.ctitle.times": "Changed title display times",
+
+  "commands.ctooltip.header.held": "The tooltip of the held item is:",
+  "commands.ctooltip.header.stack": "The tooltip of that item would be:",
+
   "commands.ctp.notSpectator": "Gracz musi być w trybie obserwatora by się przeteleportować",
   "commands.ctp.success": "Przeteleportowano gracza do %s",
 
+  "commands.ctranslate.unknownError": "Wystąpił błąd",
+  "commands.ctranslate.unknownLanguageCode": "Unknown language code \"%s\"",
+  "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
+  "commands.ctranslate.hoverText": "Click to copy, shift-click to insert in chat field",
+
+  "commands.cuuid.success": "The UUID of %s is %s",
+  "commands.cuuid.success.nameless": "The UUID of that entity is %s",
+
+  "commands.cvar.notFound": "Variable \"%s\" not found",
+  "commands.cvar.saveFile.failed": "Could not save variables file",
+  "commands.cvar.add.success": "Successfully created variable \"%s\"",
+  "commands.cvar.add.alreadyExists": "Variable \"%s\" already exists",
+  "commands.cvar.remove.success": "Successfully removed variable \"%s\"",
+  "commands.cvar.edit.success": "Successfully edited variable \"%s\"",
+  "commands.cvar.parse.success": "\"%s\" evaluates to \"%s\"",
+  "commands.cvar.list.empty": "No available variables",
+  "commands.cvar.list": "Available variables: %s",
+
+  "commands.cwe.playerNotFound": "Player not found",
+
+  "commands.cweather.reset": "Stopped overriding weather",
+
   "commands.cwiki.failed": "Nie można było otrzymać zawartości z wiki",
+  "commands.cwiki.noContent": "There is no introductory paragraph in that article",
 
   "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Anuluj",
@@ -155,9 +256,14 @@
   "commands.client.enable": "Włącz",
   "commands.client.expectedRegex": "Nieprawidłowe wyrażenie regularne %s",
   "commands.client.glow": "[Podświetl]",
-  "commands.client.notClient": "To nie jest polecenie klienta.",
-  "commands.client.tooFewArguments": "Zbyt mało argumentów",
   "commands.client.invalidArgumentException": "Nieprawidłowy argument '%s'",
+  "commands.client.invalidClickAction": "Invalid click event action '%s'",
+  "commands.client.invalidHoverAction": "Invalid hover event action '%s'",
+  "commands.client.invalidHoverEvent": "Invalid hover event '%s'",
+  "commands.client.notClient": "To nie jest polecenie klienta.",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
+  "commands.client.requiresRestart": "This change will take effect after you restart your client",
+  "commands.client.tooFewArguments": "Zbyt mało argumentów",
 
   "chorusManip.landing.success": "Ląduję na: %s, %s, %s",
   "chorusManip.landing.failed": "Manipulacja pozycjonowania jest niemożliwa",
@@ -173,6 +279,7 @@
   "enchCrack.enchantments": "Zaklęcia:",
   "enchCrack.clues": "Podpowiedzi:",
   "enchCrack.slot": "Slot %s:",
+  "enchCrack.bookshelfCount": "Bookshelf Count: %s",
 
   "enchCrack.xpSeed.one": "Ziarno XP: %s",
   "enchCrack.xpSeed.many": "Liczba możliwych ziarn XP: %s",
@@ -186,6 +293,12 @@
   "enchCrack.insn.itemThrows": "Ile musisz wyrzucić przedmiotów: %s (około %s sekund)",
   "enchCrack.insn.itemThrows.noDummy": "Nie rzucaj zaklęcia na zbędny przedmiot",
   "enchCrack.insn.enchantments": "Zaklęcia na przedmiocie:",
+
+  "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: niewystarczająca ilość przedmiotów w ekwipunku",
+
+  "minesweeperGame.minesLeft": "Mines Left: %s",
+  "minesweeperGame.timePlayed": "Time Played: %ss",
+  "minesweeperGame.title": "Minesweeper",
 
   "playerManip.state": "Stan ziarna gracza: %s",
   "playerManip.state.uncracked": "Nie złamano",
@@ -203,13 +316,16 @@
   "playerManip.reset.sprint": "Włączono sprint",
   "playerManip.reset.enterWater": "Wskoczono do wody",
   "playerManip.reset.swim": "Próbowano pływać",
+  "playerManip.reset.amethystChime": "Walked on Amethyst Crystals",
   "playerManip.reset.potion": "Efekt mikstury aktywny",
   "playerManip.reset.mending": "Naprawiono przedmiot",
+  "playerManip.reset.xp": "XP Orb Collected",
   "playerManip.reset.respiration": "Użyto hełmu z zaklęciem oddychania",
   "playerManip.reset.dropItem": "Wyrzucono przedmiot",
   "playerManip.reset.anvil": "Użyto kowadła",
   "playerManip.reset.food": "Zjedzono coś",
   "playerManip.reset.drink": "Wypito coś",
+  "playerManip.reset.consume": "Consumed",
   "playerManip.reset.baneOfArthropods": "Uderzono stawonoga, pogromcą stawonogów",
   "playerManip.reset.advancement": "Zdobyto osiągnięcie",
   "playerManip.reset.shield": "Zablokowano tarczą",
@@ -228,5 +344,30 @@
   "playerManip.notEnoughItems": "Nie wystarczająca ilość przedmiotów (%s of %s) by manipulować ziarnem",
   "playerManip.uncracked": "Ziarno gracza musi być złamane",
 
-  "itemCrack.notEnoughItems": "Nie można użyć RNG SeedCracker: niewystarczająca ilość przedmiotów w ekwipunku"
+  "snakeGame.title": "Snake",
+  "snakeGame.score": "Score: %s",
+
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
+  "ticTacToeGame.playingWith": "You are playing with %s",
+  "ticTacToeGame.noughts": "noughts (O)",
+  "ticTacToeGame.crosses": "crosses (X)",
+
+  "c2cpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
+  "c2cpacket.publicKeyNotFound": "Public key not found",
+  "c2cpacket.encryptionFailed": "Something failed while encrypting your message",
+  "c2cpacket.malformedPacket": "You have received a malformed C2C packet:",
+  "c2cpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
+  "c2cpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+
+  "c2cpacket.messageC2CPacket.incoming": "%s -> you: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }
