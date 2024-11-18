@@ -1,5 +1,5 @@
 {
-  "commands.calias.notFound": "Alias \"%s\" nicht gefunde",
+  "commands.calias.notFound": "Alias \"%s\" nicht gefunden",
   "commands.calias.illegalFormatException": "Der formatierte Text war entweder falsch formatiert oder zu wenige Argumente wurden verwendet",
   "commands.calias.file.readError": "Konnte Alias-Datei nicht lesen",
   "commands.calias.file.writeError": "Konnte Alias-Datei nicht schreiben",
