@@ -1,19 +1,65 @@
 {
+  "commands.calias.notFound": "Alias \"%s\" not found",
+  "commands.calias.illegalFormatException": "The format string was either malformed or too few arguments were supplied",
+  "commands.calias.file.readError": "Failed to read alias file",
+  "commands.calias.file.writeError": "Failed to write to alias file",
+  "commands.calias.addAlias.aliasAlreadyExists": "Alias \"%s\" already exists",
+  "commands.calias.addAlias.commandAlreadyExists": "The command \"/%s\" already exists",
+  "commands.calias.addAlias.success": "Successfully added alias \"%s\"",
+  "commands.calias.listAliases.noAliasesRegistered": "No aliases registered",
+  "commands.calias.listAliases.success": "%s aliases registered:",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
+  "commands.calias.removeAlias.success": "Successfully removed alias \"%s\"",
+
+  "commands.careastats.notLoaded": "A chunk in this area is not loaded",
+  "commands.careastats.output.chunksScanned": "Scanned %s chunks in %sns ≈ %sms",
+  "commands.careastats.output.blocksMatched": "Matched %s out of %s total blocks",
+  "commands.careastats.output.entitiesFound": "Found %s entities in this area",
+
   "commands.cbook.success": "Boek succesvol bewerkt",
   "commands.cbook.commandException": "Je houdt geen boek vast",
 
   "commands.ccalc.expected": "Verwachtte %s",
   "commands.ccalc.invalidArgumentCount": "Functie \"%s\" kan niet %s argumenten krijgen",
+  "commands.ccalc.parse": "Parsed expression: %s",
+  "commands.ccalc.parse.binaryOperator.addition": "(%s + %s)",
+  "commands.ccalc.parse.binaryOperator.division": "(%s / %s)",
+  "commands.ccalc.parse.binaryOperator.exponentiation": "(%s ^ %s)",
+  "commands.ccalc.parse.binaryOperator.modulo": "(%s %% %s)",
+  "commands.ccalc.parse.binaryOperator.multiplication": "(%s * %s)",
+  "commands.ccalc.parse.binaryOperator.subtraction": "(%s - %s)",
+  "commands.ccalc.parse.constant": "(constant '%s')",
+  "commands.ccalc.parse.function": "(function '%s' with arguments: %s)",
+  "commands.ccalc.parse.literal": "(literal: %s)",
+  "commands.ccalc.parse.negate": "(negated: %s)",
+  "commands.ccalc.tooDeeplyNested": "Expression is too deeply nested",
 
   "commands.ccalcstack.success": "%s %s zijn %s stacks en %s extra",
   "commands.ccalcstack.success.empty": "%s items zijn %s stacks en %s extra",
   "commands.ccalcstack.success.empty.exact": "%s zijn precies %s stacks",
   "commands.ccalcstack.success.exact": "%s %s zijn precies %s stacks",
 
+  "commands.ccrackrng.failed": "Failed to crack player seed",
+  "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper.",
+  "commands.ccrackrng.retries": "Cracking player seed, attempt %s/%s",
   "commands.ccrackrng.starting": "Spelersseed aan het kraken",
   "commands.ccrackrng.success": "Spelers RNG gekraakt: %s",
 
+  "commands.ccreativetab.addStack.success": "Successfully added %s to \"%s\"",
+  "commands.ccreativetab.addTab.alreadyExists": "Creative tab \"%s\" already exists",
+  "commands.ccreativetab.addTab.illegalCharacter": "Creative tab can only contain [a-z0-9/._-] characters",
+  "commands.ccreativetab.addTab.success": "Successfully added creative tab \"%s\"",
+  "commands.ccreativetab.changeIcon.success": "Successfully changed the icon of \"%s\" from %s to %s",
+  "commands.ccreativetab.notFound": "Creative tab \"%s\" not found",
+  "commands.ccreativetab.outOfBounds": "Index %s is out of bounds",
+  "commands.ccreativetab.removeStack.success": "Successfully removed stack from \"%s\" at index %s",
+  "commands.ccreativetab.removeTab.success": "Successfully removed creative tab \"%s\"",
+  "commands.ccreativetab.renameTab.success": "Successfully renamed creative tab \"%s\" to \"%s\"",
+  "commands.ccreativetab.saveFile.failed": "Could not save creative tabs file",
+  "commands.ccreativetab.setStack.success": "Successfully set the stack from \"%s\" at index %s to %s",
+
   "commands.cenchant.failed": "Het is onmogelijk of het zou te lang duren om deze betoveringen te krijgen",
+  "commands.cenchant.help.uncrackedPlayerSeed": "Help: you have not fully cracked the player seed",
   "commands.cenchant.incompatible": "Onverenigbare betoveringen",
   "commands.cenchant.needEnchantingPrediction": "Dit commando vereist betoveringspredictie om gebruikt te worden.",
   "commands.cenchant.success": "Betoveringsmanipulatie aan het starten",
@@ -25,8 +71,10 @@
   "commands.cfind.success": "%s entiteiten matchten jouw query",
 
   "commands.cfindblock.notFound": "Een dergelijk blok is niet gevonden",
+  "commands.cfindblock.starting": "Aan het zoeken naar %s",
   "commands.cfindblock.success": "De dichtstbijzijnde match is op %s, %s blokken verwijderd",
 
+  "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
   "commands.cfinditem.match": "%sx %s gevonden op %s",
   "commands.cfinditem.starting": "Aan het zoeken naar %s",
   "commands.cfinditem.starting.keepSearching": "Oneindig zoekend naar %s.",
@@ -34,13 +82,33 @@
 
   "commands.cfish.addGoal.success": "doel %s succesvol toegevoegd",
   "commands.cfish.correctLoot": "De correcte buit is verkregen met een correctie van %sms",
+  "commands.cfish.error.biome": "Loot cannot be obtained in this biome, %s needed",
   "commands.cfish.error.crackFailed": "Gefaald om de dobber RNG te kraken, is de server gemodificeerd?",
+  "commands.cfish.error.collision": "Fishing bobber collided with something",
+  "commands.cfish.error.fire": "Fishing bobber caught fire",
+  "commands.cfish.error.impossibleLoot": "That loot cannot be obtained with fishing",
+  "commands.cfish.error.onGround": "Fishing bobber hit the ground",
+  "commands.cfish.error.openWater": "Fishing bobber needs to be in open water for treasure loot",
+  "commands.cfish.error.openWater.flowingWater": "Help: the water around the bobber must be still water, flowing water does not work",
+  "commands.cfish.error.openWater.help": "Help: the red cubes show the blocks which are preventing the open water condition from being met",
+  "commands.cfish.error.openWater.lilyPad": "Help: try trapping the bobber under a lily pad",
   "commands.cfish.error.outOfWater": "Dobber uit het water, de manipulatie zal niet werken",
+  "commands.cfish.help.tooManyEnchants": "Help: multiple enchantments at once are unlikely and may take a long time to obtain",
   "commands.cfish.listGoals.noGoals": "Er zijn geen visdoelen",
   "commands.cfish.listGoals.success": "Er zijn %s visdoelen:",
   "commands.cfish.needFishingManipulation": "Vismanipulatie is niet geactiveerd.",
   "commands.cfish.removeGoal.success": "doel %s succesvol verwijderd",
   "commands.cfish.wrongLoot": "Kreeg niet de correcte buit met een correctie van %sms, zou %s ticks verder kunnen zijn",
+
+  "commands.cfov.success": "Set FOV to %s",
+
+  "commands.cfunction.limitReached": "Command limit (%s) reached",
+  "commands.cfunction.success": "Ran %s commands from function %s",
+
+  "commands.cgamemode.playerNotFound": "Player not found",
+  "commands.cgamemode.playerGameMode": "Player %s is in game mode %s",
+  "commands.cgamemode.noneWithGameMode": "No players are in game mode %s",
+  "commands.cgamemode.listWithGameMode": "The following players are in game mode %s:",
 
   "commands.cgamma.success": "Gamma ingesteld op %s",
 
@@ -55,30 +123,147 @@
   "commands.cglow.entity.success": "%s entiteiten aan het gloeien",
   "commands.cglow.area.success": "%s oppervlakte(s) aan het gloeien",
 
+  "commands.chat.success": "Successfully opened c🎩",
+
+  "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",
+  "commands.chotbar.restoredHotbar": "Restored item hotbar %s",
+
+  "commands.ckit.notFound": "Kit \"%s\" not found",
+  "commands.ckit.saveFile.failed": "Could not save kits file",
+  "commands.ckit.load.success": "Successfully gave kit \"%s\" to self",
+  "commands.ckit.load.notCreative": "Speler moet in spelmodus creatief zijn om blokken aan zichzelf te geven",
+  "commands.ckit.create.success": "Successfully created kit \"%s\"",
+  "commands.ckit.create.alreadyExists": "Kit \"%s\" already exists",
+  "commands.ckit.delete.success": "Successfully deleted kit \"%s\"",
+  "commands.ckit.edit.success": "Successfully edited kit \"%s\"",
+  "commands.ckit.list": "Available kits: %s",
+  "commands.ckit.list.empty": "No available kits",
+
+  "commands.clisten.commandDisabled": "The command was disabled, check your logs",
+  "commands.clisten.unknownPacket": "Unknown packet %s",
+  "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
+  "commands.clisten.receivedC2CPacket": "Received the following C2C packet: %s",
+  "commands.clisten.packetError": "ERROR",
+  "commands.clisten.add.success": "Successfully started listening to that packet",
+  "commands.clisten.add.failed": "Already listening to that packet",
+  "commands.clisten.remove.success": "No longer listening to that packet",
+  "commands.clisten.remove.failed": "Not listening to that packet",
+  "commands.clisten.list.none": "Not listening to any packets",
+  "commands.clisten.list": "Listening to the following packets:",
+  "commands.clisten.clear": "No longer listening to any packets",
+
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+
+  "commands.cplayerinfo.ioException": "An error occurred",
+  "commands.cplayerinfo.getNameHistory.success": "%s has had the following names: %s",
+
+  "commands.cparticle.unsuitableParticleOption": "Won't display particle as the particle video setting is unsuitable",
+  "commands.cparticle.success": "Displaying particle %s",
+
+  "commands.cpermissionlevel.success": "Your permission level is %s",
+
   "commands.cplaysound.success": "Geluid %s afgespeeld",
+
+  "commands.cplugins.found": "Found the following plugins:",
+
+  "commands.cping.success": "Your average ping is %sms",
+  "commands.cping.success.other": "The average ping of %s is %sms",
+  "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
+  "commands.cping.playerNotFound": "Player not found",
+
+  "commands.cpos.coords": "%s in %s is %s in %s",
+  "commands.cpos.level.overworld": "the Overworld",
+  "commands.cpos.level.the_end": "the End",
+  "commands.cpos.level.the_nether": "the Nether",
 
   "commands.crelog.failed": "Niet gelukt om opnieuw in te loggen",
 
   "commands.crender.entities.success": "Entiteitsweergaveregels zijn geupdatet",
+
+  "commands.csignsearch.starting": "Searching signs",
+
+  "commands.csnap.airborne": "You cannot snap while airborne",
+  "commands.csnap.cannotFit": "The player cannot fit at that location",
+  "commands.csnap.clickToTeleportEnabled": "Enabled click to teleport",
+  "commands.csnap.clickToTeleportDisabled": "Disabled click to teleport",
+  "commands.csnap.success": "Snapped to %s %s %s",
+  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away",
+  "commands.csnap.wall": "You cannot snap onto walls",
+
+  "commands.cstartup.add.success": "Added command to startup file",
+  "commands.cstartup.couldNotCreateFile": "Couldn't create startup file",
+  "commands.cstartup.couldNotEdit": "Couldn't edit startup file",
 
   "commands.cstopsound.success.sourceless.any": "Alle geluiden gestopt",
   "commands.cstopsound.success.sourceless.sound": "Geluid '%s' gestopt",
   "commands.cstopsound.success.source.any": "Alle '%s' geluiden gestopt",
   "commands.cstopsound.success.source.sound": "Geluid '%s' gestopt van bron '%s'",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "Geen taken die momenteel worden uitgevoerd",
   "commands.ctask.list.success": "%s taken die momenteel worden uitgevoerd",
   "commands.ctask.stop.noMatch": "Geen overeenkomende taken",
   "commands.ctask.stop.success": "%s taken gestopt",
 
+  "commands.ctictactoe.playerNotFound": "Player not found",
+  "commands.ctictactoe.noGameWithPlayer": "Currently not playing a game with that player",
+
+  "commands.ctime.reset.success": "The time now matches the server",
+
+  "commands.ctitle.cleared": "Cleared titles",
+  "commands.ctitle.reset": "Reset title options",
+  "commands.ctitle.show.title": "Showing new title",
+  "commands.ctitle.show.subtitle": "Showing new subtitle",
+  "commands.ctitle.show.actionbar": "Showing new actionbar title",
+  "commands.ctitle.times": "Changed title display times",
+
+  "commands.ctooltip.header.held": "The tooltip of the held item is:",
+  "commands.ctooltip.header.stack": "The tooltip of that item would be:",
+
+  "commands.ctp.notSpectator": "Player must be in spectator mode to teleport",
+  "commands.ctp.success": "Teleported player to %s",
+
+  "commands.ctranslate.unknownError": "An error occurred",
+  "commands.ctranslate.unknownLanguageCode": "Unknown language code \"%s\"",
+  "commands.ctranslate.expectedFromTo": "Expected \"from\"/\"to\"",
+  "commands.ctranslate.hoverText": "Click to copy, shift-click to insert in chat field",
+
+  "commands.cuuid.success": "The UUID of %s is %s",
+  "commands.cuuid.success.nameless": "The UUID of that entity is %s",
+
+  "commands.cvar.notFound": "Variable \"%s\" not found",
+  "commands.cvar.saveFile.failed": "Could not save variables file",
+  "commands.cvar.add.success": "Successfully created variable \"%s\"",
+  "commands.cvar.add.alreadyExists": "Variable \"%s\" already exists",
+  "commands.cvar.remove.success": "Successfully removed variable \"%s\"",
+  "commands.cvar.edit.success": "Successfully edited variable \"%s\"",
+  "commands.cvar.parse.success": "\"%s\" evaluates to \"%s\"",
+  "commands.cvar.list.empty": "No available variables",
+  "commands.cvar.list": "Available variables: %s",
+
+  "commands.cwe.playerNotFound": "Player not found",
+
+  "commands.cweather.reset": "Stopped overriding weather",
+
   "commands.cwiki.failed": "Kon wiki-inhoud niet ophalen",
+  "commands.cwiki.noContent": "There is no introductory paragraph in that article",
 
   "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Annuleren",
   "commands.client.crack": "Kraken",
   "commands.client.enable": "Activeren",
   "commands.client.expectedRegex": "Ongeldige regex %s",
+  "commands.client.glow": "[Glow]",
+  "commands.client.invalidArgumentException": "Invalid argument '%s'",
+  "commands.client.invalidClickAction": "Invalid click event action '%s'",
+  "commands.client.invalidHoverAction": "Invalid hover event action '%s'",
+  "commands.client.invalidHoverEvent": "Invalid hover event '%s'",
   "commands.client.notClient": "Geen client-side commando",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
+  "commands.client.requiresRestart": "This change will take effect after you restart your client",
+  "commands.client.tooFewArguments": "Too few arguments",
 
   "chorusManip.landing.success": "Landen op: %s, %s, %s",
   "chorusManip.landing.failed": "Landingsmanipulatie niet mogelijk",
@@ -94,6 +279,7 @@
   "enchCrack.enchantments": "Betoveringen:",
   "enchCrack.clues": "Aanwijzingen:",
   "enchCrack.slot": "Slot %s:",
+  "enchCrack.bookshelfCount": "Bookshelf Count: %s",
 
   "enchCrack.xpSeed.one": "XP Seed: %s",
   "enchCrack.xpSeed.many": "Mogelijke XP seeds: %s",
@@ -107,6 +293,12 @@
   "enchCrack.insn.itemThrows": "Itemworpen modig: %s (about %s seconds)",
   "enchCrack.insn.itemThrows.noDummy": "Geen dummy betovering",
   "enchCrack.insn.enchantments": "Betoveringen op item:",
+
+  "itemCrack.notEnoughItems": "RNG SeedCracker kan niet worden gebruikt: niet genoeg items in spelershand",
+
+  "minesweeperGame.minesLeft": "Mines Left: %s",
+  "minesweeperGame.timePlayed": "Time Played: %ss",
+  "minesweeperGame.title": "Minesweeper",
 
   "playerManip.state": "Spelers krakingsstatus: %s",
   "playerManip.state.uncracked": "Ongekraakt",
@@ -124,13 +316,16 @@
   "playerManip.reset.sprint": "Gesprint",
   "playerManip.reset.enterWater": "Water Ingegaan",
   "playerManip.reset.swim": "Gezwommen",
+  "playerManip.reset.amethystChime": "Walked on Amethyst Crystals",
   "playerManip.reset.potion": "Statuseffect Actief",
   "playerManip.reset.mending": "Item Hersteld",
+  "playerManip.reset.xp": "XP Orb Collected",
   "playerManip.reset.respiration": "Ademhalingskap Gebruikt",
   "playerManip.reset.dropItem": "Item Geworpen",
   "playerManip.reset.anvil": "Aambeeld Gebruikt",
   "playerManip.reset.food": "Gegeten",
   "playerManip.reset.drink": "Gedronken",
+  "playerManip.reset.consume": "Consumed",
   "playerManip.reset.baneOfArthropods": "Geleedpotige Geraakt met Verderf der Geleedpotigen",
   "playerManip.reset.advancement": "Prestatie Behaald",
   "playerManip.reset.shield": "Geblokkeerd met Schild",
@@ -149,5 +344,30 @@
   "playerManip.notEnoughItems": "Niet genoeg items(%s van %s) om seed te manipuleren",
   "playerManip.uncracked": "Spelersseed moet gekraakt zijn.",
 
-  "itemCrack.notEnoughItems": "RNG SeedCracker kan niet worden gebruikt: niet genoeg items in spelershand"
+  "snakeGame.title": "Snake",
+  "snakeGame.score": "Score: %s",
+
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
+  "ticTacToeGame.playingWith": "You are playing with %s",
+  "ticTacToeGame.noughts": "noughts (O)",
+  "ticTacToeGame.crosses": "crosses (X)",
+
+  "c2cpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
+  "c2cpacket.publicKeyNotFound": "Public key not found",
+  "c2cpacket.encryptionFailed": "Something failed while encrypting your message",
+  "c2cpacket.malformedPacket": "You have received a malformed C2C packet:",
+  "c2cpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
+  "c2cpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
+
+  "c2cpacket.messageC2CPacket.incoming": "%s -> you: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }
