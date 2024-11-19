@@ -65,22 +65,17 @@
   "commands.cenchant.success": "正在开始操控附魔",
   "commands.cenchant.uncracked": "你需要先破解随机种子",
 
-  "commands.cfind.found.left": "在",
-  "commands.cfind.found.right": "找到%1$s, 距离你%2$s格",
+  "commands.cfind.found": "在%2$s找到%1$s, 距离你%3$s格",
   "commands.cfind.keepSearching.success": "正在搜寻实体",
   "commands.cfind.noMatch": "未找到匹配查找条件的实体",
   "commands.cfind.success": "找到%s个匹配查找条件的实体",
 
   "commands.cfindblock.notFound": "未发现此方块",
   "commands.cfindblock.starting": "正在搜索：%s",
-  "commands.cfindblock.success.left": "离你最近的匹配方块在",
-  "commands.cfindblock.success.glow": "[发光]",
-  "commands.cfindblock.success.right": "，距离你%1$s格",
+  "commands.cfindblock.success": "离你最近的匹配方块在%s，距离你%s格",
 
-  "commands.cfinditem.match.entity.left": "%s个%s在%s中被找到，位于",
-  "commands.cfinditem.match.entity.right": "",
-  "commands.cfinditem.match.left": "在",
-  "commands.cfinditem.match.right": "找到了%s个%s",
+  "commands.cfinditem.match.entity": "%s个%s在%s中被找到，位于%s",
+  "commands.cfinditem.match": "在%3$s找到了%1$s个%2$s",
   "commands.cfinditem.starting": "正在搜索%s",
   "commands.cfinditem.starting.keepSearching": "正在持续搜索%s",
   "commands.cfinditem.total": "一共找到了%s个%s",
@@ -178,12 +173,10 @@
   "commands.cping.singleplayer": "你在一个单人游戏世界里(╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "未找到玩家",
 
+  "commands.cpos.coords": "%s在%s中是%s在%s中",
   "commands.cpos.level.overworld": "主世界",
   "commands.cpos.level.the_end": "末地",
   "commands.cpos.level.the_nether": "下界",
-  "commands.cpos.coords.left": "",
-  "commands.cpos.coords.middle": "在%1$s中是",
-  "commands.cpos.coords.right": "在%2$s中",
 
   "commands.crelog.failed": "未能重新登录",
 
@@ -254,6 +247,7 @@
   "commands.client.crack": "破解",
   "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式%s",
+  "commands.client.glow": "[发光]",
   "commands.client.invalidArgumentException": "无效参数‘%s’",
   "commands.client.invalidClickAction": "无效的点击事件操作‘%s’",
   "commands.client.invalidHoverAction": "无效的点击事件操作‘%s’",

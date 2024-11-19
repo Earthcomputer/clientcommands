@@ -65,22 +65,17 @@
   "commands.cenchant.success": "正在開始操控附魔",
   "commands.cenchant.uncracked": "您需要先破譯隨機種子。",
 
-  "commands.cfind.found.left": "在 ",
-  "commands.cfind.found.right": " 找到 %1$s，距離您 %2$s 格",
+  "commands.cfind.found": "在 %2$s 找到 %1$s，距離您 %3$s 格",
   "commands.cfind.keepSearching.success": "找尋實體中。",
   "commands.cfind.noMatch": "沒有實體符合您的搜尋條件",
   "commands.cfind.success": "%s 個實體符合您的搜尋條件",
 
   "commands.cfindblock.notFound": "沒有發現此方塊",
   "commands.cfindblock.starting": "正在搜尋 %s",
-  "commands.cfindblock.success.left": "離您最近的匹配方塊在 ",
-  "commands.cfindblock.success.glow": "[發光]",
-  "commands.cfindblock.success.right": "，距離您 %1$s 格",
+  "commands.cfindblock.success": "離您最近的匹配方塊在 %s，距離您 %s 格",
 
-  "commands.cfinditem.match.entity.left": "在 %s 的 ",
-  "commands.cfinditem.match.entity.right": " 找到 %sx %s",
-  "commands.cfinditem.match.left": "在 ",
-  "commands.cfinditem.match.right": " 找到 %sx %s",
+  "commands.cfinditem.match.entity": "在 %3$s 的 %4$s 找到 %1$sx %2$s",
+  "commands.cfinditem.match": "在 %3$s 找到 %1$sx %2$s",
   "commands.cfinditem.starting": "正在搜尋 %s",
   "commands.cfinditem.starting.keepSearching": "正在持續搜尋 %s。",
   "commands.cfinditem.total": "一共找到了 %s 個 %s 。",
@@ -178,12 +173,10 @@
   "commands.cping.singleplayer": "您在單人遊戲世界中 (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "找不到玩家",
 
+  "commands.cpos.coords": "%s 在 %s 的座標為 %s，位於 %s",
   "commands.cpos.level.overworld": "主世界",
   "commands.cpos.level.the_end": "終界",
   "commands.cpos.level.the_nether": "地獄",
-  "commands.cpos.coords.left": "",
-  "commands.cpos.coords.middle": " 在 %1$s 的座標為 ",
-  "commands.cpos.coords.right": "，位於 %2$s",
 
   "commands.crelog.failed": "重新載入記錄檔失敗",
 
@@ -262,6 +255,7 @@
   "commands.client.crack": "破譯",
   "commands.client.enable": "啟用",
   "commands.client.expectedRegex": "無效的正則表達式 %s",
+  "commands.client.glow": "[發光]",
   "commands.client.invalidArgumentException": "無效的參數「%s」",
   "commands.client.invalidClickAction": "無效的點選事件動作「%s」",
   "commands.client.invalidHoverAction": "無效的懸停事件動作「%s」",

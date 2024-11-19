@@ -64,20 +64,16 @@
   "commands.cenchant.success": "Verzauberungsmanipulation beginnt",
   "commands.cenchant.uncracked": "Seed muss geknackt sein.",
 
-  "commands.cfind.found.left": "Fand %1$s an ",
-  "commands.cfind.found.right": ", %2$s Blöcke entfernt",
+  "commands.cfind.found": "Fand %s an %s, %s Blöcke entfernt",
   "commands.cfind.keepSearching.success": "Finde Objekte",
   "commands.cfind.noMatch": "Keine Objekte haben der Abfrage entsprochen",
   "commands.cfind.success": "%s Objekte haben der Abfrage entsprochen",
 
   "commands.cfindblock.notFound": "Kein passender Block gefunden",
   "commands.cfindblock.starting": "Suche nach %s",
-  "commands.cfindblock.success.left": "Nächster passender Block ist an ",
-  "commands.cfindblock.success.glow": "[Leuchten]",
-  "commands.cfindblock.success.right": ", %1$s Blöcke entfernt",
+  "commands.cfindblock.success": "Nächster passender Block ist an %s, %s Blöcke entfernt",
 
-  "commands.cfinditem.match.left": "%sx %s wurden an ",
-  "commands.cfinditem.match.right": " gefunden",
+  "commands.cfinditem.match": "%sx %s wurden an %s gefunden",
   "commands.cfinditem.starting": "Suche nach %s",
   "commands.cfinditem.starting.keepSearching": "Suche unendlich lange nach %s.",
   "commands.cfinditem.total": "Fand insgesamt %sx %s",
@@ -173,12 +169,10 @@
   "commands.cping.singleplayer": "Du bist in einer Einzelspielerwelt (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Spieler nicht gefunden",
 
+  "commands.cpos.coords": "%s in %s ist %s in %s",
   "commands.cpos.level.overworld": "die Oberwelt",
   "commands.cpos.level.the_end": "das Ende",
   "commands.cpos.level.the_nether": "der Nether",
-  "commands.cpos.coords.left": "",
-  "commands.cpos.coords.middle": " in %1$s ist ",
-  "commands.cpos.coords.right": " in %2$s",
 
   "commands.crelog.failed": "Wiedereinloggen gescheitert",
 
@@ -245,6 +239,7 @@
   "commands.client.crack": "Knacken",
   "commands.client.enable": "Aktivieren",
   "commands.client.expectedRegex": "Ungültiger Regex %s",
+  "commands.client.glow": "[Leuchten]",
   "commands.client.invalidArgumentException": "Ungültiges Argument '%s'",
   "commands.client.invalidClickAction": "Ungültige Klickereignisaktion '%s'",
   "commands.client.invalidHoverAction": "Ungültige Hoverereignisaktion '%s'",

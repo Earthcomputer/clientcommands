@@ -65,22 +65,17 @@
   "commands.cenchant.success": "Starting enchantment manipulation.",
   "commands.cenchant.uncracked": "Seed needs to be cracked",
 
-  "commands.cfind.found.left": "Found %1$s at ",
-  "commands.cfind.found.right": ", %2$s blocks away",
+  "commands.cfind.found": "Found %s at %s, %s blocks away",
   "commands.cfind.keepSearching.success": "Finding entities",
   "commands.cfind.noMatch": "No entities matched your query",
   "commands.cfind.success": "%s entities matched your query",
 
   "commands.cfindblock.notFound": "No such block found",
   "commands.cfindblock.starting": "Searching for %s",
-  "commands.cfindblock.success.left": "Closest match is at ",
-  "commands.cfindblock.success.glow": "[Glow]",
-  "commands.cfindblock.success.right": ", %1$s blocks away",
+  "commands.cfindblock.success": "Closest match is at %s, %s blocks away",
 
-  "commands.cfinditem.match.entity.left": "%sx %s found in %s at ",
-  "commands.cfinditem.match.entity.right": "",
-  "commands.cfinditem.match.left": "%sx %s found at ",
-  "commands.cfinditem.match.right": "",
+  "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
+  "commands.cfinditem.match": "%sx %s found at %s",
   "commands.cfinditem.starting": "Searching for %s",
   "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s",
   "commands.cfinditem.total": "Found %sx %s total",
@@ -178,12 +173,10 @@
   "commands.cping.singleplayer": "You are in a singleplayer world (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Player not found",
 
+  "commands.cpos.coords": "%s in %s is %s in %s",
   "commands.cpos.level.overworld": "the Overworld",
   "commands.cpos.level.the_end": "the End",
   "commands.cpos.level.the_nether": "the Nether",
-  "commands.cpos.coords.left": "",
-  "commands.cpos.coords.middle": " in %1$s is ",
-  "commands.cpos.coords.right": " in %2$s",
 
   "commands.crelog.failed": "Failed to relog",
 
@@ -262,6 +255,7 @@
   "commands.client.crack": "Crack",
   "commands.client.enable": "Enable",
   "commands.client.expectedRegex": "Invalid regex %s",
+  "commands.client.glow": "[Glow]",
   "commands.client.invalidArgumentException": "Invalid argument '%s'",
   "commands.client.invalidClickAction": "Invalid click event action '%s'",
   "commands.client.invalidHoverAction": "Invalid hover event action '%s'",

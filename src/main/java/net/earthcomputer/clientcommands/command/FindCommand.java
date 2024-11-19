@@ -46,7 +46,7 @@ public class FindCommand {
 
             return Command.SINGLE_SUCCESS;
         } else {
-            List<? extends Entity> entities = selector.getEntities(source);
+            List<? extends Entity> entities = selector.findEntities(source);
 
             if (entities.isEmpty()) {
                 throw NO_MATCH_EXCEPTION.create();
@@ -63,9 +63,12 @@ public class FindCommand {
 
     private static void sendEntityFoundMessage(FabricClientCommandSource source, Entity entity) {
         String distance = "%.2f".formatted(Math.sqrt(entity.distanceToSqr(source.getPosition())));
-        source.sendFeedback(Component.translatable("commands.cfind.found.left", entity.getName(), distance)
-                .append(getLookCoordsTextComponent(entity.blockPosition()))
-                .append(Component.translatable("commands.cfind.found.right", entity.getName(), distance)));
+        source.sendFeedback(Component.translatable(
+            "commands.cfind.found",
+            entity.getName(),
+            getLookCoordsTextComponent(entity.blockPosition()),
+            distance
+        ));
     }
 
     private static class FindTask extends LongTask {
@@ -94,7 +97,7 @@ public class FindCommand {
         @Override
         public void body() {
             try {
-                for (Entity entity : selector.getEntities(this.source)) {
+                for (Entity entity : selector.findEntities(this.source)) {
                     if (foundEntities.add(entity.getUUID())) {
                         sendEntityFoundMessage(source, entity);
                     }
