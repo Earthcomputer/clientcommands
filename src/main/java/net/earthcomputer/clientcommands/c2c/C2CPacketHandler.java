@@ -44,11 +44,11 @@ public class C2CPacketHandler implements C2CPacketListener {
     private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.publicKeyNotFound"));
     private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.encryptionFailed"));
 
-    public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, RawPacketInfo>clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
+    public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, C2CFriendlyByteBuf>clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
         .addPacket(StartTicTacToeGameC2CPacket.ID, StartTicTacToeGameC2CPacket.CODEC)
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
-    ).bind(b -> (RawPacketInfo) b);
+    ).bind(b -> (C2CFriendlyByteBuf) b);
 
     public static final String C2C_PACKET_HEADER = "CCΕNC:";
 
@@ -152,7 +152,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         if (uncompressed == null) {
             return false;
         }
-        RawPacketInfo buf = wrapByteBuf(Unpooled.wrappedBuffer(uncompressed), sender);
+        C2CFriendlyByteBuf buf = wrapByteBuf(Unpooled.wrappedBuffer(uncompressed), sender);
         if (buf == null) {
             return false;
         }
@@ -204,12 +204,12 @@ public class C2CPacketHandler implements C2CPacketListener {
         TicTacToeCommand.onPutTicTacToeMarkC2CPacket(packet);
     }
 
-    public static @Nullable RawPacketInfo wrapByteBuf(ByteBuf buf, String sender) {
+    public static @Nullable C2CFriendlyByteBuf wrapByteBuf(ByteBuf buf, String sender) {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) {
             return null;
         }
-        return new RawPacketInfo(buf, connection.registryAccess(), sender);
+        return new C2CFriendlyByteBuf(buf, connection.registryAccess(), sender);
     }
 
     @Override
