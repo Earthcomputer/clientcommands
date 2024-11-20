@@ -154,19 +154,23 @@ public class FindItemCommand {
         }
 
         protected void printEntityLocation(Entity entity, int count) {
-            sendFeedback(Component.translatable("commands.cfinditem.match.entity.left", count, searchingForName, entity.getName())
-                .append(getLookCoordsTextComponent(BlockPos.containing(entity.position())))
-                .append(Component.translatable("commands.cfinditem.match.entity.right", count, searchingForName, entity.getName()))
-                .append(" ")
-                .append(getGlowEntityTextComponent(Component.translatable("commands.cfindblock.success.glow"), entity)));
+            sendFeedback(
+                Component.translatable(
+                    "commands.cfinditem.match.entity",
+                    count,
+                    searchingForName,
+                    entity.getName(),
+                    getLookCoordsTextComponent(BlockPos.containing(entity.position()))
+                )
+                    .append(" ")
+                    .append(getGlowButtonTextComponent(entity))
+            );
         }
 
         protected void printLocation(BlockPos pos, int count) {
-            sendFeedback(Component.translatable("commands.cfinditem.match.left", count, searchingForName)
-                .append(getLookCoordsTextComponent(pos))
-                .append(Component.translatable("commands.cfinditem.match.right", count, searchingForName))
+            sendFeedback(Component.translatable("commands.cfinditem.match", count, searchingForName, getLookCoordsTextComponent(pos))
                 .append(" ")
-                .append(getGlowCoordsTextComponent(Component.translatable("commands.cfindblock.success.glow"), pos)));
+                .append(getGlowButtonTextComponent(pos)));
         }
 
         protected boolean canSearchEntity(Entity entity) {
@@ -371,7 +375,7 @@ public class FindItemCommand {
                     mc.player,
                     InteractionHand.MAIN_HAND,
                     new BlockHitResult(clickPos,
-                        Direction.getNearest((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
+                        Direction.getApproximateNearest((float) (clickPos.x - cameraPos.x), (float) (clickPos.y - cameraPos.y), (float) (clickPos.z - cameraPos.z)),
                         pos, false)),
                 entity -> mc.gameMode.interact(
                     mc.player,
@@ -506,8 +510,8 @@ public class FindItemCommand {
 
             LevelChunk chunk = level.getChunk(chunkToScan.x, chunkToScan.z);
 
-            int minSection = chunk.getMinSection();
-            int maxSection = chunk.getMaxSection();
+            int minSection = chunk.getMinSectionY();
+            int maxSection = chunk.getMaxSectionY();
             for (int sectionY = minSection; sectionY < maxSection; sectionY++) {
                 if (!chunk.getSection(chunk.getSectionIndexFromSectionY(sectionY)).maybeHas(state -> state.is(Blocks.ENDER_CHEST) || state.hasBlockEntity())) {
                     continue;

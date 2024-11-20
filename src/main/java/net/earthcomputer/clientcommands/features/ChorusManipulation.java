@@ -100,7 +100,6 @@ public class ChorusManipulation {
 
         var throwItemsState =
                 throwItemsUntil(rand -> {
-
                     if (particleCount != 16 && itemUseTimeLeft >= 0) {
                         //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
                         for (int i = 0; i < 33 + 4.5 * itemUseTimeLeft; i++) {
@@ -111,7 +110,7 @@ public class ChorusManipulation {
                     final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.x();
                     ClientLevel level = Minecraft.getInstance().level;
                     assert level != null;
-                    final double y = Mth.clamp(pos.y() + (double) (rand.nextInt(16) - 8), level.getMinBuildHeight(), (level.getMinBuildHeight() + level.getHeight() - 1));
+                    final double y = Mth.clamp(pos.y() + (double) (rand.nextInt(16) - 8), level.getMinY(), level.getMaxY());
                     final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.z();
                     final Vec3 landingArea = canTeleport(area, new Vec3(x, y, z));
 
