@@ -13,17 +13,14 @@
     "commands.cenchant.success": "Začatek manipulacije čaranja",
     "commands.cenchant.uncracked": "Seme mora biti ugotovljeno.",
   
-    "commands.cfind.found.left": "Najdeno %1$s ob ",
-    "commands.cfind.found.right": ", %2$s blokov proč",
+    "commands.cfind.found": "Najdeno %s ob %s, %s blokov proč",
     "commands.cfind.noMatch": "Nič se ne ujema z vašo poizvedbo",
     "commands.cfind.success": "%s entitet se ujema z vašo poizvedbo",
   
     "commands.cfindblock.notFound": "Takega bloka ni mogoče najti",
-    "commands.cfindblock.success.left": "Najbližje ujemanje je ob ",
-    "commands.cfindblock.success.right": ", %1$s blokov vstran",
-  
-    "commands.cfinditem.match.left": "%sx %s najdeno ob ",
-    "commands.cfinditem.match.right": "",
+    "commands.cfindblock.success": "Najbližje ujemanje je ob %s, %s blokov vstran",
+
+    "commands.cfinditem.match": "%sx %s najdeno ob %s",
     "commands.cfinditem.starting": "Iskati %s",
     "commands.cfinditem.starting.keepSearching": "Neskončno iskanje za %s.",
     "commands.cfinditem.total": "Skupno najdeno %sx %s",

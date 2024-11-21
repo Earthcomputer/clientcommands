@@ -64,20 +64,16 @@
   "commands.cenchant.success": "エンチャント操作を開始しています",
   "commands.cenchant.uncracked": "シードがクラックされる必要があります。",
 
-  "commands.cfind.found.left": " %1$s を次の場所で発見しました: ",
-  "commands.cfind.found.right": ", %2$s ブロック分離れています",
+  "commands.cfind.found": " %s を次の場所で発見しました: %s, %s ブロック分離れています",
   "commands.cfind.keepSearching.success": "エンティティを検索しています",
   "commands.cfind.noMatch": "あなたのクエリにマッチしたエンティティが存在しませんでした",
   "commands.cfind.success": "%s のエンティティがマッチしました",
 
   "commands.cfindblock.notFound": "そのようなブロックは見つかりませんでした",
   "commands.cfindblock.starting": "%s を探しています",
-  "commands.cfindblock.success.left": "最も近いマッチは ",
-  "commands.cfindblock.success.glow": "[Glow]",
-  "commands.cfindblock.success.right": ", %1$s ブロック分離れています",
+  "commands.cfindblock.success": "最も近いマッチは %s, %s ブロック分離れています",
 
-  "commands.cfinditem.match.left": "%sx %s が次の場所で見つかりました ",
-  "commands.cfinditem.match.right": "",
+  "commands.cfinditem.match": "%sx %s が次の場所で見つかりました %s",
   "commands.cfinditem.starting": "%s を検索しています",
   "commands.cfinditem.starting.keepSearching": "次のブロックをエンドレスに検索しています %s",
   "commands.cfinditem.total": "%sx %s がトータルで見つかりました",
@@ -158,12 +154,10 @@
   "commands.cping.singleplayer": "あなたはシングルプレイヤーワールドにいます (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "プレイヤーが見つかりませんでした",
 
+  "commands.cpos.coords": "%s の %s は %s の %s",
   "commands.cpos.level.overworld": "現世",
   "commands.cpos.level.the_end": "ジ・エンド",
   "commands.cpos.level.the_nether": "ネザー",
-  "commands.cpos.coords.left": "",
-  "commands.cpos.coords.middle": " の %1$s は ",
-  "commands.cpos.coords.right": " の %2$s",
 
   "commands.crelog.failed": "再ログするのに失敗しました",
 

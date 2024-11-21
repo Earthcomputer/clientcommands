@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class RenderSettings {
     private static final List<Tuple<CEntitySelector, Boolean>> entityRenderSelectors = new ArrayList<>();
@@ -50,7 +49,7 @@ public class RenderSettings {
         disabledEntities.clear();
         for (var filter : entityRenderSelectors) {
             try {
-                List<UUID> entities = filter.getA().getEntities(source).stream().map(Entity::getUUID).collect(Collectors.toList());
+                List<UUID> entities = filter.getA().findEntities(source).stream().map(Entity::getUUID).toList();
                 if (filter.getB()) {
                     entities.forEach(disabledEntities::remove);
                 } else {

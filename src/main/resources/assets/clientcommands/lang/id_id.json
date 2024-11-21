@@ -64,20 +64,16 @@
   "commands.cenchant.success": "Memulai memanipulasi pesona",
   "commands.cenchant.uncracked": "Seed butuh diketahui.",
 
-  "commands.cfind.found.left": "Menemukan %1$s di ",
-  "commands.cfind.found.right": ", %2$s block jaraknya",
+  "commands.cfind.found": "Menemukan %s di %s, %s block jaraknya",
   "commands.cfind.keepSearching.success": "Mencari entitas.",
   "commands.cfind.noMatch": "Tidak ada entitas yang cocok di kuery anda",
   "commands.cfind.success": "%s entitas yang cocok di kuery anda",
 
   "commands.cfindblock.notFound": "Blok tidak dapat ditemukan",
   "commands.cfindblock.starting": "Mencari %s",
-  "commands.cfindblock.success.left": "Hasil paling dekat adalah di ",
-  "commands.cfindblock.success.glow": "[Sinar]",
-  "commands.cfindblock.success.right": ", %1$s block",
+  "commands.cfindblock.success": "Hasil paling dekat adalah di %s, %s block",
 
-  "commands.cfinditem.match.left": "%sx %s ketemu di ",
-  "commands.cfinditem.match.right": "",
+  "commands.cfinditem.match": "%sx %s ketemu di %s",
   "commands.cfinditem.starting": "Mencari benda %s",
   "commands.cfinditem.starting.keepSearching": "Mencari benda %s selamanya.",
   "commands.cfinditem.total": "Menemukan %sx %s",
@@ -158,12 +154,10 @@
   "commands.cping.singleplayer": "Anda berada di dunia singleplayer (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "Pemain tidak ditemukan",
 
+  "commands.cpos.coords": "%s di %s sama dengan %s di %s",
   "commands.cpos.level.overworld": "Overworld",
   "commands.cpos.level.the_end": "End",
   "commands.cpos.level.the_nether": "Nether",
-  "commands.cpos.coords.left": "",
-  "commands.cpos.coords.middle": " di %1$s sama dengan ",
-  "commands.cpos.coords.right": " di %2$s",
 
   "commands.crelog.failed": "Gagal relog",
 
@@ -230,6 +224,7 @@
   "commands.client.crack": "Pecahkan",
   "commands.client.enable": "Nyalakan",
   "commands.client.expectedRegex": "Regex tidak valid %s",
+  "commands.client.glow": "[Sinar]",
   "commands.client.invalidArgumentException": "Argumen tidak valid '%s'",
   "commands.client.invalidClickAction": "Aksi klik tidak valid '%s'",
   "commands.client.invalidHoverAction": "Aksi sorot tidak valid '%s'",

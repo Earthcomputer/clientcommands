@@ -19,18 +19,15 @@
   "commands.cenchant.success": "Betoveringsmanipulatie aan het starten",
   "commands.cenchant.uncracked": "De seed moet gekraakt zijn.",
 
-  "commands.cfind.found.left": "%1$s gevonden op ",
-  "commands.cfind.found.right": ", %2$s blokken verwijderd",
+  "commands.cfind.found": "%s gevonden op %s, %s blokken verwijderd",
   "commands.cfind.keepSearching.success": "Entiteiten aan het vinden.",
   "commands.cfind.noMatch": "Geen enkele entiteit matchte jouw query",
   "commands.cfind.success": "%s entiteiten matchten jouw query",
 
   "commands.cfindblock.notFound": "Een dergelijk blok is niet gevonden",
-  "commands.cfindblock.success.left": "De dichtstbijzijnde match is op ",
-  "commands.cfindblock.success.right": ", %1$s blokken verwijderd",
+  "commands.cfindblock.success": "De dichtstbijzijnde match is op %s, %s blokken verwijderd",
 
-  "commands.cfinditem.match.left": "%sx %s gevonden op ",
-  "commands.cfinditem.match.right": "",
+  "commands.cfinditem.match": "%sx %s gevonden op %s",
   "commands.cfinditem.starting": "Aan het zoeken naar %s",
   "commands.cfinditem.starting.keepSearching": "Oneindig zoekend naar %s.",
   "commands.cfinditem.total": "In totaal %sx %s gevonden",
