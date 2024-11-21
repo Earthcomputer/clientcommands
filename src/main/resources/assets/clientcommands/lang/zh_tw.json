@@ -65,22 +65,17 @@
   "commands.cenchant.success": "正在開始操控附魔",
   "commands.cenchant.uncracked": "您需要先破譯隨機種子。",
 
-  "commands.cfind.found.left": "在 ",
-  "commands.cfind.found.right": " 找到 %1$s，距離您 %2$s 格",
+  "commands.cfind.found": "在 %2$s 找到 %1$s，距離您 %3$s 格",
   "commands.cfind.keepSearching.success": "找尋實體中。",
   "commands.cfind.noMatch": "沒有實體符合您的搜尋條件",
   "commands.cfind.success": "%s 個實體符合您的搜尋條件",
 
   "commands.cfindblock.notFound": "沒有發現此方塊",
   "commands.cfindblock.starting": "正在搜尋 %s",
-  "commands.cfindblock.success.left": "離您最近的匹配方塊在 ",
-  "commands.cfindblock.success.glow": "[發光]",
-  "commands.cfindblock.success.right": "，距離您 %1$s 格",
+  "commands.cfindblock.success": "離您最近的匹配方塊在 %s，距離您 %s 格",
 
-  "commands.cfinditem.match.entity.left": "在 %s 的 ",
-  "commands.cfinditem.match.entity.right": " 找到 %sx %s",
-  "commands.cfinditem.match.left": "在 ",
-  "commands.cfinditem.match.right": " 找到 %sx %s",
+  "commands.cfinditem.match.entity": "在 %3$s 的 %4$s 找到 %1$sx %2$s",
+  "commands.cfinditem.match": "在 %3$s 找到 %1$sx %2$s",
   "commands.cfinditem.starting": "正在搜尋 %s",
   "commands.cfinditem.starting.keepSearching": "正在持續搜尋 %s。",
   "commands.cfinditem.total": "一共找到了 %s 個 %s 。",
@@ -178,18 +173,24 @@
   "commands.cping.singleplayer": "您在單人遊戲世界中 (╯°□°）╯︵ ┻━┻",
   "commands.cping.playerNotFound": "找不到玩家",
 
+  "commands.cpos.coords": "%s 在 %s 的座標為 %s，位於 %s",
   "commands.cpos.level.overworld": "主世界",
   "commands.cpos.level.the_end": "終界",
   "commands.cpos.level.the_nether": "地獄",
-  "commands.cpos.coords.left": "",
-  "commands.cpos.coords.middle": " 在 %1$s 的座標為 ",
-  "commands.cpos.coords.right": "，位於 %2$s",
 
   "commands.crelog.failed": "重新載入記錄檔失敗",
 
   "commands.crender.entities.success": "實體繪製規則已被更新",
 
   "commands.csignsearch.starting": "正在搜尋告示牌",
+
+  "commands.csnap.airborne": "您無法在空中時移動",
+  "commands.csnap.cannotFit": "玩家無法放置在該位置",
+  "commands.csnap.clickToTeleportEnabled": "已啟用點選傳送",
+  "commands.csnap.clickToTeleportDisabled": "已停用點選傳送",
+  "commands.csnap.success": "已移動至 %s %s %s",
+  "commands.csnap.tooFar": "您只能移動到最多 1 格遠的位置",
+  "commands.csnap.wall": "您無法移動到牆上",
 
   "commands.cstartup.add.success": "已將指令新增至啟動檔案",
   "commands.cstartup.couldNotCreateFile": "無法建立啟動檔案",
@@ -227,7 +228,7 @@
   "commands.ctranslate.unknownError": "發生錯誤",
   "commands.ctranslate.unknownLanguageCode": "未知的語言代碼「%s」",
   "commands.ctranslate.expectedFromTo": "預期為「from」/「to」",
-  "commands.ctranslate.hoverText": "點擊複製，Shift + 點擊插入聊天欄位",
+  "commands.ctranslate.hoverText": "點選複製，Shift + 點選插入聊天欄位",
 
   "commands.cuuid.success": "%s 的 UUID 為 %s",
   "commands.cuuid.success.nameless": "該實體的 UUID 為 %s",
@@ -254,8 +255,9 @@
   "commands.client.crack": "破譯",
   "commands.client.enable": "啟用",
   "commands.client.expectedRegex": "無效的正則表達式 %s",
+  "commands.client.glow": "[發光]",
   "commands.client.invalidArgumentException": "無效的參數「%s」",
-  "commands.client.invalidClickAction": "無效的點擊事件動作「%s」",
+  "commands.client.invalidClickAction": "無效的點選事件動作「%s」",
   "commands.client.invalidHoverAction": "無效的懸停事件動作「%s」",
   "commands.client.invalidHoverEvent": "無效的懸停事件「%s」",
   "commands.client.notClient": "不是用戶端指令",
@@ -323,6 +325,7 @@
   "playerManip.reset.anvil": "使用了鐵砧",
   "playerManip.reset.food": "吃東西",
   "playerManip.reset.drink": "喝東西",
+  "playerManip.reset.consume": "已食用",
   "playerManip.reset.baneOfArthropods": "使用節肢剋星攻擊了節肢生物",
   "playerManip.reset.advancement": "獲得了進度",
   "playerManip.reset.shield": "用盾牌格擋了攻擊",
@@ -362,9 +365,9 @@
   "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "您邀請 %s 玩井字遊戲",
   "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s 邀請您玩井字遊戲",
   "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "接受",
-  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "點擊接受",
-  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s 已接受您的邀請，點擊進行您的回合",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "點選接受",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s 已接受您的邀請，點選進行您的回合",
   "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "已接受邀請，您的對手將先行動",
   "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s 在井字遊戲中進行了一步並獲勝",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s 在井字遊戲中進行了一步，點擊進行您的回合"
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s 在井字遊戲中進行了一步，點選進行您的回合"
 }

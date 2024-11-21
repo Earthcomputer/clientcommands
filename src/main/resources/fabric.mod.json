@@ -29,7 +29,8 @@
     "minecraft": "${mcversion}",
     "fabricloader": ">=0.4.0",
     "fabric-api": "*",
-    "clientarguments": ">=1.3.0"
+    "betterconfig": "*",
+    "clientarguments": "*"
   },
   "mixins": [
     "mixins.clientcommands.json"

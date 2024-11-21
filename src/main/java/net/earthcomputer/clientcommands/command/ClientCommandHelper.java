@@ -72,12 +72,12 @@ public class ClientCommandHelper {
             String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Component getGlowCoordsTextComponent(MutableComponent component, BlockPos pos) {
-        return getCommandTextComponent(component, String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
+    public static Component getGlowButtonTextComponent(BlockPos pos) {
+        return getCommandTextComponent(Component.translatable("commands.client.glow"), String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
     }
 
-    public static Component getGlowEntityTextComponent(MutableComponent component, Entity entity) {
-        return getCommandTextComponent(component, "/cglow entities " + entity.getStringUUID());
+    public static Component getGlowButtonTextComponent(Entity entity) {
+        return getCommandTextComponent(Component.translatable("commands.client.glow"), "/cglow entities " + entity.getStringUUID());
     }
 
     public static Component getCommandTextComponent(@Translatable String translationKey, String command) {
