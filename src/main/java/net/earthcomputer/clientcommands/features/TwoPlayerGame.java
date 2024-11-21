@@ -125,7 +125,7 @@ public class TwoPlayerGame<T, S extends Screen> {
             throw NO_GAME_WITH_PLAYER_EXCEPTION.create();
         }
 
-        source.getClient().tell(() -> source.getClient().setScreen(this.screenFactory.createScreen(game)));
+        source.getClient().schedule(() -> source.getClient().setScreen(this.screenFactory.createScreen(game)));
         return Command.SINGLE_SUCCESS;
     }
 

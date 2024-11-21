@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -235,21 +236,20 @@ public class ConnectFourCommand {
                 case YELLOW -> 16;
                 default -> throw new IllegalStateException("Unexpected value: " + piece);
             };
-            graphics.innerBlit(
+            graphics.blit(
+                RenderType::guiTextured,
                 ConnectFourGameScreen.PIECES_TEXTURE,
                 x,
-                x + ConnectFourGameScreen.PIECE_WIDTH,
                 y,
-                y + ConnectFourGameScreen.PIECE_HEIGHT,
+                xOffset,
                 0,
-                (float) xOffset / ConnectFourGameScreen.TEXTURE_PIECES_WIDTH,
-                (float) (xOffset + ConnectFourGameScreen.TEXTURE_PIECE_WIDTH) / ConnectFourGameScreen.TEXTURE_PIECES_WIDTH,
-                0.0f / ConnectFourGameScreen.TEXTURE_PIECES_HEIGHT,
-                (float) ConnectFourGameScreen.TEXTURE_PIECE_HEIGHT / ConnectFourGameScreen.TEXTURE_PIECES_HEIGHT,
-                1.0f,
-                1.0f,
-                1.0f,
-                transparent ? 0.5f : 1.0f
+                ConnectFourGameScreen.PIECE_WIDTH,
+                ConnectFourGameScreen.PIECE_HEIGHT,
+                ConnectFourGameScreen.TEXTURE_PIECE_WIDTH,
+                ConnectFourGameScreen.TEXTURE_PIECE_HEIGHT,
+                ConnectFourGameScreen.TEXTURE_PIECES_WIDTH,
+                ConnectFourGameScreen.TEXTURE_PIECES_HEIGHT,
+                ((transparent ? 0x7F : 0xFF) << 24) | (0xFFFFFF)
             );
         }
     }
@@ -303,13 +303,14 @@ public class ConnectFourCommand {
             graphics.drawString(this.font, moveTranslate, startX + BOARD_WIDTH - this.font.width(moveTranslate), startY - 10, 0xff_ffffff);
 
             graphics.blit(
+                RenderType::guiTextured,
                 BOARD_TEXTURE,
                 startX,
                 startY,
+                0,
+                0,
                 BOARD_WIDTH,
                 BOARD_HEIGHT,
-                0,
-                0,
                 TEXTURE_BOARD_WIDTH,
                 TEXTURE_BOARD_HEIGHT,
                 TEXTURE_BOARD_WIDTH,
