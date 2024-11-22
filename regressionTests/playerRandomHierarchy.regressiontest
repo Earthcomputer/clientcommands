@@ -1,0 +1,99 @@
+net/minecraft/server/level/ServerPlayer.createItemStackToDrop (Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity; <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.createItemStackToDrop (Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity; <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.createItemStackToDrop (Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity; <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.createItemStackToDrop (Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity; <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.createItemStackToDrop (Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity; <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.createItemStackToDrop (Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity; <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/level/block/entity/BaseContainerBlockEntity.canUnlock (Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/LockCode;Lnet/minecraft/network/chat/Component;)Z <- net/minecraft/server/level/ServerPlayer.playNotifySound <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.<init> (Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.<init> (Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/advancements/AdvancementRewards.grant (Lnet/minecraft/server/level/ServerPlayer;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/advancements/AdvancementRewards.grant (Lnet/minecraft/server/level/ServerPlayer;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/commands/GiveCommand.giveItem (Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/item/ItemInput;Ljava/util/Collection;I)I <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/commands/GiveCommand.giveItem (Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/commands/arguments/item/ItemInput;Ljava/util/Collection;I)I <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/effect/InfestedMobEffect.onMobHurt (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;ILnet/minecraft/world/damagesource/DamageSource;F)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/effect/InfestedMobEffect.onMobHurt (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;ILnet/minecraft/world/damagesource/DamageSource;F)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/effect/InfestedMobEffect.spawnSilverfish (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;DDD)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/effect/OozingMobEffect.onMobRemoved (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;ILnet/minecraft/world/entity/Entity$RemovalReason;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/effect/WeavingMobEffect.onMobRemoved (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;ILnet/minecraft/world/entity/Entity$RemovalReason;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/effect/WindChargedMobEffect.onMobRemoved (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;ILnet/minecraft/world/entity/Entity$RemovalReason;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/food/FoodProperties.onConsume (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/component/Consumable;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/inventory/AnvilMenu.onTake (Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V <- net/minecraft/world/inventory/AnvilMenu.lambda$onTake$2 <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/CrossbowItem.shootProjectile (Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/projectile/Projectile;IFFFLnet/minecraft/world/entity/LivingEntity;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/ItemStack.onUseTick (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;I)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/component/Consumable.onConsume (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack; <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/consume_effects/ApplyStatusEffectsConsumeEffect.apply (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)Z <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.apply (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)Z <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.apply (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)Z <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.apply (Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)Z <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/Enchantment.modifyDamageFilteredValue (Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lorg/apache/commons/lang3/mutable/MutableFloat;)V <- net/minecraft/world/item/enchantment/Enchantment.lambda$modifyDamageFilteredValue$7 <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/Enchantment.modifyEntityFilteredValue (Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lorg/apache/commons/lang3/mutable/MutableFloat;)V <- net/minecraft/world/item/enchantment/Enchantment.lambda$modifyEntityFilteredValue$6 <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/Enchantment.modifyDamageProtection (Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lorg/apache/commons/lang3/mutable/MutableFloat;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/ExperienceOrb.repairPlayerItems (Lnet/minecraft/server/level/ServerPlayer;I)I <- net/minecraft/world/item/enchantment/EnchantmentHelper.getRandomItemWith <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/EnchantmentHelper.getTridentSpinAttackStrength (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)F <- net/minecraft/world/item/enchantment/EnchantmentHelper.lambda$getTridentSpinAttackStrength$36 <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/EnchantmentHelper.modifyCrossbowChargingTime (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;F)F <- net/minecraft/world/item/enchantment/EnchantmentHelper.lambda$modifyCrossbowChargingTime$35 <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/EnchantmentHelper.processEquipmentDropChance (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;F)F <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/effects/ApplyMobEffect.apply (Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/enchantment/EnchantedItemInUse;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/effects/DamageEntity.apply (Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/enchantment/EnchantedItemInUse;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/effects/PlaySoundEffect.apply (Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/enchantment/EnchantedItemInUse;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/effects/ReplaceBlock.apply (Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/enchantment/EnchantedItemInUse;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/effects/ReplaceDisk.apply (Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/enchantment/EnchantedItemInUse;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/enchantment/effects/SpawnParticlesEffect.apply (Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/enchantment/EnchantedItemInUse;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V <- net/minecraft/world/entity/Entity.getRandom <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.makePoofParticles ()V <- net/minecraft/world/entity/Entity.getRandomX <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.tickEffects ()V <- net/minecraft/world/entity/Entity.getRandomX <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.makePoofParticles ()V <- net/minecraft/world/entity/Entity.getRandomY <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.tickEffects ()V <- net/minecraft/world/entity/Entity.getRandomY <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.makePoofParticles ()V <- net/minecraft/world/entity/Entity.getRandomZ <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.tickEffects ()V <- net/minecraft/world/entity/Entity.getRandomZ <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.lavaHurt ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.moveTowardsClosestSpace (DDD)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.playAmethystStepSound ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.playEntityOnFireExtinguishedSound ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.playEntityOnFireExtinguishedSound ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.playSwimSound (F)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.playSwimSound (F)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.spawnSprintParticle ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/Entity.spawnSprintParticle ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.baseTick ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.baseTick ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.baseTick ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.baseTick ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.baseTick ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.baseTick ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.decreaseAirSupply (I)I <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.getVoicePitch ()F <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.getVoicePitch ()F <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.getVoicePitch ()F <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.getVoicePitch ()F <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleDamageEvent (Lnet/minecraft/world/damagesource/DamageSource;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleDamageEvent (Lnet/minecraft/world/damagesource/DamageSource;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.handleEntityEvent (B)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.makePoofParticles ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.makePoofParticles ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.makePoofParticles ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.onEquipItem (Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.pushEntities ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.breakItem (Lnet/minecraft/world/item/ItemStack;)V <- net/minecraft/world/entity/LivingEntity.spawnItemParticles <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/item/component/Consumable.emitParticlesAndSounds (Lnet/minecraft/util/RandomSource;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;I)V <- net/minecraft/world/entity/LivingEntity.spawnItemParticles <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.tickEffects ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.tickEffects ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/LivingEntity.updateFallFlying ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/player/Player.aiStep ()V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/player/Player.onEnchantmentPerformed (Lnet/minecraft/world/item/ItemStack;I)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/player/Player.readAdditionalSaveData (Lnet/minecraft/nbt/CompoundTag;)V <- net/minecraft/world/entity/Entity.random

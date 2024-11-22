@@ -1,0 +1,3 @@
+net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.<clinit> ()V <- net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.<init>
+net/minecraft/world/item/component/Consumables.<clinit> ()V <- net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.<init> <- net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.<init>
+net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.<clinit> ()V <- net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.lambda$static$0 <- net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect.<init>

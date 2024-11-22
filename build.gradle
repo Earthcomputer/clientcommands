@@ -73,6 +73,14 @@ dependencies {
 	include api('net.fabricmc:mapping-io:0.5.1')
 
 	codeGenImplementation sourceSets.main.output
+
+	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
+}
+
+test {
+	useJUnitPlatform()
+	systemProperty('clientcommands.regressionTestDir', file('regressionTests').absolutePath)
 }
 
 jar {
