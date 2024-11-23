@@ -8,6 +8,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.JsonOps;
@@ -35,7 +36,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class FormattedComponentArgument implements ArgumentType<MutableComponent> {
-    private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "bold{italic{red{nwex}}}");
+    private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "red{hello blue{world}!}", "*italic*");
+    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED = new SimpleCommandExceptionType(Component.translatable("commands.client.componentTooDeeplyNested"));
     private static final DynamicCommandExceptionType INVALID_CLICK_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidClickAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidHoverAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_EVENT = new DynamicCommandExceptionType(event -> Component.translatable("commands.client.invalidHoverEvent", event));
@@ -81,6 +83,8 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
     }
 
     private static class Parser {
+        private static final int MAX_NESTING = 50;
+
         private final StringReader reader;
         private Consumer<SuggestionsBuilder> suggestor;
 
@@ -89,68 +93,250 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
         }
 
         public MutableComponent parse() throws CommandSyntaxException {
-            int cursor = reader.getCursor();
-            suggestor = builder -> {
-                SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                SharedSuggestionProvider.suggest(FormattedText.FORMATTING.keySet(), newBuilder);
-                builder.add(newBuilder);
-            };
+            return parse(reader.getTotalLength(), 0);
+        }
 
-            String word = reader.readUnquotedString();
+        private MutableComponent parse(int end, int depth) throws CommandSyntaxException {
+            if (depth > MAX_NESTING) {
+                throw TOO_DEEPLY_NESTED.createWithContext(reader);
+            }
 
-            if (FormattedText.FORMATTING.containsKey(word.toLowerCase(Locale.ROOT))) {
-                FormattedText.Styler styler = FormattedText.FORMATTING.get(word.toLowerCase(Locale.ROOT));
-                suggestor = null;
-                reader.skipWhitespace();
+            StringBuilder plainText = new StringBuilder();
+            List<MutableComponent> components = new ArrayList<>();
+            while (reader.getCursor() < end) {
+                int cursor = reader.getCursor();
+                suggestor = builder -> {
+                    SuggestionsBuilder newBuilder = builder.createOffset(cursor);
+                    SharedSuggestionProvider.suggest(FormattedCode.CODES.keySet().stream().map(str -> str + '{'), newBuilder);
+                    builder.add(newBuilder);
+                };
 
-                if (!reader.canRead() || reader.peek() != '{') {
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "{");
-                }
-                reader.skip();
-                reader.skipWhitespace();
-                MutableComponent literalText;
-                List<String> arguments = new ArrayList<>();
-                if (reader.canRead()) {
-                    if (reader.peek() != '}') {
-                        if (StringReader.isQuotedStringStart(reader.peek())) {
-                            literalText = Component.literal(reader.readQuotedString());
-                        } else {
-                            literalText = parse();
+                String word = readWordNotSurroundedByUnderscore();
+                if (!word.isEmpty() && reader.canRead() && reader.peek() == '{') {
+                    reader.skip();
+                    word = word.toLowerCase(Locale.ROOT);
+
+                    // convert legacy formatting code into modern name
+                    if (word.length() == 1) {
+                        ChatFormatting legacyFormatting = ChatFormatting.getByCode(word.charAt(0));
+                        if (legacyFormatting != null && legacyFormatting != ChatFormatting.RESET) {
+                            word = legacyFormatting.getName().toLowerCase(Locale.ROOT);
                         }
-                        reader.skipWhitespace();
-                        while (reader.canRead() && reader.peek() != '}') {
-                            if (arguments.isEmpty()) {
-                                suggestor = builder -> {
-                                    SuggestionsBuilder newBuilder = builder.createOffset(cursor);
-                                    SharedSuggestionProvider.suggest(styler.suggestions, newBuilder);
-                                    builder.add(newBuilder);
-                                };
+                    }
+
+                    FormattedCode.Styler styler = FormattedCode.CODES.get(word);
+                    if (styler != null) {
+                        int innerStart = reader.getCursor();
+                        int braceCount = 1;
+                        while (braceCount > 0) {
+                            int openIndex = findUnescaped('{', end);
+                            int closeIndex = findUnescaped('}', end);
+                            if (closeIndex == end) {
+                                break;
                             }
-                            if (reader.peek() != ',') {
-                                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, ",");
+                            if (openIndex < closeIndex) {
+                                braceCount++;
+                                reader.setCursor(openIndex + 1);
+                            } else {
+                                braceCount--;
+                                reader.setCursor(closeIndex + 1);
                             }
-                            reader.skip();
+                        }
+                        int innerEnd = braceCount == 0 ? reader.getCursor() - 1 : end;
+                        reader.setCursor(innerStart);
+                        List<String> arguments = new ArrayList<>(styler.argumentCount());
+                        if (styler.argumentCount() > 0) {
                             reader.skipWhitespace();
+                            int argStart = reader.getCursor();
+                            suggestor = builder -> {
+                                SuggestionsBuilder newBuilder = builder.createOffset(argStart);
+                                SharedSuggestionProvider.suggest(styler.suggestions(), newBuilder);
+                                builder.add(newBuilder);
+                            };
                             arguments.add(readArgument());
                             reader.skipWhitespace();
+                            reader.expect(',');
+                            for (int i = 1; i < styler.argumentCount(); i++) {
+                                suggestor = SuggestionsBuilder::buildFuture;
+                                reader.skipWhitespace();
+                                arguments.add(readArgument());
+                                reader.expect(',');
+                                reader.skipWhitespace();
+                            }
                         }
-                    } else {
-                        literalText = Component.literal("");
-                    }
-                } else {
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "}");
-                }
-                reader.skip();
 
-                if (styler.argumentCount != arguments.size()) {
-                    reader.setCursor(cursor);
-                    reader.readUnquotedString();
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
+                        MutableComponent innerComponent = parse(innerEnd, depth + 1);
+                        reader.expect('}');
+                        innerComponent.withStyle(styler.operator().apply(innerComponent.getStyle(), arguments));
+
+                        if (!plainText.isEmpty()) {
+                            components.add(Component.literal(plainText.toString()));
+                            plainText.setLength(0);
+                        }
+                        components.add(innerComponent);
+                        continue;
+                    }
                 }
-                return new FormattedText(styler.operator, literalText, arguments).style();
-            } else {
-                return Component.literal(word + readArgument());
+
+                plainText.append(word);
+
+                if (reader.getCursor() >= end) {
+                    break;
+                }
+
+                char ch = reader.read();
+                switch (ch) {
+                    case '~' -> {
+                        if (reader.getCursor() < end && reader.peek() == '~') {
+                            reader.skip();
+                            MutableComponent innerComponent = parse(findUnescaped("~~", end), depth + 1)
+                                .withStyle(style -> style.withStrikethrough(true));
+                            reader.expect('~');
+                            reader.expect('~');
+                            if (!plainText.isEmpty()) {
+                                components.add(Component.literal(plainText.toString()));
+                                plainText.setLength(0);
+                            }
+                            components.add(innerComponent);
+                        } else {
+                            plainText.append('~');
+                        }
+                    }
+                    case '*' -> {
+                        if (reader.getCursor() < end && reader.peek() == '*') {
+                            reader.skip();
+                            MutableComponent innerComponent = parse(findUnescaped("**", end), depth + 1)
+                                .withStyle(style -> style.withBold(true));
+                            reader.expect('*');
+                            reader.expect('*');
+                            if (!plainText.isEmpty()) {
+                                components.add(Component.literal(plainText.toString()));
+                                plainText.setLength(0);
+                            }
+                            components.add(innerComponent);
+                        } else {
+                            MutableComponent innerComponent = parse(findUnescaped('*', end), depth + 1)
+                                .withStyle(style -> style.withItalic(true));
+                            reader.expect('*');
+                            if (!plainText.isEmpty()) {
+                                components.add(Component.literal(plainText.toString()));
+                                plainText.setLength(0);
+                            }
+                            components.add(innerComponent);
+                        }
+                    }
+                    case '_' -> {
+                        if (reader.getCursor() < end && reader.peek() == '_') {
+                            reader.skip();
+                            MutableComponent innerComponent = parse(findUnescaped("__", end), depth + 1)
+                                .withStyle(style -> style.withUnderlined(true));
+                            reader.expect('_');
+                            reader.expect('_');
+                            if (!plainText.isEmpty()) {
+                                components.add(Component.literal(plainText.toString()));
+                                plainText.setLength(0);
+                            }
+                            components.add(innerComponent);
+                        } else {
+                            MutableComponent innerComponent = parse(findUnescaped('_', end), depth + 1)
+                                .withStyle(style -> style.withItalic(true));
+                            reader.expect('_');
+                            if (!plainText.isEmpty()) {
+                                components.add(Component.literal(plainText.toString()));
+                                plainText.setLength(0);
+                            }
+                            components.add(innerComponent);
+                        }
+                    }
+                    case '[' -> {
+                        MutableComponent linkComponent = parse(findUnescaped(']', end), depth + 1);
+                        reader.expect(']');
+                        String linkHref;
+                        if (reader.getCursor() < end && reader.peek() == '(') {
+                            reader.skip();
+                            suggestor = SuggestionsBuilder::build;
+                            int hrefEnd = reader.getString().indexOf(')', reader.getCursor(), end);
+                            if (hrefEnd == -1) {
+                                hrefEnd = end;
+                            }
+                            linkHref = reader.getString().substring(reader.getCursor(), hrefEnd).trim();
+                            reader.expect(')');
+                        } else {
+                            linkHref = linkComponent.getString();
+                        }
+                        if (!plainText.isEmpty()) {
+                            components.add(Component.literal(plainText.toString()));
+                            plainText.setLength(0);
+                        }
+                        components.add(linkComponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, linkHref))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(linkHref)))
+                            .withColor(ChatFormatting.BLUE)
+                            .withUnderlined(true)));
+                    }
+                    case '\\' -> {
+                        if (reader.getCursor() < end) {
+                            String escapedWord = readWordNotSurroundedByUnderscore();
+                            if (!escapedWord.isEmpty()) {
+                                plainText.append(escapedWord);
+                            } else {
+                                plainText.append(reader.read());
+                            }
+                        } else {
+                            plainText.append('\\');
+                        }
+                    }
+                    default -> plainText.append(ch);
+                }
             }
+
+            if (!plainText.isEmpty()) {
+                components.add(Component.literal(plainText.toString()));
+            }
+
+            return switch (components.size()) {
+                case 0 -> Component.empty();
+                case 1 -> components.getFirst();
+                default -> {
+                    if (components.getFirst().getStyle().isEmpty()) {
+                        for (int i = 1; i < components.size(); i++) {
+                            components.getFirst().append(components.get(i));
+                        }
+                        yield components.getFirst();
+                    } else {
+                        MutableComponent parent = Component.empty();
+                        components.forEach(parent::append);
+                        yield parent;
+                    }
+                }
+            };
+        }
+
+        private boolean isEscaped(int index) {
+            boolean isEscaped = false;
+            for (int i = index - 1; i >= 0; i--) {
+                if (reader.getString().charAt(i) == '\\') {
+                    isEscaped = !isEscaped;
+                } else {
+                    break;
+                }
+            }
+            return isEscaped;
+        }
+
+        private int findUnescaped(char ch, int endIndex) {
+            int index = reader.getString().indexOf(ch, reader.getCursor(), endIndex);
+            while (index != -1 && isEscaped(index)) {
+                index = reader.getString().indexOf(ch, index + 1, endIndex);
+            }
+            return index == -1 ? endIndex : index;
+        }
+
+        private int findUnescaped(String str, int endIndex) {
+            int index = reader.getString().indexOf(str, reader.getCursor(), endIndex);
+            while (index != -1 && isEscaped(index)) {
+                index = reader.getString().indexOf(str, index + 1, endIndex);
+            }
+            return index;
         }
 
         private String readArgument() {
@@ -164,10 +350,27 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
         private static boolean isAllowedInArgument(final char c) {
             return c != ',' && c != '{' && c != '}';
         }
+
+        private String readWordNotSurroundedByUnderscore() {
+            int start = reader.getCursor();
+            String word = reader.readUnquotedString();
+
+            if (word.startsWith("_")) {
+                reader.setCursor(start);
+                return "";
+            }
+
+            while (word.endsWith("_")) {
+                word = word.substring(0, word.length() - 1);
+                reader.setCursor(reader.getCursor() - 1);
+            }
+
+            return word;
+        }
     }
 
-    static class FormattedText {
-        private static final Map<String, Styler> FORMATTING = ImmutableMap.<String, Styler>builder()
+    private static class FormattedCode {
+        private static final Map<String, Styler> CODES = ImmutableMap.<String, Styler>builder()
                 .put("aqua", new Styler((s, o) -> s.applyFormat(ChatFormatting.AQUA), 0))
                 .put("black", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLACK), 0))
                 .put("blue", new Styler((s, o) -> s.applyFormat(ChatFormatting.BLUE), 0))
@@ -185,14 +388,13 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
                 .put("light_purple", new Styler((s, o) -> s.applyFormat(ChatFormatting.LIGHT_PURPLE), 0))
                 .put("obfuscated", new Styler((s, o) -> s.applyFormat(ChatFormatting.OBFUSCATED), 0))
                 .put("red", new Styler((s, o) -> s.applyFormat(ChatFormatting.RED), 0))
-                .put("reset", new Styler((s, o) -> s.applyFormat(ChatFormatting.RESET), 0))
                 .put("strikethrough", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
                 .put("underline", new Styler((s, o) -> s.applyFormat(ChatFormatting.UNDERLINE), 0))
                 .put("white",  new Styler((s, o) -> s.applyFormat(ChatFormatting.WHITE), 0))
                 .put("yellow", new Styler((s, o) -> s.applyFormat(ChatFormatting.YELLOW), 0))
 
-                .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.tryParse(o.getFirst())), 1, "alt", "default"))
-                .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(Integer.parseInt(o.getFirst(), 16))), 1))
+                .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.read(new StringReader(o.getFirst()))), 1, "alt", "default"))
+                .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(parseHex(o.getFirst()))), 1))
                 .put("insert", new Styler((s, o) -> s.withInsertion(o.getFirst()), 1))
 
                 .put("click", new Styler((s, o) -> s.withClickEvent(parseClickEvent(o.getFirst(), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
@@ -207,7 +409,7 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
         private final MutableComponent argument;
         private final List<String> args;
 
-        public FormattedText(StylerFunc styler, MutableComponent argument, List<String> args) {
+        public FormattedCode(StylerFunc styler, MutableComponent argument, List<String> args) {
             this.styler = styler;
             this.argument = argument;
             this.args = args;
@@ -243,6 +445,14 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
             JsonElement component = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)).getOrThrow();
             HoverEvent.TypedHoverEvent<?> eventData = action.legacyCodec.codec().parse(JsonOps.INSTANCE, component).getOrThrow(error -> INVALID_HOVER_EVENT.create(value));
             return new HoverEvent(eventData);
+        }
+
+        private static int parseHex(String hex) throws CommandSyntaxException {
+            try {
+                return Integer.parseInt(hex, 16);
+            } catch (NumberFormatException e) {
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidInt().create(hex);
+            }
         }
     }
 }

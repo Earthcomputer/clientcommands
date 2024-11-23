@@ -252,6 +252,7 @@
 
   "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Cancel",
+  "commands.client.componentTooDeeplyNested": "Chat component too deeply nested",
   "commands.client.crack": "Crack",
   "commands.client.enable": "Enable",
   "commands.client.expectedRegex": "Invalid regex %s",
