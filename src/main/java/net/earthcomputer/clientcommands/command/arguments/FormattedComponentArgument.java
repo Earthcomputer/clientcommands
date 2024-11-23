@@ -260,6 +260,7 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
                                 hrefEnd = end;
                             }
                             linkHref = reader.getString().substring(reader.getCursor(), hrefEnd).trim();
+                            reader.setCursor(hrefEnd);
                             reader.expect(')');
                         } else {
                             linkHref = linkComponent.getString();
