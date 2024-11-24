@@ -35,21 +35,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class FormattedComponentArgument implements ArgumentType<MutableComponent> {
+public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "red{hello blue{world}!}", "*italic*");
-    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED = new SimpleCommandExceptionType(Component.translatable("commands.client.componentTooDeeplyNested"));
-    private static final DynamicCommandExceptionType INVALID_CLICK_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidClickAction", action));
-    private static final DynamicCommandExceptionType INVALID_HOVER_ACTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidHoverAction", action));
-    private static final DynamicCommandExceptionType INVALID_HOVER_EVENT = new DynamicCommandExceptionType(event -> Component.translatable("commands.client.invalidHoverEvent", event));
+    private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.componentTooDeeplyNested"));
+    private static final DynamicCommandExceptionType INVALID_CLICK_ACTION_EXCEPTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidClickAction", action));
+    private static final DynamicCommandExceptionType INVALID_HOVER_ACTION_EXCEPTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidHoverAction", action));
+    private static final DynamicCommandExceptionType INVALID_HOVER_EVENT_EXCEPTION = new DynamicCommandExceptionType(event -> Component.translatable("commands.client.invalidHoverEvent", event));
 
-    private FormattedComponentArgument() {
+    private ExtendedMarkdownArgument() {
     }
 
-    public static FormattedComponentArgument formattedComponent() {
-        return new FormattedComponentArgument();
+    public static ExtendedMarkdownArgument extendedMarkdown() {
+        return new ExtendedMarkdownArgument();
     }
 
-    public static MutableComponent getFormattedComponent(CommandContext<FabricClientCommandSource> context, String arg) {
+    public static MutableComponent getExtendedMarkdown(CommandContext<FabricClientCommandSource> context, String arg) {
         return context.getArgument(arg, MutableComponent.class);
     }
 
@@ -98,7 +98,7 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
 
         private MutableComponent parse(int end, int depth) throws CommandSyntaxException {
             if (depth > MAX_NESTING) {
-                throw TOO_DEEPLY_NESTED.createWithContext(reader);
+                throw TOO_DEEPLY_NESTED_EXCEPTION.createWithContext(reader);
             }
 
             StringBuilder plainText = new StringBuilder();
@@ -269,7 +269,8 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
                             components.add(Component.literal(plainText.toString()));
                             plainText.setLength(0);
                         }
-                        components.add(linkComponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, linkHref))
+                        components.add(linkComponent.withStyle(style -> style
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, linkHref))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(linkHref)))
                             .withColor(ChatFormatting.BLUE)
                             .withUnderlined(true)));
@@ -432,7 +433,7 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
         private static ClickEvent parseClickEvent(String name, String value) throws CommandSyntaxException {
             ClickEvent.Action action = CLICK_EVENT_ACTION_BY_NAME.apply(name);
             if (action == null) {
-                throw INVALID_CLICK_ACTION.create(name);
+                throw INVALID_CLICK_ACTION_EXCEPTION.create(name);
             }
             return new ClickEvent(action, value);
         }
@@ -440,11 +441,11 @@ public class FormattedComponentArgument implements ArgumentType<MutableComponent
         private static HoverEvent parseHoverEvent(String name, String value) throws CommandSyntaxException {
             HoverEvent.Action<?> action = HoverEvent.Action.UNSAFE_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(name)).result().orElse(null);
             if (action == null) {
-                throw INVALID_HOVER_ACTION.create(name);
+                throw INVALID_HOVER_ACTION_EXCEPTION.create(name);
             }
 
             JsonElement component = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)).getOrThrow();
-            HoverEvent.TypedHoverEvent<?> eventData = action.legacyCodec.codec().parse(JsonOps.INSTANCE, component).getOrThrow(error -> INVALID_HOVER_EVENT.create(value));
+            HoverEvent.TypedHoverEvent<?> eventData = action.legacyCodec.codec().parse(JsonOps.INSTANCE, component).getOrThrow(error -> INVALID_HOVER_EVENT_EXCEPTION.create(value));
             return new HoverEvent(eventData);
         }
 
