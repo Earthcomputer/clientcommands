@@ -76,7 +76,7 @@
 
   "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
   "commands.cfinditem.match": "%sx %s ketemu di %s",
-  "commands.cfinditem.starting": "Mencari benda %s",
+  "commands.cfinditem.starting": "Mencari %s",
   "commands.cfinditem.starting.keepSearching": "Mencari benda %s selamanya.",
   "commands.cfinditem.total": "Menemukan %sx %s",
 
@@ -116,7 +116,7 @@
   "commands.cghostblock.set.success": "Blok hantu dipasang",
 
   "commands.cgive.success": "Memberikan %s %s ke diri sendiri",
-  "commands.cgive.notCreative": "Pemain harus berada di mode kreatif untuk memberikan benda ke diri sendiri",
+  "commands.cgive.notCreative": "Pemain harus berada di mode kreatif untuk memakai kit ke diri sendiri",
 
   "commands.cglow.entity.keepSearching.success": "Entitas bersinar.",
   "commands.cglow.entity.failed": "Tidak ada entitas untuk menjadi bersinar",
@@ -156,7 +156,7 @@
 
   "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
 
-  "commands.cplayerinfo.ioException": "Terjadi sebuah kesalahan",
+  "commands.cplayerinfo.ioException": "Terjadi kesalahan",
   "commands.cplayerinfo.getNameHistory.success": "%s memiliki nama nama berikut: %s",
 
   "commands.cparticle.unsuitableParticleOption": "Tidak akan menampilkan partikel karena pengaturan partikel tidak cocok",
@@ -243,7 +243,7 @@
   "commands.cvar.list.empty": "Tidak ada variabel yang tersedia",
   "commands.cvar.list": "Variabel yang tersedia: %s",
 
-  "commands.cwe.playerNotFound": "Player tidak ditemukan",
+  "commands.cwe.playerNotFound": "Pemain tidak ditemukan",
 
   "commands.cweather.reset": "Berhenti mengubah cuaca",
 
@@ -252,6 +252,7 @@
 
   "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Batalkan",
+  "commands.client.componentTooDeeplyNested": "Chat component too deeply nested",
   "commands.client.crack": "Pecahkan",
   "commands.client.enable": "Nyalakan",
   "commands.client.expectedRegex": "Regex tidak valid %s",
@@ -323,6 +324,7 @@
   "playerManip.reset.respiration": "Helm Pernapasan digunakkan",
   "playerManip.reset.dropItem": "Melemparkan item",
   "playerManip.reset.anvil": "Menggunakkan Paron",
+  "playerManip.reset.crossbow": "Crossbow Used",
   "playerManip.reset.food": "Makan",
   "playerManip.reset.drink": "Minum",
   "playerManip.reset.consume": "Consumed",
@@ -332,6 +334,8 @@
   "playerManip.reset.give": "Perintah /give digunakkan",
   "playerManip.reset.unbreaking": "Item Tak Hancur digunakkan",
   "playerManip.reset.itemBreak": "Item hancur",
+  "playerManip.reset.equipItem": "Item Equipped",
+  "playerManip.reset.fallFlying": "Elytra Used",
   "playerManip.reset.frostWalker": "Pejalan Beku digunakkan",
   "playerManip.reset.soulSpeed": "Kecepatan Jiwa digunakkan",
   "playerManip.reset.entityCramming": "Tergencet Entitas",
