@@ -76,6 +76,7 @@ dependencies {
 
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
+	testImplementation "com.code-intelligence:jazzer-junit:${project.jazzer_junit_version}"
 }
 
 test {

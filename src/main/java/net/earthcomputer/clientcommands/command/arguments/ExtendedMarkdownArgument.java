@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command.arguments;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -156,10 +157,11 @@ public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> 
                             arguments.add(readArgument());
                             reader.skipWhitespace();
                             reader.expect(',');
+                            reader.skipWhitespace();
                             for (int i = 1; i < styler.argumentCount(); i++) {
                                 suggestor = SuggestionsBuilder::buildFuture;
-                                reader.skipWhitespace();
                                 arguments.add(readArgument());
+                                reader.skipWhitespace();
                                 reader.expect(',');
                                 reader.skipWhitespace();
                             }
@@ -445,7 +447,9 @@ public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> 
             }
 
             JsonElement component = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)).getOrThrow();
-            HoverEvent.TypedHoverEvent<?> eventData = action.legacyCodec.codec().parse(JsonOps.INSTANCE, component).getOrThrow(error -> INVALID_HOVER_EVENT_EXCEPTION.create(value));
+            JsonObject valueJson = new JsonObject();
+            valueJson.add("value", component);
+            HoverEvent.TypedHoverEvent<?> eventData = action.legacyCodec.codec().parse(JsonOps.INSTANCE, valueJson).getOrThrow(error -> INVALID_HOVER_EVENT_EXCEPTION.create(value));
             return new HoverEvent(eventData);
         }
 
