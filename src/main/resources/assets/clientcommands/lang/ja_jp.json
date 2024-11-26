@@ -76,7 +76,7 @@
 
   "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
   "commands.cfinditem.match": "%sx %s が次の場所で見つかりました %s",
-  "commands.cfinditem.starting": "%s を検索しています",
+  "commands.cfinditem.starting": "%s を探しています",
   "commands.cfinditem.starting.keepSearching": "次のブロックをエンドレスに検索しています %s",
   "commands.cfinditem.total": "%sx %s がトータルで見つかりました",
 
@@ -116,7 +116,7 @@
   "commands.cghostblock.set.success": "ゴーストブロックが置かれました",
 
   "commands.cgive.success": "%s を %s 自身に与えました",
-  "commands.cgive.notCreative": "アイテムを自分自身に与えるためには、クリエイティブモードである必要があります",
+  "commands.cgive.notCreative": "アイテムを自分自身に与えるためにはクリエイティブモードであることが必要です",
 
   "commands.cglow.entity.keepSearching.success": "エンティティ発光中",
   "commands.cglow.entity.failed": "光らせるべきエンティティが存在しません",
@@ -252,6 +252,7 @@
 
   "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "キャンセル",
+  "commands.client.componentTooDeeplyNested": "Chat component too deeply nested",
   "commands.client.crack": "クラック",
   "commands.client.enable": "有効化",
   "commands.client.expectedRegex": "無効な正規表現 %s",
@@ -323,6 +324,7 @@
   "playerManip.reset.respiration": "水中呼吸のヘルメットの使用",
   "playerManip.reset.dropItem": "アイテムを落としました",
   "playerManip.reset.anvil": "金床が使われました",
+  "playerManip.reset.crossbow": "Crossbow Used",
   "playerManip.reset.food": "食べました",
   "playerManip.reset.drink": "飲みました",
   "playerManip.reset.consume": "Consumed",
@@ -332,6 +334,8 @@
   "playerManip.reset.give": "giveコマンドの使用",
   "playerManip.reset.unbreaking": "不可壊のアイテムの使用",
   "playerManip.reset.itemBreak": "アイテムの破壊",
+  "playerManip.reset.equipItem": "Item Equipped",
+  "playerManip.reset.fallFlying": "Elytra Used",
   "playerManip.reset.frostWalker": "氷渡りの使用",
   "playerManip.reset.soulSpeed": "ソウルスピードの使用",
   "playerManip.reset.entityCramming": "エンティティクラミング",
