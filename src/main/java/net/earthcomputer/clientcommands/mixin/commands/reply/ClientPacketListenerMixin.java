@@ -23,7 +23,7 @@ public abstract class ClientPacketListenerMixin {
         if (packet.chatType().chatType().is(ChatType.MSG_COMMAND_INCOMING) || packet.chatType().chatType().is(ChatType.MSG_COMMAND_OUTGOING)) {
             PlayerInfo info = getPlayerInfo(packet.sender());
             if (info != null) {
-                ReplyCommand.setMostRecentWhisper(info.getProfile().getName());
+                ReplyCommand.addReplyCandidate(info.getProfile().getName(), System.currentTimeMillis());
             }
         }
     }

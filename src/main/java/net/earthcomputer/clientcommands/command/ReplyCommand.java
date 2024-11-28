@@ -3,32 +3,53 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.earthcomputer.clientcommands.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static dev.xpple.clientarguments.arguments.CMessageArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static dev.xpple.clientarguments.arguments.CMessageArgument.getMessage;
+import static dev.xpple.clientarguments.arguments.CMessageArgument.message;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class ReplyCommand {
+    public static final float MAXIMUM_REPLY_DELAY_SECONDS = 10.0f;
+
     private static final SimpleCommandExceptionType NO_TARGET_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.creply.noTargetFound"));
     private static final Dynamic2CommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.creply.messageTooLong", a, b));
 
-    @Nullable
-    private static String mostRecentWhisper = null;
-    @Nullable
-    private static String currentTarget = null;
+    private static final List<ReplyCandidate> replyCandidates = new ArrayList<>();
 
-    public static void refreshCurrentTarget() {
-        currentTarget = mostRecentWhisper;
+    @Nullable
+    public static String getCurrentTarget() {
+        long now = System.currentTimeMillis();
+
+        for (int i = 0; i < replyCandidates.size(); i++) {
+            ReplyCandidate candidate = replyCandidates.get(i);
+            if ((now - candidate.timestampMs) / 1_000.0f > MAXIMUM_REPLY_DELAY_SECONDS) {
+                replyCandidates.remove(i--);
+            }
+        }
+
+        for (int i = replyCandidates.size() - 1; i >= 0; i--) {
+            ReplyCandidate candidate = replyCandidates.get(i);
+            if ((now - candidate.timestampMs) / 1_000.0f >= Configs.minimumReplyDelaySeconds) {
+                return candidate.username;
+            }
+        }
+
+        return null;
     }
 
-    public static void setMostRecentWhisper(@NotNull String username) {
-        mostRecentWhisper = username;
+    public static void addReplyCandidate(String username, long timestamp) {
+        replyCandidates.add(new ReplyCandidate(username, timestamp));
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -39,12 +60,13 @@ public class ReplyCommand {
     }
 
     public static int reply(FabricClientCommandSource source, Component message) throws CommandSyntaxException {
-        if (currentTarget == null) {
+        @Nullable String target = ReplyCommand.getCurrentTarget();
+        if (target == null) {
             throw NO_TARGET_FOUND_EXCEPTION.create();
         }
 
         String text = message.getString();
-        String command = String.format("w %s %s", currentTarget, text);
+        String command = String.format("w %s %s", target, text);
 
         if (command.length() > SharedConstants.MAX_CHAT_LENGTH) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create(SharedConstants.MAX_CHAT_LENGTH - (command.length() - text.length()), text.length());
@@ -53,5 +75,8 @@ public class ReplyCommand {
         source.getClient().getConnection().sendCommand(command);
 
         return Command.SINGLE_SUCCESS;
+    }
+
+    private record ReplyCandidate(String username, long timestampMs) {
     }
 }

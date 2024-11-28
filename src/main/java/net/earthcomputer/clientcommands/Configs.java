@@ -176,4 +176,10 @@ public class Configs {
 
     @Config
     public static int maximumPacketFieldDepth = 10;
+
+    @Config(temporary = true, setter = @Config.Setter("setMinimumReplyDelaySeconds"))
+    public static float minimumReplyDelaySeconds = 0.5f;
+    public static void setMinimumReplyDelaySeconds(float minimumReplyDelaySeconds) {
+        Configs.minimumReplyDelaySeconds = Math.clamp(minimumReplyDelaySeconds, 0.0f, 10.0f);
+    }
 }
