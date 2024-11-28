@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.c2c.packets;
 
 import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
-import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,15 +11,14 @@ import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 
 public record StartTwoPlayerGameC2CPacket(String sender, boolean accept, TwoPlayerGame<?, ?> game) implements C2CPacket {
-    public static final StreamCodec<RegistryFriendlyByteBuf, StartTwoPlayerGameC2CPacket> CODEC = Packet.codec(StartTwoPlayerGameC2CPacket::write, StartTwoPlayerGameC2CPacket::new);
+    public static final StreamCodec<C2CFriendlyByteBuf, StartTwoPlayerGameC2CPacket> CODEC = Packet.codec(StartTwoPlayerGameC2CPacket::write, StartTwoPlayerGameC2CPacket::new);
     public static final PacketType<StartTwoPlayerGameC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "start_two_player_game"));
 
-    public StartTwoPlayerGameC2CPacket(FriendlyByteBuf buf) {
-        this(buf.readUtf(), buf.readBoolean(), TwoPlayerGame.getById(buf.readResourceLocation()));
+    public StartTwoPlayerGameC2CPacket(C2CFriendlyByteBuf buf) {
+        this(buf.getSender(), buf.readBoolean(), TwoPlayerGame.getById(buf.readResourceLocation()));
     }
 
-    public void write(FriendlyByteBuf buf) {
-        buf.writeUtf(this.sender);
+    public void write(C2CFriendlyByteBuf buf) {
         buf.writeBoolean(this.accept);
         buf.writeResourceLocation(this.game.getId());
     }

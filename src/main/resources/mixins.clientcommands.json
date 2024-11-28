@@ -29,6 +29,7 @@
     "rngevents.ClientPacketListenerMixin",
     "rngevents.ConsumableMixin",
     "rngevents.CreeperMixin",
+    "rngevents.CrossbowItemMixin",
     "rngevents.CustomCreativeSlotMixin",
     "rngevents.EntityMixin",
     "rngevents.FishingRodItemMixin",
@@ -62,7 +63,6 @@
   },
   "client": [
     "c2c.ChatListenerMixin",
-    "c2c.ClientPacketListenerMixin",
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.findblock.ClientLevelMixin",
@@ -72,6 +72,7 @@
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",
+    "rngevents.ClientLevelMixin",
     "scrambletitle.MinecraftMixin",
     "serverbrand.ClientCommonPacketListenerImplMixin",
     "suggestionshook.ClientPacketListenerMixin"

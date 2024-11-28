@@ -1,0 +1,4 @@
+net/minecraft/world/item/enchantment/Enchantments.bootstrap (Lnet/minecraft/data/worldgen/BootstrapContext;)V <- net/minecraft/world/item/enchantment/effects/PlaySoundEffect.<init>
+net/minecraft/world/item/enchantment/Enchantments.bootstrap (Lnet/minecraft/data/worldgen/BootstrapContext;)V <- net/minecraft/world/item/enchantment/effects/PlaySoundEffect.<init>
+net/minecraft/world/item/enchantment/Enchantments.bootstrap (Lnet/minecraft/data/worldgen/BootstrapContext;)V <- net/minecraft/world/item/enchantment/effects/PlaySoundEffect.<init>
+net/minecraft/world/item/enchantment/effects/PlaySoundEffect.<clinit> ()V <- net/minecraft/world/item/enchantment/effects/PlaySoundEffect.lambda$static$0 <- net/minecraft/world/item/enchantment/effects/PlaySoundEffect.<init>

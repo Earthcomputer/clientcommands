@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
@@ -48,12 +49,12 @@ public class C2CPacketHandler implements C2CPacketListener {
     private static final SimpleCommandExceptionType PUBLIC_KEY_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.publicKeyNotFound"));
     private static final SimpleCommandExceptionType ENCRYPTION_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("c2cpacket.encryptionFailed"));
 
-    public static final ProtocolInfo.Unbound<C2CPacketListener, RegistryFriendlyByteBuf> PROTOCOL_UNBOUND = ProtocolInfoBuilder.clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
+    public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, C2CFriendlyByteBuf>clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
         .addPacket(StartTwoPlayerGameC2CPacket.ID, StartTwoPlayerGameC2CPacket.CODEC)
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
         .addPacket(PutConnectFourPieceC2CPacket.ID, PutConnectFourPieceC2CPacket.CODEC)
-    );
+    ).bind(b -> (C2CFriendlyByteBuf) b);
 
     public static final String C2C_PACKET_HEADER = "CCΕNC:";
 
@@ -77,12 +78,11 @@ public class C2CPacketHandler implements C2CPacketListener {
             throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
         }
         PublicKey key = ppk.data().key();
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        ProtocolInfo<C2CPacketListener> protocolInfo = getCurrentProtocolInfo();
-        if (protocolInfo == null) {
+        FriendlyByteBuf buf = wrapByteBuf(PacketByteBufs.create(), null);
+        if (buf == null) {
             return;
         }
-        protocolInfo.codec().encode(buf, packet);
+        C2C.codec().encode(buf, packet);
         byte[] uncompressed = new byte[buf.readableBytes()];
         buf.getBytes(0, uncompressed);
         byte[] compressed = ConversionHelper.Gzip.compress(uncompressed);
@@ -158,14 +158,13 @@ public class C2CPacketHandler implements C2CPacketListener {
         if (uncompressed == null) {
             return false;
         }
-        ProtocolInfo<C2CPacketListener> protocolInfo = getCurrentProtocolInfo();
-        if (protocolInfo == null) {
+        C2CFriendlyByteBuf buf = wrapByteBuf(Unpooled.wrappedBuffer(uncompressed), sender);
+        if (buf == null) {
             return false;
         }
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(uncompressed));
         C2CPacket packet;
         try {
-            packet = (C2CPacket) protocolInfo.codec().decode(buf);
+            packet = (C2CPacket) C2C.codec().decode(buf);
         } catch (Throwable e) {
             LOGGER.error("Error decoding C2C packet", e);
             return false;
@@ -216,13 +215,12 @@ public class C2CPacketHandler implements C2CPacketListener {
         ConnectFourCommand.onPutConnectFourPieceC2CPacket(packet);
     }
 
-    @Nullable
-    public static ProtocolInfo<C2CPacketListener> getCurrentProtocolInfo() {
+    public static @Nullable C2CFriendlyByteBuf wrapByteBuf(ByteBuf buf, String sender) {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) {
             return null;
         }
-        return ((IClientPacketListener_C2C) connection).clientcommands_getC2CProtocolInfo();
+        return new C2CFriendlyByteBuf(buf, connection.registryAccess(), sender);
     }
 
     @Override

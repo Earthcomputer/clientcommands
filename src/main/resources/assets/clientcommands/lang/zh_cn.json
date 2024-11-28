@@ -184,6 +184,14 @@
 
   "commands.csignsearch.starting": "正在搜索告示牌",
 
+  "commands.csnap.airborne": "You cannot snap while airborne",
+  "commands.csnap.cannotFit": "The player cannot fit at that location",
+  "commands.csnap.clickToTeleportEnabled": "Enabled click to teleport",
+  "commands.csnap.clickToTeleportDisabled": "Disabled click to teleport",
+  "commands.csnap.success": "Snapped to %s %s %s",
+  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away",
+  "commands.csnap.wall": "You cannot snap onto walls",
+
   "commands.cstartup.add.success": "在启动文件中添加了命令",
   "commands.cstartup.couldNotCreateFile": "无法创建启动文件",
   "commands.cstartup.couldNotEdit": "无法编辑启动文件",
@@ -317,6 +325,7 @@
   "playerManip.reset.anvil": "使用了铁砧",
   "playerManip.reset.food": "进食",
   "playerManip.reset.drink": "饮用",
+  "playerManip.reset.consume": "Consumed",
   "playerManip.reset.baneOfArthropods": "使用节肢杀手攻击了节肢生物",
   "playerManip.reset.advancement": "获得了进度",
   "playerManip.reset.shield": "使用盾牌阻挡了攻击",

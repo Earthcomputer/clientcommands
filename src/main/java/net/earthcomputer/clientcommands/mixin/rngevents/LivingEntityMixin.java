@@ -6,13 +6,16 @@ import net.earthcomputer.clientcommands.util.CUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FrostedIceBlock;
@@ -38,35 +41,55 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "pushEntities", at = @At("HEAD"))
-    public void onEntityCramming(CallbackInfo ci) {
+    private void onEntityCramming(CallbackInfo ci) {
         if (isThePlayer() && level().getEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
             PlayerRandCracker.onEntityCramming();
         }
     }
 
     @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isAlive()Z", ordinal = 0))
-    public void onUnderwater(CallbackInfo ci) {
+    private void onUnderwater(CallbackInfo ci) {
         if (isThePlayer() && isAlive() && isEyeInFluid(FluidTags.WATER)) {
             PlayerRandCracker.onUnderwater();
         }
     }
 
     @Inject(method = "breakItem", at = @At("HEAD"))
-    public void onEquipmentBreak(ItemStack stack, CallbackInfo ci) {
+    private void onEquipmentBreak(ItemStack stack, CallbackInfo ci) {
         if (isThePlayer()) {
             PlayerRandCracker.onEquipmentBreak();
         }
     }
 
+    @Inject(method = "onEquipItem", at = @At("HEAD"))
+    private void onOnEquipItem(EquipmentSlot slot, ItemStack oldItem, ItemStack newItem, CallbackInfo ci) {
+        if (isThePlayer()) {
+            boolean emptySlotClickWithEmpty = newItem.isEmpty() && oldItem.isEmpty();
+            if (!emptySlotClickWithEmpty && !ItemStack.isSameItemSameComponents(oldItem, newItem) && !firstTick) {
+                Equippable equippable = newItem.get(DataComponents.EQUIPPABLE);
+                if (equippable != null && slot == equippable.slot()) {
+                    PlayerRandCracker.onEquipItem();
+                }
+            }
+        }
+    }
+
+    @Inject(method = "updateFallFlying", at = @At("HEAD"))
+    private void onUpdateFallFlying(CallbackInfo ci) {
+        if (isThePlayer()) {
+            PlayerRandCracker.onFallFlying();
+        }
+    }
+
     @Inject(method = "tickEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isInvisible()Z"))
-    public void onPotionParticles(CallbackInfo ci) {
+    private void onPotionParticles(CallbackInfo ci) {
         if (isThePlayer()) {
             PlayerRandCracker.onPotionParticles();
         }
     }
 
     @Inject(method = "baseTick", at = @At("RETURN"))
-    public void testFrostWalker(CallbackInfo ci) {
+    private void testFrostWalker(CallbackInfo ci) {
         if (!isThePlayer()) {
             return;
         }
@@ -105,6 +128,13 @@ public abstract class LivingEntityMixin extends Entity {
         boolean hasSoulSpeed = CUtil.getEnchantmentLevel(Enchantments.SOUL_SPEED, (LivingEntity) (Object) this) > 0;
         if (hasSoulSpeed && level().getBlockState(getBlockPosBelowThatAffectsMyMovement()).is(BlockTags.SOUL_SPEED_BLOCKS)) {
             PlayerRandCracker.onSoulSpeed();
+        }
+    }
+
+    @Inject(method = "handleDamageEvent", at = @At("HEAD"))
+    private void onHandleDamageEvent(CallbackInfo ci) {
+        if (isThePlayer()) {
+            PlayerRandCracker.onDamage();
         }
     }
 
