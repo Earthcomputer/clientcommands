@@ -1,7 +1,9 @@
 package net.earthcomputer.clientcommands.c2c.packets;
 
+import net.earthcomputer.clientcommands.c2c.C2CFriendlyByteBuf;
 import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
+import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
