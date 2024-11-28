@@ -8,6 +8,7 @@
   "commands.calias.addAlias.success": "Alias \"%s\" erfolgreich hinzugefügt",
   "commands.calias.listAliases.noAliasesRegistered": "Keine Aliasse registriert",
   "commands.calias.listAliases.success": "%s registrierte Aliasse:",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
   "commands.calias.removeAlias.success": "Alias \"%s\" erfolgreich entfernt",
 
   "commands.careastats.notLoaded": "Ein Chunk in diesem Bereich ist nicht geladen",
@@ -73,6 +74,7 @@
   "commands.cfindblock.starting": "Suche nach %s",
   "commands.cfindblock.success": "Nächster passender Block ist an %s, %s Blöcke entfernt",
 
+  "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
   "commands.cfinditem.match": "%sx %s wurden an %s gefunden",
   "commands.cfinditem.starting": "Suche nach %s",
   "commands.cfinditem.starting.keepSearching": "Suche unendlich lange nach %s.",
@@ -152,6 +154,8 @@
   "commands.clisten.list": "Warte auf die folgenden Pakete:",
   "commands.clisten.clear": "Warte auf kein Paket mehr",
 
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+
   "commands.cplayerinfo.ioException": "Ein Fehler ist aufgetreten",
   "commands.cplayerinfo.getNameHistory.success": "%s hatte die folgenden Namen: %s",
 
@@ -180,6 +184,14 @@
 
   "commands.csignsearch.starting": "Suche Schilder",
 
+  "commands.csnap.airborne": "You cannot snap while airborne",
+  "commands.csnap.cannotFit": "The player cannot fit at that location",
+  "commands.csnap.clickToTeleportEnabled": "Enabled click to teleport",
+  "commands.csnap.clickToTeleportDisabled": "Disabled click to teleport",
+  "commands.csnap.success": "Snapped to %s %s %s",
+  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away",
+  "commands.csnap.wall": "You cannot snap onto walls",
+
   "commands.cstartup.add.success": "Befehl zu Start-Datei hinzugefügt",
   "commands.cstartup.couldNotCreateFile": "Konnte Start-Datei nicht erstellen",
   "commands.cstartup.couldNotEdit": "Konnte Start-Datei nicht bearbeiten",
@@ -189,10 +201,14 @@
   "commands.cstopsound.success.source.any": "Alle Geräusche von '%s' wurden für dich selbst gestoppt",
   "commands.cstopsound.success.source.sound": "Gräusch '%s' von der Quelle '%s' wurde für dich selbst gestoppt",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "Derzeit werden keine Aufgaben ausgeführt",
   "commands.ctask.list.success": "Derzeit werden %s Aufgaben ausgeführt",
   "commands.ctask.stop.noMatch": "Keine passenden Aufgaben",
   "commands.ctask.stop.success": "%s Aufgaben wurden beendet",
+
+  "commands.ctictactoe.playerNotFound": "Spieler nicht gefunden",
+  "commands.ctictactoe.noGameWithPlayer": "Currently not playing a game with that player",
 
   "commands.ctime.reset.success": "Die Zeit ist jetzt mit dem Server synchronisiert",
 
@@ -245,6 +261,7 @@
   "commands.client.invalidHoverAction": "Ungültige Hoverereignisaktion '%s'",
   "commands.client.invalidHoverEvent": "Ungültiges Hoverereignis '%s'",
   "commands.client.notClient": "Kein Klientenbefehl",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
   "commands.client.requiresRestart": "Diese Änderung wird erst nach einem Neustart verfügbar",
   "commands.client.tooFewArguments": "Zu wenige Argumente",
 
@@ -279,6 +296,10 @@
 
   "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers",
 
+  "minesweeperGame.minesLeft": "Mines Left: %s",
+  "minesweeperGame.timePlayed": "Time Played: %ss",
+  "minesweeperGame.title": "Minesweeper",
+
   "playerManip.state": "Spielerknackzustand: %s",
   "playerManip.state.uncracked": "Ungeknackt",
   "playerManip.state.cracked": "Geknackt",
@@ -304,6 +325,7 @@
   "playerManip.reset.anvil": "Amboss benutzt",
   "playerManip.reset.food": "Gegessen",
   "playerManip.reset.drink": "Getrunken",
+  "playerManip.reset.consume": "Consumed",
   "playerManip.reset.baneOfArthropods": "Gliederfüßer mit Nemesis der Gliederfüßer geschlagen",
   "playerManip.reset.advancement": "Fortschritt erzielt",
   "playerManip.reset.shield": "Mit Schild abgewehrt",
@@ -325,6 +347,11 @@
   "snakeGame.title": "Snake",
   "snakeGame.score": "Punkte: %s",
 
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
+  "ticTacToeGame.playingWith": "You are playing with %s",
+  "ticTacToeGame.noughts": "noughts (O)",
+  "ticTacToeGame.crosses": "crosses (X)",
+
   "c2cpacket.messageTooLong": "Nachricht zu lange (max. 255 Zeichen) %s Zeichen gefunden",
   "c2cpacket.publicKeyNotFound": "Öffentlicher Schlüssel nicht gefunden",
   "c2cpacket.encryptionFailed": "Beim Verschlüsseln deiner Nachricht ist etwas schief gegangen",
@@ -333,5 +360,14 @@
   "c2cpacket.sentC2CPacket": "Du hast ein C2C-Paket gesendet, aber du akzeptierst keine eingehenden C2C-Pakete!",
 
   "c2cpacket.messageC2CPacket.incoming": "%s -> du: %s",
-  "c2cpacket.messageC2CPacket.outgoing": "du -> %s: %s"
+  "c2cpacket.messageC2CPacket.outgoing": "du -> %s: %s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }

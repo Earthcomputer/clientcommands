@@ -1,0 +1,20 @@
+filters:
+  - filter_type: 'file'
+    file_format: 'KEYVALUEJSON'
+    source_language: 'en_US'
+    source_file: 'src/main/resources/assets/clientcommands/lang/en_us.json'
+    translation_files_expression: 'src/main/resources/assets/clientcommands/lang/<lang>.json'
+settings:
+  pr_branch_name: 'translations_<br_unique_id>'
+  language_mapping:
+    de_DE: 'de_de'
+    en_US: 'en_us'
+    id_ID: 'id_id'
+    ja_JP: 'ja_jp'
+    nl_NL: 'nl_nl'
+    pl_PL: 'pl_pl'
+    ru_RU: 'ru_ru'
+    sl_SI: 'sl_si'
+    zh_CN: 'zh_cn'
+    zh_TW: 'zh_tw'
+

@@ -8,6 +8,7 @@
   "commands.calias.addAlias.success": "次のエイリアスの追加に成功しました: \"%s\"",
   "commands.calias.listAliases.noAliasesRegistered": "エイリアスが登録されていません",
   "commands.calias.listAliases.success": "%s 個のエイリアスが登録されています: ",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
   "commands.calias.removeAlias.success": "次のエイリアスの削除に成功しました: \"%s\"",
 
   "commands.careastats.notLoaded": "このエリアのチャンクはまだロードされていません",
@@ -73,6 +74,7 @@
   "commands.cfindblock.starting": "%s を探しています",
   "commands.cfindblock.success": "最も近いマッチは %s, %s ブロック分離れています",
 
+  "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
   "commands.cfinditem.match": "%sx %s が次の場所で見つかりました %s",
   "commands.cfinditem.starting": "%s を検索しています",
   "commands.cfinditem.starting.keepSearching": "次のブロックをエンドレスに検索しています %s",
@@ -137,6 +139,23 @@
   "commands.ckit.list": "利用可能なキット: %s",
   "commands.ckit.list.empty": "利用可能なキットがありません",
 
+  "commands.clisten.commandDisabled": "The command was disabled, check your logs",
+  "commands.clisten.unknownPacket": "Unknown packet %s",
+  "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
+  "commands.clisten.receivedC2CPacket": "Received the following C2C packet: %s",
+  "commands.clisten.packetError": "ERROR",
+  "commands.clisten.add.success": "Successfully started listening to that packet",
+  "commands.clisten.add.failed": "Already listening to that packet",
+  "commands.clisten.remove.success": "No longer listening to that packet",
+  "commands.clisten.remove.failed": "Not listening to that packet",
+  "commands.clisten.list.none": "Not listening to any packets",
+  "commands.clisten.list": "Listening to the following packets:",
+  "commands.clisten.clear": "No longer listening to any packets",
+
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+
   "commands.cplayerinfo.ioException": "エラーが発生しました",
   "commands.cplayerinfo.getNameHistory.success": "%s は過去に次の名前を所持していました: %s",
 
@@ -165,6 +184,14 @@
 
   "commands.csignsearch.starting": "看板を検索しています",
 
+  "commands.csnap.airborne": "You cannot snap while airborne",
+  "commands.csnap.cannotFit": "The player cannot fit at that location",
+  "commands.csnap.clickToTeleportEnabled": "Enabled click to teleport",
+  "commands.csnap.clickToTeleportDisabled": "Disabled click to teleport",
+  "commands.csnap.success": "Snapped to %s %s %s",
+  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away",
+  "commands.csnap.wall": "You cannot snap onto walls",
+
   "commands.cstartup.add.success": "スタートアップファイルにコマンドを追加しました",
   "commands.cstartup.couldNotCreateFile": "スタートアップファイルの作成に失敗しました",
   "commands.cstartup.couldNotEdit": "スタートアップファイルの編集に失敗しました",
@@ -174,10 +201,14 @@
   "commands.cstopsound.success.source.any": "すべての音 '%s' の自身に対する再生を停止しました",
   "commands.cstopsound.success.source.sound": "音 '%s' の音源 '%s' からの再生を停止しました",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "現在実行しているタスクはありません",
   "commands.ctask.list.success": "%s 現在実行中のタスク",
   "commands.ctask.stop.noMatch": "マッチするタスクがありません",
   "commands.ctask.stop.success": "%s のタスクを停止しました",
+
+  "commands.ctictactoe.playerNotFound": "プレイヤーが見つかりませんでした",
+  "commands.ctictactoe.noGameWithPlayer": "Currently not playing a game with that player",
 
   "commands.ctime.reset.success": "時刻がサーバーに同期されました",
 
@@ -224,11 +255,13 @@
   "commands.client.crack": "クラック",
   "commands.client.enable": "有効化",
   "commands.client.expectedRegex": "無効な正規表現 %s",
+  "commands.client.glow": "[Glow]",
   "commands.client.invalidArgumentException": "無効な引数 '%s'",
   "commands.client.invalidClickAction": "無効なクリックイベントアクション '%s'",
   "commands.client.invalidHoverAction": "無効なホバーイベントアクション '%s'",
   "commands.client.invalidHoverEvent": "無効なホバーイベントt '%s'",
   "commands.client.notClient": "クライアントサイドのコマンドではありません",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
   "commands.client.requiresRestart": "この変更はクライアントの再起動後に影響を及ぼし始めます",
   "commands.client.tooFewArguments": "引数が少なすぎます",
 
@@ -263,6 +296,10 @@
 
   "itemCrack.notEnoughItems": "RNGシードクラッカの使用に失敗しました: 十分なアイテムがありません",
 
+  "minesweeperGame.minesLeft": "Mines Left: %s",
+  "minesweeperGame.timePlayed": "Time Played: %ss",
+  "minesweeperGame.title": "Minesweeper",
+
   "playerManip.state": "プレイヤークラックの状態: %s",
   "playerManip.state.uncracked": "未クラック",
   "playerManip.state.cracked": "クラック済み",
@@ -288,6 +325,7 @@
   "playerManip.reset.anvil": "金床が使われました",
   "playerManip.reset.food": "食べました",
   "playerManip.reset.drink": "飲みました",
+  "playerManip.reset.consume": "Consumed",
   "playerManip.reset.baneOfArthropods": "虫特攻での虫への攻撃",
   "playerManip.reset.advancement": "進捗の達成",
   "playerManip.reset.shield": "盾でのブロック",
@@ -309,6 +347,11 @@
   "snakeGame.title": "スネーク",
   "snakeGame.score": "スコア: %s",
 
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
+  "ticTacToeGame.playingWith": "You are playing with %s",
+  "ticTacToeGame.noughts": "noughts (O)",
+  "ticTacToeGame.crosses": "crosses (X)",
+
   "c2cpacket.messageTooLong": "メッセージが長ぎます、 (最大. 255 文字)  %s 文字が入力されました",
   "c2cpacket.publicKeyNotFound": "パブリックキーが見つかりませんでした",
   "c2cpacket.encryptionFailed": "あなたのメッセージを暗号化するのに失敗しました",
@@ -317,5 +360,14 @@
   "c2cpacket.sentC2CPacket": "C2Cパケットを送信しましたが、あなたはC2Cパケットを受け取る設定を死ていません！",
 
   "c2cpacket.messageC2CPacket.incoming": "%s -> あなた: %s",
-  "c2cpacket.messageC2CPacket.outgoing": "あなた -> %s: %s"
+  "c2cpacket.messageC2CPacket.outgoing": "あなた -> %s: %s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }

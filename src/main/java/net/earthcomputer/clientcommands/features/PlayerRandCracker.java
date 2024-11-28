@@ -206,6 +206,23 @@ public class PlayerRandCracker {
         }
     }
 
+    public static void onEquipItem() {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20_6) {
+            if (canMaintainPlayerRNG()) {
+                nextInt();
+                nextInt();
+            } else {
+                resetCracker("equipItem");
+            }
+        }
+    }
+
+    public static void onFallFlying() {
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21_2) {
+            resetCracker("fallFlying");
+        }
+    }
+
     public static void onPotionParticles() {
         resetCracker("potion");
     }
@@ -219,6 +236,17 @@ public class PlayerRandCracker {
             nextInt();
         } else {
             resetCracker("anvil");
+        }
+    }
+
+    public static void onCrossbowUse() {
+        if (canMaintainPlayerRNG()) {
+            if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18_2) {
+                nextInt();
+            }
+            nextInt();
+        } else {
+            resetCracker("crossbow");
         }
     }
 

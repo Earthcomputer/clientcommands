@@ -8,6 +8,7 @@
   "commands.calias.addAlias.success": "Berhasil menambahkan alias \"%s\"",
   "commands.calias.listAliases.noAliasesRegistered": "Tidak ada alias yang didaftar",
   "commands.calias.listAliases.success": "Ada %s alias yang didaftar:",
+  "commands.calias.recursive": "Recursive alias \"%s\"",
   "commands.calias.removeAlias.success": "Berhasil menghapus alias \"%s\"",
 
   "commands.careastats.notLoaded": "Bingkah di area tersebut tidak termuat",
@@ -73,6 +74,7 @@
   "commands.cfindblock.starting": "Mencari %s",
   "commands.cfindblock.success": "Hasil paling dekat adalah di %s, %s block",
 
+  "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
   "commands.cfinditem.match": "%sx %s ketemu di %s",
   "commands.cfinditem.starting": "Mencari benda %s",
   "commands.cfinditem.starting.keepSearching": "Mencari benda %s selamanya.",
@@ -137,6 +139,23 @@
   "commands.ckit.list": "Kit yang tersedia: %s",
   "commands.ckit.list.empty": "Tidak ada kit yang tersedia",
 
+  "commands.clisten.commandDisabled": "The command was disabled, check your logs",
+  "commands.clisten.unknownPacket": "Unknown packet %s",
+  "commands.clisten.sentPacket": "Sent the following packet: %s",
+  "commands.clisten.receivedPacket": "Received the following packet: %s",
+  "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
+  "commands.clisten.receivedC2CPacket": "Received the following C2C packet: %s",
+  "commands.clisten.packetError": "ERROR",
+  "commands.clisten.add.success": "Successfully started listening to that packet",
+  "commands.clisten.add.failed": "Already listening to that packet",
+  "commands.clisten.remove.success": "No longer listening to that packet",
+  "commands.clisten.remove.failed": "Not listening to that packet",
+  "commands.clisten.list.none": "Not listening to any packets",
+  "commands.clisten.list": "Listening to the following packets:",
+  "commands.clisten.clear": "No longer listening to any packets",
+
+  "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
+
   "commands.cplayerinfo.ioException": "Terjadi sebuah kesalahan",
   "commands.cplayerinfo.getNameHistory.success": "%s memiliki nama nama berikut: %s",
 
@@ -165,6 +184,14 @@
 
   "commands.csignsearch.starting": "Pencari petanda",
 
+  "commands.csnap.airborne": "You cannot snap while airborne",
+  "commands.csnap.cannotFit": "The player cannot fit at that location",
+  "commands.csnap.clickToTeleportEnabled": "Enabled click to teleport",
+  "commands.csnap.clickToTeleportDisabled": "Disabled click to teleport",
+  "commands.csnap.success": "Snapped to %s %s %s",
+  "commands.csnap.tooFar": "You can only snap to locations at most 1 block away",
+  "commands.csnap.wall": "You cannot snap onto walls",
+
   "commands.cstartup.add.success": "Perintah ditambahkan ke file startup",
   "commands.cstartup.couldNotCreateFile": "Tidak bisa membuat file startup",
   "commands.cstartup.couldNotEdit": "Tidak bisa mengubah file startup",
@@ -174,10 +201,14 @@
   "commands.cstopsound.success.source.any": "Memberhentikan semua suara '%s' dari diri sendiri",
   "commands.cstopsound.success.source.sound": "Memberhentikan suara '%s' di kategori '%s' dari diri sendiri",
 
+  "commands.ctask.conflicting": "A conflicting task '%s' is already running. %s",
   "commands.ctask.list.noTasks": "Tidak ada tugas yang berjalan",
   "commands.ctask.list.success": "%s sedang menjalankan tugas",
   "commands.ctask.stop.noMatch": "Tidak ada tugas yang cocok",
   "commands.ctask.stop.success": "Memberhentikan tugas %s",
+
+  "commands.ctictactoe.playerNotFound": "Pemain tidak ditemukan",
+  "commands.ctictactoe.noGameWithPlayer": "Currently not playing a game with that player",
 
   "commands.ctime.reset.success": "Waktunya sekarang cocok dengan server",
 
@@ -230,6 +261,7 @@
   "commands.client.invalidHoverAction": "Aksi sorot tidak valid '%s'",
   "commands.client.invalidHoverEvent": "Peristiwa sorot tidak valid '%s'",
   "commands.client.notClient": "Bukan perintah sisi klien",
+  "commands.client.regexTooSlow": "Regex '%s' was too slow to match",
   "commands.client.requiresRestart": "Perubahan ini akan berlaku setelah Anda memulai ulang game Anda",
   "commands.client.tooFewArguments": "Argumen terlalu sedikit",
 
@@ -264,6 +296,10 @@
 
   "itemCrack.notEnoughItems": "Tidak bisa menggunakkan SeedCracker RNG: Tidak cukup benda di Tangan Pemain",
 
+  "minesweeperGame.minesLeft": "Mines Left: %s",
+  "minesweeperGame.timePlayed": "Time Played: %ss",
+  "minesweeperGame.title": "Minesweeper",
+
   "playerManip.state": "Status Memecahkan Pemain: %s",
   "playerManip.state.uncracked": "Belum pecah",
   "playerManip.state.cracked": "Sudah pecah",
@@ -289,6 +325,7 @@
   "playerManip.reset.anvil": "Menggunakkan Paron",
   "playerManip.reset.food": "Makan",
   "playerManip.reset.drink": "Minum",
+  "playerManip.reset.consume": "Consumed",
   "playerManip.reset.baneOfArthropods": "Pemain menyakiti serangga menggunakkan pesona Kutukan Artropoda",
   "playerManip.reset.advancement": "Mendapatkan Advancement",
   "playerManip.reset.shield": "Blok menggunakkan Perisai",
@@ -310,6 +347,11 @@
   "snakeGame.title": "Game Ular",
   "snakeGame.score": "Skor: %s",
 
+  "ticTacToeGame.title": "Tic-tac-toe against %s",
+  "ticTacToeGame.playingWith": "You are playing with %s",
+  "ticTacToeGame.noughts": "noughts (O)",
+  "ticTacToeGame.crosses": "crosses (X)",
+
   "c2cpacket.messageTooLong": "Pesan terlalu panjang (max. 255 karakter) saat ini %s karakter",
   "c2cpacket.publicKeyNotFound": "Kunci publik tidak ditemukan",
   "c2cpacket.encryptionFailed": "Terjadi kegagalan saat mengenkripsi pesan Anda ",
@@ -318,5 +360,14 @@
   "c2cpacket.sentC2CPacket": "Anda telah mengirimkan paket C2C, tetapi Anda tidak menerima paket C2C yang masuk!",
 
   "c2cpacket.messageC2CPacket.incoming": "%s -> Anda: %s",
-  "c2cpacket.messageC2CPacket.outgoing": "Anda -> %s: %s"
+  "c2cpacket.messageC2CPacket.outgoing": "Anda -> %s: %s",
+
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "You invited %s to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s invited you to a game of tic-tac-toe",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "Accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "Click to accept",
+  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s has accepted your invitation, click to make your move",
+  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
+  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, click to make your move"
 }

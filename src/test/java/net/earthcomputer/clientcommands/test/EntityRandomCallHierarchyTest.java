@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public final class EntityRandomCallHierarchyTest {
+    // TODO: regression test for enchantment value effects actually using the random
+
     @Test
     public void testPlayer() {
         TestUtil.regressionTest("playerRandomHierarchy", out -> {
@@ -33,6 +35,46 @@ public final class EntityRandomCallHierarchyTest {
         TestUtil.regressionTest("teleportRandomlyHierarchy", out -> {
             CallHierarchyWalker.fromMethod("net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect", "<init>", "(F)V")
                 .recurseThrough("net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect", "<init>", "()V")
+                .walk((reference, callStack) -> printReference(out, reference, callStack));
+        });
+    }
+
+    @Test
+    public void testEnchantmentRemoveBinomial() {
+        TestUtil.regressionTest("testEnchantmentRemoveBinomialHierarchy", out -> {
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/RemoveBinomial", "<init>", "(Lnet/minecraft/world/item/enchantment/LevelBasedValue;)V")
+                .walk((reference, callStack) -> printReference(out, reference, callStack));
+        });
+    }
+
+    @Test
+    public void testEnchantmentPlaySoundEffect() {
+        TestUtil.regressionTest("enchantmentPlaySoundEffectHierarchy", out -> {
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/PlaySoundEffect", "<init>", "(Lnet/minecraft/core/Holder;Lnet/minecraft/util/valueproviders/FloatProvider;Lnet/minecraft/util/valueproviders/FloatProvider;)V")
+                .walk((reference, callStack) -> printReference(out, reference, callStack));
+        });
+    }
+
+    @Test
+    public void testEnchantmentReplaceBlockEffect() {
+        TestUtil.regressionTest("enchantmentReplaceBlockEffectHierarchy", out -> {
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/ReplaceBlock", "<init>", "(Lnet/minecraft/core/Vec3i;Ljava/util/Optional;Lnet/minecraft/world/level/levelgen/feature/stateproviders/BlockStateProvider;Ljava/util/Optional;)V")
+                .walk((reference, callStack) -> printReference(out, reference, callStack));
+        });
+    }
+
+    @Test
+    public void testEnchantmentReplaceDiskEffect() {
+        TestUtil.regressionTest("enchantmentReplaceDiskEffectHierarchy", out -> {
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/ReplaceDisk", "<init>", "(Lnet/minecraft/world/item/enchantment/LevelBasedValue;Lnet/minecraft/world/item/enchantment/LevelBasedValue;Lnet/minecraft/core/Vec3i;Ljava/util/Optional;Lnet/minecraft/world/level/levelgen/feature/stateproviders/BlockStateProvider;Ljava/util/Optional;)V")
+                .walk((reference, callStack) -> printReference(out, reference, callStack));
+        });
+    }
+
+    @Test
+    public void testEnchantmentSpawnParticlesEffect() {
+        TestUtil.regressionTest("enchantmentSpawnParticlesEffectHierarchy", out -> {
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/SpawnParticlesEffect", "<init>", "(Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/world/item/enchantment/effects/SpawnParticlesEffect$PositionSource;Lnet/minecraft/world/item/enchantment/effects/SpawnParticlesEffect$PositionSource;Lnet/minecraft/world/item/enchantment/effects/SpawnParticlesEffect$VelocitySource;Lnet/minecraft/world/item/enchantment/effects/SpawnParticlesEffect$VelocitySource;Lnet/minecraft/util/valueproviders/FloatProvider;)V")
                 .walk((reference, callStack) -> printReference(out, reference, callStack));
         });
     }
