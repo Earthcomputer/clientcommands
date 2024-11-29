@@ -14,13 +14,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.xpple.clientarguments.arguments.CMessageArgument.getMessage;
-import static dev.xpple.clientarguments.arguments.CMessageArgument.message;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static dev.xpple.clientarguments.arguments.CMessageArgument.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class ReplyCommand {
-    public static final float MAXIMUM_REPLY_DELAY_SECONDS = 10.0f;
+    public static final float MAXIMUM_REPLY_DELAY_SECONDS = 300.0f;
 
     private static final SimpleCommandExceptionType NO_TARGET_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.creply.noTargetFound"));
     private static final Dynamic2CommandExceptionType MESSAGE_TOO_LONG_EXCEPTION = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("commands.creply.messageTooLong", a, b));
@@ -33,14 +31,14 @@ public class ReplyCommand {
 
         for (int i = 0; i < replyCandidates.size(); i++) {
             ReplyCandidate candidate = replyCandidates.get(i);
-            if ((now - candidate.timestampMs) / 1_000.0f > MAXIMUM_REPLY_DELAY_SECONDS) {
+            if (now - candidate.timestampMs > MAXIMUM_REPLY_DELAY_SECONDS * 1_000.0f) {
                 replyCandidates.remove(i--);
             }
         }
 
         for (int i = replyCandidates.size() - 1; i >= 0; i--) {
             ReplyCandidate candidate = replyCandidates.get(i);
-            if ((now - candidate.timestampMs) / 1_000.0f >= Configs.minimumReplyDelaySeconds) {
+            if (now - candidate.timestampMs >= Configs.minimumReplyDelaySeconds * 1_000.0f) {
                 return candidate.username;
             }
         }
@@ -60,7 +58,7 @@ public class ReplyCommand {
     }
 
     public static int reply(FabricClientCommandSource source, Component message) throws CommandSyntaxException {
-        @Nullable String target = ReplyCommand.getCurrentTarget();
+        String target = ReplyCommand.getCurrentTarget();
         if (target == null) {
             throw NO_TARGET_FOUND_EXCEPTION.create();
         }
