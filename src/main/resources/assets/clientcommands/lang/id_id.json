@@ -182,6 +182,9 @@
 
   "commands.crender.entities.success": "Aturan entity rendering telah di update",
 
+  "commands.creply.noTargetFound": "Could not find a target to reply to",
+  "commands.creply.messageTooLong": "Your reply was too long (maximum: %d, given: %d)",
+
   "commands.csignsearch.starting": "Pencari petanda",
 
   "commands.csnap.airborne": "You cannot snap while airborne",
