@@ -33,6 +33,9 @@ public class ReplyCommand {
             ReplyCandidate candidate = replyCandidates.get(i);
             if (now - candidate.timestampMs > MAXIMUM_REPLY_DELAY_SECONDS * 1_000.0f) {
                 replyCandidates.remove(i--);
+            } else {
+                // list is ordered and `now - candidate.timestampMs` will only get smaller and smaller, so the cmp above will never change
+                break;
             }
         }
 
