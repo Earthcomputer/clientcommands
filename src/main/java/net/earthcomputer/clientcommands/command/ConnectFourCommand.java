@@ -272,7 +272,7 @@ public class ConnectFourCommand {
         private static final int TEXTURE_SLOT_HEIGHT = TEXTURE_PIECE_HEIGHT + 2 * TEXTURE_SLOT_BORDER_HEIGHT;
         private static final int TEXTURE_BOARD_WIDTH = TEXTURE_SLOT_WIDTH * ConnectFourGame.WIDTH + TEXTURE_BOARD_BORDER_WIDTH * 2;
         private static final int TEXTURE_BOARD_HEIGHT = TEXTURE_SLOT_HEIGHT * ConnectFourGame.HEIGHT + TEXTURE_BOARD_BORDER_HEIGHT * 2;
-        private static final int TEXTURE_PIECES_WIDTH = TEXTURE_PIECE_WIDTH + TEXTURE_PIECE_WIDTH; // red and yellow
+        private static final int TEXTURE_PIECES_WIDTH = 2 * TEXTURE_PIECE_WIDTH; // red and yellow
         private static final int TEXTURE_PIECES_HEIGHT = TEXTURE_PIECE_HEIGHT;
         
         private static final int BOARD_WIDTH = SCALE * TEXTURE_BOARD_WIDTH;
