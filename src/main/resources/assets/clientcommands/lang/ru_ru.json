@@ -182,6 +182,9 @@
 
   "commands.crender.entities.success": "Обновлены правила рендеринга сущностей.",
 
+  "commands.creply.noTargetFound": "Could not find a target to reply to",
+  "commands.creply.messageTooLong": "Your reply was too long (maximum: %d, given: %d)",
+
   "commands.csignsearch.starting": "Searching signs",
 
   "commands.csnap.airborne": "You cannot snap while airborne",
