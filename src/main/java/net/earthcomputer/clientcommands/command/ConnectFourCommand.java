@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.ClickEvent;
@@ -18,7 +19,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+
+import java.util.UUID;
 
 public class ConnectFourCommand {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -29,7 +33,8 @@ public class ConnectFourCommand {
 
     public static void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
         String sender = packet.sender();
-        ConnectFourGame game = TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGame(sender);
+        UUID senderUUID = packet.senderUUID();
+        ConnectFourGame game = TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGame(senderUUID);
         if (game == null) {
             return;
         }
@@ -41,28 +46,26 @@ public class ConnectFourCommand {
         public static final int HEIGHT = 6;
 
         public final PlayerInfo opponent;
-        public final byte yourPiece;
-        public byte activePiece;
-        public final byte[][] board;
-        /**
-         * 0 for undecided
-         * 1 for red
-         * 2 for yellow
-         * 3 for draw
-        */
-        public byte winner;
+        public final Piece yourPiece;
+        public Piece activePiece;
+        public final Piece[][] board;
+        @Nullable
+        public Winner winner;
 
-        public ConnectFourGame(PlayerInfo opponent, byte yourPiece) {
+        public ConnectFourGame(PlayerInfo opponent, Piece yourPiece) {
             this.opponent = opponent;
             this.yourPiece = yourPiece;
             this.activePiece = Piece.RED;
-            this.board = new byte[WIDTH][HEIGHT];
-            this.winner = 0;
+            this.board = new Piece[WIDTH][HEIGHT];
+            this.winner = null;
         }
 
-        public void onMove(int x, byte piece) {
+        public void onMove(int x, Piece piece) {
+            final Minecraft mc = Minecraft.getInstance();
+            final ClientPacketListener connection = mc.getConnection();
+            assert connection != null;
             if (piece != activePiece) {
-                LOGGER.warn("Invalid piece, the active piece is {} and the piece that was attempted to be placed was {}", Piece.name(activePiece), Piece.name(piece));
+                LOGGER.warn("Invalid piece, the active piece is {} and the piece that was attempted to be placed was {}", this.activePiece.translate(), piece.translate());
                 return;
             }
 
@@ -78,25 +81,26 @@ public class ConnectFourCommand {
 
             if (this.isYourTurn()) {
                 try {
-                    PutConnectFourPieceC2CPacket packet = new PutConnectFourPieceC2CPacket(Minecraft.getInstance().getConnection().getLocalGameProfile().getName(), x);
+                    PutConnectFourPieceC2CPacket packet = new PutConnectFourPieceC2CPacket(connection.getLocalGameProfile().getName(), connection.getLocalGameProfile().getId(), x);
                     C2CPacketHandler.getInstance().sendPacket(packet, this.opponent);
                 } catch (CommandSyntaxException e) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translationArg(e.getRawMessage()));
+                    ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
                 }
             }
 
             String sender = this.opponent.getProfile().getName();
-            this.activePiece = Piece.opposite(piece);
-            if ((this.winner = this.getWinner()) != 0) {
-                if (this.winner == this.yourPiece) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("connectFourGame.won", sender));
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
-                } else if (this.winner == Piece.opposite(this.yourPiece)) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("c2cpacket.putConnectFourPieceC2CPacket.incoming.lost", sender));
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
-                } else if (this.winner == 3) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("connectFourGame.draw", sender));
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGames().remove(sender);
+            UUID senderUUID = this.opponent.getProfile().getId();
+            this.activePiece = piece.opposite();
+            if ((this.winner = this.getWinner()) != null) {
+                if (this.winner == this.yourPiece.asWinner()) {
+                    ClientCommandHelper.sendFeedback("connectFourGame.won", sender);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
+                } else if (this.winner == this.yourPiece.opposite().asWinner()) {
+                    ClientCommandHelper.sendFeedback("c2cpacket.putConnectFourPieceC2CPacket.incoming.lost", sender);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
+                } else if (this.winner == Winner.DRAW) {
+                    ClientCommandHelper.sendFeedback("connectFourGame.draw", sender);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
                 }
             } else {
                 if (this.isYourTurn()) {
@@ -104,7 +108,7 @@ public class ConnectFourCommand {
                     component.withStyle(style -> style
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cconnectfour open " + sender))
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/cconnectfour open " + sender))));
-                    Minecraft.getInstance().gui.getChat().addMessage(component);
+                    ClientCommandHelper.sendFeedback(component);
                 }
             }
         }
@@ -114,38 +118,33 @@ public class ConnectFourCommand {
         }
 
         public boolean isGameActive() {
-            return this.winner == 0;
+            return this.winner == null;
         }
 
         public boolean canMove() {
             return this.isYourTurn() && this.isGameActive();
         }
 
-        public byte opponentPiece() {
-            if (yourPiece == Piece.RED) {
-                return Piece.YELLOW;
-            } else {
-                return Piece.RED;
-            }
+        public Piece opponentPiece() {
+            return yourPiece.opposite();
         }
 
-        public boolean addPiece(int x, byte piece) {
+        public boolean addPiece(int x, Piece piece) {
             int y;
             if (isValidRow(x) && (y = this.getPlacementY(x)) < HEIGHT) {
-                // this only exists to signify that each bit represents a different piece
-                this.board[x][y] |= piece;
+                this.board[x][y] = piece;
                 return true;
             }
             return false;
         }
 
-        // The `&` bitmasks only work because each piece has a unique bit, therefore making each bit represent if that piece is in that position, doing an & on all of them tells you which pieces are represented in every space.
-        private byte getWinner() {
+        @Nullable
+        private Winner getWinner() {
             // check horizontally
             for (int x = 0; x < WIDTH - 3; x++) {
                 for (int y = 0; y < HEIGHT; y++) {
-                    if ((this.board[x][y] & this.board[x + 1][y] & this.board[x + 2][y] & this.board[x + 3][y]) > 0) {
-                        return this.board[x][y];
+                    if (this.board[x][y] != null && this.board[x][y] == this.board[x + 1][y] && this.board[x][y] == this.board[x + 2][y] && this.board[x][y] == this.board[x + 3][y]) {
+                        return this.board[x][y].asWinner();
                     }
                 }
             }
@@ -153,8 +152,8 @@ public class ConnectFourCommand {
             // check vertically
             for (int x = 0; x < WIDTH; x++) {
                 for (int y = 0; y < HEIGHT - 3; y++) {
-                    if ((this.board[x][y] & this.board[x][y + 1] & this.board[x][y + 2] & this.board[x][y + 3]) > 0) {
-                        return this.board[x][y];
+                    if (this.board[x][y] != null && this.board[x][y] == this.board[x][y + 1] && this.board[x][y] == this.board[x][y + 2] && this.board[x][y] == this.board[x][y + 3]) {
+                        return this.board[x][y].asWinner();
                     }
                 }
             }
@@ -162,8 +161,8 @@ public class ConnectFourCommand {
             // check horizontally (northeast)
             for (int x = 0; x < WIDTH - 3; x++) {
                 for (int y = 0; y < HEIGHT - 3; y++) {
-                    if ((this.board[x][y] & this.board[x + 1][y + 1] & this.board[x + 2][y + 2] & this.board[x + 3][y + 3]) > 0) {
-                        return this.board[x][y];
+                    if (this.board[x][y] != null && this.board[x][y] == this.board[x + 1][y + 1] && this.board[x][y] == this.board[x + 2][y + 2] && this.board[x][y] == this.board[x + 3][y + 3]) {
+                        return this.board[x][y].asWinner();
                     }
                 }
             }
@@ -171,23 +170,23 @@ public class ConnectFourCommand {
             // check horizontally (southeast)
             for (int x = 0; x < WIDTH - 3; x++) {
                 for (int y = 3; y < HEIGHT; y++) {
-                    if ((this.board[x][y] & this.board[x + 1][y - 1] & this.board[x + 2][y - 2] & this.board[x + 3][y - 3]) > 0) {
-                        return this.board[x][y];
+                    if (this.board[x][y] != null && this.board[x][y] == this.board[x + 1][y - 1] && this.board[x][y] == this.board[x + 2][y - 2] && this.board[x][y] == this.board[x + 3][y - 3]) {
+                        return this.board[x][y].asWinner();
                     }
                 }
             }
 
             for (int x = 0; x < WIDTH; x++) {
                 for (int y = 0; y < HEIGHT; y++) {
-                    if (this.board[x][y] == 0) {
+                    if (this.board[x][y] == null) {
                         // still a space to play
-                        return 0;
+                        return null;
                     }
                 }
             }
 
             // no spaces left, game ends in a draw
-            return Piece.RED | Piece.YELLOW;
+            return Winner.DRAW;
         }
 
         public static boolean isValidRow(int x) {
@@ -196,8 +195,8 @@ public class ConnectFourCommand {
 
         public int getPlacementY(int x) {
             int y = 0;
-            for (byte piece : this.board[x]) {
-                if (piece == 0) {
+            for (Piece piece : this.board[x]) {
+                if (piece == null) {
                     break;
                 }
                 y++;
@@ -207,34 +206,35 @@ public class ConnectFourCommand {
         }
     }
 
-    public static class Piece {
-        public static final byte RED = 1 << 0;
-        public static final byte YELLOW = 1 << 1;
+    public enum Piece {
+        RED,
+        YELLOW;
 
-        public static byte opposite(byte piece) {
-            return switch (piece) {
+        public Piece opposite() {
+            return switch (this) {
                 case RED -> YELLOW;
                 case YELLOW -> RED;
-                default -> throw new IllegalStateException("Unexpected value: " + piece);
             };
         }
 
-        public static Component name(byte piece) {
-            return switch (piece) {
+        public Component translate() {
+            return switch (this) {
                 case RED -> Component.translatable("connectFourGame.pieceRed");
                 case YELLOW -> Component.translatable("connectFourGame.pieceYellow");
-                default -> throw new IllegalStateException("Unexpected value: " + piece);
             };
         }
 
-        public static void render(GuiGraphics graphics, int x, int y, byte piece, boolean transparent) {
-            if (piece == 0) {
-                return;
-            }
-            int xOffset = switch (piece) {
+        public Winner asWinner() {
+            return switch (this) {
+                case RED -> Winner.RED;
+                case YELLOW -> Winner.YELLOW;
+            };
+        }
+
+        public void render(GuiGraphics graphics, int x, int y, boolean transparent) {
+            int xOffset = switch (this) {
                 case RED -> 0;
                 case YELLOW -> 16;
-                default -> throw new IllegalStateException("Unexpected value: " + piece);
             };
             graphics.blit(
                 RenderType::guiTextured,
@@ -249,9 +249,15 @@ public class ConnectFourCommand {
                 ConnectFourGameScreen.TEXTURE_PIECE_HEIGHT,
                 ConnectFourGameScreen.TEXTURE_PIECES_WIDTH,
                 ConnectFourGameScreen.TEXTURE_PIECES_HEIGHT,
-                transparent ? 0x7f_ffffff : 0xff_ffffff
+                transparent ? 0X7F_FFFFFF : 0XFF_FFFFFF
             );
         }
+    }
+
+    public enum Winner {
+        RED,
+        YELLOW,
+        DRAW
     }
 
     public static class ConnectFourGameScreen extends Screen {
@@ -297,7 +303,7 @@ public class ConnectFourCommand {
             int startX = (this.width - BOARD_WIDTH) / 2;
             int startY = (this.height - BOARD_HEIGHT) / 2;
 
-            graphics.drawString(this.font, Component.translatable("connectFourGame.pieceSet", Piece.name(this.game.yourPiece)), startX, startY - 20, 0xff_ffffff);
+            graphics.drawString(this.font, Component.translatable("connectFourGame.pieceSet", this.game.yourPiece.translate()), startX, startY - 20, 0xff_ffffff);
             graphics.drawString(this.font, this.title, startX, startY - 10, 0xff_ffffff);
             Component moveTranslate = this.game.isYourTurn() ? Component.translatable("connectFourGame.yourMove") : Component.translatable("connectFourGame.opponentMove");
             graphics.drawString(this.font, moveTranslate, startX + BOARD_WIDTH - this.font.width(moveTranslate), startY - 10, 0xff_ffffff);
@@ -319,7 +325,10 @@ public class ConnectFourCommand {
 
             for (int x = 0; x < ConnectFourGame.WIDTH; x++) {
                 for (int y = 0; y < ConnectFourGame.HEIGHT; y++) {
-                    Piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, this.game.board[x][y], false);
+                    Piece piece = this.game.board[x][y];
+                    if (piece != null) {
+                        piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, false);
+                    }
                 }
             }
 
@@ -330,7 +339,7 @@ public class ConnectFourCommand {
                 int x = (mouseX - boardMinX) / SLOT_WIDTH;
                 int y = this.game.getPlacementY(x);
                 if (y < ConnectFourGame.HEIGHT) {
-                    Piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, this.game.yourPiece, true);
+                    game.yourPiece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, true);
                 }
             }
         }

@@ -45,7 +45,7 @@ public class ChatListenerMixin {
             cir.setReturnValue(false);
             return;
         }
-        if (C2CPacketHandler.handleC2CPacket(packetString, gameProfile.getName())) {
+        if (C2CPacketHandler.handleC2CPacket(packetString, gameProfile.getName(), gameProfile.getId())) {
             cir.setReturnValue(true);
         } else {
             this.minecraft.gui.getChat().addMessage(Component.translatable("c2cpacket.malformedPacket").withStyle(ChatFormatting.RED));

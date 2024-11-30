@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.demonwav.mcdev.annotations.Translatable;
 import com.google.common.cache.CacheBuilder;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
@@ -25,10 +27,8 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
@@ -55,17 +55,17 @@ public class TwoPlayerGame<T, S extends Screen> {
     private final Component translation;
     private final String command;
     private final ResourceLocation id;
-    private final Set<String> pendingInvites;
-    private final Map<String, T> activeGames;
+    private final Set<UUID> pendingInvites;
+    private final Map<UUID, T> activeGames;
     private final GameFactory<T> gameFactory;
     private final ScreenFactory<T, S> screenFactory;
 
-    TwoPlayerGame(String translationKey, String command, ResourceLocation id, GameFactory<T> gameFactory, ScreenFactory<T, S> screenFactory) {
+    TwoPlayerGame(@Translatable String translationKey, String command, ResourceLocation id, GameFactory<T> gameFactory, ScreenFactory<T, S> screenFactory) {
         this.translation = Component.translatable(translationKey);
         this.command = command;
         this.id = id;
-        this.pendingInvites = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<String, Boolean>build().asMap());
-        this.activeGames = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(15)).<String, T>build().asMap();
+        this.pendingInvites = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<UUID, Boolean>build().asMap());
+        this.activeGames = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(15)).<UUID, T>build().asMap();
         this.gameFactory = gameFactory;
         this.screenFactory = screenFactory;
     }
@@ -78,31 +78,38 @@ public class TwoPlayerGame<T, S extends Screen> {
         return this.id;
     }
 
-    public Set<String> getPendingInvites() {
+    public Set<UUID> getPendingInvites() {
         return this.pendingInvites;
     }
 
-    public Map<String, T> getActiveGames() {
+    public Map<UUID, T> getActiveGames() {
         return this.activeGames;
     }
 
     @Nullable
-    public T getActiveGame(String opponent) {
+    public T getActiveGame(UUID opponent) {
         return this.activeGames.get(opponent);
     }
 
+    public void removeActiveGame(UUID opponent) {
+        this.activeGames.remove(opponent);
+    }
+
     public void addNewGame(PlayerInfo opponent, boolean isFirstPlayer) {
-        this.activeGames.put(opponent.getProfile().getName(), this.gameFactory.create(opponent, isFirstPlayer));
+        this.activeGames.put(opponent.getProfile().getId(), this.gameFactory.create(opponent, isFirstPlayer));
     }
 
     public LiteralArgumentBuilder<FabricClientCommandSource> createCommandTree() {
+        final Minecraft mc = Minecraft.getInstance();
+        final ClientPacketListener connection = mc.getConnection();
+        assert connection != null;
         return literal(this.command)
             .then(literal("start")
                 .then(argument("opponent", gameProfile(true))
                     .executes(ctx -> this.start(ctx.getSource(), getSingleProfileArgument(ctx, "opponent")))))
             .then(literal("open")
                 .then(argument("opponent", word())
-                    .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(this.getActiveGames().keySet(), builder))
+                    .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(this.getActiveGames().keySet().stream().flatMap(uuid -> Stream.ofNullable(connection.getPlayerInfo(uuid))).map(info -> info.getProfile().getName()), builder))
                     .executes(ctx -> this.open(ctx.getSource(), getString(ctx, "opponent")))));
     }
 
@@ -112,15 +119,19 @@ public class TwoPlayerGame<T, S extends Screen> {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
-        StartTwoPlayerGameC2CPacket packet = new StartTwoPlayerGameC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), false, this);
+        StartTwoPlayerGameC2CPacket packet = new StartTwoPlayerGameC2CPacket(player.getName(), player.getId(), false, this);
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);
-        this.pendingInvites.add(recipient.getProfile().getName());
-        source.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited", recipient.getProfile().getName(), translate()));
+        this.pendingInvites.add(player.getId());
+        source.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited", player.getName(), translate()));
         return Command.SINGLE_SUCCESS;
     }
 
     public int open(FabricClientCommandSource source, String name) throws CommandSyntaxException {
-        T game = this.activeGames.get(name);
+        PlayerInfo opponent = source.getClient().getConnection().getPlayerInfo(name);
+        if (opponent == null) {
+            throw PLAYER_NOT_FOUND_EXCEPTION.create();
+        }
+        T game = this.activeGames.get(opponent.getProfile().getId());
         if (game == null) {
             throw NO_GAME_WITH_PLAYER_EXCEPTION.create();
         }
@@ -130,6 +141,7 @@ public class TwoPlayerGame<T, S extends Screen> {
     }
 
     public static void onStartTwoPlayerGame(StartTwoPlayerGameC2CPacket packet) {
+        final Minecraft mc = Minecraft.getInstance();
         String sender = packet.sender();
         TwoPlayerGame<?, ?> game = packet.game();
         PlayerInfo opponent = Minecraft.getInstance().getConnection().getPlayerInfo(sender);
@@ -137,14 +149,14 @@ public class TwoPlayerGame<T, S extends Screen> {
             return;
         }
 
-        if (packet.accept() && game.getPendingInvites().remove(sender)) {
+        if (packet.accept() && game.getPendingInvites().remove(opponent.getProfile().getId())) {
             packet.game().addNewGame(opponent, true);
 
             MutableComponent component = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted", sender, game.translate());
             component.withStyle(style -> style
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + game.command + " open " + sender))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/" + game.command + " open " + sender))));
-            Minecraft.getInstance().gui.getChat().addMessage(component);
+            ClientCommandHelper.sendFeedback(component);
             return;
         }
 
@@ -156,18 +168,18 @@ public class TwoPlayerGame<T, S extends Screen> {
                 .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, ClientCommandHelper.registerCode(() -> {
                     game.addNewGame(opponent, false);
 
-                    StartTwoPlayerGameC2CPacket acceptPacket = new StartTwoPlayerGameC2CPacket(Minecraft.getInstance().getConnection().getLocalGameProfile().getName(), true, game);
+                    StartTwoPlayerGameC2CPacket acceptPacket = new StartTwoPlayerGameC2CPacket(mc.getGameProfile().getName(), mc.getGameProfile().getId(), true, game);
                     try {
                         C2CPacketHandler.getInstance().sendPacket(acceptPacket, opponent);
                     } catch (CommandSyntaxException e) {
-                        Minecraft.getInstance().gui.getChat().addMessage(Component.translationArg(e.getRawMessage()));
+                        ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
                     }
 
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept"));
+                    ClientCommandHelper.sendFeedback("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept");
                 })))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover")))))
             .append("]");
-        Minecraft.getInstance().gui.getChat().addMessage(component);
+        ClientCommandHelper.sendFeedback(component);
     }
 
     @FunctionalInterface

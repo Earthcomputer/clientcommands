@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 public class C2CPacketHandler implements C2CPacketListener {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -76,7 +77,7 @@ public class C2CPacketHandler implements C2CPacketListener {
             throw PUBLIC_KEY_NOT_FOUND_EXCEPTION.create();
         }
         PublicKey key = ppk.data().key();
-        FriendlyByteBuf buf = wrapByteBuf(PacketByteBufs.create(), null);
+        FriendlyByteBuf buf = wrapByteBuf(PacketByteBufs.create(), null, null);
         if (buf == null) {
             return;
         }
@@ -119,7 +120,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         OutgoingPacketFilter.addPacket(packetString);
     }
 
-    public static boolean handleC2CPacket(String content, String sender) {
+    public static boolean handleC2CPacket(String content, String sender, UUID senderUUID) {
         byte[] encrypted = ConversionHelper.BaseUTF8.fromUnicode(content);
         // round down to multiple of 256 bytes
         int length = encrypted.length & ~0xFF;
@@ -156,7 +157,7 @@ public class C2CPacketHandler implements C2CPacketListener {
         if (uncompressed == null) {
             return false;
         }
-        C2CFriendlyByteBuf buf = wrapByteBuf(Unpooled.wrappedBuffer(uncompressed), sender);
+        C2CFriendlyByteBuf buf = wrapByteBuf(Unpooled.wrappedBuffer(uncompressed), sender, senderUUID);
         if (buf == null) {
             return false;
         }
@@ -213,12 +214,12 @@ public class C2CPacketHandler implements C2CPacketListener {
         ConnectFourCommand.onPutConnectFourPieceC2CPacket(packet);
     }
 
-    public static @Nullable C2CFriendlyByteBuf wrapByteBuf(ByteBuf buf, String sender) {
+    public static @Nullable C2CFriendlyByteBuf wrapByteBuf(ByteBuf buf, String sender, UUID senderUUID) {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) {
             return null;
         }
-        return new C2CFriendlyByteBuf(buf, connection.registryAccess(), sender);
+        return new C2CFriendlyByteBuf(buf, connection.registryAccess(), sender, senderUUID);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -18,6 +19,8 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.UUID;
+
 public class TicTacToeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.createCommandTree());
@@ -25,21 +28,22 @@ public class TicTacToeCommand {
 
     public static void onPutTicTacToeMarkC2CPacket(PutTicTacToeMarkC2CPacket packet) {
         String sender = packet.sender();
-        TicTacToeGame game = TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.getActiveGame(sender);
+        UUID senderUUID = packet.senderUUID();
+        TicTacToeGame game = TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.getActiveGame(senderUUID);
         if (game == null) {
             return;
         }
         if (game.putMark(packet.x(), packet.y(), game.yourMarks.opposite())) {
             if (game.getWinner() == game.yourMarks.opposite()) {
-                Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost", sender));
-                TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.getActiveGames().remove(sender);
+                ClientCommandHelper.sendFeedback("c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost", sender);
+                TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.removeActiveGame(senderUUID);
                 return;
             }
             MutableComponent component = Component.translatable("c2cpacket.putTicTacToeMarkC2CPacket.incoming", sender);
             component.withStyle(style -> style
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ctictactoe open " + sender))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/ctictactoe open " + sender))));
-            Minecraft.getInstance().gui.getChat().addMessage(component);
+            ClientCommandHelper.sendFeedback(component);
         }
     }
 
@@ -171,13 +175,13 @@ public class TicTacToeCommand {
 
             if (this.game.putMark(x, y, this.game.yourMarks)) {
                 try {
-                    PutTicTacToeMarkC2CPacket packet = new PutTicTacToeMarkC2CPacket(Minecraft.getInstance().getConnection().getLocalGameProfile().getName(), x, y);
+                    PutTicTacToeMarkC2CPacket packet = new PutTicTacToeMarkC2CPacket(Minecraft.getInstance().getConnection().getLocalGameProfile().getName(), Minecraft.getInstance().getConnection().getLocalGameProfile().getId(), x, y);
                     C2CPacketHandler.getInstance().sendPacket(packet, this.game.opponent);
                 } catch (CommandSyntaxException e) {
-                    Minecraft.getInstance().gui.getChat().addMessage(Component.translationArg(e.getRawMessage()));
+                    ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
                 }
                 if (this.game.getWinner() == this.game.yourMarks) {
-                    TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.getActiveGames().remove(this.game.opponent.getProfile().getName());
+                    TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.removeActiveGame(this.game.opponent.getProfile().getId());
                 }
                 return true;
             }
