@@ -260,7 +260,7 @@ public final class ReferencesFinder {
         // we don't know whether the method is virtual or not yet, so find the non-virtual method first and then check
         // if it's non-virtual
         ReferencesSet nonVirtualReferences = resolveNonVirtualMethod(classInfo, new NameAndDesc(name, desc), index::get);
-        if (nonVirtualReferences != null && (nonVirtualReferences.access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC)) != 0) {
+        if (nonVirtualReferences != null && ((nonVirtualReferences.access & (Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC)) != 0 || "<init>".equals(name))) {
             return nonVirtualReferences;
         }
 

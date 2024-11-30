@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands;
 
 import dev.xpple.betterconfig.api.Config;
+import net.earthcomputer.clientcommands.command.ReplyCommand;
 import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
@@ -176,4 +177,10 @@ public class Configs {
 
     @Config
     public static int maximumPacketFieldDepth = 10;
+
+    @Config(temporary = true, setter = @Config.Setter("setMinimumReplyDelaySeconds"))
+    public static float minimumReplyDelaySeconds = 0.5f;
+    public static void setMinimumReplyDelaySeconds(float minimumReplyDelaySeconds) {
+        Configs.minimumReplyDelaySeconds = Math.clamp(minimumReplyDelaySeconds, 0.0f, ReplyCommand.MAXIMUM_REPLY_DELAY_SECONDS);
+    }
 }
