@@ -159,7 +159,6 @@
   "commands.cplayerinfo.ioException": "發生錯誤",
   "commands.cplayerinfo.getNameHistory.success": "%s 曾使用過以下名稱： %s",
 
-  "commands.cparticle.unsuitableParticleOption": "由於粒子顯示設定不適合，因此無法顯示粒子",
   "commands.cparticle.success": "正在顯示粒子 %s",
 
   "commands.cpermissionlevel.success": "您的權限等級為 %s",

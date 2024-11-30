@@ -931,7 +931,7 @@ public class FishingCracker {
             this.velocity = velocity;
             this.boundingBox = FISHING_BOBBER_DIMENSIONS.makeBoundingBox(pos.x, pos.y, pos.z);
 
-            this.fakeEntity = new FishingHook(Objects.requireNonNull(Minecraft.getInstance().player), level, 0, 0, tool);
+            this.fakeEntity = new FishingHook(Objects.requireNonNull(Minecraft.getInstance().player), level, 0, 0);
         }
 
         public boolean canCatchFish() {
