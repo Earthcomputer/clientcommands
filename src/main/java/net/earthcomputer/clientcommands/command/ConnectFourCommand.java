@@ -249,7 +249,7 @@ public class ConnectFourCommand {
                 ConnectFourGameScreen.TEXTURE_PIECE_HEIGHT,
                 ConnectFourGameScreen.TEXTURE_PIECES_WIDTH,
                 ConnectFourGameScreen.TEXTURE_PIECES_HEIGHT,
-                ((transparent ? 0x7F : 0xFF) << 24) | 0xFFFFFF // if I wanted, it could be (-1 >>> (transparent ? 1 : 0))
+                transparent ? 0x7f_ffffff : 0xff_ffffff
             );
         }
     }
