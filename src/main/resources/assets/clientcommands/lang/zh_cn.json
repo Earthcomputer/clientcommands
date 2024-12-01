@@ -198,9 +198,6 @@
   "commands.ctask.stop.noMatch": "没有匹配的任务",
   "commands.ctask.stop.success": "已停止%s个任务",
 
-  "commands.ctictactoe.playerNotFound": "未找到玩家",
-  "commands.ctictactoe.noGameWithPlayer": "目前没有与该玩家一起进行游戏",
-
   "commands.ctime.reset.success": "当前时间与服务器相同",
 
   "commands.ctitle.cleared": "已清除的标题",
@@ -352,12 +349,6 @@
   "c2cpacket.messageC2CPacket.incoming": "%s -> 你：%s",
   "c2cpacket.messageC2CPacket.outgoing": "你 -> %s：%s",
 
-  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.invited": "你邀请%s参加井字棋",
-  "c2cpacket.startTicTacToeGameC2CPacket.incoming": "%s邀请你参加井字棋",
-  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept": "接受",
-  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accept.hover": "点击以接受",
-  "c2cpacket.startTicTacToeGameC2CPacket.incoming.accepted": "%s已接受你的邀请，点击即可开始下棋",
-  "c2cpacket.startTicTacToeGameC2CPacket.outgoing.accept": "接受了邀请，你的对手将先走",
   "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s走了一步棋并赢了",
   "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s已下棋，点击来下你的棋"
 }
