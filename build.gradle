@@ -1,5 +1,7 @@
+import net.earthcomputer.clientcommands.buildscript.CheckLanguageFilesTask
+
 plugins {
-	id 'fabric-loom' version '1.8-SNAPSHOT'
+	id 'fabric-loom' version '1.9-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
@@ -129,6 +131,11 @@ tasks.register('codeGen', JavaExec) {
 	args file('src/main/java').absolutePath
 	enableAssertions = true
 }
+
+tasks.register('checkLanguageFiles', CheckLanguageFilesTask) {
+	inputDir.set(file('src/main/resources/assets/clientcommands/lang'))
+}
+check.dependsOn checkLanguageFiles
 
 // read the changelog from the changelog.txt file, make sure the changelog is recent to avoid accidentally using the previous version's changelog.
 def changelogFile = file('changelog.txt')

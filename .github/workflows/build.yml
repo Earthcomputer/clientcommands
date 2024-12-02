@@ -21,7 +21,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-      - run: ./gradlew test --stacktrace --no-daemon
+      - run: ./gradlew check --stacktrace --no-daemon
       - run: ./gradlew build -Pmod_version="$(git describe --always --tags | cut -c2-)" --stacktrace --no-daemon
       - uses: actions/upload-artifact@v3
         with:

@@ -19,7 +19,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-      - run: ./gradlew test --stacktrace --no-daemon
+      - run: ./gradlew check --stacktrace --no-daemon
       - uses: actions/upload-artifact@v3
         if: always()
         with:

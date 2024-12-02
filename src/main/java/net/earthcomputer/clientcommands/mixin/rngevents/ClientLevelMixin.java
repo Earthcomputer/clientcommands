@@ -27,7 +27,7 @@ public class ClientLevelMixin {
         if (entity instanceof ExperienceOrb) {
             LocalPlayer player = Minecraft.getInstance().player;
             assert player != null;
-            if (player.getBoundingBox().expandTowards(1.25, 0.75, 1.25).intersects(entity.getBoundingBox())) {
+            if (player.getBoundingBox().inflate(1.25, 0.75, 1.25).intersects(entity.getBoundingBox())) {
                 PlayerRandCracker.onXpOrb();
                 if (Arrays.stream(EquipmentSlot.values()).anyMatch(slot -> couldMendingRepair(player.getItemBySlot(slot)))) {
                     PlayerRandCracker.onMending();

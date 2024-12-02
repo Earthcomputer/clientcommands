@@ -361,7 +361,7 @@ public class PlayerRandCracker {
     }
 
     public static void onUnexpectedItemEnchant() {
-        resetCracker("enchanted");
+        resetCracker("enchanting");
     }
 
     private static boolean canMaintainPlayerRNG() {
