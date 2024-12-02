@@ -380,6 +380,6 @@
   "ticTacToeGame.playingWith": "You are playing with %s",
   "ticTacToeGame.title": "Tic-tac-toe against %s",
 
-  "twoPlayerGame.playerNotFound": "Player not found",
-  "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player"
+  "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player",
+  "twoPlayerGame.playerNotFound": "Player not found"
 }
