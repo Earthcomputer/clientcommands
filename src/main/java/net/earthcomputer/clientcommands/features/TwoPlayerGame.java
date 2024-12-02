@@ -165,19 +165,21 @@ public class TwoPlayerGame<T, S extends Screen> {
         if (packet.accept() && game.getPendingInvites().remove(opponent.getProfile().getId())) {
             packet.game().addNewGame(opponent, true);
 
-            MutableComponent component = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted", sender, game.translate(), Component.translatable("twoPlayerGame.clickToMakeYourMove").withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE));
-            component.withStyle(style -> style
+            MutableComponent clickable = Component.translatable("twoPlayerGame.clickToMakeYourMove");
+            clickable.withStyle(style -> style
+                .withUnderlined(true)
+                .withColor(ChatFormatting.GREEN)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + game.command + " open " + sender))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/" + game.command + " open " + sender))));
-            ClientCommandHelper.sendFeedback(component);
+            ClientCommandHelper.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted", sender, game.translate()).append(" [").append(clickable).append("]"));
             return;
         }
 
-        MutableComponent component = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming", sender, game.translate());
-        component
-            .append(" [")
-            .append(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept").withStyle(style -> style
+        MutableComponent clickable = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept").withStyle(style ->
+            style
+                .withUnderlined(true)
                 .withColor(ChatFormatting.GREEN)
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover")))
                 .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, ClientCommandHelper.registerCode(() -> {
                     if (!game.openGame(opponent.getProfile().getId())) {
                         game.addNewGame(opponent, false);
@@ -191,10 +193,8 @@ public class TwoPlayerGame<T, S extends Screen> {
 
                         ClientCommandHelper.sendFeedback("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept");
                     }
-                })))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover")))))
-            .append("]");
-        ClientCommandHelper.sendFeedback(component);
+                }))));
+        ClientCommandHelper.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming", sender, game.translate()).append(" [").append(clickable).append("]"));
     }
 
     public void onWon(String sender, UUID senderUUID) {

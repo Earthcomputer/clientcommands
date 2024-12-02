@@ -10,7 +10,7 @@
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming": "%s invited you to a game of %s",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept": "Accept",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover": "Click to accept",
-  "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted": "%s has accepted your invitation to %s, %s",
+  "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted": "%s has accepted your invitation to %s",
   "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
   "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited": "You invited %s to a game of %s",
 
