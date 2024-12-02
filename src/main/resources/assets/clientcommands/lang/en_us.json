@@ -380,11 +380,11 @@
   "ticTacToeGame.playingWith": "You are playing with %s",
   "ticTacToeGame.title": "Tic-tac-toe against %s",
 
-  "twoPlayerGame.clickToMakeYourMove": "click here to make your move",
-  "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player",
-  "twoPlayerGame.playerNotFound": "Player not found",
-  "twoPlayerGame.incoming": "%s has made a move in %s",
-  "twoPlayerGame.chat.lost": "%s has made a move in %s and won",
   "twoPlayerGame.chat.draw": "You've made a move and drawn against %s in %s",
-  "twoPlayerGame.chat.won": "You made a move in %s and beat %s!"
+  "twoPlayerGame.chat.lost": "%s has made a move in %s and won",
+  "twoPlayerGame.chat.won": "You made a move in %s and beat %s!",
+  "twoPlayerGame.clickToMakeYourMove": "click here to make your move",
+  "twoPlayerGame.incoming": "%s has made a move in %s",
+  "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player",
+  "twoPlayerGame.playerNotFound": "Player not found"
 }
