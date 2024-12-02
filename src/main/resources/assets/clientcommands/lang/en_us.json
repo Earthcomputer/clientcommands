@@ -5,10 +5,6 @@
   "c2cpacket.messageC2CPacket.outgoing": "you -> %s: %s",
   "c2cpacket.messageTooLong": "Message too long (max. 255 characters) got %s characters",
   "c2cpacket.publicKeyNotFound": "Public key not found",
-  "c2cpacket.putConnectFourPieceC2CPacket.incoming": "%s has made a move in Connect Four, %s",
-  "c2cpacket.putConnectFourPieceC2CPacket.incoming.lost": "%s has made a move in Connect Four and won",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s has made a move in tic-tac-toe, %s",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s has made a move in tic-tac-toe and won",
   "c2cpacket.receivedC2CPacket": "You have received a C2C packet, but you aren't accepting incoming C2C packets! Hover to view the raw packet.",
   "c2cpacket.sentC2CPacket": "You have sent a C2C packet, but you aren't accepting incoming C2C packets!",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming": "%s invited you to a game of %s",
@@ -297,13 +293,12 @@
   "connectFourGame.draw": "Draw!",
   "connectFourGame.won": "Won!",
   "connectFourGame.lost": "Lost!",
-  "connectFourGame.chat.draw": "You've made a move and drawn against %s in Connect Four",
+
   "connectFourGame.opponentMove": "You are waiting for your opponent...",
   "connectFourGame.pieceRed": "red",
   "connectFourGame.pieceSet": "You are playing with the %s pieces",
   "connectFourGame.pieceYellow": "yellow",
   "connectFourGame.title": "Connect Four against %s",
-  "connectFourGame.chat.won": "You made a move in Connect Four and beat %s!",
   "connectFourGame.yourMove": "It is your move",
 
   "enchCrack.addInfo": "Add Info",
@@ -385,7 +380,11 @@
   "ticTacToeGame.playingWith": "You are playing with %s",
   "ticTacToeGame.title": "Tic-tac-toe against %s",
 
-  "twoPlayerGame.clickToMakeYourMove": "[click here to make your move]",
+  "twoPlayerGame.clickToMakeYourMove": "click here to make your move",
   "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player",
-  "twoPlayerGame.playerNotFound": "Player not found"
+  "twoPlayerGame.playerNotFound": "Player not found",
+  "twoPlayerGame.incoming": "%s has made a move in %s",
+  "twoPlayerGame.chat.lost": "%s has made a move in %s and won",
+  "twoPlayerGame.chat.draw": "You've made a move and drawn against %s in %s",
+  "twoPlayerGame.chat.won": "You made a move in %s and beat %s!"
 }

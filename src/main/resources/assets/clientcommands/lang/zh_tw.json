@@ -5,8 +5,6 @@
   "c2cpacket.messageC2CPacket.outgoing": "您 -> %s： %s",
   "c2cpacket.messageTooLong": "訊息過長（最多 255 個字元），已輸入 %s 個字元",
   "c2cpacket.publicKeyNotFound": "找不到公開金鑰",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s 在井字遊戲中進行了一步，點選進行您的回合",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s 在井字遊戲中進行了一步並獲勝",
   "c2cpacket.receivedC2CPacket": "您收到了一個 C2C 封包，但您沒有接受接收 C2C 封包！ 懸停以檢視原始封包。",
   "c2cpacket.sentC2CPacket": "您發送了一個 C2C 封包，但您沒有接受接收 C2C 封包！",
 

@@ -135,13 +135,22 @@ public class TwoPlayerGame<T, S extends Screen> {
         if (opponent == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
-        T game = this.activeGames.get(opponent.getProfile().getId());
-        if (game == null) {
+        if (!openGame(opponent.getProfile().getId())) {
             throw NO_GAME_WITH_PLAYER_EXCEPTION.create();
         }
 
-        source.getClient().schedule(() -> source.getClient().setScreen(this.screenFactory.createScreen(game)));
         return Command.SINGLE_SUCCESS;
+    }
+
+    private boolean openGame(UUID opponentUuid) {
+        final Minecraft mc = Minecraft.getInstance();
+        T game = activeGames.get(opponentUuid);
+        if (game != null) {
+            mc.schedule(() -> mc.setScreen(this.screenFactory.createScreen(game)));
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static void onStartTwoPlayerGame(StartTwoPlayerGameC2CPacket packet) {
@@ -170,20 +179,47 @@ public class TwoPlayerGame<T, S extends Screen> {
             .append(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept").withStyle(style -> style
                 .withColor(ChatFormatting.GREEN)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, ClientCommandHelper.registerCode(() -> {
-                    game.addNewGame(opponent, false);
+                    if (!game.openGame(opponent.getProfile().getId())) {
+                        game.addNewGame(opponent, false);
 
-                    StartTwoPlayerGameC2CPacket acceptPacket = new StartTwoPlayerGameC2CPacket(mc.getGameProfile().getName(), mc.getGameProfile().getId(), true, game);
-                    try {
-                        C2CPacketHandler.getInstance().sendPacket(acceptPacket, opponent);
-                    } catch (CommandSyntaxException e) {
-                        ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
+                        StartTwoPlayerGameC2CPacket acceptPacket = new StartTwoPlayerGameC2CPacket(mc.getGameProfile().getName(), mc.getGameProfile().getId(), true, game);
+                        try {
+                            C2CPacketHandler.getInstance().sendPacket(acceptPacket, opponent);
+                        } catch (CommandSyntaxException e) {
+                            ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
+                        }
+
+                        ClientCommandHelper.sendFeedback("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept");
                     }
-
-                    ClientCommandHelper.sendFeedback("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept");
                 })))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover")))))
             .append("]");
         ClientCommandHelper.sendFeedback(component);
+    }
+
+    public void onWon(String sender, UUID senderUUID) {
+        ClientCommandHelper.sendFeedback("twoPlayerGame.chat.won", translate(), sender);
+        removeActiveGame(senderUUID);
+    }
+
+    public void onDraw(String sender, UUID senderUUID) {
+        ClientCommandHelper.sendFeedback("twoPlayerGame.chat.draw", translate(), sender);
+        removeActiveGame(senderUUID);
+    }
+
+    public void onLost(String sender, UUID senderUUID) {
+        ClientCommandHelper.sendFeedback("twoPlayerGame.chat.lost", sender, translate());
+        removeActiveGame(senderUUID);
+    }
+
+    public void onMove(String sender) {
+        MutableComponent clickable = Component.translatable("twoPlayerGame.clickToMakeYourMove");
+        clickable.withStyle(style -> style
+            .withColor(ChatFormatting.GREEN)
+            .withUnderlined(true)
+            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + command + " open " + sender))
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/" + command + " open " + sender))));
+        ClientCommandHelper.sendFeedback(Component.translatable("twoPlayerGame.incoming", sender).append(" [").append(clickable).append("]"));
     }
 
     @FunctionalInterface

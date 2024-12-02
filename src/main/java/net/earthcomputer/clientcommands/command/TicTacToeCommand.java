@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.command;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,16 +7,12 @@ import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
@@ -36,15 +31,10 @@ public class TicTacToeCommand {
         }
         if (game.putMark(packet.x(), packet.y(), game.yourMarks.opposite())) {
             if (game.getWinner() == game.yourMarks.opposite()) {
-                ClientCommandHelper.sendFeedback("c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost", sender);
-                TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.removeActiveGame(senderUUID);
-                return;
+                TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.onLost(sender, senderUUID);
+            } else {
+                TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.onMove(sender);
             }
-            MutableComponent component = Component.translatable("c2cpacket.putTicTacToeMarkC2CPacket.incoming", sender, Component.translatable("twoPlayerGame.clickToMakeYourMove").withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE));
-            component.withStyle(style -> style
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ctictactoe open " + sender))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/ctictactoe open " + sender))));
-            ClientCommandHelper.sendFeedback(component);
         }
     }
 

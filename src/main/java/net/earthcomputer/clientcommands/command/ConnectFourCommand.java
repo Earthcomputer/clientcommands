@@ -93,22 +93,15 @@ public class ConnectFourCommand {
             this.activePiece = piece.opposite();
             if ((this.winner = this.getWinner()) != null) {
                 if (this.winner == this.yourPiece.asWinner()) {
-                    ClientCommandHelper.sendFeedback("connectFourGame.chat.won", sender);
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onWon(sender, senderUUID);
                 } else if (this.winner == this.yourPiece.opposite().asWinner()) {
-                    ClientCommandHelper.sendFeedback("c2cpacket.putConnectFourPieceC2CPacket.incoming.lost", sender);
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onLost(sender, senderUUID);
                 } else if (this.winner == Winner.DRAW) {
-                    ClientCommandHelper.sendFeedback("connectFourGame.chat.draw", sender);
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onDraw(sender, senderUUID);
                 }
             } else {
                 if (this.isYourTurn()) {
-                    MutableComponent component = Component.translatable("c2cpacket.putConnectFourPieceC2CPacket.incoming", sender, Component.translatable("twoPlayerGame.clickToMakeYourMove").withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE));
-                    component.withStyle(style -> style
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cconnectfour open " + sender))
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/cconnectfour open " + sender))));
-                    ClientCommandHelper.sendFeedback(component);
+                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onMove(sender);
                 }
             }
         }

@@ -4,8 +4,6 @@
   "c2cpacket.messageC2CPacket.incoming": "%s -> 你：%s",
   "c2cpacket.messageC2CPacket.outgoing": "你 -> %s：%s",
   "c2cpacket.publicKeyNotFound": "未找到公共密匙",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming": "%s已下棋，点击来下你的棋",
-  "c2cpacket.putTicTacToeMarkC2CPacket.incoming.lost": "%s走了一步棋并赢了",
   "c2cpacket.receivedC2CPacket": "你收到了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！悬停以查看原始数据包。",
   "c2cpacket.sentC2CPacket": "你发送了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！",
 
