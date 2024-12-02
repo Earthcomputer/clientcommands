@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -30,8 +31,11 @@ public class TicTacToeCommand {
             return;
         }
         if (game.putMark(packet.x(), packet.y(), game.yourMarks.opposite())) {
-            if (game.getWinner() == game.yourMarks.opposite()) {
+            TicTacToeGame.Mark winner = game.getWinner();
+            if (winner == game.yourMarks.opposite()) {
                 TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.onLost(sender, senderUUID);
+            } else if (game.isDrawn()) {
+                TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.onDraw(sender, senderUUID);
             } else {
                 TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.onMove(sender);
             }
@@ -62,6 +66,7 @@ public class TicTacToeCommand {
             return false;
         }
 
+        @Nullable
         public Mark getWinner() {
             for (byte x = 0; x < 3; x++) {
                 if (this.board[x][0] == this.board[x][1] && this.board[x][1] == this.board[x][2] && this.board[x][0] != null) {
@@ -78,6 +83,18 @@ public class TicTacToeCommand {
                 return this.board[0][2];
             }
             return null;
+        }
+
+        public boolean isDrawn() {
+            for (Mark[] marks : this.board) {
+                for (Mark mark : marks) {
+                    if (mark != null) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         public enum Mark {
@@ -172,7 +189,7 @@ public class TicTacToeCommand {
                     ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
                 }
                 if (this.game.getWinner() == this.game.yourMarks) {
-                    TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.removeActiveGame(this.game.opponent.getProfile().getId());
+                    TwoPlayerGame.TIC_TAC_TOE_GAME_TYPE.onWon(this.game.opponent.getProfile().getName(), this.game.opponent.getProfile().getId());
                 }
                 return true;
             }

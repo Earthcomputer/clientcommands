@@ -15,10 +15,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -29,12 +26,12 @@ public class ConnectFourCommand {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.createCommandTree());
+        dispatcher.register(TwoPlayerGame.CONNECT_FOUR_GAME_TYPE.createCommandTree());
     }
 
     public static void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
         UUID senderUUID = packet.senderUUID();
-        ConnectFourGame game = TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGame(senderUUID);
+        ConnectFourGame game = TwoPlayerGame.CONNECT_FOUR_GAME_TYPE.getActiveGame(senderUUID);
         if (game == null) {
             return;
         }
@@ -93,15 +90,15 @@ public class ConnectFourCommand {
             this.activePiece = piece.opposite();
             if ((this.winner = this.getWinner()) != null) {
                 if (this.winner == this.yourPiece.asWinner()) {
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onWon(sender, senderUUID);
+                    TwoPlayerGame.CONNECT_FOUR_GAME_TYPE.onWon(sender, senderUUID);
                 } else if (this.winner == this.yourPiece.opposite().asWinner()) {
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onLost(sender, senderUUID);
+                    TwoPlayerGame.CONNECT_FOUR_GAME_TYPE.onLost(sender, senderUUID);
                 } else if (this.winner == Winner.DRAW) {
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onDraw(sender, senderUUID);
+                    TwoPlayerGame.CONNECT_FOUR_GAME_TYPE.onDraw(sender, senderUUID);
                 }
             } else {
                 if (this.isYourTurn()) {
-                    TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.onMove(sender);
+                    TwoPlayerGame.CONNECT_FOUR_GAME_TYPE.onMove(sender);
                 }
             }
         }
