@@ -383,7 +383,7 @@
   "twoPlayerGame.chat.draw": "You've made a move and drawn against %s in %s",
   "twoPlayerGame.chat.lost": "%s has made a move in %s and won",
   "twoPlayerGame.chat.won": "You made a move in %s and beat %s!",
-  "twoPlayerGame.clickToMakeYourMove": "click here to make your move",
+  "twoPlayerGame.clickToMakeYourMove": "Click here to make your move",
   "twoPlayerGame.incoming": "%s has made a move in %s",
   "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player",
   "twoPlayerGame.playerNotFound": "Player not found"

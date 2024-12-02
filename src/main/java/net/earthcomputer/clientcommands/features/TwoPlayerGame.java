@@ -219,7 +219,7 @@ public class TwoPlayerGame<T, S extends Screen> {
             .withUnderlined(true)
             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + command + " open " + sender))
             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/" + command + " open " + sender))));
-        ClientCommandHelper.sendFeedback(Component.translatable("twoPlayerGame.incoming", sender).append(" [").append(clickable).append("]"));
+        ClientCommandHelper.sendFeedback(Component.translatable("twoPlayerGame.incoming", sender, translate()).append(" [").append(clickable).append("]"));
     }
 
     @FunctionalInterface
