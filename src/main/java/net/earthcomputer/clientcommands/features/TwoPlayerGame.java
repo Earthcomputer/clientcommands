@@ -156,7 +156,7 @@ public class TwoPlayerGame<T, S extends Screen> {
         if (packet.accept() && game.getPendingInvites().remove(opponent.getProfile().getId())) {
             packet.game().addNewGame(opponent, true);
 
-            MutableComponent component = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted", sender, game.translate());
+            MutableComponent component = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted", sender, game.translate(), Component.translatable("twoPlayerGame.clickToMakeYourMove").withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE));
             component.withStyle(style -> style
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + game.command + " open " + sender))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/" + game.command + " open " + sender))));

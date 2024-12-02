@@ -8,6 +8,7 @@ import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
 import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,7 +33,6 @@ public class ConnectFourCommand {
     }
 
     public static void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
-        String sender = packet.sender();
         UUID senderUUID = packet.senderUUID();
         ConnectFourGame game = TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.getActiveGame(senderUUID);
         if (game == null) {
@@ -75,7 +75,7 @@ public class ConnectFourCommand {
             }
 
             if (!this.addPiece(x, piece)) {
-                LOGGER.warn("Failed to add piece to your Four in a Row game with {}.", this.opponent.getProfile().getName());
+                LOGGER.warn("Failed to add piece to your Connect Four game with {}.", this.opponent.getProfile().getName());
                 return;
             }
 
@@ -93,18 +93,18 @@ public class ConnectFourCommand {
             this.activePiece = piece.opposite();
             if ((this.winner = this.getWinner()) != null) {
                 if (this.winner == this.yourPiece.asWinner()) {
-                    ClientCommandHelper.sendFeedback("connectFourGame.won", sender);
+                    ClientCommandHelper.sendFeedback("connectFourGame.chat.won", sender);
                     TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
                 } else if (this.winner == this.yourPiece.opposite().asWinner()) {
                     ClientCommandHelper.sendFeedback("c2cpacket.putConnectFourPieceC2CPacket.incoming.lost", sender);
                     TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
                 } else if (this.winner == Winner.DRAW) {
-                    ClientCommandHelper.sendFeedback("connectFourGame.draw", sender);
+                    ClientCommandHelper.sendFeedback("connectFourGame.chat.draw", sender);
                     TwoPlayerGame.FOUR_IN_A_ROW_GAME_TYPE.removeActiveGame(senderUUID);
                 }
             } else {
                 if (this.isYourTurn()) {
-                    MutableComponent component = Component.translatable("c2cpacket.putConnectFourPieceC2CPacket.incoming", sender);
+                    MutableComponent component = Component.translatable("c2cpacket.putConnectFourPieceC2CPacket.incoming", sender, Component.translatable("twoPlayerGame.clickToMakeYourMove").withStyle(ChatFormatting.GREEN, ChatFormatting.UNDERLINE));
                     component.withStyle(style -> style
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cconnectfour open " + sender))
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/cconnectfour open " + sender))));
@@ -302,11 +302,11 @@ public class ConnectFourCommand {
             super.renderBackground(graphics, mouseX, mouseY, partialTick);
             int startX = (this.width - BOARD_WIDTH) / 2;
             int startY = (this.height - BOARD_HEIGHT) / 2;
+            Component gameStateTranslate = getGameStateTranslate();
 
             graphics.drawString(this.font, Component.translatable("connectFourGame.pieceSet", this.game.yourPiece.translate()), startX, startY - 20, 0xff_ffffff);
             graphics.drawString(this.font, this.title, startX, startY - 10, 0xff_ffffff);
-            Component moveTranslate = this.game.isYourTurn() ? Component.translatable("connectFourGame.yourMove") : Component.translatable("connectFourGame.opponentMove");
-            graphics.drawString(this.font, moveTranslate, startX + BOARD_WIDTH - this.font.width(moveTranslate), startY - 10, 0xff_ffffff);
+            graphics.drawString(this.font, gameStateTranslate, startX + BOARD_WIDTH - this.font.width(gameStateTranslate), startY - 10, 0xff_ffffff);
 
             graphics.blit(
                 RenderType::guiTextured,
@@ -340,6 +340,24 @@ public class ConnectFourCommand {
                 int y = this.game.getPlacementY(x);
                 if (y < ConnectFourGame.HEIGHT) {
                     game.yourPiece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, true);
+                }
+            }
+        }
+
+        private Component getGameStateTranslate() {
+            if (game.isGameActive()) {
+                if (this.game.isYourTurn()) {
+                    return Component.translatable("connectFourGame.yourMove");
+                } else {
+                    return Component.translatable("connectFourGame.opponentMove");
+                }
+            } else {
+                if (game.winner == Winner.DRAW) {
+                    return Component.translatable("connectFourGame.draw");
+                } else if (game.winner == game.yourPiece.asWinner()) {
+                    return Component.translatable("connectFourGame.won").withStyle(ChatFormatting.GREEN);
+                } else {
+                    return Component.translatable("connectFourGame.lost").withStyle(ChatFormatting.RED);
                 }
             }
         }
