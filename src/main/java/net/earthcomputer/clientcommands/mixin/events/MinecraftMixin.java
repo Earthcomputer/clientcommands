@@ -36,8 +36,8 @@ public abstract class MinecraftMixin {
         }
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("RETURN"))
-    public void onDisconnect(Screen screen, CallbackInfo ci) {
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V", at = @At("RETURN"))
+    public void onDisconnect(CallbackInfo ci) {
         ClientConnectionEvents.DISCONNECT.invoker().onDisconnect();
     }
 }
