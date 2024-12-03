@@ -292,13 +292,12 @@
 
   "connectFourGame.draw": "Draw!",
   "connectFourGame.lost": "Lost!",
-  "connectFourGame.won": "Won!",
-
   "connectFourGame.opponentMove": "You are waiting for your opponent...",
   "connectFourGame.pieceRed": "red",
   "connectFourGame.pieceSet": "You are playing with the %s pieces",
   "connectFourGame.pieceYellow": "yellow",
   "connectFourGame.title": "Connect Four against %s",
+  "connectFourGame.won": "Won!",
   "connectFourGame.yourMove": "It is your move",
 
   "enchCrack.addInfo": "Add Info",
