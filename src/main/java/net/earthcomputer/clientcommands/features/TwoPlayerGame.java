@@ -12,6 +12,7 @@ import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.ConnectFourCommand;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
+import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -54,6 +55,22 @@ public class TwoPlayerGame<T, S extends Screen> {
     @Nullable
     public static TwoPlayerGame<?, ?> getById(ResourceLocation id) {
         return TYPE_BY_NAME.get(id);
+    }
+
+    public static void onPlayerLeave(UUID opponentUUID) {
+        for (TwoPlayerGame<?, ?> game : TYPE_BY_NAME.values()) {
+            game.activeGames.remove(opponentUUID);
+            game.pendingInvites.remove(opponentUUID);
+        }
+    }
+
+    static {
+        ClientConnectionEvents.DISCONNECT.register(() -> {
+            for (TwoPlayerGame<?, ?> game : TYPE_BY_NAME.values()) {
+                game.activeGames.clear();
+                game.pendingInvites.clear();
+            }
+        });
     }
 
     private final Component translation;
@@ -126,6 +143,7 @@ public class TwoPlayerGame<T, S extends Screen> {
         StartTwoPlayerGameC2CPacket packet = new StartTwoPlayerGameC2CPacket(player.getName(), player.getId(), false, this);
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);
         this.pendingInvites.add(player.getId());
+        this.activeGames.remove(player.getId());
         source.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited", player.getName(), translate()));
         return Command.SINGLE_SUCCESS;
     }
@@ -172,29 +190,29 @@ public class TwoPlayerGame<T, S extends Screen> {
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + game.command + " open " + sender))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("/" + game.command + " open " + sender))));
             ClientCommandHelper.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted", sender, game.translate()).append(" [").append(clickable).append("]"));
-            return;
-        }
+        } else {
+            game.getActiveGames().remove(opponent.getProfile().getId());
+            MutableComponent clickable = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept").withStyle(style ->
+                style
+                    .withUnderlined(true)
+                    .withColor(ChatFormatting.GREEN)
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover")))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, ClientCommandHelper.registerCode(() -> {
+                        if (!game.openGame(opponent.getProfile().getId())) {
+                            game.addNewGame(opponent, false);
 
-        MutableComponent clickable = Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept").withStyle(style ->
-            style
-                .withUnderlined(true)
-                .withColor(ChatFormatting.GREEN)
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover")))
-                .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, ClientCommandHelper.registerCode(() -> {
-                    if (!game.openGame(opponent.getProfile().getId())) {
-                        game.addNewGame(opponent, false);
+                            StartTwoPlayerGameC2CPacket acceptPacket = new StartTwoPlayerGameC2CPacket(mc.getGameProfile().getName(), mc.getGameProfile().getId(), true, game);
+                            try {
+                                C2CPacketHandler.getInstance().sendPacket(acceptPacket, opponent);
+                            } catch (CommandSyntaxException e) {
+                                ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
+                            }
 
-                        StartTwoPlayerGameC2CPacket acceptPacket = new StartTwoPlayerGameC2CPacket(mc.getGameProfile().getName(), mc.getGameProfile().getId(), true, game);
-                        try {
-                            C2CPacketHandler.getInstance().sendPacket(acceptPacket, opponent);
-                        } catch (CommandSyntaxException e) {
-                            ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
+                            ClientCommandHelper.sendFeedback("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept");
                         }
-
-                        ClientCommandHelper.sendFeedback("c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept");
-                    }
-                }))));
-        ClientCommandHelper.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming", sender, game.translate()).append(" [").append(clickable).append("]"));
+                    }))));
+            ClientCommandHelper.sendFeedback(Component.translatable("c2cpacket.startTwoPlayerGameC2CPacket.incoming", sender, game.translate()).append(" [").append(clickable).append("]"));
+        }
     }
 
     public void onWon(String sender, UUID senderUUID) {
