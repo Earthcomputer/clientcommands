@@ -291,8 +291,8 @@
   "commands.cwiki.noContent": "There is no introductory paragraph in that article",
 
   "connectFourGame.draw": "Draw!",
-  "connectFourGame.won": "Won!",
   "connectFourGame.lost": "Lost!",
+  "connectFourGame.won": "Won!",
 
   "connectFourGame.opponentMove": "You are waiting for your opponent...",
   "connectFourGame.pieceRed": "red",
