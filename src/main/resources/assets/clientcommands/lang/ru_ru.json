@@ -66,7 +66,7 @@
   "commands.cenchant.failed": "Невозможно или это займет слишком много времени, чтобы получить эти чары",
   "commands.cenchant.incompatible": "Несовместимые чары",
   "commands.cenchant.needEnchantingPrediction": "Эта команда требует, чтобы предсказание зачарования было включено",
-  "commands.cenchant.success": "Начало манипуляций с чарами",
+  "commands.cenchant.success": "Начало манипуляций с чарами...",
   "commands.cenchant.uncracked": "Сид нужно взломать",
 
   "commands.cfind.found": "Найденный %s %s, %s блоков от вас",
@@ -95,7 +95,6 @@
   "commands.cfish.error.outOfWater": "Поплавок не в воде, манипуляции не сработают",
   "commands.cfish.help.tooManyEnchants": "Справка: несколько зачарований одновременно маловероятны, и их получение может занять много времени",
   "commands.cfish.listGoals.noGoals": "Нет целей для рыбалки",
-  "commands.cfish.listGoals.success": "",
   "commands.cfish.needFishingManipulation": "Манипуляции с рыбалкой не включены",
   "commands.cfish.removeGoal.success": "Цель успешно удалена %s",
   "commands.cfish.wrongLoot": "Не получил корректный лут с исправлением %sms, мог быть на %s тиков впереди",
