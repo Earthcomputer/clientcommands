@@ -1,5 +1,5 @@
 {
-  "c2cpacket.encryptionFailed": "Terjadi kegagalan saat mengenkripsi pesan Anda ",
+  "c2cpacket.encryptionFailed": "Terjadi kegagalan saat mengenkripsi pesan Anda",
   "c2cpacket.malformedPacket": "Anda telah menerima paket C2C yang formatnya salah:",
   "c2cpacket.messageC2CPacket.incoming": "%s -> Anda: %s",
   "c2cpacket.messageC2CPacket.outgoing": "Anda -> %s: %s",
@@ -75,7 +75,7 @@
   "commands.cenchant.help.uncrackedPlayerSeed": "Bantuan: anda belum sepenuhnya memecahkan benih pemain",
   "commands.cenchant.incompatible": "Pesona tidak kompatibel",
   "commands.cenchant.needEnchantingPrediction": "Perintah ini memerlukan prediksi pesona aktif",
-  "commands.cenchant.success": "Memulai memanipulasi pesona",
+  "commands.cenchant.success": "Memulai memanipulasi pesona...",
   "commands.cenchant.uncracked": "Seed butuh diketahui",
 
   "commands.cfind.found": "Menemukan %s di %s, %s block jaraknya",
