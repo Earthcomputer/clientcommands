@@ -77,7 +77,7 @@
   "commands.cenchant.help.uncrackedPlayerSeed": "說明： 您尚未完全破譯玩家隨機種子",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本指令需要啟用附魔預測",
-  "commands.cenchant.success": "正在開始操控附魔",
+  "commands.cenchant.success": "正在開始操控附魔…",
   "commands.cenchant.uncracked": "您需要先破譯隨機種子",
 
   "commands.cfind.found": "在 %2$s 找到 %1$s，距離您 %3$s 格",
