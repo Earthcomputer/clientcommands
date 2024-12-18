@@ -12,7 +12,7 @@
   "commands.cenchant.failed": "Nemogoče je ali bi trajalo pre dolgo, da bi dobile te čare",
   "commands.cenchant.incompatible": "Nezdružljivi čari",
   "commands.cenchant.needEnchantingPrediction": "Ta ukaz zahteva, da je omogočeno predvidevanje čaranja",
-  "commands.cenchant.success": "Začatek manipulacije čaranja",
+  "commands.cenchant.success": "Začatek manipulacije čaranja...",
   "commands.cenchant.uncracked": "Seme mora biti ugotovljeno",
 
   "commands.cfind.found": "Najdeno %s ob %s, %s blokov proč",
@@ -62,7 +62,7 @@
 
   "itemCrack.notEnoughItems": "Ni mogoče uporabiti RNG UgotavljalcaSemena: Ni dovolj predmetov v roki igralca",
 
-  "playerManip.reset": "Restarting player RNG manipulation. Reason: %s",
+  "playerManip.reset": "",
   "playerManip.reset.advancement": "Dosežen Napredek",
   "playerManip.reset.anvil": "Nakovalo Uporabljeno",
   "playerManip.reset.baneOfArthropods": "Zadet Členonožec z Uničevalcem Členonožcev",
