@@ -76,7 +76,7 @@
   "commands.cenchant.help.uncrackedPlayerSeed": "提示：你还没有完全破解玩家种子",
   "commands.cenchant.incompatible": "互斥的附魔",
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测",
-  "commands.cenchant.success": "正在开始操控附魔",
+  "commands.cenchant.success": "正在开始操控附魔…",
   "commands.cenchant.uncracked": "你需要先破解随机种子",
 
   "commands.cfind.found": "在%2$s找到%1$s, 距离你%3$s格",
@@ -96,7 +96,7 @@
 
   "commands.cfish.addGoal.success": "成功添加目标%s",
   "commands.cfish.correctLoot": "校正%sms后得到了目标战利品",
-  "commands.cfish.error.biome": "无法在这个区块得到目标战利品，需要%s ",
+  "commands.cfish.error.biome": "无法在这个区块得到目标战利品，需要%s",
   "commands.cfish.error.collision": "浮标撞到了奇怪的东西",
   "commands.cfish.error.crackFailed": "无法破解浮标随机种子，服务器是否受到修改？",
   "commands.cfish.error.fire": "浮标着火了",
