@@ -95,7 +95,7 @@
   "commands.cfish.error.outOfWater": "Поплавок не в воде, манипуляции не сработают",
   "commands.cfish.help.tooManyEnchants": "Справка: несколько зачарований одновременно маловероятны, и их получение может занять много времени",
   "commands.cfish.listGoals.noGoals": "Нет целей для рыбалки",
-  "commands.cfish.listGoals.success": "Есть цели для рыбалки: %s",
+  "commands.cfish.listGoals.success": "",
   "commands.cfish.needFishingManipulation": "Манипуляции с рыбалкой не включены",
   "commands.cfish.removeGoal.success": "Цель успешно удалена %s",
   "commands.cfish.wrongLoot": "Не получил корректный лут с исправлением %sms, мог быть на %s тиков впереди",
@@ -155,10 +155,10 @@
 
   "commands.crender.entities.success": "Обновлены правила рендеринга сущностей",
 
-  "commands.cstopsound.success.source.any": "Остановил все звуки '%s' ",
-  "commands.cstopsound.success.source.sound": "Остановлен звук '%s' в источнике '%s' ",
+  "commands.cstopsound.success.source.any": "Остановил все звуки '%s'",
+  "commands.cstopsound.success.source.sound": "Остановлен звук '%s' в источнике '%s'",
   "commands.cstopsound.success.sourceless.any": "Остановил все звуки",
-  "commands.cstopsound.success.sourceless.sound": "Остановлен звук '%s' ",
+  "commands.cstopsound.success.sourceless.sound": "Остановлен звук '%s'",
 
   "commands.ctask.list.noTasks": "В настоящее время нет выполняемых задач",
   "commands.ctask.list.success": "%s в настоящее время выполняет задачи",
