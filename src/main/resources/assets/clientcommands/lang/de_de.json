@@ -76,7 +76,7 @@
   "commands.cenchant.help.uncrackedPlayerSeed": "Hilfe: du hast den Spielerseed nicht vollständig geknackt",
   "commands.cenchant.incompatible": "Unvereinbare Verzauberungen",
   "commands.cenchant.needEnchantingPrediction": "Verzauberungsprognose muss aktiviert sein, um diesen Befehl auszuführen",
-  "commands.cenchant.success": "Verzauberungsmanipulation beginnt",
+  "commands.cenchant.success": "Verzauberungsmanipulation beginnt...",
   "commands.cenchant.uncracked": "Seed muss geknackt sein",
 
   "commands.cfind.found": "Fand %s an %s, %s Blöcke entfernt",
