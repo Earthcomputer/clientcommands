@@ -54,7 +54,7 @@ public class CEnchantCommand {
     }
 
     private static int cenchant(FabricClientCommandSource source, ItemAndEnchantmentsPredicate itemAndEnchantmentsPredicate) throws CommandSyntaxException {
-        if (!Configs.getEnchantingPrediction()) {
+        if (!Configs.enchantingPrediction) {
             Component component = Component.translatable("commands.cenchant.needEnchantingPrediction")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")

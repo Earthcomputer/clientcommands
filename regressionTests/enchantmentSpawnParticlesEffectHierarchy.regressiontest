@@ -1,0 +1,2 @@
+net/minecraft/world/item/enchantment/Enchantments.bootstrap (Lnet/minecraft/data/worldgen/BootstrapContext;)V <- net/minecraft/world/item/enchantment/effects/SpawnParticlesEffect.<init>
+net/minecraft/world/item/enchantment/effects/SpawnParticlesEffect.<clinit> ()V <- net/minecraft/world/item/enchantment/effects/SpawnParticlesEffect.lambda$static$0 <- net/minecraft/world/item/enchantment/effects/SpawnParticlesEffect.<init>

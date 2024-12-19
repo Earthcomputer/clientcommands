@@ -1,28 +1,19 @@
 package net.earthcomputer.clientcommands.mixin.c2c;
 
-import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
-import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
-import net.earthcomputer.clientcommands.interfaces.IClientPacketListener_C2C;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.ProtocolInfo;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.UUID;
 
 @Mixin(ClientPacketListener.class)
-public class ClientPacketListenerMixin implements IClientPacketListener_C2C {
-    @Shadow
-    @Final
-    private RegistryAccess.Frozen registryAccess;
-
-    @Unique
-    private final ProtocolInfo<C2CPacketListener> c2cProtocolInfo = C2CPacketHandler.PROTOCOL_UNBOUND.bind(RegistryFriendlyByteBuf.decorator(registryAccess));
-
-    @Override
-    public ProtocolInfo<C2CPacketListener> clientcommands_getC2CProtocolInfo() {
-        return c2cProtocolInfo;
+public class ClientPacketListenerMixin {
+    @Inject(method = "handlePlayerInfoRemove", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getPlayerSocialManager()Lnet/minecraft/client/gui/screens/social/PlayerSocialManager;"))
+    private void onHandlePlayerInfoRemove(CallbackInfo ci, @Local UUID uuid) {
+        TwoPlayerGame.onPlayerLeave(uuid);
     }
 }

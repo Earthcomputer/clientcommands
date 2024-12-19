@@ -20,6 +20,10 @@ accessible method net/minecraft/world/level/block/ShulkerBoxBlock canOpen (Lnet/
 # cfish
 accessible method net/minecraft/world/entity/projectile/FishingHook canHitEntity (Lnet/minecraft/world/entity/Entity;)Z
 
+# cgive
+accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I
+accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
+
 # chat
 accessible method net/minecraft/client/Minecraft openChatScreen (Ljava/lang/String;)V
 

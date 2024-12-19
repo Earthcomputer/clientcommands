@@ -17,4 +17,6 @@ Patreon: https://www.patreon.com/earthcomputer
    and move it to the mods folder (`.minecraft/mods`).
 
 ## Contributing
-See the [contribution guidelines](docs/CONTRIBUTING.md)
+To contribute translations, see the [translation contribution guidelines](docs/TRANSLATING.md).
+
+For other contributions, see the [contribution guidelines](docs/CONTRIBUTING.md).

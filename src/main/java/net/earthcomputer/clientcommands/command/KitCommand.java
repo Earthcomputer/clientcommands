@@ -121,7 +121,7 @@ public class KitCommand {
     }
 
     private static int load(FabricClientCommandSource source, String name, boolean override) throws CommandSyntaxException {
-        if (!source.getPlayer().getAbilities().instabuild) {
+        if (!source.getPlayer().isCreative()) {
             throw NOT_CREATIVE_EXCEPTION.create();
         }
 
@@ -137,6 +137,7 @@ public class KitCommand {
             if (slots.get(i).container == source.getPlayer().getInventory()) {
                 ItemStack itemStack = tempInv.getItem(slots.get(i).getContainerSlot());
                 if (!itemStack.isEmpty() || override) {
+                    source.getPlayer().getInventory().setItem(i, itemStack);
                     source.getClient().gameMode.handleCreativeModeItemAdd(itemStack, i);
                 }
             }

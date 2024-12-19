@@ -557,7 +557,7 @@ public class EnchantmentCracker {
     // MISCELLANEOUS HELPER METHODS & ENCHANTING SIMULATION
 
     public static boolean isEnchantingPredictionEnabled() {
-        return Configs.getEnchantingPrediction();
+        return Configs.enchantingPrediction;
     }
 
     private static int getEnchantPower(Level level, BlockPos tablePos) {

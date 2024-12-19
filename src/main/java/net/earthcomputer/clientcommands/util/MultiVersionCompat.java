@@ -34,7 +34,9 @@ public abstract sealed class MultiVersionCompat {
     public static final int V1_16 = 735;
     public static final int V1_17 = 755;
     public static final int V1_18 = 757;
+    public static final int V1_18_2 = 758;
     public static final int V1_20 = 763;
+    public static final int V1_20_6 = 766;
     public static final int V1_21 = 767;
     public static final int V1_21_2 = 768;
 

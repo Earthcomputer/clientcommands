@@ -33,7 +33,7 @@ public class ChorusManipulation {
         TaskManager.addNonConflictingTask("chorusManipRenderer", new SimpleTask() {
             @Override
             public boolean condition() {
-                return Configs.getChorusManipulation() && Minecraft.getInstance().player != null;
+                return Configs.chorusManipulation && Minecraft.getInstance().player != null;
             }
 
             @Override
@@ -48,7 +48,7 @@ public class ChorusManipulation {
     }
 
     public static int setGoal(Vec3 v1, Vec3 v2, boolean relative) {
-        if (!Configs.getChorusManipulation()) {
+        if (!Configs.chorusManipulation) {
             Component component = Component.translatable("chorusManip.needChorusManipulation")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
