@@ -70,6 +70,7 @@
     "commands.generic.CommandSuggestionsMixin",
     "commands.glow.LivingEntityRenderStateMixin",
     "commands.reply.ClientPacketListenerMixin",
+    "commands.serverseed.ClientPacketListenerMixin",
     "commands.snap.MinecraftMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",

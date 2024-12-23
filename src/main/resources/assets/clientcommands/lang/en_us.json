@@ -147,6 +147,12 @@
   "commands.cglow.entity.keepSearching.success": "Glowing entities",
   "commands.cglow.entity.success": "Glowing %s entities",
 
+  "commands.cserverseed.enchantmentSeed": "16 lower bits of enchantment seed: %s",
+  "commands.cserverseed.enchantmentSeedNotSent": "The server has not sent the partial enchantment seed yet!",
+  "commands.cserverseed.hashedSeed": "Hashed world seed: %s",
+  "commands.cserverseed.hashedSeed.impossibleSeedCombination": "Impossible seed combination!",
+  "commands.cserverseed.hashedSeed.fromStructureSeed": "Found world seed: %s",
+
   "commands.chat.success": "Successfully opened c🎩",
 
   "commands.chotbar.notCreative": "Player must be in creative mode to restore item hotbars",

@@ -24,6 +24,10 @@ accessible method net/minecraft/world/entity/projectile/FishingHook canHitEntity
 accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I
 accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
 
+# cserverseed
+accessible field net/minecraft/world/entity/player/Player enchantmentSeed I
+accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
+
 # chat
 accessible method net/minecraft/client/Minecraft openChatScreen (Ljava/lang/String;)V
 
