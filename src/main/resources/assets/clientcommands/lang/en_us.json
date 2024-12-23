@@ -226,7 +226,7 @@
 
   "commands.cserverseed.enchantmentSeed": "Lower 16 bits of the enchantment seed: %s",
   "commands.cserverseed.enchantmentSeedNotSent": "The server has not sent the partial enchantment seed yet!",
-  "commands.cserverseed.hashedSeed": "Lower 8 bytes of the hashed world seed: %s",
+  "commands.cserverseed.hashedSeed": "First 8 bytes of the hashed world seed: %s",
   "commands.cserverseed.hashedSeed.fromStructureSeed": "Found world seed: %s",
   "commands.cserverseed.hashedSeed.impossibleSeedCombination": "Impossible seed combination!",
 
