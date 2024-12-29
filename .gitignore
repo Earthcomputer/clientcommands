@@ -23,6 +23,7 @@ bin/
 # fabric
 
 run/
+runGametest/
 logs/
 
 /changelog.txt

@@ -14,7 +14,15 @@ base {
 }
 
 sourceSets {
-	codeGen
+	clientGametest {
+		compileClasspath += main.compileClasspath
+		runtimeClasspath += main.runtimeClasspath
+	}
+
+	codeGen {
+		compileClasspath += main.compileClasspath
+		runtimeClasspath += main.runtimeClasspath
+	}
 }
 
 configurations {
@@ -42,6 +50,22 @@ repositories {
 
 loom {
 	accessWidenerPath = file('src/main/resources/clientcommands.aw')
+
+	runs {
+		clientGametest {
+			client()
+			ideConfigGenerated true
+			name 'Client Gametest'
+			property 'fabric.client.gametest'
+			programArgs '--username', 'GametestUser'
+			runDir 'runGametest'
+			source sourceSets.clientGametest
+		}
+	}
+
+	mods.register('clientcommands-gametest') {
+		sourceSet sourceSets.clientGametest
+	}
 }
 
 dependencies {
@@ -74,6 +98,7 @@ dependencies {
 
 	include api('net.fabricmc:mapping-io:0.5.1')
 
+	clientGametestImplementation sourceSets.main.output
 	codeGenImplementation sourceSets.main.output
 
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
@@ -124,6 +149,25 @@ tasks.register('sourcesJar', Jar) {
 	archiveClassifier.set("sources")
 	from sourceSets.main.allSource
 }
+
+tasks.register('cleanGametestRunDir', Delete) {
+	delete 'runGametest'
+	doLast {
+		mkdir('runGametest')
+	}
+}
+
+// hack to make sure run directory is cleaned before the gametests are run
+ideaSyncTask.doLast {
+	def gametestXml = file('.idea/runConfigurations/Client_Gametest.xml').readLines()
+	def index = gametestXml.findIndexOf { it.endsWith '<method v="2">' }
+	assert index >= 0
+	def endIndex = gametestXml.findIndexOf(index) { it.endsWith('</method>') }
+	gametestXml.add(endIndex, '<option enabled="true" externalProjectPath="$PROJECT_DIR$" name="Gradle.BeforeRunTask" scriptParameters="" tasks="cleanGametestRunDir" vmOptions=""/>')
+	file('.idea/runConfigurations/Client_Gametest.xml').write(gametestXml.join('\n'))
+}
+
+runClientGametest.dependsOn cleanGametestRunDir
 
 tasks.register('codeGen', JavaExec) {
 	mainClass = 'net.earthcomputer.clientcommands.codegen.CodeGenerator'

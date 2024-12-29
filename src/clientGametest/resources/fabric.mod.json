@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "clientcommands-gametest",
+  "name": "Client Commands Gametest",
+  "description": "Gametest for clientcommands",
+  "version": "1.0",
+  "environment": "client",
+  "license": "LGPL-3.0-or-later",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "net.earthcomputer.clientcommands.gametest.BannedActionGametest"
+    ]
+  }
+}

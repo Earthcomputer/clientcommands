@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.Connection;
 import net.minecraft.world.item.Item;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Field;
@@ -50,6 +51,10 @@ public abstract sealed class MultiVersionCompat {
 
     public static final MultiVersionCompat INSTANCE = Util.make(() -> {
         try {
+            if (System.getProperty("fabric.client.gametest") != null) {
+                return new Gametest();
+            }
+
             FabricLoader loader = FabricLoader.getInstance();
             if (loader.isModLoaded("viafabric")) {
                 return new ViaFabric();
@@ -64,6 +69,18 @@ public abstract sealed class MultiVersionCompat {
         }
     });
 
+    @VisibleForTesting
+    public static void setProtocolVersion(int protocolVersion, String protocolName) {
+        Gametest gametestInstance = (Gametest) INSTANCE;
+        gametestInstance.protocolVersion = protocolVersion;
+        gametestInstance.protocolName = protocolName;
+    }
+
+    @VisibleForTesting
+    public static void setLatestProtocol() {
+        setProtocolVersion(SharedConstants.getProtocolVersion(), SharedConstants.getCurrentVersion().getName());
+    }
+
     private static final class None extends MultiVersionCompat {
         @Override
         public int getProtocolVersion() {
@@ -73,6 +90,21 @@ public abstract sealed class MultiVersionCompat {
         @Override
         public String getProtocolName() {
             return SharedConstants.getCurrentVersion().getName();
+        }
+    }
+
+    private static final class Gametest extends MultiVersionCompat {
+        private int protocolVersion = SharedConstants.getProtocolVersion();
+        private String protocolName = SharedConstants.getCurrentVersion().getName();
+
+        @Override
+        public int getProtocolVersion() {
+            return protocolVersion;
+        }
+
+        @Override
+        public String getProtocolName() {
+            return protocolName;
         }
     }
 

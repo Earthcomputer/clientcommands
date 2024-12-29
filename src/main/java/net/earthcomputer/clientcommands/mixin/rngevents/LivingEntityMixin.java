@@ -106,7 +106,7 @@ public abstract class LivingEntityMixin extends Entity {
                         for (BlockPos offsetPos : BlockPos.betweenClosed(pos.offset(-radius, -1, -radius), pos.offset(radius, -1, radius))) {
                             if (offsetPos.closerToCenterThan(position(), radius)) {
                                 BlockState offsetState = level().getBlockState(offsetPos);
-                                if (offsetState == FrostedIceBlock.meltsInto() && level().isUnobstructed(frostedIce, offsetPos, CollisionContext.empty())) {
+                                if ((offsetState.is(Blocks.FROSTED_ICE) || offsetState == FrostedIceBlock.meltsInto()) && level().isUnobstructed(frostedIce, offsetPos, CollisionContext.empty())) {
                                     if (level().isEmptyBlock(offsetPos.above())) {
                                         PlayerRandCracker.onFrostWalker();
                                     }
