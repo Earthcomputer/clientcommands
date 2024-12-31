@@ -46,7 +46,7 @@ public class ServerSeedCommand {
     private static int hashedSeed(FabricClientCommandSource source) {
         long hashedSeed = source.getWorld().getBiomeManager().biomeZoomSeed;
         HashCode seedHash = HashCode.fromLong(hashedSeed);
-        source.sendFeedback(Component.translatable("commands.cserverseed.hashedSeed", ComponentUtils.copyOnClickText(seedHash.toString())));
+        source.sendFeedback(Component.translatable("commands.cserverseed.hashedSeed", ComponentUtils.copyOnClickText(seedHash.toString()), ComponentUtils.copyOnClickText(String.valueOf(seedHash.asLong()))));
         return (int) hashedSeed;
     }
 
