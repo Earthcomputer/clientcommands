@@ -72,7 +72,7 @@ dependencies {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
 
-	include api('net.fabricmc:mapping-io:0.5.1')
+	include api("net.fabricmc:mapping-io:${project.mapping_io_version}")
 
 	codeGenImplementation sourceSets.main.output
 
