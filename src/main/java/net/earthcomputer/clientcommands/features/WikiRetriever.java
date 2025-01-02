@@ -199,11 +199,13 @@ public class WikiRetriever {
             return null;
         }
 
-        if (result.query.pages.isEmpty())
+        if (result.query.pages.isEmpty()) {
             return null;
+        }
         var page = result.query.pages.values().iterator().next();
-        if (page.missing != null || page.extract == null)
+        if (page.missing != null || page.extract == null) {
             return null;
+        }
         String html = page.extract;
         return decode(html);
     }

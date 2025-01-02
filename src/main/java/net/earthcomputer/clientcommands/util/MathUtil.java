@@ -137,8 +137,9 @@ public class MathUtil {
                 AABB obscurerFace = getFace(obscurer, obscurerSide);
                 Path2D.Double path = getShadow(sourcePos, obscurerFace, obscurerSide, f, dir,
                         minX + (maxX - minX) * .5, minY + (maxY - minY) * .5, xAxis, yAxis);
-                if (path != null)
+                if (path != null) {
                     area.subtract(new Area(path));
+                }
             }
         }
 
@@ -198,7 +199,9 @@ public class MathUtil {
             }
         }
 
-        if (Double.isNaN(closestX)) return null;
+        if (Double.isNaN(closestX)) {
+            return null;
+        }
         return createFromComponents(closestX, xAxis, closestY, yAxis, f, dir.getAxis());
     }
 
@@ -232,11 +235,9 @@ public class MathUtil {
             lastInFront = behindSource[1] ? 0 : 1;
         } else {
             //noinspection StatementWithEmptyBody
-            for (firstInFront = 0; behindSource[firstInFront]; firstInFront++)
-                ;
+            for (firstInFront = 0; behindSource[firstInFront]; firstInFront++);
             //noinspection StatementWithEmptyBody
-            for (lastInFront = 3; behindSource[lastInFront]; lastInFront--)
-                ;
+            for (lastInFront = 3; behindSource[lastInFront]; lastInFront--);
         }
 
         double firstShadowX = 0, firstShadowY = 0, lastShadowX = 0, lastShadowY = 0;
@@ -298,7 +299,9 @@ public class MathUtil {
             double dy = getComponent(a, b, c, yAxis);
             // normalize (dx, dy)
             double n = Math.sqrt(dx * dx + dy * dy);
-            if (n < EPSILON) return null; // only possible if the player is inside the obstacle
+            if (n < EPSILON) {
+                return null; // only possible if the player is inside the obstacle
+            }
             lastDx = dx / n;
             lastDy = dy / n;
         }
@@ -317,7 +320,9 @@ public class MathUtil {
             double dx = -getComponent(a, b, c, xAxis);
             double dy = getComponent(a, b, c, yAxis);
             double n = Math.sqrt(dx * dx + dy * dy);
-            if (n < EPSILON) return null;
+            if (n < EPSILON) {
+                return null;
+            }
             firstDx = dx / n;
             firstDy = dy / n;
         }
@@ -381,7 +386,9 @@ public class MathUtil {
         double firstAngle = Math.atan2(firstInfiniteY - targetCenterY, firstInfiniteX - targetCenterX);
         double targetAngle = Math.atan2(lastInfiniteY - targetCenterY, lastInfiniteX - targetCenterX);
         double angleDifference = (clockwise ? firstAngle - targetAngle : targetAngle - firstAngle) % Math.PI * 2;
-        if (angleDifference < 0) angleDifference += Math.PI * 2;
+        if (angleDifference < 0) {
+            angleDifference += Math.PI * 2;
+        }
         for (double dTheta = 0; dTheta < angleDifference; dTheta += Math.PI / 3) {
             double theta = clockwise ? firstAngle - dTheta : firstAngle + dTheta;
             path.moveTo(10 * Math.cos(theta) + targetCenterX, 10 * Math.sin(theta) + targetCenterY);

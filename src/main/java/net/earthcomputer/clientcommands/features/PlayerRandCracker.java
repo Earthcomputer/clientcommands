@@ -1,3 +1,4 @@
+// CHECKSTYLE:OFF
 package net.earthcomputer.clientcommands.features;
 
 import com.demonwav.mcdev.annotations.Translatable;
