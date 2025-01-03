@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands;
 
 import dev.xpple.betterconfig.api.Config;
+import net.earthcomputer.clientcommands.command.ReplyCommand;
 import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
@@ -23,13 +24,9 @@ public class Configs {
     @Config(readOnly = true, temporary = true)
     public static PlayerRandCracker.CrackState playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
 
-    @Config(setter = @Config.Setter("setEnchantingPrediction"), temporary = true)
-    private static boolean enchantingPrediction = false;
-    public static boolean getEnchantingPrediction() {
-        return enchantingPrediction;
-    }
-    public static void setEnchantingPrediction(boolean enchantingPrediction) {
-        Configs.enchantingPrediction = enchantingPrediction;
+    @Config(onChange = "onChangeEnchantingPrediction", temporary = true)
+    public static boolean enchantingPrediction = false;
+    private static void onChangeEnchantingPrediction(boolean oldEnchantingPrediction, boolean enchantingPrediction) {
         if (enchantingPrediction) {
             ServerBrandManager.rngWarning();
         } else {
@@ -52,13 +49,9 @@ public class Configs {
         }
     }
 
-    @Config(setter = @Config.Setter("setFishingManipulation"), temporary = true, condition = "conditionLessThan1_20")
-    private static FishingManipulation fishingManipulation = FishingManipulation.OFF;
-    public static FishingManipulation getFishingManipulation() {
-        return fishingManipulation;
-    }
-    public static void setFishingManipulation(FishingManipulation fishingManipulation) {
-        Configs.fishingManipulation = fishingManipulation;
+    @Config(onChange = "onChangeFishingManipulation", temporary = true, condition = "conditionLessThan1_20")
+    public static FishingManipulation fishingManipulation = FishingManipulation.OFF;
+    private static void onChangeFishingManipulation(FishingManipulation oldFishingManipulation, FishingManipulation fishingManipulation) {
         if (fishingManipulation.isEnabled()) {
             ServerBrandManager.rngWarning();
         } else {
@@ -121,13 +114,9 @@ public class Configs {
         Configs.minEnchantLevels = Math.min(Configs.minEnchantLevels, Configs.maxEnchantLevels);
     }
 
-    @Config(setter = @Config.Setter("setChorusManipulation"), temporary = true)
-    private static boolean chorusManipulation = false;
-    public static boolean getChorusManipulation() {
-        return chorusManipulation;
-    }
-    public static void setChorusManipulation(boolean chorusManipulation) {
-        Configs.chorusManipulation = chorusManipulation;
+    @Config(onChange = "onChangeChorusManipulation", temporary = true)
+    public static boolean chorusManipulation = false;
+    public static void onChangeChorusManipulation(boolean oldChorusManipulation, boolean chorusManipulation) {
         if (chorusManipulation) {
             ServerBrandManager.rngWarning();
             ChorusManipulation.onChorusManipEnabled();
@@ -142,6 +131,9 @@ public class Configs {
     public static void setMaxChorusItemThrows(int maxChorusItemThrows) {
         Configs.maxChorusItemThrows = Mth.clamp(maxChorusItemThrows, 0, 1000000);
     }
+
+    @Config(temporary = true)
+    public static String autoPrefix = "";
 
     @Config(temporary = true, condition = "conditionLessThan1_21")
     public static boolean infiniteTools = false;
@@ -173,4 +165,10 @@ public class Configs {
 
     @Config
     public static int maximumPacketFieldDepth = 10;
+
+    @Config(temporary = true, setter = @Config.Setter("setMinimumReplyDelaySeconds"))
+    public static float minimumReplyDelaySeconds = 0.5f;
+    public static void setMinimumReplyDelaySeconds(float minimumReplyDelaySeconds) {
+        Configs.minimumReplyDelaySeconds = Math.clamp(minimumReplyDelaySeconds, 0.0f, ReplyCommand.MAXIMUM_REPLY_DELAY_SECONDS);
+    }
 }

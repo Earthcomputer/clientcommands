@@ -48,7 +48,7 @@ public class TranslateCommand {
                     .build();
             httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenApply(HttpResponse::body)
-                    .thenAccept(response -> source.getClient().tell(() -> {
+                    .thenAccept(response -> source.getClient().schedule(() -> {
                         JsonArray result = JsonParser.parseString(response).getAsJsonArray();
                         source.sendFeedback(createText(result.get(0).getAsJsonArray().get(0).getAsJsonArray().get(0).getAsString()));
                     }));

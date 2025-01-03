@@ -56,7 +56,7 @@ public class FishCommand {
     }
 
     private static int listGoals(FabricClientCommandSource source) throws CommandSyntaxException {
-        if (!Configs.getFishingManipulation().isEnabled()) {
+        if (!Configs.fishingManipulation.isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
@@ -73,7 +73,7 @@ public class FishCommand {
     }
 
     private static int addGoal(FabricClientCommandSource source, WithStringArgument.Result<ClientItemPredicateArgument.ClientItemPredicate> goal) throws CommandSyntaxException {
-        if (!Configs.getFishingManipulation().isEnabled()) {
+        if (!Configs.fishingManipulation.isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
@@ -85,7 +85,7 @@ public class FishCommand {
     }
 
     private static int addEnchantedGoal(FabricClientCommandSource source, WithStringArgument.Result<ItemAndEnchantmentsPredicate> stringAndItemAndEnchantments) throws CommandSyntaxException {
-        if (!Configs.getFishingManipulation().isEnabled()) {
+        if (!Configs.fishingManipulation.isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 
@@ -102,7 +102,7 @@ public class FishCommand {
     }
 
     private static int removeGoal(FabricClientCommandSource source, int index) throws CommandSyntaxException {
-        if (!Configs.getFishingManipulation().isEnabled()) {
+        if (!Configs.fishingManipulation.isEnabled()) {
             throw NEED_FISHING_MANIPULATION_EXCEPTION.create();
         }
 

@@ -88,7 +88,7 @@ public class GlowCommand {
                     assert player != null;
 
                     try {
-                        for (Entity entity : entitySelector.getEntities(source)) {
+                        for (Entity entity : entitySelector.findEntities(source)) {
                             ((IEntity_Glowable) entity).clientcommands_addGlowingTicket(seconds * 20, color);
                         }
                     } catch (CommandSyntaxException e) {
@@ -103,7 +103,7 @@ public class GlowCommand {
 
             return Command.SINGLE_SUCCESS;
         } else {
-            List<? extends Entity> entities = entitySelector.getEntities(source);
+            List<? extends Entity> entities = entitySelector.findEntities(source);
             if (entities.isEmpty()) {
                 throw FAILED_EXCEPTION.create();
             }

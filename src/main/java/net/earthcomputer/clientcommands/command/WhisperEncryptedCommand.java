@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
+import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -14,7 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
-import static net.earthcomputer.clientcommands.command.arguments.FormattedComponentArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.ExtendedMarkdownArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -25,11 +26,11 @@ public class WhisperEncryptedCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cwe")
             .then(argument("player", gameProfile(true))
-                .then(argument("message", withString(formattedComponent()))
+                .then(argument("message", withString(extendedMarkdown()))
                     .executes((ctx) -> whisper(ctx.getSource(), getSingleProfileArgument(ctx, "player"), getWithString(ctx, "message", MutableComponent.class))))));
     }
 
-    private static int whisper(FabricClientCommandSource source, GameProfile player, Result<MutableComponent> result) throws CommandSyntaxException {
+    private static int whisper(FabricClientCommandSource source, GameProfile player, WithStringArgument.Result<MutableComponent> result) throws CommandSyntaxException {
         PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(player.getId());
         if (recipient == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();

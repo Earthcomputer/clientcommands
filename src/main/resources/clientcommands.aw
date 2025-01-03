@@ -2,7 +2,6 @@ accessWidener v2 named
 
 # c2c
 accessible field net/minecraft/client/multiplayer/AccountProfileKeyPairManager keyPair Ljava/util/concurrent/CompletableFuture;
-# accessible method net/minecraft/network/protocol/ProtocolInfoBuilder protocolUnbound (Lnet/minecraft/network/ConnectionProtocol;Lnet/minecraft/network/protocol/PacketFlow;Ljava/util/function/Consumer;)Lnet/minecraft/network/ProtocolInfo$Unbound;
 
 # Command Handling
 accessible field net/minecraft/client/gui/Gui overlayMessageTime I
@@ -21,12 +20,12 @@ accessible method net/minecraft/world/level/block/ShulkerBoxBlock canOpen (Lnet/
 # cfish
 accessible method net/minecraft/world/entity/projectile/FishingHook canHitEntity (Lnet/minecraft/world/entity/Entity;)Z
 
+# cgive
+accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I
+accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
+
 # chat
 accessible method net/minecraft/client/Minecraft openChatScreen (Ljava/lang/String;)V
-accessible field net/minecraft/network/chat/TextColor CUSTOM_COLOR_PREFIX Ljava/lang/String;
-
-# ckit
-extendable method net/minecraft/client/gui/screens/inventory/EffectRenderingInventoryScreen renderEffects (Lnet/minecraft/client/gui/GuiGraphics;II)V
 
 # clisten
 accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
@@ -48,6 +47,7 @@ accessible class net/minecraft/client/renderer/RenderType$CompositeState
 accessible class net/minecraft/client/renderer/RenderStateShard$LineStateShard
 
 # RNG Events
+accessible method net/minecraft/world/entity/Entity isInvulnerableToBase (Lnet/minecraft/world/damagesource/DamageSource;)Z
 accessible field net/minecraft/world/entity/LivingEntity lastHurt F
 accessible field net/minecraft/world/entity/decoration/ArmorStand invisible Z
 accessible field net/minecraft/world/level/levelgen/LegacyRandomSource seed Ljava/util/concurrent/atomic/AtomicLong;

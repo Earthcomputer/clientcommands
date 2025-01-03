@@ -36,14 +36,14 @@ public class CTitleCommand {
     }
 
     private static int executeClear(FabricClientCommandSource source) {
-        source.getClient().gui.clear();
+        source.getClient().gui.clearTitles();
 
         source.sendFeedback(Component.translatable("commands.ctitle.cleared"));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int executeReset(FabricClientCommandSource source) {
-        source.getClient().gui.clear();
+        source.getClient().gui.clearTitles();
         source.getClient().gui.resetTitleTimes();
 
         source.sendFeedback(Component.translatable("commands.ctitle.reset"));

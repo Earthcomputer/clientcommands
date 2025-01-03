@@ -39,7 +39,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -250,7 +250,7 @@ public class FishingCracker {
     }
 
     public static boolean canManipulateFishing() {
-        return Configs.getFishingManipulation().isEnabled() && !goals.isEmpty();
+        return Configs.fishingManipulation.isEnabled() && !goals.isEmpty();
     }
 
     private static void handleFishingRodThrow(ItemStack stack) {
@@ -267,7 +267,7 @@ public class FishingCracker {
         synchronized (STATE_LOCK) {
             state = State.NOT_MANIPULATING;
 
-            if (canManipulateFishing() && Configs.getFishingManipulation() == Configs.FishingManipulation.AFK) {
+            if (canManipulateFishing() && Configs.fishingManipulation == Configs.FishingManipulation.AFK) {
                 state = State.WAITING_FOR_RETRHOW;
                 TaskManager.addNonConflictingTask("cfishRethrow", new LongTask() {
                     private int counter;
@@ -340,7 +340,7 @@ public class FishingCracker {
             }
         });
         MoreClientEvents.TIME_SYNC_ON_NETWORK_THREAD.register(packet -> {
-            if (Configs.getFishingManipulation().isEnabled()) {
+            if (Configs.fishingManipulation.isEnabled()) {
                 onTimeSync();
             }
         });
@@ -590,7 +590,7 @@ public class FishingCracker {
                 int delay = (totalTicksToWait - estimatedTicksElapsed) * serverMspt - magicMillisecondsCorrection - PingCommand.getLocalPing() - timeToStartOfTick + serverMspt / 2;
                 long targetTime = (delay) * 1000000L + System.nanoTime();
                 DELAY_EXECUTOR.schedule(() -> {
-                    if (!Configs.getFishingManipulation().isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
+                    if (!Configs.fishingManipulation.isEnabled() || state != State.ASYNC_WAITING_FOR_FISH) {
                         return;
                     }
                     LocalPlayer oldPlayer = Minecraft.getInstance().player;
@@ -606,7 +606,7 @@ public class FishingCracker {
                         synchronized (STATE_LOCK) {
                             state = State.WAITING_FOR_ITEM;
                         }
-                        Minecraft.getInstance().tell(() -> {
+                        Minecraft.getInstance().schedule(() -> {
                             LocalPlayer player = Minecraft.getInstance().player;
                             if (player != null) {
                                 ItemStack oldStack = player.getMainHandItem();
@@ -617,14 +617,16 @@ public class FishingCracker {
                                 expectedFishingRodUses++;
                                 FishingHook prevFishingHook = player.fishing;
                                 player.fishing = oldFishingHook;
-                                InteractionResultHolder<ItemStack> result = oldStack.use(player.level(), player, InteractionHand.MAIN_HAND);
+                                InteractionResult result = oldStack.use(player.level(), player, InteractionHand.MAIN_HAND);
                                 player.fishing = prevFishingHook;
 
-                                if (oldStack != result.getObject()) {
-                                    player.setItemInHand(InteractionHand.MAIN_HAND, result.getObject());
-                                }
-                                if (result.getResult().consumesAction() && result.getResult().shouldSwing()) {
-                                    player.swing(InteractionHand.MAIN_HAND);
+                                if (result instanceof InteractionResult.Success successResult) {
+                                    if (oldStack != successResult.heldItemTransformedTo()) {
+                                        player.setItemInHand(InteractionHand.MAIN_HAND, successResult.heldItemTransformedTo());
+                                    }
+                                    if (successResult.swingSource() == InteractionResult.SwingSource.CLIENT) {
+                                        player.swing(InteractionHand.MAIN_HAND);
+                                    }
                                 }
                                 //networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));
                             }
@@ -881,7 +883,7 @@ public class FishingCracker {
 
         private final Level level = Objects.requireNonNull(Minecraft.getInstance().level);
 
-        private final FishingHook fakeEntity = new FishingHook(Objects.requireNonNull(Minecraft.getInstance().player), level, 0, 0);
+        private final FishingHook fakeEntity;
 
         // state variables
         private Vec3 pos;
@@ -928,6 +930,8 @@ public class FishingCracker {
             this.pos = pos;
             this.velocity = velocity;
             this.boundingBox = FISHING_BOBBER_DIMENSIONS.makeBoundingBox(pos.x, pos.y, pos.z);
+
+            this.fakeEntity = new FishingHook(Objects.requireNonNull(Minecraft.getInstance().player), level, 0, 0);
         }
 
         public boolean canCatchFish() {

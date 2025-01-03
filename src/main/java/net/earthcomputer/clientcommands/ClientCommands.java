@@ -72,7 +72,7 @@ public class ClientCommands implements ClientModInitializer {
             LOGGER.error("Failed to create config dir", e);
         }
 
-        new ModConfigBuilder("clientcommands", Configs.class).build();
+        new ModConfigBuilder<>("clientcommands", Configs.class).build();
         ClientConnectionEvents.DISCONNECT.register(() -> {
             if (!Relogger.isRelogging) {
                 BetterConfigAPI.getInstance().getModConfig("clientcommands").resetTemporaryConfigs();
@@ -126,6 +126,7 @@ public class ClientCommands implements ClientModInitializer {
         CGameModeCommand.register(dispatcher);
         CGiveCommand.register(dispatcher, context);
         ChorusCommand.register(dispatcher);
+        ConnectFourCommand.register(dispatcher);
         CParticleCommand.register(dispatcher, context);
         CPlaySoundCommand.register(dispatcher);
         CrackRNGCommand.register(dispatcher);
@@ -158,9 +159,11 @@ public class ClientCommands implements ClientModInitializer {
         PosCommand.register(dispatcher);
         RelogCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
+        ReplyCommand.register(dispatcher);
         ShrugCommand.register(dispatcher);
         SignSearchCommand.register(dispatcher);
         SnakeCommand.register(dispatcher);
+        SnapCommand.register(dispatcher);
         StartupCommand.register(dispatcher);
         TaskCommand.register(dispatcher);
         TicTacToeCommand.register(dispatcher);

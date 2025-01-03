@@ -88,11 +88,16 @@ public class FindBlockCommand {
                 Entity cameraEntity = Objects.requireNonNullElse(Minecraft.getInstance().cameraEntity, Minecraft.getInstance().player);
 
                 String foundRadius = "%.2f".formatted(Math.sqrt(closestBlock.distToCenterSqr(cameraEntity.getEyePosition(0))));
-                sendFeedback(Component.translatable("commands.cfindblock.success.left", foundRadius)
-                    .append(getLookCoordsTextComponent(closestBlock))
-                    .append(" ")
-                    .append(getGlowCoordsTextComponent(Component.translatable("commands.cfindblock.success.glow"), closestBlock))
-                    .append(Component.translatable("commands.cfindblock.success.right", foundRadius)));
+                sendFeedback(
+                    Component.translatable(
+                        "commands.cfindblock.success",
+                        Component.empty()
+                            .append(getLookCoordsTextComponent(closestBlock))
+                            .append(" ")
+                            .append(getGlowButtonTextComponent(closestBlock)),
+                        foundRadius
+                    )
+                );
             }
         }
     }

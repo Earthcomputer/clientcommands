@@ -14,7 +14,7 @@ public class ChatCommand {
     }
 
     private static int execute() {
-        Minecraft.getInstance().tell(() -> {
+        Minecraft.getInstance().schedule(() -> {
             Minecraft.getInstance().openChatScreen("");
             sendFeedback("commands.chat.success");
         });

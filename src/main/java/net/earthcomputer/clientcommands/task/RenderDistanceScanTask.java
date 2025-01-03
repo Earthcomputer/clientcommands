@@ -112,8 +112,8 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
             ChunkPos chunkPos = new ChunkPos(remainingChunks.removeFirst());
 
             if (canScanChunk(cameraEntity, chunkPos)) {
-                int minSection = level.getMinSection();
-                int maxSection = level.getMaxSection();
+                int minSection = level.getMinSectionY();
+                int maxSection = level.getMaxSectionY();
                 for (int sectionY = minSection; sectionY < maxSection; sectionY++) {
                     SectionPos sectionPos = SectionPos.of(chunkPos, sectionY);
                     if (canScanChunkSection(cameraEntity, sectionPos)) {
