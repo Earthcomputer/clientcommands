@@ -6,7 +6,9 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+// CHECKSTYLE:OFF: AvoidStarImport
 import net.earthcomputer.clientcommands.command.*;
+// CHECKSTYLE:ON: AvoidStarImport
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.earthcomputer.clientcommands.features.CommandExecutionCustomPayload;
 import net.earthcomputer.clientcommands.features.FishingCracker;

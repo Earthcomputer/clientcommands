@@ -10,7 +10,6 @@
 
         <module name="AvoidStarImport">
             <property name="allowStaticMemberImports" value="true"/>
-            <property name="excludes" value="net.earthcomputer.clientcommands.command"/>
         </module>
 
         <module name="NeedBraces">
