@@ -52,7 +52,7 @@ public class WaypointCommand {
     static {
         try {
             loadFile();
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("Could not load waypoints file, hence /cwaypoint will not work!", e);
         }
     }
