@@ -17,21 +17,39 @@ public class RegexArgument implements ArgumentType<Pattern> {
     private static final DynamicCommandExceptionType EXPECTED_REGEX_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.client.expectedRegex", arg));
 
     private final RegexType type;
+    private final boolean multiline;
 
     private RegexArgument(RegexType type) {
+        this(type, false);
+    }
+
+    private RegexArgument(RegexType type, boolean multiline) {
         this.type = type;
+        this.multiline = multiline;
     }
 
     public static RegexArgument wordRegex() {
         return new RegexArgument(RegexType.SINGLE_WORD);
     }
 
+    public static RegexArgument wordRegex(boolean multiline) {
+        return new RegexArgument(RegexType.SINGLE_WORD, multiline);
+    }
+
     public static RegexArgument slashyRegex() {
         return new RegexArgument(RegexType.SLASHY_PHRASE);
     }
 
+    public static RegexArgument slashyRegex(boolean multiline) {
+        return new RegexArgument(RegexType.SLASHY_PHRASE, multiline);
+    }
+
     public static RegexArgument greedyRegex() {
         return new RegexArgument(RegexType.GREEDY_PHRASE);
+    }
+
+    public static RegexArgument greedyRegex(boolean multiline) {
+        return new RegexArgument(RegexType.GREEDY_PHRASE, multiline);
     }
 
     public static Pattern getRegex(CommandContext<?> context, String name) {
@@ -44,7 +62,7 @@ public class RegexArgument implements ArgumentType<Pattern> {
         if (type == RegexType.GREEDY_PHRASE) {
             String text = reader.getRemaining();
             try {
-                Pattern pattern = Pattern.compile(text);
+                Pattern pattern = Pattern.compile(text, multiline ? Pattern.MULTILINE : 0);
                 reader.setCursor(reader.getTotalLength());
                 return pattern;
             } catch (PatternSyntaxException e) {
@@ -54,7 +72,7 @@ public class RegexArgument implements ArgumentType<Pattern> {
         } else if (type == RegexType.SINGLE_WORD) {
             String text = reader.readUnquotedString();
             try {
-                return Pattern.compile(text);
+                return Pattern.compile(text, multiline ? Pattern.MULTILINE : 0);
             } catch (PatternSyntaxException e) {
                 reader.setCursor(start);
                 throw EXPECTED_REGEX_EXCEPTION.createWithContext(reader, text);
@@ -64,14 +82,14 @@ public class RegexArgument implements ArgumentType<Pattern> {
         }
     }
 
-    public static Pattern parseSlashyRegex(StringReader reader) throws CommandSyntaxException {
+    private Pattern parseSlashyRegex(StringReader reader) throws CommandSyntaxException {
         final int start = reader.getCursor();
 
         boolean slashy = reader.canRead() && reader.peek() == '/';
         if (!slashy) {
             String text = reader.readUnquotedString();
             try {
-                return Pattern.compile(text);
+                return Pattern.compile(text, multiline ? Pattern.MULTILINE : 0);
             } catch (PatternSyntaxException e) {
                 reader.setCursor(start);
                 throw EXPECTED_REGEX_EXCEPTION.createWithContext(reader, text);
@@ -92,7 +110,7 @@ public class RegexArgument implements ArgumentType<Pattern> {
                 if (!escaped) {
                     reader.skip();
                     try {
-                        return Pattern.compile(regex.toString());
+                        return Pattern.compile(regex.toString(), multiline ? Pattern.MULTILINE : 0);
                     } catch (PatternSyntaxException e) {
                         int end = reader.getCursor();
                         reader.setCursor(start);

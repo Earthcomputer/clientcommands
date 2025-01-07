@@ -32,7 +32,7 @@ public class SignSearchCommand {
                 .then(argument("query", greedyString())
                     .executes(ctx -> FindBlockCommand.findBlock(ctx, Component.translatable("commands.csignsearch.starting"), predicate(getString(ctx, "query"))))))
             .then(literal("regex")
-                .then(argument("query", greedyRegex())
+                .then(argument("query", greedyRegex(true))
                     .executes(ctx -> FindBlockCommand.findBlock(ctx, Component.translatable("commands.csignsearch.starting"), predicate(getRegex(ctx, "query")))))));
         FindBlockCommand.FLAG_KEEP_SEARCHING.addToCommand(dispatcher, csignsearch, ctx -> true);
     }
