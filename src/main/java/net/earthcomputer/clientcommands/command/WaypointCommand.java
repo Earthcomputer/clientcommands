@@ -167,7 +167,7 @@ public class WaypointCommand {
 
             Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(worldIdentifier);
 
-            if (worldWaypoints.isEmpty()) {
+            if (worldWaypoints == null || worldWaypoints.isEmpty()) {
                 source.sendFeedback(Component.translatable("commands.cwaypoint.list.empty"));
                 return Command.SINGLE_SUCCESS;
             }
