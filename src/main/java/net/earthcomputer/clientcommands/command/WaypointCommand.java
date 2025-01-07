@@ -9,6 +9,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
@@ -90,7 +91,8 @@ public class WaypointCommand {
     private static String getWorldIdentifier(FabricClientCommandSource source) {
         String worldIdentifier;
         if (source.getClient().hasSingleplayerServer()) {
-            worldIdentifier = source.getClient().getSingleplayerServer().getWorldData().getLevelName();
+            // the level id remains the same even after the level is renamed
+            worldIdentifier = source.getClient().getSingleplayerServer().storageSource.getLevelId();
         } else {
             worldIdentifier = source.getClient().getConnection().getConnection().getRemoteAddress().toString();
         }
@@ -193,15 +195,18 @@ public class WaypointCommand {
     private static void saveFile() throws CommandSyntaxException {
         try {
             CompoundTag rootTag = new CompoundTag();
-            waypoints.forEach((worldIdentifier, worldWaypoints) -> rootTag.put(worldIdentifier, worldWaypoints.entrySet().stream()
+            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+            CompoundTag compoundTag = new CompoundTag();
+            waypoints.forEach((worldIdentifier, worldWaypoints) -> compoundTag.put(worldIdentifier, worldWaypoints.entrySet().stream()
                 .collect(CompoundTag::new, (result, entry) -> {
                     CompoundTag waypoint = new CompoundTag();
                     Tag pos = NbtUtils.writeBlockPos(entry.getValue().getLeft());
+                    waypoint.put("pos", pos);
                     String dimension = entry.getValue().getRight().location().toString();
-                    waypoint.put("Pos", pos);
                     waypoint.putString("Dimension", dimension);
                     result.put(entry.getKey(), waypoint);
                 }, CompoundTag::merge)));
+            rootTag.put("Waypoints", compoundTag);
             Path newFile = Files.createTempFile(ClientCommands.configDir, "waypoints", ".dat");
             NbtIo.write(rootTag, newFile);
             Path backupFile = ClientCommands.configDir.resolve("waypoints.dat_old");
@@ -218,12 +223,14 @@ public class WaypointCommand {
         if (rootTag == null) {
             return;
         }
-        rootTag.getAllKeys().forEach(worldIdentifier -> {
-            CompoundTag worldWaypoints = rootTag.getCompound(worldIdentifier);
+        // TODO: update-sensitive: apply custom data fixes when it becomes necessary
+        CompoundTag compoundTag = rootTag.getCompound("Waypoints");
+        compoundTag.getAllKeys().forEach(worldIdentifier -> {
+            CompoundTag worldWaypoints = compoundTag.getCompound(worldIdentifier);
             waypoints.put(worldIdentifier, worldWaypoints.getAllKeys().stream()
                 .collect(Collectors.toMap(Function.identity(), name -> {
                     CompoundTag waypoint = worldWaypoints.getCompound(name);
-                    BlockPos pos = NbtUtils.readBlockPos(waypoint, "Pos").orElseThrow();
+                    BlockPos pos = NbtUtils.readBlockPos(waypoint, "pos").orElseThrow();
                     ResourceKey<Level> dimension = Level.RESOURCE_KEY_CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, waypoint.get("Dimension"))).resultOrPartial(LOGGER::error).orElseThrow();
                     return Pair.of(pos, dimension);
                 })));
