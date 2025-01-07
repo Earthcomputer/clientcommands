@@ -57,6 +57,7 @@ loom {
 			ideConfigGenerated true
 			name 'Client Gametest'
 			property 'fabric.client.gametest'
+			property 'devauth.enabled', 'false'
 			programArgs '--username', 'GametestUser'
 			runDir 'runGametest'
 			source sourceSets.clientGametest
@@ -160,11 +161,13 @@ tasks.register('cleanGametestRunDir', Delete) {
 // hack to make sure run directory is cleaned before the gametests are run
 ideaSyncTask.doLast {
 	def gametestXml = file('.idea/runConfigurations/Client_Gametest.xml').readLines()
-	def index = gametestXml.findIndexOf { it.endsWith '<method v="2">' }
-	assert index >= 0
-	def endIndex = gametestXml.findIndexOf(index) { it.endsWith('</method>') }
-	gametestXml.add(endIndex, '<option enabled="true" externalProjectPath="$PROJECT_DIR$" name="Gradle.BeforeRunTask" scriptParameters="" tasks="cleanGametestRunDir" vmOptions=""/>')
-	file('.idea/runConfigurations/Client_Gametest.xml').write(gametestXml.join('\n'))
+	if (!gametestXml.any { it.contains('cleanGametestRunDir') }) {
+		def index = gametestXml.findIndexOf { it.endsWith '<method v="2">' }
+		assert index >= 0
+		def endIndex = gametestXml.findIndexOf(index) { it.endsWith('</method>') }
+		gametestXml.add(endIndex, '<option enabled="true" externalProjectPath="$PROJECT_DIR$" name="Gradle.BeforeRunTask" scriptParameters="" tasks="cleanGametestRunDir" vmOptions=""/>')
+		file('.idea/runConfigurations/Client_Gametest.xml').write(gametestXml.join('\n'))
+	}
 }
 
 runClientGametest.dependsOn cleanGametestRunDir

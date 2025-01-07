@@ -307,6 +307,7 @@ public final class BannedActionGametest implements FabricClientGameTest {
         runClientCommand(context, "clook cardinal down");
         context.waitTick();
         context.getInput().pressKey(options -> options.keyUse);
+        context.waitTick();
 
         if (Configs.playerCrackState.knowsSeed()) {
             throw new AssertionError("Didn't trigger item break detection");
