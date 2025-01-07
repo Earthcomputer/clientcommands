@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
@@ -70,6 +71,7 @@ public final class BannedActionGametest implements FabricClientGameTest {
             testFrostWalker(context, singleplayer);
             testGiveCommand(context);
             testItemBreak(context, singleplayer);
+            testMending(context, singleplayer);
 
             context.waitTicks(100);
         }
@@ -312,6 +314,40 @@ public final class BannedActionGametest implements FabricClientGameTest {
         if (Configs.playerCrackState.knowsSeed()) {
             throw new AssertionError("Didn't trigger item break detection");
         }
+
+        Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
+        MultiVersionCompat.setLatestProtocol();
+    }
+
+    private static void testMending(ClientGameTestContext context, TestSingleplayerContext singleplayer) {
+        // set the protocol version to < 1.17 to avoid XP orb collection detection
+        MultiVersionCompat.setProtocolVersion(MultiVersionCompat.V1_16, "1.16");
+        BlockPos pos = getPlayerPos(context);
+
+        ExperienceOrb orb = singleplayer.getServer().computeOnServer(server -> {
+            ItemStack mendingPickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
+            mendingPickaxe.setDamageValue(1);
+            EnchantmentHelper.updateEnchantments(mendingPickaxe, enchantments -> {
+                Registry<Enchantment> enchantmentRegistry = server.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+                enchantments.set(enchantmentRegistry.getOrThrow(Enchantments.MENDING), 1);
+            });
+            setInventoryItem(server, 0, mendingPickaxe);
+
+            ExperienceOrb orb1 = new ExperienceOrb(server.overworld(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 2.5, 1);
+            server.overworld().addFreshEntity(orb1);
+            return orb1;
+        });
+        context.waitFor(client -> orb.isRemoved());
+        context.waitTick();
+
+        if (Configs.playerCrackState.knowsSeed()) {
+            throw new AssertionError("Didn't trigger mending detection");
+        }
+
+        singleplayer.getServer().runOnServer(server -> {
+            setInventoryItem(server, 0, ItemStack.EMPTY);
+        });
+        context.waitTick();
 
         Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
         MultiVersionCompat.setLatestProtocol();
