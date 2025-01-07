@@ -6,32 +6,29 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.Component;
 
-import java.util.Collection;
-
-import static dev.xpple.clientarguments.arguments.CGameProfileArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CGameProfileArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class PingCommand {
 
-    private static final SimpleCommandExceptionType PLAYER_IN_SINGLEPLAYER_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.singleplayer"));
-    private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.playerNotFound"));
-    private static final SimpleCommandExceptionType TOO_MANY_PLAYERS_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cping.tooManyPlayers"));
+    private static final SimpleCommandExceptionType PLAYER_IN_SINGLEPLAYER_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cping.singleplayer"));
+    private static final SimpleCommandExceptionType PLAYER_NOT_FOUND_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cping.playerNotFound"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cping")
             .executes(ctx -> printPing(ctx.getSource()))
-            .then(argument("player", gameProfile())
-                .executes(ctx -> printPing(ctx.getSource(), getCProfileArgument(ctx, "player"))))
+            .then(argument("player", gameProfile(true))
+                .executes(ctx -> printPing(ctx.getSource(), getSingleProfileArgument(ctx, "player"))))
         );
     }
 
     private static int printPing(FabricClientCommandSource source) throws CommandSyntaxException {
-        if (source.getClient().isInSingleplayer()) {
+        if (source.getClient().isLocalServer()) {
             throw PLAYER_IN_SINGLEPLAYER_EXCEPTION.create();
         }
 
@@ -40,42 +37,32 @@ public class PingCommand {
             throw PLAYER_IN_SINGLEPLAYER_EXCEPTION.create();
         }
 
-        source.sendFeedback(Text.translatable("commands.cping.success", ping));
+        source.sendFeedback(Component.translatable("commands.cping.success", ping));
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int printPing(FabricClientCommandSource source, Collection<GameProfile> profiles) throws CommandSyntaxException {
-        if (source.getClient().isInSingleplayer()) {
+    private static int printPing(FabricClientCommandSource source, GameProfile player) throws CommandSyntaxException {
+        if (source.getClient().isLocalServer()) {
             throw PLAYER_IN_SINGLEPLAYER_EXCEPTION.create();
         }
 
-        if (profiles.isEmpty()) {
-            throw PLAYER_NOT_FOUND_EXCEPTION.create();
-        }
-        if (profiles.size() > 1) {
-            throw TOO_MANY_PLAYERS_EXCEPTION.create();
-        }
-        GameProfile profile = profiles.iterator().next();
-
-        ClientPlayNetworkHandler networkHandler = source.getClient().getNetworkHandler();
-        assert networkHandler != null;
-        PlayerListEntry player = networkHandler.getPlayerListEntry(profile.getId());
-        if (player == null) {
+        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.getId());
+        if (playerInfo == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
-        int ping = player.getLatency();
-        source.sendFeedback(Text.translatable("commands.cping.success.other", profile.getName(), ping));
+        int ping = playerInfo.getLatency();
+        source.sendFeedback(Component.translatable("commands.cping.success.other", playerInfo.getProfile().getName(), ping));
         return Command.SINGLE_SUCCESS;
     }
 
     public static int getLocalPing() {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
-        if (networkHandler == null) {
+        ClientPacketListener packetListener = Minecraft.getInstance().getConnection();
+        if (packetListener == null) {
             return -1;
         }
 
-        PlayerListEntry localPlayer = networkHandler.getPlayerListEntry(networkHandler.getProfile().getId());
+        PlayerInfo localPlayer = packetListener.getPlayerInfo(packetListener.getLocalGameProfile().getId());
         if (localPlayer == null) {
             return -1;
         }

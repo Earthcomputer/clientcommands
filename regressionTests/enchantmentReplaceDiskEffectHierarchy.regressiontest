@@ -1,0 +1,2 @@
+net/minecraft/world/item/enchantment/Enchantments.bootstrap (Lnet/minecraft/data/worldgen/BootstrapContext;)V <- net/minecraft/world/item/enchantment/effects/ReplaceDisk.<init>
+net/minecraft/world/item/enchantment/effects/ReplaceDisk.<clinit> ()V <- net/minecraft/world/item/enchantment/effects/ReplaceDisk.lambda$static$0 <- net/minecraft/world/item/enchantment/effects/ReplaceDisk.<init>

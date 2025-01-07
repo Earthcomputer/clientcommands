@@ -5,8 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class TaskCommand {
 
-    private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.ctask.stop.noMatch"));
+    private static final SimpleCommandExceptionType NO_MATCH_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctask.stop.noMatch"));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctask")
@@ -34,11 +34,11 @@ public class TaskCommand {
         int taskCount = TaskManager.getTaskCount();
 
         if (taskCount == 0) {
-            source.sendFeedback(Text.translatable("commands.ctask.list.noTasks"));
+            source.sendFeedback(Component.translatable("commands.ctask.list.noTasks"));
         } else {
-            source.sendFeedback(Text.translatable("commands.ctask.list.success", taskCount).formatted(Formatting.BOLD));
+            source.sendFeedback(Component.translatable("commands.ctask.list.success", taskCount).withStyle(ChatFormatting.BOLD));
             for (String task : tasks) {
-                source.sendFeedback(Text.literal("- " + task));
+                source.sendFeedback(Component.literal("- " + task));
             }
         }
 
@@ -58,12 +58,12 @@ public class TaskCommand {
 
         if (tasksToStop.isEmpty()) {
             if (pattern.isEmpty()) {
-                source.sendFeedback(Text.translatable("commands.ctask.list.noTasks"));
+                source.sendFeedback(Component.translatable("commands.ctask.list.noTasks"));
             } else {
                 throw NO_MATCH_EXCEPTION.create();
             }
         } else {
-            source.sendFeedback(Text.translatable("commands.ctask.stop.success", tasksToStop.size()));
+            source.sendFeedback(Component.translatable("commands.ctask.stop.success", tasksToStop.size()));
         }
         return tasksToStop.size();
     }

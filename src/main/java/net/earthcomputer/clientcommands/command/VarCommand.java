@@ -8,10 +8,10 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.Util;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
-import static net.minecraft.command.CommandSource.*;
+import static net.minecraft.commands.SharedSuggestionProvider.*;
 
 public class VarCommand {
 
@@ -32,9 +32,9 @@ public class VarCommand {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.cvar.saveFile.failed"));
-    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.cvar.add.alreadyExists", arg));
-    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.cvar.notFound", arg));
+    private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cvar.saveFile.failed"));
+    private static final DynamicCommandExceptionType ALREADY_EXISTS_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.cvar.add.alreadyExists", arg));
+    private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.cvar.notFound", arg));
 
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
 
@@ -56,16 +56,16 @@ public class VarCommand {
                                         .executes(ctx -> addVariable(ctx.getSource(), getString(ctx, "variable"), getString(ctx, "value"))))))
                 .then(literal("remove")
                         .then(argument("variable", word())
-                                .suggests((ctx, builder) -> suggestMatching(variables.keySet(), builder))
+                                .suggests((ctx, builder) -> suggest(variables.keySet(), builder))
                                 .executes(ctx -> removeVariable(ctx.getSource(), getString(ctx, "variable")))))
                 .then(literal("edit")
                         .then(argument("variable", word())
-                                .suggests((ctx, builder) -> suggestMatching(variables.keySet(), builder))
+                                .suggests((ctx, builder) -> suggest(variables.keySet(), builder))
                                 .then(argument("value", greedyString())
                                         .executes(ctx -> editVariable(ctx.getSource(), getString(ctx, "variable"), getString(ctx, "value"))))))
                 .then(literal("parse")
                         .then(argument("variable", word())
-                                .suggests((ctx, builder) -> suggestMatching(variables.keySet(), builder))
+                                .suggests((ctx, builder) -> suggest(variables.keySet(), builder))
                                 .executes(ctx -> parseVariable(ctx.getSource(), getString(ctx, "variable")))))
                 .then(literal("list")
                         .executes(ctx -> listVariables(ctx.getSource()))));
@@ -77,7 +77,7 @@ public class VarCommand {
         }
         variables.put(variable, value);
         saveFile();
-        source.sendFeedback(Text.translatable("commands.cvar.add.success", variable));
+        source.sendFeedback(Component.translatable("commands.cvar.add.success", variable));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -86,7 +86,7 @@ public class VarCommand {
             throw NOT_FOUND_EXCEPTION.create(variable);
         }
         saveFile();
-        source.sendFeedback(Text.translatable("commands.cvar.remove.success", variable));
+        source.sendFeedback(Component.translatable("commands.cvar.remove.success", variable));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -96,7 +96,7 @@ public class VarCommand {
         }
         variables.put(variable, value);
         saveFile();
-        source.sendFeedback(Text.translatable("commands.cvar.edit.success", variable));
+        source.sendFeedback(Component.translatable("commands.cvar.edit.success", variable));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -105,29 +105,29 @@ public class VarCommand {
         if (value == null) {
             throw NOT_FOUND_EXCEPTION.create(variable);
         }
-        source.sendFeedback(Text.translatable("commands.cvar.parse.success", variable, value));
+        source.sendFeedback(Component.translatable("commands.cvar.parse.success", variable, value));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int listVariables(FabricClientCommandSource source) {
         if (variables.isEmpty()) {
-            source.sendFeedback(Text.translatable("commands.cvar.list.empty"));
+            source.sendFeedback(Component.translatable("commands.cvar.list.empty"));
         } else {
             String list = "%" + String.join("%, %", variables.keySet()) + "%";
-            source.sendFeedback(Text.translatable("commands.cvar.list", list));
+            source.sendFeedback(Component.translatable("commands.cvar.list", list));
         }
         return variables.size();
     }
 
     private static void saveFile() throws CommandSyntaxException {
         try {
-            NbtCompound rootTag = new NbtCompound();
+            CompoundTag rootTag = new CompoundTag();
             variables.forEach(rootTag::putString);
-            File newFile = File.createTempFile("vars", ".dat", configPath.toFile());
+            Path newFile = File.createTempFile("vars", ".dat", configPath.toFile()).toPath();
             NbtIo.write(rootTag, newFile);
-            File backupFile = new File(configPath.toFile(), "vars.dat_old");
-            File currentFile = new File(configPath.toFile(), "vars.dat");
-            Util.backupAndReplace(currentFile, newFile, backupFile);
+            Path backupFile = configPath.resolve("vars.dat_old");
+            Path currentFile = configPath.resolve("vars.dat");
+            Util.safeReplaceFile(currentFile, newFile, backupFile);
         } catch (IOException e) {
             throw SAVE_FAILED_EXCEPTION.create();
         }
@@ -135,11 +135,11 @@ public class VarCommand {
 
     private static void loadFile() throws IOException {
         variables.clear();
-        NbtCompound rootTag = NbtIo.read(new File(configPath.toFile(), "vars.dat"));
+        CompoundTag rootTag = NbtIo.read(configPath.resolve("vars.dat"));
         if (rootTag == null) {
             return;
         }
-        rootTag.getKeys().forEach(key -> variables.put(key, rootTag.getString(key)));
+        rootTag.getAllKeys().forEach(key -> variables.put(key, rootTag.getString(key)));
     }
 
     public static String replaceVariables(String originalString) {
@@ -147,7 +147,7 @@ public class VarCommand {
         StringBuilder builder = new StringBuilder();
         while (matcher.find()) {
             String group = matcher.group();
-            matcher.appendReplacement(builder, variables.getOrDefault(group.substring(1, group.length() - 1), group));
+            matcher.appendReplacement(builder, variables.getOrDefault(group.substring(1, group.length() - 1), group).replace("\\", "\\\\").replace("$", "\\$"));
         }
         matcher.appendTail(builder);
         return builder.toString();

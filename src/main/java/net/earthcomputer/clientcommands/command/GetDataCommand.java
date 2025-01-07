@@ -10,36 +10,40 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.BlockDataObject;
-import net.minecraft.command.DataCommandObject;
-import net.minecraft.command.EntityDataObject;
-import net.minecraft.nbt.*;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CollectionTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.commands.data.BlockDataAccessor;
+import net.minecraft.server.commands.data.DataAccessor;
+import net.minecraft.server.commands.data.EntityDataAccessor;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import static dev.xpple.clientarguments.arguments.CBlockPosArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CEntityArgumentType.*;
-import static dev.xpple.clientarguments.arguments.CNbtPathArgumentType.*;
+import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
+import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
+import static dev.xpple.clientarguments.arguments.CNbtPathArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class GetDataCommand {
 
-    private static final DynamicCommandExceptionType GET_UNKNOWN_EXCEPTION = new DynamicCommandExceptionType(arg -> Text.translatable("commands.data.get.unknown", arg));
-    private static final SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.data.get.multiple"));
-    private static final SimpleCommandExceptionType INVALID_BLOCK_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.data.block.invalid"));
+    private static final DynamicCommandExceptionType GET_UNKNOWN_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.data.get.unknown", arg));
+    private static final SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
+    private static final SimpleCommandExceptionType INVALID_BLOCK_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.data.block.invalid"));
 
-    public static final Function<String, ObjectType> CLIENT_ENTITY_DATA_OBJECT = argName -> new ObjectType() {
+    public static final Function<String, AccessorType> CLIENT_ENTITY_DATA_ACCESSOR = argName -> new AccessorType() {
         @Override
-        public DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
-            return new EntityDataObject(getCEntity(ctx, argName));
+        public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+            return new EntityDataAccessor(getEntity(ctx, argName));
         }
 
         @Override
@@ -48,14 +52,14 @@ public class GetDataCommand {
         }
     };
 
-    public static final Function<String, ObjectType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new ObjectType() {
-        public DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
-            BlockPos pos = getCBlockPos(ctx, argName + "Pos");
-            BlockEntity blockEntity = MinecraftClient.getInstance().world.getBlockEntity(pos);
+    public static final Function<String, AccessorType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new AccessorType() {
+        public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
+            BlockPos pos = getBlockPos(ctx, argName + "Pos");
+            BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
             if (blockEntity == null) {
                 throw INVALID_BLOCK_EXCEPTION.create();
             } else {
-                return new BlockDataObject(blockEntity, pos);
+                return new BlockDataAccessor(blockEntity, pos);
             }
         }
 
@@ -64,47 +68,42 @@ public class GetDataCommand {
         }
     };
 
-    public static List<Function<String, ObjectType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_OBJECT, CLIENT_TILE_ENTITY_DATA_OBJECT);
-    public static List<ObjectType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
+    public static List<Function<String, AccessorType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_ACCESSOR, CLIENT_TILE_ENTITY_DATA_OBJECT);
+    public static List<AccessorType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        for (ObjectType objType : TARGET_OBJECT_TYPES) {
+        for (AccessorType objType : TARGET_OBJECT_TYPES) {
             //noinspection unchecked
             dispatcher.register((LiteralArgumentBuilder<FabricClientCommandSource>) objType.addArgumentsToBuilder(literal("cgetdata"), builder ->
-                    builder.executes(ctx -> getData(ctx.getSource(), objType.getObject(ctx)))
+                    builder.executes(ctx -> getData(ctx.getSource(), objType.getAccessor(ctx)))
                     .then(argument("path", nbtPath())
-                        .executes(ctx -> getData(ctx.getSource(), objType.getObject(ctx), getCNbtPath(ctx, "path"))))));
+                        .executes(ctx -> getData(ctx.getSource(), objType.getAccessor(ctx), getNbtPath(ctx, "path"))))));
         }
     }
 
-    private static int getData(FabricClientCommandSource source, DataCommandObject dataObj) throws CommandSyntaxException {
-        source.sendFeedback(dataObj.feedbackQuery(dataObj.getNbt()));
+    private static int getData(FabricClientCommandSource source, DataAccessor accessor) throws CommandSyntaxException {
+        source.sendFeedback(accessor.getPrintSuccess(accessor.getData()));
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int getData(FabricClientCommandSource source, DataCommandObject dataObj, NbtPath path) throws CommandSyntaxException {
-        NbtElement tag = getNbt(path, dataObj);
-        int ret;
-        if (tag instanceof AbstractNbtNumber) {
-            ret = MathHelper.floor(((AbstractNbtNumber) tag).doubleValue());
-        } else if (tag instanceof AbstractNbtList) {
-            ret = ((AbstractNbtList<?>) tag).size();
-        } else if (tag instanceof NbtCompound) {
-            ret = ((NbtCompound) tag).getSize();
-        } else if (tag instanceof NbtString) {
-            ret = tag.asString().length();
-        } else {
-            throw GET_UNKNOWN_EXCEPTION.create(path.toString());
-        }
+    private static int getData(FabricClientCommandSource source, DataAccessor accessor, NbtPath path) throws CommandSyntaxException {
+        Tag tag = getNbt(path, accessor);
+        int ret = switch (tag) {
+            case NumericTag numericTag -> Mth.floor(numericTag.getAsDouble());
+            case CollectionTag<?> collectionTag -> collectionTag.size();
+            case CompoundTag compoundTag -> compoundTag.size();
+            case StringTag ignored -> tag.getAsString().length();
+            case null, default -> throw GET_UNKNOWN_EXCEPTION.create(path.toString());
+        };
 
-        source.sendFeedback(dataObj.feedbackQuery(tag));
+        source.sendFeedback(accessor.getPrintSuccess(tag));
         return ret;
     }
 
-    private static NbtElement getNbt(NbtPath path, DataCommandObject dataObj) throws CommandSyntaxException {
-        Collection<NbtElement> tags = path.get(dataObj.getNbt());
-        Iterator<NbtElement> tagItr = tags.iterator();
-        NbtElement firstTag = tagItr.next();
+    private static Tag getNbt(NbtPath path, DataAccessor accessor) throws CommandSyntaxException {
+        Collection<Tag> tags = path.get(accessor.getData());
+        Iterator<Tag> tagItr = tags.iterator();
+        Tag firstTag = tagItr.next();
         if (tagItr.hasNext()) {
             throw GET_MULTIPLE_EXCEPTION.create();
         } else {
@@ -112,8 +111,8 @@ public class GetDataCommand {
         }
     }
 
-    private interface ObjectType {
-        DataCommandObject getObject(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException;
+    private interface AccessorType {
+        DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException;
         ArgumentBuilder<FabricClientCommandSource, ?> addArgumentsToBuilder(ArgumentBuilder<FabricClientCommandSource, ?> builder, Function<ArgumentBuilder<FabricClientCommandSource, ?>, ArgumentBuilder<FabricClientCommandSource, ?>> subcommandAdder);
     }
 
