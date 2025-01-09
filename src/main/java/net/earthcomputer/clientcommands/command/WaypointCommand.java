@@ -11,6 +11,7 @@ import net.earthcomputer.clientcommands.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -68,14 +69,14 @@ public class WaypointCommand {
             .then(literal("remove")
                 .then(argument("name", word())
                     .suggests((ctx, builder) -> {
-                        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource()));
+                        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource().getClient()));
                         return SharedSuggestionProvider.suggest(worldWaypoints != null ? worldWaypoints.keySet() : Collections.emptySet(), builder);
                     })
                     .executes(ctx -> remove(ctx.getSource(), getString(ctx, "name")))))
             .then(literal("edit")
                 .then(argument("name", word())
                     .suggests((ctx, builder) -> {
-                        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource()));
+                        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource().getClient()));
                         return SharedSuggestionProvider.suggest(worldWaypoints != null ? worldWaypoints.keySet() : Collections.emptySet(), builder);
                     })
                     .then(argument("pos", blockPos())
@@ -88,13 +89,13 @@ public class WaypointCommand {
                     .executes(ctx -> list(ctx.getSource(), getBool(ctx, "current"))))));
     }
 
-    private static String getWorldIdentifier(FabricClientCommandSource source) {
+    public static String getWorldIdentifier(Minecraft minecraft) {
         String worldIdentifier;
-        if (source.getClient().hasSingleplayerServer()) {
+        if (minecraft.hasSingleplayerServer()) {
             // the level id remains the same even after the level is renamed
-            worldIdentifier = source.getClient().getSingleplayerServer().storageSource.getLevelId();
+            worldIdentifier = minecraft.getSingleplayerServer().storageSource.getLevelId();
         } else {
-            worldIdentifier = source.getClient().getConnection().getConnection().getRemoteAddress().toString();
+            worldIdentifier = minecraft.getConnection().getConnection().getRemoteAddress().toString();
         }
         return worldIdentifier;
     }
@@ -104,7 +105,7 @@ public class WaypointCommand {
     }
 
     private static int add(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension) throws CommandSyntaxException {
-        String worldIdentifier = getWorldIdentifier(source);
+        String worldIdentifier = getWorldIdentifier(source.getClient());
 
         Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.computeIfAbsent(worldIdentifier, key -> new HashMap<>());
 
@@ -118,7 +119,7 @@ public class WaypointCommand {
     }
 
     private static int remove(FabricClientCommandSource source, String name) throws CommandSyntaxException {
-        String worldIdentifier = getWorldIdentifier(source);
+        String worldIdentifier = getWorldIdentifier(source.getClient());
 
         Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(worldIdentifier);
 
@@ -140,7 +141,7 @@ public class WaypointCommand {
     }
 
     private static int edit(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension) throws CommandSyntaxException {
-        String worldIdentifier = getWorldIdentifier(source);
+        String worldIdentifier = getWorldIdentifier(source.getClient());
 
         Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(worldIdentifier);
 
@@ -163,7 +164,7 @@ public class WaypointCommand {
 
     private static int list(FabricClientCommandSource source, boolean current) {
         if (current) {
-            String worldIdentifier = getWorldIdentifier(source);
+            String worldIdentifier = getWorldIdentifier(source.getClient());
 
             Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(worldIdentifier);
 
