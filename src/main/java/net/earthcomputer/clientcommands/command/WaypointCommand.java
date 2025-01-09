@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,9 +10,14 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -20,17 +26,25 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
+import org.joml.Vector2d;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -236,5 +250,106 @@ public class WaypointCommand {
                     return Pair.of(pos, dimension);
                 })));
         });
+    }
+
+    public static void renderWaypoints(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+        String worldIdentifier = getWorldIdentifier(Minecraft.getInstance());
+        Map<String, Pair<BlockPos, ResourceKey<Level>>> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
+        if (waypoints == null) {
+            return;
+        }
+
+        Minecraft minecraft = Minecraft.getInstance();
+        GameRenderer gameRenderer = minecraft.gameRenderer;
+        Camera camera = gameRenderer.getMainCamera();
+        Entity cameraEntity = camera.getEntity();
+        float partialTicks = deltaTracker.getGameTimeDeltaPartialTick(true);
+        double verticalFovRad = Math.toRadians(gameRenderer.getFov(camera, partialTicks, false));
+        Window window = minecraft.getWindow();
+        double aspectRatio = (double) window.getGuiScaledWidth() / window.getGuiScaledHeight();
+        double horizontalFovRad = 2 * Math.atan(Math.tan(verticalFovRad / 2) * aspectRatio);
+
+        Vec3 viewVector3 = cameraEntity.getViewVector(1.0f);
+        Vector2d viewVector = new Vector2d(viewVector3.x, viewVector3.z);
+        Vector2d position = new Vector2d(cameraEntity.getEyePosition().x, cameraEntity.getEyePosition().z);
+
+        PriorityQueue<Pair<Component, Integer>> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(Pair::getRight));
+        waypoints.forEach((waypointName, waypoint) -> {
+            if (!waypoint.getRight().location().equals(minecraft.level.dimension().location())) {
+                return;
+            }
+
+            long offset = Math.round(waypoint.getLeft().getY() - cameraEntity.position().y);
+            ChatFormatting colour;
+            String symbol;
+            if (offset >= 0) {
+                colour = ChatFormatting.GREEN;
+                symbol = "+";
+            } else {
+                colour = ChatFormatting.RED;
+                symbol = "-";
+            }
+
+            MutableComponent waypointComponent = Component.literal(waypointName).append(Component.literal(' ' + symbol + Math.abs(offset)).withStyle(colour));
+
+            Vector2d waypointLocation = new Vector2d(waypoint.getLeft().getX(), waypoint.getLeft().getZ());
+            double angleRad = viewVector.angle(waypointLocation.sub(position, new Vector2d()));
+            boolean right = angleRad > 0;
+            angleRad = Math.abs(angleRad);
+
+            int x;
+            if (angleRad > horizontalFovRad / 2) {
+                int width = minecraft.font.width(waypointComponent);
+                x = right ? guiGraphics.guiWidth() - width / 2 : width / 2;
+            } else {
+                // V is the view vector
+                // A is the leftmost visible direction
+                // B is the rightmost visible direction
+                // M is the intersection of the waypoint ray with AB
+                double mv = Math.tan(angleRad) * GameRenderer.PROJECTION_Z_NEAR;
+                double av = Math.tan(horizontalFovRad / 2) * GameRenderer.PROJECTION_Z_NEAR;
+                double ab = 2 * av;
+                double am = right ? mv + av : ab - (mv + av);
+                double perc = am / ab;
+                x = (int) (perc * guiGraphics.guiWidth());
+            }
+            xPositionsBuilder.offer(Pair.of(waypointComponent, x));
+        });
+
+        List<Pair<Component, Integer>> xPositions = new ArrayList<>();
+        int waypointAmount = xPositionsBuilder.size();
+        for (int i = 0; i < waypointAmount; i++) {
+            xPositions.add(xPositionsBuilder.poll());
+        }
+
+        int yOffset = 1;
+        Map<Integer, List<Pair<Component, Integer>>> positions = new HashMap<>();
+        positions.put(yOffset, xPositions);
+
+        while (true) {
+            List<Pair<Component, Integer>> pairs = positions.get(yOffset);
+            if (pairs == null) {
+                break;
+            }
+            int i = 0;
+            while (i < pairs.size() - 1) {
+                Pair<Component, Integer> leftPair = pairs.get(i);
+                Pair<Component, Integer> rightPair = pairs.get(i + 1);
+                Integer leftX = leftPair.getRight();
+                Integer rightX = rightPair.getRight();
+                int leftWidth = minecraft.font.width(leftPair.getLeft());
+                int rightWidth = minecraft.font.width(rightPair.getLeft());
+                if (leftWidth / 2 + rightWidth / 2 > rightX - leftX) {
+                    List<Pair<Component, Integer>> nextLevel = positions.computeIfAbsent(yOffset + minecraft.font.lineHeight, k -> new ArrayList<>());
+                    Pair<Component, Integer> removed = pairs.remove(i + 1);
+                    nextLevel.add(removed);
+                } else {
+                    i++;
+                }
+            }
+            yOffset += minecraft.font.lineHeight;
+        }
+
+        positions.forEach((y, w) -> w.forEach(waypoint -> guiGraphics.drawCenteredString(minecraft.font, waypoint.getLeft(), waypoint.getRight(), y, 0xFFFFFF)));
     }
 }
