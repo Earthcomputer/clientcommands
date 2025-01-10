@@ -9,7 +9,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
-import dev.xpple.clientarguments.arguments.CDimensionArgument;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -86,7 +85,7 @@ public class WaypointCommand {
                 .then(argument("name", word())
                     .then(argument("pos", blockPos())
                         .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos")))
-                        .then(argument("dimension", CDimensionArgument.dimension())
+                        .then(argument("dimension", dimension())
                             .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension")))))))
             .then(literal("remove")
                 .then(argument("name", word())
@@ -103,7 +102,7 @@ public class WaypointCommand {
                     })
                     .then(argument("pos", blockPos())
                         .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos")))
-                        .then(argument("dimension", CDimensionArgument.dimension())
+                        .then(argument("dimension", dimension())
                             .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension")))))))
             .then(literal("list")
                 .executes(ctx -> list(ctx.getSource()))
