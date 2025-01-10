@@ -110,7 +110,7 @@ public class WaypointCommand {
                     .executes(ctx -> list(ctx.getSource(), getBool(ctx, "current"))))));
     }
 
-    public static String getWorldIdentifier(Minecraft minecraft) {
+    private static String getWorldIdentifier(Minecraft minecraft) {
         String worldIdentifier;
         if (minecraft.hasSingleplayerServer()) {
             // the level id remains the same even after the level is renamed
@@ -363,6 +363,10 @@ public class WaypointCommand {
 
         ClientChunkCache chunkSource = context.world().getChunkSource();
         waypoints.forEach((waypointName, waypoint) -> {
+            if (!waypoint.dimension().location().equals(context.world().dimension().location())) {
+                return;
+            }
+
             BlockPos waypointLocation = waypoint.location();
             if (!chunkSource.hasChunk(waypointLocation.getX() >> 4, waypointLocation.getZ() >> 4)) {
                 return;
