@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import dev.xpple.clientarguments.arguments.CDimensionArgument;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -39,7 +40,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector2d;
 import org.slf4j.Logger;
 
@@ -64,7 +64,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class WaypointCommand {
 
-    private static final Map<String, Map<String, Pair<BlockPos, ResourceKey<Level>>>> waypoints = new HashMap<>();
+    private static final Map<String, Map<String, WaypointLocation>> waypoints = new HashMap<>();
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -86,24 +86,24 @@ public class WaypointCommand {
                 .then(argument("name", word())
                     .then(argument("pos", blockPos())
                         .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos")))
-                        .then(argument("dimension", dimension())
+                        .then(argument("dimension", CDimensionArgument.dimension())
                             .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension")))))))
             .then(literal("remove")
                 .then(argument("name", word())
                     .suggests((ctx, builder) -> {
-                        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource().getClient()));
+                        Map<String, WaypointLocation> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource().getClient()));
                         return SharedSuggestionProvider.suggest(worldWaypoints != null ? worldWaypoints.keySet() : Collections.emptySet(), builder);
                     })
                     .executes(ctx -> remove(ctx.getSource(), getString(ctx, "name")))))
             .then(literal("edit")
                 .then(argument("name", word())
                     .suggests((ctx, builder) -> {
-                        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource().getClient()));
+                        Map<String, WaypointLocation> worldWaypoints = waypoints.get(getWorldIdentifier(ctx.getSource().getClient()));
                         return SharedSuggestionProvider.suggest(worldWaypoints != null ? worldWaypoints.keySet() : Collections.emptySet(), builder);
                     })
                     .then(argument("pos", blockPos())
                         .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos")))
-                        .then(argument("dimension", dimension())
+                        .then(argument("dimension", CDimensionArgument.dimension())
                             .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension")))))))
             .then(literal("list")
                 .executes(ctx -> list(ctx.getSource()))
@@ -129,9 +129,9 @@ public class WaypointCommand {
     private static int add(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension) throws CommandSyntaxException {
         String worldIdentifier = getWorldIdentifier(source.getClient());
 
-        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.computeIfAbsent(worldIdentifier, key -> new HashMap<>());
+        Map<String, WaypointLocation> worldWaypoints = waypoints.computeIfAbsent(worldIdentifier, key -> new HashMap<>());
 
-        if (worldWaypoints.putIfAbsent(name, Pair.of(pos, dimension)) != null) {
+        if (worldWaypoints.putIfAbsent(name, new WaypointLocation(dimension, pos)) != null) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
 
@@ -143,7 +143,7 @@ public class WaypointCommand {
     private static int remove(FabricClientCommandSource source, String name) throws CommandSyntaxException {
         String worldIdentifier = getWorldIdentifier(source.getClient());
 
-        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(worldIdentifier);
+        Map<String, WaypointLocation> worldWaypoints = waypoints.get(worldIdentifier);
 
         if (worldWaypoints == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
@@ -165,13 +165,13 @@ public class WaypointCommand {
     private static int edit(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension) throws CommandSyntaxException {
         String worldIdentifier = getWorldIdentifier(source.getClient());
 
-        Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(worldIdentifier);
+        Map<String, WaypointLocation> worldWaypoints = waypoints.get(worldIdentifier);
 
         if (worldWaypoints == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        if (worldWaypoints.computeIfPresent(name, (key, value) -> Pair.of(pos, dimension)) == null) {
+        if (worldWaypoints.computeIfPresent(name, (key, value) -> new WaypointLocation(dimension, pos)) == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
@@ -188,14 +188,14 @@ public class WaypointCommand {
         if (current) {
             String worldIdentifier = getWorldIdentifier(source.getClient());
 
-            Map<String, Pair<BlockPos, ResourceKey<Level>>> worldWaypoints = waypoints.get(worldIdentifier);
+            Map<String, WaypointLocation> worldWaypoints = waypoints.get(worldIdentifier);
 
             if (worldWaypoints == null || worldWaypoints.isEmpty()) {
                 source.sendFeedback(Component.translatable("commands.cwaypoint.list.empty"));
                 return Command.SINGLE_SUCCESS;
             }
 
-            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, waypoint.getLeft().toShortString(), waypoint.getRight().location())));
+            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, waypoint.location().toShortString(), waypoint.dimension().location())));
             return Command.SINGLE_SUCCESS;
         }
 
@@ -210,7 +210,7 @@ public class WaypointCommand {
             }
 
             source.sendFeedback(Component.literal(worldIdentifier).append(":"));
-            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, waypoint.getLeft().toShortString(), waypoint.getRight().location())));
+            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, waypoint.location().toShortString(), waypoint.dimension().location())));
         });
         return Command.SINGLE_SUCCESS;
     }
@@ -223,9 +223,9 @@ public class WaypointCommand {
             waypoints.forEach((worldIdentifier, worldWaypoints) -> compoundTag.put(worldIdentifier, worldWaypoints.entrySet().stream()
                 .collect(CompoundTag::new, (result, entry) -> {
                     CompoundTag waypoint = new CompoundTag();
-                    Tag pos = NbtUtils.writeBlockPos(entry.getValue().getLeft());
+                    Tag pos = NbtUtils.writeBlockPos(entry.getValue().location());
                     waypoint.put("pos", pos);
-                    String dimension = entry.getValue().getRight().location().toString();
+                    String dimension = entry.getValue().dimension().location().toString();
                     waypoint.putString("Dimension", dimension);
                     result.put(entry.getKey(), waypoint);
                 }, CompoundTag::merge)));
@@ -255,14 +255,14 @@ public class WaypointCommand {
                     CompoundTag waypoint = worldWaypoints.getCompound(name);
                     BlockPos pos = NbtUtils.readBlockPos(waypoint, "pos").orElseThrow();
                     ResourceKey<Level> dimension = Level.RESOURCE_KEY_CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, waypoint.get("Dimension"))).resultOrPartial(LOGGER::error).orElseThrow();
-                    return Pair.of(pos, dimension);
+                    return new WaypointLocation(dimension, pos);
                 })));
         });
     }
 
     public static void renderWaypointLabels(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         String worldIdentifier = getWorldIdentifier(Minecraft.getInstance());
-        Map<String, Pair<BlockPos, ResourceKey<Level>>> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
+        Map<String, WaypointLocation> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
         if (waypoints == null) {
             return;
         }
@@ -281,18 +281,18 @@ public class WaypointCommand {
         Vector2d viewVector = new Vector2d(viewVector3.x, viewVector3.z);
         Vector2d position = new Vector2d(cameraEntity.getEyePosition().x, cameraEntity.getEyePosition().z);
 
-        PriorityQueue<Pair<Component, Integer>> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(Pair::getRight));
+        PriorityQueue<ComponentLocation> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(ComponentLocation::location));
         waypoints.forEach((waypointName, waypoint) -> {
-            if (!waypoint.getRight().location().equals(minecraft.level.dimension().location())) {
+            if (!waypoint.dimension().location().equals(minecraft.level.dimension().location())) {
                 return;
             }
 
-            double distanceSquared = waypoint.getLeft().distToCenterSqr(cameraEntity.position());
+            double distanceSquared = waypoint.location().distToCenterSqr(cameraEntity.position());
             long distance = Math.round(Math.sqrt(distanceSquared));
 
             MutableComponent waypointComponent = Component.literal(waypointName).append(CommonComponents.space()).append(Long.toString(distance));
 
-            Vector2d waypointLocation = new Vector2d(waypoint.getLeft().getX(), waypoint.getLeft().getZ());
+            Vector2d waypointLocation = new Vector2d(waypoint.location().getX(), waypoint.location().getZ());
             double angleRad = viewVector.angle(waypointLocation.sub(position, new Vector2d()));
             boolean right = angleRad > 0;
             angleRad = Math.abs(angleRad);
@@ -313,35 +313,35 @@ public class WaypointCommand {
                 double perc = am / ab;
                 x = (int) (perc * guiGraphics.guiWidth());
             }
-            xPositionsBuilder.offer(Pair.of(waypointComponent, x));
+            xPositionsBuilder.offer(new ComponentLocation(waypointComponent, x));
         });
 
-        List<Pair<Component, Integer>> xPositions = new ArrayList<>();
+        List<ComponentLocation> xPositions = new ArrayList<>();
         int waypointAmount = xPositionsBuilder.size();
         for (int i = 0; i < waypointAmount; i++) {
             xPositions.add(xPositionsBuilder.poll());
         }
 
         int yOffset = 1;
-        Map<Integer, List<Pair<Component, Integer>>> positions = new HashMap<>();
+        Map<Integer, List<ComponentLocation>> positions = new HashMap<>();
         positions.put(yOffset, xPositions);
 
         while (true) {
-            List<Pair<Component, Integer>> pairs = positions.get(yOffset);
-            if (pairs == null) {
+            List<ComponentLocation> componentLocations = positions.get(yOffset);
+            if (componentLocations == null) {
                 break;
             }
             int i = 0;
-            while (i < pairs.size() - 1) {
-                Pair<Component, Integer> leftPair = pairs.get(i);
-                Pair<Component, Integer> rightPair = pairs.get(i + 1);
-                Integer leftX = leftPair.getRight();
-                Integer rightX = rightPair.getRight();
-                int leftWidth = minecraft.font.width(leftPair.getLeft());
-                int rightWidth = minecraft.font.width(rightPair.getLeft());
+            while (i < componentLocations.size() - 1) {
+                ComponentLocation left = componentLocations.get(i);
+                ComponentLocation right = componentLocations.get(i + 1);
+                int leftX = left.location();
+                int rightX = right.location();
+                int leftWidth = minecraft.font.width(left.component());
+                int rightWidth = minecraft.font.width(right.component());
                 if (leftWidth / 2 + rightWidth / 2 > rightX - leftX) {
-                    List<Pair<Component, Integer>> nextLevel = positions.computeIfAbsent(yOffset + minecraft.font.lineHeight, k -> new ArrayList<>());
-                    Pair<Component, Integer> removed = pairs.remove(i + 1);
+                    List<ComponentLocation> nextLevel = positions.computeIfAbsent(yOffset + minecraft.font.lineHeight, k -> new ArrayList<>());
+                    ComponentLocation removed = componentLocations.remove(i + 1);
                     nextLevel.add(removed);
                 } else {
                     i++;
@@ -350,19 +350,19 @@ public class WaypointCommand {
             yOffset += minecraft.font.lineHeight;
         }
 
-        positions.forEach((y, w) -> w.forEach(waypoint -> guiGraphics.drawCenteredString(minecraft.font, waypoint.getLeft(), waypoint.getRight(), y, 0xFFFFFF)));
+        positions.forEach((y, w) -> w.forEach(waypoint -> guiGraphics.drawCenteredString(minecraft.font, waypoint.component(), waypoint.location(), y, 0xFFFFFF)));
     }
 
     public static void renderWaypointBoxes(WorldRenderContext context) {
         String worldIdentifier = getWorldIdentifier(Minecraft.getInstance());
-        Map<String, Pair<BlockPos, ResourceKey<Level>>> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
+        Map<String, WaypointLocation> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
         if (waypoints == null) {
             return;
         }
 
         ClientChunkCache chunkSource = context.world().getChunkSource();
         waypoints.forEach((waypointName, waypoint) -> {
-            BlockPos waypointLocation = waypoint.getLeft();
+            BlockPos waypointLocation = waypoint.location();
             if (!chunkSource.hasChunk(waypointLocation.getX() >> 4, waypointLocation.getZ() >> 4)) {
                 return;
             }
@@ -389,5 +389,11 @@ public class WaypointCommand {
 
             stack.popPose();
         });
+    }
+
+    record WaypointLocation(ResourceKey<Level> dimension, BlockPos location) {
+    }
+
+    record ComponentLocation(Component component, int location) {
     }
 }
