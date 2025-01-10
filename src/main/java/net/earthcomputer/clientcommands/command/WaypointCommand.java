@@ -278,7 +278,7 @@ public class WaypointCommand {
         Vector2d viewVector = new Vector2d(viewVector3.x, viewVector3.z);
         Vector2d position = new Vector2d(cameraEntity.getEyePosition().x, cameraEntity.getEyePosition().z);
 
-        PriorityQueue<WaypointLabelLocationDistance> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(WaypointLabelLocationDistance::location));
+        PriorityQueue<WaypointLabelLocation> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(WaypointLabelLocation::location));
         waypoints.forEach((waypointName, waypoint) -> {
             if (!waypoint.dimension().location().equals(minecraft.level.dimension().location())) {
                 return;
@@ -309,24 +309,24 @@ public class WaypointCommand {
                 double perc = am / ab;
                 x = (int) (perc * guiGraphics.guiWidth());
             }
-            xPositionsBuilder.offer(new WaypointLabelLocationDistance(label, x, distance));
+            xPositionsBuilder.offer(new WaypointLabelLocation(label, x));
         });
 
-        List<WaypointLabelLocationDistance> xPositions = new ArrayList<>();
+        List<WaypointLabelLocation> xPositions = new ArrayList<>();
         int waypointAmount = xPositionsBuilder.size();
         for (int i = 0; i < waypointAmount; i++) {
             xPositions.add(xPositionsBuilder.poll());
         }
 
-        List<List<WaypointLabelLocationDistance>> positions = new ArrayList<>();
+        List<List<WaypointLabelLocation>> positions = new ArrayList<>();
         positions.add(xPositions);
 
         for (int line = 0; line < positions.size(); line++) {
-            List<WaypointLabelLocationDistance> waypointLabelLocationDistances = positions.get(line);
+            List<WaypointLabelLocation> waypointLabelLocations = positions.get(line);
             int i = 0;
-            while (i < waypointLabelLocationDistances.size() - 1) {
-                WaypointLabelLocationDistance left = waypointLabelLocationDistances.get(i);
-                WaypointLabelLocationDistance right = waypointLabelLocationDistances.get(i + 1);
+            while (i < waypointLabelLocations.size() - 1) {
+                WaypointLabelLocation left = waypointLabelLocations.get(i);
+                WaypointLabelLocation right = waypointLabelLocations.get(i + 1);
                 int leftX = left.location();
                 int rightX = right.location();
                 int leftWidth = minecraft.font.width(left.label());
@@ -335,9 +335,8 @@ public class WaypointCommand {
                     if (line + 1 == positions.size()) {
                         positions.add(new ArrayList<>());
                     }
-                    List<WaypointLabelLocationDistance> nextLevel = positions.get(line + 1);
-                    int idx = left.distance() > right.distance() ? i + 1 : i;
-                    WaypointLabelLocationDistance removed = waypointLabelLocationDistances.remove(idx);
+                    List<WaypointLabelLocation> nextLevel = positions.get(line + 1);
+                    WaypointLabelLocation removed = waypointLabelLocations.remove(i + 1);
                     nextLevel.add(removed);
                 } else {
                     i++;
@@ -346,8 +345,8 @@ public class WaypointCommand {
         }
 
         for (int line = 0; line < positions.size(); line++) {
-            List<WaypointLabelLocationDistance> w = positions.get(line);
-            for (WaypointLabelLocationDistance waypoint : w) {
+            List<WaypointLabelLocation> w = positions.get(line);
+            for (WaypointLabelLocation waypoint : w) {
                 guiGraphics.drawCenteredString(minecraft.font, waypoint.label(), waypoint.location(), 1 + line * minecraft.font.lineHeight, 0xFFFFFF);
             }
         }
@@ -394,6 +393,6 @@ public class WaypointCommand {
     record WaypointLocation(ResourceKey<Level> dimension, BlockPos location) {
     }
 
-    record WaypointLabelLocationDistance(String label, int location, long distance) {
+    record WaypointLabelLocation(String label, int location) {
     }
 }
