@@ -13,7 +13,6 @@ import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
@@ -32,6 +31,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -287,18 +287,10 @@ public class WaypointCommand {
                 return;
             }
 
-            long offset = Math.round(waypoint.getLeft().getY() - cameraEntity.position().y);
-            ChatFormatting colour;
-            String symbol;
-            if (offset >= 0) {
-                colour = ChatFormatting.GREEN;
-                symbol = "+";
-            } else {
-                colour = ChatFormatting.RED;
-                symbol = "-";
-            }
+            double distanceSquared = waypoint.getLeft().distToCenterSqr(cameraEntity.position());
+            long distance = Math.round(Math.sqrt(distanceSquared));
 
-            MutableComponent waypointComponent = Component.literal(waypointName).append(Component.literal(' ' + symbol + Math.abs(offset)).withStyle(colour));
+            MutableComponent waypointComponent = Component.literal(waypointName).append(CommonComponents.space()).append(Long.toString(distance));
 
             Vector2d waypointLocation = new Vector2d(waypoint.getLeft().getX(), waypoint.getLeft().getZ());
             double angleRad = viewVector.angle(waypointLocation.sub(position, new Vector2d()));
