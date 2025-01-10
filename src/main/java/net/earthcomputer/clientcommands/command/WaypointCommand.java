@@ -243,7 +243,7 @@ public class WaypointCommand {
         }
     }
 
-    private static void loadFile() throws IOException {
+    private static void loadFile() throws Exception {
         waypoints.clear();
         CompoundTag rootTag = NbtIo.read(ClientCommands.configDir.resolve("waypoints.dat"));
         if (rootTag == null) {
