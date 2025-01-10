@@ -31,9 +31,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -280,7 +278,7 @@ public class WaypointCommand {
         Vector2d viewVector = new Vector2d(viewVector3.x, viewVector3.z);
         Vector2d position = new Vector2d(cameraEntity.getEyePosition().x, cameraEntity.getEyePosition().z);
 
-        PriorityQueue<ComponentLocation> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(ComponentLocation::location));
+        PriorityQueue<WaypointLabelLocationDistance> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(WaypointLabelLocationDistance::location));
         waypoints.forEach((waypointName, waypoint) -> {
             if (!waypoint.dimension().location().equals(minecraft.level.dimension().location())) {
                 return;
@@ -288,8 +286,7 @@ public class WaypointCommand {
 
             double distanceSquared = waypoint.location().distToCenterSqr(cameraEntity.position());
             long distance = Math.round(Math.sqrt(distanceSquared));
-
-            MutableComponent waypointComponent = Component.literal(waypointName).append(CommonComponents.space()).append(Long.toString(distance));
+            String label = waypointName + ' ' + distance;
 
             Vector2d waypointLocation = new Vector2d(waypoint.location().getX(), waypoint.location().getZ());
             double angleRad = viewVector.angle(waypointLocation.sub(position, new Vector2d()));
@@ -298,7 +295,7 @@ public class WaypointCommand {
 
             int x;
             if (angleRad > horizontalFovRad / 2) {
-                int width = minecraft.font.width(waypointComponent);
+                int width = minecraft.font.width(label);
                 x = right ? guiGraphics.guiWidth() - width / 2 : width / 2;
             } else {
                 // V is the view vector
@@ -312,34 +309,35 @@ public class WaypointCommand {
                 double perc = am / ab;
                 x = (int) (perc * guiGraphics.guiWidth());
             }
-            xPositionsBuilder.offer(new ComponentLocation(waypointComponent, x));
+            xPositionsBuilder.offer(new WaypointLabelLocationDistance(label, x, distance));
         });
 
-        List<ComponentLocation> xPositions = new ArrayList<>();
+        List<WaypointLabelLocationDistance> xPositions = new ArrayList<>();
         int waypointAmount = xPositionsBuilder.size();
         for (int i = 0; i < waypointAmount; i++) {
             xPositions.add(xPositionsBuilder.poll());
         }
 
-        List<List<ComponentLocation>> positions = new ArrayList<>();
+        List<List<WaypointLabelLocationDistance>> positions = new ArrayList<>();
         positions.add(xPositions);
 
         for (int line = 0; line < positions.size(); line++) {
-            List<ComponentLocation> componentLocations = positions.get(line);
+            List<WaypointLabelLocationDistance> waypointLabelLocationDistances = positions.get(line);
             int i = 0;
-            while (i < componentLocations.size() - 1) {
-                ComponentLocation left = componentLocations.get(i);
-                ComponentLocation right = componentLocations.get(i + 1);
+            while (i < waypointLabelLocationDistances.size() - 1) {
+                WaypointLabelLocationDistance left = waypointLabelLocationDistances.get(i);
+                WaypointLabelLocationDistance right = waypointLabelLocationDistances.get(i + 1);
                 int leftX = left.location();
                 int rightX = right.location();
-                int leftWidth = minecraft.font.width(left.component());
-                int rightWidth = minecraft.font.width(right.component());
+                int leftWidth = minecraft.font.width(left.label());
+                int rightWidth = minecraft.font.width(right.label());
                 if (leftWidth / 2 + rightWidth / 2 > rightX - leftX) {
                     if (line + 1 == positions.size()) {
                         positions.add(new ArrayList<>());
                     }
-                    List<ComponentLocation> nextLevel = positions.get(line + 1);
-                    ComponentLocation removed = componentLocations.remove(i + 1);
+                    List<WaypointLabelLocationDistance> nextLevel = positions.get(line + 1);
+                    int idx = left.distance() > right.distance() ? i + 1 : i;
+                    WaypointLabelLocationDistance removed = waypointLabelLocationDistances.remove(idx);
                     nextLevel.add(removed);
                 } else {
                     i++;
@@ -348,9 +346,9 @@ public class WaypointCommand {
         }
 
         for (int line = 0; line < positions.size(); line++) {
-            List<ComponentLocation> w = positions.get(line);
-            for (ComponentLocation waypoint : w) {
-                guiGraphics.drawCenteredString(minecraft.font, waypoint.component(), waypoint.location(), 1 + line * minecraft.font.lineHeight, 0xFFFFFF);
+            List<WaypointLabelLocationDistance> w = positions.get(line);
+            for (WaypointLabelLocationDistance waypoint : w) {
+                guiGraphics.drawCenteredString(minecraft.font, waypoint.label(), waypoint.location(), 1 + line * minecraft.font.lineHeight, 0xFFFFFF);
             }
         }
     }
@@ -396,6 +394,6 @@ public class WaypointCommand {
     record WaypointLocation(ResourceKey<Level> dimension, BlockPos location) {
     }
 
-    record ComponentLocation(Component component, int location) {
+    record WaypointLabelLocationDistance(String label, int location, long distance) {
     }
 }
