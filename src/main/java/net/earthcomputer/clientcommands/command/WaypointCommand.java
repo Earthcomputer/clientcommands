@@ -13,6 +13,7 @@ import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
@@ -32,6 +33,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -286,7 +288,7 @@ public class WaypointCommand {
 
             double distanceSquared = waypoint.location().distToCenterSqr(cameraEntity.position());
             long distance = Math.round(Math.sqrt(distanceSquared));
-            String label = waypointName + ' ' + distance;
+            Component label = ComponentUtils.wrapInSquareBrackets(Component.literal(waypointName + ' ' + distance).withStyle(ChatFormatting.YELLOW));
 
             Vector2d waypointLocation = new Vector2d(waypoint.location().getX(), waypoint.location().getZ());
             double angleRad = viewVector.angle(waypointLocation.sub(position, new Vector2d()));
@@ -393,6 +395,6 @@ public class WaypointCommand {
     record WaypointLocation(ResourceKey<Level> dimension, BlockPos location) {
     }
 
-    record WaypointLabelLocation(String label, int location) {
+    record WaypointLabelLocation(Component label, int location) {
     }
 }
