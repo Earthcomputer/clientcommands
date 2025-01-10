@@ -32,8 +32,10 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -135,7 +137,7 @@ public class WaypointCommand {
         }
 
         saveFile();
-        source.sendFeedback(Component.translatable("commands.cwaypoint.add.success", name, pos.toShortString(), dimension.location()));
+        source.sendFeedback(Component.translatable("commands.cwaypoint.add.success", name, formatCoordinates(pos), dimension.location()));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -175,7 +177,7 @@ public class WaypointCommand {
         }
 
         saveFile();
-        source.sendFeedback(Component.translatable("commands.cwaypoint.edit.success", name, pos.toShortString(), dimension.location()));
+        source.sendFeedback(Component.translatable("commands.cwaypoint.edit.success", name, formatCoordinates(pos), dimension.location()));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -194,7 +196,9 @@ public class WaypointCommand {
                 return Command.SINGLE_SUCCESS;
             }
 
-            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, waypoint.location().toShortString(), waypoint.dimension().location())));
+
+
+            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, formatCoordinates(waypoint.location()), waypoint.dimension().location())));
             return Command.SINGLE_SUCCESS;
         }
 
@@ -209,7 +213,7 @@ public class WaypointCommand {
             }
 
             source.sendFeedback(Component.literal(worldIdentifier).append(":"));
-            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, waypoint.location().toShortString(), waypoint.dimension().location())));
+            worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, formatCoordinates(waypoint.location()), waypoint.dimension().location())));
         });
         return Command.SINGLE_SUCCESS;
     }
@@ -257,6 +261,14 @@ public class WaypointCommand {
                     return new WaypointLocation(dimension, pos);
                 })));
         });
+    }
+
+    private static Component formatCoordinates(BlockPos waypoint) {
+        return ComponentUtils.wrapInSquareBrackets(Component.literal(waypoint.toShortString())).withStyle(style -> style
+            .withColor(ChatFormatting.GREEN)
+            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, waypoint.getX() + " " + waypoint.getY() + " " + waypoint.getZ()))
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+        );
     }
 
     public static void renderWaypointLabels(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
