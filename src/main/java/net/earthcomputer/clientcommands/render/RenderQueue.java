@@ -113,7 +113,7 @@ public class RenderQueue {
 
     private record RemoveQueueEntry(Layer layer, Object key) {}
 
-    private static final RenderType NO_DEPTH_LAYER = RenderType.create("clientcommands_no_depth", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, true, true, RenderType.CompositeState.builder()
+    public static final RenderType NO_DEPTH_LAYER = RenderType.create("clientcommands_no_depth", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, true, true, RenderType.CompositeState.builder()
             .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
             .setWriteMaskState(RenderType.COLOR_WRITE)
             .setCullState(RenderType.NO_CULL)

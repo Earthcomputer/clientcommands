@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.command;
 
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,15 +10,21 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.ClientCommands;
+import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +37,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joml.Vector2d;
@@ -56,7 +64,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class WaypointCommand {
 
-    public static final Map<String, Map<String, Pair<BlockPos, ResourceKey<Level>>>> waypoints = new HashMap<>();
+    private static final Map<String, Map<String, Pair<BlockPos, ResourceKey<Level>>>> waypoints = new HashMap<>();
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -252,7 +260,7 @@ public class WaypointCommand {
         });
     }
 
-    public static void renderWaypoints(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    public static void renderWaypointLabels(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         String worldIdentifier = getWorldIdentifier(Minecraft.getInstance());
         Map<String, Pair<BlockPos, ResourceKey<Level>>> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
         if (waypoints == null) {
@@ -351,5 +359,43 @@ public class WaypointCommand {
         }
 
         positions.forEach((y, w) -> w.forEach(waypoint -> guiGraphics.drawCenteredString(minecraft.font, waypoint.getLeft(), waypoint.getRight(), y, 0xFFFFFF)));
+    }
+
+    public static void renderWaypointBoxes(WorldRenderContext context) {
+        String worldIdentifier = getWorldIdentifier(Minecraft.getInstance());
+        Map<String, Pair<BlockPos, ResourceKey<Level>>> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
+        if (waypoints == null) {
+            return;
+        }
+
+        ClientChunkCache chunkSource = context.world().getChunkSource();
+        waypoints.forEach((waypointName, waypoint) -> {
+            BlockPos waypointLocation = waypoint.getLeft();
+            if (!chunkSource.hasChunk(waypointLocation.getX() >> 4, waypointLocation.getZ() >> 4)) {
+                return;
+            }
+
+            Vec3 cameraPosition = context.camera().getPosition();
+            float distance = (float) waypointLocation.distToCenterSqr(cameraPosition);
+            distance = (float) Math.sqrt(distance) / 4;
+
+            PoseStack stack = context.matrixStack();
+            stack.pushPose();
+            stack.translate(cameraPosition.scale(-1));
+
+            AABB box = new AABB(waypointLocation);
+            ShapeRenderer.renderLineBox(stack, context.consumers().getBuffer(RenderQueue.NO_DEPTH_LAYER), box, 1, 1, 1, 1);
+
+            stack.translate(waypointLocation.getCenter().add(new Vec3(0, 1, 0)));
+            stack.mulPose(context.camera().rotation());
+            stack.scale(0.025f * distance, -0.025f * distance, 0.025f * distance);
+
+            Font font = Minecraft.getInstance().font;
+            int width = font.width(waypointName) / 2;
+            int backgroundColour = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25f) * 255.0f) << 24;
+            font.drawInBatch(waypointName, -width, 0, 0xFFFFFF, false, stack.last().pose(), context.consumers(), Font.DisplayMode.SEE_THROUGH, backgroundColour, LightTexture.FULL_SKY);
+
+            stack.popPose();
+        });
     }
 }
