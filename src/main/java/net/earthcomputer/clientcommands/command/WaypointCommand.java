@@ -377,7 +377,7 @@ public class WaypointCommand {
 
             Vec3 cameraPosition = context.camera().getPosition();
             float distance = (float) waypointLocation.distToCenterSqr(cameraPosition);
-            distance = (float) Math.sqrt(distance) / 4;
+            distance = (float) Math.sqrt(distance) / 6;
 
             PoseStack stack = context.matrixStack();
             stack.pushPose();
