@@ -321,15 +321,11 @@ public class WaypointCommand {
             xPositions.add(xPositionsBuilder.poll());
         }
 
-        int yOffset = 1;
-        Map<Integer, List<ComponentLocation>> positions = new HashMap<>();
-        positions.put(yOffset, xPositions);
+        List<List<ComponentLocation>> positions = new ArrayList<>();
+        positions.add(xPositions);
 
-        while (true) {
-            List<ComponentLocation> componentLocations = positions.get(yOffset);
-            if (componentLocations == null) {
-                break;
-            }
+        for (int line = 0; line < positions.size(); line++) {
+            List<ComponentLocation> componentLocations = positions.get(line);
             int i = 0;
             while (i < componentLocations.size() - 1) {
                 ComponentLocation left = componentLocations.get(i);
@@ -339,17 +335,24 @@ public class WaypointCommand {
                 int leftWidth = minecraft.font.width(left.component());
                 int rightWidth = minecraft.font.width(right.component());
                 if (leftWidth / 2 + rightWidth / 2 > rightX - leftX) {
-                    List<ComponentLocation> nextLevel = positions.computeIfAbsent(yOffset + minecraft.font.lineHeight, k -> new ArrayList<>());
+                    if (line + 1 == positions.size()) {
+                        positions.add(new ArrayList<>());
+                    }
+                    List<ComponentLocation> nextLevel = positions.get(line + 1);
                     ComponentLocation removed = componentLocations.remove(i + 1);
                     nextLevel.add(removed);
                 } else {
                     i++;
                 }
             }
-            yOffset += minecraft.font.lineHeight;
         }
 
-        positions.forEach((y, w) -> w.forEach(waypoint -> guiGraphics.drawCenteredString(minecraft.font, waypoint.component(), waypoint.location(), y, 0xFFFFFF)));
+        for (int line = 0; line < positions.size(); line++) {
+            List<ComponentLocation> w = positions.get(line);
+            for (ComponentLocation waypoint : w) {
+                guiGraphics.drawCenteredString(minecraft.font, waypoint.component(), waypoint.location(), 1 + line * minecraft.font.lineHeight, 0xFFFFFF);
+            }
+        }
     }
 
     public static void renderWaypointBoxes(WorldRenderContext context) {
