@@ -304,7 +304,7 @@ public class WaypointCommand {
                 // V is the view vector
                 // A is the leftmost visible direction
                 // B is the rightmost visible direction
-                // M is the intersection of the waypoint ray with AB
+                // M is the intersection of the position -> waypoint line with AB
                 double mv = Math.tan(angleRad) * GameRenderer.PROJECTION_Z_NEAR;
                 double av = Math.tan(horizontalFovRad / 2) * GameRenderer.PROJECTION_Z_NEAR;
                 double ab = 2 * av;
