@@ -1,4 +1,9 @@
 {
+  "c2cpacket.encryptionFailed": "Er ging iets mis tijdens het versleutelen van je bericht",
+  "c2cpacket.malformedPacket": "Je hebt een verkeerd C2C-pakket ontvangen:",
+  "c2cpacket.messageC2CPacket.incoming": "%s -> jij: %s",
+  "c2cpacket.messageC2CPacket.outgoing": "Jij -> %s: %s",
+
   "chorusManip.goalTooFar": "Doel is te ver weg!",
   "chorusManip.landing.failed": "Landingsmanipulatie niet mogelijk",
   "chorusManip.landing.success": "Landen op: %s, %s, %s",
