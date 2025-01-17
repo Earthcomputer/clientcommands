@@ -53,7 +53,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -292,7 +291,7 @@ public class WaypointCommand {
         Vector2d viewVector = new Vector2d(viewVector3.x, viewVector3.z);
         Vector2d position = new Vector2d(cameraEntity.getEyePosition().x, cameraEntity.getEyePosition().z);
 
-        PriorityQueue<WaypointLabelLocation> xPositionsBuilder = new PriorityQueue<>(Comparator.comparingInt(WaypointLabelLocation::location));
+        List<WaypointLabelLocation> xPositions = new ArrayList<>();
         waypoints.forEach((waypointName, waypoint) -> {
             if (!waypoint.dimension().location().equals(minecraft.level.dimension().location())) {
                 return;
@@ -323,14 +322,10 @@ public class WaypointCommand {
                 double perc = am / ab;
                 x = (int) (perc * guiGraphics.guiWidth());
             }
-            xPositionsBuilder.offer(new WaypointLabelLocation(label, x));
+            xPositions.add(new WaypointLabelLocation(label, x));
         });
 
-        List<WaypointLabelLocation> xPositions = new ArrayList<>();
-        int waypointAmount = xPositionsBuilder.size();
-        for (int i = 0; i < waypointAmount; i++) {
-            xPositions.add(xPositionsBuilder.poll());
-        }
+        xPositions.sort(Comparator.comparingInt(WaypointLabelLocation::location));
 
         List<List<WaypointLabelLocation>> positions = new ArrayList<>();
         positions.add(xPositions);
