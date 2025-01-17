@@ -12,7 +12,9 @@ import com.mojang.serialization.Dynamic;
 import net.earthcomputer.clientcommands.ClientCommands;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -271,7 +273,12 @@ public class WaypointCommand {
         );
     }
 
-    public static void renderWaypointLabels(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    public static void registerEvents() {
+        HudRenderCallback.EVENT.register(WaypointCommand::renderWaypointLabels);
+        WorldRenderEvents.AFTER_ENTITIES.register(WaypointCommand::renderWaypointBoxes);
+    }
+
+    private static void renderWaypointLabels(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         String worldIdentifier = getWorldIdentifier(Minecraft.getInstance());
         Map<String, WaypointLocation> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
         if (waypoints == null) {
@@ -362,7 +369,7 @@ public class WaypointCommand {
         }
     }
 
-    public static void renderWaypointBoxes(WorldRenderContext context) {
+    private static void renderWaypointBoxes(WorldRenderContext context) {
         String worldIdentifier = getWorldIdentifier(Minecraft.getInstance());
         Map<String, WaypointLocation> waypoints = WaypointCommand.waypoints.get(worldIdentifier);
         if (waypoints == null) {

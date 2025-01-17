@@ -19,8 +19,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
@@ -93,8 +91,7 @@ public class ClientCommands implements ClientModInitializer {
         FishingCracker.registerEvents();
         PlayerRandCracker.registerEvents();
         ServerBrandManager.registerEvents();
-        HudRenderCallback.EVENT.register(WaypointCommand::renderWaypointLabels);
-        WorldRenderEvents.AFTER_ENTITIES.register(WaypointCommand::renderWaypointBoxes);
+        WaypointCommand.registerEvents();
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {
