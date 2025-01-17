@@ -21,7 +21,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import org.slf4j.Logger;
@@ -37,25 +36,11 @@ import java.util.stream.Stream;
 
 public class ClientCommands implements ClientModInitializer {
     private static final Logger LOGGER = LogUtils.getLogger();
-    public static Path configDir;
+    public static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
     private static final Set<String> clientcommandsCommands = new HashSet<>();
     private static final Set<String> COMMANDS_TO_NOT_SEND_TO_SERVER = Set.of("cwe", "cnote"); // could contain private information
 
-    public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
-        String playerUUID = String.valueOf(Minecraft.getInstance().getUser().getProfileId());
-
-        Set<String> victims = Set.of(
-            "fa68270b-1071-46c6-ac5c-6c4a0b777a96", // Earthcomputer
-            "d4557649-e553-413e-a019-56d14548df96", // Azteched
-            "8dc3d945-cf90-47c1-a122-a576319d05a7", // samnrad
-            "c5d72740-cabc-42d1-b789-27859041d553", // allocator
-            "e4093360-a200-4f99-aa13-be420b8d9a79", // Rybot666
-            "083fb87e-c9e4-4489-8fb7-a45b06bfca90", // Kerbaras
-            "973e8f6e-2f51-4307-97dc-56fdc71d194f" // KatieTheQt
-        );
-
-        return victims.contains(playerUUID) || Boolean.getBoolean("clientcommands.scrambleWindowTitle");
-    });
+    public static boolean scrambleWindowTitle = false;
 
     private static final Set<String> CHAT_COMMAND_USERS = Set.of(
         "b793c3b9-425f-4dd8-a056-9dec4d835e24", // wsb
@@ -65,10 +50,11 @@ public class ClientCommands implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        setupScrambleWindowTitle();
+
         // Config
-        configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
         try {
-            Files.createDirectories(configDir);
+            Files.createDirectories(CONFIG_DIR);
         } catch (IOException e) {
             LOGGER.error("Failed to create config dir", e);
         }
@@ -92,6 +78,23 @@ public class ClientCommands implements ClientModInitializer {
         PlayerRandCracker.registerEvents();
         ServerBrandManager.registerEvents();
         WaypointCommand.registerEvents();
+    }
+
+    private static void setupScrambleWindowTitle() {
+        // can't set this up during class initializer, because Minecraft.getInstance() is null during automated tests
+        String playerUUID = String.valueOf(Minecraft.getInstance().getUser().getProfileId());
+
+        Set<String> victims = Set.of(
+            "fa68270b-1071-46c6-ac5c-6c4a0b777a96", // Earthcomputer
+            "d4557649-e553-413e-a019-56d14548df96", // Azteched
+            "8dc3d945-cf90-47c1-a122-a576319d05a7", // samnrad
+            "c5d72740-cabc-42d1-b789-27859041d553", // allocator
+            "e4093360-a200-4f99-aa13-be420b8d9a79", // Rybot666
+            "083fb87e-c9e4-4489-8fb7-a45b06bfca90", // Kerbaras
+            "973e8f6e-2f51-4307-97dc-56fdc71d194f" // KatieTheQt
+        );
+
+        scrambleWindowTitle = victims.contains(playerUUID) || Boolean.getBoolean("clientcommands.scrambleWindowTitle");
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {

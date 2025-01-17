@@ -43,6 +43,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.joml.Vector2d;
 import org.slf4j.Logger;
 
@@ -235,10 +236,10 @@ public class WaypointCommand {
                     result.put(entry.getKey(), waypoint);
                 }, CompoundTag::merge)));
             rootTag.put("Waypoints", compoundTag);
-            Path newFile = Files.createTempFile(ClientCommands.configDir, "waypoints", ".dat");
+            Path newFile = Files.createTempFile(ClientCommands.CONFIG_DIR, "waypoints", ".dat");
             NbtIo.write(rootTag, newFile);
-            Path backupFile = ClientCommands.configDir.resolve("waypoints.dat_old");
-            Path currentFile = ClientCommands.configDir.resolve("waypoints.dat");
+            Path backupFile = ClientCommands.CONFIG_DIR.resolve("waypoints.dat_old");
+            Path currentFile = ClientCommands.CONFIG_DIR.resolve("waypoints.dat");
             Util.safeReplaceFile(currentFile, newFile, backupFile);
         } catch (IOException e) {
             throw SAVE_FAILED_EXCEPTION.create();
@@ -247,11 +248,17 @@ public class WaypointCommand {
 
     private static void loadFile() throws Exception {
         waypoints.clear();
-        CompoundTag rootTag = NbtIo.read(ClientCommands.configDir.resolve("waypoints.dat"));
+        CompoundTag rootTag = NbtIo.read(ClientCommands.CONFIG_DIR.resolve("waypoints.dat"));
         if (rootTag == null) {
             return;
         }
-        // TODO: update-sensitive: apply custom data fixes when it becomes necessary
+        waypoints.putAll(deserializeWaypoints(rootTag));
+    }
+
+    @VisibleForTesting
+    public static Map<String, Map<String, WaypointLocation>> deserializeWaypoints(CompoundTag rootTag) {
+        Map<String, Map<String, WaypointLocation>> waypoints = new HashMap<>();
+
         CompoundTag compoundTag = rootTag.getCompound("Waypoints");
         compoundTag.getAllKeys().forEach(worldIdentifier -> {
             CompoundTag worldWaypoints = compoundTag.getCompound(worldIdentifier);
@@ -263,6 +270,8 @@ public class WaypointCommand {
                     return new WaypointLocation(dimension, pos);
                 })));
         });
+
+        return waypoints;
     }
 
     private static Component formatCoordinates(BlockPos waypoint) {
@@ -411,7 +420,8 @@ public class WaypointCommand {
         });
     }
 
-    record WaypointLocation(ResourceKey<Level> dimension, BlockPos location) {
+    @VisibleForTesting
+    public record WaypointLocation(ResourceKey<Level> dimension, BlockPos location) {
     }
 
     record WaypointLabelLocation(Component label, int location) {
