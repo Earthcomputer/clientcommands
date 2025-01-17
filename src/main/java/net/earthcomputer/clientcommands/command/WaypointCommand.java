@@ -53,6 +53,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -192,29 +193,30 @@ public class WaypointCommand {
 
             if (worldWaypoints == null || worldWaypoints.isEmpty()) {
                 source.sendFeedback(Component.translatable("commands.cwaypoint.list.empty"));
-                return Command.SINGLE_SUCCESS;
+                return 0;
             }
 
-
-
             worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, formatCoordinates(waypoint.location()), waypoint.dimension().location())));
-            return Command.SINGLE_SUCCESS;
+            return worldWaypoints.size();
         }
 
         if (waypoints.isEmpty()) {
             source.sendFeedback(Component.translatable("commands.cwaypoint.list.empty"));
-            return Command.SINGLE_SUCCESS;
+            return 0;
         }
 
+        AtomicInteger count = new AtomicInteger();
         waypoints.forEach((worldIdentifier, worldWaypoints) -> {
             if (worldWaypoints.isEmpty()) {
                 return;
             }
 
+            count.addAndGet(worldWaypoints.size());
+
             source.sendFeedback(Component.literal(worldIdentifier).append(":"));
             worldWaypoints.forEach((name, waypoint) -> source.sendFeedback(Component.translatable("commands.cwaypoint.list", name, formatCoordinates(waypoint.location()), waypoint.dimension().location())));
         });
-        return Command.SINGLE_SUCCESS;
+        return count.get();
     }
 
     private static void saveFile() throws CommandSyntaxException {
