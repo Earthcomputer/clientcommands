@@ -11,10 +11,10 @@ import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.earthcomputer.clientcommands.features.CommandExecutionCustomPayload;
 import net.earthcomputer.clientcommands.features.FishingCracker;
-import net.earthcomputer.clientcommands.features.ServerBrandManager;
-import net.earthcomputer.clientcommands.util.MappingsHelper;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
+import net.earthcomputer.clientcommands.features.ServerBrandManager;
+import net.earthcomputer.clientcommands.util.MappingsHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -74,6 +74,7 @@ public class ClientCommands implements ClientModInitializer {
 
         // Events
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
+        CTickCommand.registerEvents();
         FishingCracker.registerEvents();
         PlayerRandCracker.registerEvents();
         ServerBrandManager.registerEvents();
@@ -139,6 +140,7 @@ public class ClientCommands implements ClientModInitializer {
         CStopSoundCommand.register(dispatcher);
         CTeleportCommand.register(dispatcher);
         CTellRawCommand.register(dispatcher, context);
+        CTickCommand.register(dispatcher);
         CTimeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher, context);
         FindBlockCommand.register(dispatcher, context);

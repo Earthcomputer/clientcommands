@@ -249,6 +249,16 @@
   "commands.ctask.stop.noMatch": "No matching tasks",
   "commands.ctask.stop.success": "Stopped %s tasks",
 
+  "commands.ctick.client.mspt.expectedMspt": "The expected client MSPT is %s",
+  "commands.ctick.client.tps.expectedTps": "The expected client TPS is %s",
+  "commands.ctick.measuring": "Measuring...",
+  "commands.ctick.mspt": "Milliseconds per tick = %s",
+  "commands.ctick.mspt.inaccurate": "MSPT is inaccurate above 20TPS",
+  "commands.ctick.server.mspt.expectedMspt": "The expected server MSPT is %s",
+  "commands.ctick.server.tps.expectedTps": "The expected server TPS is %s",
+  "commands.ctick.tps": "Ticks per second = %s",
+  "commands.ctick.tps.immeasurable": "Immeasurable",
+
   "commands.ctictactoe.name": "Tic-tac-toe",
 
   "commands.ctime.reset.success": "The time now matches the server",
