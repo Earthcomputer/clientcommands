@@ -28,17 +28,17 @@ public class CTickCommand {
         dispatcher.register(literal("ctick")
             .then(literal("client")
                 .then(literal("tps")
-                    .executes(ctx -> getTpsClient(ctx.getSource())))
+                    .executes(ctx -> getClientTps(ctx.getSource())))
                 .then(literal("mspt")
-                    .executes(ctx -> getMsptClient(ctx.getSource()))))
+                    .executes(ctx -> getClientMspt(ctx.getSource()))))
             .then(literal("server")
                 .then(literal("tps")
-                    .executes(ctx -> getTpsServer(ctx.getSource())))
+                    .executes(ctx -> getServerTps(ctx.getSource())))
                 .then(literal("mspt")
-                    .executes(ctx -> getMsptServer(ctx.getSource())))));
+                    .executes(ctx -> getServerMspt(ctx.getSource())))));
     }
 
-    private static int getTpsClient(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int getClientTps(FabricClientCommandSource source) throws CommandSyntaxException {
         stopPreviousTask();
 
         TickMeasuringTask measurer = new TickMeasuringTask(true, false);
@@ -50,7 +50,7 @@ public class CTickCommand {
         return (int) tps;
     }
 
-    private static int getMsptClient(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int getClientMspt(FabricClientCommandSource source) throws CommandSyntaxException {
         stopPreviousTask();
 
         TickMeasuringTask measurer = new TickMeasuringTask(false, false);
@@ -62,7 +62,7 @@ public class CTickCommand {
         return (int) mspt;
     }
 
-    private static int getTpsServer(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int getServerTps(FabricClientCommandSource source) throws CommandSyntaxException {
         stopPreviousTask();
 
         boolean isIntegratedServer = source.getClient().hasSingleplayerServer();
@@ -75,7 +75,7 @@ public class CTickCommand {
         return (int) tps;
     }
 
-    private static int getMsptServer(FabricClientCommandSource source) throws CommandSyntaxException {
+    private static int getServerMspt(FabricClientCommandSource source) throws CommandSyntaxException {
         stopPreviousTask();
 
         boolean isIntegratedServer = source.getClient().hasSingleplayerServer();
