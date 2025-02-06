@@ -161,7 +161,7 @@ public class CTickCommand {
                 long totalTime = lastTickStart - firstTickStart;
                 double mspt = totalTime / (1_000_000D * tickCount);
                 ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.mspt", DEC_FMT.format(mspt)));
-                ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.mspt.inaccurate"));
+                ClientCommandHelper.sendHelp(Component.translatable("commands.ctick.mspt.inaccurate"));
             } else {
                 double mspt = totalTickTime / (1_000_000D * tickCount);
                 ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.mspt", DEC_FMT.format(mspt)));
