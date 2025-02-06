@@ -22,7 +22,7 @@ public class CTickCommand {
 
     private static final String TASK_NAME = "ctick";
 
-    private static TickMeasuringTask currentMeasurer = null;
+    private static CurrentTask currentTask = null;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("ctick")
@@ -42,8 +42,8 @@ public class CTickCommand {
         stopPreviousTask();
 
         TickMeasuringTask measurer = new TickMeasuringTask(true, false);
-        TaskManager.addTask(TASK_NAME, measurer);
-        currentMeasurer = measurer;
+        String name = TaskManager.addTask(TASK_NAME, measurer);
+        currentTask = new CurrentTask(name, measurer);
 
         float tps = source.getWorld().tickRateManager().tickrate();
         source.sendFeedback(Component.translatable("commands.ctick.client.tps.expectedTps", tps));
@@ -54,8 +54,8 @@ public class CTickCommand {
         stopPreviousTask();
 
         TickMeasuringTask measurer = new TickMeasuringTask(false, false);
-        TaskManager.addTask(TASK_NAME, measurer);
-        currentMeasurer = measurer;
+        String name = TaskManager.addTask(TASK_NAME, measurer);
+        currentTask = new CurrentTask(name, measurer);
 
         float mspt = TimeUtil.MILLISECONDS_PER_SECOND / source.getWorld().tickRateManager().tickrate();
         source.sendFeedback(Component.translatable("commands.ctick.client.mspt.expectedMspt", mspt));
@@ -67,8 +67,8 @@ public class CTickCommand {
 
         boolean isIntegratedServer = source.getClient().hasSingleplayerServer();
         TickMeasuringTask measurer = new TickMeasuringTask(true, !isIntegratedServer);
-        TaskManager.addTask(TASK_NAME, measurer);
-        currentMeasurer = measurer;
+        String name = TaskManager.addTask(TASK_NAME, measurer);
+        currentTask = new CurrentTask(name, measurer);
 
         float tps = source.getWorld().tickRateManager().tickrate();
         source.sendFeedback(Component.translatable("commands.ctick.server.tps.expectedTps", tps));
@@ -80,8 +80,8 @@ public class CTickCommand {
 
         boolean isIntegratedServer = source.getClient().hasSingleplayerServer();
         TickMeasuringTask measurer = new TickMeasuringTask(false, !isIntegratedServer);
-        TaskManager.addTask(TASK_NAME, measurer);
-        currentMeasurer = measurer;
+        String name = TaskManager.addTask(TASK_NAME, measurer);
+        currentTask = new CurrentTask(name, measurer);
 
         float mspt = TimeUtil.MILLISECONDS_PER_SECOND / source.getWorld().tickRateManager().tickrate();
         source.sendFeedback(Component.translatable("commands.ctick.server.mspt.expectedMspt", mspt));
@@ -89,10 +89,9 @@ public class CTickCommand {
     }
 
     private static void stopPreviousTask() {
-        if (currentMeasurer != null) {
-            currentMeasurer._break();
-            TaskManager.removeTask(TASK_NAME);
-            currentMeasurer = null;
+        if (currentTask != null) {
+            TaskManager.removeTask(currentTask.name);
+            currentTask = null;
         }
     }
 
@@ -180,14 +179,14 @@ public class CTickCommand {
 
     public static void registerEvents() {
         ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
-            if (currentMeasurer != null && !currentMeasurer.isCompleted() && !currentMeasurer.forceInaccurate) {
-                currentMeasurer.startTick();
+            if (currentTask != null && !currentTask.measurer.isCompleted() && !currentTask.measurer.forceInaccurate) {
+                currentTask.measurer.startTick();
             }
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
-            if (currentMeasurer != null && !currentMeasurer.isCompleted() && !currentMeasurer.forceInaccurate) {
-                currentMeasurer.endTick();
+            if (currentTask != null && !currentTask.measurer.isCompleted() && !currentTask.measurer.forceInaccurate) {
+                currentTask.measurer.endTick();
             }
         });
 
@@ -196,15 +195,18 @@ public class CTickCommand {
 
             @Override
             public void onTimeSync(ClientboundSetTimePacket packet) {
-                if (currentMeasurer != null && !currentMeasurer.isCompleted() && currentMeasurer.forceInaccurate) {
+                if (currentTask != null && !currentTask.measurer.isCompleted() && currentTask.measurer.forceInaccurate) {
                     long tick = packet.gameTime();
                     if (lastTick != -1) {
                         int deltaTick = (int) (tick - lastTick);
-                        currentMeasurer.incrTickCount(deltaTick);
+                        currentTask.measurer.incrTickCount(deltaTick);
                     }
                     lastTick = tick;
                 }
             }
         });
+    }
+
+    private record CurrentTask(String name, TickMeasuringTask measurer) {
     }
 }
