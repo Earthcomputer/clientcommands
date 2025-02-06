@@ -140,7 +140,11 @@
   "commands.client.expectedRegex": "Nieprawidłowe wyrażenie regularne %s",
   "commands.client.glow": "[Podświetl]",
   "commands.client.invalidArgumentException": "Nieprawidłowy argument '%s'",
+  "commands.client.invalidClickAction": "Nieprawidłowe akcja clicknięcia '%s'",
+  "commands.client.invalidHoverAction": "Nieprawidłowa akcja przesunięcia '%s'",
+  "commands.client.invalidHoverEvent": "Nieprawidłowy ewent przesunięcia '%s'",
   "commands.client.notClient": "To nie jest polecenie klienta",
+  "commands.client.requiresRestart": "Ta zmiana, zacznie działaś po ponownym uruchomieniu clienta gry",
   "commands.client.tooFewArguments": "Zbyt mało argumentów",
 
   "commands.cparticle.success": "Pokazuję cząsteczkę %s",
