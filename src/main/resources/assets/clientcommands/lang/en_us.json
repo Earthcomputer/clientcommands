@@ -253,7 +253,7 @@
   "commands.ctick.client.tps.expectedTps": "The expected client TPS is %s",
   "commands.ctick.measuring": "Measuring...",
   "commands.ctick.mspt": "Milliseconds per tick = %s",
-  "commands.ctick.mspt.inaccurate": "MSPT is inaccurate above 20TPS",
+  "commands.ctick.mspt.inaccurate": "MSPT is inaccurate when the server isn't lagging",
   "commands.ctick.server.mspt.expectedMspt": "The expected server MSPT is %s",
   "commands.ctick.server.tps.expectedTps": "The expected server TPS is %s",
   "commands.ctick.tps": "Ticks per second = %s",
