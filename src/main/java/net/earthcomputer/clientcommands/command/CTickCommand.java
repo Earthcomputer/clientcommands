@@ -94,7 +94,6 @@ public class CTickCommand {
         }
     }
 
-    // see https://github.com/Earthcomputer/clientcommands/blob/c1e37665739f0e1d6aeb826b9d4e45b7adb5d876/src/main/java/net/earthcomputer/clientcommands/command/CommandTick.java#L175-L255
     private static class TickMeasuringTask extends SimpleTask {
 
         private static final int PERIOD = 100;
