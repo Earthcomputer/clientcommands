@@ -7,7 +7,6 @@ import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.util.TimeUtil;
@@ -100,8 +99,6 @@ public class CTickCommand {
 
         private static final int PERIOD = 100;
 
-        private static final Minecraft minecraft = Minecraft.getInstance();
-
         private int tickCount = 0;
         private long totalTickTime = 0;
         private long startTickTime;
@@ -151,7 +148,7 @@ public class CTickCommand {
 
         @Override
         public void initialize() {
-            minecraft.player.displayClientMessage(Component.translatable("commands.ctick.measuring"), false);
+            ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.measuring"));
         }
 
         @Override
@@ -159,15 +156,15 @@ public class CTickCommand {
             if (tps) {
                 long totalTime = lastTickStart - firstTickStart;
                 double tps = 1_000_000_000D * tickCount / totalTime;
-                minecraft.player.displayClientMessage(Component.translatable("commands.ctick.tps", totalTime == 0 ? Component.translatable("commands.ctick.tps.immeasurable") : DEC_FMT.format(tps)), false);
+                ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.tps", totalTime == 0 ? Component.translatable("commands.ctick.tps.immeasurable") : DEC_FMT.format(tps)));
             } else if (forceInaccurate) {
                 long totalTime = lastTickStart - firstTickStart;
                 double mspt = totalTime / (1_000_000D * tickCount);
-                minecraft.player.displayClientMessage(Component.translatable("commands.ctick.mspt", DEC_FMT.format(mspt)), false);
-                minecraft.player.displayClientMessage(Component.translatable("commands.ctick.mspt.inaccurate"), false);
+                ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.mspt", DEC_FMT.format(mspt)));
+                ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.mspt.inaccurate"));
             } else {
                 double mspt = totalTickTime / (1_000_000D * tickCount);
-                minecraft.player.displayClientMessage(Component.translatable("commands.ctick.mspt", DEC_FMT.format(mspt)), false);
+                ClientCommandHelper.sendFeedback(Component.translatable("commands.ctick.mspt", DEC_FMT.format(mspt)));
             }
         }
 
