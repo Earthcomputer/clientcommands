@@ -51,7 +51,7 @@ abstract class GenerateBuildInfoTask : DefaultTask() {
         val outputBytes = ByteArrayOutputStream()
         this.execOperations.exec {
             standardOutput = outputBytes
-            commandLine(args)
+            commandLine(*args)
         }.rethrowFailure()
         return outputBytes.toString(StandardCharsets.UTF_8).trim()
     }
