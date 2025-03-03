@@ -103,7 +103,7 @@ jar {
 }
 
 tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
-	outputFile = new File(temporaryDir, "build_info.json");
+	outputFile = new File(temporaryDir, "build_info.json")
 }
 
 processResources {
