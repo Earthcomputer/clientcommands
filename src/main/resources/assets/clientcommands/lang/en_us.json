@@ -40,6 +40,8 @@
   "commands.cbook.commandException": "You are not holding a book",
   "commands.cbook.success": "Successfully edited book",
 
+  "commands.cbuildinfo.success": "Running clientcommands on version %s (%s@{%s})",
+
   "commands.ccalc.expected": "Expected %s",
   "commands.ccalc.invalidArgumentCount": "Function \"%s\" cannot take %s arguments",
   "commands.ccalc.parse": "Parsed expression: %s",
