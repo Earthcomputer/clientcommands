@@ -31,7 +31,7 @@ public final class WaypointLoadingTest {
     }
 
     @Test
-    public void testWaypointLoadingWithoutVisibleAndColourKey() {
+    public void testWaypointLoadingWithoutVisibleAndColorKey() {
         CompoundTag waypointTag = parseSnbt("""
             {
                 DataVersion: 4189,
@@ -56,7 +56,7 @@ public final class WaypointLoadingTest {
         assertEquals(new BlockPos(1, 2, 3), waypoint.location());
         assertEquals(Level.OVERWORLD, waypoint.dimension());
         assertTrue(waypoint.visible());
-        assertEquals(ChatFormatting.WHITE.getColor(), waypoint.colour());
+        assertEquals(ChatFormatting.WHITE.getColor(), waypoint.color());
     }
 
     @Test
@@ -70,7 +70,7 @@ public final class WaypointLoadingTest {
                            pos: [I; 1, 2, 3],
                            Dimension: "minecraft:overworld",
                            Visible: true,
-                           Colour: 16733525
+                           Color: 16733525
                         }
                     }
                 }
@@ -87,6 +87,6 @@ public final class WaypointLoadingTest {
         assertEquals(new BlockPos(1, 2, 3), waypoint.location());
         assertEquals(Level.OVERWORLD, waypoint.dimension());
         assertTrue(waypoint.visible());
-        assertEquals(ChatFormatting.RED.getColor(), waypoint.colour());
+        assertEquals(ChatFormatting.RED.getColor(), waypoint.color());
     }
 }

@@ -82,7 +82,7 @@ public class WaypointCommand {
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(name -> Component.translatable("commands.cwaypoint.notFound", name));
     private static final DynamicCommandExceptionType ALREADY_VISIBLE_EXCEPTION = new DynamicCommandExceptionType(name -> Component.translatable("commands.cwaypoint.alreadyVisible", name));
     private static final DynamicCommandExceptionType ALREADY_HIDDEN_EXCEPTION = new DynamicCommandExceptionType(name -> Component.translatable("commands.cwaypoint.alreadyHidden", name));
-    private static final DynamicCommandExceptionType INVALID_COLOR_EXCEPTION = new DynamicCommandExceptionType(color -> Component.translatableEscape("commands.cwaypoint.invalidColour", color));
+    private static final DynamicCommandExceptionType INVALID_COLOR_EXCEPTION = new DynamicCommandExceptionType(color -> Component.translatableEscape("commands.cwaypoint.invalidColor", color));
 
     static {
         try {
@@ -100,8 +100,8 @@ public class WaypointCommand {
                         .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos")))
                         .then(argument("dimension", dimension())
                             .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension")))
-                            .then(argument("colour", color())
-                                .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension"), getColor(ctx, "colour"))))))))
+                            .then(argument("color", color())
+                                .executes(ctx -> add(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension"), getColor(ctx, "color"))))))))
             .then(literal("remove")
                 .then(argument("name", word())
                     .suggests((ctx, builder) -> {
@@ -133,8 +133,8 @@ public class WaypointCommand {
                         .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos")))
                         .then(argument("dimension", dimension())
                             .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension")))
-                            .then(argument("colour", color())
-                                .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension"), getColor(ctx, "colour"))))))))
+                            .then(argument("color", color())
+                                .executes(ctx -> edit(ctx.getSource(), getString(ctx, "name"), getBlockPos(ctx, "pos"), getDimension(ctx, "dimension"), getColor(ctx, "color"))))))))
             .then(literal("list")
                 .executes(ctx -> list(ctx.getSource()))
                 .then(argument("current", bool())
@@ -169,19 +169,19 @@ public class WaypointCommand {
         return add(source, name, pos, dimension, ChatFormatting.WHITE);
     }
 
-    private static int add(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension, ChatFormatting colour) throws CommandSyntaxException {
-        if (colour == ChatFormatting.RESET) {
-            throw INVALID_COLOR_EXCEPTION.create(colour.getName());
+    private static int add(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension, ChatFormatting color) throws CommandSyntaxException {
+        if (color == ChatFormatting.RESET) {
+            throw INVALID_COLOR_EXCEPTION.create(color.getName());
         }
         String worldIdentifier = getWorldIdentifier(source.getClient());
         Map<String, WaypointLocation> worldWaypoints = waypoints.computeIfAbsent(worldIdentifier, key -> new HashMap<>());
         //noinspection DataFlowIssue
-        if (worldWaypoints.putIfAbsent(name, new WaypointLocation(dimension, pos, true, colour.getColor())) != null) {
+        if (worldWaypoints.putIfAbsent(name, new WaypointLocation(dimension, pos, true, color.getColor())) != null) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
 
         saveFile();
-        source.sendFeedback(Component.translatable("commands.cwaypoint.add.success", name, formatCoordinates(pos), dimension.location(), colour.getName()));
+        source.sendFeedback(Component.translatable("commands.cwaypoint.add.success", name, formatCoordinates(pos), dimension.location(), color.getName()));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -217,7 +217,7 @@ public class WaypointCommand {
         } else if (!waypoint.visible() && !visible) {
             throw ALREADY_HIDDEN_EXCEPTION.create(name);
         }
-        worldWaypoints.put(name, new WaypointLocation(waypoint.dimension, waypoint.location, visible, waypoint.colour));
+        worldWaypoints.put(name, new WaypointLocation(waypoint.dimension, waypoint.location, visible, waypoint.color));
 
         saveFile();
         if (visible) {
@@ -236,9 +236,9 @@ public class WaypointCommand {
         return edit(source, name, pos, dimension, ChatFormatting.WHITE);
     }
 
-    private static int edit(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension, ChatFormatting colour) throws CommandSyntaxException {
-        if (colour == ChatFormatting.RESET) {
-            throw INVALID_COLOR_EXCEPTION.create(colour.getName());
+    private static int edit(FabricClientCommandSource source, String name, BlockPos pos, ResourceKey<Level> dimension, ChatFormatting color) throws CommandSyntaxException {
+        if (color == ChatFormatting.RESET) {
+            throw INVALID_COLOR_EXCEPTION.create(color.getName());
         }
         String worldIdentifier = getWorldIdentifier(source.getClient());
         Map<String, WaypointLocation> worldWaypoints = waypoints.get(worldIdentifier);
@@ -247,12 +247,12 @@ public class WaypointCommand {
         }
 
         //noinspection DataFlowIssue
-        if (worldWaypoints.computeIfPresent(name, (key, value) -> new WaypointLocation(dimension, pos, value.visible, colour.getColor())) == null) {
+        if (worldWaypoints.computeIfPresent(name, (key, value) -> new WaypointLocation(dimension, pos, value.visible, color.getColor())) == null) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
         saveFile();
-        source.sendFeedback(Component.translatable("commands.cwaypoint.edit.success", name, formatCoordinates(pos), dimension.location(), colour.getName()));
+        source.sendFeedback(Component.translatable("commands.cwaypoint.edit.success", name, formatCoordinates(pos), dimension.location(), color.getName()));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -306,7 +306,7 @@ public class WaypointCommand {
                     String dimension = entry.getValue().dimension().location().toString();
                     waypoint.putString("Dimension", dimension);
                     waypoint.putBoolean("Visible", entry.getValue().visible());
-                    waypoint.putInt("Colour", entry.getValue().colour());
+                    waypoint.putInt("Color", entry.getValue().color());
                     result.put(entry.getKey(), waypoint);
                 }, CompoundTag::merge)));
             rootTag.put("Waypoints", compoundTag);
@@ -343,8 +343,8 @@ public class WaypointCommand {
                     BlockPos pos = NbtUtils.readBlockPos(waypoint, "pos").orElseThrow();
                     ResourceKey<Level> dimension = Level.RESOURCE_KEY_CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, waypoint.get("Dimension"))).resultOrPartial(LOGGER::error).orElseThrow();
                     boolean visible = waypoint.getBoolean("Visible");
-                    int colour = waypoint.getInt("Colour");
-                    return new WaypointLocation(dimension, pos, visible, colour);
+                    int color = waypoint.getInt("Color");
+                    return new WaypointLocation(dimension, pos, visible, color);
                 })));
         });
 
@@ -492,8 +492,8 @@ public class WaypointCommand {
 
             AABB box = new AABB(waypointLocation);
 
-            int colour = waypoint.colour();
-            ShapeRenderer.renderLineBox(stack, context.consumers().getBuffer(RenderQueue.NO_DEPTH_LAYER), box, ARGB.red(colour) / 255.0f, ARGB.green(colour) / 255.0f, ARGB.blue(colour) / 255.0f, ARGB.alpha(colour) / 255.0f);
+            int color = waypoint.color();
+            ShapeRenderer.renderLineBox(stack, context.consumers().getBuffer(RenderQueue.NO_DEPTH_LAYER), box, ARGB.red(color) / 255.0f, ARGB.green(color) / 255.0f, ARGB.blue(color) / 255.0f, ARGB.alpha(color) / 255.0f);
 
             stack.translate(waypointLocation.getCenter().add(new Vec3(0, 1, 0)));
             stack.mulPose(context.camera().rotation());
@@ -501,15 +501,15 @@ public class WaypointCommand {
 
             Font font = Minecraft.getInstance().font;
             int width = font.width(waypointName) / 2;
-            int backgroundColour = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25f) * 255.0f) << 24;
-            font.drawInBatch(waypointName, -width, 0, 0xFFFFFF, false, stack.last().pose(), context.consumers(), Font.DisplayMode.SEE_THROUGH, backgroundColour, LightTexture.FULL_SKY);
+            int backgroundColor = (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25f) * 255.0f) << 24;
+            font.drawInBatch(waypointName, -width, 0, 0xFFFFFF, false, stack.last().pose(), context.consumers(), Font.DisplayMode.SEE_THROUGH, backgroundColor, LightTexture.FULL_SKY);
 
             stack.popPose();
         });
     }
 
     @VisibleForTesting
-    public record WaypointLocation(ResourceKey<Level> dimension, BlockPos location, boolean visible, int colour) {
+    public record WaypointLocation(ResourceKey<Level> dimension, BlockPos location, boolean visible, int color) {
     }
 
     record WaypointLabelLocation(Component label, int location) {

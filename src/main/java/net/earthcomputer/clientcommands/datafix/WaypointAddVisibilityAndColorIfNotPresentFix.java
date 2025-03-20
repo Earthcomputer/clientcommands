@@ -4,20 +4,20 @@ import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 
-public class WaypointAddVisibilityAndColourIfNotPresentFix extends DataFix {
+public class WaypointAddVisibilityAndColorIfNotPresentFix extends DataFix {
 
     private static final String VISIBILITY_KEY = "Visible";
-    private static final String COLOUR_KEY = "Colour";
+    private static final String COLOR_KEY = "Color";
 
     private final boolean visible;
-    private final int colour;
+    private final int color;
     private final String name;
 
-    public WaypointAddVisibilityAndColourIfNotPresentFix(Schema outputSchema, boolean visible, int colour) {
+    public WaypointAddVisibilityAndColorIfNotPresentFix(Schema outputSchema, boolean visible, int color) {
         super(outputSchema, true);
         this.visible = visible;
-        this.colour = colour;
-        this.name = "WaypointAddVisibilityIfNotPresentFix_" + VISIBILITY_KEY + "=" + this.visible + "_" + COLOUR_KEY + "=" + this.colour + " for " + outputSchema.getVersionKey();
+        this.color = color;
+        this.name = "WaypointAddVisibilityIfNotPresentFix_" + VISIBILITY_KEY + "=" + this.visible + "_" + COLOR_KEY + "=" + this.color + " for " + outputSchema.getVersionKey();
     }
 
     @Override
