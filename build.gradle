@@ -1,8 +1,9 @@
 import net.earthcomputer.clientcommands.buildscript.CheckLanguageFilesTask
 import net.earthcomputer.clientcommands.buildscript.GenerateBuildInfoTask
+import net.fabricmc.loom.task.prod.ClientProductionRunTask
 
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
@@ -13,6 +14,16 @@ base {
 	archivesName = project.archives_base_name
 	version = project.mod_version
 	group = project.maven_group
+}
+
+ext.localProperties = new Properties()
+def localPropertiesFile = file("gradle-local.properties")
+if (localPropertiesFile.exists()) {
+	localPropertiesFile.withInputStream { stream ->
+		ext.localProperties.load(stream)
+	}
+} else {
+	localPropertiesFile.createNewFile()
 }
 
 sourceSets {
@@ -56,6 +67,7 @@ dependencies {
 	}
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
@@ -70,7 +82,10 @@ dependencies {
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
-	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
+	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
+	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
 
@@ -131,6 +146,17 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
+}
+
+tasks.register("prodClient", ClientProductionRunTask) {
+	runDir = file("run")
+
+	jvmArgs.add("-Ddevauth.enabled=true")
+	jvmArgs.add("-Ddevauth.account=${localProperties.minecraft_user}")
+
+	javaLauncher = javaToolchains.launcherFor {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 tasks.register('sourcesJar', Jar) {
