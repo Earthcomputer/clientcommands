@@ -19,6 +19,7 @@
     "commands.render.EntityRendererDispatcherMixin",
     "commands.time.ClientLevelDataMixin",
     "commands.weather.LevelMixin",
+    "datafix.DataFixersMixin",
     "debug.EntityMixin",
     "debug.ServerLevelMixin",
     "events.MinecraftMixin",

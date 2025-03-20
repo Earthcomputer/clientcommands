@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.test;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.command.WaypointCommand;
+import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -30,7 +31,7 @@ public final class WaypointLoadingTest {
     }
 
     @Test
-    public void testWaypointLoading() {
+    public void testWaypointLoadingWithoutVisibleAndColourKey() {
         CompoundTag waypointTag = parseSnbt("""
             {
                 DataVersion: 4189,
@@ -54,5 +55,38 @@ public final class WaypointLoadingTest {
         var waypoint = worldWaypoints.get("testWaypoint");
         assertEquals(new BlockPos(1, 2, 3), waypoint.location());
         assertEquals(Level.OVERWORLD, waypoint.dimension());
+        assertTrue(waypoint.visible());
+        assertEquals(ChatFormatting.WHITE.getColor(), waypoint.colour());
+    }
+
+    @Test
+    public void testWaypointLoading() {
+        CompoundTag waypointTag = parseSnbt("""
+            {
+                DataVersion: 4189,
+                Waypoints: {
+                    foo: {
+                        testWaypoint: {
+                           pos: [I; 1, 2, 3],
+                           Dimension: "minecraft:overworld",
+                           Visible: true,
+                           Colour: 16733525
+                        }
+                    }
+                }
+            }
+            """);
+
+        var waypoints = WaypointCommand.deserializeWaypoints(waypointTag);
+        assertEquals(1, waypoints.size());
+        assertTrue(waypoints.containsKey("foo"));
+        var worldWaypoints = waypoints.get("foo");
+        assertEquals(1, worldWaypoints.size());
+        assertTrue(worldWaypoints.containsKey("testWaypoint"));
+        var waypoint = worldWaypoints.get("testWaypoint");
+        assertEquals(new BlockPos(1, 2, 3), waypoint.location());
+        assertEquals(Level.OVERWORLD, waypoint.dimension());
+        assertTrue(waypoint.visible());
+        assertEquals(ChatFormatting.RED.getColor(), waypoint.colour());
     }
 }

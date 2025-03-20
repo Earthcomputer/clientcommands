@@ -182,4 +182,7 @@ public class Configs {
     public static void setMinimumReplyDelaySeconds(float minimumReplyDelaySeconds) {
         Configs.minimumReplyDelaySeconds = Math.clamp(minimumReplyDelaySeconds, 0.0f, ReplyCommand.MAXIMUM_REPLY_DELAY_SECONDS);
     }
+
+    @Config(comment = "Distance after which to stop rendering waypoint labels; put a negative value to disable")
+    public static int waypointLabelRenderLimit = -1;
 }
