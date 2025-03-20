@@ -299,8 +299,8 @@
   "commands.cwaypoint.notFound": "No waypoint with the name \"%s\" could be found",
   "commands.cwaypoint.remove.success": "Waypoint \"%s\" successfully removed",
   "commands.cwaypoint.saveFailed": "Could not save waypoints file",
-  "commands.cwaypoint.shown": "shown",
   "commands.cwaypoint.show.success": "Now showing %s",
+  "commands.cwaypoint.shown": "shown",
 
   "commands.cwe.playerNotFound": "Player not found",
 
