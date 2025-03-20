@@ -46,7 +46,7 @@ public final class MappingsHelper {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Path MAPPINGS_DIR = ClientCommands.configDir.resolve("mappings");
+    private static final Path MAPPINGS_DIR = ClientCommands.CONFIG_DIR.resolve("mappings");
 
     private static final boolean IS_DEV_ENV = FabricLoader.getInstance().isDevelopmentEnvironment();
 

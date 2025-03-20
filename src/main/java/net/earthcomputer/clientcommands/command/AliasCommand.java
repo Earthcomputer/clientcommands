@@ -151,7 +151,7 @@ public class AliasCommand {
         } else {
             source.sendFeedback(Component.translatable("commands.calias.listAliases.success", aliasMap.size()));
             for (String key : aliasMap.keySet()) {
-                source.sendFeedback(Component.literal(ChatFormatting.BOLD + key + ChatFormatting.RESET + ": " + aliasMap.get(key).replace("%","%%")));
+                source.sendFeedback(Component.literal(ChatFormatting.BOLD + key + ChatFormatting.RESET + ": " + aliasMap.get(key).replace("%", "%%")));
             }
         }
         return Command.SINGLE_SUCCESS;

@@ -17,7 +17,7 @@ public class MinecraftMixin {
     // Earth annoying his friends <3 nothing to see here
     @Inject(method = "createTitle", at = @At("RETURN"), cancellable = true)
     private void modifyWindowTitle(CallbackInfoReturnable<String> ci) {
-        if (ClientCommands.SCRAMBLE_WINDOW_TITLE) {
+        if (ClientCommands.scrambleWindowTitle) {
             List<Character> chars = ci.getReturnValue().chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayList::new));
             Collections.shuffle(chars);
             ci.setReturnValue(chars.stream().map(String::valueOf).collect(Collectors.joining()));

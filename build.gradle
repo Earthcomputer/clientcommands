@@ -1,10 +1,12 @@
 import net.earthcomputer.clientcommands.buildscript.CheckLanguageFilesTask
+import net.earthcomputer.clientcommands.buildscript.GenerateBuildInfoTask
 
 plugins {
 	id 'fabric-loom' version '1.9-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
+	id 'checkstyle'
 }
 
 base {
@@ -81,6 +83,12 @@ dependencies {
 	testImplementation "com.code-intelligence:jazzer-junit:${project.jazzer_junit_version}"
 }
 
+checkstyle {
+	toolVersion = project.checkstyle_version
+	configFile = rootProject.file("checkstyle.xml")
+	ignoreFailures = false
+}
+
 test {
 	useJUnitPlatform()
 	systemProperty('clientcommands.regressionTestDir', file('regressionTests').absolutePath)
@@ -92,6 +100,10 @@ jar {
 	}
 
 	from("LICENSE")
+}
+
+tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
+	outputFile = new File(temporaryDir, "build_info.json")
 }
 
 processResources {
@@ -108,6 +120,8 @@ processResources {
 	from(sourceSets.main.resources.srcDirs) {
 		exclude "fabric.mod.json"
 	}
+
+	from generateBuildInfo
 }
 
 java {

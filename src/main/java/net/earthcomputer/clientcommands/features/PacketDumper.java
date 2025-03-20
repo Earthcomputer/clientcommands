@@ -494,7 +494,7 @@ public class PacketDumper {
 
         @Override
         public @NotNull PacketDumpByteBuf writeChar(int value) {
-            return dumpSimple("char", Character.toString((char)value), JsonWriter::value);
+            return dumpSimple("char", Character.toString((char) value), JsonWriter::value);
         }
 
         @Override

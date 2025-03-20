@@ -116,7 +116,7 @@ public class DebugRandom extends LegacyRandomSource {
     public void writeToFile() {
         try {
             this.nbtStream.close();
-            Path debugDir = ClientCommands.configDir.resolve("debug");
+            Path debugDir = ClientCommands.CONFIG_DIR.resolve("debug");
             Files.createDirectories(debugDir);
             try (DataOutputStream dataOutput = new DataOutputStream(new GZIPOutputStream(Files.newOutputStream(debugDir.resolve(this.entity.getStringUUID() + ".dat"))))) {
                 dataOutput.writeInt(stackTraceById.size());

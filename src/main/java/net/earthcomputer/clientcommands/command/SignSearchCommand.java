@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.RegexArgument.*;
@@ -30,7 +32,7 @@ public class SignSearchCommand {
                 .then(argument("query", greedyString())
                     .executes(ctx -> FindBlockCommand.findBlock(ctx, Component.translatable("commands.csignsearch.starting"), predicate(getString(ctx, "query"))))))
             .then(literal("regex")
-                .then(argument("query", greedyRegex())
+                .then(argument("query", greedyRegex(true))
                     .executes(ctx -> FindBlockCommand.findBlock(ctx, Component.translatable("commands.csignsearch.starting"), predicate(getRegex(ctx, "query")))))));
         FindBlockCommand.FLAG_KEEP_SEARCHING.addToCommand(dispatcher, csignsearch, ctx -> true);
     }
@@ -55,15 +57,12 @@ public class SignSearchCommand {
                     return false;
                 }
 
-                SignText frontText = sign.getFrontText();
-                SignText backText = sign.getBackText();
-                for (int i = 0; i < SignText.LINES; i++) {
-                    String line = frontText.getMessage(i, Minecraft.getInstance().isTextFilteringEnabled()).getString();
-                    if (linePredicate.test(line)) {
-                        return true;
-                    }
-                    line = backText.getMessage(i, Minecraft.getInstance().isTextFilteringEnabled()).getString();
-                    if (linePredicate.test(line)) {
+                boolean textFilteringEnabled = Minecraft.getInstance().isTextFilteringEnabled();
+                for (SignText text : new SignText[]{sign.getFrontText(), sign.getBackText()}) {
+                    String string = IntStream.range(0, SignText.LINES)
+                        .mapToObj(i -> text.getMessage(i, textFilteringEnabled).getString())
+                        .collect(Collectors.joining("\n"));
+                    if (linePredicate.test(string)) {
                         return true;
                     }
                 }
@@ -77,5 +76,4 @@ public class SignSearchCommand {
             }
         };
     }
-
 }

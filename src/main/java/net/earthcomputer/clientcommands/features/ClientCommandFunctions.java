@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 public class ClientCommandFunctions {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Path FUNCTION_DIR = ClientCommands.configDir.resolve("functions");
+    private static final Path FUNCTION_DIR = ClientCommands.CONFIG_DIR.resolve("functions");
 
     private static final DynamicCommandExceptionType NO_SUCH_FUNCTION_EXCEPTION = new DynamicCommandExceptionType(id -> Component.translatable("arguments.function.unknown", id));
     private static final DynamicCommandExceptionType COMMAND_LIMIT_REACHED_EXCEPTION = new DynamicCommandExceptionType(limit -> Component.translatable("commands.cfunction.limitReached", limit));

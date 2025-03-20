@@ -104,6 +104,17 @@ public class Configs {
         Configs.maxEnchantLevels = Math.max(Configs.maxEnchantLevels, Configs.minEnchantLevels);
     }
 
+    @Config(setter = @Config.Setter("setMaxEnchantSlot"), temporary = true)
+    private static int maxEnchantSlot = 3;
+
+    public static int getMaxEnchantSlot() {
+        return maxEnchantSlot;
+    }
+
+    public static void setMaxEnchantSlot(int minEnchantLevels) {
+        Configs.maxEnchantSlot = Mth.clamp(maxEnchantSlot, 1, 3);
+    }
+
     @Config(setter = @Config.Setter("setMaxEnchantLevels"), temporary = true)
     private static int maxEnchantLevels = 30;
     public static int getMaxEnchantLevels() {

@@ -201,7 +201,7 @@ public class FishingCracker {
             long b = (-4824621L * upperBits + 7847617L * lowerBits + 7847617L) >> 32;
             long seed = 7847617L * a - 18218081L * b;
 
-            if ((seed >>> 16 << 32) + (int)(((seed * 0x5deece66dL + 0xbL) & ((1L << 48) - 1)) >>> 16) == nextLongOutput) {
+            if ((seed >>> 16 << 32) + (int) (((seed * 0x5deece66dL + 0xbL) & ((1L << 48) - 1)) >>> 16) == nextLongOutput) {
                 // advance by -3
                 seed = (seed * 0x13A1F16F099DL + 0x95756C5D2097L) & ((1L << 48) - 1);
                 RandomSource rand = RandomSource.create(seed ^ 0x5deece66dL);
@@ -985,12 +985,12 @@ public class FishingCracker {
             } else {
                 if (this.state == State.BOBBING) {
                     Vec3 vec3 = this.velocity;
-                    double d = this.pos.y + vec3.y - (double)blockPos.getY() - (double)f;
+                    double d = this.pos.y + vec3.y - (double) blockPos.getY() - (double) f;
                     if (Math.abs(d) < 0.01D) {
                         d += Math.signum(d) * 0.1D;
                     }
 
-                    this.velocity = new Vec3(vec3.x * 0.9D, vec3.y - d * (double)this.random.nextFloat() * 0.2D, vec3.z * 0.9D);
+                    this.velocity = new Vec3(vec3.x * 0.9D, vec3.y - d * (double) this.random.nextFloat() * 0.2D, vec3.z * 0.9D);
                     if (this.hookCountdown <= 0 && this.fishTravelCountdown <= 0) {
                         this.inOpenWater = true;
                     } else {
@@ -1059,7 +1059,7 @@ public class FishingCracker {
                 g = 1.0F;
             }
 
-            if ((double)g < 0.25D) {
+            if ((double) g < 0.25D) {
                 random.nextFloat();
                 random.nextFloat();
                 //this.playSound(this.getSplashSound(), g, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
@@ -1069,21 +1069,21 @@ public class FishingCracker {
                 //this.playSound(this.getHighSpeedSplashSound(), g, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
             }
 
-            float h = (float)Mth.floor(this.pos.y);
+            float h = (float) Mth.floor(this.pos.y);
 
             int j;
             double k;
             double l;
-            for(j = 0; (float)j < 1.0F + FISHING_BOBBER_DIMENSIONS.width() * 20.0F; ++j) {
-                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
-                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
+            for (j = 0; (float) j < 1.0F + FISHING_BOBBER_DIMENSIONS.width() * 20.0F; ++j) {
+                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double) FISHING_BOBBER_DIMENSIONS.width();
+                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double) FISHING_BOBBER_DIMENSIONS.width();
                 random.nextDouble();
                 //this.world.addParticle(ParticleTypes.BUBBLE, this.pos.x + k, (double)(h + 1.0F), this.pos.z + l, vec3d.x, vec3d.y - this.random.nextDouble() * 0.20000000298023224D, vec3d.z);
             }
 
-            for(j = 0; (float)j < 1.0F + FISHING_BOBBER_DIMENSIONS.width() * 20.0F; ++j) {
-                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
-                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double)FISHING_BOBBER_DIMENSIONS.width();
+            for (j = 0; (float) j < 1.0F + FISHING_BOBBER_DIMENSIONS.width() * 20.0F; ++j) {
+                k = (this.random.nextDouble() * 2.0D - 1.0D) * (double) FISHING_BOBBER_DIMENSIONS.width();
+                l = (this.random.nextDouble() * 2.0D - 1.0D) * (double) FISHING_BOBBER_DIMENSIONS.width();
                 //this.world.addParticle(ParticleTypes.SPLASH, this.getX() + k, (double)(h + 1.0F), this.getZ() + l, vec3d.x, vec3d.y, vec3d.z);
             }
         }
@@ -1111,7 +1111,7 @@ public class FishingCracker {
                             mutable.set(p, q, r);
                             FluidState fluidState = this.level.getFluidState(mutable);
                             if (fluidState.is(tag)) {
-                                double f = (float)q + fluidState.getHeight(this.level, mutable);
+                                double f = (float) q + fluidState.getHeight(this.level, mutable);
                                 if (f >= aabb.minY) {
                                     bl2 = true;
                                     e = Math.max(f - aabb.minY, e);
@@ -1123,7 +1123,7 @@ public class FishingCracker {
 
                 if (vec3.length() > 0.0D) {
                     if (o > 0) {
-                        vec3 = vec3.scale(1.0D / (double)o);
+                        vec3 = vec3.scale(1.0D / (double) o);
                     }
 
                     vec3 = vec3.normalize();
@@ -1185,7 +1185,7 @@ public class FishingCracker {
             //this.checkBlockCollision(); // no interesting blocks
 
             float i = this.getVelocityMultiplier();
-            this.velocity = this.velocity.multiply((double)i, 1.0D, (double)i);
+            this.velocity = this.velocity.multiply(i, 1.0D, i);
             if (this.level.getBlockStatesIfLoaded(this.boundingBox.deflate(0.001D)).anyMatch((blockStatex) -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA))) {
                 failedReason = "fire";
             }
@@ -1212,7 +1212,7 @@ public class FishingCracker {
             Block block = this.level.getBlockState(BlockPos.containing(pos)).getBlock();
             float f = block.getSpeedFactor();
             if (block != Blocks.WATER && block != Blocks.BUBBLE_COLUMN) {
-                return (double)f == 1.0D ? this.level
+                return (double) f == 1.0D ? this.level
                     .getBlockState(BlockPos.containing(this.pos.x, this.boundingBox.minY - 0.5000001D, this.pos.z)).getBlock().getSpeedFactor() : f;
             } else {
                 return f;
@@ -1318,9 +1318,9 @@ public class FishingCracker {
                         n = this.fishAngle * 0.017453292F;
                         o = Mth.sin(n);
                         p = Mth.cos(n);
-                        q = this.pos.x + (double)(o * (float)this.fishTravelCountdown * 0.1F);
-                        r = (double)((float)Mth.floor(this.pos.y) + 1.0F);
-                        s = this.pos.z + (double)(p * (float)this.fishTravelCountdown * 0.1F);
+                        q = this.pos.x + (double) (o * (float) this.fishTravelCountdown * 0.1F);
+                        r = (float) Mth.floor(this.pos.y) + 1.0F;
+                        s = this.pos.z + (double) (p * (float) this.fishTravelCountdown * 0.1F);
                         blockState2 = level.getBlockState(BlockPos.containing(q, r - 1.0D, s));
                         if (blockState2.is(Blocks.WATER)) {
                             if (this.random.nextFloat() < 0.15F) {
@@ -1347,19 +1347,19 @@ public class FishingCracker {
                     this.waitCountdown -= i;
                     n = 0.15F;
                     if (this.waitCountdown < 20) {
-                        n = (float)((double)n + (double)(20 - this.waitCountdown) * 0.05D);
+                        n = (float) ((double) n + (double) (20 - this.waitCountdown) * 0.05D);
                     } else if (this.waitCountdown < 40) {
-                        n = (float)((double)n + (double)(40 - this.waitCountdown) * 0.02D);
+                        n = (float) ((double) n + (double) (40 - this.waitCountdown) * 0.02D);
                     } else if (this.waitCountdown < 60) {
-                        n = (float)((double)n + (double)(60 - this.waitCountdown) * 0.01D);
+                        n = (float) ((double) n + (double) (60 - this.waitCountdown) * 0.01D);
                     }
 
                     if (this.random.nextFloat() < n) {
                         o = Mth.nextFloat(this.random, 0.0F, 360.0F) * 0.017453292F;
                         p = Mth.nextFloat(this.random, 25.0F, 60.0F);
-                        q = this.pos.x + (double)(Mth.sin(o) * p * 0.1F);
-                        r = (float)Mth.floor(this.pos.y) + 1.0F;
-                        s = this.pos.z + (double)(Mth.cos(o) * p * 0.1F);
+                        q = this.pos.x + (double) (Mth.sin(o) * p * 0.1F);
+                        r = (float) Mth.floor(this.pos.y) + 1.0F;
+                        s = this.pos.z + (double) (Mth.cos(o) * p * 0.1F);
                         blockState2 = level.getBlockState(BlockPos.containing(q, r - 1.0D, s));
                         if (blockState2.is(Blocks.WATER)) {
                             random.nextInt(2);

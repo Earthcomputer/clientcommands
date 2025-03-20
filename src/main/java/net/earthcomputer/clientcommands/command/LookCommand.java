@@ -30,7 +30,7 @@ public class LookCommand {
                 .then(literal("west")
                     .executes(ctx -> lookCardinal(ctx.getSource(), 90, 0)))
                 .then(literal("east")
-                    .executes(ctx -> lookCardinal(ctx.getSource(),-90, 0)))
+                    .executes(ctx -> lookCardinal(ctx.getSource(), -90, 0)))
                 .then(literal("north")
                     .executes(ctx -> lookCardinal(ctx.getSource(), -180, 0)))
                 .then(literal("south")

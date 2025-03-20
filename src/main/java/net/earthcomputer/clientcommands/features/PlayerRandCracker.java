@@ -61,7 +61,7 @@ public class PlayerRandCracker {
 
     public static int nextInt(int bound) {
         if ((bound & -bound) == bound) {
-            return (int) ((bound * (long)next(31)) >> 31);
+            return (int) ((bound * (long) next(31)) >> 31);
         }
 
         int bits, val;
@@ -311,8 +311,8 @@ public class PlayerRandCracker {
 
                     if (Configs.toolBreakWarning && stack.getDamageValue() + amount >= stack.getMaxDamage() - 30) {
 
-                        if(stack.getDamageValue() + amount >= stack.getMaxDamage() - 15) {
-                            Minecraft.getInstance().player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 10,0.1f);
+                        if (stack.getDamageValue() + amount >= stack.getMaxDamage() - 15) {
+                            Minecraft.getInstance().player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 10, 0.1f);
                         }
 
                         MutableComponent durability = Component.literal(String.valueOf(stack.getMaxDamage() - stack.getDamageValue() - 1)).withStyle(ChatFormatting.RED);
@@ -326,10 +326,12 @@ public class PlayerRandCracker {
                         int unbreakingLevel_f = unbreakingLevel;
                         Runnable action = () -> throwItemsUntil(rand -> {
                             for (int i = 0; i < amount; i++) {
-                                if (stack.getItem() instanceof ArmorItem && rand.nextFloat() < 0.6)
+                                if (stack.getItem() instanceof ArmorItem && rand.nextFloat() < 0.6) {
                                     return false;
-                                if (rand.nextInt(unbreakingLevel_f + 1) == 0)
+                                }
+                                if (rand.nextInt(unbreakingLevel_f + 1) == 0) {
                                     return false;
+                                }
                             }
                             return true;
                         }, 64);
