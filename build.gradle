@@ -16,16 +16,6 @@ base {
 	group = project.maven_group
 }
 
-ext.localProperties = new Properties()
-def localPropertiesFile = file("gradle-local.properties")
-if (localPropertiesFile.exists()) {
-	localPropertiesFile.withInputStream { stream ->
-		ext.localProperties.load(stream)
-	}
-} else {
-	localPropertiesFile.createNewFile()
-}
-
 sourceSets {
 	codeGen
 }
@@ -152,7 +142,6 @@ tasks.register("prodClient", ClientProductionRunTask) {
 	runDir = file("run")
 
 	jvmArgs.add("-Ddevauth.enabled=true")
-	jvmArgs.add("-Ddevauth.account=${localProperties.minecraft_user}")
 
 	javaLauncher = javaToolchains.launcherFor {
 		languageVersion = JavaLanguageVersion.of(21)
