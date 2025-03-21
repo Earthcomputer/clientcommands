@@ -74,6 +74,7 @@ public class ClientCommands implements ClientModInitializer {
 
         // Events
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
+        CTickCommand.registerEvents();
         FishingCracker.registerEvents();
         PlayerRandCracker.registerEvents();
         ServerBrandManager.registerEvents();
@@ -140,6 +141,7 @@ public class ClientCommands implements ClientModInitializer {
         CStopSoundCommand.register(dispatcher);
         CTeleportCommand.register(dispatcher);
         CTellRawCommand.register(dispatcher, context);
+        CTickCommand.register(dispatcher);
         CTimeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher, context);
         FindBlockCommand.register(dispatcher, context);
