@@ -17,6 +17,11 @@ accessible method net/minecraft/world/level/block/ShulkerBoxBlock canOpen (Lnet/
 # cfish
 accessible method net/minecraft/world/entity/projectile/FishingHook canHitEntity (Lnet/minecraft/world/entity/Entity;)Z
 
+# cfps
+accessible field net/minecraft/client/Minecraft virtualScreen Lnet/minecraft/client/renderer/VirtualScreen;
+accessible field net/minecraft/client/renderer/VirtualScreen screenManager Lcom/mojang/blaze3d/platform/ScreenManager;
+accessible field com/mojang/blaze3d/platform/ScreenManager monitors Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;
+
 # cgive
 accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I
 accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z

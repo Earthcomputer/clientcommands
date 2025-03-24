@@ -151,6 +151,7 @@ public class ClientCommands implements ClientModInitializer {
         FindItemCommand.register(dispatcher, context);
         FishCommand.register(dispatcher, context);
         FovCommand.register(dispatcher);
+        FramerateCommand.register(dispatcher);
         GammaCommand.register(dispatcher);
         GetDataCommand.register(dispatcher);
         GhostBlockCommand.register(dispatcher, context);

@@ -68,6 +68,7 @@
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.findblock.ClientLevelMixin",
+    "commands.fps.MinecraftMixin",
     "commands.generic.CommandSuggestionsMixin",
     "commands.glow.LivingEntityRenderStateMixin",
     "commands.reply.ClientPacketListenerMixin",
