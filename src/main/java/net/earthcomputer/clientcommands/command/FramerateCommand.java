@@ -38,16 +38,9 @@ public class FramerateCommand {
     }
 
     private static int setMaxFps(FabricClientCommandSource source, int maxFps) {
-        int maxRefreshRate = MAX_REFRESH_RATE.getAsInt();
-        boolean unlimited;
-        if (maxFps > maxRefreshRate) {
-            maxFps = maxRefreshRate;
-            unlimited = true;
-        } else {
-            unlimited = false;
-        }
         source.getClient().getFramerateLimitTracker().setFramerateLimit(maxFps);
-        if (unlimited) {
+        int maxRefreshRate = MAX_REFRESH_RATE.getAsInt();
+        if (maxFps > maxRefreshRate) {
             source.sendFeedback(Component.translatable("commands.cfps.setMaxFps.unlimited"));
         } else {
             source.sendFeedback(Component.translatable("commands.cfps.setMaxFps.success", maxFps));
