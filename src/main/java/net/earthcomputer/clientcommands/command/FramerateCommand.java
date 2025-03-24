@@ -38,9 +38,9 @@ public class FramerateCommand {
     private static int getMaxFps(FabricClientCommandSource source) {
         int framerateLimit = source.getClient().getFramerateLimitTracker().getFramerateLimit();
         if (framerateLimit < Integer.MAX_VALUE) {
-            source.sendFeedback(Component.translatable("commands.cfps.success.get", framerateLimit));
+            source.sendFeedback(Component.translatable("commands.cfps.getMaxFps", framerateLimit));
         } else {
-            source.sendFeedback(Component.translatable("commands.cfps.success.get.unlimited"));
+            source.sendFeedback(Component.translatable("commands.cfps.getMaxFps.unlimited"));
         }
         return framerateLimit;
     }
@@ -48,9 +48,9 @@ public class FramerateCommand {
     private static int maxFps(FabricClientCommandSource source, int maxFps) {
         source.getClient().getFramerateLimitTracker().setFramerateLimit(maxFps);
         if (maxFps == Integer.MAX_VALUE) {
-            source.sendFeedback(Component.translatable("commands.cfps.success.set.unlimited"));
+            source.sendFeedback(Component.translatable("commands.cfps.setMaxFps.unlimited"));
         } else {
-            source.sendFeedback(Component.translatable("commands.cfps.success.set", maxFps));
+            source.sendFeedback(Component.translatable("commands.cfps.setMaxFps", maxFps));
         }
         return maxFps;
     }
