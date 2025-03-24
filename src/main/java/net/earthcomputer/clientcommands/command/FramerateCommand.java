@@ -32,7 +32,9 @@ public class FramerateCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfps")
-            .then(argument("maxfps", integer())
+            .then(literal("unlimited")
+                .executes(ctx -> maxFps(ctx.getSource(), Integer.MAX_VALUE))
+            ).then(argument("maxfps", integer())
                 .suggests((context, builder) -> {
                     for (int refreshRate : COMMON_REFRESH_RATES) {
                         builder.suggest(refreshRate);
@@ -40,8 +42,6 @@ public class FramerateCommand {
                     return builder.buildFuture();
                 })
                 .executes(ctx -> maxFps(ctx.getSource(), getInteger(ctx, "maxfps")))
-            ).then(literal("unlimited")
-                .executes(ctx -> maxFps(ctx.getSource(), Integer.MAX_VALUE))
             )
         );
 
