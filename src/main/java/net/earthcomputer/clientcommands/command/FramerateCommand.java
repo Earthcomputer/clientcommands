@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import net.minecraft.network.chat.Component;
 
 import java.util.function.IntSupplier;
@@ -12,9 +13,9 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FramerateCommand {
 
-    public static final IntSupplier MAX_REFRESH_RATE = () -> Minecraft.getInstance().virtualScreen.screenManager.monitors.values().stream()
+    public static final IntSupplier MAX_REFRESH_RATE = () -> Math.max(Options.UNLIMITED_FRAMERATE_CUTOFF, Minecraft.getInstance().virtualScreen.screenManager.monitors.values().stream()
         .mapToInt(monitor -> monitor.getCurrentMode().getRefreshRate())
-        .max().orElseThrow();
+        .max().orElseThrow());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfps")
