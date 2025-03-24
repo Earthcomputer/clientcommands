@@ -31,8 +31,8 @@ public class FramerateCommand {
         dispatcher.register(literal("cfps")
             .executes(ctx -> getMaxFps(ctx.getSource()))
             .then(literal("unlimited")
-                .executes(ctx -> maxFps(ctx.getSource(), Integer.MAX_VALUE))
-            ).then(argument("maxfps", integer())
+                .executes(ctx -> maxFps(ctx.getSource(), Integer.MAX_VALUE)))
+            .then(argument("maxfps", integer())
                 .suggests((context, builder) -> {
                     int maxFps = getDisplayMaxFramerate();
                     for (int refreshRate : COMMON_REFRESH_RATES) {
