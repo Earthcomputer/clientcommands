@@ -32,6 +32,7 @@ public class FramerateCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfps")
+            .executes(ctx -> getMaxFps(ctx.getSource()))
             .then(literal("unlimited")
                 .executes(ctx -> maxFps(ctx.getSource(), Integer.MAX_VALUE))
             ).then(argument("maxfps", integer())
@@ -39,7 +40,7 @@ public class FramerateCommand {
                     int maxFps = getDisplayMaxFramerate();
                     for (int refreshRate : COMMON_REFRESH_RATES) {
                         if (refreshRate > maxFps) {
-                            break;
+                            continue;
                         }
                         builder.suggest(refreshRate);
                     }
@@ -51,12 +52,22 @@ public class FramerateCommand {
 
     }
 
+    private static int getMaxFps(FabricClientCommandSource source) {
+        int framerateLimit = source.getClient().getFramerateLimitTracker().getFramerateLimit();
+        if (framerateLimit < Integer.MAX_VALUE) {
+            source.sendFeedback(Component.translatable("commands.cfps.success.get", framerateLimit));
+        } else {
+            source.sendFeedback(Component.translatable("commands.cfps.success.get.unlimited"));
+        }
+        return framerateLimit;
+    }
+
     private static int maxFps(FabricClientCommandSource source, int maxFps) {
         source.getClient().getFramerateLimitTracker().setFramerateLimit(maxFps);
         if (maxFps == Integer.MAX_VALUE) {
-            source.sendFeedback(Component.translatable("commands.cfps.success.unlimited"));
+            source.sendFeedback(Component.translatable("commands.cfps.success.set.unlimited"));
         } else {
-            source.sendFeedback(Component.translatable("commands.cfps.success", maxFps));
+            source.sendFeedback(Component.translatable("commands.cfps.success.set", maxFps));
         }
         return maxFps;
     }
