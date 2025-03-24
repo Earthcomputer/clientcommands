@@ -10,23 +10,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class FramerateCommand {
     private static final int[] COMMON_REFRESH_RATES = new int[] {
-        30,
-        45,
-        60,
-        75,
-        90,
-        100,
-        120,
-        144,
-        165,
-        180,
-        240,
-        300,
-        360,
-        420,
-        480,
-        540,
-        600
+        30, 45, 60, 75, 90, 100, 120, 144, 165, 180, 240, 300, 360, 420, 480, 540, 600
     };
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
