@@ -140,8 +140,7 @@ public class MapCommand {
             BlockPos relPos = pos.subtract(initialPos);
             Vector2i position = new Vector2i(
                 relPos.get(xAxis.getAxis()) * xAxis.getAxisDirection().getStep(),
-                relPos.get(yAxis.getAxis()) * yAxis.getAxisDirection().getStep()
-            );
+                relPos.get(yAxis.getAxis()) * yAxis.getAxisDirection().getStep());
 
             // offset rotation to match with map orientation
             int rotationOffset = switch (xAxis) {
