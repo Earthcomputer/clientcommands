@@ -19,14 +19,25 @@ public class FramerateCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfps")
+            .executes(ctx -> getMaxFps(ctx.getSource()))
             .then(argument("maxfps", integer(1))
                 .suggests((context, builder) -> builder.suggest(MAX_REFRESH_RATE.getAsInt()).buildFuture())
-                .executes(ctx -> maxFps(ctx.getSource(), getInteger(ctx, "maxfps"))))
+                .executes(ctx -> setMaxFps(ctx.getSource(), getInteger(ctx, "maxfps"))))
             .then(literal("unlimited")
-                .executes(ctx -> maxFps(ctx.getSource(), MAX_REFRESH_RATE.getAsInt() + 1))));
+                .executes(ctx -> setMaxFps(ctx.getSource(), MAX_REFRESH_RATE.getAsInt() + 1))));
     }
 
-    private static int maxFps(FabricClientCommandSource source, int maxFps) {
+    private static int getMaxFps(FabricClientCommandSource source) {
+        int framerateLimit = source.getClient().getFramerateLimitTracker().getFramerateLimit();
+        if (framerateLimit > MAX_REFRESH_RATE.getAsInt()) {
+            source.sendFeedback(Component.translatable("commands.cfps.getMaxFps.unlimited"));
+        } else {
+            source.sendFeedback(Component.translatable("commands.cfps.getMaxFps", framerateLimit));
+        }
+        return framerateLimit;
+    }
+
+    private static int setMaxFps(FabricClientCommandSource source, int maxFps) {
         int maxRefreshRate = MAX_REFRESH_RATE.getAsInt();
         boolean unlimited;
         if (maxFps > maxRefreshRate) {
@@ -37,9 +48,9 @@ public class FramerateCommand {
         }
         source.getClient().getFramerateLimitTracker().setFramerateLimit(maxFps);
         if (unlimited) {
-            source.sendFeedback(Component.translatable("commands.cfps.unlimited"));
+            source.sendFeedback(Component.translatable("commands.cfps.setMaxFps.unlimited"));
         } else {
-            source.sendFeedback(Component.translatable("commands.cfps.success", maxFps));
+            source.sendFeedback(Component.translatable("commands.cfps.setMaxFps.success", maxFps));
         }
         return maxFps;
     }
