@@ -159,6 +159,7 @@ public class ClientCommands implements ClientModInitializer {
         KitCommand.register(dispatcher);
         ListenCommand.register(dispatcher);
         LookCommand.register(dispatcher);
+        MapCommand.register(dispatcher);
         MinesweeperCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
         NoteCommand.register(dispatcher);

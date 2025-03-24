@@ -33,6 +33,9 @@ accessible field net/minecraft/network/PacketDecoder protocolInfo Lnet/minecraft
 accessible field net/minecraft/network/PacketEncoder protocolInfo Lnet/minecraft/network/ProtocolInfo;
 accessible field net/minecraft/network/codec/IdDispatchCodec toId Lit/unimi/dsi/fastutil/objects/Object2IntMap;
 
+# cmap
+accessible method net/minecraft/client/Screenshot getFile (Ljava/io/File;)Ljava/io/File;
+
 # cpermissionlevel
 accessible method net/minecraft/client/player/LocalPlayer getPermissionLevel ()I
 
