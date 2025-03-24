@@ -51,10 +51,7 @@ public class MapCommand {
             .then(literal("export")
                 .executes(ctx -> exportMap(ctx.getSource(), 1))
                 .then(argument("scale", integer(1, 64))
-                    .executes(ctx -> exportMap(ctx.getSource(), getInteger(ctx, "scale")))
-                )
-            )
-        );
+                    .executes(ctx -> exportMap(ctx.getSource(), getInteger(ctx, "scale"))))));
     }
 
     private static int exportMap(FabricClientCommandSource source, int scale) throws CommandSyntaxException {
