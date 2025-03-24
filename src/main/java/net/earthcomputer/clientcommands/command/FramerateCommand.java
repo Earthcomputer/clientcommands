@@ -30,14 +30,17 @@ public class FramerateCommand {
         10
     };
 
-
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cfps")
             .then(literal("unlimited")
                 .executes(ctx -> maxFps(ctx.getSource(), Integer.MAX_VALUE))
             ).then(argument("maxfps", integer())
                 .suggests((context, builder) -> {
+                    int maxFps = getDisplayMaxFramerate();
                     for (int refreshRate : COMMON_REFRESH_RATES) {
+                        if (refreshRate > maxFps) {
+                            break;
+                        }
                         builder.suggest(refreshRate);
                     }
                     return builder.buildFuture();
@@ -56,6 +59,12 @@ public class FramerateCommand {
             source.sendFeedback(Component.translatable("commands.cfps.success", maxFps));
         }
         return maxFps;
+    }
+
+    private static int getDisplayMaxFramerate() {
+        return Minecraft.getInstance().virtualScreen.screenManager.monitors.values().stream()
+            .mapToInt(monitor -> monitor.getCurrentMode().getRefreshRate())
+            .max().orElseThrow();
     }
 
 }
