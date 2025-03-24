@@ -10,6 +10,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class MinecraftMixin {
     @ModifyConstant(method = "runTick", constant = @Constant(intValue = 260))
     private int uncapFps(int original) {
-        return FramerateCommand.MAX_FRAMERATE + 1;
+        return FramerateCommand.MAX_REFRESH_RATE.getAsInt();
     }
 }

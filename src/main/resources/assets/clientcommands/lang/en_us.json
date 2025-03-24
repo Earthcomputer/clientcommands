@@ -130,6 +130,7 @@
   "commands.cfov.success": "Set FOV to %s",
 
   "commands.cfps.success": "Set max FPS to %s",
+  "commands.cfps.unlimited": "Set max FPS to unlimited",
 
   "commands.cfunction.limitReached": "Command limit (%s) reached",
   "commands.cfunction.success": "Ran %s commands from function %s",
