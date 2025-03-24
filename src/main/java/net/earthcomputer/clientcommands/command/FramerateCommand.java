@@ -23,13 +23,13 @@ public class FramerateCommand {
                 .suggests((context, builder) -> builder.suggest(MAX_REFRESH_RATE.getAsInt()).buildFuture())
                 .executes(ctx -> maxFps(ctx.getSource(), getInteger(ctx, "maxfps"))))
             .then(literal("unlimited")
-                .executes(ctx -> maxFps(ctx.getSource(), MAX_REFRESH_RATE.getAsInt()))));
+                .executes(ctx -> maxFps(ctx.getSource(), MAX_REFRESH_RATE.getAsInt() + 1))));
     }
 
     private static int maxFps(FabricClientCommandSource source, int maxFps) {
         int maxRefreshRate = MAX_REFRESH_RATE.getAsInt();
         boolean unlimited;
-        if (maxFps >= maxRefreshRate) {
+        if (maxFps > maxRefreshRate) {
             maxFps = maxRefreshRate;
             unlimited = true;
         } else {

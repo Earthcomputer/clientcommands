@@ -11,6 +11,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class MinecraftMixin {
     @ModifyConstant(method = "runTick", constant = @Constant(intValue = Options.UNLIMITED_FRAMERATE_CUTOFF))
     private int changeCutoff(int original) {
-        return FramerateCommand.MAX_REFRESH_RATE.getAsInt();
+        return FramerateCommand.MAX_REFRESH_RATE.getAsInt() + 1;
     }
 }
