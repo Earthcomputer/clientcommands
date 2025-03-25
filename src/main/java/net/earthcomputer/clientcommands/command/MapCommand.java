@@ -222,7 +222,7 @@ public class MapCommand {
             throw FAILED_SAVE_EXCEPTION.create();
         }
 
-        source.sendFeedback(Component.translatable(world ? "commands.cmap.success.world" : "commands.cmap.success.hand", Component.literal(imageFile.getName())
+        source.sendFeedback(Component.translatable(world ? "commands.cmap.export.success.world" : "commands.cmap.export.success.hand", Component.literal(imageFile.getName())
             .withStyle(ChatFormatting.UNDERLINE)
             .withStyle(s -> s.withClickEvent(new ClickEvent.OpenFile(imageFile.getAbsoluteFile())))));
 

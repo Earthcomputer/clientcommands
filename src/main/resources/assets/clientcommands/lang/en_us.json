@@ -198,10 +198,10 @@
   "commands.clisten.sentPacket": "Sent the following packet: %s",
   "commands.clisten.unknownPacket": "Unknown packet %s",
 
-  "commands.cmap.noHeldMap": "You are not holding or looking at a map",
+  "commands.cmap.export.success.hand": "Saved held map successfully as %s",
+  "commands.cmap.export.success.world": "Saved target map successfully as %s",
   "commands.cmap.failedSave": "Failed to save map to file",
-  "commands.cmap.success.hand": "Saved held map successfully as %s",
-  "commands.cmap.success.world": "Saved target map successfully as %s",
+  "commands.cmap.noHeldMap": "You are not holding or looking at a map",
 
   "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
 
