@@ -41,6 +41,10 @@ accessible field net/minecraft/network/codec/IdDispatchCodec toId Lit/unimi/dsi/
 # cpermissionlevel
 accessible method net/minecraft/client/player/LocalPlayer getPermissionLevel ()I
 
+# cposteffect
+accessible field net/minecraft/client/renderer/GameRenderer BLUR_POST_CHAIN_ID Lnet/minecraft/resources/ResourceLocation;
+accessible method net/minecraft/client/renderer/GameRenderer setPostEffect (Lnet/minecraft/resources/ResourceLocation;)V
+
 # cwaypoint
 accessible field net/minecraft/server/MinecraftServer storageSource Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)F
