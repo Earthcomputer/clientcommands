@@ -5,6 +5,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.logging.LogUtils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Screenshot;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Vector2i;
 import org.joml.Vector4i;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class MapCommand {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final SimpleCommandExceptionType NO_HELD_MAP_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cmap.noHeldMap"));
     private static final SimpleCommandExceptionType FAILED_SAVE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cmap.failedSave"));
@@ -113,7 +116,17 @@ public class MapCommand {
         Map<BlockPos, ItemFrame> frames = StreamSupport.stream(level.entitiesForRendering().spliterator(), true)
             .filter(e -> e instanceof ItemFrame itemFrame && itemFrame.getDirection() == direction)
             .map(ItemFrame.class::cast)
-            .collect(Collectors.toMap(ItemFrame::getPos, Function.identity()));
+            .collect(Collectors.toMap(ItemFrame::getPos, Function.identity(), (a, b) -> {
+                boolean aHas = a.getItem().has(DataComponents.MAP_ID);
+                boolean bHas = b.getItem().has(DataComponents.MAP_ID);
+                if (aHas && bHas) {
+                    LOGGER.warn("More than one map item frame found at {}.", a.getPos());
+                }
+                if (aHas) {
+                    return a;
+                }
+                return b;
+            }));
 
         // dfs
         BlockPos initialPos = frame.getPos();
