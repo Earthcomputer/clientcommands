@@ -227,7 +227,7 @@
   "commands.cpos.level.the_nether": "the Nether",
 
   "commands.cposteffect.apply.success": "Successfully applied post effect %s",
-  "commands.cposteffect.reset.success":"Successfully reset post effect",
+  "commands.cposteffect.reset.success": "Successfully reset post effect",
   "commands.cposteffect.unknownPostEffect": "Unknown post effect %s",
 
   "commands.crelog.failed": "Failed to relog",
