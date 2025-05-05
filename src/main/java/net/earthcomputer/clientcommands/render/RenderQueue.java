@@ -41,7 +41,7 @@ public class RenderQueue {
 
     static {
         ClientTickEvents.START_CLIENT_TICK.register(RenderQueue::tick);
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(context -> {
             RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.LINES_NO_DEPTH_LAYER), context);
         });
     }
