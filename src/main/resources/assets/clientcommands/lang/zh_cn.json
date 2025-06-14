@@ -410,9 +410,9 @@
 
   "twoPlayerGame.chat.draw": "您已经采取了行动，并在%s中绘制了%s",
   "twoPlayerGame.chat.lost": "%s已经在%s中做出了一个行动并赢了",
-  "twoPlayerGame.chat.won": "你已经在%中做出了一个行动并击败了%s!",
+  "twoPlayerGame.chat.won": "你已经在%s中做出了一个行动并击败了%s!",
   "twoPlayerGame.clickToMakeYourMove": "单击此处以行动",
-  "twoPlayerGame.incoming": "%s已经在%中做出了一个行动s",
+  "twoPlayerGame.incoming": "%s已经在%s中做出了一个行动",
   "twoPlayerGame.noGameWithPlayer": "目前没有和那个玩家一起玩游戏",
   "twoPlayerGame.playerNotFound": "玩家未找到"
 }
