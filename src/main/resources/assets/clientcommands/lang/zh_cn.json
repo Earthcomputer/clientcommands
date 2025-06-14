@@ -62,13 +62,13 @@
   "commands.ccalcstack.success.empty.exact": "%s个物品是正好%s组",
   "commands.ccalcstack.success.exact": "%s个%s是正好%s组",
 
-  "commands.ccallback.failed": "未知或过期的callback",
+  "commands.ccallback.failed": "未知或过期的回调",
 
   "commands.cconnectfour.name": "四子棋",
 
   "commands.ccrackrng.failed": "破解玩家随机种子失败",
   "commands.ccrackrng.failed.help": "提示：RNG控制并不在一些被修改过的服务器有效，特别是Paper端",
-  "commands.ccrackrng.failed.unexpectedCall": "由于意外的RNG call而无法破解玩家种子：%s",
+  "commands.ccrackrng.failed.unexpectedCall": "由于意外的RNG调用而无法破解玩家种子：%s",
   "commands.ccrackrng.retries": "正在破解玩家随机种子，尝试次数：%s/%s",
   "commands.ccrackrng.starting": "正在破解玩家随机种子",
   "commands.ccrackrng.success": "成功破解玩家随机种子：%s",
@@ -92,7 +92,7 @@
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测",
   "commands.cenchant.success": "正在开始操控附魔…",
   "commands.cenchant.uncracked": "你需要先破解随机种子",
-  "commands.cenchant.unexpectedCall": "由于意外的RNG call而导致停止附魔操纵：%s",
+  "commands.cenchant.unexpectedCall": "由于意外的RNG调用而导致停止附魔操纵：%s",
 
   "commands.cfind.found": "找到%s位于%s，%s格远",
   "commands.cfind.keepSearching.success": "正在搜寻实体",
