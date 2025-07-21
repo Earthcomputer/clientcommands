@@ -148,6 +148,7 @@ public class ClientCommands implements ClientModInitializer {
         CTellRawCommand.register(dispatcher, context);
         CTimeCommand.register(dispatcher);
         CTitleCommand.register(dispatcher, context);
+        EnchantmentDatabaseCommand.register(dispatcher, context);
         FindBlockCommand.register(dispatcher, context);
         FindCommand.register(dispatcher);
         FindItemCommand.register(dispatcher, context);
