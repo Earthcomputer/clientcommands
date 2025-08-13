@@ -54,7 +54,8 @@
     "rngevents.droppableinventory.ItemCombinerMenuMixin",
     "rngevents.droppableinventory.LoomMenuMixin",
     "rngevents.droppableinventory.MerchantMenuMixin",
-    "rngevents.droppableinventory.StonecutterMenuMixin"
+    "rngevents.droppableinventory.StonecutterMenuMixin",
+    "simplewaypoints.WaypointCommandMixin"
   ],
   "injectors": {
     "defaultRequire": 1
