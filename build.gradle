@@ -61,6 +61,7 @@ dependencies {
 
 	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
+	include modImplementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
 	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_feature_version}"
 	includedLibrary "com.seedfinding:mc_biome:${project.seedfinding_biome_version}"

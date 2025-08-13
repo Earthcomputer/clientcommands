@@ -301,15 +301,6 @@
   "commands.cvar.remove.success": "成功删除变量“%s”",
   "commands.cvar.saveFile.failed": "无法保存变量文件",
 
-  "commands.cwaypoint.add.success": "成功添加导航点“%s”位于%s在%s",
-  "commands.cwaypoint.alreadyExists": "名称为“%s”的导航点已经存在",
-  "commands.cwaypoint.edit.success": "导航点“%s”已成功修改到%s在%s",
-  "commands.cwaypoint.list": "- “%s”位于%s在%s",
-  "commands.cwaypoint.list.empty": "没有可用的导航点",
-  "commands.cwaypoint.notFound": "找不到名称为“%s”的导航点",
-  "commands.cwaypoint.remove.success": "导航点“%s”已被移除",
-  "commands.cwaypoint.saveFailed": "无法保存导航点文件",
-
   "commands.cwe.playerNotFound": "未找到玩家",
 
   "commands.cweather.reset": "停止天气覆盖",

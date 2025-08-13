@@ -7,6 +7,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.simplewaypoints.SimpleWaypoints;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.earthcomputer.clientcommands.features.CommandExecutionCustomPayload;
@@ -25,11 +26,14 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,6 +67,8 @@ public class ClientCommands implements ClientModInitializer {
             LOGGER.error("Failed to create config dir", e);
         }
 
+        migrateWaypoints();
+
         new ModConfigBuilder<>("clientcommands", Configs.class).build();
         ClientConnectionEvents.DISCONNECT.register(() -> {
             if (!Relogger.isRelogging) {
@@ -82,7 +88,53 @@ public class ClientCommands implements ClientModInitializer {
         FishingCracker.registerEvents();
         PlayerRandCracker.registerEvents();
         ServerBrandManager.registerEvents();
-        WaypointCommand.registerEvents();
+    }
+
+    private static void migrateWaypoints() {
+        Path clientcommandsWaypointsPath = CONFIG_DIR.resolve("waypoints.dat");
+        if (!Files.isRegularFile(clientcommandsWaypointsPath)) {
+            return; // nothing to migrate, or migration already done
+        }
+        LOGGER.info("clientcommands' waypoints.dat file detected, will be migrated to SimpleWaypoints");
+        Path clientcommandsOldWaypointsPath = CONFIG_DIR.resolve("waypoints.dat_old");
+        boolean deleteOld;
+        try {
+            Files.copy(clientcommandsWaypointsPath, clientcommandsOldWaypointsPath, StandardCopyOption.REPLACE_EXISTING);
+            deleteOld = true;
+        } catch (IOException e) {
+            LOGGER.error("Could not back up waypoints.dat file", e);
+            deleteOld = false;
+        }
+        Path simplewaypointsWaypointsPath = SimpleWaypoints.MOD_CONFIG_PATH.resolve("waypoints.dat");
+        if (Files.isRegularFile(simplewaypointsWaypointsPath)) {
+            LOGGER.info("SimpleWaypoints' waypoints.dat file already exists, clientcommands' waypoints.dat file will be merged");
+            try {
+                CompoundTag clientcommandsCompoundTag = NbtIo.read(clientcommandsWaypointsPath);
+                CompoundTag simplewaypointsCompoundTag = NbtIo.read(simplewaypointsWaypointsPath);
+                if (clientcommandsCompoundTag == null || simplewaypointsCompoundTag == null) {
+                    throw new IOException("Could not parse clientcommands' or SimpleWaypoints' waypoint.dat file");
+                }
+                simplewaypointsCompoundTag.merge(clientcommandsCompoundTag);
+                NbtIo.write(simplewaypointsCompoundTag, simplewaypointsWaypointsPath);
+            } catch (IOException e) {
+                LOGGER.error("Could not merge waypoints.dat file", e);
+            }
+        } else {
+            LOGGER.info("SimpleWaypoints' waypoints.dat does not exist yet, clientcommands' waypoints.dat file will be copied");
+            try {
+                Files.copy(clientcommandsWaypointsPath, simplewaypointsWaypointsPath);
+            } catch (IOException e) {
+                LOGGER.error("Could not migrate waypoints.dat file", e);
+            }
+        }
+        if (deleteOld) {
+            LOGGER.info("clientcommands's waypoint.dat will be deleted, waypoints.dat_old is kept");
+            try {
+                Files.delete(clientcommandsWaypointsPath);
+            } catch (IOException e) {
+                LOGGER.error("Could not delete waypoints.dat file during migration", e);
+            }
+        }
     }
 
     private static void setupScrambleWindowTitle() {
@@ -186,7 +238,6 @@ public class ClientCommands implements ClientModInitializer {
         UsageTreeCommand.register(dispatcher);
         UuidCommand.register(dispatcher);
         VarCommand.register(dispatcher);
-        WaypointCommand.register(dispatcher);
         WeatherCommand.register(dispatcher);
         WhisperEncryptedCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
