@@ -182,6 +182,7 @@ modrinth {
 	dependencies {
 		required.project 'fabric-api'
 		embedded.project 'betterconfig'
+		embedded.project 'simplewaypoints'
 	}
 }
 tasks.modrinth.onlyIf {
