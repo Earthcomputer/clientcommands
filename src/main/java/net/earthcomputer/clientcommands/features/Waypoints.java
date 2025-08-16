@@ -23,6 +23,7 @@ public final class Waypoints {
         if (!Files.isRegularFile(clientcommandsWaypointsPath)) {
             return; // nothing to migrate, or migration already done
         }
+
         LOGGER.info("clientcommands' waypoints.dat file detected, will be migrated to SimpleWaypoints");
         Path clientcommandsOldWaypointsPath = ClientCommands.CONFIG_DIR.resolve("waypoints.dat_old");
         boolean deleteOld;
@@ -33,6 +34,7 @@ public final class Waypoints {
             LOGGER.error("Could not back up waypoints.dat file", e);
             deleteOld = false;
         }
+
         Path simplewaypointsWaypointsPath = SimpleWaypoints.MOD_CONFIG_PATH.resolve("waypoints.dat");
         if (Files.isRegularFile(simplewaypointsWaypointsPath)) {
             LOGGER.info("SimpleWaypoints' waypoints.dat file already exists, clientcommands' waypoints.dat file will be merged");
@@ -55,6 +57,7 @@ public final class Waypoints {
                 LOGGER.error("Could not migrate waypoints.dat file", e);
             }
         }
+
         if (deleteOld) {
             LOGGER.info("clientcommands's waypoint.dat will be deleted, waypoints.dat_old is kept");
             try {
