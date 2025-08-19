@@ -35,6 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -266,5 +267,24 @@ class PreviewScreen extends AbstractContainerScreen<InventoryMenu> {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         return false;
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+
+        return true;
     }
 }
