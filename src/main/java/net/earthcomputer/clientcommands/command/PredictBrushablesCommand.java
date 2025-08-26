@@ -49,11 +49,11 @@ public class PredictBrushablesCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         var cpredictbrushables = dispatcher.register(literal("cpredictbrushables")
-            .executes(ctx -> predictSuspiciousSand(ctx, Component.translatable("commands.cpredictbrushables.starting"))));
+            .executes(ctx -> predictBrushables(ctx, Component.translatable("commands.cpredictbrushables.starting"))));
         FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cpredictbrushables, ctx -> true);
     }
 
-    public static int predictSuspiciousSand(CommandContext<FabricClientCommandSource> ctx, Component startingMessage) throws CommandSyntaxException {
+    public static int predictBrushables(CommandContext<FabricClientCommandSource> ctx, Component startingMessage) throws CommandSyntaxException {
         boolean keepSearching = getFlag(ctx, FLAG_KEEP_SEARCHING);
         sendFeedback(startingMessage);
         TaskManager.addTask("cpredictbrushables", new PredictBrushablesTask(keepSearching));
