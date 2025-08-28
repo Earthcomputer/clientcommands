@@ -73,7 +73,7 @@ public class ClientCommandHelper {
     }
 
     public static Component getGlowButtonTextComponent(BlockPos pos) {
-        return getCommandTextComponent(Component.translatable("commands.client.glow"), String.format("/cglow block %d %d %d 10", pos.getX(), pos.getY(), pos.getZ()));
+        return getCommandTextComponent(Component.translatable("commands.client.glow"), String.format("/cglow block %d %d %d 60", pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static Component getGlowButtonTextComponent(Entity entity) {
