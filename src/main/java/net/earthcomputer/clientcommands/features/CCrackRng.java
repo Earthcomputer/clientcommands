@@ -5,7 +5,6 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -48,11 +47,20 @@ public class CCrackRng {
             }
 
             @Override
-            protected void onFailedToThrowItem() {
-                Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("itemCrack.notEnoughItems").withStyle(ChatFormatting.RED));
-                EnchantmentCracker.LOGGER.info("Unable to use rng SeedCracker |not enough items|");
+            protected void onFailedToThrowItem(PlayerRandCracker.ThrowItemsResult throwItemsResult) {
+                super.onFailedToThrowItem(throwItemsResult);
                 Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
                 currentTaskName = null;
+            }
+
+            @Override
+            protected void onUnexpectedRNGCall(PlayerRandCracker.RNGCallType callType) {
+                ClientCommandHelper.sendError(Component.translatable("commands.ccrackrng.failed.unexpectedCall", callType.getResetMessage()));
+            }
+
+            @Override
+            protected boolean requireCrackedRNG() {
+                return false;
             }
 
             @Override

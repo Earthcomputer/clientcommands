@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,9 +35,9 @@ public class Cuboid extends Shape {
     }
 
     @Override
-    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float delta) {
+    public void render(VertexConsumer vertexConsumer, WorldRenderContext context) {
         for (Line edge : this.edges) {
-            edge.renderLine(poseStack, vertexConsumer, delta, prevPos.subtract(getPos()));
+            edge.renderLine(vertexConsumer, context, prevPos.subtract(getPos()));
         }
     }
 

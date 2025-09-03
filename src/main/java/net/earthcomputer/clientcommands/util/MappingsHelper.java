@@ -59,7 +59,7 @@ public final class MappingsHelper {
     }
 
     private static final CompletableFuture<MemoryMappingTree> mojmapOfficial = Util.make(() -> {
-        String version = DetectedVersion.BUILT_IN.getName();
+        String version = DetectedVersion.BUILT_IN.name();
         try (BufferedReader reader = Files.newBufferedReader(MAPPINGS_DIR.resolve(version + ".txt"))) {
             MemoryMappingTree tree = new MemoryMappingTree();
             MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);

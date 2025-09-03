@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -162,10 +162,8 @@ public class MinesweeperCommand {
 
         @Override
         public void render(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
-            renderBackground(graphics, mouseX, mouseY, tickDelta);
-
-            graphics.drawString(minecraft.font, I18n.get("minesweeperGame.minesLeft", minesLeft), topLeftX, topLeftY - 10, 0xFFFFFF);
-            graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFF);
+            graphics.drawString(minecraft.font, I18n.get("minesweeperGame.minesLeft", minesLeft), topLeftX, topLeftY - 10, 0xFFFFFFFF);
+            graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFFFF);
             {
                 String str = I18n.get("minesweeperGame.timePlayed", Math.ceilDiv(ticksPlaying, 20));
                 int color;
@@ -203,7 +201,7 @@ public class MinesweeperCommand {
         }
 
         public void blitSprite(GuiGraphics graphics, Vector2i uv, int x, int y, int width, int height) {
-            graphics.blit(RenderType::guiTextured, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
         }
 
         @Override

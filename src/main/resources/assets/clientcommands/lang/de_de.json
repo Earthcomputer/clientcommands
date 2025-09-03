@@ -282,9 +282,7 @@
   "enchCrack.xpSeed.many": "Anzahl der möglichen XP-Seeds: %s",
   "enchCrack.xpSeed.one": "XP-Seed: %s",
 
-  "itemCrack.notEnoughItems": "Kann RNG-SeedCracker nicht benutzen: Nicht genug Gegenstände in der Hand des Spielers",
-
-  "playerManip.notEnoughItems": "Nicht genug Gegenstände (%s von %s), um Seed zu manipulieren",
+  "playerManip.notEnoughItems": "Nicht genug Gegenstände, um Seed zu manipulieren",
   "playerManip.reset": "Starte Spieler-RNG-Manipulation neu. Grund: %s",
   "playerManip.reset.advancement": "Fortschritt erzielt",
   "playerManip.reset.amethystChime": "Auf einen Amethystkristall gestiegen",
@@ -318,9 +316,7 @@
   "playerManip.state.ench_cracking_1": "Knacke Verzauberungsseed 1",
   "playerManip.state.ench_cracking_2": "Knacke Verzauberungsseed 2",
   "playerManip.state.half_cracked": "Halb Geknackt",
-  "playerManip.state.manipulating_enchantments": "Manipuliere Verzauberungen",
   "playerManip.state.uncracked": "Ungeknackt",
-  "playerManip.state.waiting_dummy_enchant": "Warte auf eine Dummy-Verzauberung",
   "playerManip.throwError": "Bedingung nicht möglich oder würde mehr als %s Würfe von Gegenstände erfordern",
   "playerManip.toolBreakWarning": "Warnung: Werkzeug hat nur mehr %s Haltbarkeit übrig",
   "playerManip.uncracked": "Spieler-Seed muss geknackt sein",

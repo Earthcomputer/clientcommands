@@ -12,10 +12,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -106,8 +108,16 @@ public class DebugRandom extends LegacyRandomSource {
 
     private void handleStackTrace(int stackTrace) {
         this.stackTracesThisTick.add(stackTrace);
-        try {
-            NbtIo.writeUnnamedTagWithFallback(firstTick ? new CompoundTag() : entity.saveWithoutId(new CompoundTag()), nbtStream);
+        try (ProblemReporter.ScopedCollector collector = new ProblemReporter.ScopedCollector(LOGGER)) {
+            CompoundTag tagToSave;
+            if (firstTick) {
+                tagToSave = new CompoundTag();
+            } else {
+                TagValueOutput output = TagValueOutput.createWithContext(collector, entity.level().registryAccess());
+                entity.saveWithoutId(output);
+                tagToSave = output.buildResult();
+            }
+            NbtIo.writeUnnamedTagWithFallback(tagToSave, nbtStream);
         } catch (IOException e) {
             throw new AssertionError(e);
         }

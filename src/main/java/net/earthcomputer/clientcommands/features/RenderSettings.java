@@ -44,7 +44,7 @@ public class RenderSettings {
         if (minecraft.player == null) {
             return;
         }
-        FabricClientCommandSource source = (FabricClientCommandSource) new ClientSuggestionProvider(minecraft.getConnection(), minecraft);
+        FabricClientCommandSource source = (FabricClientCommandSource) new ClientSuggestionProvider(minecraft.getConnection(), minecraft, false);
 
         disabledEntities.clear();
         for (var filter : entityRenderSelectors) {

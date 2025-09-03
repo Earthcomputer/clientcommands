@@ -72,7 +72,7 @@ public abstract sealed class MultiVersionCompat {
 
         @Override
         public String getProtocolName() {
-            return SharedConstants.getCurrentVersion().getName();
+            return SharedConstants.getCurrentVersion().name();
         }
     }
 

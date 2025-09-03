@@ -266,9 +266,7 @@
   "enchCrack.xpSeed.many": "可能性のあるXPシード: %s",
   "enchCrack.xpSeed.one": "XPシード: %s",
 
-  "itemCrack.notEnoughItems": "RNGシードクラッカの使用に失敗しました: 十分なアイテムがありません",
-
-  "playerManip.notEnoughItems": "シードを操作するためのアイテムが不足しています (%s 分の %s)",
+  "playerManip.notEnoughItems": "シードを操作するためのアイテムが不足しています",
   "playerManip.reset": "RNG操作を再度開始しています、 理由は次のとおりです: %s",
   "playerManip.reset.advancement": "進捗の達成",
   "playerManip.reset.amethystChime": "アメジストのクリスタルのを上を歩きました",
@@ -302,9 +300,7 @@
   "playerManip.state.ench_cracking_1": "エンチャントシード 1 をクラックしています",
   "playerManip.state.ench_cracking_2": "エンチャントシード 2 をクラックしています",
   "playerManip.state.half_cracked": "半分のクラックに成功しました",
-  "playerManip.state.manipulating_enchantments": "エンチャントを操作しています",
   "playerManip.state.uncracked": "未クラック",
-  "playerManip.state.waiting_dummy_enchant": "ダミーエンチャントを待っています",
   "playerManip.throwError": "その状態は不可能であるか %s 回以上のアイテムを投げることが必要です",
   "playerManip.toolBreakWarning": "警告: ツールはあと %s の耐久値しかありません",
   "playerManip.uncracked": "プレイヤーシードがクラックされている必要があります",

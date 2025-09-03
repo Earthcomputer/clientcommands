@@ -52,21 +52,23 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "pushEntities", at = @At("HEAD"))
     private void onEntityCramming(CallbackInfo ci) {
         if (isThePlayer() && level().getEntities(this, getBoundingBox(), Entity::isPushable).size() >= 24) {
-            PlayerRandCracker.onEntityCramming();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.ENTITY_CRAMMING);
         }
     }
 
     @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isAlive()Z", ordinal = 0))
     private void onUnderwater(CallbackInfo ci) {
         if (isThePlayer() && isAlive() && isEyeInFluid(FluidTags.WATER)) {
-            PlayerRandCracker.onUnderwater();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.SWIM);
         }
     }
 
     @Inject(method = "breakItem", at = @At("HEAD"))
     private void onEquipmentBreak(ItemStack stack, CallbackInfo ci) {
         if (isThePlayer()) {
-            PlayerRandCracker.onEquipmentBreak();
+            if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_13_2) {
+                PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.ITEM_BREAK);
+            }
         }
     }
 
@@ -86,14 +88,16 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "updateFallFlying", at = @At("HEAD"))
     private void onUpdateFallFlying(CallbackInfo ci) {
         if (isThePlayer()) {
-            PlayerRandCracker.onFallFlying();
+            if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21_2) {
+                PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.FALL_FLYING);
+            }
         }
     }
 
     @Inject(method = "tickEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isInvisible()Z"))
     private void onPotionParticles(CallbackInfo ci) {
         if (isThePlayer()) {
-            PlayerRandCracker.onPotionParticles();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.POTION);
         }
     }
 
@@ -117,7 +121,7 @@ public abstract class LivingEntityMixin extends Entity {
                                 BlockState offsetState = level().getBlockState(offsetPos);
                                 if (offsetState == FrostedIceBlock.meltsInto() && level().isUnobstructed(frostedIce, offsetPos, CollisionContext.empty())) {
                                     if (level().isEmptyBlock(offsetPos.above())) {
-                                        PlayerRandCracker.onFrostWalker();
+                                        PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.FROST_WALKER);
                                     }
                                 }
                             }
@@ -136,14 +140,14 @@ public abstract class LivingEntityMixin extends Entity {
 
         boolean hasSoulSpeed = CUtil.getEnchantmentLevel(Enchantments.SOUL_SPEED, (LivingEntity) (Object) this) > 0;
         if (hasSoulSpeed && level().getBlockState(getBlockPosBelowThatAffectsMyMovement()).is(BlockTags.SOUL_SPEED_BLOCKS)) {
-            PlayerRandCracker.onSoulSpeed();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.SOUL_SPEED);
         }
     }
 
     @Inject(method = "handleDamageEvent", at = @At("HEAD"))
     private void onHandleDamageEvent(CallbackInfo ci) {
         if (isThePlayer()) {
-            PlayerRandCracker.onDamage();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.PLAYER_HURT);
         }
     }
 

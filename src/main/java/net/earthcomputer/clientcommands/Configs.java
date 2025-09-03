@@ -1,6 +1,9 @@
 package net.earthcomputer.clientcommands;
 
+import com.google.common.base.Suppliers;
+import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.Config;
+import dev.xpple.betterconfig.api.ModConfig;
 import net.earthcomputer.clientcommands.command.ReplyCommand;
 import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
@@ -8,12 +11,19 @@ import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.ServerBrandManager;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 
 public class Configs {
+    private static final Supplier<ModConfig<Component>> CONFIG_REF = Suppliers.memoize(() -> BetterConfigAPI.getInstance().getModConfig("clientcommands"));
+
+    public static void save() {
+        CONFIG_REF.get().save();
+    }
 
     @Config(readOnly = true, temporary = true)
     public static double calcAnswer = 0;
@@ -182,4 +192,7 @@ public class Configs {
     public static void setMinimumReplyDelaySeconds(float minimumReplyDelaySeconds) {
         Configs.minimumReplyDelaySeconds = Math.clamp(minimumReplyDelaySeconds, 0.0f, ReplyCommand.MAXIMUM_REPLY_DELAY_SECONDS);
     }
+
+    @Config(readOnly = true)
+    public static int overriddenFps = 0;
 }

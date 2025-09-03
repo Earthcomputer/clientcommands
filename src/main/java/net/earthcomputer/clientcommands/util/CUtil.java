@@ -3,9 +3,14 @@ package net.earthcomputer.clientcommands.util;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -14,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -21,6 +27,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public final class CUtil {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final DynamicCommandExceptionType REGEX_TOO_SLOW_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.client.regexTooSlow", arg));
 
     private CUtil() {
@@ -64,6 +71,19 @@ public final class CUtil {
             return 0;
         }
         return Arrays.stream(EquipmentSlot.values()).mapToInt(slot -> entity.getItemBySlot(slot).getEnchantments().getLevel(enchHolder.get())).max().orElse(0);
+    }
+
+    public static Optional<ItemStack> parseItemStack(HolderLookup.Provider registries, Tag nbt) {
+        return ItemStack.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), nbt)
+            .resultOrPartial(error -> LOGGER.error("Tried to load invalid item: '{}'", error));
+    }
+
+    public static CompoundTag saveItemStack(HolderLookup.Provider registries, ItemStack stack) {
+        if (stack.isEmpty()) {
+            throw new IllegalStateException("Cannot encode empty ItemStack");
+        }
+
+        return (CompoundTag) ItemStack.CODEC.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow();
     }
 
     private static class FusedRegexInput implements CharSequence {

@@ -1,9 +1,9 @@
 package net.earthcomputer.clientcommands.mixin.commands.listen;
 
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import net.earthcomputer.clientcommands.command.ListenCommand;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +26,7 @@ public class ConnectionMixin {
     }
 
     @Inject(method = "doSendPacket", at = @At("HEAD"))
-    private void onPacketSend(Packet<?> packet, @Nullable PacketSendListener sendListener, boolean flush, CallbackInfo ci) {
+    private void onPacketSend(Packet<?> packet, @Nullable ChannelFutureListener sendListener, boolean flush, CallbackInfo ci) {
         if (this.receiving == PacketFlow.CLIENTBOUND) {
             ListenCommand.onPacket(packet, ListenCommand.PacketFlow.SERVERBOUND);
         }

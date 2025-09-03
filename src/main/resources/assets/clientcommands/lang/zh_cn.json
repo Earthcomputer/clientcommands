@@ -3,9 +3,16 @@
   "c2cpacket.malformedPacket": "你收到了一个格式错误的客户端到客户端数据包：",
   "c2cpacket.messageC2CPacket.incoming": "%s -> 你：%s",
   "c2cpacket.messageC2CPacket.outgoing": "你 -> %s：%s",
+  "c2cpacket.messageTooLong": "消息太长（最多255个字符）得到%s个字符",
   "c2cpacket.publicKeyNotFound": "未找到公共密匙",
   "c2cpacket.receivedC2CPacket": "你收到了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！悬停以查看原始数据包",
   "c2cpacket.sentC2CPacket": "你发送了一个客户端到客户端数据包，但你不接受传入客户端到客户端的数据包！",
+  "c2cpacket.startTwoPlayerGameC2CPacket.incoming": "%s邀请您参加%s的游戏",
+  "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept": "同意",
+  "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover": "点击以同意",
+  "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted": "%s已经接受了你的邀请%s",
+  "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept": "接受邀请，你的对手将先走",
+  "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited": "你邀请%s参加%s的游戏",
 
   "chorusManip.goalTooFar": "目标过远！",
   "chorusManip.landing.failed": "降落操作不可用",
@@ -33,6 +40,8 @@
   "commands.cbook.commandException": "你没有手握书本",
   "commands.cbook.success": "成功编辑书本",
 
+  "commands.cbuildinfo.success": "运行clientcommands在%s版本上(%s@{%s})",
+
   "commands.ccalc.expected": "期望的标识符%s",
   "commands.ccalc.invalidArgumentCount": "函数“%s”无法接受%s个自变量",
   "commands.ccalc.parse": "表达式解析结果：%s",
@@ -53,8 +62,13 @@
   "commands.ccalcstack.success.empty.exact": "%s个物品是正好%s组",
   "commands.ccalcstack.success.exact": "%s个%s是正好%s组",
 
+  "commands.ccallback.failed": "未知或过期的回调",
+
+  "commands.cconnectfour.name": "四子棋",
+
   "commands.ccrackrng.failed": "破解玩家随机种子失败",
   "commands.ccrackrng.failed.help": "提示：RNG控制并不在一些被修改过的服务器有效，特别是Paper端",
+  "commands.ccrackrng.failed.unexpectedCall": "由于意外的RNG调用而无法破解玩家种子：%s",
   "commands.ccrackrng.retries": "正在破解玩家随机种子，尝试次数：%s/%s",
   "commands.ccrackrng.starting": "正在破解玩家随机种子",
   "commands.ccrackrng.success": "成功破解玩家随机种子：%s",
@@ -78,8 +92,9 @@
   "commands.cenchant.needEnchantingPrediction": "本命令需要启用附魔预测",
   "commands.cenchant.success": "正在开始操控附魔…",
   "commands.cenchant.uncracked": "你需要先破解随机种子",
+  "commands.cenchant.unexpectedCall": "由于意外的RNG调用而导致停止附魔操纵：%s",
 
-  "commands.cfind.found": "在%2$s找到%1$s, 距离你%3$s格",
+  "commands.cfind.found": "找到%s位于%s，%s格远",
   "commands.cfind.keepSearching.success": "正在搜寻实体",
   "commands.cfind.noMatch": "未找到匹配查找条件的实体",
   "commands.cfind.success": "找到%s个匹配查找条件的实体",
@@ -88,7 +103,7 @@
   "commands.cfindblock.starting": "正在搜索：%s",
   "commands.cfindblock.success": "离你最近的匹配方块在%s，距离你%s格",
 
-  "commands.cfinditem.match": "在%3$s找到了%1$s个%2$s",
+  "commands.cfinditem.match": "%s个%s被找到于%s",
   "commands.cfinditem.match.entity": "%s个%s在%s中被找到，位于%s",
   "commands.cfinditem.starting": "正在搜索%s",
   "commands.cfinditem.starting.keepSearching": "正在持续搜索%s",
@@ -116,6 +131,12 @@
 
   "commands.cfov.success": "将视场角设为%s",
 
+  "commands.cfps.getMaxFps": "最大FPS是%s",
+  "commands.cfps.getMaxFps.unlimited": "最大FPS是无限",
+  "commands.cfps.resetMaxFps.success": "停止重写最大FPS",
+  "commands.cfps.setMaxFps": "设置最大FPS为%s",
+  "commands.cfps.setMaxFps.unlimited": "设置最大FPS为无限",
+
   "commands.cfunction.limitReached": "已达到命令限制（%s）",
   "commands.cfunction.success": "从函数%s中运行%s个命令",
 
@@ -129,6 +150,7 @@
   "commands.cghostblock.fill.success": "成功填充%s个幽灵方块",
   "commands.cghostblock.set.success": "成功放置幽灵方块",
 
+  "commands.cgive.noSpace": "你的背包中没有空间存放这些物品",
   "commands.cgive.notCreative": "仅创造模式玩家可以将物品给予自己",
   "commands.cgive.success": "成功给予%s个%s给自己",
 
@@ -155,6 +177,7 @@
 
   "commands.client.blockpos": "(%s，%s，%s)",
   "commands.client.cancel": "取消",
+  "commands.client.componentTooDeeplyNested": "聊天组件嵌套过深",
   "commands.client.crack": "破解",
   "commands.client.enable": "启用",
   "commands.client.expectedRegex": "无效的正则表达式%s",
@@ -183,6 +206,11 @@
   "commands.clisten.sentPacket": "发送了以下数据包：%s",
   "commands.clisten.unknownPacket": "未知数据包%s",
 
+  "commands.cmap.export.success.hand": "成功保存手持地图为%s",
+  "commands.cmap.export.success.world": "成功保存准心地图为%s",
+  "commands.cmap.failedSave": "保存地图到文件失败",
+  "commands.cmap.noHeldMap": "你没有持有或看向地图",
+
   "commands.cminesweeper.tooManyMines": "地雷数量过多，必须在0到9之间并小于砖块总数",
 
   "commands.cparticle.success": "成功显示粒子效果%s",
@@ -210,7 +238,18 @@
 
   "commands.crender.entities.success": "实体渲染规则已更新",
 
+  "commands.creply.messageTooLong": "你的回复太长（最大：%s，给定：%s）",
+  "commands.creply.noTargetFound": "找不到回复目标",
+
   "commands.csignsearch.starting": "正在搜索告示牌",
+
+  "commands.csnap.airborne": "你在空中时不能移动",
+  "commands.csnap.cannotFit": "玩家无法适应该位置",
+  "commands.csnap.clickToTeleportDisabled": "禁用点击传送",
+  "commands.csnap.clickToTeleportEnabled": "启用点击传输",
+  "commands.csnap.success": "移动到 %s %s %s",
+  "commands.csnap.tooFar": "你只能移动到最远1方块的位置",
+  "commands.csnap.wall": "你不能移动到墙上",
 
   "commands.cstartup.add.success": "在启动文件中添加了命令",
   "commands.cstartup.couldNotCreateFile": "无法创建启动文件",
@@ -226,6 +265,8 @@
   "commands.ctask.list.success": "%s个任务正在执行",
   "commands.ctask.stop.noMatch": "没有匹配的任务",
   "commands.ctask.stop.success": "已停止%s个任务",
+
+  "commands.ctictactoe.name": "井字棋",
 
   "commands.ctime.reset.success": "当前时间与服务器相同",
 
@@ -267,8 +308,21 @@
   "commands.cwiki.failed": "未能获取维基内容",
   "commands.cwiki.noContent": "那篇文章中没有用于介绍的段落",
 
+  "connectFourGame.draw": "绘制！",
+  "connectFourGame.lost": "失败！",
+  "connectFourGame.opponentMove": "你正在等待你的对手...",
+  "connectFourGame.pieceRed": "红色",
+  "connectFourGame.pieceSet": "你正在玩的是%s棋子",
+  "connectFourGame.pieceYellow": "黄色",
+  "connectFourGame.title": "四子棋对抗%s",
+  "connectFourGame.won": "获胜！",
+  "connectFourGame.yourMove": "这是你的行动",
+
   "enchCrack.addInfo": "添加信息",
   "enchCrack.bookshelfCount": "书架数量：%s",
+  "enchCrack.bookshelfCount.actual": "实际书架数量：%s",
+  "enchCrack.bookshelfCount.expected": "预期书架数量：%s",
+  "enchCrack.bookshelfCount.incorrect": "不正确的书架数量",
   "enchCrack.clues": "提示：",
   "enchCrack.enchantments": "附魔：",
   "enchCrack.insn.bookshelves": "需要的书架数：%s",
@@ -287,23 +341,26 @@
   "enchCrack.xpSeed.many": "可能的经验值种子数量：%s",
   "enchCrack.xpSeed.one": "经验值种子：%s",
 
-  "itemCrack.notEnoughItems": "无法使用随机数种子破解：玩家手中物品不足",
-
   "minesweeperGame.minesLeft": "剩余地雷：%s",
   "minesweeperGame.timePlayed": "游玩时间：%s秒",
   "minesweeperGame.title": "扫雷",
 
-  "playerManip.notEnoughItems": "物品数量（%s，共%s）不足以破解玩家种子",
+  "playerManip.notEnoughItems": "物品数量不足以破解玩家种子",
+  "playerManip.notEnoughItems.help": "帮助：将更多的物品放入你的背包中",
   "playerManip.reset": "重新开始操控玩家随机数。原因：%s",
   "playerManip.reset.advancement": "获得了进度",
   "playerManip.reset.amethystChime": "在紫水晶上走动",
   "playerManip.reset.anvil": "使用了铁砧",
   "playerManip.reset.baneOfArthropods": "使用节肢杀手攻击了节肢生物",
+  "playerManip.reset.consume": "消耗",
+  "playerManip.reset.crossbow": "使用弩",
   "playerManip.reset.drink": "饮用",
   "playerManip.reset.dropItem": "扔出了物品",
   "playerManip.reset.enchanting": "附魔了物品",
   "playerManip.reset.enterWater": "进入水中",
   "playerManip.reset.entityCramming": "实体拥挤伤害",
+  "playerManip.reset.equipItem": "装备物品",
+  "playerManip.reset.fallFlying": "使用鞘翅",
   "playerManip.reset.food": "进食",
   "playerManip.reset.frostWalker": "使用了冰霜行者",
   "playerManip.reset.give": "使用了give命令",
@@ -327,9 +384,9 @@
   "playerManip.state.ench_cracking_1": "正在破解附魔种子1",
   "playerManip.state.ench_cracking_2": "正在破解附魔种子2",
   "playerManip.state.half_cracked": "半破解",
-  "playerManip.state.manipulating_enchantments": "正在操控附魔",
   "playerManip.state.uncracked": "未破解",
-  "playerManip.state.waiting_dummy_enchant": "等待附魔其他物品",
+  "playerManip.throttled": "命中创造模式物品扔出限制",
+  "playerManip.throttled.help": "帮助：尝试更改为生存模式",
   "playerManip.throwError": "条件不可达成，或者需要丢出大于%s个物品",
   "playerManip.toolBreakWarning": "警告：工具还有%s耐久度",
   "playerManip.uncracked": "需要破解玩家种子",
@@ -340,5 +397,13 @@
   "ticTacToeGame.crosses": "叉（X）",
   "ticTacToeGame.noughts": "圈（O）",
   "ticTacToeGame.playingWith": "你正在与%s玩",
-  "ticTacToeGame.title": "井字棋对手：%s"
+  "ticTacToeGame.title": "井字棋对手：%s",
+
+  "twoPlayerGame.chat.draw": "您已经采取了行动，并在%s中绘制了%s",
+  "twoPlayerGame.chat.lost": "%s已经在%s中做出了一个行动并赢了",
+  "twoPlayerGame.chat.won": "你已经在%s中做出了一个行动并击败了%s!",
+  "twoPlayerGame.clickToMakeYourMove": "单击此处以行动",
+  "twoPlayerGame.incoming": "%s已经在%s中做出了一个行动",
+  "twoPlayerGame.noGameWithPlayer": "目前没有和那个玩家一起玩游戏",
+  "twoPlayerGame.playerNotFound": "玩家未找到"
 }

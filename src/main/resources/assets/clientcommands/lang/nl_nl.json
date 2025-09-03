@@ -112,9 +112,7 @@
   "enchCrack.xpSeed.many": "Mogelijke XP seeds: %s",
   "enchCrack.xpSeed.one": "XP Seed: %s",
 
-  "itemCrack.notEnoughItems": "RNG SeedCracker kan niet worden gebruikt: niet genoeg items in spelershand",
-
-  "playerManip.notEnoughItems": "Niet genoeg items(%s van %s) om seed te manipuleren",
+  "playerManip.notEnoughItems": "Niet genoeg items om seed te manipuleren",
   "playerManip.reset": "Speler RNG manipulatie aan het herstarten. Reden: %s",
   "playerManip.reset.advancement": "Prestatie Behaald",
   "playerManip.reset.anvil": "Aambeeld Gebruikt",
@@ -146,9 +144,7 @@
   "playerManip.state.ench_cracking_1": "Betoveringsseed 1 aan het kraken",
   "playerManip.state.ench_cracking_2": "Betoveringsseed 2 aan het kraken",
   "playerManip.state.half_cracked": "Voor de helft gekraakt",
-  "playerManip.state.manipulating_enchantments": "Betoveringen aan het manipuleren",
   "playerManip.state.uncracked": "Ongekraakt",
-  "playerManip.state.waiting_dummy_enchant": "Aan het wachten op dummy betovering",
   "playerManip.throwError": "Conditie niet mogelijk of zou meer dan %s itemworpen nodig hebben",
   "playerManip.toolBreakWarning": "Waarschuwing: gereedschap heeft %s levensduur over",
   "playerManip.uncracked": "Spelersseed moet gekraakt zijn"

@@ -68,6 +68,7 @@
 
   "commands.ccrackrng.failed": "Failed to crack player seed",
   "commands.ccrackrng.failed.help": "Help: RNG manipulation doesn't work on some modded servers, in particular Paper",
+  "commands.ccrackrng.failed.unexpectedCall": "Failed to crack player seed due to unexpected RNG call: %s",
   "commands.ccrackrng.retries": "Cracking player seed, attempt %s/%s",
   "commands.ccrackrng.starting": "Cracking player seed",
   "commands.ccrackrng.success": "Player RNG cracked: %s",
@@ -91,6 +92,7 @@
   "commands.cenchant.needEnchantingPrediction": "This command requires enchanting prediction to be enabled",
   "commands.cenchant.success": "Starting enchantment manipulation...",
   "commands.cenchant.uncracked": "Seed needs to be cracked",
+  "commands.cenchant.unexpectedCall": "Stopped enchantment manipulation due to unexpected RNG call: %s",
 
   "commands.cfind.found": "Found %s at %s, %s blocks away",
   "commands.cfind.keepSearching.success": "Finding entities",
@@ -131,6 +133,7 @@
 
   "commands.cfps.getMaxFps": "Max FPS is %s",
   "commands.cfps.getMaxFps.unlimited": "Max FPS is unlimited",
+  "commands.cfps.resetMaxFps.success": "Stopped overriding max FPS",
   "commands.cfps.setMaxFps": "Set max FPS to %s",
   "commands.cfps.setMaxFps.unlimited": "Set max FPS to unlimited",
 
@@ -202,6 +205,11 @@
   "commands.clisten.sentC2CPacket": "Sent the following C2C packet: %s",
   "commands.clisten.sentPacket": "Sent the following packet: %s",
   "commands.clisten.unknownPacket": "Unknown packet %s",
+
+  "commands.cmap.export.success.hand": "Saved held map successfully as %s",
+  "commands.cmap.export.success.world": "Saved target map successfully as %s",
+  "commands.cmap.failedSave": "Failed to save map to file",
+  "commands.cmap.noHeldMap": "You are not holding or looking at a map",
 
   "commands.cminesweeper.tooManyMines": "Too many mines, must be between 0 and 9 less than than the amount of total tiles",
 
@@ -297,15 +305,6 @@
   "commands.cvar.remove.success": "Successfully removed variable \"%s\"",
   "commands.cvar.saveFile.failed": "Could not save variables file",
 
-  "commands.cwaypoint.add.success": "Waypoint \"%s\" at %s in %s successfully added",
-  "commands.cwaypoint.alreadyExists": "A waypoint with the name \"%s\" already exists",
-  "commands.cwaypoint.edit.success": "Waypoint \"%s\" has successfully been changed to %s in %s",
-  "commands.cwaypoint.list": "- \"%s\" at %s in %s",
-  "commands.cwaypoint.list.empty": "No available waypoints",
-  "commands.cwaypoint.notFound": "No waypoint with the name \"%s\" could be found",
-  "commands.cwaypoint.remove.success": "Waypoint \"%s\" successfully removed",
-  "commands.cwaypoint.saveFailed": "Could not save waypoints file",
-
   "commands.cwe.playerNotFound": "Player not found",
 
   "commands.cweather.reset": "Stopped overriding weather",
@@ -325,6 +324,9 @@
 
   "enchCrack.addInfo": "Add Info",
   "enchCrack.bookshelfCount": "Bookshelf Count: %s",
+  "enchCrack.bookshelfCount.actual": "Actual Bookshelf Count: %s",
+  "enchCrack.bookshelfCount.expected": "Expected Bookshelf Count: %s",
+  "enchCrack.bookshelfCount.incorrect": "Incorrect Bookshelf Count",
   "enchCrack.clues": "Clues:",
   "enchCrack.enchantments": "Enchantments:",
   "enchCrack.insn.bookshelves": "Bookshelves needed: %s",
@@ -343,13 +345,12 @@
   "enchCrack.xpSeed.many": "Possible XP seeds: %s",
   "enchCrack.xpSeed.one": "XP Seed: %s",
 
-  "itemCrack.notEnoughItems": "Unable to use RNG SeedCracker: Not Enough Items in Player Hand",
-
   "minesweeperGame.minesLeft": "Mines Left: %s",
   "minesweeperGame.timePlayed": "Time Played: %ss",
   "minesweeperGame.title": "Minesweeper",
 
-  "playerManip.notEnoughItems": "Not enough items(%s of %s) to manipulate seed",
+  "playerManip.notEnoughItems": "Not enough items to manipulate seed",
+  "playerManip.notEnoughItems.help": "Help: put some more items in your inventory",
   "playerManip.reset": "Restarting player RNG manipulation. Reason: %s",
   "playerManip.reset.advancement": "Gained Advancement",
   "playerManip.reset.amethystChime": "Walked on Amethyst Crystals",
@@ -387,12 +388,12 @@
   "playerManip.state.ench_cracking_1": "Cracking Enchantment Seed 1",
   "playerManip.state.ench_cracking_2": "Cracking Enchantment Seed 2",
   "playerManip.state.half_cracked": "Half Cracked",
-  "playerManip.state.manipulating_enchantments": "Manipulating Enchantments",
   "playerManip.state.uncracked": "Uncracked",
-  "playerManip.state.waiting_dummy_enchant": "Waiting for Dummy Enchantment",
+  "playerManip.throttled": "Hit the creative mode item throw throttle limit",
+  "playerManip.throttled.help": "Help: try changing to survival mode",
   "playerManip.throwError": "Condition not possible or would require more than %s item throws",
   "playerManip.toolBreakWarning": "Warning: tool has %s durability left",
-  "playerManip.uncracked": "Player-Seed needs to be cracked",
+  "playerManip.uncracked": "Player seed needs to be cracked",
 
   "snakeGame.score": "Score: %s",
   "snakeGame.title": "Snake",

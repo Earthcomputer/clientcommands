@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import net.earthcomputer.clientcommands.util.CUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.loader.api.FabricLoader;
@@ -47,7 +48,6 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 import static net.minecraft.commands.SharedSuggestionProvider.*;
 
 public class CreativeTabCommand {
-
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.ccreativetab.notFound", arg));
@@ -90,8 +90,6 @@ public class CreativeTabCommand {
                     .suggests((ctx, builder) -> suggest(tabs.keySet(), builder))
                     .then(literal("add")
                         .then(argument("itemstack", itemStack(context))
-                            .then(argument("count", integer(1))
-                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
                             .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "itemstack").createItemStack(1, false)))))
                     .then(literal("remove")
                         .then(argument("index", integer(0))
@@ -99,8 +97,6 @@ public class CreativeTabCommand {
                     .then(literal("set")
                         .then(argument("index", integer(0))
                             .then(argument("itemstack", itemStack(context))
-                                .then(argument("count", integer(1))
-                                    .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
                                 .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createItemStack(1, false))))))
                     .then(literal("icon")
                         .then(argument("icon", itemStack(context))
@@ -128,9 +124,7 @@ public class CreativeTabCommand {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(name);
         }
 
-        icon.setCount(1);
-
-        tabs.put(name, new Tab((CompoundTag) icon.save(source.registryAccess()), new ListTag()));
+        tabs.put(name, new Tab(CUtil.saveItemStack(source.registryAccess(), icon), new ListTag()));
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.addTab.success", name));
         ClientCommandHelper.sendRequiresRestart();
@@ -157,7 +151,7 @@ public class CreativeTabCommand {
 
         Tab tab = tabs.get(name);
         ListTag items = tab.items();
-        items.add(itemStack.save(source.registryAccess()));
+        items.add(CUtil.saveItemStack(source.registryAccess(), itemStack));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.addStack.success", itemStack.getDisplayName(), name));
@@ -193,7 +187,7 @@ public class CreativeTabCommand {
         if ((index < 0) || (index >= items.size())) {
             throw OUT_OF_BOUNDS_EXCEPTION.create(index);
         }
-        items.set(index, itemStack.save(source.registryAccess()));
+        items.set(index, CUtil.saveItemStack(source.registryAccess(), itemStack));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.setStack.success", name, index, itemStack.getDisplayName()));
@@ -205,13 +199,12 @@ public class CreativeTabCommand {
         if (!tabs.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        icon.setCount(1);
 
         Tab tab = tabs.get(name);
         ListTag items = tab.items();
-        ItemStack old = ItemStack.parse(source.registryAccess(), tab.icon()).orElse(ItemStack.EMPTY);
+        ItemStack old = CUtil.parseItemStack(source.registryAccess(), tab.icon()).orElse(ItemStack.EMPTY);
 
-        tabs.put(name, new Tab((CompoundTag) icon.save(source.registryAccess()), items));
+        tabs.put(name, new Tab(CUtil.saveItemStack(source.registryAccess(), icon), items));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.changeIcon.success", name, old.getDisplayName(), icon.getDisplayName()));
@@ -247,7 +240,7 @@ public class CreativeTabCommand {
                 tab.put("items", value.items());
                 compoundTag.put(key, tab);
             });
-            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().dataVersion().version());
             rootTag.put("CreativeTabs", compoundTag);
             Path newFile = File.createTempFile("creative_tabs", ".dat", configPath.toFile()).toPath();
             NbtIo.write(rootTag, newFile);
@@ -275,7 +268,7 @@ public class CreativeTabCommand {
             }
         }
         CompoundTag rootTag = rootTagTmp;
-        final int currentVersion = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
+        final int currentVersion = SharedConstants.getCurrentVersion().dataVersion().version();
         final int fileVersion = rootTag.getIntOr("DataVersion", 99);
         CompoundTag compoundTag = rootTag.getCompound("CreativeTabs").orElseGet(() -> rootTag.getCompoundOrEmpty("Groups"));
         DataFixer dataFixer = Minecraft.getInstance().getFixerUpper();
@@ -319,7 +312,7 @@ public class CreativeTabCommand {
     }
 
     private static ItemStack singleItemFromNbt(HolderLookup.Provider holderLookupProvider, CompoundTag nbt) {
-        ItemStack stack = ItemStack.parse(holderLookupProvider, nbt).orElse(ItemStack.EMPTY);
+        ItemStack stack = CUtil.parseItemStack(holderLookupProvider, nbt).orElse(ItemStack.EMPTY);
         if (!stack.isEmpty()) {
             stack.setCount(1);
         }

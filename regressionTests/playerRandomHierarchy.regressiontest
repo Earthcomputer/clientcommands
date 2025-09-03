@@ -96,4 +96,4 @@ net/minecraft/world/entity/LivingEntity.tickEffects ()V <- net/minecraft/world/e
 net/minecraft/world/entity/LivingEntity.updateFallFlying ()V <- net/minecraft/world/entity/Entity.random
 net/minecraft/world/entity/player/Player.aiStep ()V <- net/minecraft/world/entity/Entity.random
 net/minecraft/world/entity/player/Player.onEnchantmentPerformed (Lnet/minecraft/world/item/ItemStack;I)V <- net/minecraft/world/entity/Entity.random
-net/minecraft/world/entity/player/Player.readAdditionalSaveData (Lnet/minecraft/nbt/CompoundTag;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/world/entity/player/Player.readAdditionalSaveData (Lnet/minecraft/world/level/storage/ValueInput;)V <- net/minecraft/world/entity/Entity.random

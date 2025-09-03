@@ -23,6 +23,9 @@ public class ClientSuggestionsProviderMixin implements IClientSuggestionsProvide
     @Shadow
     @Final
     private Minecraft minecraft;
+    @Shadow
+    @Final
+    private boolean allowsRestrictedCommands;
 
     @Unique
     private ImmutableMap<Flag<?>, Object> flags = ImmutableMap.of();
@@ -35,7 +38,7 @@ public class ClientSuggestionsProviderMixin implements IClientSuggestionsProvide
 
     @Override
     public <T> IClientSuggestionsProvider clientcommands_withFlag(Flag<T> flag, T value) {
-        ClientSuggestionsProviderMixin source = (ClientSuggestionsProviderMixin) (Object) new ClientSuggestionProvider(this.connection, this.minecraft);
+        ClientSuggestionsProviderMixin source = (ClientSuggestionsProviderMixin) (Object) new ClientSuggestionProvider(this.connection, this.minecraft, this.allowsRestrictedCommands);
         source.flags = ImmutableMap.<Flag<?>, Object>builderWithExpectedSize(this.flags.size() + 1).putAll(this.flags).put(flag, value).build();
         return source;
     }

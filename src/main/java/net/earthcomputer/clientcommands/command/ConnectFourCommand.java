@@ -14,7 +14,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -227,7 +227,7 @@ public class ConnectFourCommand {
                 case YELLOW -> 16;
             };
             graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 ConnectFourGameScreen.PIECES_TEXTURE,
                 x,
                 y,
@@ -299,7 +299,7 @@ public class ConnectFourCommand {
             graphics.drawString(this.font, gameStateTranslate, startX + BOARD_WIDTH - this.font.width(gameStateTranslate), startY - 10, 0xff_ffffff);
 
             graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 BOARD_TEXTURE,
                 startX,
                 startY,

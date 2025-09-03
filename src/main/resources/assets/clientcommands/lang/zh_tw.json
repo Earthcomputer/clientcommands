@@ -296,13 +296,11 @@
   "enchCrack.xpSeed.many": "可能的經驗值種子數量： %s",
   "enchCrack.xpSeed.one": "經驗值種子： %s",
 
-  "itemCrack.notEnoughItems": "無法使用隨機種子破譯： 玩家手中沒有足夠的物品",
-
   "minesweeperGame.minesLeft": "剩餘地雷： %s",
   "minesweeperGame.timePlayed": "遊戲時間： %ss",
   "minesweeperGame.title": "踩地雷",
 
-  "playerManip.notEnoughItems": "物品數量不足（%s 的 %s）來操控種子",
+  "playerManip.notEnoughItems": "物品數量不足來操控種子",
   "playerManip.reset": "重新開始操控玩家隨機數。原因： %s",
   "playerManip.reset.advancement": "獲得了進度",
   "playerManip.reset.amethystChime": "走在紫水晶晶芽上",
@@ -337,9 +335,7 @@
   "playerManip.state.ench_cracking_1": "正在破譯附魔種子 1",
   "playerManip.state.ench_cracking_2": "正在破譯附魔種子 2",
   "playerManip.state.half_cracked": "半破譯",
-  "playerManip.state.manipulating_enchantments": "正在操控附魔",
   "playerManip.state.uncracked": "未破譯",
-  "playerManip.state.waiting_dummy_enchant": "等待附魔其他物品",
   "playerManip.throwError": "條件不可行，或需要超過 %s 個物品拋出",
   "playerManip.toolBreakWarning": "警告： 工具還有 %s 耐久度",
   "playerManip.uncracked": "需要先破譯玩家隨機種子",

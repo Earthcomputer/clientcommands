@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.mixin.commands.enchant;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -31,7 +32,7 @@ public abstract class EnchantmentScreenMixin extends AbstractContainerScreen<Enc
 
     @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleInventoryButtonClick(II)V"))
     public void onItemEnchanted(double mouseX, double mouseY, int mouseButton, CallbackInfoReturnable<Boolean> ci) {
-        EnchantmentCracker.onEnchantedItem();
+        PlayerRandCracker.onEnchantedItem();
     }
 
     @Inject(method = "init", at = @At("TAIL"))

@@ -60,8 +60,6 @@
   "enchCrack.xpSeed.many": "Možna XP semena: %s",
   "enchCrack.xpSeed.one": "XP Seme: %s",
 
-  "itemCrack.notEnoughItems": "Ni mogoče uporabiti RNG UgotavljalcaSemena: Ni dovolj predmetov v roki igralca",
-
   "playerManip.reset.advancement": "Dosežen Napredek",
   "playerManip.reset.anvil": "Nakovalo Uporabljeno",
   "playerManip.reset.baneOfArthropods": "Zadet Členonožec z Uničevalcem Členonožcev",
@@ -91,8 +89,6 @@
   "playerManip.state.ench_cracking_1": "Ugotavljanje Semena Čaranja 1",
   "playerManip.state.ench_cracking_2": "Ugotavljanje Semena Čaranja 2",
   "playerManip.state.half_cracked": "Napol Ugotovljeno",
-  "playerManip.state.manipulating_enchantments": "Manipuliranje Čaranja",
   "playerManip.state.uncracked": "Neugotovljeno",
-  "playerManip.state.waiting_dummy_enchant": "Čakanje na Poskusno Čaranje",
   "playerManip.toolBreakWarning": "Opozorilo: orodju ostaja %s trajnosti"
 }

@@ -2,20 +2,22 @@ package net.earthcomputer.clientcommands.render;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import net.earthcomputer.clientcommands.event.MoreWorldRenderEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -41,21 +43,41 @@ public class RenderQueue {
         .setLineState(new RenderType.LineStateShard(OptionalDouble.of(Line.THICKNESS)))
         .createCompositeState(false));
 
+    private static final MethodHandle WORLD_RENDER_CONTEXT_HANDLE = findWorldRenderContextHandle();
+
     static {
         ClientTickEvents.START_CLIENT_TICK.register(RenderQueue::tick);
-        WorldRenderEvents.AFTER_ENTITIES.register(context -> {
-            context.matrixStack().pushPose();
-
-            Vec3 cameraPos = context.camera().getPosition();
-            context.matrixStack().translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.LINES_NO_DEPTH_LAYER), context.matrixStack(), context.tickCounter().getRealtimeDeltaTicks());
-
-            context.matrixStack().popPose();
+        MoreWorldRenderEvents.END_MAIN_PASS.register(context -> {
+            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.LINES_NO_DEPTH_LAYER), context);
         });
     }
 
     public static void register() {
         // load class
+    }
+
+    // TODO: remove this reflection by PRing to FAPI
+    private static MethodHandle findWorldRenderContextHandle() {
+        return Arrays.stream(LevelRenderer.class.getDeclaredFields())
+            .filter(field -> WorldRenderContext.class.isAssignableFrom(field.getType()) && field.getName().contains("context"))
+            .findFirst()
+            .map(field -> {
+                field.setAccessible(true);
+                try {
+                    return MethodHandles.lookup().unreflectGetter(field);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException("Unable to access WorldRenderContext field in LevelRenderer", e);
+                }
+            })
+            .orElseThrow(() -> new IllegalStateException("Unable to find WorldRenderContext field in LevelRenderer"));
+    }
+
+    public static WorldRenderContext getWorldRenderContext(LevelRenderer renderer) {
+        try {
+            return (WorldRenderContext) WORLD_RENDER_CONTEXT_HANDLE.invoke(renderer);
+        } catch (Throwable e) {
+            throw new IllegalStateException("Exception calling WorldRenderContext getter", e);
+        }
     }
 
     public static void add(Layer layer, Object key, Shape shape, int life) {
@@ -117,11 +139,11 @@ public class RenderQueue {
         }
     }
 
-    public static void render(Layer layer, VertexConsumer vertexConsumer, PoseStack poseStack, float delta) {
+    public static void render(Layer layer, VertexConsumer vertexConsumer, WorldRenderContext context) {
         if (!queue.containsKey(layer)) {
             return;
         }
-        queue.get(layer).values().forEach(shape -> shape.render(poseStack, vertexConsumer, delta));
+        queue.get(layer).values().forEach(shape -> shape.render(vertexConsumer, context));
     }
 
     public enum Layer {

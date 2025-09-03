@@ -12,9 +12,10 @@ import net.minecraft.world.entity.EntityType;
 import org.slf4j.Logger;
 
 import java.lang.ref.WeakReference;
+import java.util.EnumSet;
 import java.util.Set;
 
-public class ItemThrowTask extends SimpleTask {
+public abstract class ItemThrowTask extends SimpleTask {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final Set<Object> MUTEX_KEYS = Set.of(ItemThrowTask.class);
@@ -26,6 +27,7 @@ public class ItemThrowTask extends SimpleTask {
 
     static {
         MoreClientEntityEvents.POST_ADD.register(ItemThrowTask::handleItemSpawn);
+        PlayerRandCracker.RNG_CALLED_EVENT.register(ItemThrowTask::handleRNGCallEvent);
     }
 
     private final int totalItemsToThrow;
@@ -36,6 +38,9 @@ public class ItemThrowTask extends SimpleTask {
     private float itemThrowsAllowedThisTick;
     private boolean waitingFence = false;
     private boolean failed = false;
+    private boolean isThrowingItem = false;
+    private boolean hadUnexpectedRNGCall = false;
+    private final Set<PlayerRandCracker.ThrowItemsResult.Type> errorTypesHappened = EnumSet.noneOf(PlayerRandCracker.ThrowItemsResult.Type.class);
 
     public ItemThrowTask(int itemsToThrow) {
         this(itemsToThrow, 0);
@@ -57,13 +62,19 @@ public class ItemThrowTask extends SimpleTask {
 
         while (((flags & FLAG_URGENT) != 0 || itemThrowsAllowedThisTick >= 1) && sentItemThrows < totalItemsToThrow) {
             itemThrowsAllowedThisTick--;
-            if (!PlayerRandCracker.throwItem()) {
+            isThrowingItem = true;
+            PlayerRandCracker.ThrowItemsResult throwItemsResult = PlayerRandCracker.throwItem();
+            isThrowingItem = false;
+            if (hadUnexpectedRNGCall) {
+                return;
+            }
+            if (!throwItemsResult.isSuccess()) {
+                onFailedToThrowItem(throwItemsResult);
                 if ((flags & FLAG_WAIT_FOR_ITEMS) != 0) {
                     return;
                 }
                 failed = true;
                 _break();
-                onFailedToThrowItem();
                 return;
             }
             onItemThrown(++sentItemThrows, totalItemsToThrow);
@@ -102,16 +113,27 @@ public class ItemThrowTask extends SimpleTask {
         return MUTEX_KEYS;
     }
 
-    protected void onFailedToThrowItem() {
+    protected void onFailedToThrowItem(PlayerRandCracker.ThrowItemsResult throwItemsResult) {
+        if (throwItemsResult.getType() != PlayerRandCracker.ThrowItemsResult.Type.NOT_ENOUGH_ITEMS || (flags & FLAG_WAIT_FOR_ITEMS) == 0) {
+            if (errorTypesHappened.add(throwItemsResult.getType())) {
+                throwItemsResult.sendErrorMessage();
+            }
+        }
     }
 
     protected void onSuccess() {
     }
 
+    protected abstract void onUnexpectedRNGCall(PlayerRandCracker.RNGCallType callType);
+
     protected void onItemSpawn(ClientboundAddEntityPacket packet) {
     }
 
     protected void onItemThrown(int current, int total) {
+    }
+
+    protected boolean requireCrackedRNG() {
+        return true;
     }
 
     private static void handleItemSpawn(ClientboundAddEntityPacket packet) {
@@ -134,6 +156,25 @@ public class ItemThrowTask extends SimpleTask {
 
         task.confirmedItemThrows++;
         task.onItemSpawn(packet);
+    }
+
+    private static void handleRNGCallEvent(PlayerRandCracker.RNGCallEvent event) {
+        ItemThrowTask task = currentThrowTask == null ? null : currentThrowTask.get();
+        if (task != null) {
+            if (task.isThrowingItem && event.getType() == PlayerRandCracker.RNGCallType.DROP_ITEM) {
+                if (task.requireCrackedRNG()) {
+                    event.setMaintained();
+                } else {
+                    event.setMaintainedEvenIfSeedUnknown();
+                }
+                task.isThrowingItem = false;
+            } else {
+                task.onUnexpectedRNGCall(event.getType());
+                task.hadUnexpectedRNGCall = true;
+                task.failed = true;
+                task._break();
+            }
+        }
     }
 
     @Override

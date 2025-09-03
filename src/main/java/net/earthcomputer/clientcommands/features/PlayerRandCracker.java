@@ -7,8 +7,13 @@ import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -38,6 +43,7 @@ import java.util.Map;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -89,14 +95,21 @@ public class PlayerRandCracker {
 
     // ===== RESET DETECTION + PLAYER RNG MAINTENANCE ===== //
 
+    public static final Event<RNGCallListener> RNG_CALLED_EVENT = EventFactory.createArrayBacked(RNGCallListener.class, listeners -> event -> {
+        for (RNGCallListener listener : listeners) {
+            listener.onCall(event);
+        }
+    });
+
     public static boolean isPredictingBlockBreaking = false;
     @Nullable
     private static Runnable postBlockBreakPredictAction = null;
 
     public static void registerEvents() {
         ClientLevelEvents.LOAD_LEVEL.register(level -> {
-            resetCracker("recreated");
+            resetCracker(RNGCallType.RECREATED);
         });
+        RNG_CALLED_EVENT.register(PlayerRandCracker::throwItemsUntilOnRNGCallEvent);
     }
 
     public static void postSendBlockBreakingPredictionPacket() {
@@ -108,35 +121,29 @@ public class PlayerRandCracker {
 
     // TODO: update-sensitive: call hierarchy of Player.random and Player.getRandom()
 
-    private static int expectedThrows = 0;
-
-    public static void resetCracker() {
-        Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+    public static void resetCracker(RNGCallType reason) {
+        resetCracker(reason, true);
     }
 
-    public static void resetCracker(@Translatable(prefix = "playerManip.reset.") String reason) {
-        if (Configs.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
-            ClientCommandHelper.sendFeedback(Component.translatable("playerManip.reset", Component.translatable("playerManip.reset." + reason))
-                    .withStyle(ChatFormatting.RED));
+    // isResettingUnconditionally should be true iff canMaintainPlayerRNG wasn't previously called
+    private static void resetCracker(RNGCallType reason, boolean isResettingUnconditionally) {
+        if (isResettingUnconditionally) {
+            RNG_CALLED_EVENT.invoker().onCall(new RNGCallEvent(reason, false));
         }
-        resetCracker();
+        if (Configs.playerCrackState != PlayerRandCracker.CrackState.UNCRACKED) {
+            ClientCommandHelper.sendError(Component.translatable("playerManip.reset", reason.resetMessage));
+            Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
+        }
     }
 
     public static void onDropItem() {
-        if (expectedThrows > 0 || canMaintainPlayerRNG()) {
+        if (canMaintainPlayerRNG(RNGCallType.DROP_ITEM)) {
             for (int i = 0; i < 4; i++) {
                 nextInt();
             }
         } else {
-            resetCracker("dropItem");
+            resetCracker(RNGCallType.DROP_ITEM, false);
         }
-        if (expectedThrows > 0) {
-            expectedThrows--;
-        }
-    }
-
-    public static void onEntityCramming() {
-        resetCracker("entityCramming");
     }
 
     public static void onConsume(ItemStack stack, Vec3 pos, int particleCount, int itemUseTimeLeft, Consumable consumable) {
@@ -144,8 +151,14 @@ public class PlayerRandCracker {
             // non-eating actions (e.g. drinking) have no random calls prior to 1.21.2
             return;
         }
+        
+        RNGCallType callType = switch (consumable.animation()) {
+            case EAT -> RNGCallType.FOOD;
+            case DRINK -> RNGCallType.DRINK;
+            default -> RNGCallType.CONSUME;
+        };
 
-        if (canMaintainPlayerRNG()) {
+        if (canMaintainPlayerRNG(callType)) {
             if (itemUseTimeLeft < 0 && particleCount != 16) {
                 // We have accounted for all eating ticks, that on the server should be calculated
                 // Sometimes if the connection is laggy we eat more than 24 ticks so just hope for the best
@@ -173,173 +186,106 @@ public class PlayerRandCracker {
                 }
             }
         } else {
-            resetCracker(switch (consumable.animation()) {
-                case EAT -> "food";
-                case DRINK -> "drink";
-                default -> "consume";
-            });
-        }
-    }
-
-    public static void onUnderwater() {
-        resetCracker("swim");
-    }
-
-    public static void onSwimmingStart() {
-        resetCracker("enterWater");
-    }
-
-    public static void onAmethystChime() {
-        resetCracker("amethystChime");
-    }
-
-    public static void onDamage() {
-        resetCracker("playerHurt");
-    }
-
-    public static void onSprinting() {
-        resetCracker("sprint");
-    }
-
-    public static void onEquipmentBreak() {
-        if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_13_2) {
-            resetCracker("itemBreak");
+            resetCracker(callType, false);
         }
     }
 
     public static void onEquipItem() {
         if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20_6) {
-            if (canMaintainPlayerRNG()) {
+            if (canMaintainPlayerRNG(RNGCallType.EQUIP_ITEM)) {
                 nextInt();
                 nextInt();
             } else {
-                resetCracker("equipItem");
+                resetCracker(RNGCallType.EQUIP_ITEM, false);
             }
         }
     }
 
-    public static void onFallFlying() {
-        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21_2) {
-            resetCracker("fallFlying");
-        }
-    }
-
-    public static void onPotionParticles() {
-        resetCracker("potion");
-    }
-
-    public static void onGiveCommand() {
-        resetCracker("give");
-    }
-
     public static void onAnvilUse() {
-        if (canMaintainPlayerRNG()) {
+        if (canMaintainPlayerRNG(RNGCallType.ANVIL)) {
             nextInt();
         } else {
-            resetCracker("anvil");
+            resetCracker(RNGCallType.ANVIL, false);
         }
     }
 
     public static void onCrossbowUse() {
-        if (canMaintainPlayerRNG()) {
+        if (canMaintainPlayerRNG(RNGCallType.CROSSBOW)) {
             if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18_2) {
                 nextInt();
             }
             nextInt();
         } else {
-            resetCracker("crossbow");
+            resetCracker(RNGCallType.CROSSBOW, false);
         }
-    }
-
-    public static void onMending() {
-        resetCracker("mending");
     }
 
     public static void onXpOrb() {
         if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_17) {
             // TODO: is there a way to be smarter about this?
-            resetCracker("xp");
+            resetCracker(RNGCallType.XP);
         }
-    }
-
-    public static void onFrostWalker() {
-        resetCracker("frostWalker");
-    }
-
-    public static void onSoulSpeed() {
-        resetCracker("soulSpeed");
     }
 
     public static void onBaneOfArthropods() {
         if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21) {
-            if (canMaintainPlayerRNG()) {
+            if (canMaintainPlayerRNG(RNGCallType.BANE_OF_ARTHROPODS)) {
                 nextInt();
             } else {
-                resetCracker("baneOfArthropods");
+                resetCracker(RNGCallType.BANE_OF_ARTHROPODS, false);
             }
         }
     }
 
-    public static void onUnbreaking(ItemStack stack, int amount, int unbreakingLevel) {
-        if (canMaintainPlayerRNG()) {
+    private static void onUnbreaking(ItemStack stack, int amount, int unbreakingLevel) {
+        if (canMaintainPlayerRNG(RNGCallType.UNBREAKING)) {
             for (int i = 0; i < amount; i++) {
                 Equippable equippableComponent = stack.get(DataComponents.EQUIPPABLE);
                 boolean isArmor = equippableComponent != null && equippableComponent.damageOnHurt();
                 if (!isArmor || nextFloat() >= 0.6) {
                     nextInt(unbreakingLevel + 1);
                 } else {
-                    resetCracker("unbreaking");
+                    resetCracker(RNGCallType.UNBREAKING, false);
                 }
             }
+        } else {
+            resetCracker(RNGCallType.UNBREAKING, false);
         }
-    }
-
-    public static void onUnbreakingUncertain(ItemStack stack, int minAmount, int maxAmount, int unbreakingLevel) {
-        resetCracker("unbreaking");
     }
 
     // TODO: update-sensitive: call hierarchy of ItemStack.damage
     public static void onItemDamage(int amount, LivingEntity holder, ItemStack stack) {
-        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21) {
-            return;
-        }
+        boolean unbreakingCallsRandom = MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21;
 
-        if (holder instanceof LocalPlayer && !((LocalPlayer) holder).getAbilities().instabuild) {
+        if (holder instanceof LocalPlayer player && !player.getAbilities().instabuild) {
             if (stack.isDamageableItem()) {
                 if (amount > 0) {
                     int unbreakingLevel = CUtil.getEnchantmentLevel(holder.registryAccess(), Enchantments.UNBREAKING, stack);
-                    if (unbreakingLevel > 0) {
+                    if (unbreakingCallsRandom && unbreakingLevel > 0) {
                         onUnbreaking(stack, amount, unbreakingLevel);
                     }
 
-                    if (Configs.toolBreakWarning && stack.getDamageValue() + amount >= stack.getMaxDamage() - 30) {
+                    handleToolBreakWarning(amount, stack, player);
 
-                        if (stack.getDamageValue() + amount >= stack.getMaxDamage() - 15) {
-                            Minecraft.getInstance().player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 10, 0.1f);
-                        }
-
-                        MutableComponent durability = Component.literal(String.valueOf(stack.getMaxDamage() - stack.getDamageValue() - 1)).withStyle(ChatFormatting.RED);
-
-                        Minecraft.getInstance().gui.setOverlayMessage(
-                                Component.translatable("playerManip.toolBreakWarning", durability).withStyle(ChatFormatting.GOLD),
-                                false);
-                    }
-
-                    if (Configs.infiniteTools && Configs.playerCrackState.knowsSeed()) {
-                        int unbreakingLevel_f = unbreakingLevel;
-                        Runnable action = () -> throwItemsUntil(rand -> {
-                            for (int i = 0; i < amount; i++) {
-                                Equippable equippableComponent = stack.get(DataComponents.EQUIPPABLE);
-                                boolean isArmor = equippableComponent != null && equippableComponent.damageOnHurt();
-                                if (isArmor && rand.nextFloat() < 0.6) {
-                                    return false;
+                    if (unbreakingCallsRandom && Configs.infiniteTools && Configs.playerCrackState.knowsSeed()) {
+                        Runnable action = () -> {
+                            ThrowItemsResult result = throwItemsUntil(rand -> {
+                                for (int i = 0; i < amount; i++) {
+                                    Equippable equippableComponent = stack.get(DataComponents.EQUIPPABLE);
+                                    boolean isArmor = equippableComponent != null && equippableComponent.damageOnHurt();
+                                    if (isArmor && rand.nextFloat() < 0.6) {
+                                        return false;
+                                    }
+                                    if (rand.nextInt(unbreakingLevel + 1) == 0) {
+                                        return false;
+                                    }
                                 }
-                                if (rand.nextInt(unbreakingLevel_f + 1) == 0) {
-                                    return false;
-                                }
+                                return true;
+                            }, 64);
+                            if (!result.isSuccess()) {
+                                result.sendErrorMessage();
                             }
-                            return true;
-                        }, 64);
+                        };
                         if (isPredictingBlockBreaking) {
                             postBlockBreakPredictAction = action;
                         } else {
@@ -352,36 +298,64 @@ public class PlayerRandCracker {
     }
 
     public static void onItemDamageUncertain(int minAmount, int maxAmount, LivingEntity holder, ItemStack stack) {
-        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_21) {
-            return;
-        }
-        if (holder instanceof LocalPlayer && !((LocalPlayer) holder).getAbilities().instabuild) {
+        boolean unbreakingCallsRandom = MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_21;
+        if (holder instanceof LocalPlayer player && !player.getAbilities().instabuild) {
             if (stack.isDamageableItem()) {
                 if (maxAmount > 0) {
                     int unbreakingLevel = CUtil.getEnchantmentLevel(holder.registryAccess(), Enchantments.UNBREAKING, stack);
-                    if (unbreakingLevel > 0) {
-                        onUnbreakingUncertain(stack, minAmount, maxAmount, unbreakingLevel);
+                    if (unbreakingCallsRandom && unbreakingLevel > 0) {
+                        resetCracker(RNGCallType.UNBREAKING);
                     }
+
+                    handleToolBreakWarning(maxAmount, stack, player);
                 }
             }
         }
     }
 
-    public static void onUnexpectedItemEnchant() {
-        resetCracker("enchanting");
+    private static void handleToolBreakWarning(int amount, ItemStack stack, LocalPlayer player) {
+        if (Configs.toolBreakWarning && stack.getDamageValue() + amount >= stack.getMaxDamage() - 30) {
+            if (stack.getDamageValue() + amount >= stack.getMaxDamage() - 15) {
+                player.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 10, 0.1f);
+            }
+
+            MutableComponent durability = Component.literal(String.valueOf(stack.getMaxDamage() - stack.getDamageValue() - 1)).withStyle(ChatFormatting.RED);
+
+            Minecraft.getInstance().gui.setOverlayMessage(
+                Component.translatable("playerManip.toolBreakWarning", durability).withStyle(ChatFormatting.GOLD),
+                false);
+        }
     }
 
-    private static boolean canMaintainPlayerRNG() {
-        if (Configs.playerRNGMaintenance && Configs.playerCrackState.knowsSeed()) {
+    public static void onEnchantedItem() {
+        if (canMaintainPlayerRNG(RNGCallType.ENCHANTING)) {
+            nextInt();
+        } else {
+            resetCracker(RNGCallType.ENCHANTING, false);
+        }
+    }
+
+    private static boolean canMaintainPlayerRNG(RNGCallType callType) {
+        RNGCallEvent event = new RNGCallEvent(callType, Configs.playerRNGMaintenance && Configs.playerCrackState.knowsSeed());
+        RNG_CALLED_EVENT.invoker().onCall(event);
+        if (event.isMaintained && Configs.playerCrackState.knowsSeed()) {
             Configs.playerCrackState = CrackState.CRACKED;
             return true;
         } else {
-            return false;
+            return event.isMaintainedEvenIfSeedUnknown;
         }
     }
 
 
     // ===== UTILITIES ===== //
+
+    private static boolean isThrowItemsUntilThrowingItem = false;
+
+    private static void throwItemsUntilOnRNGCallEvent(RNGCallEvent event) {
+        if (isThrowItemsUntilThrowingItem && event.type == RNGCallType.DROP_ITEM) {
+            event.setMaintained();
+        }
+    }
 
     public static ThrowItemsResult throwItemsUntil(Predicate<Random> condition, int max) {
         if (!Configs.playerCrackState.knowsSeed()) {
@@ -403,26 +377,49 @@ public class PlayerRandCracker {
             return new ThrowItemsResult(ThrowItemsResult.Type.NOT_POSSIBLE, itemsNeeded);
         }
         for (int i = 0; i < itemsNeeded; i++) {
-            if (!throwItem()) {
-                return new ThrowItemsResult(ThrowItemsResult.Type.NOT_ENOUGH_ITEMS, i, itemsNeeded);
+            ThrowItemsResult result;
+            isThrowItemsUntilThrowingItem = true;
+            try {
+                result = throwItem();
+            } finally {
+                isThrowItemsUntilThrowingItem = false;
+            }
+            if (!result.isSuccess()) {
+                return result;
             }
         }
 
         return new ThrowItemsResult(ThrowItemsResult.Type.SUCCESS);
     }
 
-    public static boolean throwItem() {
-        LocalPlayer player = Minecraft.getInstance().player;
+    public static ThrowItemsResult throwItem() {
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        MultiPlayerGameMode interactionManager = mc.gameMode;
+        assert player != null && interactionManager != null;
+
+        boolean isInContainer = mc.screen instanceof AbstractContainerScreen && !(mc.screen instanceof CreativeModeInventoryScreen);
+        boolean useCreativeThrow = player.hasInfiniteMaterials() && !isInContainer;
+        if (useCreativeThrow) {
+            // the client throttle is set a bit below the server throttle so we shouldn't get a desync here
+            if (!player.canDropItems()) {
+                return new ThrowItemsResult(ThrowItemsResult.Type.THROTTLED);
+            }
+
+            ItemStack stackToDrop = new ItemStack(Items.COBBLESTONE);
+            player.drop(stackToDrop, true);
+            interactionManager.handleCreativeModeItemDrop(stackToDrop);
+            return new ThrowItemsResult(ThrowItemsResult.Type.SUCCESS);
+        }
 
         Slot matchingSlot = getBestItemThrowSlot(player.containerMenu.slots);
         if (matchingSlot == null) {
-            return false;
+            return new ThrowItemsResult(ThrowItemsResult.Type.NOT_ENOUGH_ITEMS);
         }
-        expectedThrows++;
-        Minecraft.getInstance().gameMode.handleInventoryMouseClick(player.containerMenu.containerId,
+        interactionManager.handleInventoryMouseClick(player.containerMenu.containerId,
                 matchingSlot.index, 0, ClickType.THROW, player);
 
-        return true;
+        return new ThrowItemsResult(ThrowItemsResult.Type.SUCCESS);
     }
 
     public static void unthrowItem() {
@@ -453,7 +450,6 @@ public class PlayerRandCracker {
         if (itemCounts.isEmpty()) {
             return null;
         }
-        //noinspection OptionalGetWithoutIsPresent
         Item preferredItem = itemCounts.keySet().stream().max(Comparator.comparingInt(Item::getDefaultMaxStackSize).thenComparing(itemCounts::get)).get();
         //noinspection OptionalGetWithoutIsPresent
         return slots.stream().filter(slot -> slot.getItem().getItem() == preferredItem).findFirst().get();
@@ -488,47 +484,59 @@ public class PlayerRandCracker {
 
     public static class ThrowItemsResult {
         private final Type type;
-        private final MutableComponent message;
+        private final Object[] messageArgs;
 
-        public ThrowItemsResult(Type type, Object... args) {
+        public ThrowItemsResult(Type type, Object... messageArgs) {
             this.type = type;
-            this.message = Component.translatable(type.getTranslationKey(), args);
+            this.messageArgs = messageArgs;
+        }
+
+        public boolean isSuccess() {
+            return type.success;
         }
 
         public Type getType() {
             return type;
         }
 
-        public MutableComponent getMessage() {
-            return message;
+        public void sendErrorMessage() {
+            for (MutableComponent message : type.messageCreator.apply(messageArgs)) {
+                ClientCommandHelper.sendFeedback(message);
+            }
         }
 
         public enum Type {
-            NOT_ENOUGH_ITEMS(false, "playerManip.notEnoughItems"),
+            NOT_ENOUGH_ITEMS(false, args -> List.of(
+                Component.translatable("playerManip.notEnoughItems", args).withStyle(ChatFormatting.RED),
+                Component.translatable("playerManip.notEnoughItems.help").withStyle(ChatFormatting.AQUA)
+            )),
             NOT_POSSIBLE(false, "playerManip.throwError"),
-            UNKNOWN_SEED(false, "playerManip.uncracked"),
-            SUCCESS(true, null),
+            THROTTLED(false, args -> List.of(
+                Component.translatable("playerManip.throttled", args).withStyle(ChatFormatting.RED),
+                Component.translatable("playerManip.throttled.help").withStyle(ChatFormatting.AQUA)
+            )),
+            UNKNOWN_SEED(false, args -> List.of(Component.translatable("playerManip.uncracked")
+                .append(" ")
+                .append(ClientCommandHelper.getCommandTextComponent("commands.client.crack", "/ccrackrng"))
+                .withStyle(ChatFormatting.RED))),
+            SUCCESS(true, (Function<Object[], List<MutableComponent>>) null),
             ;
 
             private final boolean success;
-            private final String translationKey;
+            private final Function<Object[], List<MutableComponent>> messageCreator;
 
-            Type(boolean success, String translationKey) {
+            Type(boolean success, @Translatable String translationKey) {
+                this(success, args -> List.of(Component.translatable(translationKey, args).withStyle(ChatFormatting.RED)));
+            }
+
+            Type(boolean success, Function<Object[], List<MutableComponent>> messageCreator) {
                 this.success = success;
-                this.translationKey = translationKey;
-            }
-
-            public boolean isSuccess() {
-                return success;
-            }
-
-            public String getTranslationKey() {
-                return translationKey;
+                this.messageCreator = messageCreator;
             }
         }
     }
 
-    public static enum CrackState implements StringRepresentable {
+    public enum CrackState implements StringRepresentable {
         UNCRACKED("uncracked"),
         CRACKED("cracked", true),
         ENCH_CRACKING_1("ench_cracking_1"),
@@ -536,16 +544,14 @@ public class PlayerRandCracker {
         ENCH_CRACKING_2("ench_cracking_2"),
         CRACKING("cracking"),
         EATING("eating"),
-        MANIPULATING_ENCHANTMENTS("manipulating_enchantments"),
-        WAITING_DUMMY_ENCHANT("waiting_dummy_enchant", true),
         ;
 
         private final String name;
         private final boolean knowsSeed;
-        CrackState(String name) {
+        CrackState(@Translatable(prefix = "playerManip.state.") String name) {
             this(name, false);
         }
-        CrackState(String name, boolean knowsSeed) {
+        CrackState(@Translatable(prefix = "playerManip.state.") String name, boolean knowsSeed) {
             this.name = name;
             this.knowsSeed = knowsSeed;
         }
@@ -557,6 +563,75 @@ public class PlayerRandCracker {
 
         public boolean knowsSeed() {
             return knowsSeed;
+        }
+    }
+
+    @FunctionalInterface
+    public interface RNGCallListener {
+        void onCall(RNGCallEvent event);
+    }
+
+    public static final class RNGCallEvent {
+        private final RNGCallType type;
+        private boolean isMaintained;
+        private boolean isMaintainedEvenIfSeedUnknown = false;
+
+        public RNGCallEvent(RNGCallType type, boolean isMaintained) {
+            this.type = type;
+            this.isMaintained = isMaintained;
+        }
+
+        public RNGCallType getType() {
+            return type;
+        }
+
+        public void setMaintained() {
+            this.isMaintained = true;
+        }
+
+        public void setMaintainedEvenIfSeedUnknown() {
+            this.isMaintainedEvenIfSeedUnknown = true;
+        }
+    }
+
+    public enum RNGCallType {
+        ADVANCEMENT("advancement"),
+        AMETHYST_CHIME("amethystChime"),
+        ANVIL("anvil"),
+        BANE_OF_ARTHROPODS("baneOfArthropods"),
+        CONSUME("consume"),
+        CROSSBOW("crossbow"),
+        DRINK("drink"),
+        DROP_ITEM("dropItem"),
+        ENCHANTING("enchanting"),
+        ENTER_WATER("enterWater"),
+        ENTITY_CRAMMING("entityCramming"),
+        EQUIP_ITEM("equipItem"),
+        FALL_FLYING("fallFlying"),
+        FOOD("food"),
+        FROST_WALKER("frostWalker"),
+        GIVE("give"),
+        ITEM_BREAK("itemBreak"),
+        MENDING("mending"),
+        PLAYER_HURT("playerHurt"),
+        POTION("potion"),
+        RECREATED("recreated"),
+        RESPIRATION("respiration"),
+        SHIELD("shield"),
+        SOUL_SPEED("soulSpeed"),
+        SPRINT("sprint"),
+        SWIM("swim"),
+        UNBREAKING("unbreaking"),
+        XP("xp"),
+        ;
+
+        private final Component resetMessage;
+        RNGCallType(@Translatable(prefix = "playerManip.reset.") String resetMessage) {
+            this.resetMessage = Component.translatable("playerManip.reset." + resetMessage);
+        }
+
+        public Component getResetMessage() {
+            return resetMessage;
         }
     }
 
