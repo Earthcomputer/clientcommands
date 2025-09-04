@@ -235,7 +235,7 @@
   "commands.cpos.level.the_nether": "the Nether",
 
   "commands.cpredictbrushables.foundBrushableBlock": "Found %s at %s with item %s %s",
-  "commands.cpredictbrushables.starting": "Searching for brushable blocks",
+  "commands.cpredictbrushables.starting": "Searching for brushable blocks [%s]",
   "commands.cpredictbrushables.stewEffect": "%s (%s seconds)",
 
   "commands.crelog.failed": "Failed to relog",
