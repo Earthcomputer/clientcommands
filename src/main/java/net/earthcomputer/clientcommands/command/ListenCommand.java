@@ -17,10 +17,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -58,6 +55,11 @@ public class ListenCommand {
     private static final SimpleCommandExceptionType COMMAND_DISABLED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.commandDisabled"));
     private static final SimpleCommandExceptionType ALREADY_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.add.failed"));
     private static final SimpleCommandExceptionType NOT_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.remove.failed"));
+
+    private static final Component SQUARE_BRACKET = Component.literal("]");
+    private static final Component CURLY_BRACKET = Component.literal("}");
+    private static final Component EQUALS = Component.literal("=");
+    private static final Component SEPARATOR = ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR;
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -198,38 +200,38 @@ public class ListenCommand {
             case Message message -> Component.translationArg(message);
             case Collection<?> collection -> {
                 MutableComponent component = Component.literal("[");
-                component.append(collection.stream().map(e -> asMutable(serialize(e, seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElseGet(Component::empty));
-                yield component.append("]");
+                component.append(collection.stream().map(e -> asMutable(serialize(e, seen, depth + 1))).reduce((l, r) -> l.append(SEPARATOR).append(r)).orElseGet(Component::empty));
+                yield component.append(SQUARE_BRACKET);
             }
             case Map<?, ?> map -> {
                 MutableComponent component = Component.literal("{");
-                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append("=").append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElseGet(Component::empty));
-                yield component.append("}");
+                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append(EQUALS).append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(SEPARATOR).append(r)).orElseGet(Component::empty));
+                yield component.append(CURLY_BRACKET);
             }
             case Registry<?> registry -> Component.translationArg(registry.key().location());
             case ResourceKey<?> resourceKey -> {
                 MutableComponent component = Component.literal("{");
-                component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(", ");
+                component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(SEPARATOR);
                 component.append("location=").append(serialize(resourceKey.location(), seen, depth + 1));
-                yield component.append("}");
+                yield component.append(CURLY_BRACKET);
             }
             case Holder<?> holder -> {
                 MutableComponent component = Component.literal("{");
-                component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(", ");
+                component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(SEPARATOR);
                 component.append("value=").append(serialize(holder.value(), seen, depth + 1));
-                yield component.append("}");
+                yield component.append(CURLY_BRACKET);
             }
             default -> {
                 if (object.getClass().isArray()) {
                     MutableComponent component = Component.literal("[");
                     int lengthMinusOne = Array.getLength(object) - 1;
                     if (lengthMinusOne < 0) {
-                        yield component.append("]");
+                        yield component.append(SQUARE_BRACKET);
                     }
                     for (int i = 0; i < lengthMinusOne; i++) {
-                        component.append(serialize(Array.get(object, i), seen, depth + 1)).append(", ");
+                        component.append(serialize(Array.get(object, i), seen, depth + 1)).append(SEPARATOR);
                     }
-                    yield component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append("]");
+                    yield component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append(SQUARE_BRACKET);
                 }
 
                 String className = object.getClass().getName().replace(".", "/");
@@ -258,9 +260,9 @@ public class ListenCommand {
                             }
                         }
                     })
-                    .reduce((l, r) -> l.append(", ").append(r))
+                    .reduce((l, r) -> l.append(SEPARATOR).append(r))
                     .orElseGet(Component::empty));
-                yield component.append("}");
+                yield component.append(CURLY_BRACKET);
             }
         };
     }
