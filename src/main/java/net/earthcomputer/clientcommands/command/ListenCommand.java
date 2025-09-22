@@ -22,7 +22,10 @@ import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.slf4j.Logger;
@@ -226,12 +229,15 @@ public class ListenCommand {
                 yield component.append(CURLY_BRACKET);
             }
             case BlockState state -> {
-                MutableComponent component = Component.literal(BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString());
+                MutableComponent component = asMutable(serialize(state.getBlock(), seen, depth));
                 if (!state.getProperties().isEmpty()) {
                     component.append(state.getProperties().stream().map(property -> property.getName() + "=" + getProperty(state, property)).collect(Collectors.joining(", ", "[", "]")));
                 }
                 yield component;
             }
+            case Block block -> Component.literal(BuiltInRegistries.BLOCK.getKey(block).toString());
+            case Item item -> Component.literal(BuiltInRegistries.ITEM.getKey(item).toString());
+            case EntityType<?> entityType -> Component.literal(BuiltInRegistries.ENTITY_TYPE.getKey(entityType).toString());
             default -> {
                 if (object.getClass().isArray()) {
                     MutableComponent component = Component.literal("[");
