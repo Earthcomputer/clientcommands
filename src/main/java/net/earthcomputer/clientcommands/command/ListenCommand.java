@@ -17,11 +17,14 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -40,6 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static net.earthcomputer.clientcommands.command.arguments.PacketTypeArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
@@ -221,6 +225,13 @@ public class ListenCommand {
                 component.append("value=").append(serialize(holder.value(), seen, depth + 1));
                 yield component.append(CURLY_BRACKET);
             }
+            case BlockState state -> {
+                MutableComponent component = Component.literal(BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString());
+                if (!state.getProperties().isEmpty()) {
+                    component.append(state.getProperties().stream().map(property -> property.getName() + "=" + getProperty(state, property)).collect(Collectors.joining(", ", "[", "]")));
+                }
+                yield component;
+            }
             default -> {
                 if (object.getClass().isArray()) {
                     MutableComponent component = Component.literal("[");
@@ -269,6 +280,10 @@ public class ListenCommand {
 
     private static MutableComponent asMutable(Component component) {
         return component instanceof MutableComponent mutable ? mutable : component.copy();
+    }
+
+    private static <T extends Comparable<T>> String getProperty(BlockState state, Property<T> property) {
+        return property.getName(state.getValue(property));
     }
 
     public enum PacketFlow {
