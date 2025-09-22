@@ -198,12 +198,12 @@ public class ListenCommand {
             case Message message -> Component.translationArg(message);
             case Collection<?> collection -> {
                 MutableComponent component = Component.literal("[");
-                component.append(collection.stream().map(e -> asMutable(serialize(e, seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
+                component.append(collection.stream().map(e -> asMutable(serialize(e, seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElseGet(Component::empty));
                 yield component.append("]");
             }
             case Map<?, ?> map -> {
                 MutableComponent component = Component.literal("{");
-                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append("=").append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElse(Component.empty()));
+                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append("=").append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(", ").append(r)).orElseGet(Component::empty));
                 yield component.append("}");
             }
             case Registry<?> registry -> Component.translationArg(registry.key().location());
@@ -259,7 +259,7 @@ public class ListenCommand {
                         }
                     })
                     .reduce((l, r) -> l.append(", ").append(r))
-                    .orElse(Component.empty()));
+                    .orElseGet(Component::empty));
                 yield component.append("}");
             }
         };
