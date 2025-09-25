@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -538,6 +540,54 @@ public final class EnchantmentDatabase {
                 });
             }
         });
+    }
+
+    public static void generateAllDatabases(HolderLookup.Provider registries) {
+        registries.lookupOrThrow(Registries.ITEM).listElements().forEach(item -> {
+            byte[] data;
+            try {
+                data = Files.readAllBytes(Path.of("../enchantment_databases/" + item.key().location().getPath() + ".bin"));
+            } catch (NoSuchFileException e) {
+                return;
+            } catch (IOException e) {
+                LOGGER.error("Failed to read enchantment database blob", e);
+                return;
+            }
+
+            EnchantmentDatabase database = new EnchantmentDatabase();
+            database.itemTypePool.getOrCreateIndex(database.itemTypeFromItem(new ItemStack(item), true, registries, true));
+            CompoundTag nbt = database.toNbt();
+            nbt.putByteArray("result_stats", data);
+
+            try {
+                NbtIo.writeCompressed(nbt, Path.of("../enchantment_databases/" + item.key().location().getPath() + ".nbt"));
+            } catch (IOException e) {
+                LOGGER.error("Failed to write enchantment database", e);
+            }
+        });
+    }
+
+    public static void combineAllDatabases() {
+        EnchantmentDatabase combined = new EnchantmentDatabase();
+        try (Stream<Path> paths = Files.list(Path.of("../enchantment_databases"))) {
+            for (Path path : (Iterable<Path>) paths::iterator) {
+                if (!path.getFileName().toString().endsWith(".nbt")) {
+                    continue;
+                }
+                CompoundTag nbt = NbtIo.readCompressed(path, NbtAccounter.unlimitedHeap());
+                EnchantmentDatabase database = EnchantmentDatabase.fromNbt(nbt);
+                combined.merge(database);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to read enchantment databases", e);
+            return;
+        }
+
+        try {
+            NbtIo.writeCompressed(combined.toNbt(), Path.of("../enchantment_databases/combined.nbt"));
+        } catch (IOException e) {
+            LOGGER.error("Failed to write enchantment databases", e);
+        }
     }
 
     private static final class Pool<T> {
