@@ -56,11 +56,18 @@ public class PredictBrushablesCommand {
     private static int predictBrushables(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
         boolean keepSearching = getFlag(ctx, FLAG_KEEP_SEARCHING);
         String taskName = TaskManager.addTask("cpredictbrushables", new PredictBrushablesTask(keepSearching));
-        sendFeedback(Component.translatable("commands.cpredictbrushables.starting", getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+        if (keepSearching) {
+            sendFeedback(Component.translatable("commands.cpredictbrushables.starting.keepSearching", getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+        } else {
+            sendFeedback(Component.translatable("commands.cpredictbrushables.starting"));
+        }
+
         return Command.SINGLE_SUCCESS;
     }
 
     private static final class PredictBrushablesTask extends RenderDistanceScanTask {
+        private boolean found = false;
+
         PredictBrushablesTask(boolean keepSearching) {
             super(keepSearching);
         }
@@ -122,6 +129,8 @@ public class PredictBrushablesCommand {
                 mcItemStack.set(DataComponents.LORE, getItemLore(mcItemStack));
                 ClientCommandHelper.sendFeedback(Component.translatable("commands.cpredictbrushables.foundBrushableBlock", blockState.getBlock().getName(), ClientCommandHelper.getLookCoordsTextComponent(pos), mcItemStack.getDisplayName(), ClientCommandHelper.getGlowButtonTextComponent(pos)));
             }
+
+            found = true;
         }
 
         // use lore to display effects
@@ -147,6 +156,14 @@ public class PredictBrushablesCommand {
         @Override
         protected boolean canScanChunkSection(Entity cameraEntity, SectionPos pos) {
             return hasBlockState(pos, s -> s.getBlock() instanceof BrushableBlock) && super.canScanChunkSection(cameraEntity, pos);
+        }
+
+        @Override
+        public void onCompleted() {
+            super.onCompleted();
+            if (!found) {
+                sendError(Component.translatable("commands.cpredictbrushables.notFound"));
+            }
         }
     }
 }
