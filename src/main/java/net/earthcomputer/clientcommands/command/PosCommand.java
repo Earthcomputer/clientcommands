@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -13,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CDimensionArgument.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class PosCommand {
@@ -84,7 +84,7 @@ public class PosCommand {
             "commands.cpos.coords",
             getCoordsTextComponent(pos),
             sourceWorldName,
-            getLookCoordsTextComponent(targetPos),
+            CComponentUtil.getLookCoordsTextComponent(targetPos),
             targetWorldName)
         );
 

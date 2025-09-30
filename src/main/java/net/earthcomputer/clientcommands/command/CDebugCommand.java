@@ -22,7 +22,7 @@ public class CDebugCommand {
     private static int execute(FabricClientCommandSource source, DebugScreenType type) {
         DebugScreenOverlay debugScreenOverlay = source.getClient().getDebugOverlay();
         switch (type) {
-            case OVERLAY -> debugScreenOverlay.toggleOverlay();
+            case OVERLAY -> source.getClient().debugEntries.toggleF3Visible();
             case FPS -> debugScreenOverlay.toggleFpsCharts();
             case NETWORK -> debugScreenOverlay.toggleNetworkCharts();
             case PROFILER -> debugScreenOverlay.toggleProfilerChart();

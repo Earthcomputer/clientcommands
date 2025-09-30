@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import com.demonwav.mcdev.annotations.Translatable;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.util.CUtil;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
@@ -517,7 +518,7 @@ public class PlayerRandCracker {
             )),
             UNKNOWN_SEED(false, args -> List.of(Component.translatable("playerManip.uncracked")
                 .append(" ")
-                .append(ClientCommandHelper.getCommandTextComponent("commands.client.crack", "/ccrackrng"))
+                .append(CComponentUtil.getCommandTextComponent("commands.client.crack", "/ccrackrng"))
                 .withStyle(ChatFormatting.RED))),
             SUCCESS(true, (Function<Object[], List<MutableComponent>>) null),
             ;
@@ -618,6 +619,7 @@ public class PlayerRandCracker {
         RECREATED("recreated"),
         RESPIRATION("respiration"),
         SHIELD("shield"),
+        SHOULDER_PARROT("shoulderParrot"),
         SOUL_SPEED("soulSpeed"),
         SPRINT("sprint"),
         SWIM("swim"),

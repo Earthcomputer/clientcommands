@@ -39,7 +39,7 @@ public abstract class PlayerMixin extends LivingEntity {
     // TODO: update-sensitive: type hierarchy of Entity.damage
     @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z", ordinal = 0))
     public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount, Operation<Boolean> original) {
-        if (!level().isClientSide || !isThePlayer()) {
+        if (!level().isClientSide() || !isThePlayer()) {
             return original.call(target, source, amount);
         }
 

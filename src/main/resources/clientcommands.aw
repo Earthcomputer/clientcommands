@@ -10,6 +10,15 @@ accessible field net/minecraft/client/gui/components/CommandSuggestions ARGUMENT
 # Data Query Handler
 accessible field net/minecraft/client/DebugQueryHandler transactionId I
 
+# CComponentUtil
+accessible field net/minecraft/commands/arguments/coordinates/LocalCoordinates forwards D
+accessible field net/minecraft/commands/arguments/coordinates/LocalCoordinates left D
+accessible field net/minecraft/commands/arguments/coordinates/LocalCoordinates up D
+accessible field net/minecraft/commands/arguments/coordinates/WorldCoordinates x Lnet/minecraft/commands/arguments/coordinates/WorldCoordinate;
+accessible field net/minecraft/commands/arguments/coordinates/WorldCoordinates y Lnet/minecraft/commands/arguments/coordinates/WorldCoordinate;
+accessible field net/minecraft/commands/arguments/coordinates/WorldCoordinates z Lnet/minecraft/commands/arguments/coordinates/WorldCoordinate;
+accessible field net/minecraft/network/chat/contents/NbtContents compiledNbtPath Lnet/minecraft/commands/arguments/NbtPathArgument$NbtPath;
+
 # cfinditem
 accessible field net/minecraft/world/inventory/AbstractContainerMenu menuType Lnet/minecraft/world/inventory/MenuType;
 accessible method net/minecraft/world/level/block/ShulkerBoxBlock canOpen (Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/ShulkerBoxBlockEntity;)Z
@@ -25,9 +34,6 @@ accessible field com/mojang/blaze3d/platform/ScreenManager monitors Lit/unimi/ds
 # cgive
 accessible method net/minecraft/world/entity/player/Inventory addResource (ILnet/minecraft/world/item/ItemStack;)I
 accessible method net/minecraft/world/entity/player/Inventory hasRemainingSpaceForItem (Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z
-
-# chat
-accessible method net/minecraft/client/Minecraft openChatScreen (Ljava/lang/String;)V
 
 # ckit
 accessible field net/minecraft/world/entity/LivingEntity equipment Lnet/minecraft/world/entity/EntityEquipment;

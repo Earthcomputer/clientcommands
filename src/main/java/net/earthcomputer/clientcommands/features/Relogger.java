@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
-import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -96,7 +95,6 @@ public class Relogger {
             && !(screen instanceof ProgressScreen)
             && !(screen instanceof ConnectScreen)
             && !(screen instanceof PauseScreen)
-            && !(screen instanceof ReceivingLevelScreen)
             && !(screen instanceof TitleScreen)
             && !(screen instanceof JoinMultiplayerScreen)
         ) {

@@ -42,7 +42,7 @@ public abstract class LivingEntityMixin extends Entity {
         super(entityType_1, level_1);
     }
 
-    @Inject(method = "drop", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
+    @Inject(method = "drop", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;isClientSide()Z"))
     private void onDrop(CallbackInfoReturnable<ItemEntity> ci) {
         if (isThePlayer()) {
             PlayerRandCracker.onDropItem();

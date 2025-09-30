@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Direction;
@@ -96,17 +97,17 @@ class SnakeGameScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (minecraft.options.keyUp.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_UP) {
+    public boolean keyPressed(KeyEvent event) {
+        if (minecraft.options.keyUp.matches(event) || event.key() == GLFW.GLFW_KEY_UP) {
             return this.setDirection(Direction.NORTH);
-        } else if (minecraft.options.keyLeft.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_LEFT) {
+        } else if (minecraft.options.keyLeft.matches(event) || event.key() == GLFW.GLFW_KEY_LEFT) {
             return this.setDirection(Direction.WEST);
-        } else if (minecraft.options.keyDown.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_DOWN) {
+        } else if (minecraft.options.keyDown.matches(event) || event.key() == GLFW.GLFW_KEY_DOWN) {
             return this.setDirection(Direction.SOUTH);
-        } else if (minecraft.options.keyRight.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_RIGHT) {
+        } else if (minecraft.options.keyRight.matches(event) || event.key() == GLFW.GLFW_KEY_RIGHT) {
             return this.setDirection(Direction.EAST);
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     private void move() {

@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument;
 import net.earthcomputer.clientcommands.task.RenderDistanceScanTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -85,16 +86,16 @@ public class FindBlockCommand {
             if (closestBlock == null) {
                 sendError(Component.translatable("commands.cfindblock.notFound"));
             } else {
-                Entity cameraEntity = Objects.requireNonNullElse(Minecraft.getInstance().cameraEntity, Minecraft.getInstance().player);
+                Entity cameraEntity = Objects.requireNonNullElse(Minecraft.getInstance().getCameraEntity(), Minecraft.getInstance().player);
 
                 String foundRadius = "%.2f".formatted(Math.sqrt(closestBlock.distToCenterSqr(cameraEntity.getEyePosition(0))));
                 sendFeedback(
                     Component.translatable(
                         "commands.cfindblock.success",
                         Component.empty()
-                            .append(getLookCoordsTextComponent(closestBlock))
+                            .append(CComponentUtil.getLookCoordsTextComponent(closestBlock))
                             .append(" ")
-                            .append(getGlowButtonTextComponent(closestBlock)),
+                            .append(CComponentUtil.getGlowButtonTextComponent(closestBlock)),
                         foundRadius
                     )
                 );

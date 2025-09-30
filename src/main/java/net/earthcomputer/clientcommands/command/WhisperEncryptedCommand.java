@@ -31,19 +31,19 @@ public class WhisperEncryptedCommand {
     }
 
     private static int whisper(FabricClientCommandSource source, GameProfile player, WithStringArgument.Result<MutableComponent> result) throws CommandSyntaxException {
-        PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(player.getId());
+        PlayerInfo recipient = source.getClient().getConnection().getPlayerInfo(player.id());
         if (recipient == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
-        MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getConnection().getLocalGameProfile().getName(), result.string());
+        MessageC2CPacket packet = new MessageC2CPacket(source.getClient().getConnection().getLocalGameProfile().name(), result.string());
         C2CPacketHandler.getInstance().sendPacket(packet, recipient);
         MutableComponent prefix = Component.empty();
         prefix.append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal("/cwe").withStyle(ChatFormatting.AQUA));
         prefix.append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
         prefix.append(Component.literal(" "));
-        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.outgoing", recipient.getProfile().getName(), result.value()));
+        Component component = prefix.append(Component.translatable("c2cpacket.messageC2CPacket.outgoing", recipient.getProfile().name(), result.value()));
         source.sendFeedback(component);
         return Command.SINGLE_SUCCESS;
     }

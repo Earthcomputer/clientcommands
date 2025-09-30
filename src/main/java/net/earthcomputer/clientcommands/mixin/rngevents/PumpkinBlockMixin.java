@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PumpkinBlock.class)
 public class PumpkinBlockMixin {
 
-    @Inject(method = "useItemOn", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
+    @Inject(method = "useItemOn", at = @At(value = "CONSTANT", args = "classValue=net/minecraft/server/level/ServerLevel"))
     public void onShear(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
         PlayerRandCracker.onItemDamage(1, player, stack);
     }

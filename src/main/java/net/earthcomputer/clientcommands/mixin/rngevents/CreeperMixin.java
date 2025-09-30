@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Creeper.class)
 public class CreeperMixin {
-    @Inject(method = "mobInteract", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
+    @Inject(method = "mobInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;isClientSide()Z"))
     public void onInteract(Player player, InteractionHand hand, CallbackInfoReturnable<Boolean> ci) {
         PlayerRandCracker.onItemDamage(1, player, player.getItemInHand(hand));
     }

@@ -31,7 +31,7 @@ public abstract class EnchantmentScreenMixin extends AbstractContainerScreen<Enc
     }
 
     @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleInventoryButtonClick(II)V"))
-    public void onItemEnchanted(double mouseX, double mouseY, int mouseButton, CallbackInfoReturnable<Boolean> ci) {
+    public void onItemEnchanted(CallbackInfoReturnable<Boolean> ci) {
         PlayerRandCracker.onEnchantedItem();
     }
 

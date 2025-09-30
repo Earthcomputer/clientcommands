@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
@@ -22,7 +23,7 @@ public class CallbackCommand {
     }
 
     private static int runCallback(UUID uuid) throws CommandSyntaxException {
-        if (!ClientCommandHelper.runCallback(uuid)) {
+        if (!CComponentUtil.runCallback(uuid)) {
             throw NO_SUCH_CALLBACK_EXCEPTION.create();
         }
 

@@ -38,7 +38,7 @@ public class UuidCommand {
             source.sendFeedback(Component.translatable("commands.cuuid.success.nameless", uuidComponent));
             return Command.SINGLE_SUCCESS;
         }
-        String name = player.getProfile().getName();
+        String name = player.getProfile().name();
         source.sendFeedback(Component.translatable("commands.cuuid.success", name, uuidComponent));
         return Command.SINGLE_SUCCESS;
     }

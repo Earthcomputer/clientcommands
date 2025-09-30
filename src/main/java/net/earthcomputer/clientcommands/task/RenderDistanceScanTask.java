@@ -70,7 +70,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     @Override
     public void initialize() {
         remainingChunks = new LongLinkedOpenHashSet();
-        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+        Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
         if (cameraEntity == null) {
             _break();
             return;
@@ -98,7 +98,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     }
 
     protected void doTick() throws CommandSyntaxException {
-        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+        Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
         if (cameraEntity == null) {
             _break();
             return;
@@ -142,7 +142,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     protected void onBlockStateUpdate(ClientLevel level, BlockPos pos, BlockState oldState, BlockState newState) {
         if (keepSearching) {
             try {
-                scanBlock(Minecraft.getInstance().cameraEntity, pos);
+                scanBlock(Minecraft.getInstance().getCameraEntity(), pos);
             } catch (CommandSyntaxException e) {
                 ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
             }

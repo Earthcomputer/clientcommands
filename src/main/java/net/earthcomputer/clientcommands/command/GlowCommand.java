@@ -9,6 +9,7 @@ import net.earthcomputer.clientcommands.interfaces.IEntity_Glowable;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -99,7 +100,7 @@ public class GlowCommand {
 
             source.sendFeedback(Component.translatable("commands.cglow.entity.keepSearching.success")
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
             return Command.SINGLE_SUCCESS;
         } else {

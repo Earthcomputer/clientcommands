@@ -238,6 +238,12 @@
   "commands.cposteffect.reset.success": "Successfully reset post effect",
   "commands.cposteffect.unknownPostEffect": "Unknown post effect %s",
 
+  "commands.cpredictbrushables.foundBrushableBlock": "Found %s at %s with item %s %s",
+  "commands.cpredictbrushables.notFound": "No brushable blocks found",
+  "commands.cpredictbrushables.starting": "Searching for brushable blocks",
+  "commands.cpredictbrushables.starting.keepSearching": "Infinitely searching for brushable blocks [%s]",
+  "commands.cpredictbrushables.stewEffect": "%s (%s seconds)",
+
   "commands.crelog.failed": "Failed to relog",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
@@ -375,6 +381,7 @@
   "playerManip.reset.recreated": "Player Recreated",
   "playerManip.reset.respiration": "Respiration Helmet Used",
   "playerManip.reset.shield": "Blocked with Shield",
+  "playerManip.reset.shoulderParrot": "Parrot on Shoulder",
   "playerManip.reset.soulSpeed": "Soul Speed Used",
   "playerManip.reset.sprint": "Sprinted",
   "playerManip.reset.swim": "Swum",

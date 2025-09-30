@@ -46,13 +46,13 @@ public class PingCommand {
             throw PLAYER_IN_SINGLEPLAYER_EXCEPTION.create();
         }
 
-        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.getId());
+        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.id());
         if (playerInfo == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
         int ping = playerInfo.getLatency();
-        source.sendFeedback(Component.translatable("commands.cping.success.other", playerInfo.getProfile().getName(), ping));
+        source.sendFeedback(Component.translatable("commands.cping.success.other", playerInfo.getProfile().name(), ping));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -62,7 +62,7 @@ public class PingCommand {
             return -1;
         }
 
-        PlayerInfo localPlayer = packetListener.getPlayerInfo(packetListener.getLocalGameProfile().getId());
+        PlayerInfo localPlayer = packetListener.getPlayerInfo(packetListener.getLocalGameProfile().id());
         if (localPlayer == null) {
             return -1;
         }

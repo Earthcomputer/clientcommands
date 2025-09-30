@@ -32,12 +32,12 @@ public class CGameModeCommand {
     }
 
     private static int getPlayerGameMode(FabricClientCommandSource source, GameProfile player) throws CommandSyntaxException {
-        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.getId());
+        PlayerInfo playerInfo = source.getClient().getConnection().getPlayerInfo(player.id());
         if (playerInfo == null) {
             throw PLAYER_NOT_FOUND_EXCEPTION.create();
         }
 
-        source.sendFeedback(Component.translatable("commands.cgamemode.playerGameMode", playerInfo.getProfile().getName(), playerInfo.getGameMode().getShortDisplayName()));
+        source.sendFeedback(Component.translatable("commands.cgamemode.playerGameMode", playerInfo.getProfile().name(), playerInfo.getGameMode().getShortDisplayName()));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -50,7 +50,7 @@ public class CGameModeCommand {
             source.sendFeedback(Component.translatable("commands.cgamemode.noneWithGameMode", gameMode.getShortDisplayName()));
         } else {
             source.sendFeedback(Component.translatable("commands.cgamemode.listWithGameMode", gameMode.getShortDisplayName()));
-            playersWithGameMode.forEach(p -> source.sendFeedback(Component.literal(p.getProfile().getName())));
+            playersWithGameMode.forEach(p -> source.sendFeedback(Component.literal(p.getProfile().name())));
         }
 
         return playersWithGameMode.size();

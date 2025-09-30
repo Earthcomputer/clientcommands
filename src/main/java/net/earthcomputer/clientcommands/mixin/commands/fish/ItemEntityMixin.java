@@ -23,7 +23,7 @@ public abstract class ItemEntityMixin extends Entity {
 
     @Inject(method = "onSyncedDataUpdated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"))
     private void onStackSet(CallbackInfo ci) {
-        if (level().isClientSide && FishingCracker.canManipulateFishing()) {
+        if (level().isClientSide() && FishingCracker.canManipulateFishing()) {
             FishingCracker.processItemSpawn(position(), getItem());
         }
     }

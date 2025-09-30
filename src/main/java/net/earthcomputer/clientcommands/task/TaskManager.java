@@ -3,9 +3,9 @@ package net.earthcomputer.clientcommands.task;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.logging.LogUtils;
-import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.features.Relogger;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -115,7 +115,7 @@ public class TaskManager {
             if (task.conflictsWith(otherTask.getValue())) {
                 throw CONFLICTING_TASK_EXCEPTION.create(
                     otherTask.getKey(),
-                    ClientCommandHelper.getCommandTextComponent("commands.client.cancel", "/ctask stop " + otherTask.getKey())
+                    CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + otherTask.getKey())
                 );
             }
         }

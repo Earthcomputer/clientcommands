@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.xpple.clientarguments.arguments.CEntitySelector;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -42,7 +43,7 @@ public class FindCommand {
 
             source.sendFeedback(Component.translatable("commands.cfind.keepSearching.success")
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
             return Command.SINGLE_SUCCESS;
         } else {
@@ -66,7 +67,7 @@ public class FindCommand {
         source.sendFeedback(Component.translatable(
             "commands.cfind.found",
             entity.getName(),
-            getLookCoordsTextComponent(entity.blockPosition()),
+            CComponentUtil.getLookCoordsTextComponent(entity.blockPosition()),
             distance
         ));
     }

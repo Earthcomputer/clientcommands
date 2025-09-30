@@ -12,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -67,26 +68,26 @@ public class ConnectFourCommand {
             }
 
             if (!this.isGameActive()) {
-                LOGGER.warn("Tried to add piece to the already completed game with {}.", this.opponent.getProfile().getName());
+                LOGGER.warn("Tried to add piece to the already completed game with {}.", this.opponent.getProfile().name());
                 return;
             }
 
             if (!this.addPiece(x, piece)) {
-                LOGGER.warn("Failed to add piece to your Connect Four game with {}.", this.opponent.getProfile().getName());
+                LOGGER.warn("Failed to add piece to your Connect Four game with {}.", this.opponent.getProfile().name());
                 return;
             }
 
             if (this.isYourTurn()) {
                 try {
-                    PutConnectFourPieceC2CPacket packet = new PutConnectFourPieceC2CPacket(connection.getLocalGameProfile().getName(), connection.getLocalGameProfile().getId(), x);
+                    PutConnectFourPieceC2CPacket packet = new PutConnectFourPieceC2CPacket(connection.getLocalGameProfile().name(), connection.getLocalGameProfile().id(), x);
                     C2CPacketHandler.getInstance().sendPacket(packet, this.opponent);
                 } catch (CommandSyntaxException e) {
                     ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
                 }
             }
 
-            String sender = this.opponent.getProfile().getName();
-            UUID senderUUID = this.opponent.getProfile().getId();
+            String sender = this.opponent.getProfile().name();
+            UUID senderUUID = this.opponent.getProfile().id();
             this.activePiece = piece.opposite();
             if ((this.winner = this.getWinner()) != null) {
                 if (this.winner == this.yourPiece.asWinner()) {
@@ -283,7 +284,7 @@ public class ConnectFourCommand {
         private static final int SLOT_HEIGHT = SCALE * TEXTURE_SLOT_HEIGHT;
         
         public ConnectFourGameScreen(ConnectFourGame game) {
-            super(Component.translatable("connectFourGame.title", game.opponent.getProfile().getName()));
+            super(Component.translatable("connectFourGame.title", game.opponent.getProfile().name()));
             this.game = game;
         }
 
@@ -353,7 +354,7 @@ public class ConnectFourCommand {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             int startX = (this.width - BOARD_WIDTH) / 2;
             int startY = (this.height - BOARD_HEIGHT) / 2;
 
@@ -361,15 +362,15 @@ public class ConnectFourCommand {
             int boardMaxX = startX + BOARD_WIDTH - BOARD_BORDER_WIDTH * 2;
             int boardMaxY = startY + BOARD_HEIGHT;
 
-            if (!(boardMinX <= mouseX && mouseX < boardMaxX && mouseY < boardMaxY)) {
-                return super.mouseClicked(mouseX, mouseY, button);
+            if (!(boardMinX <= event.x() && event.x() < boardMaxX && event.y() < boardMaxY)) {
+                return super.mouseClicked(event, doubleClick);
             }
 
-            if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+            if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) {
                 return false;
             }
             
-            int x = (int) ((mouseX - boardMinX) / SLOT_WIDTH);
+            int x = (int) ((event.x() - boardMinX) / SLOT_WIDTH);
             if (this.game.canMove()) {
                 this.game.onMove(x, game.yourPiece);
                 return true;

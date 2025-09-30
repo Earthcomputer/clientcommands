@@ -37,7 +37,7 @@ public class CTeleportCommand {
         PlayerInfo playerInfo = packetListener.getPlayerInfo(uuid);
         String name;
         if (playerInfo != null) {
-            name = playerInfo.getProfile().getName();
+            name = playerInfo.getProfile().name();
         } else {
             name = uuid.toString();
         }

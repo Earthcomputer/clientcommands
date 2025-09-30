@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.LegacyEnchantment;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
@@ -58,7 +59,7 @@ public class CEnchantCommand {
             Component component = Component.translatable("commands.cenchant.needEnchantingPrediction")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands enchantingPrediction set true"));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.enable", "/cconfig clientcommands enchantingPrediction set true"));
             source.sendFeedback(component);
             return Command.SINGLE_SUCCESS;
         }
@@ -66,7 +67,7 @@ public class CEnchantCommand {
             Component component = Component.translatable("commands.cenchant.uncracked")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.crack", "/ccrackrng"));
             source.sendFeedback(component);
             return Command.SINGLE_SUCCESS;
         }
@@ -88,7 +89,7 @@ public class CEnchantCommand {
                     if (Configs.playerCrackState != PlayerRandCracker.CrackState.CRACKED) {
                         MutableComponent help = Component.translatable("commands.cenchant.help.uncrackedPlayerSeed")
                             .append(" ")
-                            .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+                            .append(CComponentUtil.getCommandTextComponent("commands.client.crack", "/ccrackrng"));
                         sendHelp(help);
                     }
                 } else {
@@ -111,7 +112,7 @@ public class CEnchantCommand {
 
         source.sendFeedback(Component.translatable("commands.cenchant.success")
             .append(" ")
-            .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+            .append(CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
         return Command.SINGLE_SUCCESS;
     }

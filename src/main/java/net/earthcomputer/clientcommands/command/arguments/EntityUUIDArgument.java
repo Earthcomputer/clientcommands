@@ -90,7 +90,7 @@ public class EntityUUIDArgument implements ArgumentType<EntityUUIDArgument.Resul
             if (entry == null) {
                 throw CEntityArgument.ENTITY_NOT_FOUND_EXCEPTION.create();
             }
-            return entry.getProfile().getId();
+            return entry.getProfile().id();
         }
     }
 

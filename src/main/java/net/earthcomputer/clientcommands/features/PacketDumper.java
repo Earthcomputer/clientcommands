@@ -1,17 +1,10 @@
 package net.earthcomputer.clientcommands.features;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.authlib.yggdrasil.response.ProfileSearchResultsResponse;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import com.mojang.util.ByteBufferTypeAdapter;
-import com.mojang.util.InstantTypeAdapter;
-import com.mojang.util.UUIDTypeAdapter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelPipeline;
@@ -23,12 +16,10 @@ import net.earthcomputer.clientcommands.util.MappingsHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketDecoder;
 import net.minecraft.network.PacketEncoder;
-import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.network.protocol.Packet;
@@ -95,14 +86,7 @@ public class PacketDumper {
     }
 
     private static class PacketDumpByteBuf extends FriendlyByteBuf {
-        private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
-            .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
-            .registerTypeHierarchyAdapter(ByteBuffer.class, new ByteBufferTypeAdapter().nullSafe())
-            .registerTypeAdapter(GameProfile.class, new GameProfile.Serializer())
-            .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
-            .registerTypeAdapter(ProfileSearchResultsResponse.class, new ProfileSearchResultsResponse.Serializer())
-            .create();
+        private static final Gson GSON = new Gson();
         private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
 
         private final JsonWriter writer;
@@ -266,15 +250,6 @@ public class PacketDumper {
             return dump("chunkPos", () -> writer
                 .name("x").value(chunkPos.x)
                 .name("z").value(chunkPos.z)
-            );
-        }
-
-        @Override
-        public @NotNull PacketDumpByteBuf writeSectionPos(SectionPos sectionPos) {
-            return dump("sectionPos", () -> writer
-                .name("x").value(sectionPos.x())
-                .name("y").value(sectionPos.y())
-                .name("z").value(sectionPos.z())
             );
         }
 

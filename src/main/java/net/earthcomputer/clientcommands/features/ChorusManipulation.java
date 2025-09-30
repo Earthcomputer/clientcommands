@@ -4,6 +4,7 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -52,7 +53,7 @@ public class ChorusManipulation {
             Component component = Component.translatable("chorusManip.needChorusManipulation")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands chorusManipulation set true"));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.enable", "/cconfig clientcommands chorusManipulation set true"));
             sendFeedback(component);
             return 0;
         }
@@ -61,7 +62,7 @@ public class ChorusManipulation {
             Component component = Component.translatable("playerManip.uncracked")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.crack", "/ccrackrng"));
             sendFeedback(component);
             return 0;
         }

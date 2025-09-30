@@ -1,4 +1,7 @@
 net/minecraft/world/level/block/entity/BaseContainerBlockEntity.canUnlock (Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/LockCode;Lnet/minecraft/network/chat/Component;)Z <- net/minecraft/server/level/ServerPlayer.playNotifySound <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.playShoulderEntityAmbientSound (Lnet/minecraft/nbt/CompoundTag;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.playShoulderEntityAmbientSound (Lnet/minecraft/nbt/CompoundTag;)V <- net/minecraft/world/entity/Entity.random
+net/minecraft/server/level/ServerPlayer.playShoulderEntityAmbientSound (Lnet/minecraft/nbt/CompoundTag;)V <- net/minecraft/world/entity/Entity.random
 net/minecraft/world/entity/Entity.<init> (Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V <- net/minecraft/world/entity/Entity.random
 net/minecraft/world/entity/Entity.<init> (Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V <- net/minecraft/world/entity/Entity.random
 net/minecraft/world/entity/Entity.doWaterSplashEffect ()V <- net/minecraft/world/entity/Entity.random

@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import net.earthcomputer.clientcommands.features.ClientcommandsDataQueryHandler;
 import net.earthcomputer.clientcommands.util.CUtil;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.earthcomputer.clientcommands.util.GuiBlocker;
 import net.earthcomputer.clientcommands.util.MathUtil;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
@@ -97,7 +98,7 @@ public class FindItemCommand {
         if (keepSearching) {
             ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting.keepSearching", item.string())
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
         } else {
             ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting", item.string()));
         }
@@ -192,17 +193,17 @@ public class FindItemCommand {
                     count,
                     searchingForName,
                     entity.getName(),
-                    getLookCoordsTextComponent(BlockPos.containing(entity.position()))
+                    CComponentUtil.getLookCoordsTextComponent(BlockPos.containing(entity.position()))
                 )
                     .append(" ")
-                    .append(getGlowButtonTextComponent(entity))
+                    .append(CComponentUtil.getGlowButtonTextComponent(entity))
             );
         }
 
         protected void printLocation(BlockPos pos, int count) {
-            sendFeedback(Component.translatable("commands.cfinditem.match", count, searchingForName, getLookCoordsTextComponent(pos))
+            sendFeedback(Component.translatable("commands.cfinditem.match", count, searchingForName, CComponentUtil.getLookCoordsTextComponent(pos))
                 .append(" ")
-                .append(getGlowButtonTextComponent(pos)));
+                .append(CComponentUtil.getGlowButtonTextComponent(pos)));
         }
 
         protected boolean canSearchEntity(Entity entity) {
@@ -238,7 +239,7 @@ public class FindItemCommand {
 
         @Override
         protected void onTick() {
-            Entity entity = Minecraft.getInstance().cameraEntity;
+            Entity entity = Minecraft.getInstance().getCameraEntity();
             if (entity == null) {
                 _break();
                 return;
@@ -432,7 +433,7 @@ public class FindItemCommand {
 
         @Override
         protected void onTick() {
-            Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+            Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
             if (cameraEntity == null) {
                 _break();
                 return;

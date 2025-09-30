@@ -2,28 +2,25 @@ package net.earthcomputer.clientcommands.render;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.earthcomputer.clientcommands.event.MoreWorldRenderEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.OptionalDouble;
 
 public class RenderQueue {
@@ -31,6 +28,8 @@ public class RenderQueue {
     private static final List<AddQueueEntry> addQueue = new ArrayList<>();
     private static final List<RemoveQueueEntry> removeQueue = new ArrayList<>();
     private static final EnumMap<Layer, Map<Object, Shape>> queue = new EnumMap<>(Layer.class);
+
+    private static final RenderStateDataKey<EnumMap<Layer, List<Line>>> LINES_KEY = RenderStateDataKey.create(() -> "clientcommands render queue");
 
     private static final RenderPipeline LINES_NO_DEPTH_PIPELINE = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
@@ -43,41 +42,26 @@ public class RenderQueue {
         .setLineState(new RenderType.LineStateShard(OptionalDouble.of(Line.THICKNESS)))
         .createCompositeState(false));
 
-    private static final MethodHandle WORLD_RENDER_CONTEXT_HANDLE = findWorldRenderContextHandle();
-
     static {
         ClientTickEvents.START_CLIENT_TICK.register(RenderQueue::tick);
-        MoreWorldRenderEvents.END_MAIN_PASS.register(context -> {
-            RenderQueue.render(RenderQueue.Layer.ON_TOP, Objects.requireNonNull(context.consumers()).getBuffer(RenderQueue.LINES_NO_DEPTH_LAYER), context);
+
+        MoreWorldRenderEvents.EXTRACT_STATE.register((state, camera, deltaTracker) -> {
+            EnumMap<Layer, List<Line>> lines = new EnumMap<>(Layer.class);
+            queue.forEach((layer, shapes) -> {
+                List<Line> linesToRender = new ArrayList<>();
+                shapes.values().forEach(shape -> shape.addLines(linesToRender::add, camera, deltaTracker));
+                lines.put(layer, linesToRender);
+            });
+            state.setData(LINES_KEY, lines);
+        });
+
+        MoreWorldRenderEvents.END_MAIN_PASS.register((bufferSource, poseStack, state) -> {
+            render(Layer.ON_TOP, bufferSource.getBuffer(LINES_NO_DEPTH_LAYER), poseStack, state);
         });
     }
 
     public static void register() {
         // load class
-    }
-
-    // TODO: remove this reflection by PRing to FAPI
-    private static MethodHandle findWorldRenderContextHandle() {
-        return Arrays.stream(LevelRenderer.class.getDeclaredFields())
-            .filter(field -> WorldRenderContext.class.isAssignableFrom(field.getType()) && field.getName().contains("context"))
-            .findFirst()
-            .map(field -> {
-                field.setAccessible(true);
-                try {
-                    return MethodHandles.lookup().unreflectGetter(field);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException("Unable to access WorldRenderContext field in LevelRenderer", e);
-                }
-            })
-            .orElseThrow(() -> new IllegalStateException("Unable to find WorldRenderContext field in LevelRenderer"));
-    }
-
-    public static WorldRenderContext getWorldRenderContext(LevelRenderer renderer) {
-        try {
-            return (WorldRenderContext) WORLD_RENDER_CONTEXT_HANDLE.invoke(renderer);
-        } catch (Throwable e) {
-            throw new IllegalStateException("Exception calling WorldRenderContext getter", e);
-        }
     }
 
     public static void add(Layer layer, Object key, Shape shape, int life) {
@@ -139,11 +123,20 @@ public class RenderQueue {
         }
     }
 
-    public static void render(Layer layer, VertexConsumer vertexConsumer, WorldRenderContext context) {
-        if (!queue.containsKey(layer)) {
+    private static void render(Layer layer, VertexConsumer vertexConsumer, PoseStack poseStack, LevelRenderState state) {
+        EnumMap<Layer, List<Line>> lines = state.getData(LINES_KEY);
+        if (lines == null) {
             return;
         }
-        queue.get(layer).values().forEach(shape -> shape.render(vertexConsumer, context));
+
+        List<Line> linesToRender = lines.get(layer);
+        if (linesToRender == null) {
+            return;
+        }
+
+        for (Line line : linesToRender) {
+            line.draw(vertexConsumer, poseStack);
+        }
     }
 
     public enum Layer {

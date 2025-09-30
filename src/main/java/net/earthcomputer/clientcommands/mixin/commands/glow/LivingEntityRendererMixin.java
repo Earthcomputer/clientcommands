@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.mixin.commands.glow;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.earthcomputer.clientcommands.interfaces.IEntity_Glowable;
 import net.earthcomputer.clientcommands.interfaces.ILivingEntityRenderState_Glowable;
 import net.minecraft.client.model.EntityModel;
@@ -10,12 +11,12 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends EntityRenderer<T, S> {
@@ -26,11 +27,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         super(ctx);
     }
 
-    @Inject(method = "getRenderType", at = @At("RETURN"), cancellable = true)
-    private void onGetRenderType(S renderState, boolean visible, boolean translucent, boolean showOutline, CallbackInfoReturnable<RenderType> ci) {
-        if (ci.getReturnValue() == null && ((ILivingEntityRenderState_Glowable) renderState).clientcommands_hasGlowingTicket()) {
-            ci.setReturnValue(RenderType.outline(getTextureLocation(renderState)));
+    @ModifyReturnValue(method = "getRenderType", at = @At("RETURN"))
+    @Nullable
+    private RenderType onGetRenderType(@Nullable RenderType original, S renderState) {
+        if (original == null && ((ILivingEntityRenderState_Glowable) renderState).clientcommands_hasGlowingTicket()) {
+            return RenderType.outline(getTextureLocation(renderState));
         }
+
+        return original;
     }
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At("RETURN"))

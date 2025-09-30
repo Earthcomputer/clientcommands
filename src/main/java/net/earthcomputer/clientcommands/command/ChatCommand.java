@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ChatComponent;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
@@ -15,7 +16,7 @@ public class ChatCommand {
 
     private static int execute() {
         Minecraft.getInstance().schedule(() -> {
-            Minecraft.getInstance().openChatScreen("");
+            Minecraft.getInstance().openChatScreen(ChatComponent.ChatMethod.MESSAGE);
             sendFeedback("commands.chat.success");
         });
         return Command.SINGLE_SUCCESS;

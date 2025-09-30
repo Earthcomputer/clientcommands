@@ -26,7 +26,7 @@ public abstract class EntityMixin implements IEntity_Debug {
 
     @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/Entity;random:Lnet/minecraft/util/RandomSource;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
     private void onInitRandom(EntityType<?> type, Level level, CallbackInfo ci) {
-        if (type == DebugRandom.DEBUG_ENTITY_TYPE && !level.isClientSide) {
+        if (type == DebugRandom.DEBUG_ENTITY_TYPE && !level.isClientSide()) {
             this.random = new DebugRandom((Entity) (Object) this);
         }
     }

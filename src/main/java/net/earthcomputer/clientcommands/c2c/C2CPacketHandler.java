@@ -113,7 +113,7 @@ public class C2CPacketHandler implements C2CPacketListener {
             System.arraycopy(encrypted[i], 0, joined, i * 256, 256);
         }
         String packetString = ConversionHelper.BaseUTF8.toUnicode(joined);
-        String commandString = "w " + recipient.getProfile().getName() + ' ' + C2C_PACKET_HEADER + packetString;
+        String commandString = "w " + recipient.getProfile().name() + ' ' + C2C_PACKET_HEADER + packetString;
         if (commandString.length() >= SharedConstants.MAX_CHAT_LENGTH) {
             throw MESSAGE_TOO_LONG_EXCEPTION.create(commandString.length());
         }

@@ -62,6 +62,9 @@
   "overwrites": {
     "requireAnnotations": true
   },
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "client": [
     "c2c.ChatListenerMixin",
     "c2c.ClientPacketListenerMixin",

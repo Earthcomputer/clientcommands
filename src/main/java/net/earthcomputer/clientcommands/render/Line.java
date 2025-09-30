@@ -2,8 +2,11 @@ package net.earthcomputer.clientcommands.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.function.Consumer;
 
 public class Line extends Shape {
     public final Vec3 start;
@@ -18,18 +21,24 @@ public class Line extends Shape {
     }
 
     @Override
-    public void render(VertexConsumer vertexConsumer, WorldRenderContext context) {
-        renderLine(vertexConsumer, context, prevPos.subtract(getPos()));
+    public void addLines(Consumer<Line> lines, Camera camera, DeltaTracker deltaTracker) {
+        lines.accept(toCameraView(camera, deltaTracker, prevPos.subtract(getPos())));
     }
 
-    public void renderLine(VertexConsumer vertexConsumer, WorldRenderContext context, Vec3 prevPosOffset) {
-        PoseStack poseStack = context.matrixStack();
-        float delta = context.tickCounter().getRealtimeDeltaTicks();
-        Vec3 cameraPos = context.camera().getPosition();
-        assert poseStack != null;
+    public Line toCameraView(Camera camera, DeltaTracker deltaTracker, Vec3 prevPosOffset) {
+        float delta = deltaTracker.getRealtimeDeltaTicks();
+        Vec3 cameraPos = camera.getPosition();
+        return new Line(
+            start.add(prevPosOffset.scale(1 - delta)).subtract(cameraPos),
+            end.add(prevPosOffset.scale(1 - delta).subtract(cameraPos)),
+            color
+        );
+    }
+
+    public void draw(VertexConsumer vertexConsumer, PoseStack poseStack) {
         Vec3 normal = this.end.subtract(this.start).normalize();
-        putVertex(poseStack, vertexConsumer, this.start.add(prevPosOffset.scale(1 - delta)).subtract(cameraPos), normal);
-        putVertex(poseStack, vertexConsumer, this.end.add(prevPosOffset.scale(1 - delta)).subtract(cameraPos), normal);
+        putVertex(poseStack, vertexConsumer, this.start, normal);
+        putVertex(poseStack, vertexConsumer, this.end, normal);
     }
 
     private void putVertex(PoseStack poseStack, VertexConsumer vertexConsumer, Vec3 pos, Vec3 normal) {
@@ -55,5 +64,4 @@ public class Line extends Shape {
     public Vec3 getPos() {
         return start;
     }
-
 }

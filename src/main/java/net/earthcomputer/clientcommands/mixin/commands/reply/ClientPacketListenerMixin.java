@@ -18,12 +18,12 @@ import java.util.UUID;
 public abstract class ClientPacketListenerMixin {
     @Shadow public abstract @Nullable PlayerInfo getPlayerInfo(UUID uniqueId);
 
-    @Inject(method = "handlePlayerChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V", shift = At.Shift.AFTER))
+    @Inject(method = "handlePlayerChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V", shift = At.Shift.AFTER))
     private void onHandlePlayerChat(ClientboundPlayerChatPacket packet, CallbackInfo ci) {
         if (packet.chatType().chatType().is(ChatType.MSG_COMMAND_INCOMING) || packet.chatType().chatType().is(ChatType.MSG_COMMAND_OUTGOING)) {
             PlayerInfo info = getPlayerInfo(packet.sender());
             if (info != null) {
-                ReplyCommand.addReplyCandidate(info.getProfile().getName(), System.currentTimeMillis());
+                ReplyCommand.addReplyCandidate(info.getProfile().name(), System.currentTimeMillis());
             }
         }
     }

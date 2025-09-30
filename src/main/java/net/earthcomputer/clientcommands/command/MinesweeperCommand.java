@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -212,12 +213,12 @@ public class MinesweeperCommand {
         }
 
         @Override
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
-            int tileX = Mth.floorDiv((int) (mouseX - topLeftX - 12), 16);
-            int tileY = Mth.floorDiv((int) (mouseY - topLeftY - 12), 16);
+        public boolean mouseReleased(MouseButtonEvent event) {
+            int tileX = Mth.floorDiv((int) (event.x() - topLeftX - 12), 16);
+            int tileY = Mth.floorDiv((int) (event.y() - topLeftY - 12), 16);
 
             if (isWithinBounds(tileX, tileY) && gameActive()) {
-                if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                     if (ticksPlaying == 0) {
                         generateMines(tileX, tileY);
                         ticksPlaying = 1;
@@ -231,7 +232,7 @@ public class MinesweeperCommand {
                     } else if (deathCoords != null) {
                         minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1.0f, 1.0f);
                     }
-                } else if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
+                } else if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                     flag(tileX, tileY);
                 }
             }
