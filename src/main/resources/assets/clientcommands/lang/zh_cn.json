@@ -234,6 +234,12 @@
   "commands.cpos.level.the_end": "末地",
   "commands.cpos.level.the_nether": "下界",
 
+  "commands.cpredictbrushables.foundBrushableBlock": "Found %s at %s with item %s %s",
+  "commands.cpredictbrushables.notFound": "No brushable blocks found",
+  "commands.cpredictbrushables.starting": "Searching for brushable blocks",
+  "commands.cpredictbrushables.starting.keepSearching": "Infinitely searching for brushable blocks [%s]",
+  "commands.cpredictbrushables.stewEffect": "%s (%s seconds)",
+
   "commands.crelog.failed": "未能重新登录",
 
   "commands.crender.entities.success": "实体渲染规则已更新",
@@ -371,6 +377,7 @@
   "playerManip.reset.recreated": "重新创建了玩家",
   "playerManip.reset.respiration": "使用了水下呼吸头盔",
   "playerManip.reset.shield": "使用盾牌阻挡了攻击",
+  "playerManip.reset.shoulderParrot": "Parrot on Shoulder",
   "playerManip.reset.soulSpeed": "使用了灵魂疾行",
   "playerManip.reset.sprint": "疾跑",
   "playerManip.reset.swim": "游泳",
