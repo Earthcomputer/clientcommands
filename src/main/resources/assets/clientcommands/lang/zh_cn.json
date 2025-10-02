@@ -237,8 +237,8 @@
   "commands.cpredictbrushables.foundBrushableBlock": "Found %s at %s with item %s %s",
   "commands.cpredictbrushables.notFound": "No brushable blocks found",
   "commands.cpredictbrushables.starting": "Searching for brushable blocks",
-  "commands.cpredictbrushables.starting.keepSearching": "Infinitely searching for brushable blocks [%s]",
-  "commands.cpredictbrushables.stewEffect": "%s (%s seconds)",
+  "commands.cpredictbrushables.starting.keepSearching": "无限地搜索brushable blocks[%s]",
+  "commands.cpredictbrushables.stewEffect": "%s（%s秒）",
 
   "commands.crelog.failed": "未能重新登录",
 
@@ -377,7 +377,7 @@
   "playerManip.reset.recreated": "重新创建了玩家",
   "playerManip.reset.respiration": "使用了水下呼吸头盔",
   "playerManip.reset.shield": "使用盾牌阻挡了攻击",
-  "playerManip.reset.shoulderParrot": "Parrot on Shoulder",
+  "playerManip.reset.shoulderParrot": "鹦鹉站在肩膀上",
   "playerManip.reset.soulSpeed": "使用了灵魂疾行",
   "playerManip.reset.sprint": "疾跑",
   "playerManip.reset.swim": "游泳",
