@@ -234,10 +234,10 @@
   "commands.cpos.level.the_end": "末地",
   "commands.cpos.level.the_nether": "下界",
 
-  "commands.cpredictbrushables.foundBrushableBlock": "Found %s at %s with item %s %s",
-  "commands.cpredictbrushables.notFound": "No brushable blocks found",
-  "commands.cpredictbrushables.starting": "Searching for brushable blocks",
-  "commands.cpredictbrushables.starting.keepSearching": "无限地搜索brushable blocks[%s]",
+  "commands.cpredictbrushables.foundBrushableBlock": "找到%s位于%s带有物品%s %s",
+  "commands.cpredictbrushables.notFound": "没有找到可以被刷子刷的方块",
+  "commands.cpredictbrushables.starting": "正在搜索可以被刷子刷的方块",
+  "commands.cpredictbrushables.starting.keepSearching": "无限地搜索可以被刷子刷的方块[%s]",
   "commands.cpredictbrushables.stewEffect": "%s（%s秒）",
 
   "commands.crelog.failed": "未能重新登录",
