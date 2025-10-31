@@ -5,6 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import com.seedfinding.mcseed.lcg.LCG;
 import com.seedfinding.mcseed.rand.Rand;
+import it.unimi.dsi.fastutil.ints.IntIterator;
+import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.earthcomputer.clientcommands.Configs;
@@ -55,8 +57,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -148,7 +148,7 @@ public class EnchantmentCracker {
         lines.add(Component.empty());
 
         if (crackState == CrackState.CRACKED) {
-            lines.add(Component.translatable("enchCrack.xpSeed.one", String.format("%08X", possibleXPSeeds.iterator().next())));
+            lines.add(Component.translatable("enchCrack.xpSeed.one", String.format("%08X", possibleXPSeeds.firstInt())));
         } else if (crackState == CrackState.CRACKING) {
             lines.add(Component.translatable("enchCrack.xpSeed.many", possibleXPSeeds.size()));
         }
@@ -204,7 +204,7 @@ public class EnchantmentCracker {
      * This section is in charge of the logic of the cracking
      */
 
-    static Set<Integer> possibleXPSeeds = new HashSet<>(1 << 20);
+    static IntLinkedOpenHashSet possibleXPSeeds = new IntLinkedOpenHashSet(1 << 20);
     private static int firstXpSeed;
     public static BlockPos enchantingTablePos = null;
     private static boolean doneEnchantment = false;
@@ -255,9 +255,9 @@ public class EnchantmentCracker {
         int version = MultiVersionCompat.INSTANCE.getProtocolVersion();
 
         // brute force the possible seeds
-        Iterator<Integer> xpSeedItr = possibleXPSeeds.iterator();
+        IntIterator xpSeedItr = possibleXPSeeds.iterator();
         seedLoop: while (xpSeedItr.hasNext()) {
-            int xpSeed = xpSeedItr.next();
+            int xpSeed = xpSeedItr.nextInt();
             rand.setSeed(xpSeed);
 
             // check enchantment levels match
@@ -302,7 +302,7 @@ public class EnchantmentCracker {
                     "Invalid enchantment seed information. Has the server got unknown mods, is there a desync, or is the client just bugged?");
         } else if (possibleXPSeeds.size() == 1) {
             Configs.enchCrackState = CrackState.CRACKED;
-            addPlayerRNGInfo(possibleXPSeeds.iterator().next());
+            addPlayerRNGInfo(possibleXPSeeds.firstInt());
         }
     }
 
@@ -395,7 +395,7 @@ public class EnchantmentCracker {
             new ThreadFactoryBuilder().setNameFormat("Enchantment Cracker #%d").build()
         );
 
-        int noDummyXpSeed = Configs.enchCrackState == CrackState.CRACKED ? possibleXPSeeds.iterator().next() : 0;
+        int noDummyXpSeed = Configs.enchCrackState == CrackState.CRACKED ? possibleXPSeeds.firstInt() : 0;
 
         ItemStack stack = new ItemStack(item);
         long playerSeed = PlayerRandCracker.getSeed();
@@ -698,7 +698,7 @@ public class EnchantmentCracker {
         } else {
             // return the enchantments using our cracked seed
             RandomSource rand = RandomSource.create();
-            int xpSeed = possibleXPSeeds.iterator().next();
+            int xpSeed = possibleXPSeeds.firstInt();
             ItemStack enchantingStack = enchMenu.getSlot(0).getItem();
             int enchantLevels = enchMenu.costs[slot];
             return getEnchantmentList(enchantmentRegistry, rand, xpSeed, enchantingStack, slot, enchantLevels, MultiVersionCompat.INSTANCE.getProtocolVersion());
