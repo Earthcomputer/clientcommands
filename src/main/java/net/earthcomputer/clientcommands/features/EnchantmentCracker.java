@@ -115,6 +115,8 @@ public class EnchantmentCracker {
 
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final int PROGRESS_BAR_WIDTH = 50;
+    private static final LCG LCG_JAVA_ADVANCE_4 = LCG.JAVA.combine(4);
+    private static final int LCG_JAVA_NEXT_INT_OFFSET = LCG.JAVA.getModTrailingZeroes() - 32;
 
     private static WeakReference<LongTask> currentEnchantingTask = null;
     private static boolean isCurrentlyThrowingItems = false;
@@ -395,8 +397,6 @@ public class EnchantmentCracker {
             new ThreadFactoryBuilder().setNameFormat("Enchantment Cracker #%d").build()
         );
 
-        int noDummyXpSeed = Configs.enchCrackState == CrackState.CRACKED ? possibleXPSeeds.firstInt() : 0;
-
         ItemStack stack = new ItemStack(item);
         long playerSeed = PlayerRandCracker.getSeed();
         Registry<Enchantment> enchantmentRegistry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
@@ -404,19 +404,52 @@ public class EnchantmentCracker {
 
         List<CompletableFuture<@Nullable ManipulateResult>> futures = new ArrayList<>();
 
-        for (int i = Configs.enchCrackState == CrackState.CRACKED ? ManipulateResult.NO_DUMMY : 0;
-             i < (Configs.playerCrackState.knowsSeed() ? Configs.getMaxEnchantItemThrows() : 0);
-             i++
+        if (Configs.enchCrackState == CrackState.CRACKED) {
+            int noDummyXpSeed = possibleXPSeeds.firstInt();
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                try {
+                    int[] enchantLevels = new int[3];
+                    RandomSource rand = RandomSource.create();
+                    for (int bookshelvesNeeded = Configs.getMinEnchantBookshelves(); bookshelvesNeeded <= Configs.getMaxEnchantBookshelves(); bookshelvesNeeded++) {
+                        rand.setSeed(noDummyXpSeed);
+                        for (int slot = 0; slot < 3; slot++) {
+                            int level = EnchantmentHelper.getEnchantmentCost(rand, slot, bookshelvesNeeded, stack);
+                            if (level < slot + 1) {
+                                level = 0;
+                            }
+                            enchantLevels[slot] = level;
+                        }
+                        int maxEnchantSlot = Configs.getMaxEnchantSlot();
+                        for (int slot = 0; slot < maxEnchantSlot; slot++) {
+                            List<EnchantmentInstance> enchantments = getEnchantmentList(enchantmentRegistry, rand, noDummyXpSeed, stack, slot, enchantLevels[slot], version);
+                            if (enchantmentsPredicate.test(enchantments)
+                                    && enchantLevels[slot] >= Configs.getMinEnchantLevels()
+                                    && enchantLevels[slot] <= Configs.getMaxEnchantLevels()
+                            ) {
+                                return new ManipulateResult(ManipulateResult.NO_DUMMY, bookshelvesNeeded, slot, enchantments);
+                            }
+                        }
+                    }
+                } catch (Throwable e) {
+                    LOGGER.error("An error occurred simulating enchantments", e);
+                }
+
+                return null;
+            }, threadPool));
+        }
+        Rand playerRand = new Rand(LCG.JAVA, playerSeed);
+        playerRand.nextSeed(); // avoid nextBits(32) calls, replaced by getSeed() >>> (48 - 32)
+        for (int i = 0,
+             maxEnchantItemThrows = Configs.playerCrackState.knowsSeed()
+                     ? Configs.getMaxEnchantItemThrows()
+                     : 0;
+             i < maxEnchantItemThrows;
+             i++, playerRand.advance(LCG_JAVA_ADVANCE_4)
         ) {
+            int xpSeed = (int) (playerRand.getSeed() >>> LCG_JAVA_NEXT_INT_OFFSET);
             int times = i;
             futures.add(CompletableFuture.supplyAsync(() -> {
                 try {
-                    Rand playerRand = new Rand(LCG.JAVA, playerSeed);
-                    playerRand.advance(Math.max(times, 0) * 4L);
-                    int xpSeed = times == ManipulateResult.NO_DUMMY ?
-                        noDummyXpSeed
-                        : (int) playerRand.nextBits(32);
-
                     int[] enchantLevels = new int[3];
                     RandomSource rand = RandomSource.create();
                     for (int bookshelvesNeeded = Configs.getMinEnchantBookshelves(); bookshelvesNeeded <= Configs.getMaxEnchantBookshelves(); bookshelvesNeeded++) {
