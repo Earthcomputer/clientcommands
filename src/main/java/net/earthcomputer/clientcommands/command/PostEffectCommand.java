@@ -7,14 +7,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import static net.earthcomputer.clientcommands.command.arguments.PostChainArgument.*;
+import static net.earthcomputer.clientcommands.command.arguments.PostEffectArgument.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 public class PostEffectCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cposteffect")
-            .then(argument("posteffect", postChain())
-                .executes(ctx -> applyPostEffect(ctx.getSource(), getPostChain(ctx, "posteffect"))))
+            .then(argument("posteffect", postEffect())
+                .executes(ctx -> applyPostEffect(ctx.getSource(), getPostEffect(ctx, "posteffect"))))
             .then(literal("reset")
                 .executes(ctx -> applyPostEffect(ctx.getSource(), null))));
     }
