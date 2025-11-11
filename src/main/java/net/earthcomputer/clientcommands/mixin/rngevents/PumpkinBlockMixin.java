@@ -1,7 +1,10 @@
 package net.earthcomputer.clientcommands.mixin.rngevents;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -17,8 +20,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PumpkinBlock.class)
 public class PumpkinBlockMixin {
-
-    @Inject(method = "useItemOn", at = @At(value = "CONSTANT", args = "classValue=net/minecraft/server/level/ServerLevel"))
+    @Definition(id = "ServerLevel", type = ServerLevel.class)
+    @Expression("? instanceof ServerLevel")
+    @Inject(method = "useItemOn", at = @At("MIXINEXTRAS:EXPRESSION"))
     public void onShear(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult, CallbackInfoReturnable<InteractionResult> cir) {
         PlayerRandCracker.onItemDamage(1, player, stack);
     }
