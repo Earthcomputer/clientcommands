@@ -124,7 +124,7 @@ public class DebugRandom extends LegacyRandomSource {
         super(RandomSupport.generateUniqueSeed());
 
         this.tagToSaveSupplier = CompoundTag::new;
-        this.idSupplier = () -> level.dimension().location().toString();
+        this.idSupplier = () -> level.dimension().location().getPath();
 
         this.stackTraces.add(this.stackTracesThisTick);
         try {
