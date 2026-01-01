@@ -234,6 +234,10 @@
   "commands.cpos.level.the_end": "末地",
   "commands.cpos.level.the_nether": "下界",
 
+  "commands.cposteffect.apply.success": "Successfully applied post effect %s",
+  "commands.cposteffect.reset.success": "Successfully reset post effect",
+  "commands.cposteffect.unknownPostEffect": "Unknown post effect %s",
+
   "commands.cpredictbrushables.foundBrushableBlock": "找到%s位于%s带有物品%s %s",
   "commands.cpredictbrushables.notFound": "没有找到可以被刷子刷的方块",
   "commands.cpredictbrushables.starting": "正在搜索可以被刷子刷的方块",
