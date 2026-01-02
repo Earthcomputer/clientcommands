@@ -73,12 +73,12 @@ dependencies {
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
-//	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
-//		exclude group: 'net.fabricmc', module: 'fabric-loader'
-//	}
-//	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
-//		exclude group: 'net.fabricmc', module: 'fabric-loader'
-//	}
+	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
+	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+		exclude group: 'net.fabricmc', module: 'fabric-loader'
+	}
 
 	include api("net.fabricmc:mapping-io:${project.mapping_io_version}")
 

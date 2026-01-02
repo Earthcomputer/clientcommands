@@ -11,8 +11,8 @@ import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
-import net.minecraft.DetectedVersion;
 import net.minecraft.Optionull;
+import net.minecraft.SharedConstants;
 import net.minecraft.util.Util;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -59,80 +59,82 @@ public final class MappingsHelper {
     }
 
     private static final CompletableFuture<MemoryMappingTree> mojmapOfficial = Util.make(() -> {
-        String version = DetectedVersion.BUILT_IN.name();
+        String version = SharedConstants.getCurrentVersion().id();
         try (BufferedReader reader = Files.newBufferedReader(MAPPINGS_DIR.resolve(version + ".txt"))) {
             MemoryMappingTree tree = new MemoryMappingTree();
             MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
             return CompletableFuture.completedFuture(tree);
         } catch (IOException e) {
-            try (HttpClient httpClient = HttpClient.newHttpClient()) {
-                HttpRequest versionsRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"))
-                    .GET()
-                    .timeout(Duration.ofSeconds(5))
-                    .build();
-                return httpClient.sendAsync(versionsRequest, HttpResponse.BodyHandlers.ofString())
-                    .thenApply(HttpResponse::body)
-                    .thenCompose(versionsBody -> {
-                        JsonObject versionsJson = JsonParser.parseString(versionsBody).getAsJsonObject();
-                        String versionUrl = versionsJson.getAsJsonArray("versions").asList().stream()
-                            .map(JsonElement::getAsJsonObject)
-                            .filter(v -> v.get("id").getAsString().equals(version))
-                            .map(v -> v.get("url").getAsString())
-                            .findAny().orElseThrow();
+            //noinspection resource async requests do not lend themselves for auto-closure
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest versionsRequest = HttpRequest.newBuilder()
+                .uri(URI.create("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"))
+                .GET()
+                .timeout(Duration.ofSeconds(5))
+                .build();
+            return httpClient.sendAsync(versionsRequest, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenCompose(versionsBody -> {
+                    JsonObject versionsJson = JsonParser.parseString(versionsBody).getAsJsonObject();
+                    String versionUrl = versionsJson.getAsJsonArray("versions").asList().stream()
+                        .map(JsonElement::getAsJsonObject)
+                        .filter(v -> v.get("id").getAsString().equals(version))
+                        .map(v -> v.get("url").getAsString())
+                        .findAny().orElseThrow();
 
-                        HttpRequest versionRequest = HttpRequest.newBuilder()
-                            .uri(URI.create(versionUrl))
-                            .GET()
-                            .timeout(Duration.ofSeconds(5))
-                            .build();
-                        return httpClient.sendAsync(versionRequest, HttpResponse.BodyHandlers.ofString());
-                    })
-                    .whenComplete((result, exception) -> {
-                        if (exception != null) {
-                            ListenCommand.disable();
-                        }
-                    })
-                    .thenApply(HttpResponse::body)
-                    .thenCompose(versionBody -> {
-                        JsonObject versionJson = JsonParser.parseString(versionBody).getAsJsonObject();
-                        String mappingsUrl = versionJson
-                            .getAsJsonObject("downloads")
-                            .getAsJsonObject("client_mappings")
-                            .get("url").getAsString();
+                    HttpRequest versionRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(versionUrl))
+                        .GET()
+                        .timeout(Duration.ofSeconds(5))
+                        .build();
+                    return httpClient.sendAsync(versionRequest, HttpResponse.BodyHandlers.ofString());
+                })
+                .whenComplete((result, exception) -> {
+                    if (exception != null) {
+                        LOGGER.error("An error occurred while fetching mappings file", exception);
+                        ListenCommand.disable();
+                    }
+                })
+                .thenApply(HttpResponse::body)
+                .thenCompose(versionBody -> {
+                    JsonObject versionJson = JsonParser.parseString(versionBody).getAsJsonObject();
+                    String mappingsUrl = versionJson
+                        .getAsJsonObject("downloads")
+                        .getAsJsonObject("client_mappings")
+                        .get("url").getAsString();
 
-                        HttpRequest mappingsRequest = HttpRequest.newBuilder()
-                            .uri(URI.create(mappingsUrl))
-                            .GET()
-                            .timeout(Duration.ofSeconds(5))
-                            .build();
-                        return httpClient.sendAsync(mappingsRequest, HttpResponse.BodyHandlers.ofString());
-                    })
-                    .thenApply(HttpResponse::body)
-                    .thenApply(body -> {
-                        try (StringReader reader = new StringReader(body)) {
-                            MemoryMappingTree tree = new MemoryMappingTree();
-                            MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
-                            return tree;
+                    HttpRequest mappingsRequest = HttpRequest.newBuilder()
+                        .uri(URI.create(mappingsUrl))
+                        .GET()
+                        .timeout(Duration.ofSeconds(5))
+                        .build();
+                    return httpClient.sendAsync(mappingsRequest, HttpResponse.BodyHandlers.ofString());
+                })
+                .thenApply(HttpResponse::body)
+                .thenApply(body -> {
+                    try (StringReader reader = new StringReader(body)) {
+                        MemoryMappingTree tree = new MemoryMappingTree();
+                        MappingReader.read(reader, MappingFormat.PROGUARD_FILE, tree);
+                        return tree;
+                    } catch (IOException ex) {
+                        LOGGER.error("Could not read ProGuard mappings file", ex);
+                        ListenCommand.disable();
+                        throw new UncheckedIOException(ex);
+                    } finally {
+                        try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
+                            writer.write(body);
                         } catch (IOException ex) {
-                            LOGGER.error("Could not read ProGuard mappings file", ex);
-                            ListenCommand.disable();
-                            throw new UncheckedIOException(ex);
-                        } finally {
-                            try (BufferedWriter writer = Files.newBufferedWriter(MAPPINGS_DIR.resolve(version + ".txt"), StandardOpenOption.CREATE)) {
-                                writer.write(body);
-                            } catch (IOException ex) {
-                                LOGGER.error("Could not write ProGuard mappings file", ex);
-                            }
+                            LOGGER.error("Could not write ProGuard mappings file", ex);
                         }
-                    });
-            }
+                    }
+                });
+
         }
     });
     private static final int SRC_OFFICIAL = 0;
     private static final int DEST_OFFICIAL = 0;
 
-    private static final MemoryMappingTree officialIntermediaryNamed = Util.make(() -> {
+    private static final @Nullable MemoryMappingTree officialIntermediaryNamed = Util.make(() -> {
         try (InputStream stream = FabricLoader.class.getClassLoader().getResourceAsStream("mappings/mappings.tiny")) {
             if (stream == null) {
                 throw new IOException("Could not find mappings.tiny");

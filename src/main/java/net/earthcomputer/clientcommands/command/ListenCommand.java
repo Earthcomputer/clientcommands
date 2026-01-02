@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class ListenCommand {
 
     private static final Set<Identifier> packets = new HashSet<>();
 
-    private static PacketCallback callback;
+    private static @Nullable PacketCallback callback;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("clisten")
@@ -171,7 +172,7 @@ public class ListenCommand {
         }
     }
 
-    private static Component serialize(Object object, Set<Object> seen, int depth) {
+    private static Component serialize(@Nullable Object object, Set<@Nullable Object> seen, int depth) {
         try {
             if (depth <= Configs.maximumPacketFieldDepth && seen.add(object)) {
                 return serializeInner(object, seen, depth);
@@ -182,7 +183,7 @@ public class ListenCommand {
         }
     }
 
-    private static Component serializeInner(Object object, Set<Object> seen, int depth) {
+    private static Component serializeInner(@Nullable Object object, Set<@Nullable Object> seen, int depth) {
         return switch (object) {
             case null -> Component.literal("null");
             case Component component -> component;
@@ -276,6 +277,7 @@ public class ListenCommand {
         if (!packets.contains(packet.type().id())) {
             return;
         }
+        assert callback != null;
         callback.apply(packet, side);
     }
 
