@@ -159,7 +159,7 @@
   "commands.cglow.entity.keepSearching.success": "Ricerca entità da evidenziare",
   "commands.cglow.entity.success": "%s entità evidenziate",
 
-  "commands.chat.success": "Chat aperta con suc🚽", 
+  "commands.chat.success": "Chat aperta con suc🚽",
 
   "commands.chotbar.notCreative": "Serve la modalità creativa per ripristinare barre oggetti",
   "commands.chotbar.restoredHotbar": "Barra oggetti %s ripristinata",
