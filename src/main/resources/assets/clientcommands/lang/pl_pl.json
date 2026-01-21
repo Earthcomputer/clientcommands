@@ -147,7 +147,7 @@
 
   "commands.cgamma.success": "Ustawiono gammę na %s",
 
-  "commands.cghostblock.fill.success": "Zapełniono %s \"ghost blocks\"",
+  "commands.cghostblock.fill.success": "Zapełniono %s \"ghost blocki\"",
   "commands.cghostblock.set.success": "Położono \"ghost block\"",
 
   "commands.cgive.noSpace": "Nie ma miejsca na ten przedmiot w Twoim ekwipunku",
@@ -177,7 +177,7 @@
 
   "commands.client.blockpos": "(%s, %s, %s)",
   "commands.client.cancel": "Anuluj",
-  "commands.client.componentTooDeeplyNested": "Chat component too deeply nested",
+  "commands.client.componentTooDeeplyNested": "Komponent czatu jest za bardzo zagnieżdżony",
   "commands.client.crack": "Złam",
   "commands.client.enable": "Włącz",
   "commands.client.expectedRegex": "Nieprawidłowe wyrażenie regularne %s",
