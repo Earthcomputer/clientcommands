@@ -3,9 +3,9 @@
   "c2cpacket.malformedPacket": "Otrzymano źle sformułowany pakiet C2C:",
   "c2cpacket.messageC2CPacket.incoming": "%s -> ty: %s",
   "c2cpacket.messageC2CPacket.outgoing": "Ty -> %s: %s",
-  "c2cpacket.messageTooLong": "Wiadomość jest za długa (max. 255 znaków) got %s characters",
+  "c2cpacket.messageTooLong": "Wiadomość jest za długa (max. 255 znaków), otrzymano %s znaków",
   "c2cpacket.publicKeyNotFound": "Nie znaleniono klucza publicznego",
-  "c2cpacket.receivedC2CPacket": "Otrzymałeś pakiet C2C, ale you aren't accepting incoming C2C packets! Najedź, aby zobaczyć nieprzetworzony pakiet",
+  "c2cpacket.receivedC2CPacket": "Otrzymałeś pakiet C2C, ale nie przyjmujesz przychodzących pakietów C2C! Najedź, aby zobaczyć nieprzetworzony pakiet",
   "c2cpacket.sentC2CPacket": "Wysłałeś a pakiet C2C, lecz odbiór przychodzących pakietów C2C jest wyłączony",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming": "%s zaprosił cię do zagrania w %s",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept": "Akceptuj",
@@ -202,7 +202,7 @@
   "commands.clisten.receivedPacket": "Otrzymano następujący pakiet: %s",
   "commands.clisten.remove.failed": "Nie nasłuchujesz tego pakietu!",
   "commands.clisten.remove.success": "Przestałeś nasłuchiwać tego pakietu",
-  "commands.clisten.sentC2CPacket": "Wysłano następujący pa C2C packet: %s",
+  "commands.clisten.sentC2CPacket": "Wysłano następujący pakiet C2C: %s",
   "commands.clisten.sentPacket": "Wysłano następujący pakiet: %s",
   "commands.clisten.unknownPacket": "Nieznany pakiet %s",
 
@@ -230,9 +230,9 @@
   "commands.cplugins.found": "Znaleziono następujące pluginy:",
 
   "commands.cpos.coords": "%s w %s to %s w %s",
-  "commands.cpos.level.overworld": "the Overworld",
-  "commands.cpos.level.the_end": "the End",
-  "commands.cpos.level.the_nether": "the Nether",
+  "commands.cpos.level.overworld": "Overworldzie",
+  "commands.cpos.level.the_end": "Endzie",
+  "commands.cpos.level.the_nether": "Netherze",
 
   "commands.cposteffect.apply.success": "Pomyślnie nałożono post efekt %s",
   "commands.cposteffect.reset.success": "Pomyślnie przywrócono post efekt",
@@ -287,8 +287,8 @@
   "commands.ctitle.show.title": "Wyświetlanie nowego tytułu",
   "commands.ctitle.times": "Zmieniono czasy wyświetlania tytułów",
 
-  "commands.ctooltip.header.held": "The tooltip of the held item is:",
-  "commands.ctooltip.header.stack": "The tooltip of that item would be:",
+  "commands.ctooltip.header.held": "Etykieta wybranego przedmiotu to:",
+  "commands.ctooltip.header.stack": "Etykieta tego przedmiotu była by:",
 
   "commands.ctp.notSpectator": "Gracz musi być w trybie obserwatora by się przeteleportować",
   "commands.ctp.success": "Przeteleportowano gracza do %s",
