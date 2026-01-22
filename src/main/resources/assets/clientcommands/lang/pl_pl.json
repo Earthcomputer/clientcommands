@@ -4,14 +4,14 @@
   "c2cpacket.messageC2CPacket.incoming": "%s -> ty: %s",
   "c2cpacket.messageC2CPacket.outgoing": "Ty -> %s: %s",
   "c2cpacket.messageTooLong": "Wiadomość jest za długa (max. 255 znaków), otrzymano %s znaków",
-  "c2cpacket.publicKeyNotFound": "Nie znaleniono klucza publicznego",
+  "c2cpacket.publicKeyNotFound": "Nie znaleziono klucza publicznego",
   "c2cpacket.receivedC2CPacket": "Otrzymałeś pakiet C2C, ale nie przyjmujesz przychodzących pakietów C2C! Najedź, aby zobaczyć nieprzetworzony pakiet",
-  "c2cpacket.sentC2CPacket": "Wysłałeś a pakiet C2C, lecz odbiór przychodzących pakietów C2C jest wyłączony",
+  "c2cpacket.sentC2CPacket": "Wysłałeś pakiet C2C, lecz odbiór przychodzących pakietów C2C jest wyłączony",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming": "%s zaprosił cię do zagrania w %s",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept": "Akceptuj",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accept.hover": "Kliknij aby zaakceptować",
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted": "%s zaakceptował twoje zaproszenie na %s",
-  "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept": "Zaakcptowano zaproszenie, przeciwnik rozpocznie grę",
+  "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept": "Zaakceptowano zaproszenie, przeciwnik rozpocznie grę",
   "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited": "Zaproszono gracza %s do zagrania w %s",
 
   "chorusManip.goalTooFar": "Cel jest za daleko!",
@@ -89,7 +89,7 @@
   "commands.cenchant.failed": "To niemożliwe albo zajmie to zbyt długo aby otrzymać te zaklęcia",
   "commands.cenchant.help.uncrackedPlayerSeed": "Pomoc: ziarno gracza nie zostało w pełni złamane",
   "commands.cenchant.incompatible": "Niekompatybilne zaklęcia",
-  "commands.cenchant.needEnchantingPrediction": "Te polecenie wymaga włączonego \"Enchanting prediction\"",
+  "commands.cenchant.needEnchantingPrediction": "To polecenie wymaga włączonego \"Przewidywanie zaklęć\"",
   "commands.cenchant.success": "Rozpoczynam manipulowanie zaklęciami...",
   "commands.cenchant.uncracked": "Ziarno gracza musi być złamane",
   "commands.cenchant.unexpectedCall": "Wstrzymano manipulację zaklęciami z powodu niespodziewanego wywołania RNG: %s",
@@ -104,7 +104,7 @@
   "commands.cfindblock.success": "Najbliższe dopasowanie znajduje się na pozycji %s, w odległości %s bloków",
 
   "commands.cfinditem.match": "%sx %s znaleziono na %s",
-  "commands.cfinditem.match.entity": "%sx %s znaleziono w %s at %s",
+  "commands.cfinditem.match.entity": "Znaleziono %sx %s w %s na %s",
   "commands.cfinditem.starting": "Szukam %s",
   "commands.cfinditem.starting.keepSearching": "Nieskończone szukanie %s",
   "commands.cfinditem.total": "Znaleziono %sx %s",
@@ -122,7 +122,7 @@
   "commands.cfish.error.openWater.help": "Rada: czerwone sześciany pokazują bloki które powstrzymują spełnienie warunków na otwartą wodę",
   "commands.cfish.error.openWater.lilyPad": "Pomoc: spróbuj zanurzyć spławik pod lilią wodną",
   "commands.cfish.error.outOfWater": "Spławik jest poza wodą, manipulacja się nie uda",
-  "commands.cfish.help.tooManyEnchants": "Pomoc: Im wiecej zakleć na wędce, tym trudniej jest zdobyć porządane przedmioty",
+  "commands.cfish.help.tooManyEnchants": "Pomoc: Im więcej zaklęć na wędce, tym trudniej jest zdobyć porządane przedmioty",
   "commands.cfish.listGoals.noGoals": "Nie mam żadnego celu",
   "commands.cfish.listGoals.success": "Jest %s celi:",
   "commands.cfish.needFishingManipulation": "Manipulacja łowienia jest wyłączona",
@@ -161,7 +161,7 @@
 
   "commands.chat.success": "Pomyślnie otwarto czat",
 
-  "commands.chotbar.notCreative": "Gracz musi byc w trybie kreatywnym aby przywrócić pasek dostępu",
+  "commands.chotbar.notCreative": "Gracz musi być w trybie kreatywnym aby przywrócić pasek dostępu",
   "commands.chotbar.restoredHotbar": "Przywrócono pasek dostępu %s",
 
   "commands.ckit.create.alreadyExists": "Zestaw \"%s\" już istnieje",
@@ -183,12 +183,12 @@
   "commands.client.expectedRegex": "Nieprawidłowe wyrażenie regularne %s",
   "commands.client.glow": "[Podświetl]",
   "commands.client.invalidArgumentException": "Nieprawidłowy argument '%s'",
-  "commands.client.invalidClickAction": "Nieprawidłowe akcja clicknięcia '%s'",
+  "commands.client.invalidClickAction": "Nieprawidłowa akcja kliknięcia '%s'",
   "commands.client.invalidHoverAction": "Nieprawidłowa akcja przesunięcia '%s'",
-  "commands.client.invalidHoverEvent": "Nieprawidłowy ewent przesunięcia '%s'",
+  "commands.client.invalidHoverEvent": "Nieprawidłowe zdarzenie przesunięcia '%s'",
   "commands.client.notClient": "To nie jest polecenie klienta",
   "commands.client.regexTooSlow": "Wyrażenie regularne '%s' było za wolne na dopasowywanie",
-  "commands.client.requiresRestart": "Ta zmiana zacznie działaś po ponownym uruchomieniu gry",
+  "commands.client.requiresRestart": "Ta zmiana zacznie działać po ponownym uruchomieniu gry",
   "commands.client.tooFewArguments": "Zbyt mało argumentów",
 
   "commands.clisten.add.failed": "Już nasłuchujesz tego pakietu",
@@ -211,7 +211,7 @@
   "commands.cmap.failedSave": "Zapisywanie mapy do pliku nie powiodło się",
   "commands.cmap.noHeldMap": "Nie trzymasz ani nie widzisz jakiejś mapy",
 
-  "commands.cminesweeper.tooManyMines": "Za dużo min, liczba musi być o pomiędzy 0 a 9 mniejsza od całkowitej liczby pól",
+  "commands.cminesweeper.tooManyMines": "Za dużo min, liczba musi być pomiędzy 0 a 9 mniejsza od całkowitej liczby pól",
 
   "commands.cparticle.success": "Wyświetlanie cząsteczki %s",
 
@@ -230,15 +230,15 @@
   "commands.cplugins.found": "Znaleziono następujące pluginy:",
 
   "commands.cpos.coords": "%s w %s to %s w %s",
-  "commands.cpos.level.overworld": "Overworldzie",
-  "commands.cpos.level.the_end": "Endzie",
-  "commands.cpos.level.the_nether": "Netherze",
+  "commands.cpos.level.overworld": "Overworld",
+  "commands.cpos.level.the_end": "End",
+  "commands.cpos.level.the_nether": "Nether",
 
-  "commands.cposteffect.apply.success": "Pomyślnie nałożono post efekt %s",
-  "commands.cposteffect.reset.success": "Pomyślnie przywrócono post efekt",
-  "commands.cposteffect.unknownPostEffect": "Nieznany post efekt %s",
+  "commands.cposteffect.apply.success": "Pomyślnie nałożono efekt %s",
+  "commands.cposteffect.reset.success": "Pomyślnie przywrócono efekt",
+  "commands.cposteffect.unknownPostEffect": "Nieznany efekt %s",
 
-  "commands.cpredictbrushables.foundBrushableBlock": "Znaleniono %s na pozycji %s z przedmiotem %s %s",
+  "commands.cpredictbrushables.foundBrushableBlock": "Znaleziono %s na pozycji %s z przedmiotem %s %s",
   "commands.cpredictbrushables.notFound": "Nie znaleziono żadnych bloków możliwych się do szczotkowania",
   "commands.cpredictbrushables.starting": "Wyszukiwanie bloków możliwych do szczotkowania",
   "commands.cpredictbrushables.starting.keepSearching": "Nieskończone szukanie bloków możliwych do szczotkowania [%s]",
@@ -246,7 +246,7 @@
 
   "commands.crelog.failed": "Nie udało się połączyć ponownie",
 
-  "commands.crender.entities.success": "Reguła renderowania obiektu została zaktualizowana",
+  "commands.crender.entities.success": "Reguła renderowania bytu została zaktualizowana",
 
   "commands.creply.messageTooLong": "Twoja wiadomość jest za długa (maximum: %s, długość: %s)",
   "commands.creply.noTargetFound": "Ustalenie celu do odpowiedzi jest niemożliwe",
@@ -259,13 +259,13 @@
   "commands.csnap.clickToTeleportEnabled": "Włączono: kliknij żeby teleportować",
   "commands.csnap.success": "Przeskoczono do %s %s %s",
   "commands.csnap.tooFar": "Można przeskakiwać tylko do lokalizacji oddalonych co najwyżej o 1 blok",
-  "commands.csnap.wall": "Nie można przezkakiwać przez ściany",
+  "commands.csnap.wall": "Nie można przeskakiwać przez ściany",
 
   "commands.cstartup.add.success": "Dodano polecenie do pliku startowego",
-  "commands.cstartup.couldNotCreateFile": "Utworzenie pliku startowego nie powiodło",
+  "commands.cstartup.couldNotCreateFile": "Utworzenie pliku startowego nie powiodło się",
   "commands.cstartup.couldNotEdit": "Edytowanie pliku startowego nie powiodło się",
 
-  "commands.cstopsound.success.source.any": "Zatrzymano wszystkie '%s' dźwięki",
+  "commands.cstopsound.success.source.any": "Zatrzymano wszystkie dźwięki '%s'",
   "commands.cstopsound.success.source.sound": "Zatrzymano dźwięk '%s' na źródle '%s'",
   "commands.cstopsound.success.sourceless.any": "Zatrzymano wszystkie dźwięki",
   "commands.cstopsound.success.sourceless.sound": "Zatrzymano dźwięk '%s'",
@@ -288,13 +288,13 @@
   "commands.ctitle.times": "Zmieniono czasy wyświetlania tytułów",
 
   "commands.ctooltip.header.held": "Etykieta wybranego przedmiotu to:",
-  "commands.ctooltip.header.stack": "Etykieta tego przedmiotu była by:",
+  "commands.ctooltip.header.stack": "Etykietą tego przedmiotu byłoby:",
 
   "commands.ctp.notSpectator": "Gracz musi być w trybie obserwatora by się przeteleportować",
   "commands.ctp.success": "Przeteleportowano gracza do %s",
 
   "commands.ctranslate.expectedFromTo": "Oczekiwane \"from\"/\"to\"",
-  "commands.ctranslate.hoverText": "Kliknij aby skopiować, shift-kliknij żeby wprowadzić do czatu",
+  "commands.ctranslate.hoverText": "Kliknij aby skopiować, przytrzymaj Shift i kliknij żeby wprowadzić do czatu",
   "commands.ctranslate.unknownError": "Wystąpił błąd",
   "commands.ctranslate.unknownLanguageCode": "Nieznany kod języka \"%s\"",
 
@@ -308,7 +308,7 @@
   "commands.cvar.list.empty": "Brak dostępnych zmiennych",
   "commands.cvar.notFound": "Nie znaleziono zmiennej \"%s\"",
   "commands.cvar.parse.success": "\"%s\" ma wartość \"%s\"",
-  "commands.cvar.remove.success": "Pomyślnie usunięto zmnienną \"%s\"",
+  "commands.cvar.remove.success": "Pomyślnie usunięto zmienną \"%s\"",
   "commands.cvar.saveFile.failed": "Zapisanie pliku zmiennych nie powiodło się",
 
   "commands.cwe.playerNotFound": "Nie znaleziono gracza",
@@ -352,14 +352,14 @@
   "enchCrack.xpSeed.one": "Ziarno XP: %s",
 
   "minesweeperGame.minesLeft": "Ilość pozostałych min: %s",
-  "minesweeperGame.timePlayed": "Czas przegrany: %ss",
+  "minesweeperGame.timePlayed": "Czas gry: %ss",
   "minesweeperGame.title": "Saper",
 
-  "playerManip.notEnoughItems": "Nie wystarczająca ilość przedmiotów by manipulować ziarnem",
+  "playerManip.notEnoughItems": "Niewystarczająca ilość przedmiotów by manipulować ziarnem",
   "playerManip.notEnoughItems.help": "Rada: włóż trochę przedmiotów do ekwipunku",
   "playerManip.reset": "Resetowanie manipulacji RNG. Powód: %s",
   "playerManip.reset.advancement": "Zdobyto osiągnięcie",
-  "playerManip.reset.amethystChime": "Przeszedłeś prez Skupisko Ametystu",
+  "playerManip.reset.amethystChime": "Przeszedłeś przez Skupisko Ametystu",
   "playerManip.reset.anvil": "Użyto kowadła",
   "playerManip.reset.baneOfArthropods": "Uderzono stawonoga, pogromcą stawonogów",
   "playerManip.reset.consume": "Zjedzono",
@@ -368,8 +368,8 @@
   "playerManip.reset.dropItem": "Wyrzucono przedmiot",
   "playerManip.reset.enchanting": "Zaklęto przedmiot",
   "playerManip.reset.enterWater": "Wskoczono do wody",
-  "playerManip.reset.entityCramming": "Wepchnięto sie w Entity",
-  "playerManip.reset.equipItem": "Nałożono przedmion",
+  "playerManip.reset.entityCramming": "Wepchnięto się w obszar stłoczonych bytów",
+  "playerManip.reset.equipItem": "Nałożono przedmiot",
   "playerManip.reset.fallFlying": "Użyto elytry",
   "playerManip.reset.food": "Zjedzono coś",
   "playerManip.reset.frostWalker": "Użyto mroźnego piechura",
@@ -381,7 +381,7 @@
   "playerManip.reset.recreated": "Zareagowanie gracza",
   "playerManip.reset.respiration": "Użyto hełmu z zaklęciem oddychania",
   "playerManip.reset.shield": "Zablokowano tarczą",
-  "playerManip.reset.shoulderParrot": "Papługa na ramieniu",
+  "playerManip.reset.shoulderParrot": "Papuga na ramieniu",
   "playerManip.reset.soulSpeed": "Prędkość dusz włączona",
   "playerManip.reset.sprint": "Włączono sprint",
   "playerManip.reset.swim": "Próbowano pływać",
@@ -398,7 +398,7 @@
   "playerManip.state.uncracked": "Nie złamano",
   "playerManip.throttled": "Osiągnięto limit throttlingu wyrzucania przedmiotów w trybie kreatywnym",
   "playerManip.throttled.help": "Rada: zmień tryb gry na Przetrwanie",
-  "playerManip.throwError": "Czynność jest niemożliwa lub wymagała by więcej niż %s rzutów przedmiotami",
+  "playerManip.throwError": "Czynność jest niemożliwa lub wymagałaby więcej niż %s rzutów przedmiotami",
   "playerManip.toolBreakWarning": "Ostrzeżenie: Narzędzie ma %s wytrzymałości",
   "playerManip.uncracked": "Ziarno gracza musi być złamane",
 
