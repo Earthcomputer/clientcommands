@@ -136,6 +136,7 @@ public class ClientCommands implements ClientModInitializer {
         CalcCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher, context);
         CallbackCommand.register(dispatcher);
+        ChessCommand.register(dispatcher);
         CDebugCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher, context);
         CFunctionCommand.register(dispatcher);

@@ -7,15 +7,22 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.earthcomputer.clientcommands.c2c.chess.ChessGame;
+import net.earthcomputer.clientcommands.c2c.packets.ChessDrawOfferC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.ChessMoveC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.ChessResignC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.StopTwoPlayerGameC2CPacket;
+import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.command.ConnectFourCommand;
 import net.earthcomputer.clientcommands.command.ListenCommand;
 import net.earthcomputer.clientcommands.command.TicTacToeCommand;
 import net.earthcomputer.clientcommands.command.arguments.ExtendedMarkdownArgument;
 import net.earthcomputer.clientcommands.features.TwoPlayerGame;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
@@ -28,6 +35,7 @@ import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
@@ -52,8 +60,12 @@ public class C2CPacketHandler implements C2CPacketListener {
     public static final ProtocolInfo<C2CPacketListener> C2C = ProtocolInfoBuilder.<C2CPacketListener, C2CFriendlyByteBuf>clientboundProtocol(ConnectionProtocol.PLAY, builder -> builder
         .addPacket(MessageC2CPacket.ID, MessageC2CPacket.CODEC)
         .addPacket(StartTwoPlayerGameC2CPacket.ID, StartTwoPlayerGameC2CPacket.CODEC)
+        .addPacket(StopTwoPlayerGameC2CPacket.ID, StopTwoPlayerGameC2CPacket.CODEC)
         .addPacket(PutTicTacToeMarkC2CPacket.ID, PutTicTacToeMarkC2CPacket.CODEC)
         .addPacket(PutConnectFourPieceC2CPacket.ID, PutConnectFourPieceC2CPacket.CODEC)
+        .addPacket(ChessResignC2CPacket.ID, ChessResignC2CPacket.CODEC)
+        .addPacket(ChessMoveC2CPacket.ID, ChessMoveC2CPacket.CODEC)
+        .addPacket(ChessDrawOfferC2CPacket.ID, ChessDrawOfferC2CPacket.CODEC)
     ).bind(b -> (C2CFriendlyByteBuf) b);
 
     public static final String C2C_PACKET_HEADER = "CCΕNC:";
@@ -212,6 +224,11 @@ public class C2CPacketHandler implements C2CPacketListener {
     }
 
     @Override
+    public void onStopTwoPlayerGameC2CPacket(StopTwoPlayerGameC2CPacket packet) {
+        TwoPlayerGame.onStopTwoPlayerGame(packet);
+    }
+
+    @Override
     public void onPutTicTacToeMarkC2CPacket(PutTicTacToeMarkC2CPacket packet) {
         TicTacToeCommand.onPutTicTacToeMarkC2CPacket(packet);
     }
@@ -219,6 +236,72 @@ public class C2CPacketHandler implements C2CPacketListener {
     @Override
     public void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
         ConnectFourCommand.onPutConnectFourPieceC2CPacket(packet);
+    }
+
+    @Override
+    public void onChessResignPacket(ChessResignC2CPacket packet) {
+        ChessGame activeGame = TwoPlayerGame.CHESS_TYPE.getActiveGame(packet.senderUUID());
+        if (activeGame == null) {
+            return;
+        }
+        String opponent = activeGame.opponent.getProfile().name();
+        TwoPlayerGame.CHESS_TYPE.removeActiveGame(packet.senderUUID());
+        ClientCommandHelper.sendFeedback(Component.translatable("chessGame.opponentResigned", opponent));
+    }
+
+    @Override
+    public void onChessMovePacket(ChessMoveC2CPacket packet) {
+        ChessGame activeGame = TwoPlayerGame.CHESS_TYPE.getActiveGame(packet.senderUUID());
+        if (activeGame == null) {
+            return;
+        }
+
+        // validate move
+        if (activeGame.colorToMove == activeGame.yourColor) {
+            return;
+        }
+        if (!activeGame.legalMoves().contains(packet.move())) {
+            return;
+        }
+
+        String moveNotation = activeGame.getAlgebraicNotation(packet.move());
+        activeGame.makeMove(packet.move());
+
+        Component clickable = CComponentUtil.getCommandTextComponent("twoPlayerGame.clickToMakeYourMove", "/cchess open " + packet.sender());
+        ClientCommandHelper.sendFeedback(Component.translatable("chessGame.opponentMoved", activeGame.opponent.getProfile().name(), moveNotation, ComponentUtils.wrapInSquareBrackets(clickable)));
+
+        Component endCondition = activeGame.detectEndCondition();
+        if (endCondition != null) {
+            TwoPlayerGame.CHESS_TYPE.removeActiveGame(packet.senderUUID());
+            ClientCommandHelper.sendFeedback(endCondition);
+        }
+    }
+
+    @Override
+    public void onChessDrawOfferPacket(ChessDrawOfferC2CPacket packet) {
+        ChessGame activeGame = TwoPlayerGame.CHESS_TYPE.getActiveGame(packet.senderUUID());
+        if (activeGame == null) {
+            return;
+        }
+
+        String opponent = activeGame.opponent.getProfile().name();
+
+        // TODO: there are possibilities of desyncs here, not really sure how to fix it tbh
+        switch (packet.operation()) {
+            case OFFER -> {
+                activeGame.drawOfferedBy = activeGame.yourColor.opposite();
+                ClientCommandHelper.sendFeedback(Component.translatable("chessGame.drawOffered", opponent));
+            }
+            case RETRACT -> {
+                activeGame.drawOfferedBy = null;
+                ClientCommandHelper.sendFeedback(Component.translatable("chessGame.drawOfferRetracted", opponent));
+            }
+            case ACCEPT -> {
+                TwoPlayerGame.CHESS_TYPE.removeActiveGame(packet.senderUUID());
+                ClientCommandHelper.sendFeedback(Component.translatable("chessGame.drawOfferAccepted", opponent));
+                ClientCommandHelper.sendFeedback(Component.translatable("chessGame.draw.agreement"));
+            }
+        }
     }
 
     public static @Nullable C2CFriendlyByteBuf wrapByteBuf(ByteBuf buf, @Nullable String sender, @Nullable UUID senderUUID) {

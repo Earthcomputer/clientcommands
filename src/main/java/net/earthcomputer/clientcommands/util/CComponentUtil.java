@@ -83,6 +83,7 @@ public final class CComponentUtil {
 
     public static Component getCommandTextComponent(MutableComponent component, String command) {
         return component.withStyle(style -> style.applyFormat(ChatFormatting.UNDERLINE)
+            .withColor(ChatFormatting.GREEN)
             .withClickEvent(new ClickEvent.RunCommand(command))
             .withHoverEvent(new HoverEvent.ShowText(Component.literal(command))));
     }

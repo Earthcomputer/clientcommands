@@ -3,6 +3,9 @@ accessWidener v2 named
 # c2c
 accessible field net/minecraft/client/multiplayer/AccountProfileKeyPairManager keyPair Ljava/util/concurrent/CompletableFuture;
 
+# cchess
+accessible field net/minecraft/client/gui/components/AbstractButton TEXT_MARGIN I
+
 # Command Handling
 accessible field net/minecraft/client/gui/Gui overlayMessageTime I
 accessible field net/minecraft/client/gui/components/CommandSuggestions ARGUMENT_STYLES Ljava/util/List;

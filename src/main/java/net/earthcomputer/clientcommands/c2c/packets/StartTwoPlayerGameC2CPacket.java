@@ -18,7 +18,7 @@ public record StartTwoPlayerGameC2CPacket(@Nullable String sender, @Nullable UUI
     public static final PacketType<StartTwoPlayerGameC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, Identifier.fromNamespaceAndPath("clientcommands", "start_two_player_game"));
 
     public StartTwoPlayerGameC2CPacket(C2CFriendlyByteBuf buf) {
-        this(buf.getSender(), buf.getSenderUUID(), buf.readBoolean(), getById(buf.readIdentifier()));
+        this(buf.getSender(), buf.getSenderUUID(), buf.readBoolean(), TwoPlayerGame.getByIdOrThrow(buf.readIdentifier()));
     }
 
     public void write(C2CFriendlyByteBuf buf) {
@@ -34,13 +34,5 @@ public record StartTwoPlayerGameC2CPacket(@Nullable String sender, @Nullable UUI
     @Override
     public PacketType<? extends Packet<C2CPacketListener>> type() {
         return ID;
-    }
-
-    private static TwoPlayerGame<?, ?> getById(Identifier id) {
-        TwoPlayerGame<?, ?> game = TwoPlayerGame.getById(id);
-        if (game == null) {
-            throw new IllegalStateException("Unknown game type " + id);
-        }
-        return game;
     }
 }
