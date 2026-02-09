@@ -317,6 +317,7 @@
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
   "commands.cwiki.noContent": "There is no introductory paragraph in that article",
+  "commands.cwiki.openArticle": "[Open article]",
 
   "connectFourGame.draw": "Draw!",
   "connectFourGame.lost": "Lost!",

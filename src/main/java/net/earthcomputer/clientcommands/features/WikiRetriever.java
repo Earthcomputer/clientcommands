@@ -182,7 +182,7 @@ public class WikiRetriever {
 
         return rawStr;
     }
-
+    
     @Nullable
     public static String getWikiSummary(String pageName) {
         URL url;
