@@ -13,11 +13,13 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class WikiRetriever {
 
@@ -198,9 +200,13 @@ public class WikiRetriever {
 
     @Nullable
     public static URL buildURL(String page, String query) {
+        String result = Arrays.stream(page.split("\\s+"))
+                .map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1))
+                .collect(Collectors.joining(" "));
+
         URL url;
         try {
-            String encodedPage = URLEncoder.encode(page, StandardCharsets.UTF_8);
+            String encodedPage = URLEncoder.encode(result, StandardCharsets.UTF_8);
             url = URI.create(String.format(query, encodedPage)).toURL();
         } catch (MalformedURLException e) {
             return null;
@@ -210,7 +216,7 @@ public class WikiRetriever {
 
     @Nullable
     public static String searchArticleName(String pageInput){
-        URL url = buildURL(pageInput, SEARCH_QUERY);
+        URL url = buildURL(pageInput.trim(), SEARCH_QUERY);
         if (url == null) {
             return null;
         }
@@ -220,11 +226,22 @@ public class WikiRetriever {
             return null;
         }
 
-        if (result.query == null || result.query.search == null || result.query.search.isEmpty()) {
+        var query = result.query;
+        if (query == null) {
             return null;
         }
 
-        return result.query.search.getFirst().title;
+        var search = query.search;
+        var searchinfo = query.searchinfo;
+        if (search == null || search.isEmpty() || searchinfo == null || searchinfo.totalhits == 0) {
+            return null;
+        }
+
+        if (searchinfo.suggestion != null) {
+            return searchinfo.suggestion;
+        }
+
+        return query.search.getFirst().title;
     }
 
     @Nullable
@@ -280,6 +297,14 @@ public class WikiRetriever {
             private static class Search {
                 @Nullable
                 public String title;
+            }
+            @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+            @Nullable
+            private SearchInfo searchinfo;
+            private static class SearchInfo {
+                public int totalhits;
+                @Nullable
+                public String suggestion;
             }
         }
     }
