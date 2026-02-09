@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
 public class WikiRetriever {
 
     private static final String WIKI_HOST = "https://minecraft.wiki/";
+    private static final String SEARCH_QUERY = WIKI_HOST + "api.php?action=query&list=search&srlimit=1&srprop=snippet&format=json&srsearch=intitle:%s";
     private static final String PAGE_SUMMARY_QUERY = WIKI_HOST + "api.php?action=query&prop=extracts&exintro=true&format=json&titles=%s";
     private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<\\s*(/)?\\s*(\\w+).*?>|<!--.*?-->|\n", Pattern.DOTALL);
     private static final ChatFormatting CODE_COLOR = ChatFormatting.DARK_GREEN;
@@ -182,12 +184,42 @@ public class WikiRetriever {
 
         return rawStr;
     }
-    
+
     @Nullable
-    public static String getWikiSummary(String pageName) {
+    public static String getArticleName(String pageInput){
         URL url;
         try {
-            String encodedPage = URLEncoder.encode(pageName, StandardCharsets.UTF_8);
+            String encodedPage = URLEncoder.encode(pageInput, StandardCharsets.UTF_8);
+            url = URI.create(String.format(SEARCH_QUERY, encodedPage)).toURL();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+
+        QueryResult result;
+        try (InputStream in = url.openConnection().getInputStream()) {
+            result = GSON.fromJson(new InputStreamReader(in), QueryResult.class);
+        } catch (IOException e) {
+            return null;
+        }
+
+        if (result.query == null || result.query.search == null || result.query.search.isEmpty()) {
+            return null;
+        }
+
+        return result.query.search.getFirst().title;
+    }
+
+
+    @Nullable
+    public static String getWikiSummary(String pageName) {
+        String title = getArticleName(pageName);
+        if (title == null) {
+            return null;
+        }
+
+        URL url;
+        try {
+            String encodedPage = URLEncoder.encode(title, StandardCharsets.UTF_8);
             url = URI.create(String.format(PAGE_SUMMARY_QUERY, encodedPage)).toURL();
         } catch (MalformedURLException e) {
             return null;
@@ -222,13 +254,19 @@ public class WikiRetriever {
             @Nullable
             private Map<String, Page> pages;
             private static class Page {
-                public int pageid;
+                public int pageId;
                 @Nullable
                 public String title;
                 @Nullable
                 public String extract;
                 @Nullable
                 public String missing;
+            }
+            @Nullable
+            private List<Search> search;
+            private static class Search {
+                @Nullable
+                public String title;
             }
         }
     }
