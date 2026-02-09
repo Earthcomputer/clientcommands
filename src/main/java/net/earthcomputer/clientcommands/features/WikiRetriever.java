@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 public class WikiRetriever {
 
     private static final String WIKI_HOST = "https://minecraft.wiki/";
-    private static final String SEARCH_QUERY = WIKI_HOST + "api.php?action=query&list=search&srlimit=1&srprop=snippet&format=json&srsearch=intitle:%s";
+    private static final String SEARCH_QUERY = WIKI_HOST + "api.php?action=query&list=search&srlimit=1&srprop=snippet&format=json&srsearch=%s";
     private static final String PAGE_SUMMARY_QUERY = WIKI_HOST + "api.php?action=query&prop=extracts&exintro=true&format=json&titles=%s";
     private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<\\s*(/)?\\s*(\\w+).*?>|<!--.*?-->|\n", Pattern.DOTALL);
     private static final ChatFormatting CODE_COLOR = ChatFormatting.DARK_GREEN;
@@ -186,19 +186,37 @@ public class WikiRetriever {
     }
 
     @Nullable
-    public static String getArticleName(String pageInput){
-        URL url;
-        try {
-            String encodedPage = URLEncoder.encode(pageInput, StandardCharsets.UTF_8);
-            url = URI.create(String.format(SEARCH_QUERY, encodedPage)).toURL();
-        } catch (MalformedURLException e) {
-            return null;
-        }
-
+    public static QueryResult getResult(URL url) {
         QueryResult result;
         try (InputStream in = url.openConnection().getInputStream()) {
             result = GSON.fromJson(new InputStreamReader(in), QueryResult.class);
         } catch (IOException e) {
+            return null;
+        }
+        return result;
+    }
+
+    @Nullable
+    public static URL buildURL(String page, String query) {
+        URL url;
+        try {
+            String encodedPage = URLEncoder.encode(page, StandardCharsets.UTF_8);
+            url = URI.create(String.format(query, encodedPage)).toURL();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+        return url;
+    }
+
+    @Nullable
+    public static String searchArticleName(String pageInput){
+        URL url = buildURL(pageInput, SEARCH_QUERY);
+        if (url == null) {
+            return null;
+        }
+
+        QueryResult result = getResult(url);
+        if (result == null) {
             return null;
         }
 
@@ -209,26 +227,20 @@ public class WikiRetriever {
         return result.query.search.getFirst().title;
     }
 
-
     @Nullable
     public static String getWikiSummary(String pageName) {
-        String title = getArticleName(pageName);
+        String title = searchArticleName(pageName);
         if (title == null) {
             return null;
         }
 
-        URL url;
-        try {
-            String encodedPage = URLEncoder.encode(title, StandardCharsets.UTF_8);
-            url = URI.create(String.format(PAGE_SUMMARY_QUERY, encodedPage)).toURL();
-        } catch (MalformedURLException e) {
+        URL url = buildURL(title, PAGE_SUMMARY_QUERY);
+        if (url == null) {
             return null;
         }
 
-        QueryResult result;
-        try (InputStream in = url.openConnection().getInputStream()) {
-            result = GSON.fromJson(new InputStreamReader(in), QueryResult.class);
-        } catch (IOException e) {
+        QueryResult result = getResult(url);
+        if (result == null) {
             return null;
         }
 
@@ -244,17 +256,17 @@ public class WikiRetriever {
     }
 
     @SuppressWarnings("unused")
-    private static class QueryResult {
+    public static class QueryResult {
         @Nullable
         public String batchcomplete;
         @Nullable
         public Query query;
-        private static class Query {
+        public static class Query {
             @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
             @Nullable
             private Map<String, Page> pages;
             private static class Page {
-                public int pageId;
+                public int pageid;
                 @Nullable
                 public String title;
                 @Nullable
@@ -262,6 +274,7 @@ public class WikiRetriever {
                 @Nullable
                 public String missing;
             }
+            @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
             @Nullable
             private List<Search> search;
             private static class Search {
