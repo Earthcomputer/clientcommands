@@ -201,8 +201,10 @@ public class WikiRetriever {
     @Nullable
     public static URL buildURL(String page, String query) {
         String result = Arrays.stream(page.split("\\s+"))
-                .map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1))
+                .map(w -> w.substring(0, 1).toUpperCase()
+                        + w.substring(1).toLowerCase())
                 .collect(Collectors.joining(" "));
+
 
         URL url;
         try {
