@@ -35,7 +35,6 @@ public class WindowSizeCommand {
         int newX = centerX - width / 2;
         int newY = centerY - height / 2;
 
-        GlStateManager._viewport(newX, newY, width, height);
         GLFW.glfwSetWindowPos(handle, newX, newY);
         return Command.SINGLE_SUCCESS;
     }
