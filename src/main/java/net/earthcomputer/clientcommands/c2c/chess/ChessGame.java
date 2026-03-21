@@ -380,6 +380,7 @@ public final class ChessGame {
 
         ChessGame gameCopy = new ChessGame(this);
         move.perform(gameCopy);
+        gameCopy.colorToMove = gameCopy.colorToMove.opposite();
         if (gameCopy.isCheckmate()) {
             notation.append('#');
         } else if (gameCopy.isCheck()) {

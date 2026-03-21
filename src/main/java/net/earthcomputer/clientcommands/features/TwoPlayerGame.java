@@ -8,9 +8,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
+import net.earthcomputer.clientcommands.c2c.chess.ChessColor;
 import net.earthcomputer.clientcommands.c2c.chess.ChessGame;
 import net.earthcomputer.clientcommands.c2c.chess.ChessScreen;
-import net.earthcomputer.clientcommands.c2c.chess.ChessColor;
 import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StopTwoPlayerGameC2CPacket;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
@@ -30,15 +30,11 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
-import java.util.AbstractMap;
-import java.util.AbstractSet;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -72,35 +68,7 @@ public class TwoPlayerGame<T, S extends Screen> {
         this.command = command;
         this.id = id;
         this.pendingInvites = Collections.newSetFromMap(CacheBuilder.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).<UUID, Boolean>build().asMap());
-        this.activeGames = new AbstractMap<>() {
-            private final Map<UUID, T> map = new HashMap<>();
-
-            @Override
-            public Set<Entry<UUID, T>> entrySet() {
-                return map.entrySet();
-            }
-
-            @Override
-            public void clear() {
-                Thread.dumpStack();
-                map.clear();
-            }
-
-            @Override
-            public T put(UUID key, T value) {
-                T old = map.put(key, value);
-                if (old != null) {
-                    Thread.dumpStack();
-                }
-                return old;
-            }
-
-            @Override
-            public T remove(Object key) {
-                Thread.dumpStack();
-                return map.remove(key);
-            }
-        };
+        this.activeGames = new HashMap<>();
         this.gameFactory = gameFactory;
         this.screenFactory = screenFactory;
     }
