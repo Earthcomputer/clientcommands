@@ -79,6 +79,7 @@
     "commands.snap.MinecraftMixin",
     "commands.time.ClientClockManagerMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
+    "debug.ClientHandshakePacketListenerImplMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",
     "rngevents.ClientLevelMixin",

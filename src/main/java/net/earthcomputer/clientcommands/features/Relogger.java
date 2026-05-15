@@ -22,6 +22,8 @@ import java.util.List;
 
 public class Relogger {
     public static boolean isRelogging;
+    @Nullable
+    public static ServerData serverData;
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
 
     static {
@@ -61,31 +63,50 @@ public class Relogger {
 
     public static boolean relog() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.isLocalServer()) {
-            IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
-            if (server == null) {
-                return false;
-            }
-            String levelName = server.getWorldPath(LevelResource.ROOT).normalize().getFileName().toString();
-            if (!disconnect(true)) {
-                return false;
-            }
-            if (!mc.getLevelSource().levelExists(levelName)) {
-                return false;
-            }
-            mc.createWorldOpenFlows().openWorld(levelName, () -> mc.setScreen(new TitleScreen()));
-            return true;
-        } else {
-            ServerData serverData = mc.getCurrentServer();
-            if (serverData == null) {
-                return false;
-            }
-            if (!disconnect(true)) {
-                return false;
-            }
-            ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false, null);
-            return true;
+        return mc.isLocalServer() ? relogToIntegratedServer(mc.getSingleplayerServer()) : relogToDedicatedServer(mc.getCurrentServer(), false);
+    }
+
+    private static boolean relogToIntegratedServer(@Nullable IntegratedServer server) {
+        Minecraft mc = Minecraft.getInstance();
+
+        if (server == null) {
+            return false;
         }
+        String levelName = server.getWorldPath(LevelResource.ROOT).normalize().getFileName().toString();
+        if (!disconnect(true)) {
+            return false;
+        }
+        if (!mc.getLevelSource().levelExists(levelName)) {
+            return false;
+        }
+        mc.createWorldOpenFlows().openWorld(levelName, () -> mc.setScreen(new TitleScreen()));
+        return true;
+    }
+
+    private static boolean relogToDedicatedServer(@Nullable ServerData serverData, boolean ignoreDisconnectResult) {
+        Minecraft mc = Minecraft.getInstance();
+
+        if (serverData == null) {
+            return false;
+        }
+        if (!disconnect(true) && !ignoreDisconnectResult) {
+            return false;
+        }
+        isRelogging = true;
+        Relogger.serverData = serverData;
+        mc.setScreen(new TitleScreen());
+        ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false, null);
+        return true;
+    }
+
+    public static void onFailedRelog() {
+        if (!isRelogging || serverData == null) {
+            return;
+        }
+        isRelogging = false;
+        ServerData serverData = Relogger.serverData;
+        Relogger.serverData = null;
+        relogToDedicatedServer(serverData, true);
     }
 
     private static boolean onAddScreen(@Nullable Screen screen) {
@@ -110,6 +131,8 @@ public class Relogger {
             task.run();
         }
         relogSuccessTasks.clear();
+        isRelogging = false;
+        serverData = null;
         return result;
     }
 }
