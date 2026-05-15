@@ -17,7 +17,7 @@ import net.minecraft.world.phys.AABB;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientBlockPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.ListArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class AreaStatsCommand {
 
@@ -35,7 +35,7 @@ public class AreaStatsCommand {
     }
 
     private static int areaStats(FabricClientCommandSource source, BlockPos pos1, BlockPos pos2, ClientBlockPredicate blockPredicate) throws CommandSyntaxException {
-        final ClientLevel level = source.getWorld();
+        final ClientLevel level = source.getLevel();
         chunkSource = level.getChunkSource();
         assertChunkIsLoaded(pos1.getX() >> 4, pos1.getZ() >> 4);
         assertChunkIsLoaded(pos2.getX() >> 4, pos2.getZ() >> 4);
@@ -67,7 +67,7 @@ public class AreaStatsCommand {
         if (chunk1.getPos().equals(chunk2.getPos())) {
             chunks = 1;
             blocks += loop(level, minX, maxX, minZ, maxZ, minY, maxY, blockPredicate, chunk1, mutablePos);
-        } else if (chunk1.getPos().x == chunk2.getPos().x) {
+        } else if (chunk1.getPos().x() == chunk2.getPos().x()) {
             chunks = 2;
             final LevelChunk minMinChunk = level.getChunk(minXShifted, minZShifted);
             blocks += loop(level, minX, maxX, minZ, minZShifted * 16 + 15, minY, maxY, blockPredicate, minMinChunk, mutablePos);
@@ -75,13 +75,13 @@ public class AreaStatsCommand {
             final LevelChunk minMaxChunk = level.getChunk(minXShifted, maxZShifted);
             blocks += loop(level, minX, maxX, maxZShifted * 16, maxZ, minY, maxY, blockPredicate, minMaxChunk, mutablePos);
 
-            for (int chunkZ = minMinChunk.getPos().z + 1; chunkZ < minMaxChunk.getPos().z; chunkZ++) {
-                assertChunkIsLoaded(minMinChunk.getPos().x, chunkZ);
+            for (int chunkZ = minMinChunk.getPos().z() + 1; chunkZ < minMaxChunk.getPos().z(); chunkZ++) {
+                assertChunkIsLoaded(minMinChunk.getPos().x(), chunkZ);
                 chunks++;
-                final LevelChunk chunk = level.getChunk(minMinChunk.getPos().x, chunkZ);
+                final LevelChunk chunk = level.getChunk(minMinChunk.getPos().x(), chunkZ);
                 blocks += loop(level, minX, maxX, 16 * chunkZ, 16 * chunkZ + 15, minY, maxY, blockPredicate, chunk, mutablePos);
             }
-        } else if (chunk1.getPos().z == chunk2.getPos().z) {
+        } else if (chunk1.getPos().z() == chunk2.getPos().z()) {
             chunks = 2;
             final LevelChunk minMinChunk = level.getChunk(minXShifted, minZShifted);
             blocks += loop(level, minX, minXShifted * 16 + 15, minZ, maxZ, minY, maxY, blockPredicate, minMinChunk, mutablePos);
@@ -89,10 +89,10 @@ public class AreaStatsCommand {
             final LevelChunk maxMinChunk = level.getChunk(maxXShifted, minZShifted);
             blocks += loop(level, maxXShifted * 16, maxX, minZ, maxZ, minY, maxY, blockPredicate, maxMinChunk, mutablePos);
 
-            for (int chunkX = minMinChunk.getPos().x + 1; chunkX < maxMinChunk.getPos().x; chunkX++) {
-                assertChunkIsLoaded(chunkX, minMinChunk.getPos().z);
+            for (int chunkX = minMinChunk.getPos().x() + 1; chunkX < maxMinChunk.getPos().x(); chunkX++) {
+                assertChunkIsLoaded(chunkX, minMinChunk.getPos().z());
                 chunks++;
-                final LevelChunk chunk = level.getChunk(chunkX, minMinChunk.getPos().z);
+                final LevelChunk chunk = level.getChunk(chunkX, minMinChunk.getPos().z());
                 blocks += loop(level, 16 * chunkX, 16 * chunkX + 15, minZ, maxZ, minY, maxY, blockPredicate, chunk, mutablePos);
             }
         } else {
@@ -115,32 +115,32 @@ public class AreaStatsCommand {
 
             blocks += loop(level, maxXShifted * 16, maxX, maxZShifted * 16, maxZ, minY, maxY, blockPredicate, maxMaxChunk, mutablePos);
 
-            for (int minMinMaxMin = minMinChunk.getPos().x + 1; minMinMaxMin < maxMinChunk.getPos().x; minMinMaxMin++) {
-                assertChunkIsLoaded(minMinMaxMin, minMinChunk.getPos().z);
+            for (int minMinMaxMin = minMinChunk.getPos().x() + 1; minMinMaxMin < maxMinChunk.getPos().x(); minMinMaxMin++) {
+                assertChunkIsLoaded(minMinMaxMin, minMinChunk.getPos().z());
                 chunks++;
-                final LevelChunk chunk = level.getChunk(minMinMaxMin, minMinChunk.getPos().z);
+                final LevelChunk chunk = level.getChunk(minMinMaxMin, minMinChunk.getPos().z());
                 blocks += loop(level, 16 * minMinMaxMin, 16 * minMinMaxMin + 15, minZ, minZShifted * 16 + 15, minY, maxY, blockPredicate, chunk, mutablePos);
             }
-            for (int minMinMinMax = minMinChunk.getPos().z + 1; minMinMinMax < minMaxChunk.getPos().z; minMinMinMax++) {
-                assertChunkIsLoaded(minMinChunk.getPos().x, minMinMinMax);
+            for (int minMinMinMax = minMinChunk.getPos().z() + 1; minMinMinMax < minMaxChunk.getPos().z(); minMinMinMax++) {
+                assertChunkIsLoaded(minMinChunk.getPos().x(), minMinMinMax);
                 chunks++;
-                final LevelChunk chunk = level.getChunk(minMinChunk.getPos().x, minMinMinMax);
+                final LevelChunk chunk = level.getChunk(minMinChunk.getPos().x(), minMinMinMax);
                 blocks += loop(level, minX, minXShifted * 16 + 15, 16 * minMinMinMax, 16 * minMinMinMax + 15, minY, maxY, blockPredicate, chunk, mutablePos);
             }
-            for (int minMaxMaxMax = minMaxChunk.getPos().x + 1; minMaxMaxMax < maxMaxChunk.getPos().x; minMaxMaxMax++) {
-                assertChunkIsLoaded(minMaxMaxMax, minMaxChunk.getPos().z);
+            for (int minMaxMaxMax = minMaxChunk.getPos().x() + 1; minMaxMaxMax < maxMaxChunk.getPos().x(); minMaxMaxMax++) {
+                assertChunkIsLoaded(minMaxMaxMax, minMaxChunk.getPos().z());
                 chunks++;
-                final LevelChunk chunk = level.getChunk(minMaxMaxMax, minMaxChunk.getPos().z);
+                final LevelChunk chunk = level.getChunk(minMaxMaxMax, minMaxChunk.getPos().z());
                 blocks += loop(level, 16 * minMaxMaxMax, 16 * minMaxMaxMax + 15, maxZShifted * 16, maxZ, minY, maxY, blockPredicate, chunk, mutablePos);
             }
-            for (int maxMinMaxMax = maxMinChunk.getPos().z + 1; maxMinMaxMax < maxMaxChunk.getPos().z; maxMinMaxMax++) {
-                assertChunkIsLoaded(maxMinChunk.getPos().x, maxMinMaxMax);
+            for (int maxMinMaxMax = maxMinChunk.getPos().z() + 1; maxMinMaxMax < maxMaxChunk.getPos().z(); maxMinMaxMax++) {
+                assertChunkIsLoaded(maxMinChunk.getPos().x(), maxMinMaxMax);
                 chunks++;
-                final LevelChunk chunk = level.getChunk(maxMinChunk.getPos().x, maxMinMaxMax);
+                final LevelChunk chunk = level.getChunk(maxMinChunk.getPos().x(), maxMinMaxMax);
                 blocks += loop(level, maxXShifted * 16, maxX, 16 * maxMinMaxMax, 16 * maxMinMaxMax + 15, minY, maxY, blockPredicate, chunk, mutablePos);
             }
-            for (int chunkX = minMinChunk.getPos().x + 1; chunkX < maxMinChunk.getPos().x; chunkX++) {
-                for (int chunkZ = minMinChunk.getPos().z + 1; chunkZ < minMaxChunk.getPos().z; chunkZ++) {
+            for (int chunkX = minMinChunk.getPos().x() + 1; chunkX < maxMinChunk.getPos().x(); chunkX++) {
+                for (int chunkZ = minMinChunk.getPos().z() + 1; chunkZ < minMaxChunk.getPos().z(); chunkZ++) {
                     assertChunkIsLoaded(chunkX, chunkZ);
                     chunks++;
                     final LevelChunk chunk = level.getChunk(chunkX, chunkZ);

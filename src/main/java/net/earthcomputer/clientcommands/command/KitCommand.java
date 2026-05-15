@@ -8,26 +8,36 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import net.earthcomputer.clientcommands.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.Util;
 import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -38,11 +48,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 import static net.minecraft.commands.SharedSuggestionProvider.*;
 
 public class KitCommand {
-
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final SimpleCommandExceptionType SAVE_FAILED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ckit.saveFile.failed"));
@@ -51,8 +60,6 @@ public class KitCommand {
 
     private static final SimpleCommandExceptionType NOT_CREATIVE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ckit.load.notCreative"));
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.ckit.notFound", arg));
-
-    private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
 
     private static final Map<String, ListTag> kits = new HashMap<>();
 
@@ -95,7 +102,7 @@ public class KitCommand {
         if (kits.containsKey(name)) {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
-        kits.put(name, source.getPlayer().getInventory().save(new ListTag()));
+        kits.put(name, saveInventory(source.registryAccess(), source.getPlayer().getInventory()));
         saveFile();
         source.sendFeedback(Component.translatable("commands.ckit.create.success", name));
         return Command.SINGLE_SUCCESS;
@@ -114,7 +121,7 @@ public class KitCommand {
         if (!kits.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        kits.put(name, source.getPlayer().getInventory().save(new ListTag()));
+        kits.put(name, saveInventory(source.registryAccess(), source.getPlayer().getInventory()));
         saveFile();
         source.sendFeedback(Component.translatable("commands.ckit.edit.success", name));
         return Command.SINGLE_SUCCESS;
@@ -130,14 +137,14 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        Inventory tempInv = new Inventory(source.getPlayer());
-        tempInv.load(kit);
+        Inventory tempInv = new Inventory(source.getPlayer(), source.getPlayer().equipment);
+        loadInventory(source.registryAccess(), tempInv, kit);
         List<Slot> slots = source.getPlayer().inventoryMenu.slots;
         for (int i = 0; i < slots.size(); i++) {
             if (slots.get(i).container == source.getPlayer().getInventory()) {
                 ItemStack itemStack = tempInv.getItem(slots.get(i).getContainerSlot());
                 if (!itemStack.isEmpty() || override) {
-                    source.getPlayer().getInventory().setItem(i, itemStack);
+                    source.getPlayer().getInventory().setItem(slots.get(i).getContainerSlot(), itemStack);
                     source.getClient().gameMode.handleCreativeModeItemAdd(itemStack, i);
                 }
             }
@@ -164,8 +171,8 @@ public class KitCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        Inventory tempInv = new Inventory(source.getPlayer());
-        tempInv.load(kit);
+        Inventory tempInv = new Inventory(source.getPlayer(), source.getPlayer().equipment);
+        loadInventory(source.registryAccess(), tempInv, kit);
         /*
             After executing a command, the current screen will be closed (the chat hud).
             And if you open a new screen in a command, that new screen will be closed
@@ -181,12 +188,12 @@ public class KitCommand {
             CompoundTag rootTag = new CompoundTag();
             CompoundTag compoundTag = new CompoundTag();
             kits.forEach(compoundTag::put);
-            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().dataVersion().version());
             rootTag.put("Kits", compoundTag);
-            Path newFile = File.createTempFile("kits", ".dat", configPath.toFile()).toPath();
+            Path newFile = File.createTempFile("kits", ".dat", ClientCommands.CONFIG_DIR.toFile()).toPath();
             NbtIo.write(rootTag, newFile);
-            Path backupFile = configPath.resolve("kits.dat_old");
-            Path currentFile = configPath.resolve("kits.dat");;
+            Path backupFile = ClientCommands.CONFIG_DIR.resolve("kits.dat_old");
+            Path currentFile = ClientCommands.CONFIG_DIR.resolve("kits.dat");;
             Util.safeReplaceFile(currentFile, newFile, backupFile);
         } catch (IOException e) {
             throw SAVE_FAILED_EXCEPTION.create();
@@ -195,26 +202,43 @@ public class KitCommand {
 
     private static void loadFile() throws IOException {
         kits.clear();
-        CompoundTag rootTag = NbtIo.read(configPath.resolve("kits.dat"));
+        CompoundTag rootTag = NbtIo.read(ClientCommands.CONFIG_DIR.resolve("kits.dat"));
         if (rootTag == null) {
             return;
         }
-        final int currentVersion = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
-        final int fileVersion = rootTag.getInt("DataVersion");
-        CompoundTag compoundTag = rootTag.getCompound("Kits");
+        final int currentVersion = SharedConstants.getCurrentVersion().dataVersion().version();
+        final int fileVersion = rootTag.getIntOr("DataVersion", 0);
+        CompoundTag compoundTag = rootTag.getCompoundOrEmpty("Kits");
         DataFixer dataFixer = Minecraft.getInstance().getFixerUpper();
         if (fileVersion >= currentVersion) {
-            compoundTag.getAllKeys().forEach(key -> kits.put(key, compoundTag.getList(key, Tag.TAG_COMPOUND)));
+            compoundTag.keySet().forEach(key -> kits.put(key, compoundTag.getListOrEmpty(key)));
         } else {
-            compoundTag.getAllKeys().forEach(key -> {
+            compoundTag.keySet().forEach(key -> {
                 ListTag updatedListTag = new ListTag();
-                compoundTag.getList(key, Tag.TAG_COMPOUND).forEach(tag -> {
+                compoundTag.getListOrEmpty(key).forEach(tag -> {
                     Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
                     Dynamic<Tag> newTagDynamic = dataFixer.update(References.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
                 kits.put(key, updatedListTag);
             });
+        }
+    }
+
+    private static void loadInventory(HolderLookup.Provider registries, Inventory inventory, ListTag items) {
+        CompoundTag nbt = new CompoundTag();
+        nbt.put(ContainerHelper.TAG_ITEMS, items);
+        try (ProblemReporter.ScopedCollector collector = new ProblemReporter.ScopedCollector(LOGGER)) {
+            ValueInput input = TagValueInput.create(collector, registries, nbt);
+            inventory.load(input.listOrEmpty(ContainerHelper.TAG_ITEMS, ItemStackWithSlot.CODEC));
+        }
+    }
+
+    private static ListTag saveInventory(HolderLookup.Provider registries, Inventory inventory) {
+        try (ProblemReporter.ScopedCollector collector = new ProblemReporter.ScopedCollector(LOGGER)) {
+            TagValueOutput output = TagValueOutput.createWithContext(collector, registries);
+            inventory.save(output.list(ContainerHelper.TAG_ITEMS, ItemStackWithSlot.CODEC));
+            return output.buildResult().getListOrEmpty(ContainerHelper.TAG_ITEMS);
         }
     }
 }
@@ -226,25 +250,43 @@ class PreviewScreen extends AbstractContainerScreen<InventoryMenu> {
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0x404040, false);
+    protected void extractLabels(GuiGraphicsExtractor graphics, int xm, int ym) {
+        graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, 0xff404040, false);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(graphics, mouseX, mouseY, delta);
-        super.render(graphics, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractRenderState(graphics, mouseX, mouseY, a);
 
-        this.renderTooltip(graphics, mouseX, mouseY);
+        this.extractTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float delta, int mouseX, int mouseY) {
-        graphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
+    protected void extractMenuBackground(GuiGraphicsExtractor graphics, int x, int y, int width, int height) {
+        graphics.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         return false;
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == GLFW.GLFW_KEY_ESCAPE || this.minecraft.options.keyInventory.matches(event)) {
+            return super.keyPressed(event);
+        }
+
+        return true;
     }
 }

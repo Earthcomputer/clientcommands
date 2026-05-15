@@ -6,11 +6,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.xpple.clientarguments.arguments.CSuggestionProviders;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 
-import static dev.xpple.clientarguments.arguments.CResourceLocationArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static dev.xpple.clientarguments.arguments.CIdentifierArgument.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CStopSoundCommand {
 
@@ -33,7 +33,7 @@ public class CStopSoundCommand {
                 .executes(ctx -> stopSound(ctx.getSource(), source, getId(ctx, "sound"))));
     }
 
-    private static int stopSound(FabricClientCommandSource source, SoundSource soundSource, ResourceLocation sound) {
+    private static int stopSound(FabricClientCommandSource source, SoundSource soundSource, Identifier sound) {
         source.getClient().getSoundManager().stop(sound, soundSource);
 
         if (soundSource == null && sound == null) {

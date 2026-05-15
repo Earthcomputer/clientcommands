@@ -6,7 +6,7 @@ import net.earthcomputer.clientcommands.event.MoreScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,8 +18,8 @@ public abstract class MinecraftMixin {
     @Unique
     private boolean isLevelLoaded = false;
 
-    @Inject(method = "updateLevelInEngines", at = @At("HEAD"))
-    public void onUpdateLevelInEngines(ClientLevel level, CallbackInfo ci) {
+    @Inject(method = "updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;Z)V", at = @At("HEAD"))
+    public void onUpdateLevelInEngines(@Nullable ClientLevel level, boolean bl, CallbackInfo ci) {
         if (isLevelLoaded) {
             ClientLevelEvents.UNLOAD_LEVEL.invoker().onUnloadLevel(level == null);
         }

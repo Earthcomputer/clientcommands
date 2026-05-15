@@ -5,13 +5,15 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.DataResult;
+import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
 import net.earthcomputer.clientcommands.features.ClientcommandsDataQueryHandler;
+import net.earthcomputer.clientcommands.task.SimpleTask;
+import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.earthcomputer.clientcommands.util.CUtil;
 import net.earthcomputer.clientcommands.util.GuiBlocker;
 import net.earthcomputer.clientcommands.util.MathUtil;
-import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
-import net.earthcomputer.clientcommands.task.SimpleTask;
-import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -27,19 +29,23 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -47,6 +53,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
@@ -54,8 +61,9 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,10 +75,11 @@ import java.util.function.Predicate;
 import static dev.xpple.clientarguments.arguments.CItemPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class FindItemCommand {
-    private static final Flag<Boolean> FLAG_NO_SEARCH_SHULKER_BOX = Flag.ofFlag("no-search-shulker-box").withShortName('s').build();
+    private static final Flag<Boolean> FLAG_CLICK_INVENTORIES = Flag.ofFlag("click-inventories").build();
+    private static final Flag<Boolean> FLAG_NO_SEARCH_NESTED = Flag.ofFlag("no-search-nested").withShortName('s').build();
     private static final Flag<Boolean> FLAG_KEEP_SEARCHING = Flag.ofFlag("keep-searching").build();
 
     @SuppressWarnings("unchecked")
@@ -79,19 +88,21 @@ public class FindItemCommand {
             .then(argument("item", withString(itemPredicate(context)))
                 .executes(ctx ->
                     findItem(ctx,
-                        getFlag(ctx, FLAG_NO_SEARCH_SHULKER_BOX),
+                        getFlag(ctx, FLAG_CLICK_INVENTORIES),
+                        getFlag(ctx, FLAG_NO_SEARCH_NESTED),
                         getFlag(ctx, FLAG_KEEP_SEARCHING),
                         getWithString(ctx, "item", (Class<Predicate<ItemStack>>) (Class<?>) Predicate.class)))));
-        FLAG_NO_SEARCH_SHULKER_BOX.addToCommand(dispatcher, cfinditem, ctx -> true);
+        FLAG_CLICK_INVENTORIES.addToCommand(dispatcher, cfinditem, ctx -> true);
+        FLAG_NO_SEARCH_NESTED.addToCommand(dispatcher, cfinditem, ctx -> true);
         FLAG_KEEP_SEARCHING.addToCommand(dispatcher, cfinditem, ctx -> true);
     }
 
-    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean noSearchShulkerBox, boolean keepSearching, WithStringArgument.Result<Predicate<ItemStack>> item) throws CommandSyntaxException {
-        String taskName = TaskManager.addTask("cfinditem", makeFindItemsTask(item.string(), item.value(), !noSearchShulkerBox, keepSearching));
+    private static int findItem(CommandContext<FabricClientCommandSource> ctx, boolean clickInventories, boolean noSearchNested, boolean keepSearching, WithStringArgument.Result<Predicate<ItemStack>> item) throws CommandSyntaxException {
+        String taskName = TaskManager.addTask("cfinditem", makeFindItemsTask(item.string(), item.value(), clickInventories, !noSearchNested, keepSearching));
         if (keepSearching) {
             ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting.keepSearching", item.string())
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
         } else {
             ctx.getSource().sendFeedback(Component.translatable("commands.cfinditem.starting", item.string()));
         }
@@ -99,13 +110,14 @@ public class FindItemCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static SimpleTask makeFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+    private static SimpleTask makeFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean clickInventories, boolean searchNested, boolean keepSearching) {
+        Predicate<ItemStackTemplate> templatePredicate = template -> searchingFor.test(new ItemStack(template.item(), template.count(), template.components()));
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
-        if (player.hasPermissions(2)) {
-            return new NbtQueryFindItemsTask(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
+        if (player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) && !clickInventories) {
+            return new NbtQueryFindItemsTask(searchingForName, templatePredicate, searchNested, keepSearching);
         } else {
-            return new ClickInventoriesFindItemsTask(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
+            return new ClickInventoriesFindItemsTask(searchingForName, templatePredicate, searchNested, keepSearching);
         }
     }
 
@@ -113,17 +125,59 @@ public class FindItemCommand {
         private static final Set<Object> MUTEX_KEYS = Set.of(TaskManager.INTENSIVE_TASK_MUTEX);
 
         protected final String searchingForName;
-        protected final Predicate<ItemStack> searchingFor;
-        protected final boolean searchShulkerBoxes;
+        protected final Predicate<ItemStackTemplate> searchingFor;
+        protected final boolean searchNested;
         protected final boolean keepSearching;
 
         protected int totalFound = 0;
 
-        private AbstractFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
+        private AbstractFindItemsTask(String searchingForName, Predicate<ItemStackTemplate> searchingFor, boolean searchNested, boolean keepSearching) {
             this.searchingForName = searchingForName;
             this.searchingFor = searchingFor;
-            this.searchShulkerBoxes = searchShulkerBoxes;
+            this.searchNested = searchNested;
             this.keepSearching = keepSearching;
+        }
+
+        protected int countItems(ItemStackTemplate stack) {
+            if (searchingFor.test(stack)) {
+                return stack.count();
+            }
+
+            if (searchNested) {
+                int total = 0;
+
+                ItemContainerContents containerContents = stack.get(DataComponents.CONTAINER);
+                if (containerContents != null) {
+                    for (ItemStackTemplate item : containerContents.nonEmptyItems()) {
+                        total += countItems(item);
+                    }
+                }
+
+                BundleContents bundleContents = stack.get(DataComponents.BUNDLE_CONTENTS);
+                if (bundleContents != null) {
+                    for (ItemStackTemplate item : bundleContents.items()) {
+                        total += countItems(item);
+                    }
+                }
+
+                return total;
+            }
+
+            return 0;
+        }
+
+        protected int countItems(CompoundTag stack) {
+            ClientLevel level = Minecraft.getInstance().level;
+            if (level == null) {
+                return 0;
+            }
+
+            DataResult<ItemStackTemplate> itemResult = ItemStackTemplate.CODEC.parse(level.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack);
+            if (itemResult.isSuccess()) {
+                return countItems(itemResult.getOrThrow());
+            } else {
+                return 0;
+            }
         }
 
         protected int countItems(ListTag inventory) {
@@ -132,25 +186,12 @@ public class FindItemCommand {
                 return 0;
             }
 
-            int result = 0;
+            int total = 0;
             for (int i = 0; i < inventory.size(); i++) {
-                CompoundTag compound = inventory.getCompound(i);
-                ItemStack stack = ItemStack.parseOptional(level.registryAccess(), compound);
-                if (searchingFor.test(stack)) {
-                    result += stack.getCount();
-                }
-                if (searchShulkerBoxes) {
-                    ItemContainerContents containerContents = stack.get(DataComponents.CONTAINER);
-                    if (containerContents != null) {
-                        for (ItemStack item : containerContents.nonEmptyItems()) {
-                            if (searchingFor.test(item)) {
-                                result += item.getCount();
-                            }
-                        }
-                    }
-                }
+                CompoundTag compound = inventory.getCompoundOrEmpty(i);
+                total += countItems(compound);
             }
-            return result;
+            return total;
         }
 
         protected void printEntityLocation(Entity entity, int count) {
@@ -160,17 +201,17 @@ public class FindItemCommand {
                     count,
                     searchingForName,
                     entity.getName(),
-                    getLookCoordsTextComponent(BlockPos.containing(entity.position()))
+                    CComponentUtil.getLookCoordsTextComponent(BlockPos.containing(entity.position()))
                 )
                     .append(" ")
-                    .append(getGlowButtonTextComponent(entity))
+                    .append(CComponentUtil.getGlowButtonTextComponent(entity))
             );
         }
 
         protected void printLocation(BlockPos pos, int count) {
-            sendFeedback(Component.translatable("commands.cfinditem.match", count, searchingForName, getLookCoordsTextComponent(pos))
+            sendFeedback(Component.translatable("commands.cfinditem.match", count, searchingForName, CComponentUtil.getLookCoordsTextComponent(pos))
                 .append(" ")
-                .append(getGlowButtonTextComponent(pos)));
+                .append(CComponentUtil.getGlowButtonTextComponent(pos)));
         }
 
         protected boolean canSearchEntity(Entity entity) {
@@ -179,7 +220,7 @@ public class FindItemCommand {
 
         @Override
         public void onCompleted() {
-            Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("commands.cfinditem.total", totalFound, searchingForName).withStyle(ChatFormatting.BOLD));
+            ClientCommandHelper.sendFeedback(Component.translatable("commands.cfinditem.total", totalFound, searchingForName).withStyle(ChatFormatting.BOLD));
         }
 
         @Override
@@ -191,12 +232,13 @@ public class FindItemCommand {
     private static class ClickInventoriesFindItemsTask extends AbstractFindItemsTask {
         private final Set<BlockPos> searchedBlocks = new HashSet<>();
         private final Set<UUID> searchedEntities = new HashSet<>();
+        @Nullable
         private Either<BlockPos, Entity> currentlySearching = null;
         private int currentlySearchingTimeout;
         private boolean hasSearchedEnderChest = false;
 
-        public ClickInventoriesFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
-            super(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
+        public ClickInventoriesFindItemsTask(String searchingForName, Predicate<ItemStackTemplate> searchingFor, boolean searchNested, boolean keepSearching) {
+            super(searchingForName, searchingFor, searchNested, keepSearching);
         }
 
         @Override
@@ -206,7 +248,7 @@ public class FindItemCommand {
 
         @Override
         protected void onTick() {
-            Entity entity = Minecraft.getInstance().cameraEntity;
+            Entity entity = Minecraft.getInstance().getCameraEntity();
             if (entity == null) {
                 _break();
                 return;
@@ -337,18 +379,8 @@ public class FindItemCommand {
                                     continue;
                                 }
                                 ItemStack stack = stacks.get(slot);
-                                if (searchingFor.test(stack)) {
-                                    matchingItems += stack.getCount();
-                                }
-                                if (searchShulkerBoxes) {
-                                    ItemContainerContents containerContents = stack.get(DataComponents.CONTAINER);
-                                    if (containerContents != null) {
-                                        for (ItemStack item : containerContents.nonEmptyItems()) {
-                                            if (searchingFor.test(item)) {
-                                                matchingItems += item.getCount();
-                                            }
-                                        }
-                                    }
+                                if (!stack.isEmpty()) {
+                                    matchingItems += countItems(ItemStackTemplate.fromNonEmptyStack(stack));
                                 }
                             }
                             if (matchingItems > 0) {
@@ -380,6 +412,7 @@ public class FindItemCommand {
                 entity -> mc.gameMode.interact(
                     mc.player,
                     entity,
+                    new EntityHitResult(entity),
                     InteractionHand.MAIN_HAND));
         }
     }
@@ -391,6 +424,7 @@ public class FindItemCommand {
         private final Set<BlockPos> searchedBlocks = new HashSet<>();
         private final Set<UUID> searchedEntities = new HashSet<>();
         private boolean isScanning = true;
+        @Nullable
         private Iterator<BlockPos.MutableBlockPos> scanningIterator;
         private final Set<BlockPos> waitingOnBlocks = new HashSet<>();
         private final Set<UUID> waitingOnEntities = new HashSet<>();
@@ -401,8 +435,8 @@ public class FindItemCommand {
         private Integer numItemsInEnderChest = null;
         private boolean hasPrintedEnderChest = false;
 
-        public NbtQueryFindItemsTask(String searchingForName, Predicate<ItemStack> searchingFor, boolean searchShulkerBoxes, boolean keepSearching) {
-            super(searchingForName, searchingFor, searchShulkerBoxes, keepSearching);
+        public NbtQueryFindItemsTask(String searchingForName, Predicate<ItemStackTemplate> searchingFor, boolean searchNested, boolean keepSearching) {
+            super(searchingForName, searchingFor, searchNested, keepSearching);
         }
 
         @Override
@@ -412,7 +446,7 @@ public class FindItemCommand {
 
         @Override
         protected void onTick() {
-            Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+            Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
             if (cameraEntity == null) {
                 _break();
                 return;
@@ -431,8 +465,8 @@ public class FindItemCommand {
                         currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
                         ClientcommandsDataQueryHandler.get(packetListener).queryEntityNbt(entity.getId(), entityNbt -> {
                             waitingOnEntities.remove(entity.getUUID());
-                            if (!entity.isRemoved() && entityNbt != null && entityNbt.contains("Items", Tag.TAG_LIST)) {
-                                int count = countItems(entityNbt.getList("Items", Tag.TAG_COMPOUND));
+                            if (!entity.isRemoved() && entityNbt != null && entityNbt.contains(ContainerHelper.TAG_ITEMS)) {
+                                int count = countItems(entityNbt.getListOrEmpty(ContainerHelper.TAG_ITEMS));
                                 if (count > 0) {
                                     totalFound += count;
                                     printEntityLocation(entity, count);
@@ -496,7 +530,7 @@ public class FindItemCommand {
                 double enderChestDistanceSq = enderChestPosition.distToCenterSqr(cameraPos);
                 int cameraChunkX = Mth.floor(cameraPos.x) >> 4;
                 int cameraChunkZ = Mth.floor(cameraPos.z) >> 4;
-                int currentChunkRadius = Math.max(Math.abs(cameraChunkX - chunkToScan.x), Math.abs(cameraChunkZ - chunkToScan.z));
+                int currentChunkRadius = Math.max(Math.abs(cameraChunkX - chunkToScan.x()), Math.abs(cameraChunkZ - chunkToScan.z()));
                 double closestPossibleDistance = ((currentChunkRadius - 1) << 4) + Math.min(
                     Math.min(cameraPos.x - (cameraChunkX << 4), cameraPos.z - (cameraChunkZ << 4)),
                     Math.min(((cameraChunkX + 1) << 4) - cameraPos.x, ((cameraChunkZ + 1) << 4) - cameraPos.z));
@@ -508,7 +542,7 @@ public class FindItemCommand {
                 }
             }
 
-            LevelChunk chunk = level.getChunk(chunkToScan.x, chunkToScan.z);
+            LevelChunk chunk = level.getChunk(chunkToScan.x(), chunkToScan.z());
 
             int minSection = chunk.getMinSectionY();
             int maxSection = chunk.getMaxSectionY();
@@ -531,8 +565,8 @@ public class FindItemCommand {
                             currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
                             ClientcommandsDataQueryHandler.get(packetListener).queryEntityNbt(player.getId(), playerNbt -> {
                                 int numItemsInEnderChest = 0;
-                                if (playerNbt != null && playerNbt.contains("EnderItems", Tag.TAG_LIST)) {
-                                    numItemsInEnderChest = countItems(playerNbt.getList("EnderItems", Tag.TAG_COMPOUND));
+                                if (playerNbt != null && playerNbt.contains("EnderItems")) {
+                                    numItemsInEnderChest = countItems(playerNbt.getListOrEmpty("EnderItems"));
                                 }
                                 this.numItemsInEnderChest = numItemsInEnderChest;
                                 totalFound += numItemsInEnderChest;
@@ -553,8 +587,11 @@ public class FindItemCommand {
                         currentlySearchingTimeout = NO_RESPONSE_TIMEOUT;
                         ClientcommandsDataQueryHandler.get(packetListener).queryBlockNbt(currentPos, blockNbt -> {
                             waitingOnBlocks.remove(currentPos);
-                            if (blockNbt != null && blockNbt.contains("Items", Tag.TAG_LIST)) {
-                                int count = countItems(blockNbt.getList("Items", Tag.TAG_COMPOUND));
+                            if (blockNbt != null && blockNbt.contains(ContainerHelper.TAG_ITEMS)) {
+                                int count = countItems(blockNbt.getListOrEmpty(ContainerHelper.TAG_ITEMS));
+                                if (count == 0) {
+                                    count = countItems(blockNbt.getCompoundOrEmpty(DecoratedPotBlockEntity.TAG_ITEM));
+                                }
                                 if (count > 0) {
                                     totalFound += count;
                                     printLocation(currentPos, count);

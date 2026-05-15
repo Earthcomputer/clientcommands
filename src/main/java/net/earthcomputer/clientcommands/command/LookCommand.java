@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec2;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CRotationArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class LookCommand {
 
@@ -30,7 +30,7 @@ public class LookCommand {
                 .then(literal("west")
                     .executes(ctx -> lookCardinal(ctx.getSource(), 90, 0)))
                 .then(literal("east")
-                    .executes(ctx -> lookCardinal(ctx.getSource(),-90, 0)))
+                    .executes(ctx -> lookCardinal(ctx.getSource(), -90, 0)))
                 .then(literal("north")
                     .executes(ctx -> lookCardinal(ctx.getSource(), -180, 0)))
                 .then(literal("south")
@@ -62,7 +62,7 @@ public class LookCommand {
     }
 
     private static int doLook(LocalPlayer player, float yaw, float pitch) {
-        player.moveTo(player.getX(), player.getY(), player.getZ(), yaw, pitch);
+        player.moveOrInterpolateTo(player.position(), yaw, pitch);
         return Command.SINGLE_SUCCESS;
     }
 

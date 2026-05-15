@@ -5,10 +5,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
 
 import static dev.xpple.clientarguments.arguments.CEnumArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CDebugCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -22,7 +21,7 @@ public class CDebugCommand {
     private static int execute(FabricClientCommandSource source, DebugScreenType type) {
         DebugScreenOverlay debugScreenOverlay = source.getClient().getDebugOverlay();
         switch (type) {
-            case OVERLAY -> debugScreenOverlay.toggleOverlay();
+            case OVERLAY -> source.getClient().debugEntries.toggleDebugOverlay();
             case FPS -> debugScreenOverlay.toggleFpsCharts();
             case NETWORK -> debugScreenOverlay.toggleNetworkCharts();
             case PROFILER -> debugScreenOverlay.toggleProfilerChart();
@@ -42,7 +41,7 @@ public class CDebugCommand {
             this.name = name;
         }
         
-        public @NotNull String getSerializedName() {
+        public String getSerializedName() {
             return this.name;
         }
     }

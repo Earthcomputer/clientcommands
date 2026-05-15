@@ -5,8 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.Item;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,8 +23,7 @@ public class MultiPlayerGameModeMixin {
         assert player != null;
         Level level = player.level();
         ItemStack stack = player.getMainHandItem();
-        Item item = stack.getItem();
-        if (item instanceof DiggerItem) {
+        if (stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.AXES) || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES)) {
             BlockState state = level.getBlockState(pos);
             if (state.getDestroySpeed(level, pos) != 0) {
                 PlayerRandCracker.onItemDamage(1, player, stack);

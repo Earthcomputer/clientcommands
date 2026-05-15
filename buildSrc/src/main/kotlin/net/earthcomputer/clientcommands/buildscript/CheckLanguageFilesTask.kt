@@ -414,7 +414,7 @@ abstract class CheckLanguageFilesTask : DefaultTask() {
                             logger.error("$filename:$lineNumber: translation key '$key' does not have enough format specifiers. It only has ${usedIndexes.size} while the English has $numSpecifiers")
                             errored = true
                         } else if (usedIndexes.size > numSpecifiers) {
-                            logger.error("$filename:$lineNumber: translation key '$key' has extra format specifiers. It has ${usedIndexes.size} while the English only ha $numSpecifiers")
+                            logger.error("$filename:$lineNumber: translation key '$key' has extra format specifiers. It has ${usedIndexes.size} while the English only has $numSpecifiers")
                             errored = true
                         }
                     } else {

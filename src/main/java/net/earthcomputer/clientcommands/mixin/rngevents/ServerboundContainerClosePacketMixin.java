@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.mixin.rngevents;
 
+import com.google.common.collect.Iterables;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.interfaces.IDroppableInventoryContainer;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Arrays;
 
 @Mixin(ServerboundContainerClosePacket.class)
 public class ServerboundContainerClosePacketMixin {
@@ -32,8 +35,8 @@ public class ServerboundContainerClosePacketMixin {
         }
 
         if (menu instanceof IDroppableInventoryContainer) {
-            int[] itemCounts = playerInv.items.stream().mapToInt(ItemStack::getCount).toArray();
-            ItemStack[] itemStacks = playerInv.items.toArray(new ItemStack[0]);
+            ItemStack[] itemStacks = Iterables.toArray(playerInv, ItemStack.class);
+            int[] itemCounts = Arrays.stream(itemStacks).mapToInt(ItemStack::getCount).toArray();
             Container toDrop = ((IDroppableInventoryContainer) menu).getDroppableInventory();
             for (int fromSlot = 0; fromSlot < toDrop.getContainerSize(); fromSlot++) {
                 ItemStack stack = toDrop.getItem(fromSlot);

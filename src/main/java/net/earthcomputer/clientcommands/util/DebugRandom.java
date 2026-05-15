@@ -11,12 +11,16 @@ import net.earthcomputer.clientcommands.ClientCommands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.FileUtil;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.level.storage.TagValueOutput;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.swing.DefaultListModel;
@@ -47,27 +51,42 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class DebugRandom extends LegacyRandomSource {
     static final Logger LOGGER = LogUtils.getLogger();
 
+    @Nullable
     public static final EntityType<?> DEBUG_ENTITY_TYPE;
+    @Nullable
+    public static final Identifier DEBUG_DIMENSION;
+    public static final boolean SAVE_ENTITY_TAG = Boolean.parseBoolean(System.getProperty("clientcommands.debugEntityRng.saveTag", "true"));
+
     static {
         String debugEntityType = System.getProperty("clientcommands.debugEntityRng");
         if (debugEntityType == null) {
             DEBUG_ENTITY_TYPE = null;
         } else {
-            DEBUG_ENTITY_TYPE = BuiltInRegistries.ENTITY_TYPE.getValue(ResourceLocation.parse(debugEntityType));
+            DEBUG_ENTITY_TYPE = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(debugEntityType));
+        }
+
+        String debugDimensionStr = System.getProperty("clientcommands.debugDimensionRng");
+        if (debugDimensionStr == null) {
+            DEBUG_DIMENSION = null;
+        } else {
+            DEBUG_DIMENSION = Identifier.tryParse(debugDimensionStr);
         }
     }
 
     private static final Object2IntMap<String> stackTraceIds = new Object2IntOpenHashMap<>();
     static final List<String> stackTraceById = new ArrayList<>();
 
-    private final Entity entity;
     private boolean firstTick = true;
+    private final Supplier<CompoundTag> tagToSaveSupplier;
+    private boolean supplyingTagToSave = false;
+    private final Supplier<String> idSupplier;
 
     private final List<IntList> stackTraces = new ArrayList<>();
     private IntList stackTracesThisTick = new IntArrayList();
@@ -77,7 +96,39 @@ public class DebugRandom extends LegacyRandomSource {
 
     public DebugRandom(Entity entity) {
         super(RandomSupport.generateUniqueSeed());
-        this.entity = entity;
+
+        if (SAVE_ENTITY_TAG) {
+            tagToSaveSupplier = () -> {
+                if (firstTick) {
+                    return new CompoundTag();
+                } else {
+                    try (ProblemReporter.ScopedCollector collector = new ProblemReporter.ScopedCollector(LOGGER)) {
+                        TagValueOutput output = TagValueOutput.createWithContext(collector, entity.level().registryAccess());
+                        entity.saveWithoutId(output);
+                        return output.buildResult();
+                    }
+                }
+            };
+        } else {
+            tagToSaveSupplier = CompoundTag::new;
+        }
+
+        this.idSupplier = entity::getStringUUID;
+
+        this.stackTraces.add(this.stackTracesThisTick);
+        try {
+            this.nbtStream = new DataOutputStream(new GZIPOutputStream(gzippedNbt));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public DebugRandom(Level level) {
+        super(RandomSupport.generateUniqueSeed());
+
+        this.tagToSaveSupplier = CompoundTag::new;
+        this.idSupplier = () -> FileUtil.sanitizeName(level.dimension().identifier().toString());
+
         this.stackTraces.add(this.stackTracesThisTick);
         try {
             this.nbtStream = new DataOutputStream(new GZIPOutputStream(gzippedNbt));
@@ -107,7 +158,18 @@ public class DebugRandom extends LegacyRandomSource {
     private void handleStackTrace(int stackTrace) {
         this.stackTracesThisTick.add(stackTrace);
         try {
-            NbtIo.writeUnnamedTagWithFallback(firstTick ? new CompoundTag() : entity.saveWithoutId(new CompoundTag()), nbtStream);
+            boolean wasSupplyingTagToSave = supplyingTagToSave;
+            supplyingTagToSave = true;
+            CompoundTag tagToSave;
+            try {
+                tagToSave = tagToSaveSupplier.get();
+            } finally {
+                supplyingTagToSave = wasSupplyingTagToSave;
+            }
+            if (supplyingTagToSave) {
+                tagToSave.putBoolean("clientcommands:causedByTagSaving", true);
+            }
+            NbtIo.writeUnnamedTagWithFallback(tagToSave, nbtStream);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -116,9 +178,9 @@ public class DebugRandom extends LegacyRandomSource {
     public void writeToFile() {
         try {
             this.nbtStream.close();
-            Path debugDir = ClientCommands.configDir.resolve("debug");
+            Path debugDir = ClientCommands.CONFIG_DIR.resolve("debug");
             Files.createDirectories(debugDir);
-            try (DataOutputStream dataOutput = new DataOutputStream(new GZIPOutputStream(Files.newOutputStream(debugDir.resolve(this.entity.getStringUUID() + ".dat"))))) {
+            try (DataOutputStream dataOutput = new DataOutputStream(new GZIPOutputStream(Files.newOutputStream(debugDir.resolve(this.idSupplier.get() + ".dat"))))) {
                 dataOutput.writeInt(stackTraceById.size());
                 for (String st : stackTraceById) {
                     dataOutput.writeUTF(st);
@@ -132,7 +194,7 @@ public class DebugRandom extends LegacyRandomSource {
                 }
                 dataOutput.write(this.gzippedNbt.toByteArray());
             }
-            LOGGER.info("Written debug random for " + this.entity.getStringUUID() + " to file");
+            LOGGER.info("Written debug random for {} to file", this.idSupplier.get());
         } catch (IOException e) {
             LOGGER.error("Error saving debug source to file", e);
         }
@@ -183,7 +245,7 @@ public class DebugRandom extends LegacyRandomSource {
             return;
         }
 
-        JFrame frame = new JFrame("Debug Entity RNG");
+        JFrame frame = new JFrame("Debug RNG");
         frame.add(new DebugRandomSourcePanel(randomCalls));
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.pack();
@@ -241,6 +303,16 @@ class DebugRandomSourcePanel extends JPanel {
             if (value.stackTrace() == selectedStackTrace) {
                 textArea.setBackground(Color.YELLOW);
             }
+
+            if (value.nbt().contains("clientcommands:causedByTagSaving")) {
+                JPanel panel = new JPanel(new BorderLayout());
+                panel.add(textArea, BorderLayout.CENTER);
+                JLabel warningLabel = new JLabel("This stack trace was caused by saving the NBT tag during debug");
+                warningLabel.setForeground(Color.RED);
+                panel.add(warningLabel, BorderLayout.NORTH);
+                return panel;
+            }
+
             return textArea;
         });
         callsInTickList.addListSelectionListener(e -> {
@@ -285,6 +357,7 @@ class DebugRandomSourcePanel extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
+    @SuppressWarnings("ConstantValue")
     private void setSelectedStackTrace(int selectedStackTrace) {
         this.selectedStackTrace = selectedStackTrace;
         if (randomCallsList != null) {

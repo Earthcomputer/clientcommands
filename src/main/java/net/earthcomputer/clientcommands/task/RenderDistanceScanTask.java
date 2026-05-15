@@ -18,7 +18,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Set;
@@ -70,12 +70,12 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     @Override
     public void initialize() {
         remainingChunks = new LongLinkedOpenHashSet();
-        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+        Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
         if (cameraEntity == null) {
             _break();
             return;
         }
-        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
+        BlockPos.spiralAround(new BlockPos(Mth.floor(cameraEntity.getX()) >> 4, 0, Mth.floor(cameraEntity.getZ()) >> 4), Minecraft.getInstance().options.renderDistance().get(), Direction.EAST, Direction.SOUTH).iterator().forEachRemaining(pos -> remainingChunks.add(ChunkPos.pack(pos.getX(), pos.getZ())));
         currentScanTask = new WeakReference<>(this);
     }
 
@@ -98,7 +98,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     }
 
     protected void doTick() throws CommandSyntaxException {
-        Entity cameraEntity = Minecraft.getInstance().cameraEntity;
+        Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
         if (cameraEntity == null) {
             _break();
             return;
@@ -109,7 +109,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
         long startTime = System.nanoTime();
         while (hasChunksRemaining()) {
-            ChunkPos chunkPos = new ChunkPos(remainingChunks.removeFirst());
+            ChunkPos chunkPos = ChunkPos.unpack(remainingChunks.removeFirst());
 
             if (canScanChunk(cameraEntity, chunkPos)) {
                 int minSection = level.getMinSectionY();
@@ -142,7 +142,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
     protected void onBlockStateUpdate(ClientLevel level, BlockPos pos, BlockState oldState, BlockState newState) {
         if (keepSearching) {
             try {
-                scanBlock(Minecraft.getInstance().cameraEntity, pos);
+                scanBlock(Minecraft.getInstance().getCameraEntity(), pos);
             } catch (CommandSyntaxException e) {
                 ClientCommandHelper.sendError(ComponentUtils.fromMessage(e.getRawMessage()));
             }
@@ -151,20 +151,20 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     protected void onLoadChunk(ClientLevel level, ChunkPos pos) {
         if (keepSearching) {
-            remainingChunks.add(pos.toLong());
+            remainingChunks.add(pos.pack());
         }
     }
 
     protected void onUnloadChunk(ClientLevel level, ChunkPos pos) {
         if (keepSearching) {
-            remainingChunks.add(pos.toLong());
+            remainingChunks.add(pos.pack());
         }
     }
 
     protected boolean canScanChunk(Entity cameraEntity, ChunkPos pos) {
         ClientLevel level = Minecraft.getInstance().level;
         assert level != null;
-        return level.getChunk(pos.x, pos.z, ChunkStatus.FULL, false) != null;
+        return level.getChunk(pos.x(), pos.z(), ChunkStatus.FULL, false) != null;
     }
 
     protected boolean canScanChunkSection(Entity cameraEntity, SectionPos pos) {
@@ -173,8 +173,8 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
 
     protected boolean hasAnyBlockCloserThan(Entity cameraEntity, ChunkPos chunkPos, double distanceSq) {
         Vec3 cameraPos = cameraEntity.getEyePosition(0);
-        double closestX = Mth.clamp(cameraPos.x, chunkPos.x << 4, (chunkPos.x + 1) << 4);
-        double closestZ = Mth.clamp(cameraPos.z, chunkPos.z << 4, (chunkPos.z + 1) << 4);
+        double closestX = Mth.clamp(cameraPos.x, chunkPos.x() << 4, (chunkPos.x() + 1) << 4);
+        double closestZ = Mth.clamp(cameraPos.z, chunkPos.z() << 4, (chunkPos.z() + 1) << 4);
         double closestDistanceSq = Mth.square(cameraPos.x - closestX) + Mth.square(cameraPos.z - closestZ);
         return closestDistanceSq < distanceSq;
     }
@@ -183,7 +183,7 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         Vec3 cameraPos = cameraEntity.getEyePosition(0);
         int cameraChunkX = Mth.floor(cameraPos.x) >> 4;
         int cameraChunkZ = Mth.floor(cameraPos.z) >> 4;
-        int chunkRadius = Math.max(Math.abs(currentlyScanningChunk.x - cameraChunkX), Math.abs(currentlyScanningChunk.z - cameraChunkZ));
+        int chunkRadius = Math.max(Math.abs(currentlyScanningChunk.x() - cameraChunkX), Math.abs(currentlyScanningChunk.z() - cameraChunkZ));
         double minPossibleDistance = ((chunkRadius - 1) << 4) + Math.min(
             Math.min(cameraPos.x - (cameraChunkX << 4), ((cameraChunkX + 1) << 4) - cameraPos.x),
             Math.min(cameraPos.z - (cameraChunkZ << 4), ((cameraChunkZ + 1) << 4) - cameraPos.z)

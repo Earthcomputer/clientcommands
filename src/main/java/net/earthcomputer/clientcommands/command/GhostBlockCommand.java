@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CBlockPredicateArgument.*;
 import static dev.xpple.clientarguments.arguments.CBlockStateArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class GhostBlockCommand {
 
@@ -42,7 +42,7 @@ public class GhostBlockCommand {
     }
 
     private static int setGhostBlock(FabricClientCommandSource source, BlockPos pos, BlockState state) throws CommandSyntaxException {
-        ClientLevel level = source.getWorld();
+        ClientLevel level = source.getLevel();
         assert level != null;
 
         checkLoaded(level, pos);
@@ -57,7 +57,7 @@ public class GhostBlockCommand {
     }
 
     private static int fillGhostBlocks(FabricClientCommandSource source, BlockPos from, BlockPos to, BlockState state, Predicate<BlockInWorld> filter) throws CommandSyntaxException {
-        ClientLevel level = source.getWorld();
+        ClientLevel level = source.getLevel();
         assert level != null;
 
         checkLoaded(level, from);

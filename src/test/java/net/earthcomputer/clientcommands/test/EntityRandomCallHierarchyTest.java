@@ -18,9 +18,11 @@ public final class EntityRandomCallHierarchyTest {
                 .recurseThrough("net/minecraft/world/item/enchantment/EnchantmentHelper", "getRandomItemWith", "(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Predicate;)Ljava/util/Optional;")
                 .recurseThrough("net/minecraft/world/item/enchantment/Enchantment", "modifyEntityFilteredValue", "(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lorg/apache/commons/lang3/mutable/MutableFloat;)V")
                 .recurseThrough("net/minecraft/world/entity/Entity", "getRandomX", "(D)D")
-                .recurseThrough("net/minecraft/world/entity/Entity", "getRandomY", "()D")
+                .recurseThrough("net/minecraft/world/entity/Entity", "getRandomY", "(D)D")
                 .recurseThrough("net/minecraft/world/entity/Entity", "getRandomZ", "(D)D")
+                .recurseThrough("net/minecraft/world/entity/Entity", "getRandomY", "()D")
                 .recurseThrough("net/minecraft/server/level/ServerPlayer", "playNotifySound", "(Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V")
+                .recurseThrough("net/minecraft/world/entity/LivingEntity", "makeDrownParticles", "()V")
                 .recurseThrough("net/minecraft/world/entity/LivingEntity", "spawnItemParticles", "(Lnet/minecraft/world/item/ItemStack;I)V")
                 .walk((reference, callStack) -> {
                     if (!reference.owner().startsWith("net/minecraft/world/entity/ai/")) {
@@ -50,7 +52,7 @@ public final class EntityRandomCallHierarchyTest {
     @Test
     public void testEnchantmentPlaySoundEffect() {
         TestUtil.regressionTest("enchantmentPlaySoundEffectHierarchy", out -> {
-            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/PlaySoundEffect", "<init>", "(Lnet/minecraft/core/Holder;Lnet/minecraft/util/valueproviders/FloatProvider;Lnet/minecraft/util/valueproviders/FloatProvider;)V")
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/PlaySoundEffect", "<init>", "(Ljava/util/List;Lnet/minecraft/util/valueproviders/FloatProvider;Lnet/minecraft/util/valueproviders/FloatProvider;)V")
                 .walk((reference, callStack) -> printReference(out, reference, callStack));
         });
     }

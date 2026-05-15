@@ -4,15 +4,13 @@ import net.earthcomputer.clientcommands.features.ChatLengthExtender;
 import net.earthcomputer.clientcommands.interfaces.IEditBox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.util.StringUtil;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.function.Predicate;
 
 @Mixin(EditBox.class)
 public abstract class EditBoxMixin implements IEditBox {
@@ -27,7 +25,6 @@ public abstract class EditBoxMixin implements IEditBox {
 
     @Shadow public abstract String getValue();
 
-    @Shadow private Predicate<String> filter;
     @Unique
     @Nullable
     private Integer oldMaxLength = null;
@@ -44,9 +41,6 @@ public abstract class EditBoxMixin implements IEditBox {
         int startSelection = Math.min(cursorPos, highlightPos);
         int endSelection = Math.max(cursorPos, highlightPos);
         String newText = new StringBuilder(getValue()).replace(startSelection, endSelection, StringUtil.filterText(textToWrite)).toString();
-        if (!this.filter.test(newText)) {
-            return;
-        }
 
         updateTextMaxLength(newText);
     }

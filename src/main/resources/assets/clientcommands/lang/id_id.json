@@ -266,9 +266,7 @@
   "enchCrack.xpSeed.many": "Kemungkinan benih XP: %s",
   "enchCrack.xpSeed.one": "Benih XP: %s",
 
-  "itemCrack.notEnoughItems": "Tidak bisa menggunakkan SeedCracker RNG: Tidak cukup benda di Tangan Pemain",
-
-  "playerManip.notEnoughItems": "Tidak cukup item(%s dari %s) untuk memanipulasi seed",
+  "playerManip.notEnoughItems": "Tidak cukup item untuk memanipulasi seed",
   "playerManip.reset": "Manipulasi pemain RNG telah di reset. Alasan: %s",
   "playerManip.reset.advancement": "Mendapatkan Advancement",
   "playerManip.reset.amethystChime": "Jalan di Gugus Kecubung",
@@ -302,9 +300,7 @@
   "playerManip.state.ench_cracking_1": "Sedang memecahkan Seed Pesona ke 1",
   "playerManip.state.ench_cracking_2": "Sedang memecahkan Seed Pesona ke 2",
   "playerManip.state.half_cracked": "Setengahnya telah pecah",
-  "playerManip.state.manipulating_enchantments": "Sedang Memanipulasi Pesona",
   "playerManip.state.uncracked": "Belum pecah",
-  "playerManip.state.waiting_dummy_enchant": "Sedang menunggu pesona asal",
   "playerManip.throwError": "Kondisi tidak bisa atau akan membutuhkan lebih dari %s benda yang dilempar",
   "playerManip.toolBreakWarning": "Peringatan: Alat mempunyai sisa %s ketahanan",
   "playerManip.uncracked": "Benih Pemain butuh dipecahkan",

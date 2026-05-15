@@ -14,7 +14,7 @@ public class ClientPacketListenerMixin implements ClientcommandsDataQueryHandler
     @Unique
     private final ClientcommandsDataQueryHandler ccDataQueryHandler = new ClientcommandsDataQueryHandler((ClientPacketListener) (Object) this);
 
-    @Inject(method = "handleTagQueryPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "handleTagQueryPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V", shift = At.Shift.AFTER), cancellable = true)
     private void onHandleTagQueryPacket(ClientboundTagQueryPacket packet, CallbackInfo ci) {
         if (ccDataQueryHandler.handleQueryResponse(packet.getTransactionId(), packet.getTag())) {
             ci.cancel();

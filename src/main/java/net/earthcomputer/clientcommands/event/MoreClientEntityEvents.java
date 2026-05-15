@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.event;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
+import net.minecraft.world.entity.ExperienceOrb;
 
 public final class MoreClientEntityEvents {
     /**
@@ -21,12 +21,9 @@ public final class MoreClientEntityEvents {
         }
     });
 
-    /**
-     * Because for some reason this is separate from adding a regular entity
-     */
-    public static final Event<AddXpOrb> POST_ADD_XP_ORB = EventFactory.createArrayBacked(AddXpOrb.class, listeners -> packet -> {
-        for (AddXpOrb listener : listeners) {
-            listener.onXpOrb(packet);
+    public static final Event<SetInitialXpOrbValue> POST_SET_INITIAL_XP_ORB_VALUE = EventFactory.createArrayBacked(SetInitialXpOrbValue.class, listeners -> orb -> {
+        for (SetInitialXpOrbValue listener : listeners) {
+            listener.onSetInitialXpOrbValue(orb);
         }
     });
 
@@ -36,7 +33,7 @@ public final class MoreClientEntityEvents {
     }
 
     @FunctionalInterface
-    public interface AddXpOrb {
-        void onXpOrb(ClientboundAddExperienceOrbPacket packet);
+    public interface SetInitialXpOrbValue {
+        void onSetInitialXpOrbValue(ExperienceOrb orb);
     }
 }

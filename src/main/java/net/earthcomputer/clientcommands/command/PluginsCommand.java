@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class PluginsCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.LongArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class BookCommand {
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Component.translatable("commands.cbook.commandException"));
@@ -82,7 +82,7 @@ public class BookCommand {
                 throw NO_BOOK.create();
             }
         }
-        int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : Inventory.SLOT_OFFHAND;
+        int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().getSelectedSlot() : Inventory.SLOT_OFFHAND;
 
         String joinedPages = characterGenerator.limit((long) getMaxLimit() * 210).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
 

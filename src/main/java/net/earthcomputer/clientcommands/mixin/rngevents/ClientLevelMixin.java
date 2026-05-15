@@ -30,7 +30,7 @@ public class ClientLevelMixin {
             if (player.getBoundingBox().inflate(1.25, 0.75, 1.25).intersects(entity.getBoundingBox())) {
                 PlayerRandCracker.onXpOrb();
                 if (Arrays.stream(EquipmentSlot.values()).anyMatch(slot -> couldMendingRepair(player.getItemBySlot(slot)))) {
-                    PlayerRandCracker.onMending();
+                    PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.MENDING);
                 }
             }
         }

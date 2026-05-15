@@ -38,7 +38,7 @@ public class LongTaskList extends LongTask {
                 scheduleDelay();
             }
             children.removeFirst();
-            if (!children.isEmpty()) {
+            if (!isCompleted()) {
                 children.getFirst().initialize();
             }
         } else {

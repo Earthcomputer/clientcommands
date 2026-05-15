@@ -200,9 +200,7 @@
   "enchCrack.xpSeed.many": "Возможный Сид Опыта: %s",
   "enchCrack.xpSeed.one": "Сид Опыта: %s",
 
-  "itemCrack.notEnoughItems": "Невозможно использовать ВзломщикСида Рандомного Генератора Чисел: Недостаточно предметов в инвенторе игрока",
-
-  "playerManip.notEnoughItems": "Недостаточно элементов (%s из %s) для манипуляций с seed",
+  "playerManip.notEnoughItems": "Недостаточно элементов для манипуляций с seed",
   "playerManip.reset": "Перезапуск манипуляции Рандомного Генератора Чисел игрока. Причина: %s",
   "playerManip.reset.advancement": "Полученно достижение",
   "playerManip.reset.amethystChime": "Ходьба по аметистам",
@@ -236,9 +234,7 @@
   "playerManip.state.ench_cracking_1": "Взламывает Сида Зачарования 1",
   "playerManip.state.ench_cracking_2": "Взламывает Сида Зачарования 2",
   "playerManip.state.half_cracked": "На половина взломанный",
-  "playerManip.state.manipulating_enchantments": "Управление чарами",
   "playerManip.state.uncracked": "Не взломанный",
-  "playerManip.state.waiting_dummy_enchant": "В ожидании тестового зачарования",
   "playerManip.throwError": "Условие невозможно или потребует более %s бросков предметов",
   "playerManip.toolBreakWarning": "Предупреждение: у инструмента осталось %s прочности",
   "playerManip.uncracked": "Сид-Игрока нуждается в взломе",

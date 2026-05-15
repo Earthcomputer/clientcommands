@@ -1,9 +1,6 @@
 package net.earthcomputer.clientcommands.command.arguments;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -12,20 +9,21 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.serialization.JsonOps;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.StringRepresentable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,11 +32,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> {
     private static final Collection<String> EXAMPLES = Arrays.asList("Earth", "bold{xpple}", "red{hello blue{world}!}", "*italic*");
     private static final SimpleCommandExceptionType TOO_DEEPLY_NESTED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.client.componentTooDeeplyNested"));
+    // TODO: way to add back click and hover events?
     private static final DynamicCommandExceptionType INVALID_CLICK_ACTION_EXCEPTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidClickAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_ACTION_EXCEPTION = new DynamicCommandExceptionType(action -> Component.translatable("commands.client.invalidHoverAction", action));
     private static final DynamicCommandExceptionType INVALID_HOVER_EVENT_EXCEPTION = new DynamicCommandExceptionType(event -> Component.translatable("commands.client.invalidHoverEvent", event));
@@ -87,6 +85,7 @@ public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> 
         private static final int MAX_NESTING = 50;
 
         private final StringReader reader;
+        @Nullable
         private Consumer<SuggestionsBuilder> suggestor;
 
         public Parser(StringReader reader) {
@@ -271,11 +270,16 @@ public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> 
                             components.add(Component.literal(plainText.toString()));
                             plainText.setLength(0);
                         }
-                        components.add(linkComponent.withStyle(style -> style
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, linkHref))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(linkHref)))
-                            .withColor(ChatFormatting.BLUE)
-                            .withUnderlined(true)));
+                        URI linkHrefUri = tryParseUri(linkHref);
+                        components.add(linkComponent.withStyle(style -> {
+                            if (linkHrefUri != null) {
+                                style = style.withClickEvent(new ClickEvent.OpenUrl(linkHrefUri));
+                            }
+                            return style
+                                .withHoverEvent(new HoverEvent.ShowText(Component.literal(linkHref)))
+                                .withColor(ChatFormatting.BLUE)
+                                .withUnderlined(true);
+                        }));
                     }
                     case '\\' -> {
                         if (reader.getCursor() < end) {
@@ -313,6 +317,15 @@ public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> 
                     }
                 }
             };
+        }
+
+        @Nullable
+        private static URI tryParseUri(String uriStr) {
+            try {
+                return new URI(uriStr);
+            } catch (URISyntaxException e) {
+                return null;
+            }
         }
 
         private boolean isEscaped(int index) {
@@ -397,12 +410,9 @@ public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> 
                 .put("white",  new Styler((s, o) -> s.applyFormat(ChatFormatting.WHITE), 0))
                 .put("yellow", new Styler((s, o) -> s.applyFormat(ChatFormatting.YELLOW), 0))
 
-                .put("font", new Styler((s, o) -> s.withFont(ResourceLocation.read(new StringReader(o.getFirst()))), 1, "alt", "default"))
+                .put("font", new Styler((s, o) -> s.withFont(new FontDescription.Resource(Identifier.read(new StringReader(o.getFirst())))), 1, "alt", "default"))
                 .put("hex", new Styler((s, o) -> s.withColor(TextColor.fromRgb(parseHex(o.getFirst()))), 1))
                 .put("insert", new Styler((s, o) -> s.withInsertion(o.getFirst()), 1))
-
-                .put("click", new Styler((s, o) -> s.withClickEvent(parseClickEvent(o.getFirst(), o.get(1))), 2, "change_page", "copy_to_clipboard", "open_file", "open_url", "run_command", "suggest_command"))
-                .put("hover", new Styler((s, o) -> s.withHoverEvent(parseHoverEvent(o.getFirst(), o.get(1))), 2, "show_entity", "show_item", "show_text"))
 
                 // aliases
                 .put("strike", new Styler((s, o) -> s.applyFormat(ChatFormatting.STRIKETHROUGH), 0))
@@ -428,29 +438,6 @@ public class ExtendedMarkdownArgument implements ArgumentType<MutableComponent> 
         @FunctionalInterface
         interface StylerFunc {
             Style apply(Style style, List<String> args) throws CommandSyntaxException;
-        }
-
-        private static final Function<String, ClickEvent.Action> CLICK_EVENT_ACTION_BY_NAME = StringRepresentable.createNameLookup(ClickEvent.Action.values(), Function.identity());
-
-        private static ClickEvent parseClickEvent(String name, String value) throws CommandSyntaxException {
-            ClickEvent.Action action = CLICK_EVENT_ACTION_BY_NAME.apply(name);
-            if (action == null) {
-                throw INVALID_CLICK_ACTION_EXCEPTION.create(name);
-            }
-            return new ClickEvent(action, value);
-        }
-
-        private static HoverEvent parseHoverEvent(String name, String value) throws CommandSyntaxException {
-            HoverEvent.Action<?> action = HoverEvent.Action.UNSAFE_CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive(name)).result().orElse(null);
-            if (action == null) {
-                throw INVALID_HOVER_ACTION_EXCEPTION.create(name);
-            }
-
-            JsonElement component = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, Component.nullToEmpty(value)).getOrThrow();
-            JsonObject valueJson = new JsonObject();
-            valueJson.add("value", component);
-            HoverEvent.TypedHoverEvent<?> eventData = action.legacyCodec.codec().parse(JsonOps.INSTANCE, valueJson).getOrThrow(error -> INVALID_HOVER_EVENT_EXCEPTION.create(value));
-            return new HoverEvent(eventData);
         }
 
         private static int parseHex(String hex) throws CommandSyntaxException {

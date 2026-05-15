@@ -7,8 +7,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.ClientCommandFunctions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class StartupCommand {
     private static final Logger LOGGER = LogUtils.getLogger();

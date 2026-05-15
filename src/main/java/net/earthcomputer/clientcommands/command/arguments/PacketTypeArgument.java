@@ -10,7 +10,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.netty.channel.ChannelPipeline;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
-import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -21,8 +20,8 @@ import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.IdDispatchCodec;
 import net.minecraft.network.protocol.PacketType;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,7 +31,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
+public class PacketTypeArgument implements ArgumentType<Identifier> {
 
     private static final Collection<String> EXAMPLES = Arrays.asList("add_entity", "minecraft:add_entity", "commands");
 
@@ -42,14 +41,14 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
         return new PacketTypeArgument();
     }
 
-    public static ResourceLocation getPacket(final CommandContext<FabricClientCommandSource> context, final String name) {
-        return context.getArgument(name, ResourceLocation.class);
+    public static Identifier getPacket(final CommandContext<FabricClientCommandSource> context, final String name) {
+        return context.getArgument(name, Identifier.class);
     }
 
     @Override
-    public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
+    public Identifier parse(StringReader reader) throws CommandSyntaxException {
         int start = reader.getCursor();
-        ResourceLocation packetId = ResourceLocation.read(reader);
+        Identifier packetId = Identifier.read(reader);
         PacketTypes types = PacketTypes.get();
         if (types == null || (!types.clientbound.contains(packetId) && !types.serverbound.contains(packetId) && !types.c2cbound.contains(packetId))) {
             reader.setCursor(start);
@@ -72,10 +71,10 @@ public class PacketTypeArgument implements ArgumentType<ResourceLocation> {
         return EXAMPLES;
     }
 
-    private record PacketTypes(Set<ResourceLocation> clientbound, Set<ResourceLocation> serverbound, Set<ResourceLocation> c2cbound) {
-        private static final Map<Object, Set<ResourceLocation>> packetTypesCache = new WeakHashMap<>();
+    private record PacketTypes(Set<Identifier> clientbound, Set<Identifier> serverbound, Set<Identifier> c2cbound) {
+        private static final Map<Object, Set<Identifier>> packetTypesCache = new WeakHashMap<>();
 
-        private static Set<ResourceLocation> getPacketTypes(ProtocolInfo<?> protocolInfo) {
+        private static Set<Identifier> getPacketTypes(ProtocolInfo<?> protocolInfo) {
             return ((IdDispatchCodec<?, ?, PacketType<?>>) protocolInfo.codec()).toId.keySet().stream()
                 .map(PacketType::id)
                 .collect(Collectors.toSet());

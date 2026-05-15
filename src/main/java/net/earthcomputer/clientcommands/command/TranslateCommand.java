@@ -11,24 +11,23 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import static net.earthcomputer.clientcommands.command.arguments.TranslationQueryArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class TranslateCommand {
 
     private static final SimpleCommandExceptionType UNKNOWN_ERROR_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctranslate.unknownError"));
 
-    private static final String URL = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t";
+    private static final String URL_FORMAT = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=%s&tl=%s&q=%s";
 
     private static final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -58,20 +57,20 @@ public class TranslateCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static URI createUri(String from, String to, String query) throws URISyntaxException {
-        URIBuilder builder = new URIBuilder(URL, Charset.defaultCharset());
-        builder.addParameter("sl", from);
-        builder.addParameter("tl", to);
-        builder.addParameter("q", query);
-        return builder.build();
+    private static URI createUri(String from, String to, String query) {
+        return URI.create(URL_FORMAT.formatted(
+            URLEncoder.encode(from, StandardCharsets.UTF_8),
+            URLEncoder.encode(to, StandardCharsets.UTF_8),
+            URLEncoder.encode(query, StandardCharsets.UTF_8)
+        ));
     }
 
     private static Component createText(String translation) {
         return Component.literal(translation).withStyle(s -> s
             .withUnderlined(true)
-            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, translation))
+            .withClickEvent(new ClickEvent.CopyToClipboard(translation))
             .withInsertion(translation)
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.ctranslate.hoverText")))
+            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("commands.ctranslate.hoverText")))
         );
     }
 }

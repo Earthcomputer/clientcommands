@@ -7,13 +7,14 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.PacketType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
-public record PutTicTacToeMarkC2CPacket(String sender, UUID senderUUID, byte x, byte y) implements C2CPacket {
+public record PutTicTacToeMarkC2CPacket(@Nullable String sender, @Nullable UUID senderUUID, byte x, byte y) implements C2CPacket {
     public static final StreamCodec<C2CFriendlyByteBuf, PutTicTacToeMarkC2CPacket> CODEC = Packet.codec(PutTicTacToeMarkC2CPacket::write, PutTicTacToeMarkC2CPacket::new);
-    public static final PacketType<PutTicTacToeMarkC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.fromNamespaceAndPath("clientcommands", "put_tic_tac_toe_mark"));
+    public static final PacketType<PutTicTacToeMarkC2CPacket> ID = new PacketType<>(PacketFlow.CLIENTBOUND, Identifier.fromNamespaceAndPath("clientcommands", "put_tic_tac_toe_mark"));
 
     public PutTicTacToeMarkC2CPacket(C2CFriendlyByteBuf buf) {
         this(buf.getSender(), buf.getSenderUUID(), buf.readByte(), buf.readByte());

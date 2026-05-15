@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.interfaces;
 
 import com.mojang.brigadier.suggestion.Suggestion;
 import net.earthcomputer.clientcommands.command.Flag;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

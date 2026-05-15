@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.LongArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class ServerSeedCommand {
 
@@ -44,14 +44,14 @@ public class ServerSeedCommand {
     }
 
     private static int hashedSeed(FabricClientCommandSource source) {
-        long hashedSeed = source.getWorld().getBiomeManager().biomeZoomSeed;
+        long hashedSeed = source.getLevel().getBiomeManager().biomeZoomSeed;
         HashCode seedHash = HashCode.fromLong(hashedSeed);
         source.sendFeedback(Component.translatable("commands.cserverseed.hashedSeed", ComponentUtils.copyOnClickText(seedHash.toString()), ComponentUtils.copyOnClickText(String.valueOf(seedHash.asLong()))));
         return (int) hashedSeed;
     }
 
     private static int fromStructureSeed(FabricClientCommandSource source, long structureSeed) throws CommandSyntaxException {
-        long hashedSeed = source.getWorld().getBiomeManager().biomeZoomSeed;
+        long hashedSeed = source.getLevel().getBiomeManager().biomeZoomSeed;
         List<Long> seeds = WorldSeed.fromHash(structureSeed, hashedSeed);
         if (seeds.isEmpty()) {
             throw IMPOSSIBLE_SEED_COMBINATION_EXCEPTION.create();

@@ -10,14 +10,15 @@ import net.earthcomputer.clientcommands.features.TwoPlayerGame;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.UUID;
@@ -31,6 +32,9 @@ public class ConnectFourCommand {
 
     public static void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet) {
         UUID senderUUID = packet.senderUUID();
+        if (senderUUID == null) {
+            return;
+        }
         ConnectFourGame game = TwoPlayerGame.CONNECT_FOUR_GAME_TYPE.getActiveGame(senderUUID);
         if (game == null) {
             return;
@@ -45,7 +49,7 @@ public class ConnectFourCommand {
         public final PlayerInfo opponent;
         public final Piece yourPiece;
         public Piece activePiece;
-        public final Piece[][] board;
+        public final @Nullable Piece[][] board;
         @Nullable
         public Winner winner;
 
@@ -67,26 +71,26 @@ public class ConnectFourCommand {
             }
 
             if (!this.isGameActive()) {
-                LOGGER.warn("Tried to add piece to the already completed game with {}.", this.opponent.getProfile().getName());
+                LOGGER.warn("Tried to add piece to the already completed game with {}.", this.opponent.getProfile().name());
                 return;
             }
 
             if (!this.addPiece(x, piece)) {
-                LOGGER.warn("Failed to add piece to your Connect Four game with {}.", this.opponent.getProfile().getName());
+                LOGGER.warn("Failed to add piece to your Connect Four game with {}.", this.opponent.getProfile().name());
                 return;
             }
 
             if (this.isYourTurn()) {
                 try {
-                    PutConnectFourPieceC2CPacket packet = new PutConnectFourPieceC2CPacket(connection.getLocalGameProfile().getName(), connection.getLocalGameProfile().getId(), x);
+                    PutConnectFourPieceC2CPacket packet = new PutConnectFourPieceC2CPacket(connection.getLocalGameProfile().name(), connection.getLocalGameProfile().id(), x);
                     C2CPacketHandler.getInstance().sendPacket(packet, this.opponent);
                 } catch (CommandSyntaxException e) {
                     ClientCommandHelper.sendFeedback(Component.translationArg(e.getRawMessage()));
                 }
             }
 
-            String sender = this.opponent.getProfile().getName();
-            UUID senderUUID = this.opponent.getProfile().getId();
+            String sender = this.opponent.getProfile().name();
+            UUID senderUUID = this.opponent.getProfile().id();
             this.activePiece = piece.opposite();
             if ((this.winner = this.getWinner()) != null) {
                 if (this.winner == this.yourPiece.asWinner()) {
@@ -221,13 +225,13 @@ public class ConnectFourCommand {
             };
         }
 
-        public void render(GuiGraphics graphics, int x, int y, boolean transparent) {
+        public void extractRenderState(GuiGraphicsExtractor graphics, int x, int y, boolean transparent) {
             int xOffset = switch (this) {
                 case RED -> 0;
                 case YELLOW -> 16;
             };
             graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 ConnectFourGameScreen.PIECES_TEXTURE,
                 x,
                 y,
@@ -253,8 +257,8 @@ public class ConnectFourCommand {
     public static class ConnectFourGameScreen extends Screen {
         private final ConnectFourGame game;
 
-        private static final ResourceLocation BOARD_TEXTURE = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/connect_four/board.png");
-        private static final ResourceLocation PIECES_TEXTURE = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/connect_four/pieces.png");
+        private static final Identifier BOARD_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/connect_four/board.png");
+        private static final Identifier PIECES_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/connect_four/pieces.png");
 
         private static final int SCALE = 4;
 
@@ -283,23 +287,23 @@ public class ConnectFourCommand {
         private static final int SLOT_HEIGHT = SCALE * TEXTURE_SLOT_HEIGHT;
         
         public ConnectFourGameScreen(ConnectFourGame game) {
-            super(Component.translatable("connectFourGame.title", game.opponent.getProfile().getName()));
+            super(Component.translatable("connectFourGame.title", game.opponent.getProfile().name()));
             this.game = game;
         }
 
         @Override
-        public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-            super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+            super.extractRenderState(graphics, mouseX, mouseY, a);
             int startX = (this.width - BOARD_WIDTH) / 2;
             int startY = (this.height - BOARD_HEIGHT) / 2;
             Component gameStateTranslate = getGameStateTranslate();
 
-            graphics.drawString(this.font, Component.translatable("connectFourGame.pieceSet", this.game.yourPiece.translate()), startX, startY - 20, 0xff_ffffff);
-            graphics.drawString(this.font, this.title, startX, startY - 10, 0xff_ffffff);
-            graphics.drawString(this.font, gameStateTranslate, startX + BOARD_WIDTH - this.font.width(gameStateTranslate), startY - 10, 0xff_ffffff);
+            graphics.text(this.font, Component.translatable("connectFourGame.pieceSet", this.game.yourPiece.translate()), startX, startY - 20, 0xff_ffffff);
+            graphics.text(this.font, this.title, startX, startY - 10, 0xff_ffffff);
+            graphics.text(this.font, gameStateTranslate, startX + BOARD_WIDTH - this.font.width(gameStateTranslate), startY - 10, 0xff_ffffff);
 
             graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 BOARD_TEXTURE,
                 startX,
                 startY,
@@ -317,7 +321,7 @@ public class ConnectFourCommand {
                 for (int y = 0; y < ConnectFourGame.HEIGHT; y++) {
                     Piece piece = this.game.board[x][y];
                     if (piece != null) {
-                        piece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, false);
+                        piece.extractRenderState(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, false);
                     }
                 }
             }
@@ -329,7 +333,7 @@ public class ConnectFourCommand {
                 int x = (mouseX - boardMinX) / SLOT_WIDTH;
                 int y = this.game.getPlacementY(x);
                 if (y < ConnectFourGame.HEIGHT) {
-                    game.yourPiece.render(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, true);
+                    game.yourPiece.extractRenderState(graphics, startX + BOARD_BORDER_WIDTH + SLOT_WIDTH * x + SLOT_BORDER_WIDTH, startY + BOARD_BORDER_HEIGHT + SLOT_HEIGHT * (ConnectFourGame.HEIGHT - 1 - y) + SLOT_BORDER_HEIGHT, true);
                 }
             }
         }
@@ -353,7 +357,7 @@ public class ConnectFourCommand {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             int startX = (this.width - BOARD_WIDTH) / 2;
             int startY = (this.height - BOARD_HEIGHT) / 2;
 
@@ -361,15 +365,15 @@ public class ConnectFourCommand {
             int boardMaxX = startX + BOARD_WIDTH - BOARD_BORDER_WIDTH * 2;
             int boardMaxY = startY + BOARD_HEIGHT;
 
-            if (!(boardMinX <= mouseX && mouseX < boardMaxX && mouseY < boardMaxY)) {
-                return super.mouseClicked(mouseX, mouseY, button);
+            if (!(boardMinX <= event.x() && event.x() < boardMaxX && event.y() < boardMaxY)) {
+                return super.mouseClicked(event, doubleClick);
             }
 
-            if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+            if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) {
                 return false;
             }
             
-            int x = (int) ((mouseX - boardMinX) / SLOT_WIDTH);
+            int x = (int) ((event.x() - boardMinX) / SLOT_WIDTH);
             if (this.game.canMove()) {
                 this.game.onMove(x, game.yourPiece);
                 return true;

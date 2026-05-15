@@ -12,7 +12,7 @@ import java.util.List;
 
 import static dev.xpple.clientarguments.arguments.CItemArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class TooltipCommand {
 
@@ -24,7 +24,7 @@ public class TooltipCommand {
                 .executes(ctx -> showTooltip(ctx.getSource(), ctx.getSource().getPlayer().getMainHandItem(), "held")))
             .then(literal("stack")
                 .then(argument("stack", itemStack(context))
-                    .executes(ctx -> showTooltip(ctx.getSource(), getItemStackArgument(ctx, "stack").createItemStack(1, false), "stack")))));
+                    .executes(ctx -> showTooltip(ctx.getSource(), getItemStackArgument(ctx, "stack").createItemStack(1), "stack")))));
         FLAG_ADVANCED.addToCommand(dispatcher, ctooltip, ctx -> true);
     }
 
@@ -33,7 +33,7 @@ public class TooltipCommand {
 
         TooltipFlag flag = getFlag(source, FLAG_ADVANCED) ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
 
-        List<Component> tooltip = stack.getTooltipLines(Item.TooltipContext.of(source.getWorld()), source.getPlayer(), flag);
+        List<Component> tooltip = stack.getTooltipLines(Item.TooltipContext.of(source.getLevel()), source.getPlayer(), flag);
         for (Component line : tooltip) {
             source.sendFeedback(line);
         }

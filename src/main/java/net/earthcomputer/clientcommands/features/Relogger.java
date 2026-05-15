@@ -7,16 +7,15 @@ import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
-import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelResource;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +39,14 @@ public class Relogger {
         }
 
         boolean singleplayer = mc.isLocalServer();
-        mc.level.disconnect();
+        mc.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
         if (relogging) {
             isRelogging = true;
         }
         if (singleplayer) {
-            mc.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
+            mc.disconnectWithSavingScreen();
         } else {
-            mc.disconnect();
+            mc.disconnectWithProgressScreen();
         }
         isRelogging = false;
 
@@ -96,7 +95,6 @@ public class Relogger {
             && !(screen instanceof ProgressScreen)
             && !(screen instanceof ConnectScreen)
             && !(screen instanceof PauseScreen)
-            && !(screen instanceof ReceivingLevelScreen)
             && !(screen instanceof TitleScreen)
             && !(screen instanceof JoinMultiplayerScreen)
         ) {

@@ -1,10 +1,11 @@
 package net.earthcomputer.clientcommands.render;
 
-
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.function.Consumer;
 
 public class Cuboid extends Shape {
 
@@ -34,9 +35,10 @@ public class Cuboid extends Shape {
     }
 
     @Override
-    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float delta) {
+    public void addLines(Consumer<Line> lines, Camera camera, DeltaTracker deltaTracker) {
+        Vec3 prevPosOffset = prevPos.subtract(getPos());
         for (Line edge : this.edges) {
-            edge.renderLine(poseStack, vertexConsumer, delta, prevPos.subtract(getPos()));
+            lines.accept(edge.toCameraView(camera, deltaTracker, prevPosOffset));
         }
     }
 

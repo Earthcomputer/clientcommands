@@ -16,13 +16,13 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(LevelChunk.class)
 public class LevelChunkMixin {
-
-    @Shadow @Final private Level level;
+    @Shadow @Final
+    Level level;
 
     @WrapOperation(method = "setBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunkSection;setBlockState(IIILnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/state/BlockState;"))
-    private BlockState onSetBlockState(LevelChunkSection instance, int x, int y, int z, BlockState state, Operation<BlockState> original, BlockPos pos, BlockState redundant, boolean isMoving) {
+    private BlockState onSetBlockState(LevelChunkSection instance, int x, int y, int z, BlockState state, Operation<BlockState> original, BlockPos pos, BlockState redundant, int flags) {
         BlockState oldState = original.call(instance, x, y, z, state);
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             ClientLevelEvents.CHUNK_UPDATE.invoker().onBlockStateUpdate((ClientLevel) level, pos, oldState, state);
         }
         return oldState;

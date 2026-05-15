@@ -12,7 +12,7 @@ import net.minecraft.network.chat.HoverEvent;
 import java.util.UUID;
 
 import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class UuidCommand {
 
@@ -26,8 +26,8 @@ public class UuidCommand {
         String uuid = entity.toString();
         Component uuidComponent = Component.literal(uuid).withStyle(style -> style
             .withUnderlined(true)
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid))
+            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.copy.click")))
+            .withClickEvent(new ClickEvent.CopyToClipboard(uuid))
         );
 
         ClientPacketListener packetListener = source.getClient().getConnection();
@@ -38,7 +38,7 @@ public class UuidCommand {
             source.sendFeedback(Component.translatable("commands.cuuid.success.nameless", uuidComponent));
             return Command.SINGLE_SUCCESS;
         }
-        String name = player.getProfile().getName();
+        String name = player.getProfile().name();
         source.sendFeedback(Component.translatable("commands.cuuid.success", name, uuidComponent));
         return Command.SINGLE_SUCCESS;
     }

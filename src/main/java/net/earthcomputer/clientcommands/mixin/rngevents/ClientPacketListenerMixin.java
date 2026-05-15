@@ -15,7 +15,7 @@ public abstract class ClientPacketListenerMixin {
         StringReader reader = new StringReader(command);
         String commandName = reader.canRead() ? reader.readUnquotedString() : "";
         if ("give".equals(commandName)) {
-            PlayerRandCracker.onGiveCommand();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.GIVE);
         }
     }
 }

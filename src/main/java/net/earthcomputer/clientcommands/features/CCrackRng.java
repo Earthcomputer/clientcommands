@@ -5,7 +5,7 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
-import net.minecraft.ChatFormatting;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -34,7 +34,7 @@ public class CCrackRng {
     private static String throwItems() throws CommandSyntaxException {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
-        player.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 90);
+        player.snapTo(player.position(), player.getYRot(), 90);
         // point to correct location
         player.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), 90, player.onGround(), player.horizontalCollision));
         ItemThrowTask task = new ItemThrowTask(NUM_THROWS) {
@@ -48,11 +48,20 @@ public class CCrackRng {
             }
 
             @Override
-            protected void onFailedToThrowItem() {
-                Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("itemCrack.notEnoughItems").withStyle(ChatFormatting.RED));
-                EnchantmentCracker.LOGGER.info("Unable to use rng SeedCracker |not enough items|");
+            protected void onFailedToThrowItem(PlayerRandCracker.ThrowItemsResult throwItemsResult) {
+                super.onFailedToThrowItem(throwItemsResult);
                 Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
                 currentTaskName = null;
+            }
+
+            @Override
+            protected void onUnexpectedRNGCall(PlayerRandCracker.RNGCallType callType) {
+                ClientCommandHelper.sendError(Component.translatable("commands.ccrackrng.failed.unexpectedCall", callType.getResetMessage()));
+            }
+
+            @Override
+            protected boolean requireCrackedRNG() {
+                return false;
             }
 
             @Override
@@ -113,15 +122,15 @@ public class CCrackRng {
         if (attemptCount == 1) {
             Component message = Component.translatable("commands.ccrackrng.starting")
                 .append(" ")
-                .append(ClientCommandHelper.getCommandTextComponent("commands.client.cancel", "/ctask stop " + currentTaskName));
-            Minecraft.getInstance().gui.getChat().addMessage(message);
+                .append(CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + currentTaskName));
+            ClientCommandHelper.sendFeedback(message);
         }
     }
 
     public static void onEntityCreation(ClientboundAddEntityPacket packet) {
         if (Configs.playerCrackState == PlayerRandCracker.CrackState.CRACKING) {
             if (CCrackRng.expectedItems > 0) {
-                float nextFloat = (float) Math.sqrt(packet.getXa() * packet.getXa() + packet.getZa() * packet.getZa()) * 50f;
+                float nextFloat = (float) Math.sqrt(packet.getMovement().x * packet.getMovement().x + packet.getMovement().z * packet.getMovement().z) * 50f;
                 CCrackRng.nextFloats[NUM_THROWS - CCrackRng.expectedItems] = nextFloat;
                 CCrackRng.expectedItems--;
             }

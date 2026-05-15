@@ -15,4 +15,9 @@ public class ClientLevelMixin {
     private void onTickNonPassenger(Entity entity, CallbackInfo ci) {
         ((IEntity_Glowable) entity).clientcommands_tickGlowingTickets();
     }
+
+    @Inject(method = "tickPassenger", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;rideTick()V"))
+    private void onTickPassenger(Entity vehicle, Entity entity, CallbackInfo ci) {
+        ((IEntity_Glowable) entity).clientcommands_tickGlowingTickets();
+    }
 }

@@ -1,8 +1,10 @@
 package net.earthcomputer.clientcommands.render;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.function.Consumer;
 
 public abstract class Shape {
     int deathTime;
@@ -11,7 +13,7 @@ public abstract class Shape {
     public void tick() {
     }
 
-    public abstract void render(PoseStack poseStack, VertexConsumer vertexConsumer, float delta);
+    public abstract void addLines(Consumer<Line> lines, Camera camera, DeltaTracker deltaTracker);
 
     public abstract Vec3 getPos();
 

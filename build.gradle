@@ -1,10 +1,13 @@
 import net.earthcomputer.clientcommands.buildscript.CheckLanguageFilesTask
+import net.earthcomputer.clientcommands.buildscript.GenerateBuildInfoTask
+import net.fabricmc.loom.task.prod.ClientProductionRunTask
 
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
+	id 'checkstyle'
 }
 
 base {
@@ -46,17 +49,12 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.layered {
-		officialMojangMappings {
-			nameSyntheticMembers = true
-		}
-		parchment("org.parchmentmc.data:parchment-${project.parchment_mcversion}:${project.parchment_version}@zip")
-	}
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
-	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
+	include implementation("dev.xpple:clientarguments:${project.clientarguments_version}")
+	include implementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
+	include implementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
 	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_feature_version}"
 	includedLibrary "com.seedfinding:mc_biome:${project.seedfinding_biome_version}"
@@ -68,17 +66,21 @@ dependencies {
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
-	modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
+	runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
-
-	include api('net.fabricmc:mapping-io:0.5.1')
 
 	codeGenImplementation sourceSets.main.output
 
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
 	testImplementation "com.code-intelligence:jazzer-junit:${project.jazzer_junit_version}"
+}
+
+checkstyle {
+	toolVersion = project.checkstyle_version
+	configFile = rootProject.file("checkstyle.xml")
+	ignoreFailures = false
 }
 
 test {
@@ -92,6 +94,10 @@ jar {
 	}
 
 	from("LICENSE")
+}
+
+tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
+	outputFile = new File(temporaryDir, "build_info.json")
 }
 
 processResources {
@@ -108,15 +114,27 @@ processResources {
 	from(sourceSets.main.resources.srcDirs) {
 		exclude "fabric.mod.json"
 	}
+
+	from generateBuildInfo
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
+}
+
+tasks.register("prodClient", ClientProductionRunTask) {
+	runDir = file("run")
+
+	jvmArgs.add("-Ddevauth.enabled=true")
+
+	javaLauncher = javaToolchains.launcherFor {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
 }
 
 tasks.register('sourcesJar', Jar) {
@@ -145,13 +163,14 @@ def changelogText = changelogFile.exists() && System.currentTimeMillis() - chang
 modrinth {
 	token = project.hasProperty('modrinthKey') ? project.modrinthKey : System.getenv("MODRINTH_TOKEN")
 	projectId = 'client-commands'
-	uploadFile = remapJar
+	uploadFile = jar
 	gameVersions.set(project.minecraft_version_list.split('\\s*,\\s*').toList())
 	loaders.set(['fabric', 'quilt'])
 	changelog = changelogText
 	dependencies {
 		required.project 'fabric-api'
 		embedded.project 'betterconfig'
+		embedded.project 'simplewaypoints'
 	}
 }
 tasks.modrinth.onlyIf {
@@ -165,7 +184,7 @@ githubRelease {
 	targetCommitish 'fabric'
 	releaseName "Version ${project.version} for Minecraft ${project.minecraft_version_list_presentable}"
 	body changelogText
-	releaseAssets remapJar.outputs
+	releaseAssets jar.outputs
 }
 tasks.githubRelease.onlyIf {
 	!changelogText.isBlank()
@@ -174,12 +193,8 @@ tasks.githubRelease.onlyIf {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifact(jar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			artifact jar
+			artifact sourcesJar
 		}
 	}
 

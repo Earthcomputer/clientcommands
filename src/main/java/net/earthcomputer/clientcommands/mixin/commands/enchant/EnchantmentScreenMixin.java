@@ -1,8 +1,9 @@
 package net.earthcomputer.clientcommands.mixin.commands.enchant;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
@@ -17,21 +18,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EnchantmentScreen.class)
 public abstract class EnchantmentScreenMixin extends AbstractContainerScreen<EnchantmentMenu> {
-
-    public EnchantmentScreenMixin(EnchantmentMenu container_1, Inventory playerInventory_1, Component text_1) {
-        super(container_1, playerInventory_1, text_1);
+    public EnchantmentScreenMixin(EnchantmentMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title);
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    public void postRender(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    public void postExtract(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float ignored, CallbackInfo ci) {
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
-            EnchantmentCracker.drawEnchantmentGUIOverlay(graphics);
+            EnchantmentCracker.extractEnchantmentGUIOverlay(graphics);
         }
     }
 
     @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleInventoryButtonClick(II)V"))
-    public void onItemEnchanted(double mouseX, double mouseY, int mouseButton, CallbackInfoReturnable<Boolean> ci) {
-        EnchantmentCracker.onEnchantedItem();
+    public void onItemEnchanted(CallbackInfoReturnable<Boolean> ci) {
+        PlayerRandCracker.onEnchantedItem();
     }
 
     @Inject(method = "init", at = @At("TAIL"))

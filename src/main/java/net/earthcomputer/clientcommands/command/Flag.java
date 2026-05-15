@@ -8,15 +8,16 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public final class Flag<T> {
     private final Class<T> type;
@@ -69,12 +70,12 @@ public final class Flag<T> {
 
     public void addToCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> commandNode, Function<CommandContext<FabricClientCommandSource>, T> value) {
         dispatcher.register(commandNode.createBuilder()
-            .then(ClientCommandManager.literal(getFlag())
+            .then(literal(getFlag())
                 .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))
                 .executes(commandNode.getCommand())));
         if (shortName != null) {
             dispatcher.register(commandNode.createBuilder()
-                .then(ClientCommandManager.literal(getShortFlag())
+                .then(literal(getShortFlag())
                     .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))
                     .executes(commandNode.getCommand())));
         }
@@ -82,14 +83,14 @@ public final class Flag<T> {
 
     public void addToCommandWithArg(CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> commandNode, ArgumentType<T> argument) {
         dispatcher.register(commandNode.createBuilder()
-            .then(ClientCommandManager.literal(getFlag())
-                .then(ClientCommandManager.argument(this.name, argument)
+            .then(literal(getFlag())
+                .then(argument(this.name, argument)
                     .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type)))
                     .executes(commandNode.getCommand()))));
         if (shortName != null) {
             dispatcher.register(commandNode.createBuilder()
-                .then(ClientCommandManager.literal(getShortFlag())
-                    .then(ClientCommandManager.argument(this.name, argument)
+                .then(literal(getShortFlag())
+                    .then(argument(this.name, argument)
                         .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type)))
                         .executes(commandNode.getCommand()))));
         }
@@ -103,7 +104,7 @@ public final class Flag<T> {
     public static <S> S getActualSource(CommandContext<S> ctx) {
         if (ctx.getRootNode() == Objects.requireNonNull(Minecraft.getInstance().getConnection()).getCommands().getRoot()) {
             // we're in the completion dispatcher, reparse using the real dispatcher to get the redirects
-            return (S) getActualSource(Objects.requireNonNull(ClientCommandManager.getActiveDispatcher()).parse(
+            return (S) getActualSource(Objects.requireNonNull(getActiveDispatcher()).parse(
                 StringRange.encompassing(ctx.getRange(), ctx.getLastChild().getRange()).get(ctx.getInput()),
                 (FabricClientCommandSource) ctx.getSource()
             ));

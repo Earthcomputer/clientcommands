@@ -32,7 +32,7 @@ import java.util.function.Function;
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CEntityArgument.*;
 import static dev.xpple.clientarguments.arguments.CNbtPathArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class GetDataCommand {
 
@@ -40,7 +40,7 @@ public class GetDataCommand {
     private static final SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
     private static final SimpleCommandExceptionType INVALID_BLOCK_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.data.block.invalid"));
 
-    public static final Function<String, AccessorType> CLIENT_ENTITY_DATA_ACCESSOR = argName -> new AccessorType() {
+    private static final Function<String, AccessorType> CLIENT_ENTITY_DATA_ACCESSOR = argName -> new AccessorType() {
         @Override
         public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
             return new EntityDataAccessor(getEntity(ctx, argName));
@@ -52,7 +52,7 @@ public class GetDataCommand {
         }
     };
 
-    public static final Function<String, AccessorType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new AccessorType() {
+    private static final Function<String, AccessorType> CLIENT_TILE_ENTITY_DATA_OBJECT = argName -> new AccessorType() {
         public DataAccessor getAccessor(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException {
             BlockPos pos = getBlockPos(ctx, argName + "Pos");
             BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(pos);
@@ -68,8 +68,8 @@ public class GetDataCommand {
         }
     };
 
-    public static List<Function<String, AccessorType>> OBJECT_TYPES = ImmutableList.of(CLIENT_ENTITY_DATA_ACCESSOR, CLIENT_TILE_ENTITY_DATA_OBJECT);
-    public static List<AccessorType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
+    private static final List<Function<String, AccessorType>> OBJECT_TYPES = List.of(CLIENT_ENTITY_DATA_ACCESSOR, CLIENT_TILE_ENTITY_DATA_OBJECT);
+    private static final List<AccessorType> TARGET_OBJECT_TYPES = OBJECT_TYPES.stream().map(it -> it.apply("target")).collect(ImmutableList.toImmutableList());
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         for (AccessorType objType : TARGET_OBJECT_TYPES) {
@@ -89,10 +89,10 @@ public class GetDataCommand {
     private static int getData(FabricClientCommandSource source, DataAccessor accessor, NbtPath path) throws CommandSyntaxException {
         Tag tag = getNbt(path, accessor);
         int ret = switch (tag) {
-            case NumericTag numericTag -> Mth.floor(numericTag.getAsDouble());
-            case CollectionTag<?> collectionTag -> collectionTag.size();
+            case NumericTag numericTag -> Mth.floor(numericTag.doubleValue());
+            case CollectionTag collectionTag -> collectionTag.size();
             case CompoundTag compoundTag -> compoundTag.size();
-            case StringTag ignored -> tag.getAsString().length();
+            case StringTag stringTag -> stringTag.value().length();
             case null, default -> throw GET_UNKNOWN_EXCEPTION.create(path.toString());
         };
 

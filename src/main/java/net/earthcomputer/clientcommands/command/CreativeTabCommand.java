@@ -8,11 +8,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import net.earthcomputer.clientcommands.util.CUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.HolderLookup;
@@ -25,7 +25,8 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackLinkedSet;
@@ -43,11 +44,10 @@ import java.util.Set;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 import static net.minecraft.commands.SharedSuggestionProvider.*;
 
 public class CreativeTabCommand {
-
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final DynamicCommandExceptionType NOT_FOUND_EXCEPTION = new DynamicCommandExceptionType(arg -> Component.translatable("commands.ccreativetab.notFound", arg));
@@ -71,10 +71,12 @@ public class CreativeTabCommand {
         // FIXME: this is a hack because creative tabs must be registered on startup but item stacks normally can't be
         // parsed until the world is loaded. Use the default registries for now, as most things in item stacks aren't
         // in dynamic registries yet. Fix this once creative tabs can be registered dynamically.
-        var holderLookupProvider = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
+        // This only affects the icon of the creative tab and the contents, which is lazily populated and has access to
+        // the dynamic registries.
+        var builtinLookupProvider = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
         tabs.forEach((key, tab) -> {
             try {
-                tab.registerCreativeTab(holderLookupProvider, key);
+                tab.registerCreativeTab(builtinLookupProvider, key);
             } catch (Throwable e) {
                 LOGGER.error("Could not load tab {}", key, e);
             }
@@ -88,28 +90,24 @@ public class CreativeTabCommand {
                     .suggests((ctx, builder) -> suggest(tabs.keySet(), builder))
                     .then(literal("add")
                         .then(argument("itemstack", itemStack(context))
-                            .then(argument("count", integer(1))
-                                .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
-                            .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "itemstack").createItemStack(1, false)))))
+                            .executes(ctx -> addStack(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "itemstack").createItemStack(1)))))
                     .then(literal("remove")
                         .then(argument("index", integer(0))
                             .executes(ctx -> removeStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index")))))
                     .then(literal("set")
                         .then(argument("index", integer(0))
                             .then(argument("itemstack", itemStack(context))
-                                .then(argument("count", integer(1))
-                                    .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createItemStack(getInteger(ctx, "count"), false))))
-                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createItemStack(1, false))))))
+                                .executes(ctx -> setStack(ctx.getSource(), getString(ctx, "tab"), getInteger(ctx, "index"), getItemStackArgument(ctx, "itemstack").createItemStack(1))))))
                     .then(literal("icon")
                         .then(argument("icon", itemStack(context))
-                            .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "icon").createItemStack(1, false)))))
+                            .executes(ctx -> changeIcon(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "icon").createItemStack(1)))))
                     .then(literal("rename")
                         .then(argument("new", string())
                             .executes(ctx -> renameTab(ctx.getSource(), getString(ctx, "tab"), getString(ctx, "new")))))))
             .then(literal("add")
                 .then(argument("tab", string())
                     .then(argument("icon", itemStack(context))
-                         .executes(ctx -> addTab(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "icon").createItemStack(1, false))))))
+                         .executes(ctx -> addTab(ctx.getSource(), getString(ctx, "tab"), getItemStackArgument(ctx, "icon").createItemStack(1))))))
             .then(literal("remove")
                 .then(argument("tab", string())
                     .suggests((ctx, builder) -> suggest(tabs.keySet(), builder))
@@ -121,14 +119,12 @@ public class CreativeTabCommand {
             throw ALREADY_EXISTS_EXCEPTION.create(name);
         }
 
-        final ResourceLocation identifier = ResourceLocation.tryParse("clientcommands:" + name);
+        final Identifier identifier = Identifier.tryParse("clientcommands:" + name);
         if (identifier == null) {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(name);
         }
 
-        icon.setCount(1);
-
-        tabs.put(name, new Tab((CompoundTag) icon.save(source.registryAccess()), new ListTag()));
+        tabs.put(name, new Tab(CUtil.saveItemStack(source.registryAccess(), icon), new ListTag()));
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.addTab.success", name));
         ClientCommandHelper.sendRequiresRestart();
@@ -155,7 +151,7 @@ public class CreativeTabCommand {
 
         Tab tab = tabs.get(name);
         ListTag items = tab.items();
-        items.add(itemStack.save(source.registryAccess()));
+        items.add(CUtil.saveItemStack(source.registryAccess(), itemStack));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.addStack.success", itemStack.getDisplayName(), name));
@@ -191,7 +187,7 @@ public class CreativeTabCommand {
         if ((index < 0) || (index >= items.size())) {
             throw OUT_OF_BOUNDS_EXCEPTION.create(index);
         }
-        items.set(index, itemStack.save(source.registryAccess()));
+        items.set(index, CUtil.saveItemStack(source.registryAccess(), itemStack));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.setStack.success", name, index, itemStack.getDisplayName()));
@@ -203,13 +199,12 @@ public class CreativeTabCommand {
         if (!tabs.containsKey(name)) {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
-        icon.setCount(1);
 
         Tab tab = tabs.get(name);
         ListTag items = tab.items();
-        ItemStack old = ItemStack.parseOptional(source.registryAccess(), tab.icon());
+        ItemStack old = CUtil.parseItemStack(source.registryAccess(), tab.icon()).orElse(ItemStack.EMPTY);
 
-        tabs.put(name, new Tab((CompoundTag) icon.save(source.registryAccess()), items));
+        tabs.put(name, new Tab(CUtil.saveItemStack(source.registryAccess(), icon), items));
 
         saveFile();
         source.sendFeedback(Component.translatable("commands.ccreativetab.changeIcon.success", name, old.getDisplayName(), icon.getDisplayName()));
@@ -222,7 +217,7 @@ public class CreativeTabCommand {
             throw NOT_FOUND_EXCEPTION.create(name);
         }
 
-        ResourceLocation identifier = ResourceLocation.tryParse("clientcommands:" + _new);
+        Identifier identifier = Identifier.tryParse("clientcommands:" + _new);
         if (identifier == null) {
             throw ILLEGAL_CHARACTER_EXCEPTION.create(_new);
         }
@@ -245,7 +240,7 @@ public class CreativeTabCommand {
                 tab.put("items", value.items());
                 compoundTag.put(key, tab);
             });
-            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+            rootTag.putInt("DataVersion", SharedConstants.getCurrentVersion().dataVersion().version());
             rootTag.put("CreativeTabs", compoundTag);
             Path newFile = File.createTempFile("creative_tabs", ".dat", configPath.toFile()).toPath();
             NbtIo.write(rootTag, newFile);
@@ -260,62 +255,64 @@ public class CreativeTabCommand {
 
     private static void loadFile() throws IOException {
         tabs.clear();
-        CompoundTag rootTag = NbtIo.read(configPath.resolve("creative_tabs.dat"));
-        if (rootTag == null) {
+        CompoundTag rootTagTmp = NbtIo.read(configPath.resolve("creative_tabs.dat"));
+        if (rootTagTmp == null) {
             try {
                 Files.move(configPath.resolve("groups.dat"), configPath.resolve("creative_tabs.dat"));
             } catch (NoSuchFileException e) {
                 return;
             }
-            rootTag = NbtIo.read(configPath.resolve("creative_tabs.dat"));
-            if (rootTag == null) {
+            rootTagTmp = NbtIo.read(configPath.resolve("creative_tabs.dat"));
+            if (rootTagTmp == null) {
                 return;
             }
         }
-        final int currentVersion = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
-        final int fileVersion = rootTag.getInt("DataVersion");
-        CompoundTag compoundTag = rootTag.getCompound("CreativeTabs");
-        if (compoundTag.isEmpty()) {
-            compoundTag = rootTag.getCompound("Groups");
-        }
+        CompoundTag rootTag = rootTagTmp;
+        final int currentVersion = SharedConstants.getCurrentVersion().dataVersion().version();
+        final int fileVersion = rootTag.getIntOr("DataVersion", 99);
+        CompoundTag compoundTag = rootTag.getCompound("CreativeTabs").orElseGet(() -> rootTag.getCompoundOrEmpty("Groups"));
         DataFixer dataFixer = Minecraft.getInstance().getFixerUpper();
         if (fileVersion >= currentVersion) {
-            for (String key : compoundTag.getAllKeys()) {
-                if (ResourceLocation.tryParse("clientcommands:" + key) == null) {
-                    LOGGER.warn("Skipping creative tab with invalid name {}", key);
+            for (var entry : compoundTag.entrySet()) {
+                if (Identifier.tryParse("clientcommands:" + entry.getKey()) == null) {
+                    LOGGER.warn("Skipping creative tab with invalid name {}", entry.getKey());
                     return;
                 }
 
-                CompoundTag tab = compoundTag.getCompound(key);
-                CompoundTag icon = tab.getCompound("icon");
-                ListTag items = tab.getList("items", Tag.TAG_COMPOUND);
-                tabs.put(key, new Tab(icon, items));
+                if (!(entry.getValue() instanceof CompoundTag tab)) {
+                    continue;
+                }
+                CompoundTag icon = tab.getCompoundOrEmpty("icon");
+                ListTag items = tab.getListOrEmpty("items");
+                tabs.put(entry.getKey(), new Tab(icon, items));
             }
         } else {
-            for (String key : compoundTag.getAllKeys()) {
-                if (ResourceLocation.tryParse("clientcommands:" + key) == null) {
-                    LOGGER.warn("Skipping creative tab with invalid name {}", key);
+            for (var entry : compoundTag.entrySet()) {
+                if (Identifier.tryParse("clientcommands:" + entry.getKey()) == null) {
+                    LOGGER.warn("Skipping creative tab with invalid name {}", entry.getKey());
                     return;
                 }
 
-                CompoundTag tab = compoundTag.getCompound(key);
-                Dynamic<Tag> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, tab.getCompound("icon"));
+                if (!(entry.getValue() instanceof CompoundTag tab)) {
+                    continue;
+                }
+                Dynamic<Tag> oldStackDynamic = new Dynamic<>(NbtOps.INSTANCE, tab.getCompoundOrEmpty("icon"));
                 Dynamic<Tag> newStackDynamic = dataFixer.update(References.ITEM_STACK, oldStackDynamic, fileVersion, currentVersion);
                 CompoundTag icon = (CompoundTag) newStackDynamic.getValue();
 
                 ListTag updatedListTag = new ListTag();
-                tab.getList("items", Tag.TAG_COMPOUND).forEach(tag -> {
+                tab.getListOrEmpty("items").forEach(tag -> {
                     Dynamic<Tag> oldTagDynamic = new Dynamic<>(NbtOps.INSTANCE, tag);
                     Dynamic<Tag> newTagDynamic = dataFixer.update(References.ITEM_STACK, oldTagDynamic, fileVersion, currentVersion);
                     updatedListTag.add(newTagDynamic.getValue());
                 });
-                tabs.put(key, new Tab(icon, updatedListTag));
+                tabs.put(entry.getKey(), new Tab(icon, updatedListTag));
             }
         }
     }
 
     private static ItemStack singleItemFromNbt(HolderLookup.Provider holderLookupProvider, CompoundTag nbt) {
-        ItemStack stack = ItemStack.parseOptional(holderLookupProvider, nbt);
+        ItemStack stack = CUtil.parseItemStack(holderLookupProvider, nbt).orElse(ItemStack.EMPTY);
         if (!stack.isEmpty()) {
             stack.setCount(1);
         }
@@ -323,14 +320,14 @@ public class CreativeTabCommand {
     }
 
     private record Tab(CompoundTag icon, ListTag items) {
-        void registerCreativeTab(HolderLookup.Provider holderLookupProvider, String key) {
-            Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath("clientcommands", key), FabricItemGroup.builder()
+        void registerCreativeTab(HolderLookup.Provider builtinLookupProvider, String key) {
+            Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Identifier.fromNamespaceAndPath("clientcommands", key), FabricCreativeModeTab.builder()
                     .title(Component.literal(key))
-                    .icon(() -> singleItemFromNbt(holderLookupProvider, icon))
+                    .icon(() -> singleItemFromNbt(builtinLookupProvider, icon))
                     .displayItems((displayContext, entries) -> {
                         Set<ItemStack> existingStacks = ItemStackLinkedSet.createTypeAndComponentsSet();
                         for (int i = 0; i < items.size(); i++) {
-                            ItemStack stack = singleItemFromNbt(holderLookupProvider, items.getCompound(i));
+                            ItemStack stack = singleItemFromNbt(displayContext.holders(), items.getCompoundOrEmpty(i));
                             if (stack.isEmpty()) {
                                 continue;
                             }

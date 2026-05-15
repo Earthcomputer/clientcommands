@@ -5,9 +5,9 @@
   "mixins": [
     "commands.enchant.EnchantmentScreenMixin",
     "commands.findblock.LevelChunkMixin",
+    "commands.fish.EntityMixin",
     "commands.fish.FishingHookMixin",
     "commands.fish.FishingRodItemMixin",
-    "commands.fish.ItemEntityMixin",
     "commands.generic.ChatScreenMixin",
     "commands.generic.ClientSuggestionsProviderMixin",
     "commands.glow.ArmorStandRendererMixin",
@@ -17,12 +17,13 @@
     "commands.listen.ConnectionMixin",
     "commands.relog.ClientPacketListenerMixin",
     "commands.render.EntityRendererDispatcherMixin",
-    "commands.time.ClientLevelDataMixin",
     "commands.weather.LevelMixin",
     "debug.EntityMixin",
+    "debug.LevelMixin",
     "debug.ServerLevelMixin",
+    "events.EntityMixin",
+    "events.ExperienceOrbMixin",
     "events.MinecraftMixin",
-    "events.ScreenMixin",
     "lengthextender.EditBoxMixin",
     "lengthextender.StringUtilMixin",
     "rngevents.AnvilMenuMixin",
@@ -61,23 +62,28 @@
   "overwrites": {
     "requireAnnotations": true
   },
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "client": [
     "c2c.ChatListenerMixin",
     "c2c.ClientPacketListenerMixin",
     "commands.alias.ClientSuggestionProviderMixin",
     "commands.enchant.MultiPlayerGameModeMixin",
     "commands.findblock.ClientLevelMixin",
+    "commands.fps.FramerateLimitTrackerMixin",
+    "commands.fps.MinecraftMixin",
     "commands.generic.CommandSuggestionsMixin",
     "commands.glow.LivingEntityRenderStateMixin",
     "commands.reply.ClientPacketListenerMixin",
     "commands.serverseed.ClientPacketListenerMixin",
     "commands.snap.MinecraftMixin",
+    "commands.time.ClientClockManagerMixin",
     "dataqueryhandler.ClientPacketListenerMixin",
     "events.ClientPacketListenerMixin",
     "lengthextender.ChatScreenMixin",
     "rngevents.ClientLevelMixin",
     "scrambletitle.MinecraftMixin",
-    "serverbrand.ClientCommonPacketListenerImplMixin",
     "suggestionshook.ClientPacketListenerMixin"
   ]
 }

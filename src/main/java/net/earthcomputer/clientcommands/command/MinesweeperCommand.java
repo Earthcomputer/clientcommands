@@ -6,22 +6,23 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Random;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class MinesweeperCommand {
     private static final SimpleCommandExceptionType TOO_MANY_MINES_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cminesweeper.tooManyMines"));
@@ -53,7 +54,7 @@ public class MinesweeperCommand {
     }
 
     private static class MinesweeperGameScreen extends Screen {
-        private static final ResourceLocation MINESWEEPER_ATLAS = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/minesweeper_atlas.png");
+        private static final Identifier MINESWEEPER_ATLAS = Identifier.fromNamespaceAndPath("clientcommands", "textures/minesweeper_atlas.png");
         private static final int MINESWEEPER_ATLAS_WIDTH = 128;
         private static final int MINESWEEPER_ATLAS_HEIGHT = 64;
 
@@ -161,11 +162,11 @@ public class MinesweeperCommand {
         }
 
         @Override
-        public void render(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
-            renderBackground(graphics, mouseX, mouseY, tickDelta);
+        public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+            super.extractRenderState(graphics, mouseX, mouseY, a);
 
-            graphics.drawString(minecraft.font, I18n.get("minesweeperGame.minesLeft", minesLeft), topLeftX, topLeftY - 10, 0xFFFFFF);
-            graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFF);
+            graphics.text(minecraft.font, I18n.get("minesweeperGame.minesLeft", minesLeft), topLeftX, topLeftY - 10, 0xFFFFFFFF);
+            graphics.centeredText(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFFFF);
             {
                 String str = I18n.get("minesweeperGame.timePlayed", Math.ceilDiv(ticksPlaying, 20));
                 int color;
@@ -176,7 +177,7 @@ public class MinesweeperCommand {
                 } else {
                     color = 0xFFFFFF;
                 }
-                graphics.drawString(minecraft.font, str, topLeftX + gameWidth - minecraft.font.width(str), topLeftY - 10, color);
+                graphics.text(minecraft.font, str, topLeftX + gameWidth - minecraft.font.width(str), topLeftY - 10, color);
             }
 
             blitSprite(graphics, TOP_LEFT_UV, 0, 0, 12, 12);
@@ -202,8 +203,8 @@ public class MinesweeperCommand {
             }
         }
 
-        public void blitSprite(GuiGraphics graphics, Vector2i uv, int x, int y, int width, int height) {
-            graphics.blit(RenderType::guiTextured, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
+        public void blitSprite(GuiGraphicsExtractor graphics, Vector2i uv, int x, int y, int width, int height) {
+            graphics.blit(RenderPipelines.GUI_TEXTURED, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
         }
 
         @Override
@@ -214,12 +215,12 @@ public class MinesweeperCommand {
         }
 
         @Override
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
-            int tileX = Mth.floorDiv((int) (mouseX - topLeftX - 12), 16);
-            int tileY = Mth.floorDiv((int) (mouseY - topLeftY - 12), 16);
+        public boolean mouseReleased(MouseButtonEvent event) {
+            int tileX = Mth.floorDiv((int) (event.x() - topLeftX - 12), 16);
+            int tileY = Mth.floorDiv((int) (event.y() - topLeftY - 12), 16);
 
             if (isWithinBounds(tileX, tileY) && gameActive()) {
-                if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
                     if (ticksPlaying == 0) {
                         generateMines(tileX, tileY);
                         ticksPlaying = 1;
@@ -227,13 +228,13 @@ public class MinesweeperCommand {
 
                     click(tileX, tileY);
 
-                    assert minecraft != null && minecraft.player != null;
+                    assert minecraft.player != null && minecraft.level != null;
                     if (emptyTilesRemaining <= 0) {
-                        minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.MASTER, 1.0f, 2.0f);
+                        minecraft.level.playSound(minecraft.player, minecraft.player.getX(), minecraft.player.getY(), minecraft.player.getZ(), SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.MASTER, 1.0f, 2.0f);
                     } else if (deathCoords != null) {
-                        minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1.0f, 1.0f);
+                        minecraft.level.playSound(minecraft.player, minecraft.player.getX(), minecraft.player.getY(), minecraft.player.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1.0f, 1.0f);
                     }
-                } else if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
+                } else if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                     flag(tileX, tileY);
                 }
             }

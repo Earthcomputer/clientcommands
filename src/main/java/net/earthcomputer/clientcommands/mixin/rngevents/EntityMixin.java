@@ -14,21 +14,21 @@ public class EntityMixin {
     @Inject(method = "doWaterSplashEffect", at = @At("HEAD"))
     public void onDoWaterSplashEffect(CallbackInfo ci) {
         if (isThePlayer()) {
-            PlayerRandCracker.onSwimmingStart();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.ENTER_WATER);
         }
     }
 
     @Inject(method = "playAmethystStepSound", at = @At("HEAD"))
     private void onPlayAmethystStepSound(CallbackInfo ci) {
         if (isThePlayer()) {
-            PlayerRandCracker.onAmethystChime();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.AMETHYST_CHIME);
         }
     }
 
     @Inject(method = "spawnSprintParticle", at = @At("HEAD"))
     public void onSprinting(CallbackInfo ci) {
         if (isThePlayer()) {
-            PlayerRandCracker.onSprinting();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.SPRINT);
         }
     }
 

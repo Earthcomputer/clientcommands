@@ -7,6 +7,7 @@ import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.LegacyEnchantment;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
@@ -29,7 +30,7 @@ import java.util.List;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CEnchantCommand {
 
@@ -58,7 +59,7 @@ public class CEnchantCommand {
             Component component = Component.translatable("commands.cenchant.needEnchantingPrediction")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands enchantingPrediction set true"));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.enable", "/cconfig clientcommands enchantingPrediction set true"));
             source.sendFeedback(component);
             return Command.SINGLE_SUCCESS;
         }
@@ -66,7 +67,7 @@ public class CEnchantCommand {
             Component component = Component.translatable("commands.cenchant.uncracked")
                     .withStyle(ChatFormatting.RED)
                     .append(" ")
-                    .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+                    .append(CComponentUtil.getCommandTextComponent("commands.client.crack", "/ccrackrng"));
             source.sendFeedback(component);
             return Command.SINGLE_SUCCESS;
         }
@@ -88,14 +89,14 @@ public class CEnchantCommand {
                     if (Configs.playerCrackState != PlayerRandCracker.CrackState.CRACKED) {
                         MutableComponent help = Component.translatable("commands.cenchant.help.uncrackedPlayerSeed")
                             .append(" ")
-                            .append(getCommandTextComponent("commands.client.crack", "/ccrackrng"));
+                            .append(CComponentUtil.getCommandTextComponent("commands.client.crack", "/ccrackrng"));
                         sendHelp(help);
                     }
                 } else {
                     if (result.itemThrows() < 0) {
                         source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows.noDummy"));
                     } else {
-                        source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows", result.itemThrows(), (float)result.itemThrows() / (Configs.itemThrowsPerTick * 20)));
+                        source.sendFeedback(Component.translatable("enchCrack.insn.itemThrows", result.itemThrows(), (float) result.itemThrows() / (Configs.itemThrowsPerTick * 20)));
                     }
                     source.sendFeedback(Component.translatable("enchCrack.insn.bookshelves", result.bookshelves()));
                     source.sendFeedback(Component.translatable("enchCrack.insn.slot", result.slot() + 1));
@@ -103,7 +104,7 @@ public class CEnchantCommand {
                     List<EnchantmentInstance> enchantments = new ArrayList<>(result.enchantments());
                     EnchantmentCracker.sortIntoTooltipOrder(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), enchantments);
                     for (EnchantmentInstance ench : enchantments) {
-                        source.sendFeedback(Component.literal("- ").append(Enchantment.getFullname(ench.enchantment, ench.level)));
+                        source.sendFeedback(Component.literal("- ").append(Enchantment.getFullname(ench.enchantment(), ench.level())));
                     }
                 }
             }
@@ -111,7 +112,7 @@ public class CEnchantCommand {
 
         source.sendFeedback(Component.translatable("commands.cenchant.success")
             .append(" ")
-            .append(getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
+            .append(CComponentUtil.getCommandTextComponent("commands.client.cancel", "/ctask stop " + taskName)));
 
         return Command.SINGLE_SUCCESS;
     }

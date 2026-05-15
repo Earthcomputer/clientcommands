@@ -1,10 +1,9 @@
 package net.earthcomputer.clientcommands.util;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.Util;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.Util;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
-import sun.misc.Unsafe;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
@@ -19,18 +18,18 @@ public final class UnsafeUtils {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final @Nullable Unsafe UNSAFE = Util.make(() -> {
+    private static final sun.misc.@Nullable Unsafe UNSAFE = Util.make(() -> {
         try {
-            final Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            final Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
             unsafeField.setAccessible(true);
-            return (Unsafe) unsafeField.get(null);
+            return (sun.misc.Unsafe) unsafeField.get(null);
         } catch (Exception e) {
             LOGGER.error("Could not access theUnsafe", e);
             return null;
         }
     });
 
-    private static final @Nullable MethodHandles.Lookup IMPL_LOOKUP = Util.make(() -> {
+    private static final MethodHandles.@Nullable Lookup IMPL_LOOKUP = Util.make(() -> {
         try {
             //noinspection ConstantValue
             if (UNSAFE == null) {
@@ -44,11 +43,11 @@ public final class UnsafeUtils {
         }
     });
 
-    public static @Nullable Unsafe getUnsafe() {
+    public static sun.misc.@Nullable Unsafe getUnsafe() {
         return UNSAFE;
     }
 
-    public static @Nullable MethodHandles.Lookup getImplLookup() {
+    public static MethodHandles.@Nullable Lookup getImplLookup() {
         return IMPL_LOOKUP;
     }
 }

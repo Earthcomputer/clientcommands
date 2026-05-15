@@ -1,3 +1,4 @@
+// CHECKSTYLE:OFF: AvoidStarImport allow commands to be wildcard imported
 package net.earthcomputer.clientcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -6,21 +7,23 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.earthcomputer.clientcommands.features.CommandExecutionCustomPayload;
+import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
-import net.earthcomputer.clientcommands.features.ServerBrandManager;
-import net.earthcomputer.clientcommands.util.MappingsHelper;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
+import net.earthcomputer.clientcommands.features.ServerBrandManager;
+import net.earthcomputer.clientcommands.features.Waypoints;
+import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
 import org.slf4j.Logger;
@@ -36,11 +39,55 @@ import java.util.stream.Stream;
 
 public class ClientCommands implements ClientModInitializer {
     private static final Logger LOGGER = LogUtils.getLogger();
-    public static Path configDir;
+    public static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
     private static final Set<String> clientcommandsCommands = new HashSet<>();
     private static final Set<String> COMMANDS_TO_NOT_SEND_TO_SERVER = Set.of("cwe", "cnote"); // could contain private information
 
-    public static final boolean SCRAMBLE_WINDOW_TITLE = Util.make(() -> {
+    public static boolean scrambleWindowTitle = false;
+
+    private static final Set<String> CHAT_COMMAND_USERS = Set.of(
+        "b793c3b9-425f-4dd8-a056-9dec4d835e24", // wsb
+        "0071ccd7-467f-4e71-8237-cb15f229a1ff", // 8YX
+        "c3bca648-b8ce-491d-bf6a-36bb42c5a70b" // Y99
+    );
+
+    @Override
+    public void onInitializeClient() {
+        RenderQueue.register();
+
+        setupScrambleWindowTitle();
+
+        // Config
+        try {
+            Files.createDirectories(CONFIG_DIR);
+        } catch (IOException e) {
+            LOGGER.error("Failed to create config dir", e);
+        }
+
+        new ModConfigBuilder<>("clientcommands", Configs.class).build();
+        ClientConnectionEvents.DISCONNECT.register(() -> {
+            if (!Relogger.isRelogging) {
+                BetterConfigAPI.getInstance().getModConfig("clientcommands").resetTemporaryConfigs();
+            }
+        });
+
+        Waypoints.migrateWaypoints();
+        SimpleWaypointsAPI.getInstance().registerCommandAlias("cwaypoint");
+
+        // Registration
+        PayloadTypeRegistry.serverboundPlay().register(CommandExecutionCustomPayload.TYPE, CommandExecutionCustomPayload.CODEC);
+        CreativeTabCommand.registerCreativeTabs();
+
+        // Events
+        ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
+        EnchantmentCracker.registerEvents();
+        FishingCracker.registerEvents();
+        PlayerRandCracker.registerEvents();
+        ServerBrandManager.registerEvents();
+    }
+
+    private static void setupScrambleWindowTitle() {
+        // can't set this up during class initializer, because Minecraft.getInstance() is null during automated tests
         String playerUUID = String.valueOf(Minecraft.getInstance().getUser().getProfileId());
 
         Set<String> victims = Set.of(
@@ -53,43 +100,7 @@ public class ClientCommands implements ClientModInitializer {
             "973e8f6e-2f51-4307-97dc-56fdc71d194f" // KatieTheQt
         );
 
-        return victims.contains(playerUUID) || Boolean.getBoolean("clientcommands.scrambleWindowTitle");
-    });
-
-    private static final Set<String> CHAT_COMMAND_USERS = Set.of(
-        "b793c3b9-425f-4dd8-a056-9dec4d835e24", // wsb
-        "0071ccd7-467f-4e71-8237-cb15f229a1ff", // 8YX
-        "c3bca648-b8ce-491d-bf6a-36bb42c5a70b" // Y99
-    );
-
-    @Override
-    public void onInitializeClient() {
-        // Config
-        configDir = FabricLoader.getInstance().getConfigDir().resolve("clientcommands");
-        try {
-            Files.createDirectories(configDir);
-        } catch (IOException e) {
-            LOGGER.error("Failed to create config dir", e);
-        }
-
-        new ModConfigBuilder<>("clientcommands", Configs.class).build();
-        ClientConnectionEvents.DISCONNECT.register(() -> {
-            if (!Relogger.isRelogging) {
-                BetterConfigAPI.getInstance().getModConfig("clientcommands").resetTemporaryConfigs();
-            }
-        });
-
-        MappingsHelper.load();
-
-        // Registration
-        PayloadTypeRegistry.playC2S().register(CommandExecutionCustomPayload.TYPE, CommandExecutionCustomPayload.CODEC);
-        CreativeTabCommand.registerCreativeTabs();
-
-        // Events
-        ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
-        FishingCracker.registerEvents();
-        PlayerRandCracker.registerEvents();
-        ServerBrandManager.registerEvents();
+        scrambleWindowTitle = victims.contains(playerUUID) || Boolean.getBoolean("clientcommands.scrambleWindowTitle");
     }
 
     private static Set<String> getCommands(CommandDispatcher<?> dispatcher) {
@@ -118,8 +129,11 @@ public class ClientCommands implements ClientModInitializer {
         AreaStatsCommand.register(dispatcher, context);
         AuditMixinsCommand.register(dispatcher);
         BookCommand.register(dispatcher);
+        BuildInfoCommand.register(dispatcher);
         CalcCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher, context);
+        CallbackCommand.register(dispatcher);
+        ChessCommand.register(dispatcher);
         CDebugCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher, context);
         CFunctionCommand.register(dispatcher);
@@ -141,6 +155,7 @@ public class ClientCommands implements ClientModInitializer {
         FindItemCommand.register(dispatcher, context);
         FishCommand.register(dispatcher, context);
         FovCommand.register(dispatcher);
+        FramerateCommand.register(dispatcher);
         GammaCommand.register(dispatcher);
         GetDataCommand.register(dispatcher);
         GhostBlockCommand.register(dispatcher, context);
@@ -149,6 +164,7 @@ public class ClientCommands implements ClientModInitializer {
         KitCommand.register(dispatcher);
         ListenCommand.register(dispatcher);
         LookCommand.register(dispatcher);
+        MapCommand.register(dispatcher);
         MinesweeperCommand.register(dispatcher);
         MoteCommand.register(dispatcher);
         NoteCommand.register(dispatcher);
@@ -157,6 +173,8 @@ public class ClientCommands implements ClientModInitializer {
         // PlayerInfoCommand.register(dispatcher);
         PluginsCommand.register(dispatcher);
         PosCommand.register(dispatcher);
+        PostEffectCommand.register(dispatcher);
+        PredictBrushablesCommand.register(dispatcher);
         RelogCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
         ReplyCommand.register(dispatcher);
@@ -176,6 +194,7 @@ public class ClientCommands implements ClientModInitializer {
         WeatherCommand.register(dispatcher);
         WhisperEncryptedCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
+        WindowSizeCommand.register(dispatcher);
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;
