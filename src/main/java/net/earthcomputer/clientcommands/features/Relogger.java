@@ -24,12 +24,11 @@ public class Relogger {
     public static boolean isRelogging;
     @Nullable
     public static ServerData cachedServerData;
-    @Nullable
-    private static Long countdownEndTimestamp;
+    public static int remainingTicks;
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
 
     public static final String RATE_LIMIT_MESSAGE = "RateLimiter disallowed request";
-    public static final long RETRY_DELAY_MS = 10_000;
+    public static final int RETRY_DELAY_TICKS = 200;
 
     static {
         MoreScreenEvents.BEFORE_ADD.register(Relogger::onAddScreen);
@@ -132,25 +131,20 @@ public class Relogger {
             throw new IllegalStateException("Expected a back button in the DisconnectScreen");
         }
 
-        long remainingMs = getRemainingCountdownMs();
-        double remainingSeconds = (double) remainingMs / TimeUtil.MILLISECONDS_PER_SECOND;
+        double remainingSeconds = (double) remainingTicks * 0.050;
         Component text = Component.translatable("commands.crelog.retry", String.format("%.1f", remainingSeconds));
         int textWidth = screen.getFont().width(text);
 
         graphics.text(screen.getFont(), text, (screen.width - textWidth) / 2, button.getY() + button.getHeight() + 10, 0xff_ffffff);
+    }
 
-        if (remainingMs <= 0) {
-            onFailedRelog();
+    public static void onDisconnectScreenTick(Screen screen) {
+        if (remainingTicks > 0) {
+            remainingTicks--;
+            if (remainingTicks == 0) {
+                onFailedRelog();
+            }
         }
-    }
-
-    public static void setCountdownMs(long ms) {
-        countdownEndTimestamp = System.currentTimeMillis() + ms;
-    }
-
-    public static long getRemainingCountdownMs() {
-        assert countdownEndTimestamp != null : "No known end timestamp";
-        return countdownEndTimestamp - System.currentTimeMillis();
     }
 
     private static boolean onAddScreen(@Nullable Screen screen) {

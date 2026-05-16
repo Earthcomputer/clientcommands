@@ -76,7 +76,6 @@
     "commands.generic.CommandSuggestionsMixin",
     "commands.glow.LivingEntityRenderStateMixin",
     "commands.relog.ClientHandshakePacketListenerImplMixin",
-    "commands.relog.DisconnectedScreenMixin",
     "commands.reply.ClientPacketListenerMixin",
     "commands.snap.MinecraftMixin",
     "commands.time.ClientClockManagerMixin",
