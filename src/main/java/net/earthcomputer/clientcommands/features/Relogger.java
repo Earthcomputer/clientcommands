@@ -153,6 +153,7 @@ public class Relogger {
             && !(screen instanceof LevelLoadingScreen)
             && !(screen instanceof ProgressScreen)
             && !(screen instanceof ConnectScreen)
+            && !(screen instanceof DisconnectedScreen)
             && !(screen instanceof PauseScreen)
             && !(screen instanceof TitleScreen)
             && !(screen instanceof JoinMultiplayerScreen)
