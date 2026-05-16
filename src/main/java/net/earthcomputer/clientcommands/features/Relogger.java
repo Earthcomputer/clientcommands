@@ -14,6 +14,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jspecify.annotations.Nullable;
 
@@ -23,18 +25,14 @@ import java.util.List;
 public class Relogger {
     public static boolean isRelogging;
     @Nullable
-    public static ServerData serverData;
+    public static ServerData cachedServerData;
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
 
     static {
         MoreScreenEvents.BEFORE_ADD.register(Relogger::onAddScreen);
     }
 
-    public static boolean disconnect() {
-        return disconnect(false);
-    }
-
-    private static boolean disconnect(boolean relogging) {
+    private static boolean disconnect() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
             return false;
@@ -42,9 +40,7 @@ public class Relogger {
 
         boolean singleplayer = mc.isLocalServer();
         mc.level.disconnect(ClientLevel.DEFAULT_QUIT_MESSAGE);
-        if (relogging) {
-            isRelogging = true;
-        }
+        isRelogging = true;
         if (singleplayer) {
             mc.disconnectWithSavingScreen();
         } else {
@@ -63,7 +59,19 @@ public class Relogger {
 
     public static boolean relog() {
         Minecraft mc = Minecraft.getInstance();
-        return mc.isLocalServer() ? relogToIntegratedServer(mc.getSingleplayerServer()) : relogToDedicatedServer(mc.getCurrentServer(), false);
+        if (mc.isLocalServer()) {
+            IntegratedServer server = mc.getSingleplayerServer();
+            if (!disconnect()) {
+                return false;
+            }
+            return relogToIntegratedServer(server);
+        } else {
+            ServerData server = mc.getCurrentServer();
+            if (!disconnect()) {
+                return false;
+            }
+            return relogToDedicatedServer(server);
+        }
     }
 
     private static boolean relogToIntegratedServer(@Nullable IntegratedServer server) {
@@ -73,9 +81,6 @@ public class Relogger {
             return false;
         }
         String levelName = server.getWorldPath(LevelResource.ROOT).normalize().getFileName().toString();
-        if (!disconnect(true)) {
-            return false;
-        }
         if (!mc.getLevelSource().levelExists(levelName)) {
             return false;
         }
@@ -83,33 +88,34 @@ public class Relogger {
         return true;
     }
 
-    private static boolean relogToDedicatedServer(@Nullable ServerData serverData, boolean ignoreDisconnectResult) {
+    private static boolean relogToDedicatedServer(@Nullable ServerData serverData) {
         Minecraft mc = Minecraft.getInstance();
 
         if (serverData == null) {
             return false;
         }
-        if (!disconnect(true) && !ignoreDisconnectResult) {
-            return false;
-        }
         isRelogging = true;
-        Relogger.serverData = serverData;
+        cachedServerData = serverData;
         mc.setScreen(new TitleScreen());
         ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false, null);
         return true;
     }
 
     public static void onFailedRelog() {
-        if (!isRelogging || serverData == null) {
+        if (cachedServerData == null) {
             return;
         }
         isRelogging = false;
-        ServerData serverData = Relogger.serverData;
-        Relogger.serverData = null;
-        relogToDedicatedServer(serverData, true);
+        ServerData serverData = cachedServerData;
+        cachedServerData = null;
+        relogToDedicatedServer(serverData);
     }
 
     private static boolean onAddScreen(@Nullable Screen screen) {
+        if (screen instanceof ConnectScreen && isRelogging) {
+            return false;
+        }
+
         if (screen != null
             && !(screen instanceof GenericMessageScreen)
             && !(screen instanceof LevelLoadingScreen)
@@ -132,7 +138,11 @@ public class Relogger {
         }
         relogSuccessTasks.clear();
         isRelogging = false;
-        serverData = null;
+        cachedServerData = null;
         return result;
+    }
+
+    public static boolean isRateLimitMessage(Component error) {
+        return error.getContents() instanceof TranslatableContents translate && translate.getKey().equals("disconnect.loginFailedInfo") && translate.getArgs()[0].toString().equals("RateLimiter disallowed request");
     }
 }

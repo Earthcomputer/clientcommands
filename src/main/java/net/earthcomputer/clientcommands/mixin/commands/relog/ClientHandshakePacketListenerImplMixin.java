@@ -1,4 +1,4 @@
-package net.earthcomputer.clientcommands.mixin.debug;
+package net.earthcomputer.clientcommands.mixin.commands.relog;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import net.earthcomputer.clientcommands.features.Relogger;
@@ -24,10 +24,22 @@ public class ClientHandshakePacketListenerImplMixin {
     private static Logger LOGGER;
 
     @Inject(method = "lambda$handleHello$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;disconnect(Lnet/minecraft/network/chat/Component;)V", shift = At.Shift.AFTER))
-    private void logError(String digest, ServerboundKeyPacket setKeyPacket, Cipher decryptCipher, Cipher encryptCipher, CallbackInfo ci, @Local(name = "error") Component error) {
-        LOGGER.warn(error.getString());
-        if (Relogger.isRelogging && error.getContents() instanceof TranslatableContents translate && translate.getKey().equals("disconnect.loginFailedInfo") && translate.getArgs()[0].toString().equals("RateLimiter disallowed request")) {
-            Minecraft.getInstance().schedule(Relogger::onFailedRelog);
+    private void onRelogFail(String digest, ServerboundKeyPacket setKeyPacket, Cipher decryptCipher, Cipher encryptCipher, CallbackInfo ci, @Local(name = "error") Component error) {
+        if (!Relogger.isRelogging) {
+            return;
         }
+
+        if (Relogger.isRateLimitMessage(error)) {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1_000);
+                    Minecraft.getInstance().schedule(Relogger::onFailedRelog);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+        }
+
+        Relogger.isRelogging = false;
     }
 }
