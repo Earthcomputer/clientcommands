@@ -19,10 +19,6 @@ import javax.crypto.Cipher;
 
 @Mixin(ClientHandshakePacketListenerImpl.class)
 public class ClientHandshakePacketListenerImplMixin {
-    @Shadow
-    @Final
-    private static Logger LOGGER;
-
     @Inject(method = "lambda$handleHello$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;disconnect(Lnet/minecraft/network/chat/Component;)V", shift = At.Shift.AFTER))
     private void onRelogFail(String digest, ServerboundKeyPacket setKeyPacket, Cipher decryptCipher, Cipher encryptCipher, CallbackInfo ci, @Local(name = "error") Component error) {
         if (!Relogger.isRelogging) {
