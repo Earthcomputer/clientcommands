@@ -431,6 +431,8 @@
   "playerManip.toolBreakWarning": "Warning: tool has %s durability left",
   "playerManip.uncracked": "Player seed needs to be cracked",
 
+  "relogger.connection_failed": "%s\nRetrying...",
+
   "snakeGame.score": "Score: %s",
   "snakeGame.title": "Snake",
 

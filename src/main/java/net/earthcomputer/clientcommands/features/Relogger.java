@@ -1,14 +1,9 @@
 package net.earthcomputer.clientcommands.features;
 
+import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.event.MoreScreenEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.gui.screens.GenericMessageScreen;
-import net.minecraft.client.gui.screens.LevelLoadingScreen;
-import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.gui.screens.ProgressScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
@@ -27,6 +22,8 @@ public class Relogger {
     @Nullable
     public static ServerData cachedServerData;
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
+
+    public static final String RATE_LIMIT_MESSAGE = "RateLimiter disallowed request";
 
     static {
         MoreScreenEvents.BEFORE_ADD.register(Relogger::onAddScreen);
@@ -64,17 +61,17 @@ public class Relogger {
             if (!disconnect()) {
                 return false;
             }
-            return relogToIntegratedServer(server);
+            return loginToIntegratedServer(server);
         } else {
             ServerData server = mc.getCurrentServer();
             if (!disconnect()) {
                 return false;
             }
-            return relogToDedicatedServer(server);
+            return loginToDedicatedServer(server);
         }
     }
 
-    private static boolean relogToIntegratedServer(@Nullable IntegratedServer server) {
+    private static boolean loginToIntegratedServer(@Nullable IntegratedServer server) {
         Minecraft mc = Minecraft.getInstance();
 
         if (server == null) {
@@ -88,7 +85,7 @@ public class Relogger {
         return true;
     }
 
-    private static boolean relogToDedicatedServer(@Nullable ServerData serverData) {
+    private static boolean loginToDedicatedServer(@Nullable ServerData serverData) {
         Minecraft mc = Minecraft.getInstance();
 
         if (serverData == null) {
@@ -96,25 +93,30 @@ public class Relogger {
         }
         isRelogging = true;
         cachedServerData = serverData;
-        mc.setScreen(new TitleScreen());
+        LogUtils.getLogger().info("Beginning login...");
         ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false, null);
         return true;
     }
 
     public static void onFailedRelog() {
-        if (cachedServerData == null) {
+        Minecraft mc = Minecraft.getInstance();
+        // only possible if the user clicks off and "cancels"
+        if (!(mc.screen instanceof DisconnectedScreen screen) || cachedServerData == null) {
+            isRelogging = false;
+            cachedServerData = null;
             return;
         }
-        isRelogging = false;
+
+        mc.setScreen(screen.parent);
+
         ServerData serverData = cachedServerData;
         cachedServerData = null;
-        relogToDedicatedServer(serverData);
+        isRelogging = false;
+        loginToDedicatedServer(serverData);
     }
 
     private static boolean onAddScreen(@Nullable Screen screen) {
-        if (screen instanceof ConnectScreen && isRelogging) {
-            return false;
-        }
+        LogUtils.getLogger().info("Changed screen to {}", screen == null ? "null" : screen.getClass().getSimpleName());
 
         if (screen != null
             && !(screen instanceof GenericMessageScreen)
@@ -143,6 +145,6 @@ public class Relogger {
     }
 
     public static boolean isRateLimitMessage(Component error) {
-        return error.getContents() instanceof TranslatableContents translate && translate.getKey().equals("disconnect.loginFailedInfo") && translate.getArgs()[0].toString().equals("RateLimiter disallowed request");
+        return error.getContents() instanceof TranslatableContents translate && translate.getKey().equals("disconnect.loginFailedInfo") && translate.getArgs().length == 1 && translate.getArgs()[0].toString().equals(RATE_LIMIT_MESSAGE);
     }
 }
