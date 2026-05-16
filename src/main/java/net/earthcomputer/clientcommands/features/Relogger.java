@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.event.MoreScreenEvents;
-import net.earthcomputer.clientcommands.interfaces.IDisconnectedScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -25,10 +24,12 @@ public class Relogger {
     public static boolean isRelogging;
     @Nullable
     public static ServerData cachedServerData;
+    @Nullable
+    private static Long countdownEndTimestamp;
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
 
     public static final String RATE_LIMIT_MESSAGE = "RateLimiter disallowed request";
-    public static final long RELOG_RETRY_DELAY_MS = 10_000;
+    public static final long RETRY_DELAY_MS = 10_000;
 
     static {
         MoreScreenEvents.BEFORE_ADD.register(Relogger::onAddScreen);
@@ -131,12 +132,25 @@ public class Relogger {
             throw new IllegalStateException("Expected a back button in the DisconnectScreen");
         }
 
-        long remainingMs = ((IDisconnectedScreen) screen).clientcommands_getRemainingMs();
+        long remainingMs = getRemainingCountdownMs();
         double remainingSeconds = (double) remainingMs / TimeUtil.MILLISECONDS_PER_SECOND;
         Component text = Component.translatable("commands.crelog.retry", String.format("%.1f", remainingSeconds));
         int textWidth = screen.getFont().width(text);
 
         graphics.text(screen.getFont(), text, (screen.width - textWidth) / 2, button.getY() + button.getHeight() + 10, 0xff_ffffff);
+
+        if (remainingMs <= 0) {
+            onFailedRelog();
+        }
+    }
+
+    public static void setCountdownMs(long ms) {
+        countdownEndTimestamp = System.currentTimeMillis() + ms;
+    }
+
+    public static long getRemainingCountdownMs() {
+        assert countdownEndTimestamp != null : "No known end timestamp";
+        return countdownEndTimestamp - System.currentTimeMillis();
     }
 
     private static boolean onAddScreen(@Nullable Screen screen) {
