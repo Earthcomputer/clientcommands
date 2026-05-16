@@ -75,6 +75,7 @@
     "commands.fps.MinecraftMixin",
     "commands.generic.CommandSuggestionsMixin",
     "commands.glow.LivingEntityRenderStateMixin",
+    "commands.render.LevelRendererMixin",
     "commands.reply.ClientPacketListenerMixin",
     "commands.snap.MinecraftMixin",
     "commands.time.ClientClockManagerMixin",

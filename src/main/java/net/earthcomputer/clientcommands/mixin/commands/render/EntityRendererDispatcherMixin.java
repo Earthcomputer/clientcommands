@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityRenderDispatcher.class)
 public class EntityRendererDispatcherMixin {
-
     @Inject(method = "prepare", at = @At("HEAD"))
     public void onPrepare(Camera camera, Entity entity, CallbackInfo ci) {
         RenderSettings.preRenderEntities();
@@ -20,11 +19,6 @@ public class EntityRendererDispatcherMixin {
 
     @ModifyReturnValue(method = "shouldRender", at = @At("RETURN"))
     public boolean redirectShouldRender(boolean original, Entity entity) {
-        if (original && !RenderSettings.shouldRenderEntity(entity)) {
-            return false;
-        }
-
-        return original;
+        return original && RenderSettings.shouldRenderEntity(entity);
     }
-
 }
