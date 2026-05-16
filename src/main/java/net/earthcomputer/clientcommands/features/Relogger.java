@@ -1,7 +1,11 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.event.MoreScreenEvents;
+import net.earthcomputer.clientcommands.interfaces.IDisconnectedScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -10,6 +14,7 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jspecify.annotations.Nullable;
 
@@ -23,6 +28,8 @@ public class Relogger {
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
 
     public static final String RATE_LIMIT_MESSAGE = "RateLimiter disallowed request";
+
+    public static final long RELOG_RETRY_DELAY_MS = 5_000;
 
     static {
         MoreScreenEvents.BEFORE_ADD.register(Relogger::onAddScreen);
@@ -99,7 +106,7 @@ public class Relogger {
     public static void onFailedRelog() {
         Minecraft mc = Minecraft.getInstance();
         // only possible if the user clicks off and "cancels"
-        if (!(mc.screen instanceof DisconnectedScreen screen) || cachedServerData == null) {
+        if (!(mc.screen instanceof DisconnectedScreen screen) || cachedServerData == null || !isRateLimitMessage(screen.details.reason())) {
             isRelogging = false;
             cachedServerData = null;
             return;
@@ -111,6 +118,22 @@ public class Relogger {
         cachedServerData = null;
         isRelogging = false;
         loginToDedicatedServer(serverData);
+    }
+
+    public static void postRender(Screen screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tickProgress) {
+        Component text = Component.translatable("commands.crelog.connection_failed_retry", String.format("%.1f", (double) ((IDisconnectedScreen) screen).clientcommands_getRemainingMs() / TimeUtil.MILLISECONDS_PER_SECOND));
+        int textWidth = screen.getFont().width(text);
+        Button button = null;
+        for (GuiEventListener child : screen.children()) {
+            if (child instanceof Button buttonChild) {
+                button = buttonChild;
+                break;
+            }
+        }
+        if (button == null) {
+            throw new IllegalStateException("Expected a back button in the DisconnectScreen");
+        }
+        graphics.text(screen.getFont(), text, (screen.width - textWidth) / 2, button.getY() + button.getHeight() + 10, 0xff_ffffff);
     }
 
     private static boolean onAddScreen(@Nullable Screen screen) {

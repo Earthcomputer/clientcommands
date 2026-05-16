@@ -273,6 +273,7 @@
   "commands.cpredictbrushables.stewEffect": "%s (%s seconds)",
 
   "commands.crelog.failed": "Failed to relog",
+  "commands.crelog.connection_failed_retry": "Retrying in %s seconds...",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
@@ -430,8 +431,6 @@
   "playerManip.throwError": "Condition not possible or would require more than %s item throws",
   "playerManip.toolBreakWarning": "Warning: tool has %s durability left",
   "playerManip.uncracked": "Player seed needs to be cracked",
-
-  "relogger.connection_failed": "%s\nRetrying...",
 
   "snakeGame.score": "Score: %s",
   "snakeGame.title": "Snake",
