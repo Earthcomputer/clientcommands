@@ -28,8 +28,7 @@ public class Relogger {
     public static final List<Runnable> relogSuccessTasks = new ArrayList<>();
 
     public static final String RATE_LIMIT_MESSAGE = "RateLimiter disallowed request";
-
-    public static final long RELOG_RETRY_DELAY_MS = 5_000;
+    public static final long RELOG_RETRY_DELAY_MS = 10_000;
 
     static {
         MoreScreenEvents.BEFORE_ADD.register(Relogger::onAddScreen);
@@ -120,9 +119,7 @@ public class Relogger {
         loginToDedicatedServer(serverData);
     }
 
-    public static void postRender(Screen screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tickProgress) {
-        Component text = Component.translatable("commands.crelog.connection_failed_retry", String.format("%.1f", (double) ((IDisconnectedScreen) screen).clientcommands_getRemainingMs() / TimeUtil.MILLISECONDS_PER_SECOND));
-        int textWidth = screen.getFont().width(text);
+    public static void onDisconnectScreenRender(Screen screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tickProgress) {
         Button button = null;
         for (GuiEventListener child : screen.children()) {
             if (child instanceof Button buttonChild) {
@@ -133,6 +130,12 @@ public class Relogger {
         if (button == null) {
             throw new IllegalStateException("Expected a back button in the DisconnectScreen");
         }
+
+        long remainingMs = ((IDisconnectedScreen) screen).clientcommands_getRemainingMs();
+        double remainingSeconds = (double) remainingMs / TimeUtil.MILLISECONDS_PER_SECOND;
+        Component text = Component.translatable("commands.crelog.retry", String.format("%.1f", remainingSeconds));
+        int textWidth = screen.getFont().width(text);
+
         graphics.text(screen.getFont(), text, (screen.width - textWidth) / 2, button.getY() + button.getHeight() + 10, 0xff_ffffff);
     }
 

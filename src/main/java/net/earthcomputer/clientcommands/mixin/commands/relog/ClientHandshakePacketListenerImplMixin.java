@@ -31,18 +31,18 @@ public class ClientHandshakePacketListenerImplMixin {
             return;
         }
 
-        Minecraft mc = Minecraft.getInstance();
-
         if (!Relogger.isRateLimitMessage(error)) {
             Relogger.isRelogging = false;
             return;
         }
 
+        Minecraft mc = Minecraft.getInstance();
+
         mc.executeBlocking(() -> {
             connection.handleDisconnection();
             if (mc.screen instanceof DisconnectedScreen screen && Relogger.isRateLimitMessage(screen.details.reason())) {
                 ((IDisconnectedScreen) screen).clientcommands_setCountdownMs(Relogger.RELOG_RETRY_DELAY_MS);
-                ScreenExtensions.getExtensions(screen).fabric_getAfterRenderEvent().register(Relogger::postRender);
+                ScreenExtensions.getExtensions(screen).fabric_getAfterRenderEvent().register(Relogger::onDisconnectScreenRender);
             }
         });
 
