@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.features;
 
-import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.event.MoreScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.*;
@@ -93,7 +92,6 @@ public class Relogger {
         }
         isRelogging = true;
         cachedServerData = serverData;
-        LogUtils.getLogger().info("Beginning login...");
         ConnectScreen.startConnecting(mc.screen, mc, ServerAddress.parseString(serverData.ip), serverData, false, null);
         return true;
     }
@@ -116,8 +114,6 @@ public class Relogger {
     }
 
     private static boolean onAddScreen(@Nullable Screen screen) {
-        LogUtils.getLogger().info("Changed screen to {}", screen == null ? "null" : screen.getClass().getSimpleName());
-
         if (screen != null
             && !(screen instanceof GenericMessageScreen)
             && !(screen instanceof LevelLoadingScreen)

@@ -4,13 +4,10 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.network.Connection;
-import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.login.ServerboundKeyPacket;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,10 +19,6 @@ import javax.crypto.Cipher;
 
 @Mixin(ClientHandshakePacketListenerImpl.class)
 public class ClientHandshakePacketListenerImplMixin {
-    @Shadow
-    @Final
-    private static Logger LOGGER;
-
     @Shadow
     @Final
     private Connection connection;
