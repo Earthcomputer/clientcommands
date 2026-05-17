@@ -38,8 +38,8 @@ public class CPlaySoundCommand {
                 .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, getVec3(ctx, "pos"), 1, 1))
                 .then(argument("volume", floatArg(0))
                     .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, getVec3(ctx, "pos"), getFloat(ctx, "volume"), 1))
-                    .then(argument("pitch", floatArg(0, 2)))
-                        .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, getVec3(ctx, "pos"), getFloat(ctx, "volume"), getFloat(ctx, "pitch")))));
+                    .then(argument("pitch", floatArg(0, 2))
+                        .executes(ctx -> playSound(ctx.getSource(), getId(ctx, "sound"), source, getVec3(ctx, "pos"), getFloat(ctx, "volume"), getFloat(ctx, "pitch"))))));
     }
 
     private static int playSound(FabricClientCommandSource source, Identifier sound, SoundSource soundSource, Vec3 pos, float volume, float pitch) {
