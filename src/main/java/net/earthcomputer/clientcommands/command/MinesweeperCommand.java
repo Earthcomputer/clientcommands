@@ -31,18 +31,18 @@ public class MinesweeperCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cminesweeper")
-                .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10))
-                .then(literal("beginner")
-                        .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10)))
-                .then(literal("intermediate")
-                        .executes(ctx -> minesweeper(ctx.getSource(), 16, 16, 40)))
-                .then(literal("expert")
-                        .executes(ctx -> minesweeper(ctx.getSource(), 32, 16, 99)))
-                .then(literal("custom")
-                        .then(argument("width", integer(3, 128))
-                                .then(argument("height", integer(3, 128))
-                                        .then(argument("mines", integer(0, 128 * 128 - 9))
-                                                .executes(ctx -> minesweeper(ctx.getSource(), getInteger(ctx, "width"), getInteger(ctx, "height"), getInteger(ctx, "mines"))))))));
+            .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10))
+            .then(literal("beginner")
+                .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10)))
+            .then(literal("intermediate")
+                .executes(ctx -> minesweeper(ctx.getSource(), 16, 16, 40)))
+            .then(literal("expert")
+                .executes(ctx -> minesweeper(ctx.getSource(), 32, 16, 99)))
+            .then(literal("custom")
+                .then(argument("width", integer(3, 128))
+                    .then(argument("height", integer(3, 128))
+                        .then(argument("mines", integer(0, 128 * 128 - 9))
+                            .executes(ctx -> minesweeper(ctx.getSource(), getInteger(ctx, "width"), getInteger(ctx, "height"), getInteger(ctx, "mines"))))))));
     }
 
     private static int minesweeper(FabricClientCommandSource source, int width, int height, int mines) throws CommandSyntaxException {
@@ -85,15 +85,15 @@ public class MinesweeperCommand {
         private static final Vector2i SIX_TILE_UV = new Vector2i(36, 16);
         private static final Vector2i SEVEN_TILE_UV = new Vector2i(52, 16);
         private static final Vector2i EIGHT_TILE_UV = new Vector2i(68, 16);
-        private static final Vector2i[] WARNING_TILE_UV = new Vector2i[] {
-                ONE_TILE_UV,
-                TWO_TILE_UV,
-                THREE_TILE_UV,
-                FOUR_TILE_UV,
-                FIVE_TILE_UV,
-                SIX_TILE_UV,
-                SEVEN_TILE_UV,
-                EIGHT_TILE_UV
+        private static final Vector2i[] WARNING_TILE_UV = new Vector2i[]{
+            ONE_TILE_UV,
+            TWO_TILE_UV,
+            THREE_TILE_UV,
+            FOUR_TILE_UV,
+            FIVE_TILE_UV,
+            SIX_TILE_UV,
+            SEVEN_TILE_UV,
+            EIGHT_TILE_UV
         };
 
         private static final byte EMPTY_TILE_TYPE = 0;
@@ -200,7 +200,7 @@ public class MinesweeperCommand {
             for (int x = 0; x < boardWidth; x++) {
                 for (int y = 0; y < boardHeight; y++) {
                     boolean hovered = Mth.floorDiv(mouseX - topLeftX - 12, 16) == x && Mth.floorDiv(mouseY - topLeftY - 12, 16) == y;
-                    blitSprite(graphics, getTileSprite(x, y, hovered),  x * 16 + 12, y * 16 + 12, 16, 16);
+                    blitSprite(graphics, getTileSprite(x, y, hovered), x * 16 + 12, y * 16 + 12, 16, 16);
                 }
             }
         }
@@ -300,9 +300,9 @@ public class MinesweeperCommand {
 
         private Stream<Vector2i> getNeighbours(int x, int y) {
             return Stream.of(
-                    new Vector2i(x - 1, y - 1), new Vector2i(x, y - 1), new Vector2i(x + 1, y - 1),
-                    new Vector2i(x - 1, y),                                   new Vector2i(x + 1, y),
-                    new Vector2i(x - 1, y + 1), new Vector2i(x, y + 1), new Vector2i(x + 1, y + 1)
+                new Vector2i(x - 1, y - 1), new Vector2i(x, y - 1), new Vector2i(x + 1, y - 1),
+                new Vector2i(x - 1, y), new Vector2i(x + 1, y),
+                new Vector2i(x - 1, y + 1), new Vector2i(x, y + 1), new Vector2i(x + 1, y + 1)
             ).filter(pos -> isWithinBounds(pos.x, pos.y));
         }
 
