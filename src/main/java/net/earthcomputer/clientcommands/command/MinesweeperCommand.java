@@ -5,6 +5,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,6 +21,7 @@ import org.joml.Vector2i;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
@@ -29,18 +31,18 @@ public class MinesweeperCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("cminesweeper")
-            .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10))
-            .then(literal("beginner")
-                .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10)))
-            .then(literal("intermediate")
-                .executes(ctx -> minesweeper(ctx.getSource(), 16, 16, 40)))
-            .then(literal("expert")
-                .executes(ctx -> minesweeper(ctx.getSource(), 32, 16, 99)))
-            .then(literal("custom")
-                .then(argument("width", integer(3, 128))
-                    .then(argument("height", integer(3, 128))
-                        .then(argument("mines", integer(0, 128 * 128 - 9))
-                            .executes(ctx -> minesweeper(ctx.getSource(), getInteger(ctx, "width"), getInteger(ctx, "height"), getInteger(ctx, "mines"))))))));
+                .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10))
+                .then(literal("beginner")
+                        .executes(ctx -> minesweeper(ctx.getSource(), 9, 9, 10)))
+                .then(literal("intermediate")
+                        .executes(ctx -> minesweeper(ctx.getSource(), 16, 16, 40)))
+                .then(literal("expert")
+                        .executes(ctx -> minesweeper(ctx.getSource(), 32, 16, 99)))
+                .then(literal("custom")
+                        .then(argument("width", integer(3, 128))
+                                .then(argument("height", integer(3, 128))
+                                        .then(argument("mines", integer(0, 128 * 128 - 9))
+                                                .executes(ctx -> minesweeper(ctx.getSource(), getInteger(ctx, "width"), getInteger(ctx, "height"), getInteger(ctx, "mines"))))))));
     }
 
     private static int minesweeper(FabricClientCommandSource source, int width, int height, int mines) throws CommandSyntaxException {
@@ -84,14 +86,14 @@ public class MinesweeperCommand {
         private static final Vector2i SEVEN_TILE_UV = new Vector2i(52, 16);
         private static final Vector2i EIGHT_TILE_UV = new Vector2i(68, 16);
         private static final Vector2i[] WARNING_TILE_UV = new Vector2i[] {
-            ONE_TILE_UV,
-            TWO_TILE_UV,
-            THREE_TILE_UV,
-            FOUR_TILE_UV,
-            FIVE_TILE_UV,
-            SIX_TILE_UV,
-            SEVEN_TILE_UV,
-            EIGHT_TILE_UV
+                ONE_TILE_UV,
+                TWO_TILE_UV,
+                THREE_TILE_UV,
+                FOUR_TILE_UV,
+                FIVE_TILE_UV,
+                SIX_TILE_UV,
+                SEVEN_TILE_UV,
+                EIGHT_TILE_UV
         };
 
         private static final byte EMPTY_TILE_TYPE = 0;
@@ -221,12 +223,17 @@ public class MinesweeperCommand {
 
             if (isWithinBounds(tileX, tileY) && gameActive()) {
                 if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+                    byte tile = getTile(tileX, tileY);
                     if (ticksPlaying == 0) {
                         generateMines(tileX, tileY);
                         ticksPlaying = 1;
                     }
 
-                    click(tileX, tileY);
+                    if (isCovered(tile)) {
+                        click(tileX, tileY);
+                    } else {
+                        click3x3(tileX, tileY);
+                    }
 
                     assert minecraft.player != null && minecraft.level != null;
                     if (emptyTilesRemaining <= 0) {
@@ -291,6 +298,14 @@ public class MinesweeperCommand {
             return 0 <= x && x < boardWidth && 0 <= y && y < boardHeight;
         }
 
+        private Stream<Vector2i> getNeighbours(int x, int y) {
+            return Stream.of(
+                    new Vector2i(x - 1, y - 1), new Vector2i(x, y - 1), new Vector2i(x + 1, y - 1),
+                    new Vector2i(x - 1, y),                                   new Vector2i(x + 1, y),
+                    new Vector2i(x - 1, y + 1), new Vector2i(x, y + 1), new Vector2i(x + 1, y + 1)
+            ).filter(pos -> isWithinBounds(pos.x, pos.y));
+        }
+
         private void click(int x, int y) {
             byte tile = getTile(x, y);
             if (!isCovered(tile) || isFlagged(tile)) {
@@ -308,39 +323,29 @@ public class MinesweeperCommand {
                 uncover(x, y);
                 emptyTilesRemaining--;
                 // we need to leave room for the current tile in the queue
-                int[] queue = new int[emptyTilesRemaining + 1];
-                int queueIdx = 0;
-                queue[0] = y * boardWidth + x;
-                while (queueIdx >= 0) {
-                    int idx = queue[queueIdx--];
+                IntArrayList queue = new IntArrayList(emptyTilesRemaining + 1);
+                queue.add(y * boardWidth + x);
+                while (!queue.isEmpty()) {
+                    int idx = queue.popInt();
                     int xPart = idx % boardWidth;
                     int yPart = idx / boardWidth;
-                    for (Vector2i possibleNeighbour : new Vector2i[]{
-                        new Vector2i(xPart - 1, yPart - 1),
-                        new Vector2i(xPart, yPart - 1),
-                        new Vector2i(xPart + 1, yPart - 1),
-
-                        new Vector2i(xPart - 1, yPart),
-                        new Vector2i(xPart + 1, yPart),
-
-                        new Vector2i(xPart - 1, yPart + 1),
-                        new Vector2i(xPart, yPart + 1),
-                        new Vector2i(xPart + 1, yPart + 1),
-                    }) {
-                        if (isWithinBounds(possibleNeighbour.x, possibleNeighbour.y)) {
-                            byte value = getTile(possibleNeighbour.x, possibleNeighbour.y);
-                            uncover(possibleNeighbour.x, possibleNeighbour.y);
-                            if (isCovered(value)) {
-                                emptyTilesRemaining--;
-                                // if it's an empty tile, we put it in the queue to go activate all its neighbours
-                                if (tileType(value) == EMPTY_TILE_TYPE) {
-                                    queue[++queueIdx] = possibleNeighbour.y * boardWidth + possibleNeighbour.x;
-                                }
+                    getNeighbours(xPart, yPart).forEach(neighbour -> {
+                        byte value = getTile(neighbour.x, neighbour.y);
+                        uncover(neighbour.x, neighbour.y);
+                        if (isCovered(value)) {
+                            emptyTilesRemaining--;
+                            // if it's an empty tile, we put it in the queue to go activate all its neighbours
+                            if (tileType(value) == EMPTY_TILE_TYPE) {
+                                queue.add(neighbour.y * boardWidth + neighbour.x);
                             }
                         }
-                    }
+                    });
                 }
             }
+        }
+
+        private void click3x3(int x, int y) {
+            getNeighbours(x, y).forEach(neighbour -> click(neighbour.x, neighbour.y));
         }
 
         private void flag(int x, int y) {
