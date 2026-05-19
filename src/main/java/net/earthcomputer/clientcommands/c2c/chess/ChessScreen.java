@@ -9,7 +9,7 @@ import net.earthcomputer.clientcommands.c2c.packets.ChessMoveC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.ChessResignC2CPacket;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.TwoPlayerGame;
-import net.earthcomputer.clientcommands.interfaces.IScreenSafeZone;
+import net.earthcomputer.clientcommands.interfaces.ISafeZoneScreen;
 import net.earthcomputer.clientcommands.render.ColoredTriangleRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class ChessScreen extends Screen implements IScreenSafeZone {
+public final class ChessScreen extends Screen implements ISafeZoneScreen {
     private static final Identifier BOARD_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/chess/board.png");
     private static final Identifier SQUARE_HIGHLIGHT_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/chess/square_highlight.png");
     private static final Identifier CAPTURE_HIGHLIGHT_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/chess/capture_highlight.png");

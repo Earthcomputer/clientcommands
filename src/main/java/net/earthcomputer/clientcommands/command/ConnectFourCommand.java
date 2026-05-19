@@ -7,7 +7,7 @@ import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
 import net.earthcomputer.clientcommands.features.TwoPlayerGame;
-import net.earthcomputer.clientcommands.interfaces.IScreenSafeZone;
+import net.earthcomputer.clientcommands.interfaces.ISafeZoneScreen;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -255,7 +255,7 @@ public class ConnectFourCommand {
         DRAW
     }
 
-    public static class ConnectFourGameScreen extends Screen implements IScreenSafeZone {
+    public static class ConnectFourGameScreen extends Screen implements ISafeZoneScreen {
         private final ConnectFourGame game;
 
         private static final Identifier BOARD_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/connect_four/board.png");

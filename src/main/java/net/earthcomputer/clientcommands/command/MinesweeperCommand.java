@@ -5,7 +5,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.earthcomputer.clientcommands.interfaces.IScreenSafeZone;
+import net.earthcomputer.clientcommands.interfaces.ISafeZoneScreen;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -56,7 +56,7 @@ public class MinesweeperCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static class MinesweeperGameScreen extends Screen implements IScreenSafeZone {
+    private static class MinesweeperGameScreen extends Screen implements ISafeZoneScreen {
         private static final Identifier MINESWEEPER_ATLAS = Identifier.fromNamespaceAndPath("clientcommands", "textures/minesweeper_atlas.png");
         private static final int MINESWEEPER_ATLAS_WIDTH = 128;
         private static final int MINESWEEPER_ATLAS_HEIGHT = 64;

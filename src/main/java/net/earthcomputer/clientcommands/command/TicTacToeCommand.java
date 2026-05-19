@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.earthcomputer.clientcommands.c2c.C2CPacketHandler;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.features.TwoPlayerGame;
-import net.earthcomputer.clientcommands.interfaces.IScreenSafeZone;
+import net.earthcomputer.clientcommands.interfaces.ISafeZoneScreen;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -119,7 +119,7 @@ public class TicTacToeCommand {
         }
     }
 
-    public static class TicTacToeGameScreen extends Screen implements IScreenSafeZone {
+    public static class TicTacToeGameScreen extends Screen implements ISafeZoneScreen {
         private final TicTacToeGame game;
 
         private static final Identifier GRID_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/tic_tac_toe/grid.png");

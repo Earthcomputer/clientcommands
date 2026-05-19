@@ -1,6 +1,6 @@
 package net.earthcomputer.clientcommands.interfaces;
 
-public interface IScreenSafeZone {
+public interface ISafeZoneScreen {
     int getSafeZoneWidth();
 
     int getSafeZoneHeight();
