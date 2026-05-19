@@ -111,7 +111,7 @@ public class Relogger {
     public static void onFailedRelog() {
         Minecraft mc = Minecraft.getInstance();
         // only possible if the user clicks off and "cancels"
-        if (!(mc.screen instanceof DisconnectedScreen screen) || cachedServerData == null || !isRateLimitMessage(screen.details.reason())) {
+        if (!(mc.screen instanceof DisconnectedScreen screen) || cachedServerData == null) {
             isRelogging = false;
             cachedServerData = null;
             return;

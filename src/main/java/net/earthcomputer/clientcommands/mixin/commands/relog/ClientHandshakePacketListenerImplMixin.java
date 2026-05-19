@@ -39,7 +39,7 @@ public class ClientHandshakePacketListenerImplMixin {
 
         mc.execute(() -> {
             connection.handleDisconnection();
-            if (mc.screen instanceof DisconnectedScreen screen && Relogger.isRateLimitMessage(screen.details.reason())) {
+            if (mc.screen instanceof DisconnectedScreen screen && Relogger.isRateLimitMessage(error)) {
                 Relogger.remainingTicks = Relogger.RETRY_DELAY_TICKS;
                 ScreenExtensions.getExtensions(screen).fabric_getAfterRenderEvent().register(Relogger::onDisconnectScreenRender);
                 ScreenExtensions.getExtensions(screen).fabric_getAfterTickEvent().register(Relogger::onDisconnectScreenTick);

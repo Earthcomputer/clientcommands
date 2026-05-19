@@ -48,7 +48,6 @@ accessible field net/minecraft/client/renderer/ShaderManager$CompilationCache co
 
 # crelog
 accessible field net/minecraft/client/gui/screens/DisconnectedScreen parent Lnet/minecraft/client/gui/screens/Screen;
-accessible field net/minecraft/client/gui/screens/DisconnectedScreen details Lnet/minecraft/network/DisconnectionDetails;
 
 # Game Options
 accessible field net/minecraft/client/OptionInstance value Ljava/lang/Object;
