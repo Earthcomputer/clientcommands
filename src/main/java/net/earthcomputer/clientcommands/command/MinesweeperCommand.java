@@ -298,7 +298,7 @@ public class MinesweeperCommand {
             return 0 <= x && x < boardWidth && 0 <= y && y < boardHeight;
         }
 
-        private Stream<Vector2i> getNeighbours(int x, int y) {
+        private Stream<Vector2i> getNeighbors(int x, int y) {
             return Stream.of(
                 new Vector2i(x - 1, y - 1), new Vector2i(x, y - 1), new Vector2i(x + 1, y - 1),
                 new Vector2i(x - 1, y), new Vector2i(x + 1, y),
@@ -329,14 +329,14 @@ public class MinesweeperCommand {
                     int idx = queue.popInt();
                     int xPart = idx % boardWidth;
                     int yPart = idx / boardWidth;
-                    getNeighbours(xPart, yPart).forEach(neighbour -> {
-                        byte value = getTile(neighbour.x, neighbour.y);
-                        uncover(neighbour.x, neighbour.y);
+                    getNeighbors(xPart, yPart).forEach(neighbor -> {
+                        byte value = getTile(neighbor.x, neighbor.y);
+                        uncover(neighbor.x, neighbor.y);
                         if (isCovered(value)) {
                             emptyTilesRemaining--;
-                            // if it's an empty tile, we put it in the queue to go activate all its neighbours
+                            // if it's an empty tile, we put it in the queue to go activate all its neighbors
                             if (tileType(value) == EMPTY_TILE_TYPE) {
-                                queue.add(neighbour.y * boardWidth + neighbour.x);
+                                queue.add(neighbor.y * boardWidth + neighbor.x);
                             }
                         }
                     });
@@ -345,7 +345,7 @@ public class MinesweeperCommand {
         }
 
         private void click3x3(int x, int y) {
-            getNeighbours(x, y).forEach(neighbour -> click(neighbour.x, neighbour.y));
+            getNeighbors(x, y).forEach(neighbor -> click(neighbor.x, neighbor.y));
         }
 
         private void flag(int x, int y) {
