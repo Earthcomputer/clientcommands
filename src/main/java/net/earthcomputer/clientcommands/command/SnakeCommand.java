@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import net.earthcomputer.clientcommands.interfaces.IScreenSafeZone;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -41,7 +42,7 @@ public class SnakeCommand {
     }
 }
 
-class SnakeGameScreen extends Screen {
+class SnakeGameScreen extends Screen implements IScreenSafeZone {
 
     private static final Minecraft minecraft = Minecraft.getInstance();
 
@@ -155,5 +156,15 @@ class SnakeGameScreen extends Screen {
         }
         this.direction = direction;
         return true;
+    }
+
+    @Override
+    public int getSafeZoneWidth() {
+        return 16 + BOARD_SIZE + 16;
+    }
+
+    @Override
+    public int getSafeZoneHeight() {
+        return 16 + BOARD_SIZE + 16;
     }
 }

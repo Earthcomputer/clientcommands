@@ -9,6 +9,7 @@ import net.earthcomputer.clientcommands.c2c.packets.ChessMoveC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.ChessResignC2CPacket;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.features.TwoPlayerGame;
+import net.earthcomputer.clientcommands.interfaces.IScreenSafeZone;
 import net.earthcomputer.clientcommands.render.ColoredTriangleRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -49,7 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class ChessScreen extends Screen {
+public final class ChessScreen extends Screen implements IScreenSafeZone {
     private static final Identifier BOARD_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/chess/board.png");
     private static final Identifier SQUARE_HIGHLIGHT_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/chess/square_highlight.png");
     private static final Identifier CAPTURE_HIGHLIGHT_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/chess/capture_highlight.png");
@@ -748,6 +749,16 @@ public final class ChessScreen extends Screen {
         } else {
             return 1 - (float) Math.pow(1 - t, Constants.C) / Constants.ONE_MINUS_P_POW_C_MINUS_ONE;
         }
+    }
+
+    @Override
+    public int getSafeZoneWidth() {
+        return BOARD_SIZE;
+    }
+
+    @Override
+    public int getSafeZoneHeight() {
+        return BOARD_SIZE;
     }
 
     private record Arrow(Vector2i from, Vector2i to) {

@@ -86,6 +86,8 @@
     "lengthextender.ChatScreenMixin",
     "rngevents.ClientLevelMixin",
     "scrambletitle.MinecraftMixin",
+    "screen.MinecraftMixin",
+    "screen.WindowMixin",
     "suggestionshook.ClientPacketListenerMixin"
   ]
 }
