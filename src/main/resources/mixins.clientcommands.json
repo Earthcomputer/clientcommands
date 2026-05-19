@@ -8,6 +8,7 @@
     "commands.fish.EntityMixin",
     "commands.fish.FishingHookMixin",
     "commands.fish.FishingRodItemMixin",
+    "commands.flag.ArgumentCommandNodeAccessor",
     "commands.generic.ChatScreenMixin",
     "commands.generic.ClientSuggestionsProviderMixin",
     "commands.glow.ArmorStandRendererMixin",

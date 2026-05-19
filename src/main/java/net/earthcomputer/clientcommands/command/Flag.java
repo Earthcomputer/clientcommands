@@ -7,7 +7,11 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.earthcomputer.clientcommands.command.arguments.ExcludingArgument;
+import net.earthcomputer.clientcommands.mixin.commands.flag.ArgumentCommandNodeAccessor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import org.jspecify.annotations.Nullable;
@@ -68,31 +72,51 @@ public final class Flag<T> {
         return repeatable;
     }
 
-    public void addToCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> commandNode, Function<CommandContext<FabricClientCommandSource>, T> value) {
-        dispatcher.register(commandNode.createBuilder()
-            .then(literal(getFlag())
-                .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))
-                .executes(commandNode.getCommand())));
-        if (shortName != null) {
-            dispatcher.register(commandNode.createBuilder()
-                .then(literal(getShortFlag())
-                    .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, value.apply(ctx)))
-                    .executes(commandNode.getCommand())));
+    private void addExclusion(LiteralCommandNode<FabricClientCommandSource> baseNode) {
+        Collection<CommandNode<FabricClientCommandSource>> children = baseNode.getChildren();
+        for (CommandNode<FabricClientCommandSource> childDowncasted : children) {
+            if (childDowncasted instanceof ArgumentCommandNodeAccessor<?> child) {
+                ArgumentType<?> argument = child.getArgumentType();
+                if (argument instanceof ExcludingArgument<?, ?> excluding) {
+                    excluding.exclusions.add(ExcludingArgument.Exclusion.forFlag(this));
+                } else {
+                    ArgumentType<?> excluding = ExcludingArgument.excluding(argument, ExcludingArgument.Exclusion.forFlag(this));
+                    child.setArgumentType(excluding);
+                }
+            }
         }
     }
 
-    public void addToCommandWithArg(CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> commandNode, ArgumentType<T> argument) {
-        dispatcher.register(commandNode.createBuilder()
-            .then(literal(getFlag())
-                .then(argument(this.name, argument)
-                    .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type)))
-                    .executes(commandNode.getCommand()))));
+    private void addLiteralFlagToCommand(String literal, CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> baseNode, Function<CommandContext<FabricClientCommandSource>, T> function) {
+        dispatcher.register(baseNode.createBuilder()
+                .then(literal(literal)
+                        .redirect(baseNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, function.apply(ctx)))
+                        .executes(baseNode.getCommand())));
+    }
+
+    private void addArgumentFlagToCommand(String literal, ArgumentType<T> argument, CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> baseNode) {
+        dispatcher.register(baseNode.createBuilder()
+                .then(literal(literal)
+                        .then(argument(this.name, argument)
+                                .redirect(baseNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type)))
+                                .executes(baseNode.getCommand()))));
+    }
+
+    public void addToCommand(CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> baseNode, Function<CommandContext<FabricClientCommandSource>, T> function) {
+        addExclusion(baseNode);
+
+        addLiteralFlagToCommand(getFlag(), dispatcher, baseNode, function);
         if (shortName != null) {
-            dispatcher.register(commandNode.createBuilder()
-                .then(literal(getShortFlag())
-                    .then(argument(this.name, argument)
-                        .redirect(commandNode, ctx -> ClientCommandHelper.withFlag(ctx.getSource(), this, ctx.getArgument(this.name, this.type)))
-                        .executes(commandNode.getCommand()))));
+            addLiteralFlagToCommand(getShortFlag(), dispatcher, baseNode, function);
+        }
+    }
+
+    public void addToCommandWithArg(CommandDispatcher<FabricClientCommandSource> dispatcher, LiteralCommandNode<FabricClientCommandSource> baseNode, ArgumentType<T> argument) {
+        addExclusion(baseNode);
+
+        addArgumentFlagToCommand(getFlag(), argument, dispatcher, baseNode);
+        if (shortName != null) {
+            addArgumentFlagToCommand(getShortFlag(), argument, dispatcher, baseNode);
         }
     }
 

@@ -208,6 +208,7 @@
   "commands.client.componentTooDeeplyNested": "Chat component too deeply nested",
   "commands.client.crack": "Crack",
   "commands.client.enable": "Enable",
+  "commands.client.excluding": "Invalid argument; excluded",
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.glow": "[Glow]",
   "commands.client.invalidArgumentException": "Invalid argument '%s'",
