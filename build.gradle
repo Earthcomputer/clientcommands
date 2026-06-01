@@ -50,7 +50,7 @@ loom {
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	include implementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include implementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")

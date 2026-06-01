@@ -88,7 +88,7 @@ public class ListenCommand {
         source.sendFeedback(Component.translatable("commands.clisten.add.success"));
 
         if (callback == null) {
-            callback = (packet, side) -> {
+            callback = (packet, side) -> source.getClient().schedule(() -> {
                 String packetData;
                 Component packetDataPreview;
                 if (Configs.packetDumpMethod == Configs.PacketDumpMethod.BYTE_BUF) {
@@ -125,7 +125,7 @@ public class ListenCommand {
                     case C2C_OUTBOUND -> source.sendFeedback(Component.translatable("commands.clisten.sentC2CPacket", packetComponent));
                     case C2C_INBOUND -> source.sendFeedback(Component.translatable("commands.clisten.receivedC2CPacket", packetComponent));
                 }
-            };
+            });
         }
 
         return Command.SINGLE_SUCCESS;

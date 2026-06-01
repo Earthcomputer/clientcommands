@@ -19,14 +19,14 @@ public class ConnectionMixin {
     @Shadow @Final private PacketFlow receiving;
 
     @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;genericsFtw(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V"))
-    private void onPacketReceive(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
+    private void onPacketReceive(ChannelHandlerContext ctx, Packet<?> packet, CallbackInfo ci) {
         if (this.receiving == PacketFlow.CLIENTBOUND) {
             ListenCommand.onPacket(packet, ListenCommand.PacketFlow.CLIENTBOUND);
         }
     }
 
     @Inject(method = "doSendPacket", at = @At("HEAD"))
-    private void onPacketSend(Packet<?> packet, @Nullable ChannelFutureListener sendListener, boolean flush, CallbackInfo ci) {
+    private void onPacketSend(Packet<?> packet, @Nullable ChannelFutureListener listener, boolean flush, CallbackInfo ci) {
         if (this.receiving == PacketFlow.CLIENTBOUND) {
             ListenCommand.onPacket(packet, ListenCommand.PacketFlow.SERVERBOUND);
         }

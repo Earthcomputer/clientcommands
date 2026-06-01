@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.features;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
@@ -41,6 +42,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -182,6 +184,25 @@ public class PacketDumper {
         }
 
         @Override
+        public <L, R> void writeEither(Either<L, R> value, StreamEncoder<? super FriendlyByteBuf, L> leftWriter, StreamEncoder<? super FriendlyByteBuf, R> rightWriter) {
+            dump("either", () -> {
+                writer.name("left");
+                Optional<L> left = value.left();
+                if (left.isPresent()) {
+                    writer.value(true);
+                    writer.name("value");
+                    dumpValue(left.get(), leftWriter);
+                }
+                Optional<R> right = value.right();
+                if (right.isPresent()) {
+                    writer.value(false);
+                    writer.name("value");
+                    dumpValue(right.get(), rightWriter);
+                }
+            });
+        }
+
+        @Override
         public <T> void writeNullable(@Nullable T value, StreamEncoder<? super FriendlyByteBuf, T> valueEncoder) {
             writeNullable("nullable", value, valueEncoder);
         }
@@ -203,6 +224,7 @@ public class PacketDumper {
         public PacketDumpByteBuf writeByteArray(byte[] array) {
             return dump("byteArray", () -> writer
                 .name("length").value(array.length)
+                .name("utf8").value(new String(array, StandardCharsets.UTF_8))
                 .name("value").value(Base64.getEncoder().encodeToString(array))
             );
         }
@@ -225,6 +247,17 @@ public class PacketDumper {
                 writer.name("length").value(array.length);
                 writer.name("elements").beginArray();
                 for (final long element : array) {
+                    writer.value(element);
+                }
+                writer.endArray();
+            });
+        }
+
+        @Override
+        public FriendlyByteBuf writeFixedSizeLongArray(long[] longs) {
+            return dump("fixedSizeLongArray", () -> {
+                writer.name("elements").beginArray();
+                for (final long element : longs) {
                     writer.value(element);
                 }
                 writer.endArray();
@@ -393,6 +426,11 @@ public class PacketDumper {
         }
 
         @Override
+        public void writeContainerId(int id) {
+            dumpSimple("containerId", id, JsonWriter::value);
+        }
+
+        @Override
         public PacketDumpByteBuf skipBytes(int length) {
             return dump("skipBytes", () -> writer.name("length").value(length));
         }
@@ -537,6 +575,7 @@ public class PacketDumper {
         private PacketDumpByteBuf dumpBytes(byte[] bytes) {
             return dump("bytes", () -> writer
                 .name("length").value(bytes.length)
+                .name("utf8").value(new String(bytes, StandardCharsets.UTF_8))
                 .name("value").value(Base64.getEncoder().encodeToString(bytes))
             );
         }
