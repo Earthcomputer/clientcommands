@@ -42,7 +42,7 @@ public class EntityMixin implements IEntity_Glowable {
 
     @Override
     public void clientcommands_tickGlowingTickets() {
-        if (((Entity) (Object) this).level().isClientSide) {
+        if (((Entity) (Object) this).level().isClientSide()) {
             Iterator<EntityGlowingTicket> itr = glowingTickets.iterator();
             //noinspection Java8CollectionRemoveIf
             while (itr.hasNext()) {

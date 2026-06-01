@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin({HoeItem.class, ShovelItem.class})
 public class HoeAndShovelItemMixin {
 
-    @Inject(method = "useOn", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/Level;isClientSide:Z"))
+    @Inject(method = "useOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;isClientSide()Z"))
     public void onUseOn(UseOnContext context, CallbackInfoReturnable<InteractionResult> ci) {
         PlayerRandCracker.onItemDamage(1, context.getPlayer(), context.getItemInHand());
     }

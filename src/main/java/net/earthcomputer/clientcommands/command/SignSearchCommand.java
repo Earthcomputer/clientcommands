@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.RegexArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class SignSearchCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

@@ -10,17 +10,17 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
-import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.task.ItemThrowTask;
 import net.earthcomputer.clientcommands.task.LongTask;
 import net.earthcomputer.clientcommands.task.LongTaskList;
 import net.earthcomputer.clientcommands.task.OneTickTask;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -33,7 +33,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -48,7 +47,7 @@ import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EnchantingTableBlock;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -116,6 +115,7 @@ public class EnchantmentCracker {
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final int PROGRESS_BAR_WIDTH = 50;
 
+    @Nullable
     private static WeakReference<LongTask> currentEnchantingTask = null;
     private static boolean isCurrentlyThrowingItems = false;
     private static int expectedNumBookshelves = -1;
@@ -134,7 +134,7 @@ public class EnchantmentCracker {
      * This section is in charge of rendering the overlay on the enchantment GUI
      */
 
-    public static void drawEnchantmentGUIOverlay(GuiGraphics graphics) {
+    public static void extractEnchantmentGUIOverlay(GuiGraphicsExtractor graphics) {
         ClientLevel level = Minecraft.getInstance().level;
         assert level != null;
 
@@ -194,7 +194,7 @@ public class EnchantmentCracker {
         Font font = Minecraft.getInstance().font;
         int y = 0;
         for (Component line : lines) {
-            graphics.drawString(font, line, 0, y, 0xffffffff, false);
+            graphics.text(font, line, 0, y, 0xffffffff, false);
             y += font.lineHeight;
         }
     }
@@ -206,6 +206,7 @@ public class EnchantmentCracker {
 
     static Set<Integer> possibleXPSeeds = new HashSet<>(1 << 20);
     private static int firstXpSeed;
+    @Nullable
     public static BlockPos enchantingTablePos = null;
     private static boolean doneEnchantment = false;
 
@@ -276,7 +277,7 @@ public class EnchantmentCracker {
             for (int slot = 0; slot < 3; slot++) {
                 if (actualEnchantCosts[slot] > 0) {
                     List<EnchantmentInstance> enchantments = getEnchantmentList(enchantmentRegistry, rand, xpSeed, itemToEnchant, slot, actualEnchantCosts[slot], version);
-                    if (enchantments == null || enchantments.isEmpty()) {
+                    if (enchantments.isEmpty()) {
                         // check that there is indeed no enchantment clue
                         if (actualEnchantmentClues[slot] != -1 || actualLevelClues[slot] != -1) {
                             xpSeedItr.remove();
@@ -463,6 +464,7 @@ public class EnchantmentCracker {
 
         taskList.addTask(new SimpleTask() {
             private int index = 0;
+            @Nullable
             ManipulateResult finalResult = null;
             private boolean hasShutDown = false;
 
@@ -520,7 +522,7 @@ public class EnchantmentCracker {
                                 @Override
                                 public void onCompleted() {
                                     super.onCompleted();
-                                    Minecraft.getInstance().player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 1.0f, 2.0f);
+                                    Minecraft.getInstance().player.playSound(SoundEvents.NOTE_BLOCK_PLING.value(), 1.0f, 2.0f);
                                     isCurrentlyThrowingItems = false;
                                 }
 
@@ -558,7 +560,7 @@ public class EnchantmentCracker {
                         taskList.addTask(new LongTask() {
                             @Override
                             public void initialize() {
-                                Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("enchCrack.insn.dummy"));
+                                ClientCommandHelper.sendFeedback("enchCrack.insn.dummy");
                             }
 
                             @Override
@@ -587,9 +589,9 @@ public class EnchantmentCracker {
                         public void run() {
                             if (Configs.enchCrackState == CrackState.CRACKED) {
                                 ChatComponent chat = Minecraft.getInstance().gui.getChat();
-                                chat.addMessage(Component.translatable("enchCrack.insn.ready").withStyle(ChatFormatting.BOLD));
-                                chat.addMessage(Component.translatable("enchCrack.insn.bookshelves", finalResult.bookshelves));
-                                chat.addMessage(Component.translatable("enchCrack.insn.slot", finalResult.slot + 1));
+                                ClientCommandHelper.sendFeedback(Component.translatable("enchCrack.insn.ready").withStyle(ChatFormatting.BOLD));
+                                ClientCommandHelper.sendFeedback("enchCrack.insn.bookshelves", finalResult.bookshelves);
+                                ClientCommandHelper.sendFeedback("enchCrack.insn.slot", finalResult.slot + 1);
                                 expectedNumBookshelves = finalResult.bookshelves;
                             }
                         }

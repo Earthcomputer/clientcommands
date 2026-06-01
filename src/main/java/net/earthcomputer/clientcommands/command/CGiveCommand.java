@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CGiveCommand {
 
@@ -41,7 +41,7 @@ public class CGiveCommand {
         MultiPlayerGameMode interactionManager = source.getClient().gameMode;
         assert interactionManager != null;
 
-        ItemStack stack = itemInput.createItemStack(count, false);
+        ItemStack stack = itemInput.createItemStack(count);
 
         IntList changedSlots = new IntArrayList();
         int simulatedCount = stack.getCount();
@@ -72,7 +72,7 @@ public class CGiveCommand {
         player.inventoryMenu.broadcastChanges();
 
         // recreate the stack, otherwise it shows that the player was given air
-        stack = itemInput.createItemStack(count, false);
+        stack = itemInput.createItemStack(count);
         source.sendFeedback(Component.translatable("commands.cgive.success", count, stack.getDisplayName()));
         return Command.SINGLE_SUCCESS;
     }

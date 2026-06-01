@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgument;
 import net.earthcomputer.clientcommands.command.arguments.WithStringArgument;
@@ -20,11 +21,10 @@ import net.minecraft.world.item.Items;
 import java.util.Set;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.command.arguments.ClientItemPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.ItemAndEnchantmentsPredicateArgument.*;
 import static net.earthcomputer.clientcommands.command.arguments.WithStringArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class FishCommand {
 
@@ -34,7 +34,7 @@ public class FishCommand {
         Component.translatable("commands.cfish.needFishingManipulation")
             .withStyle(style -> style.withColor(ChatFormatting.RED))
             .append(" ")
-            .append(getCommandTextComponent("commands.client.enable", "/cconfig clientcommands fishingManipulation set MANUAL")));
+            .append(CComponentUtil.getCommandTextComponent("commands.client.enable", "/cconfig clientcommands fishingManipulation set MANUAL")));
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext context) {
         if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20) {

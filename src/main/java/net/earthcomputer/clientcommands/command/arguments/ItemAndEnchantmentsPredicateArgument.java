@@ -10,7 +10,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.core.Holder;
@@ -20,7 +20,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,7 +28,7 @@ import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,6 +168,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
 
     private class Parser {
         private final StringReader reader;
+        @Nullable
         private Consumer<SuggestionsBuilder> suggestor;
 
         private Item item;
@@ -195,7 +196,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         private Item parseItem() throws CommandSyntaxException {
             suggestEnchantableItem();
             int start = reader.getCursor();
-            ResourceLocation identifier = ResourceLocation.read(reader);
+            Identifier identifier = Identifier.read(reader);
             Item item = BuiltInRegistries.ITEM.getOptional(identifier).orElseThrow(() -> {
                 reader.setCursor(start);
                 return ID_INVALID_EXCEPTION.createWithContext(reader, identifier);
@@ -308,16 +309,16 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
             if (suggest) {
                 suggestor = suggestions -> {
                     SuggestionsBuilder builder = suggestions.createOffset(start);
-                    SharedSuggestionProvider.suggestResource(allowedEnchantments.stream().map(ench -> ench.key().location()), builder);
+                    SharedSuggestionProvider.suggestResource(allowedEnchantments.stream().map(ench -> ench.key().identifier()), builder);
                     suggestions.add(builder);
                 };
             }
 
-            ResourceLocation identifier = ResourceLocation.read(reader);
+            Identifier identifier = Identifier.read(reader);
             ResourceKey<Enchantment> enchantmentKey = ResourceKey.create(Registries.ENCHANTMENT, identifier);
             Holder<Enchantment> enchantment = enchantmentLookup.get(enchantmentKey).orElseThrow(() -> {
                 reader.setCursor(start);
-                return ResourceArgument.ERROR_UNKNOWN_RESOURCE.createWithContext(reader, identifier, Registries.ENCHANTMENT.location());
+                return ResourceArgument.ERROR_UNKNOWN_RESOURCE.createWithContext(reader, identifier, Registries.ENCHANTMENT.identifier());
             });
 
             if (!enchantment.value().canEnchant(stack) && stack.getItem() != Items.BOOK) {
@@ -417,7 +418,7 @@ public class ItemAndEnchantmentsPredicateArgument implements ArgumentType<ItemAn
         }
 
         private void suggestEnchantableItem() {
-            List<ResourceLocation> allowed = new ArrayList<>();
+            List<Identifier> allowed = new ArrayList<>();
             for (Item item : BuiltInRegistries.ITEM) {
                 if (item.components().has(DataComponents.ENCHANTABLE) && itemPredicate.test(item)) {
                     if (MultiVersionCompat.INSTANCE.doesItemExist(item)) {

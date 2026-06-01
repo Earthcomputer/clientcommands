@@ -6,6 +6,7 @@ import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 
@@ -44,7 +45,7 @@ public class RenderSettings {
         if (minecraft.player == null) {
             return;
         }
-        FabricClientCommandSource source = (FabricClientCommandSource) new ClientSuggestionProvider(minecraft.getConnection(), minecraft, false);
+        FabricClientCommandSource source = (FabricClientCommandSource) new ClientSuggestionProvider(minecraft.getConnection(), minecraft, PermissionSet.ALL_PERMISSIONS);
 
         disabledEntities.clear();
         for (var filter : entityRenderSelectors) {

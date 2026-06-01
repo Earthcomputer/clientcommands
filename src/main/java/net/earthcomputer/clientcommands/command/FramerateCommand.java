@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class FramerateCommand {
     private static final int[] COMMON_REFRESH_RATES = new int[] {
@@ -72,7 +72,7 @@ public class FramerateCommand {
     }
 
     private static int getDisplayMaxFramerate() {
-        return Minecraft.getInstance().virtualScreen.screenManager.monitors.values().stream()
+        return Minecraft.getInstance().getWindow().screenManager.monitors.values().stream()
             .mapToInt(monitor -> monitor.getCurrentMode().getRefreshRate())
             .max().orElseThrow();
     }

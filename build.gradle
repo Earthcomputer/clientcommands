@@ -3,7 +3,7 @@ import net.earthcomputer.clientcommands.buildscript.GenerateBuildInfoTask
 import net.fabricmc.loom.task.prod.ClientProductionRunTask
 
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id 'com.modrinth.minotaur' version '2.+'
 	id 'com.github.breadmoirai.github-release' version '2.4.1'
@@ -49,19 +49,12 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.layered {
-		officialMojangMappings {
-			nameSyntheticMembers = true
-		}
-		parchment("org.parchmentmc.data:parchment-${project.parchment_mcversion}:${project.parchment_version}@zip")
-	}
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	include modImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
-	include modImplementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
-	include modImplementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
+	include implementation("dev.xpple:clientarguments:${project.clientarguments_version}")
+	include implementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
+	include implementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
 	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_feature_version}"
 	includedLibrary "com.seedfinding:mc_biome:${project.seedfinding_biome_version}"
@@ -71,16 +64,13 @@ dependencies {
 	includedLibrary "com.seedfinding:latticg:${project.latticg_version}:rt"
 	codeGenImplementation "com.seedfinding:latticg:${project.latticg_version}"
 
+	codeGenImplementation "org.jspecify:jspecify:1.0.0"
+
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
-	modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+	runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
-	productionRuntimeMods("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
-		exclude group: 'net.fabricmc', module: 'fabric-loader'
-	}
-
-	include api("net.fabricmc:mapping-io:${project.mapping_io_version}")
 
 	codeGenImplementation sourceSets.main.output
 
@@ -131,8 +121,8 @@ processResources {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -145,7 +135,7 @@ tasks.register("prodClient", ClientProductionRunTask) {
 	jvmArgs.add("-Ddevauth.enabled=true")
 
 	javaLauncher = javaToolchains.launcherFor {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 
@@ -175,7 +165,7 @@ def changelogText = changelogFile.exists() && System.currentTimeMillis() - chang
 modrinth {
 	token = project.hasProperty('modrinthKey') ? project.modrinthKey : System.getenv("MODRINTH_TOKEN")
 	projectId = 'client-commands'
-	uploadFile = remapJar
+	uploadFile = jar
 	gameVersions.set(project.minecraft_version_list.split('\\s*,\\s*').toList())
 	loaders.set(['fabric', 'quilt'])
 	changelog = changelogText
@@ -196,7 +186,7 @@ githubRelease {
 	targetCommitish 'fabric'
 	releaseName "Version ${project.version} for Minecraft ${project.minecraft_version_list_presentable}"
 	body changelogText
-	releaseAssets remapJar.outputs
+	releaseAssets jar.outputs
 }
 tasks.githubRelease.onlyIf {
 	!changelogText.isBlank()
@@ -205,12 +195,8 @@ tasks.githubRelease.onlyIf {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifact(jar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			artifact jar
+			artifact sourcesJar
 		}
 	}
 

@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CComponentArgument.*;
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CTitleCommand {
 
@@ -20,13 +20,13 @@ public class CTitleCommand {
             .then(literal("reset")
                 .executes(ctx -> executeReset(ctx.getSource())))
             .then(literal("title")
-                .then(argument("title", textComponent(context))
+                .then(argument("title", component(context))
                     .executes(ctx -> executeTitle(ctx.getSource(), getComponent(ctx, "title")))))
             .then(literal("subtitle")
-                .then(argument("title", textComponent(context))
+                .then(argument("title", component(context))
                     .executes(ctx -> executeSubtitle(ctx.getSource(), getComponent(ctx, "title")))))
             .then(literal("actionbar")
-                .then(argument("title", textComponent(context))
+                .then(argument("title", component(context))
                     .executes(ctx -> executeActionBar(ctx.getSource(), getComponent(ctx, "title")))))
             .then(literal("times")
                 .then(argument("fadeIn", integer(0))

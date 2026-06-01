@@ -3,7 +3,7 @@ package net.earthcomputer.clientcommands.mixin.rngevents;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.FoodOnAStickItem;
 import net.minecraft.world.level.Level;

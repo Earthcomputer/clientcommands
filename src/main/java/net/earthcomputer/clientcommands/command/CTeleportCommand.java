@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import java.util.UUID;
 
 import static net.earthcomputer.clientcommands.command.arguments.EntityUUIDArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CTeleportCommand {
     private static final SimpleCommandExceptionType NOT_SPECTATOR_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctp.notSpectator"));
@@ -37,7 +37,7 @@ public class CTeleportCommand {
         PlayerInfo playerInfo = packetListener.getPlayerInfo(uuid);
         String name;
         if (playerInfo != null) {
-            name = playerInfo.getProfile().getName();
+            name = playerInfo.getProfile().name();
         } else {
             name = uuid.toString();
         }

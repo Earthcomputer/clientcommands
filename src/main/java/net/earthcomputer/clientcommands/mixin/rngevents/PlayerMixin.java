@@ -15,9 +15,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.item.component.Weapon;
@@ -39,7 +39,7 @@ public abstract class PlayerMixin extends LivingEntity {
     // TODO: update-sensitive: type hierarchy of Entity.damage
     @WrapOperation(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z", ordinal = 0))
     public boolean clientSideAttackDamage(Entity target, DamageSource source, float amount, Operation<Boolean> original) {
-        if (!level().isClientSide || !isThePlayer()) {
+        if (!level().isClientSide() || !isThePlayer()) {
             return original.call(target, source, amount);
         }
 
@@ -95,7 +95,7 @@ public abstract class PlayerMixin extends LivingEntity {
                     PlayerRandCracker.onItemDamage(weaponComponent.itemDamagePerAttack(), this, heldStack);
                 }
 
-                if (target.getType().is(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS)) {
+                if (target.is(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS)) {
                     registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.BANE_OF_ARTHROPODS).ifPresent(baneOfArthropods -> {
                         if (EnchantmentHelper.getItemEnchantmentLevel(baneOfArthropods, heldStack) > 0) {
                             PlayerRandCracker.onBaneOfArthropods();
@@ -120,7 +120,7 @@ public abstract class PlayerMixin extends LivingEntity {
         }
 
         BlocksAttacks blocksAttacksComponent = blockingWith.get(DataComponents.BLOCKS_ATTACKS);
-        if (blocksAttacksComponent == null || blocksAttacksComponent.bypassedBy().map(source::is).orElse(false)) {
+        if (blocksAttacksComponent == null || blocksAttacksComponent.bypassedBy().map(bypassedBy -> bypassedBy.contains(source.typeHolder())).orElse(false)) {
             return 0;
         }
 

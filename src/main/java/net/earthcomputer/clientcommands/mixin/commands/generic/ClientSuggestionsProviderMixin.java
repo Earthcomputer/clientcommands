@@ -7,7 +7,8 @@ import net.earthcomputer.clientcommands.interfaces.IClientSuggestionsProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.server.permissions.PermissionSet;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,7 +26,7 @@ public class ClientSuggestionsProviderMixin implements IClientSuggestionsProvide
     private Minecraft minecraft;
     @Shadow
     @Final
-    private boolean allowsRestrictedCommands;
+    private PermissionSet permissions;
 
     @Unique
     private ImmutableMap<Flag<?>, Object> flags = ImmutableMap.of();
@@ -38,7 +39,7 @@ public class ClientSuggestionsProviderMixin implements IClientSuggestionsProvide
 
     @Override
     public <T> IClientSuggestionsProvider clientcommands_withFlag(Flag<T> flag, T value) {
-        ClientSuggestionsProviderMixin source = (ClientSuggestionsProviderMixin) (Object) new ClientSuggestionProvider(this.connection, this.minecraft, this.allowsRestrictedCommands);
+        ClientSuggestionsProviderMixin source = (ClientSuggestionsProviderMixin) (Object) new ClientSuggestionProvider(this.connection, this.minecraft, this.permissions);
         source.flags = ImmutableMap.<Flag<?>, Object>builderWithExpectedSize(this.flags.size() + 1).putAll(this.flags).put(flag, value).build();
         return source;
     }

@@ -3,6 +3,7 @@ package net.earthcomputer.clientcommands.features;
 import com.demonwav.mcdev.annotations.Translatable;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.util.CUtil;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
@@ -21,7 +22,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +34,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Comparator;
@@ -416,8 +417,8 @@ public class PlayerRandCracker {
         if (matchingSlot == null) {
             return new ThrowItemsResult(ThrowItemsResult.Type.NOT_ENOUGH_ITEMS);
         }
-        interactionManager.handleInventoryMouseClick(player.containerMenu.containerId,
-                matchingSlot.index, 0, ClickType.THROW, player);
+        interactionManager.handleContainerInput(player.containerMenu.containerId,
+                matchingSlot.index, 0, ContainerInput.THROW, player);
 
         return new ThrowItemsResult(ThrowItemsResult.Type.SUCCESS);
     }
@@ -426,6 +427,7 @@ public class PlayerRandCracker {
         seed = (seed * 0xdba6ed0471f1L + 0x25493d2c3b3cL) & MASK;
     }
 
+    @Nullable
     public static Slot getBestItemThrowSlot(List<Slot> slots) {
         slots = slots.stream().filter(slot -> {
             if (!slot.hasItem()) {
@@ -455,6 +457,7 @@ public class PlayerRandCracker {
         return slots.stream().filter(slot -> slot.getItem().getItem() == preferredItem).findFirst().get();
     }
 
+    @Nullable
     private static final Field RANDOM_SEED;
     static {
         Field randomSeedField;
@@ -517,7 +520,7 @@ public class PlayerRandCracker {
             )),
             UNKNOWN_SEED(false, args -> List.of(Component.translatable("playerManip.uncracked")
                 .append(" ")
-                .append(ClientCommandHelper.getCommandTextComponent("commands.client.crack", "/ccrackrng"))
+                .append(CComponentUtil.getCommandTextComponent("commands.client.crack", "/ccrackrng"))
                 .withStyle(ChatFormatting.RED))),
             SUCCESS(true, (Function<Object[], List<MutableComponent>>) null),
             ;
@@ -618,6 +621,7 @@ public class PlayerRandCracker {
         RECREATED("recreated"),
         RESPIRATION("respiration"),
         SHIELD("shield"),
+        SHOULDER_PARROT("shoulderParrot"),
         SOUL_SPEED("soulSpeed"),
         SPRINT("sprint"),
         SWIM("swim"),

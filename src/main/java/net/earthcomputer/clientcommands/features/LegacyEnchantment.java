@@ -1,21 +1,21 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
-import net.minecraft.Util;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.intellij.lang.annotations.MagicConstant;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -38,13 +38,13 @@ public enum LegacyEnchantment {
     FROST_WALKER(Enchantments.FROST_WALKER, 2, Weight.RARE, MultiVersionCompat.V1_9, ItemTags.FOOT_ARMOR_ENCHANTABLE, ItemTags.FOOT_ARMOR_ENCHANTABLE, l -> l * 10, l -> 15 + l * 10, Flags.TREASURE),
     BINDING_CURSE(Enchantments.BINDING_CURSE, 1, Weight.VERY_RARE, MultiVersionCompat.V1_11, ItemTags.EQUIPPABLE_ENCHANTABLE, ItemTags.EQUIPPABLE_ENCHANTABLE, l -> 25, l -> 50, Flags.TREASURE),
     SOUL_SPEED(Enchantments.SOUL_SPEED, 3, Weight.VERY_RARE, MultiVersionCompat.V1_16, ItemTags.FOOT_ARMOR_ENCHANTABLE, ItemTags.FOOT_ARMOR_ENCHANTABLE, l -> l * 10, l -> 15 + l * 10, Flags.TREASURE, Flags.NON_DISCOVERABLE),
-    SHARPNESS(Enchantments.SHARPNESS, 5, Weight.COMMON, MultiVersionCompat.V1_7_2, ItemTags.SWORD_ENCHANTABLE, ItemTags.SHARP_WEAPON_ENCHANTABLE, l -> 1 + (l - 1) * 11, l -> 21 + (l - 1) * 11),
-    SMITE(Enchantments.SMITE, 5, Weight.UNCOMMON, MultiVersionCompat.V1_7_2, ItemTags.SWORD_ENCHANTABLE, ItemTags.WEAPON_ENCHANTABLE, l -> 5 + (l - 1) * 8, l -> 25 + (l - 1) * 8),
-    BANE_OF_ARTHROPODS(Enchantments.BANE_OF_ARTHROPODS, 5, Weight.UNCOMMON, MultiVersionCompat.V1_7_2, ItemTags.SWORD_ENCHANTABLE, ItemTags.WEAPON_ENCHANTABLE, l -> 5 + (l - 1) * 8, l -> 25 + (l - 1) * 8),
-    KNOCKBACK(Enchantments.KNOCKBACK, 2, Weight.UNCOMMON, MultiVersionCompat.V1_7_2, ItemTags.SWORD_ENCHANTABLE, ItemTags.SWORD_ENCHANTABLE, l -> 5 + (l - 1) * 20, l -> 55 + (l - 1) * 20),
-    FIRE_ASPECT(Enchantments.FIRE_ASPECT, 2, Weight.RARE, MultiVersionCompat.V1_7_2, ItemTags.SWORD_ENCHANTABLE, ItemTags.FIRE_ASPECT_ENCHANTABLE, l -> 10 + (l - 1) * 20, l -> 40 + l * 20),
-    LOOTING(Enchantments.LOOTING, 3, Weight.RARE, MultiVersionCompat.V1_7_2, ItemTags.SWORD_ENCHANTABLE, ItemTags.SWORD_ENCHANTABLE, l -> 15 + (l - 1) * 9, l -> 65 + (l - 1) * 9),
-    SWEEPING_EDGE(Enchantments.SWEEPING_EDGE, 3, Weight.RARE, MultiVersionCompat.V1_11_1, ItemTags.SWORD_ENCHANTABLE, ItemTags.SWORD_ENCHANTABLE, l -> 5 + (l - 1) * 9, l -> 20 + (l - 1) * 9),
+    SHARPNESS(Enchantments.SHARPNESS, 5, Weight.COMMON, MultiVersionCompat.V1_7_2, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.SHARP_WEAPON_ENCHANTABLE, l -> 1 + (l - 1) * 11, l -> 21 + (l - 1) * 11),
+    SMITE(Enchantments.SMITE, 5, Weight.UNCOMMON, MultiVersionCompat.V1_7_2, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.WEAPON_ENCHANTABLE, l -> 5 + (l - 1) * 8, l -> 25 + (l - 1) * 8),
+    BANE_OF_ARTHROPODS(Enchantments.BANE_OF_ARTHROPODS, 5, Weight.UNCOMMON, MultiVersionCompat.V1_7_2, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.WEAPON_ENCHANTABLE, l -> 5 + (l - 1) * 8, l -> 25 + (l - 1) * 8),
+    KNOCKBACK(Enchantments.KNOCKBACK, 2, Weight.UNCOMMON, MultiVersionCompat.V1_7_2, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.MELEE_WEAPON_ENCHANTABLE, l -> 5 + (l - 1) * 20, l -> 55 + (l - 1) * 20),
+    FIRE_ASPECT(Enchantments.FIRE_ASPECT, 2, Weight.RARE, MultiVersionCompat.V1_7_2, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.FIRE_ASPECT_ENCHANTABLE, l -> 10 + (l - 1) * 20, l -> 40 + l * 20),
+    LOOTING(Enchantments.LOOTING, 3, Weight.RARE, MultiVersionCompat.V1_7_2, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.MELEE_WEAPON_ENCHANTABLE, l -> 15 + (l - 1) * 9, l -> 65 + (l - 1) * 9),
+    SWEEPING_EDGE(Enchantments.SWEEPING_EDGE, 3, Weight.RARE, MultiVersionCompat.V1_11_1, ItemTags.MELEE_WEAPON_ENCHANTABLE, ItemTags.MELEE_WEAPON_ENCHANTABLE, l -> 5 + (l - 1) * 9, l -> 20 + (l - 1) * 9),
     EFFICIENCY(Enchantments.EFFICIENCY, 5, Weight.COMMON, MultiVersionCompat.V1_7_2, ItemTags.MINING_ENCHANTABLE, ItemTags.MINING_ENCHANTABLE, l -> 1 + (l - 1) * 10, l -> 50 + l * 10),
     SILK_TOUCH(Enchantments.SILK_TOUCH, 1, Weight.VERY_RARE, MultiVersionCompat.V1_7_2, ItemTags.MINING_LOOT_ENCHANTABLE, ItemTags.MINING_LOOT_ENCHANTABLE, l -> 15, l -> 65),
     UNBREAKING(Enchantments.UNBREAKING, 3, Weight.UNCOMMON, MultiVersionCompat.V1_7_2, ItemTags.DURABILITY_ENCHANTABLE, ItemTags.DURABILITY_ENCHANTABLE, l -> 5 + (l - 1) * 8, l -> 55 + (l - 1) * 8),
@@ -120,7 +120,7 @@ public enum LegacyEnchantment {
         @MagicConstant(flagsFromClass = Flags.class) int... flags
     ) {
         this.enchantmentKey = enchantmentKey;
-        this.displayName = Component.translatable(enchantmentKey.location().toLanguageKey("enchantment"));
+        this.displayName = Component.translatable(enchantmentKey.identifier().toLanguageKey("enchantment"));
         this.maxLevel = maxLevel;
         this.weight = weight;
         this.introducedVersion = introducedVersion;
@@ -286,7 +286,7 @@ public enum LegacyEnchantment {
         }
     }
 
-    private record ExclusiveSet(EnumSet<LegacyEnchantment> set, @Nullable MinMaxBounds.Ints ignoreOnVersions) {
+    private record ExclusiveSet(EnumSet<LegacyEnchantment> set, MinMaxBounds.@Nullable Ints ignoreOnVersions) {
     }
 
     private static class Flags {

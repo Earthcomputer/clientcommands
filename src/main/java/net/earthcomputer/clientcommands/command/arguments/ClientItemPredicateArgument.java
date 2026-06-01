@@ -16,8 +16,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -64,7 +64,7 @@ public class ClientItemPredicateArgument implements ArgumentType<ClientItemPredi
             reader.skip();
             reader.skipWhitespace();
             int tagStart = reader.getCursor();
-            ResourceLocation tagId = ResourceLocation.read(reader);
+            Identifier tagId = Identifier.read(reader);
             reader.setCursor(start);
             TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagId);
             HolderSet<Item> tag = holderLookup.get(tagKey).orElseThrow(() -> {
@@ -73,7 +73,7 @@ public class ClientItemPredicateArgument implements ArgumentType<ClientItemPredi
             });
             return new TagPredicate(tag, delegate.parse(reader));
         } else {
-            ResourceLocation itemId = ResourceLocation.read(reader);
+            Identifier itemId = Identifier.read(reader);
             reader.setCursor(start);
             ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, itemId);
             Holder<Item> item = holderLookup.get(itemKey).orElseThrow(() -> INVALID_ITEM_ID_EXCEPTION.createWithContext(reader, itemId));

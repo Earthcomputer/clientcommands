@@ -10,7 +10,7 @@ import net.minecraft.core.Direction;
 import java.util.EnumSet;
 
 import static dev.xpple.clientarguments.arguments.CVec3Argument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class ChorusCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {

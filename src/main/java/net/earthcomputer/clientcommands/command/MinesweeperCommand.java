@@ -5,23 +5,27 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.earthcomputer.clientcommands.interfaces.ISafeZoneScreen;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class MinesweeperCommand {
     private static final SimpleCommandExceptionType TOO_MANY_MINES_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.cminesweeper.tooManyMines"));
@@ -52,8 +56,8 @@ public class MinesweeperCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static class MinesweeperGameScreen extends Screen {
-        private static final ResourceLocation MINESWEEPER_ATLAS = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/minesweeper_atlas.png");
+    private static class MinesweeperGameScreen extends Screen implements ISafeZoneScreen {
+        private static final Identifier MINESWEEPER_ATLAS = Identifier.fromNamespaceAndPath("clientcommands", "textures/minesweeper_atlas.png");
         private static final int MINESWEEPER_ATLAS_WIDTH = 128;
         private static final int MINESWEEPER_ATLAS_HEIGHT = 64;
 
@@ -82,7 +86,7 @@ public class MinesweeperCommand {
         private static final Vector2i SIX_TILE_UV = new Vector2i(36, 16);
         private static final Vector2i SEVEN_TILE_UV = new Vector2i(52, 16);
         private static final Vector2i EIGHT_TILE_UV = new Vector2i(68, 16);
-        private static final Vector2i[] WARNING_TILE_UV = new Vector2i[] {
+        private static final Vector2i[] WARNING_TILE_UV = new Vector2i[]{
             ONE_TILE_UV,
             TWO_TILE_UV,
             THREE_TILE_UV,
@@ -161,9 +165,11 @@ public class MinesweeperCommand {
         }
 
         @Override
-        public void render(GuiGraphics graphics, int mouseX, int mouseY, float tickDelta) {
-            graphics.drawString(minecraft.font, I18n.get("minesweeperGame.minesLeft", minesLeft), topLeftX, topLeftY - 10, 0xFFFFFFFF);
-            graphics.drawCenteredString(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFFFF);
+        public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+            super.extractRenderState(graphics, mouseX, mouseY, a);
+
+            graphics.text(minecraft.font, I18n.get("minesweeperGame.minesLeft", minesLeft), topLeftX, topLeftY - 10, 0xFFFFFFFF);
+            graphics.centeredText(minecraft.font, title.getString(), topLeftX + gameWidth / 2, topLeftY - 20, 0xFFFFFFFF);
             {
                 String str = I18n.get("minesweeperGame.timePlayed", Math.ceilDiv(ticksPlaying, 20));
                 int color;
@@ -174,7 +180,7 @@ public class MinesweeperCommand {
                 } else {
                     color = 0xFFFFFF;
                 }
-                graphics.drawString(minecraft.font, str, topLeftX + gameWidth - minecraft.font.width(str), topLeftY - 10, color);
+                graphics.text(minecraft.font, str, topLeftX + gameWidth - minecraft.font.width(str), topLeftY - 10, color);
             }
 
             blitSprite(graphics, TOP_LEFT_UV, 0, 0, 12, 12);
@@ -195,12 +201,12 @@ public class MinesweeperCommand {
             for (int x = 0; x < boardWidth; x++) {
                 for (int y = 0; y < boardHeight; y++) {
                     boolean hovered = Mth.floorDiv(mouseX - topLeftX - 12, 16) == x && Mth.floorDiv(mouseY - topLeftY - 12, 16) == y;
-                    blitSprite(graphics, getTileSprite(x, y, hovered),  x * 16 + 12, y * 16 + 12, 16, 16);
+                    blitSprite(graphics, getTileSprite(x, y, hovered), x * 16 + 12, y * 16 + 12, 16, 16);
                 }
             }
         }
 
-        public void blitSprite(GuiGraphics graphics, Vector2i uv, int x, int y, int width, int height) {
+        public void blitSprite(GuiGraphicsExtractor graphics, Vector2i uv, int x, int y, int width, int height) {
             graphics.blit(RenderPipelines.GUI_TEXTURED, MINESWEEPER_ATLAS, topLeftX + x, topLeftY + y, uv.x, uv.y, width, height, MINESWEEPER_ATLAS_WIDTH, MINESWEEPER_ATLAS_HEIGHT);
         }
 
@@ -212,26 +218,31 @@ public class MinesweeperCommand {
         }
 
         @Override
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
-            int tileX = Mth.floorDiv((int) (mouseX - topLeftX - 12), 16);
-            int tileY = Mth.floorDiv((int) (mouseY - topLeftY - 12), 16);
+        public boolean mouseReleased(MouseButtonEvent event) {
+            int tileX = Mth.floorDiv((int) (event.x() - topLeftX - 12), 16);
+            int tileY = Mth.floorDiv((int) (event.y() - topLeftY - 12), 16);
 
             if (isWithinBounds(tileX, tileY) && gameActive()) {
-                if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+                if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+                    byte tile = getTile(tileX, tileY);
                     if (ticksPlaying == 0) {
                         generateMines(tileX, tileY);
                         ticksPlaying = 1;
                     }
 
-                    click(tileX, tileY);
-
-                    assert minecraft != null && minecraft.player != null;
-                    if (emptyTilesRemaining <= 0) {
-                        minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.MASTER, 1.0f, 2.0f);
-                    } else if (deathCoords != null) {
-                        minecraft.player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1.0f, 1.0f);
+                    if (isCovered(tile)) {
+                        click(tileX, tileY);
+                    } else {
+                        click3x3(tileX, tileY);
                     }
-                } else if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
+
+                    assert minecraft.player != null && minecraft.level != null;
+                    if (emptyTilesRemaining <= 0) {
+                        minecraft.level.playSound(minecraft.player, minecraft.player.getX(), minecraft.player.getY(), minecraft.player.getZ(), SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.MASTER, 1.0f, 2.0f);
+                    } else if (deathCoords != null) {
+                        minecraft.level.playSound(minecraft.player, minecraft.player.getX(), minecraft.player.getY(), minecraft.player.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1.0f, 1.0f);
+                    }
+                } else if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                     flag(tileX, tileY);
                 }
             }
@@ -288,6 +299,14 @@ public class MinesweeperCommand {
             return 0 <= x && x < boardWidth && 0 <= y && y < boardHeight;
         }
 
+        private Stream<Vector2i> getNeighbors(int x, int y) {
+            return Stream.of(
+                new Vector2i(x - 1, y - 1), new Vector2i(x, y - 1), new Vector2i(x + 1, y - 1),
+                new Vector2i(x - 1, y), new Vector2i(x + 1, y),
+                new Vector2i(x - 1, y + 1), new Vector2i(x, y + 1), new Vector2i(x + 1, y + 1)
+            ).filter(pos -> isWithinBounds(pos.x, pos.y));
+        }
+
         private void click(int x, int y) {
             byte tile = getTile(x, y);
             if (!isCovered(tile) || isFlagged(tile)) {
@@ -305,39 +324,29 @@ public class MinesweeperCommand {
                 uncover(x, y);
                 emptyTilesRemaining--;
                 // we need to leave room for the current tile in the queue
-                int[] queue = new int[emptyTilesRemaining + 1];
-                int queueIdx = 0;
-                queue[0] = y * boardWidth + x;
-                while (queueIdx >= 0) {
-                    int idx = queue[queueIdx--];
+                IntArrayList queue = new IntArrayList(emptyTilesRemaining + 1);
+                queue.add(y * boardWidth + x);
+                while (!queue.isEmpty()) {
+                    int idx = queue.popInt();
                     int xPart = idx % boardWidth;
                     int yPart = idx / boardWidth;
-                    for (Vector2i possibleNeighbour : new Vector2i[]{
-                        new Vector2i(xPart - 1, yPart - 1),
-                        new Vector2i(xPart, yPart - 1),
-                        new Vector2i(xPart + 1, yPart - 1),
-
-                        new Vector2i(xPart - 1, yPart),
-                        new Vector2i(xPart + 1, yPart),
-
-                        new Vector2i(xPart - 1, yPart + 1),
-                        new Vector2i(xPart, yPart + 1),
-                        new Vector2i(xPart + 1, yPart + 1),
-                    }) {
-                        if (isWithinBounds(possibleNeighbour.x, possibleNeighbour.y)) {
-                            byte value = getTile(possibleNeighbour.x, possibleNeighbour.y);
-                            uncover(possibleNeighbour.x, possibleNeighbour.y);
-                            if (isCovered(value)) {
-                                emptyTilesRemaining--;
-                                // if it's an empty tile, we put it in the queue to go activate all its neighbours
-                                if (tileType(value) == EMPTY_TILE_TYPE) {
-                                    queue[++queueIdx] = possibleNeighbour.y * boardWidth + possibleNeighbour.x;
-                                }
+                    getNeighbors(xPart, yPart).forEach(neighbor -> {
+                        byte value = getTile(neighbor.x, neighbor.y);
+                        uncover(neighbor.x, neighbor.y);
+                        if (isCovered(value)) {
+                            emptyTilesRemaining--;
+                            // if it's an empty tile, we put it in the queue to go activate all its neighbors
+                            if (tileType(value) == EMPTY_TILE_TYPE) {
+                                queue.add(neighbor.y * boardWidth + neighbor.x);
                             }
                         }
-                    }
+                    });
                 }
             }
+        }
+
+        private void click3x3(int x, int y) {
+            getNeighbors(x, y).forEach(neighbor -> click(neighbor.x, neighbor.y));
         }
 
         private void flag(int x, int y) {
@@ -427,6 +436,16 @@ public class MinesweeperCommand {
             }
 
             return (byte) ((covered ? 0 : 1) | ((flagged ? 1 : 0) << 1) | (type << 2) | ((warningQuantity == null ? 0 : warningQuantity - 1) << 4));
+        }
+
+        @Override
+        public int getSafeZoneWidth() {
+            return gameWidth;
+        }
+
+        @Override
+        public int getSafeZoneHeight() {
+            return gameHeight;
         }
     }
 }

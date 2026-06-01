@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.c2c;
 
 import com.mojang.logging.LogUtils;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.crypto.Cipher;
@@ -96,7 +96,7 @@ public class ConversionHelper {
      * @author Wagyourtail
      */
     public static class Gzip {
-        public static byte @Nullable [] compress(byte[] bytes) {
+        public static byte @Nullable [] compress(byte @Nullable [] bytes) {
             if (bytes == null || bytes.length == 0) {
                 return null;
             }
@@ -110,7 +110,7 @@ public class ConversionHelper {
             return out.toByteArray();
         }
 
-        public static byte @Nullable [] decompress(byte[] bytes) {
+        public static byte @Nullable [] decompress(byte @Nullable [] bytes) {
             if (bytes == null || bytes.length == 0) {
                 return null;
             }
@@ -131,7 +131,7 @@ public class ConversionHelper {
     }
 
     public static class RsaEcb {
-        public static byte[] encrypt(byte[] bytes, PublicKey key) {
+        public static byte @Nullable [] encrypt(byte[] bytes, PublicKey key) {
             try {
                 Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -142,7 +142,7 @@ public class ConversionHelper {
             }
         }
 
-        public static byte[] decrypt(byte[] bytes, PrivateKey key) {
+        public static byte @Nullable [] decrypt(byte[] bytes, PrivateKey key) {
             try {
                 Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipher.init(Cipher.DECRYPT_MODE, key);

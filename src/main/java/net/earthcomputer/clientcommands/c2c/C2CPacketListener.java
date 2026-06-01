@@ -1,9 +1,13 @@
 package net.earthcomputer.clientcommands.c2c;
 
+import net.earthcomputer.clientcommands.c2c.packets.ChessDrawOfferC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.ChessMoveC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.ChessResignC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.MessageC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutConnectFourPieceC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.PutTicTacToeMarkC2CPacket;
 import net.earthcomputer.clientcommands.c2c.packets.StartTwoPlayerGameC2CPacket;
+import net.earthcomputer.clientcommands.c2c.packets.StopTwoPlayerGameC2CPacket;
 import net.minecraft.network.ClientboundPacketListener;
 
 public interface C2CPacketListener extends ClientboundPacketListener {
@@ -11,7 +15,15 @@ public interface C2CPacketListener extends ClientboundPacketListener {
 
     void onStartTwoPlayerGameC2CPacket(StartTwoPlayerGameC2CPacket packet);
 
+    void onStopTwoPlayerGameC2CPacket(StopTwoPlayerGameC2CPacket packet);
+
     void onPutTicTacToeMarkC2CPacket(PutTicTacToeMarkC2CPacket packet);
 
     void onPutConnectFourPieceC2CPacket(PutConnectFourPieceC2CPacket packet);
+
+    void onChessResignPacket(ChessResignC2CPacket packet);
+
+    void onChessMovePacket(ChessMoveC2CPacket packet);
+
+    void onChessDrawOfferPacket(ChessDrawOfferC2CPacket packet);
 }

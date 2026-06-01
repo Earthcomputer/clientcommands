@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
-    @ModifyExpressionValue(method = "runTick", at = @At(value = "CONSTANT", args = "intValue=" + Options.UNLIMITED_FRAMERATE_CUTOFF))
+    @ModifyExpressionValue(method = "renderFrame", at = @At(value = "CONSTANT", args = "intValue=" + Options.UNLIMITED_FRAMERATE_CUTOFF))
     private int fixMaxFps(int fps) {
         if (Configs.overriddenFps > 0) {
             return Integer.MAX_VALUE;

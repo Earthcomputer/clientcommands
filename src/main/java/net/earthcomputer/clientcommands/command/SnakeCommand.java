@@ -2,16 +2,18 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import net.earthcomputer.clientcommands.interfaces.ISafeZoneScreen;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
@@ -20,7 +22,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class SnakeCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -40,11 +42,11 @@ public class SnakeCommand {
     }
 }
 
-class SnakeGameScreen extends Screen {
+class SnakeGameScreen extends Screen implements ISafeZoneScreen {
 
     private static final Minecraft minecraft = Minecraft.getInstance();
 
-    private static final ResourceLocation GRID_TEXTURE = ResourceLocation.fromNamespaceAndPath("clientcommands", "textures/snake_grid.png");
+    private static final Identifier GRID_TEXTURE = Identifier.fromNamespaceAndPath("clientcommands", "textures/snake_grid.png");
 
     private static final Random random = new Random();
 
@@ -77,14 +79,15 @@ class SnakeGameScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.renderBackground(graphics, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractRenderState(graphics, mouseX, mouseY, a);
+
         int startX = (this.width - BOARD_SIZE) / 2;
         int startY = (this.height - BOARD_SIZE) / 2;
 
-        graphics.drawString(minecraft.font, this.title, startX, startY - 10, 0xff_ffffff);
+        graphics.text(minecraft.font, this.title, startX, startY - 10, 0xff_ffffff);
         MutableComponent score = Component.translatable("snakeGame.score", this.snake.size());
-        graphics.drawCenteredString(minecraft.font, score, this.width / 2, startY - 10, 0xff_ffffff);
+        graphics.centeredText(minecraft.font, score, this.width / 2, startY - 10, 0xff_ffffff);
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, GRID_TEXTURE, startX, startY, 0, 0, BOARD_SIZE, BOARD_SIZE, BOARD_SIZE, BOARD_SIZE);
         int scaleX = MAX_X + 1;
@@ -96,17 +99,17 @@ class SnakeGameScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (minecraft.options.keyUp.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_UP) {
+    public boolean keyPressed(KeyEvent event) {
+        if (minecraft.options.keyUp.matches(event) || event.key() == GLFW.GLFW_KEY_UP) {
             return this.setDirection(Direction.NORTH);
-        } else if (minecraft.options.keyLeft.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_LEFT) {
+        } else if (minecraft.options.keyLeft.matches(event) || event.key() == GLFW.GLFW_KEY_LEFT) {
             return this.setDirection(Direction.WEST);
-        } else if (minecraft.options.keyDown.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_DOWN) {
+        } else if (minecraft.options.keyDown.matches(event) || event.key() == GLFW.GLFW_KEY_DOWN) {
             return this.setDirection(Direction.SOUTH);
-        } else if (minecraft.options.keyRight.matches(keyCode, scanCode) || keyCode == GLFW.GLFW_KEY_RIGHT) {
+        } else if (minecraft.options.keyRight.matches(event) || event.key() == GLFW.GLFW_KEY_RIGHT) {
             return this.setDirection(Direction.EAST);
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     private void move() {
@@ -153,5 +156,15 @@ class SnakeGameScreen extends Screen {
         }
         this.direction = direction;
         return true;
+    }
+
+    @Override
+    public int getSafeZoneWidth() {
+        return 16 + BOARD_SIZE + 16;
+    }
+
+    @Override
+    public int getSafeZoneHeight() {
+        return 16 + BOARD_SIZE + 16;
     }
 }

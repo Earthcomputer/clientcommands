@@ -4,22 +4,28 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.seedfinding.mcbiome.biome.Biomes;
 import com.seedfinding.mccore.version.MCVersion;
-import net.minecraft.Util;
+import com.seedfinding.mcfeature.loot.effect.Effect;
+import com.seedfinding.mcfeature.loot.effect.Effects;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Util;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -65,12 +71,45 @@ public class SeedfindingUtil {
         map.put(Enchantments.VANISHING_CURSE, "vanishing_curse");
     });
 
+    private static final BiMap<Holder<MobEffect>, Effect> SEEDFINDING_EFFECTS = Util.make(HashBiMap.create(), map -> {
+        map.put(MobEffects.SPEED, Effects.MOVEMENT_SPEED);
+        map.put(MobEffects.SLOWNESS, Effects.MOVEMENT_SLOWDOWN);
+        map.put(MobEffects.HASTE, Effects.DIG_SPEED);
+        map.put(MobEffects.MINING_FATIGUE, Effects.DIG_SLOWDOWN);
+        map.put(MobEffects.STRENGTH, Effects.DAMAGE_BOOST);
+        map.put(MobEffects.INSTANT_HEALTH, Effects.HEAL);
+        map.put(MobEffects.INSTANT_DAMAGE, Effects.HARM);
+        map.put(MobEffects.JUMP_BOOST, Effects.JUMP);
+        map.put(MobEffects.NAUSEA, Effects.CONFUSION);
+        map.put(MobEffects.REGENERATION, Effects.REGENERATION);
+        map.put(MobEffects.RESISTANCE, Effects.DAMAGE_RESISTANCE);
+        map.put(MobEffects.FIRE_RESISTANCE, Effects.FIRE_RESISTANCE);
+        map.put(MobEffects.WATER_BREATHING, Effects.WATER_BREATHING);
+        map.put(MobEffects.INVISIBILITY, Effects.INVISIBILITY);
+        map.put(MobEffects.BLINDNESS, Effects.BLINDNESS);
+        map.put(MobEffects.NIGHT_VISION, Effects.NIGHT_VISION);
+        map.put(MobEffects.HUNGER, Effects.HUNGER);
+        map.put(MobEffects.WEAKNESS, Effects.WEAKNESS);
+        map.put(MobEffects.POISON, Effects.POISON);
+        map.put(MobEffects.WITHER, Effects.WITHER);
+        map.put(MobEffects.HEALTH_BOOST, Effects.HEALTH_BOOST);
+        map.put(MobEffects.ABSORPTION, Effects.ABSORPTION);
+        map.put(MobEffects.SATURATION, Effects.SATURATION);
+        map.put(MobEffects.GLOWING, Effects.GLOWING);
+        map.put(MobEffects.LEVITATION, Effects.LEVITATION);
+        map.put(MobEffects.LUCK, Effects.LUCK);
+        map.put(MobEffects.UNLUCK, Effects.UNLUCK);
+        map.put(MobEffects.SLOW_FALLING, Effects.SLOW_FALLING);
+        map.put(MobEffects.CONDUIT_POWER, Effects.CONDUIT_POWER);
+        map.put(MobEffects.DOLPHINS_GRACE, Effects.DOLPHINS_GRACE);
+        map.put(MobEffects.BAD_OMEN, Effects.BAD_OMEN);
+    });
+
     private SeedfindingUtil() {
     }
 
-    @Nullable
-    public static com.seedfinding.mcbiome.biome.Biome toSeedfindingBiome(Level level, Holder<Biome> biome) {
-        ResourceLocation name = level.registryAccess().lookupOrThrow(Registries.BIOME).getKey(biome.value());
+    public static com.seedfinding.mcbiome.biome.@Nullable Biome toSeedfindingBiome(Level level, Holder<Biome> biome) {
+        Identifier name = level.registryAccess().lookupOrThrow(Registries.BIOME).getKey(biome.value());
         if (name == null || !"minecraft".equals(name.getNamespace())) {
             return null;
         }
@@ -87,7 +126,7 @@ public class SeedfindingUtil {
     }
 
     public static ItemStack fromSeedfindingItem(com.seedfinding.mcfeature.loot.item.ItemStack stack, RegistryAccess registryAccess) {
-        Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.withDefaultNamespace(stack.getItem().getName()));
+        Item item = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(stack.getItem().getName()));
         if (!stack.getItem().getEnchantments().isEmpty() && item == Items.BOOK) {
             item = Items.ENCHANTED_BOOK;
         }
@@ -100,6 +139,12 @@ public class SeedfindingUtil {
             enchantmentRegistry.get(enchKey).ifPresent(enchantment -> {
                 ret.enchant(enchantment, enchAndLevel.getSecond());
             });
+        }
+
+        for (var effectAndDuration : stack.getItem().getEffects()) {
+            Holder<MobEffect> effectHolder = Objects.requireNonNull(SEEDFINDING_EFFECTS.inverse().get(effectAndDuration.getFirst()), () -> "missing seedfinding effect " + effectAndDuration.getFirst());
+            SuspiciousStewEffects.Entry entry = new SuspiciousStewEffects.Entry(effectHolder, effectAndDuration.getSecond());
+            ret.update(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY, entry, SuspiciousStewEffects::withEffectAdded);
         }
         return ret;
     }

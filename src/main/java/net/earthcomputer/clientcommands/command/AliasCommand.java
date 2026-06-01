@@ -13,7 +13,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.util.BrigadierRemover;
 import net.earthcomputer.clientcommands.interfaces.IClientSuggestionsProvider_Alias;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
@@ -32,7 +31,7 @@ import java.util.IllegalFormatException;
 import java.util.regex.Pattern;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class AliasCommand {
 
@@ -124,14 +123,14 @@ public class AliasCommand {
         if (aliasMap.containsKey(key)) {
             throw ALIAS_EXISTS_EXCEPTION.create(key);
         }
-        if (ClientCommandManager.getActiveDispatcher().getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
+        if (getActiveDispatcher().getRoot().getChildren().stream().map(CommandNode::getName).anyMatch(literal -> literal.equals(key))) {
             throw COMMAND_EXISTS_EXCEPTION.create(key);
         }
         if (!command.startsWith("/")) {
             command = "/" + command;
         }
 
-        for (CommandDispatcher<FabricClientCommandSource> dispatcher : new CommandDispatcher[] { ClientCommandManager.getActiveDispatcher(), Minecraft.getInstance().getConnection().getCommands() }) {
+        for (CommandDispatcher<FabricClientCommandSource> dispatcher : new CommandDispatcher[] { getActiveDispatcher(), Minecraft.getInstance().getConnection().getCommands() }) {
             dispatcher.register(literal(key)
                     .executes(ctx -> executeAliasCommand(source, key, null))
                     .then(argument("arguments", greedyString())
@@ -159,7 +158,7 @@ public class AliasCommand {
 
     private static int removeAlias(FabricClientCommandSource source, String key) throws CommandSyntaxException {
         if (aliasMap.containsKey(key)) {
-            BrigadierRemover.of(ClientCommandManager.getActiveDispatcher()).get(key).remove();
+            BrigadierRemover.of(getActiveDispatcher()).get(key).remove();
             BrigadierRemover.of(Minecraft.getInstance().getConnection().getCommands()).get(key).remove();
             aliasMap.remove(key);
         } else {

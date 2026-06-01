@@ -61,7 +61,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -317,7 +317,7 @@ public class FishingCracker {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null && canManipulateFishing()) {
                 if (packet.getData() == player.getId() && packet.getType() == EntityType.FISHING_BOBBER) {
-                    processBobberSpawn(packet.getUUID(), new Vec3(packet.getX(), packet.getY(), packet.getZ()), new Vec3(packet.getXa(), packet.getYa(), packet.getZa()));
+                    processBobberSpawn(packet.getUUID(), new Vec3(packet.getX(), packet.getY(), packet.getZ()), packet.getMovement());
                 }
             }
         });

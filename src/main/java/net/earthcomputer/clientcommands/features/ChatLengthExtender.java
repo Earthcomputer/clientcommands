@@ -1,7 +1,7 @@
 package net.earthcomputer.clientcommands.features;
 
 import net.earthcomputer.clientcommands.ClientCommands;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ChatLengthExtender {
     public static final int EXTENDED_LENGTH = 32767;

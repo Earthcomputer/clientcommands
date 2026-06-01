@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -9,12 +10,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static dev.xpple.clientarguments.arguments.CBlockPosArgument.*;
 import static dev.xpple.clientarguments.arguments.CDimensionArgument.*;
-import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class PosCommand {
     // Syntax: "/cpos [to|from <dimension>] [from|to <dimension>] [<pos>]"
@@ -84,7 +84,7 @@ public class PosCommand {
             "commands.cpos.coords",
             getCoordsTextComponent(pos),
             sourceWorldName,
-            getLookCoordsTextComponent(targetPos),
+            CComponentUtil.getLookCoordsTextComponent(targetPos),
             targetWorldName)
         );
 
@@ -122,11 +122,11 @@ public class PosCommand {
      * if that fails.
      */
     private static String getLevelName(ResourceKey<Level> level) {
-        String levelNameKey = "commands.cpos.level." + level.location().getPath();
+        String levelNameKey = "commands.cpos.level." + level.identifier().getPath();
         if (I18n.exists(levelNameKey)) {
             return I18n.get(levelNameKey);
         } else {
-            return level.location().getPath();
+            return level.identifier().getPath();
         }
     }
 

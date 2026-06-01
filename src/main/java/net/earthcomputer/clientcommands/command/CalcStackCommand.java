@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static dev.xpple.clientarguments.arguments.CItemArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CalcStackCommand {
 
@@ -19,7 +19,7 @@ public class CalcStackCommand {
             .then(argument("count", integer(0))
                 .then(argument("item", itemStack(context))
                 .executes(ctx -> {
-                    ItemStack stack = getItemStackArgument(ctx, "item").createItemStack(1, false);
+                    ItemStack stack = getItemStackArgument(ctx, "item").createItemStack(1);
                     return getStackSize(ctx.getSource(), stack, getInteger(ctx, "count"));
                 }))
             .executes(ctx -> getStackSize(ctx.getSource(), getInteger(ctx, "count")))));

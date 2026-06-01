@@ -13,6 +13,31 @@
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted": "%s has accepted your invitation to %s",
   "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept": "Accepted the invitation, your opponent will go first",
   "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited": "You invited %s to a game of %s",
+  "c2cpacket.stopTwoPlayerGameC2CPacket.incoming": "%s has stopped the game of %s with you",
+
+  "chessGame.acceptDraw": "Accept draw",
+  "chessGame.checkmate.lost": "Checkmate! You lost",
+  "chessGame.checkmate.won": "Checkmate! You win!",
+  "chessGame.copyFen": "Copy FEN",
+  "chessGame.copyFen.success": "Copied FEN: %s",
+  "chessGame.copyPgn": "Copy PGN",
+  "chessGame.copyPgn.success": "Copied PGN: %s",
+  "chessGame.draw.agreement": "The game ended in a draw by agreement",
+  "chessGame.draw.fiftyMoves": "The game ended in a draw by the fifty move rule",
+  "chessGame.draw.insufficientMaterial": "The game ended in a draw by insufficient material",
+  "chessGame.draw.repetition": "The game ended in a draw by repetition",
+  "chessGame.draw.stalemate": "Stalemate! The game ended in a draw",
+  "chessGame.drawOfferAccepted": "%s accepted your draw offer",
+  "chessGame.drawOffered": "%s offered a draw",
+  "chessGame.drawOfferRetracted": "%s retracted their draw offer",
+  "chessGame.offerDraw": "Offer draw",
+  "chessGame.opponentMoved": "%s has played %s. %s",
+  "chessGame.opponentResigned": "%s resigned, you win!",
+  "chessGame.resign": "Resign",
+  "chessGame.retractDrawOffer": "Retract draw offer",
+  "chessGame.title": "Chess against %s",
+  "chessGame.youMoved": "You played %s",
+  "chessGame.youResigned": "You resigned",
 
   "chorusManip.goalTooFar": "Goal is too far away!",
   "chorusManip.landing.failed": "Landing manipulation not possible",
@@ -63,6 +88,8 @@
   "commands.ccalcstack.success.exact": "%s %s is exactly %s stacks",
 
   "commands.ccallback.failed": "Unknown or expired callback",
+
+  "commands.cchess.name": "Chess",
 
   "commands.cconnectfour.name": "Connect Four",
 
@@ -138,6 +165,7 @@
   "commands.cfps.setMaxFps.unlimited": "Set max FPS to unlimited",
 
   "commands.cfunction.limitReached": "Command limit (%s) reached",
+  "commands.cfunction.noActiveDispatcher": "No active command dispatcher",
   "commands.cfunction.success": "Ran %s commands from function %s",
 
   "commands.cgamemode.listWithGameMode": "The following players are in game mode %s:",
@@ -180,6 +208,7 @@
   "commands.client.componentTooDeeplyNested": "Chat component too deeply nested",
   "commands.client.crack": "Crack",
   "commands.client.enable": "Enable",
+  "commands.client.excluding": "Invalid argument; excluded",
   "commands.client.expectedRegex": "Invalid regex %s",
   "commands.client.glow": "[Glow]",
   "commands.client.invalidArgumentException": "Invalid argument '%s'",
@@ -234,7 +263,18 @@
   "commands.cpos.level.the_end": "the End",
   "commands.cpos.level.the_nether": "the Nether",
 
+  "commands.cposteffect.apply.success": "Successfully applied post effect %s",
+  "commands.cposteffect.reset.success": "Successfully reset post effect",
+  "commands.cposteffect.unknownPostEffect": "Unknown post effect %s",
+
+  "commands.cpredictbrushables.foundBrushableBlock": "Found %s at %s with item %s %s",
+  "commands.cpredictbrushables.notFound": "No brushable blocks found",
+  "commands.cpredictbrushables.starting": "Searching for brushable blocks",
+  "commands.cpredictbrushables.starting.keepSearching": "Infinitely searching for brushable blocks [%s]",
+  "commands.cpredictbrushables.stewEffect": "%s (%s seconds)",
+
   "commands.crelog.failed": "Failed to relog",
+  "commands.crelog.retry": "Retrying in %s seconds...",
 
   "commands.crender.entities.success": "Entity rendering rules have been updated",
 
@@ -307,6 +347,7 @@
 
   "commands.cwiki.failed": "Could not retrieve wiki content",
   "commands.cwiki.noContent": "There is no introductory paragraph in that article",
+  "commands.cwiki.openArticle": "[Open article]",
 
   "connectFourGame.draw": "Draw!",
   "connectFourGame.lost": "Lost!",
@@ -371,6 +412,7 @@
   "playerManip.reset.recreated": "Player Recreated",
   "playerManip.reset.respiration": "Respiration Helmet Used",
   "playerManip.reset.shield": "Blocked with Shield",
+  "playerManip.reset.shoulderParrot": "Parrot on Shoulder",
   "playerManip.reset.soulSpeed": "Soul Speed Used",
   "playerManip.reset.sprint": "Sprinted",
   "playerManip.reset.swim": "Swum",
@@ -399,11 +441,13 @@
   "ticTacToeGame.playingWith": "You are playing with %s",
   "ticTacToeGame.title": "Tic-tac-toe against %s",
 
+  "twoPlayerGame.alreadyInGame": "You are already in a game with that player",
   "twoPlayerGame.chat.draw": "You've made a move and drawn against %s in %s",
   "twoPlayerGame.chat.lost": "%s has made a move in %s and won",
   "twoPlayerGame.chat.won": "You made a move in %s and beat %s!",
   "twoPlayerGame.clickToMakeYourMove": "Click here to make your move",
   "twoPlayerGame.incoming": "%s has made a move in %s",
   "twoPlayerGame.noGameWithPlayer": "Currently not playing a game with that player",
-  "twoPlayerGame.playerNotFound": "Player not found"
+  "twoPlayerGame.playerNotFound": "Player not found",
+  "twoPlayerGame.stopped": "You stopped playing the game of %s with %s"
 }

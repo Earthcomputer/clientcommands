@@ -18,7 +18,6 @@ import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.ServerBrandManager;
 import net.earthcomputer.clientcommands.features.Waypoints;
 import net.earthcomputer.clientcommands.render.RenderQueue;
-import net.earthcomputer.clientcommands.util.MappingsHelper;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -75,10 +74,8 @@ public class ClientCommands implements ClientModInitializer {
         Waypoints.migrateWaypoints();
         SimpleWaypointsAPI.getInstance().registerCommandAlias("cwaypoint");
 
-        MappingsHelper.load();
-
         // Registration
-        PayloadTypeRegistry.playC2S().register(CommandExecutionCustomPayload.TYPE, CommandExecutionCustomPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(CommandExecutionCustomPayload.TYPE, CommandExecutionCustomPayload.CODEC);
         CreativeTabCommand.registerCreativeTabs();
 
         // Events
@@ -136,6 +133,7 @@ public class ClientCommands implements ClientModInitializer {
         CalcCommand.register(dispatcher);
         CalcStackCommand.register(dispatcher, context);
         CallbackCommand.register(dispatcher);
+        ChessCommand.register(dispatcher);
         CDebugCommand.register(dispatcher);
         CEnchantCommand.register(dispatcher, context);
         CFunctionCommand.register(dispatcher);
@@ -175,6 +173,8 @@ public class ClientCommands implements ClientModInitializer {
         // PlayerInfoCommand.register(dispatcher);
         PluginsCommand.register(dispatcher);
         PosCommand.register(dispatcher);
+        PostEffectCommand.register(dispatcher);
+        PredictBrushablesCommand.register(dispatcher);
         RelogCommand.register(dispatcher);
         RenderCommand.register(dispatcher);
         ReplyCommand.register(dispatcher);
@@ -193,6 +193,7 @@ public class ClientCommands implements ClientModInitializer {
         WeatherCommand.register(dispatcher);
         WhisperEncryptedCommand.register(dispatcher);
         WikiCommand.register(dispatcher);
+        WindowSizeCommand.register(dispatcher);
 
         Calendar calendar = Calendar.getInstance();
         boolean registerChatCommand = calendar.get(Calendar.MONTH) == Calendar.APRIL && calendar.get(Calendar.DAY_OF_MONTH) == 1;

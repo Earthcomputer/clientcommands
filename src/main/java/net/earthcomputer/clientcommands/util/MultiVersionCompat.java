@@ -6,10 +6,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.Connection;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 
@@ -39,6 +39,7 @@ public abstract sealed class MultiVersionCompat {
     public static final int V1_20_6 = 766;
     public static final int V1_21 = 767;
     public static final int V1_21_2 = 768;
+    public static final int V1_21_9 = 773;
 
     public abstract int getProtocolVersion();
 

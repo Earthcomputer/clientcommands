@@ -18,7 +18,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Arrays;
@@ -37,7 +38,8 @@ public final class CUtil {
         return regex.matcher(new FusedRegexInput(regex, input)).find();
     }
 
-    @NotNull
+    @SuppressWarnings("NullableProblems")
+    @NonNull
     public static RuntimeException sneakyThrow(Throwable e) {
         CUtil.sneakyThrowHelper(e);
         return null;
@@ -49,7 +51,7 @@ public final class CUtil {
     }
 
     public static <L, R> void forEither(Either<L, R> either, Consumer<? super L> left, Consumer<? super R> right) {
-        either.<Void>map(l -> {
+        either.<@Nullable Void>map(l -> {
             left.accept(l);
             return null;
         }, r -> {
@@ -116,7 +118,6 @@ public final class CUtil {
             return delegate.charAt(i);
         }
 
-        @NotNull
         @Override
         public CharSequence subSequence(int start, int end) {
             return new FusedRegexInput(startTime, regex, delegate.subSequence(start, end));
@@ -128,7 +129,6 @@ public final class CUtil {
             }
         }
 
-        @NotNull
         @Override
         public String toString() {
             return delegate.toString();

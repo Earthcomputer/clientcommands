@@ -8,7 +8,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 
 import static dev.xpple.clientarguments.arguments.CTimeArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class CTimeCommand {
 
@@ -38,19 +38,19 @@ public class CTimeCommand {
     }
 
     private static int executeQueryDay(FabricClientCommandSource source) {
-        return executeQuery(source, (int) (source.getWorld().getDayTime() / SharedConstants.TICKS_PER_GAME_DAY % 2147483647L));
+        return executeQuery(source, (int) (source.getLevel().getOverworldClockTime() / SharedConstants.TICKS_PER_GAME_DAY % 2147483647L));
     }
 
     private static int executeQueryDayTime(FabricClientCommandSource source) {
-        return executeQuery(source, (int) (source.getWorld().getDayTime() % SharedConstants.TICKS_PER_GAME_DAY));
+        return executeQuery(source, (int) (source.getLevel().getOverworldClockTime() % SharedConstants.TICKS_PER_GAME_DAY));
     }
 
     private static int executeQueryGameTime(FabricClientCommandSource source) {
-        return executeQuery(source, (int) (source.getWorld().getGameTime() % 2147483647L));
+        return executeQuery(source, (int) (source.getLevel().getGameTime() % 2147483647L));
     }
 
     private static int executeQuery(FabricClientCommandSource source, int time) {
-        source.sendFeedback(Component.translatable("commands.time.query", time));
+        source.sendFeedback(Component.translatable("commands.time.query.timeline", "minecraft:overworld", time));
         return time;
     }
 

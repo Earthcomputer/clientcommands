@@ -1,5 +1,7 @@
 package net.earthcomputer.clientcommands.mixin.commands.fish;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -11,7 +13,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FishingHook.class)
@@ -23,11 +24,12 @@ public abstract class FishingHookMixin extends Entity {
         super(type, world);
     }
 
-    @Inject(method = "tick",
-            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/projectile/FishingHook;outOfWaterTime:I", ordinal = 0)),
-            at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", remap = false, ordinal = 0))
+    @Definition(id = "min", method = "Ljava/lang/Math;min(II)I")
+    @Definition(id = "outOfWaterTime", field = "Lnet/minecraft/world/entity/projectile/FishingHook;outOfWaterTime:I")
+    @Expression("min(10, this.outOfWaterTime + 1)")
+    @Inject(method = "tick", at = @At("MIXINEXTRAS:EXPRESSION"))
     private void onBobOutOfWater(CallbackInfo ci) {
-        if (FishingCracker.canManipulateFishing() && level().isClientSide && getPlayerOwner() == Minecraft.getInstance().player) {
+        if (FishingCracker.canManipulateFishing() && level().isClientSide() && getPlayerOwner() == Minecraft.getInstance().player) {
             FishingCracker.onBobOutOfWater();
         }
     }

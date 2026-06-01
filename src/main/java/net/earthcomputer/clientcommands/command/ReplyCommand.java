@@ -9,13 +9,13 @@ import net.earthcomputer.clientcommands.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static dev.xpple.clientarguments.arguments.CMessageArgument.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class ReplyCommand {
     public static final float MAXIMUM_REPLY_DELAY_SECONDS = 300.0f;

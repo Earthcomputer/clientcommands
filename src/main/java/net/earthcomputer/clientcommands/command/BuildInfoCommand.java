@@ -6,7 +6,7 @@ import net.earthcomputer.clientcommands.util.BuildInfo;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class BuildInfoCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
