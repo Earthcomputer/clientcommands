@@ -189,25 +189,25 @@ public class ListenCommand {
             case Collection<?> collection -> {
                 MutableComponent component = Component.literal("[");
                 component.append(collection.stream().map(e -> asMutable(serialize(e, seen, depth + 1))).reduce((l, r) -> l.append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR).append(r)).orElseGet(Component::empty));
-                yield component.append(Component.literal("]"));
+                yield component.append("]");
             }
             case Map<?, ?> map -> {
                 MutableComponent component = Component.literal("{");
-                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append(Component.literal("=")).append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR).append(r)).orElseGet(Component::empty));
-                yield component.append(Component.literal("}"));
+                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append("=").append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR).append(r)).orElseGet(Component::empty));
+                yield component.append("}");
             }
             case Registry<?> registry -> Component.translationArg(registry.key().identifier());
             case ResourceKey<?> resourceKey -> {
                 MutableComponent component = Component.literal("{");
                 component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
                 component.append("identifier=").append(serialize(resourceKey.identifier(), seen, depth + 1));
-                yield component.append(Component.literal("}"));
+                yield component.append("}");
             }
             case Holder<?> holder -> {
                 MutableComponent component = Component.literal("{");
                 component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
                 component.append("value=").append(serialize(holder.value(), seen, depth + 1));
-                yield component.append(Component.literal("}"));
+                yield component.append("}");
             }
             case BlockState state -> {
                 MutableComponent component = asMutable(serialize(state.getBlock(), seen, depth));
@@ -224,12 +224,12 @@ public class ListenCommand {
                     MutableComponent component = Component.literal("[");
                     int lengthMinusOne = Array.getLength(object) - 1;
                     if (lengthMinusOne < 0) {
-                        yield component.append(Component.literal("]"));
+                        yield component.append("]");
                     }
                     for (int i = 0; i < lengthMinusOne; i++) {
                         component.append(serialize(Array.get(object, i), seen, depth + 1)).append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
                     }
-                    yield component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append(Component.literal("]"));
+                    yield component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append("]");
                 }
 
                 String className = object.getClass().getName().replace(".", "/");
@@ -258,7 +258,7 @@ public class ListenCommand {
                     })
                     .reduce((l, r) -> l.append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR).append(r))
                     .orElseGet(Component::empty));
-                yield component.append(Component.literal("}"));
+                yield component.append("}");
             }
         };
     }
