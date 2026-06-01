@@ -223,7 +223,6 @@
   "commands.clisten.add.failed": "Already listening to that packet",
   "commands.clisten.add.success": "Successfully started listening to that packet",
   "commands.clisten.clear": "No longer listening to any packets",
-  "commands.clisten.commandDisabled": "The command was disabled, check your logs",
   "commands.clisten.list": "Listening to the following packets:",
   "commands.clisten.list.none": "Not listening to any packets",
   "commands.clisten.packetError": "ERROR",

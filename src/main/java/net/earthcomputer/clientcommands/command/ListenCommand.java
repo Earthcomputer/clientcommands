@@ -57,20 +57,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class ListenCommand {
 
-    private static volatile boolean isEnabled = true;
-
-    public static void disable() {
-        isEnabled = false;
-    }
-
-    private static final SimpleCommandExceptionType COMMAND_DISABLED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.commandDisabled"));
     private static final SimpleCommandExceptionType ALREADY_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.add.failed"));
     private static final SimpleCommandExceptionType NOT_LISTENING_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.clisten.remove.failed"));
-
-    private static final Component SQUARE_BRACKET = Component.literal("]");
-    private static final Component CURLY_BRACKET = Component.literal("}");
-    private static final Component EQUALS = Component.literal("=");
-    private static final Component SEPARATOR = ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR;
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -93,7 +81,6 @@ public class ListenCommand {
     }
 
     private static int add(FabricClientCommandSource source, Identifier packetType) throws CommandSyntaxException {
-        checkEnabled();
         if (!packets.add(packetType)) {
             throw ALREADY_LISTENING_EXCEPTION.create();
         }
@@ -145,7 +132,6 @@ public class ListenCommand {
     }
 
     private static int remove(FabricClientCommandSource source, Identifier packetType) throws CommandSyntaxException {
-        checkEnabled();
         if (!packets.remove(packetType)) {
             throw NOT_LISTENING_EXCEPTION.create();
         }
@@ -155,7 +141,6 @@ public class ListenCommand {
     }
 
     private static int list(FabricClientCommandSource source) throws CommandSyntaxException {
-        checkEnabled();
         int amount = packets.size();
         if (amount == 0) {
             source.sendFeedback(Component.translatable("commands.clisten.list.none"));
@@ -170,17 +155,10 @@ public class ListenCommand {
     }
 
     private static int clear(FabricClientCommandSource source) throws CommandSyntaxException {
-        checkEnabled();
         int amount = packets.size();
         packets.clear();
         source.sendFeedback(Component.translatable("commands.clisten.clear"));
         return amount;
-    }
-
-    private static void checkEnabled() throws CommandSyntaxException {
-        if (!isEnabled) {
-            throw COMMAND_DISABLED_EXCEPTION.create();
-        }
     }
 
     private static Component serialize(@Nullable Object object, Set<@Nullable Object> seen, int depth) {
@@ -201,7 +179,7 @@ public class ListenCommand {
             case String string -> Component.literal(string);
             case Number number -> Component.literal(number.toString());
             case Boolean bool -> Component.literal(bool.toString());
-            case Optional<?> optional -> optional.isPresent() ? serialize(optional.get(), seen, depth + 1) : Component.literal("empty");
+            case Optional<?> optional -> optional.map(o -> serialize(o, seen, depth + 1)).orElseGet(() -> Component.literal("empty"));
             case Date date -> Component.translationArg(date);
             case Instant instant -> Component.translationArg(Date.from(instant));
             case UUID uuid -> Component.translationArg(uuid);
@@ -210,26 +188,26 @@ public class ListenCommand {
             case Message message -> Component.translationArg(message);
             case Collection<?> collection -> {
                 MutableComponent component = Component.literal("[");
-                component.append(collection.stream().map(e -> asMutable(serialize(e, seen, depth + 1))).reduce((l, r) -> l.append(SEPARATOR).append(r)).orElseGet(Component::empty));
-                yield component.append(SQUARE_BRACKET);
+                component.append(collection.stream().map(e -> asMutable(serialize(e, seen, depth + 1))).reduce((l, r) -> l.append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR).append(r)).orElseGet(Component::empty));
+                yield component.append(Component.literal("]"));
             }
             case Map<?, ?> map -> {
                 MutableComponent component = Component.literal("{");
-                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append(EQUALS).append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(SEPARATOR).append(r)).orElseGet(Component::empty));
-                yield component.append(CURLY_BRACKET);
+                component.append(map.entrySet().stream().map(e -> asMutable(serialize(e.getKey(), seen, depth + 1)).append(Component.literal("=")).append(serialize(e.getValue(), seen, depth + 1))).reduce((l, r) -> l.append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR).append(r)).orElseGet(Component::empty));
+                yield component.append(Component.literal("}"));
             }
             case Registry<?> registry -> Component.translationArg(registry.key().identifier());
             case ResourceKey<?> resourceKey -> {
                 MutableComponent component = Component.literal("{");
-                component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(SEPARATOR);
+                component.append("registry=").append(serialize(resourceKey.registry(), seen, depth + 1)).append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
                 component.append("identifier=").append(serialize(resourceKey.identifier(), seen, depth + 1));
-                yield component.append(CURLY_BRACKET);
+                yield component.append(Component.literal("}"));
             }
             case Holder<?> holder -> {
                 MutableComponent component = Component.literal("{");
-                component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(SEPARATOR);
+                component.append("kind=").append(serialize(holder.kind().name(), seen, depth + 1)).append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
                 component.append("value=").append(serialize(holder.value(), seen, depth + 1));
-                yield component.append(CURLY_BRACKET);
+                yield component.append(Component.literal("}"));
             }
             case BlockState state -> {
                 MutableComponent component = asMutable(serialize(state.getBlock(), seen, depth));
@@ -246,12 +224,12 @@ public class ListenCommand {
                     MutableComponent component = Component.literal("[");
                     int lengthMinusOne = Array.getLength(object) - 1;
                     if (lengthMinusOne < 0) {
-                        yield component.append(SQUARE_BRACKET);
+                        yield component.append(Component.literal("]"));
                     }
                     for (int i = 0; i < lengthMinusOne; i++) {
-                        component.append(serialize(Array.get(object, i), seen, depth + 1)).append(SEPARATOR);
+                        component.append(serialize(Array.get(object, i), seen, depth + 1)).append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
                     }
-                    yield component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append(SQUARE_BRACKET);
+                    yield component.append(serialize(Array.get(object, lengthMinusOne), seen, depth + 1)).append(Component.literal("]"));
                 }
 
                 String className = object.getClass().getName().replace(".", "/");
@@ -278,9 +256,9 @@ public class ListenCommand {
                             }
                         }
                     })
-                    .reduce((l, r) -> l.append(SEPARATOR).append(r))
+                    .reduce((l, r) -> l.append(ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR).append(r))
                     .orElseGet(Component::empty));
-                yield component.append(CURLY_BRACKET);
+                yield component.append(Component.literal("}"));
             }
         };
     }

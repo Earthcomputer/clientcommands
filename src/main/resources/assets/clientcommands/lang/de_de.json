@@ -169,7 +169,6 @@
   "commands.clisten.add.failed": "Warte bereits auf Pakete dieses Typs",
   "commands.clisten.add.success": "Warte auf Pakete dieses Typs",
   "commands.clisten.clear": "Warte auf kein Paket mehr",
-  "commands.clisten.commandDisabled": "Der Befehl wurde deaktiviert, schau in dein Protokoll",
   "commands.clisten.list": "Warte auf die folgenden Pakete:",
   "commands.clisten.list.none": "Warte derzeit nicht auf Pakete",
   "commands.clisten.packetError": "FEHLER",

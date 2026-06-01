@@ -194,7 +194,6 @@
   "commands.clisten.add.failed": "Już nasłuchujesz tego pakietu",
   "commands.clisten.add.success": "Pomyślnie rozpoczęto nasłuchiwanie tego pakietu",
   "commands.clisten.clear": "Przestałeś nasłuchiwać jakiegokolwiek pakietu",
-  "commands.clisten.commandDisabled": "To polecenie zostało wyłączone, sprawdź logi",
   "commands.clisten.list": "Nasłuchujesz następujących pakietów:",
   "commands.clisten.list.none": "Nie nasłuchujesz żadnych pakietów",
   "commands.clisten.packetError": "BŁĄD",

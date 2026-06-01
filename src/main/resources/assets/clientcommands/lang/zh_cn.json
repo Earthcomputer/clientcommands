@@ -194,7 +194,6 @@
   "commands.clisten.add.failed": "已经在监听该数据包",
   "commands.clisten.add.success": "成功开始监听该数据包",
   "commands.clisten.clear": "不再监听任何数据包",
-  "commands.clisten.commandDisabled": "此命令已被禁用，请查看日志",
   "commands.clisten.list": "正在监听以下数据包：",
   "commands.clisten.list.none": "未监听任何数据包",
   "commands.clisten.packetError": "错误",

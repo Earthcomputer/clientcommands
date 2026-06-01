@@ -172,7 +172,6 @@
   "commands.clisten.add.failed": "已在監聽該封包",
   "commands.clisten.add.success": "成功開始監聽該封包",
   "commands.clisten.clear": "不再監聽任何封包",
-  "commands.clisten.commandDisabled": "指令已被停用，請檢查您的記錄檔",
   "commands.clisten.list": "正在監聽以下封包：",
   "commands.clisten.list.none": "沒有在監聽任何封包",
   "commands.clisten.packetError": "錯誤",

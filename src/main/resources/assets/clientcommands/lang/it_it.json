@@ -194,7 +194,6 @@
   "commands.clisten.add.failed": "Pacchetto già in ascolto",
   "commands.clisten.add.success": "Ascolto pacchetto avviato",
   "commands.clisten.clear": "Ascolto pacchetti interrotto",
-  "commands.clisten.commandDisabled": "Comando disabilitato, controlla i log",
   "commands.clisten.list": "In ascolto dei seguenti pacchetti:",
   "commands.clisten.list.none": "Nessun pacchetto in ascolto",
   "commands.clisten.packetError": "ERRORE",
