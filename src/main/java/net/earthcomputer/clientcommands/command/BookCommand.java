@@ -2,6 +2,7 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
@@ -26,35 +27,48 @@ import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static com.mojang.brigadier.arguments.LongArgumentType.*;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class BookCommand {
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Component.translatable("commands.cbook.commandException"));
+    private static final SimpleCommandExceptionType TITLE_TOO_LONG = new SimpleCommandExceptionType(Component.translatable("commands.cbook.titleTooLong"));
 
     private static final int DEFAULT_LIMIT = 50;
+    private static final int TITLE_MAX_LENGTH = 32;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_15) {
-            return; // chunk savestate fixed in 1.15
+        LiteralArgumentBuilder<FabricClientCommandSource> cbook = literal("cbook")
+                .then(literal("sign")
+                        .executes(ctx -> signBook(ctx.getSource(), ""))
+                        .then(argument("title", greedyString())
+                                .executes(ctx -> signBook(ctx.getSource(), getString(ctx, "title")))));
+
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_15) {
+            cbook.then(literal("fill")
+                    .then(literal("static")
+                            .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
+                            .then(argument("limit", integer(0, getMaxLimit()))
+                                    .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
+                    .then(literal("random")
+                            .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
+                            .then(argument("limit", integer(0, getMaxLimit()))
+                                    .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
+                                    .then(argument("seed", longArg())
+                                            .executes(ctx -> fillBook(ctx.getSource(),
+                                                    random(new Random(getLong(ctx, "seed"))),
+                                                    getInteger(ctx, "limit"))))))
+                    .then(literal("ascii")
+                            .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
+                            .then(argument("limit", integer(0, getMaxLimit()))
+                                    .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
+                                    .then(argument("seed", longArg())
+                                            .executes(ctx -> fillBook(ctx.getSource(),
+                                                    ascii(new Random(getLong(ctx, "seed"))),
+                                                    getInteger(ctx, "limit")))))));
         }
 
-        dispatcher.register(literal("cbook")
-                .then(literal("fill")
-                        .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
-                        .then(argument("limit", integer(0, getMaxLimit()))
-                                .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
-                .then(literal("random")
-                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
-                        .then(argument("limit", integer(0, getMaxLimit()))
-                                .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
-                                .then(argument("seed", longArg())
-                                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit"))))))
-                .then(literal("ascii")
-                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
-                        .then(argument("limit", integer(0, getMaxLimit()))
-                                .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
-                                .then(argument("seed", longArg())
-                                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit")))))));
+        dispatcher.register(cbook);
     }
 
     private static IntStream fill() {
@@ -71,20 +85,12 @@ public class BookCommand {
 
     private static int fillBook(FabricClientCommandSource source, IntStream characterGenerator, int limit) throws CommandSyntaxException {
         LocalPlayer player = source.getPlayer();
-        assert player != null;
 
-        ItemStack heldItem = player.getMainHandItem();
-        InteractionHand hand = InteractionHand.MAIN_HAND;
-        if (heldItem.getItem() != Items.WRITABLE_BOOK) {
-            heldItem = player.getOffhandItem();
-            hand = InteractionHand.OFF_HAND;
-            if (heldItem.getItem() != Items.WRITABLE_BOOK) {
-                throw NO_BOOK.create();
-            }
-        }
-        int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().getSelectedSlot() : Inventory.SLOT_OFFHAND;
+        HeldBook book = getHeldWritableBook(player);
 
-        String joinedPages = characterGenerator.limit((long) getMaxLimit() * 210).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
+        String joinedPages = characterGenerator.limit((long) getMaxLimit() * 210)
+                .mapToObj(i -> String.valueOf((char) i))
+                .collect(Collectors.joining());
 
         List<String> pages = new ArrayList<>(limit);
         List<Filterable<String>> filterablePages = new ArrayList<>();
@@ -95,15 +101,49 @@ public class BookCommand {
             filterablePages.add(Filterable.passThrough(page));
         }
 
-        heldItem.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(filterablePages));
-        player.connection.send(new ServerboundEditBookPacket(slot, pages, Optional.empty()));
+        book.stack().set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(filterablePages));
+        player.connection.send(new ServerboundEditBookPacket(book.slot(), pages, Optional.empty()));
 
         source.sendFeedback(Component.translatable("commands.cbook.success"));
 
         return Command.SINGLE_SUCCESS;
     }
 
+    private static int signBook(FabricClientCommandSource source, String title) throws CommandSyntaxException {
+        LocalPlayer player = source.getPlayer();
+
+        if (title.length() > TITLE_MAX_LENGTH) {
+            throw TITLE_TOO_LONG.create();
+        }
+
+        HeldBook book = getHeldWritableBook(player);
+        WritableBookContent content = book.stack().get(DataComponents.WRITABLE_BOOK_CONTENT);
+        List<String> pages = content == null ? List.of() : content.getPages(false).toList();
+
+        player.connection.send(new ServerboundEditBookPacket(book.slot(), pages, Optional.of(title)));
+        source.sendFeedback(Component.translatable("commands.cbook.success"));
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static HeldBook getHeldWritableBook(LocalPlayer player) throws CommandSyntaxException {
+        ItemStack heldItem = player.getMainHandItem();
+        InteractionHand hand = InteractionHand.MAIN_HAND;
+        if (heldItem.getItem() != Items.WRITABLE_BOOK) {
+            heldItem = player.getOffhandItem();
+            hand = InteractionHand.OFF_HAND;
+            if (heldItem.getItem() != Items.WRITABLE_BOOK) {
+                throw NO_BOOK.create();
+            }
+        }
+        int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().getSelectedSlot() : Inventory.SLOT_OFFHAND;
+        return new HeldBook(heldItem, slot);
+    }
+
     private static int getMaxLimit() {
         return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_14 ? 50 : 100;
+    }
+
+    private record HeldBook(ItemStack stack, int slot) {
     }
 }

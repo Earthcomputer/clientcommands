@@ -64,6 +64,7 @@
 
   "commands.cbook.commandException": "You are not holding a book",
   "commands.cbook.success": "Successfully edited book",
+  "commands.cbook.titleTooLong": "Book title cannot be longer than 32 characters",
 
   "commands.cbuildinfo.success": "Running clientcommands on version %s (%s@{%s})",
 
