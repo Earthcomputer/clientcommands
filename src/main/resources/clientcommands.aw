@@ -49,6 +49,12 @@ accessible field net/minecraft/client/renderer/ShaderManager$CompilationCache co
 # crelog
 accessible field net/minecraft/client/gui/screens/DisconnectedScreen parent Lnet/minecraft/client/gui/screens/Screen;
 
+# ctranslate
+accessible class net/minecraft/client/gui/components/ChatComponent$ClickableTextOnlyGraphicsAccess
+accessible field net/minecraft/client/gui/components/ChatComponent$ClickableTextOnlyGraphicsAccess output Lnet/minecraft/client/gui/ActiveTextCollector;
+accessible field net/minecraft/client/gui/ActiveTextCollector$ClickableStyleFinder testX I
+accessible field net/minecraft/client/gui/ActiveTextCollector$ClickableStyleFinder testY I
+
 # Game Options
 accessible field net/minecraft/client/OptionInstance value Ljava/lang/Object;
 
