@@ -13,11 +13,9 @@ import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
-import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Debug(export = true)
 @Mixin(targets = "net/minecraft/client/gui/components/ChatComponent$1")
 public abstract class ChatComponent$1Mixin {
     @WrapOperation(method = "accept", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent$ChatGraphicsAccess;handleMessage(IFLnet/minecraft/util/FormattedCharSequence;)Z"))
