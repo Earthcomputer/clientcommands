@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.WritableBookContent;
+import net.minecraft.world.item.component.WrittenBookContent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,41 +33,39 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class BookCommand {
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Component.translatable("commands.cbook.commandException"));
-    private static final SimpleCommandExceptionType TITLE_TOO_LONG = new SimpleCommandExceptionType(Component.translatable("commands.cbook.titleTooLong"));
+    private static final SimpleCommandExceptionType TITLE_TOO_LONG = new SimpleCommandExceptionType(
+            Component.translatable("commands.cbook.titleTooLong", WrittenBookContent.TITLE_MAX_LENGTH));
 
     private static final int DEFAULT_LIMIT = 50;
-    private static final int TITLE_MAX_LENGTH = 32;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         LiteralArgumentBuilder<FabricClientCommandSource> cbook = literal("cbook")
                 .then(literal("sign")
                         .executes(ctx -> signBook(ctx.getSource(), ""))
                         .then(argument("title", greedyString())
-                                .executes(ctx -> signBook(ctx.getSource(), getString(ctx, "title")))));
-
-        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_15) {
-            cbook.then(literal("fill")
-                    .then(literal("static")
-                            .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
-                            .then(argument("limit", integer(0, getMaxLimit()))
-                                    .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
-                    .then(literal("random")
-                            .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
-                            .then(argument("limit", integer(0, getMaxLimit()))
-                                    .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
-                                    .then(argument("seed", longArg())
-                                            .executes(ctx -> fillBook(ctx.getSource(),
-                                                    random(new Random(getLong(ctx, "seed"))),
-                                                    getInteger(ctx, "limit"))))))
-                    .then(literal("ascii")
-                            .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
-                            .then(argument("limit", integer(0, getMaxLimit()))
-                                    .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
-                                    .then(argument("seed", longArg())
-                                            .executes(ctx -> fillBook(ctx.getSource(),
-                                                    ascii(new Random(getLong(ctx, "seed"))),
-                                                    getInteger(ctx, "limit")))))));
-        }
+                                .executes(ctx -> signBook(ctx.getSource(), getString(ctx, "title")))))
+                .then(literal("fill")
+                        .requires(source -> MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_15)
+                        .then(literal("static")
+                                .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
+                                .then(argument("limit", integer(0, getMaxLimit()))
+                                        .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
+                        .then(literal("random")
+                                .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
+                                .then(argument("limit", integer(0, getMaxLimit()))
+                                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
+                                        .then(argument("seed", longArg())
+                                                .executes(ctx -> fillBook(ctx.getSource(),
+                                                        random(new Random(getLong(ctx, "seed"))),
+                                                        getInteger(ctx, "limit"))))))
+                        .then(literal("ascii")
+                                .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
+                                .then(argument("limit", integer(0, getMaxLimit()))
+                                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
+                                        .then(argument("seed", longArg())
+                                                .executes(ctx -> fillBook(ctx.getSource(),
+                                                        ascii(new Random(getLong(ctx, "seed"))),
+                                                        getInteger(ctx, "limit")))))));
 
         dispatcher.register(cbook);
     }
@@ -112,7 +111,7 @@ public class BookCommand {
     private static int signBook(FabricClientCommandSource source, String title) throws CommandSyntaxException {
         LocalPlayer player = source.getPlayer();
 
-        if (title.length() > TITLE_MAX_LENGTH) {
+        if (title.length() > WrittenBookContent.TITLE_MAX_LENGTH) {
             throw TITLE_TOO_LONG.create();
         }
 
