@@ -25,7 +25,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class TranslateCommand {
 
-    public static final String LITERAL = "ctranslate";
+    public static final String COMMAND_NAME = "ctranslate";
 
     private static final SimpleCommandExceptionType UNKNOWN_ERROR_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.ctranslate.unknownError"));
 
@@ -36,7 +36,7 @@ public class TranslateCommand {
     private static final Duration DURATION = Duration.ofSeconds(5);
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(literal(LITERAL)
+        dispatcher.register(literal(COMMAND_NAME)
                 .then(argument("query", translationQuery())
                         .executes(ctx -> translate(ctx.getSource(), getTranslationQuery(ctx, "query")))));
     }

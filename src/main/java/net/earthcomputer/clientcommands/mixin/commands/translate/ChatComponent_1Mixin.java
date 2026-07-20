@@ -14,32 +14,34 @@ import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(targets = "net/minecraft/client/gui/components/ChatComponent$1")
-public abstract class ChatComponent$1Mixin {
+public abstract class ChatComponent_1Mixin {
     @WrapOperation(method = "accept", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent$ChatGraphicsAccess;handleMessage(IFLnet/minecraft/util/FormattedCharSequence;)Z"))
     private boolean copyText(ChatComponent.ChatGraphicsAccess instance, int textTop, float opacity, FormattedCharSequence text, Operation<Boolean> original, GuiMessage.Line line) {
-        if (shouldCallOriginal(instance, textTop, text, line)) {
+        if (!tryCopy(instance, textTop, text, line)) {
             return original.call(instance, textTop, opacity, text);
         }
-        // original.call() always returns false
+        // original.call() always returns false, so we return false here also
         return false;
     }
 
-    private static boolean shouldCallOriginal(ChatComponent.ChatGraphicsAccess instance, int textTop, FormattedCharSequence text, GuiMessage.Line line) {
+    @Unique
+    private static boolean tryCopy(ChatComponent.ChatGraphicsAccess instance, int textTop, FormattedCharSequence text, GuiMessage.Line line) {
         if (!(instance instanceof ChatComponent.ClickableTextOnlyGraphicsAccess clickableTextOnlyGraphicsAccess)) {
-            return true;
+            return false;
         }
         Minecraft minecraft = Minecraft.getInstance();
         if (!(minecraft.gui.screen() instanceof ChatScreen chatScreen)) {
-            return true;
+            return false;
         }
         if (!((IChatScreen) chatScreen).clientcommands_isTranslating()) {
-            return true;
+            return false;
         }
         if (!(clickableTextOnlyGraphicsAccess.output instanceof ActiveTextCollector.ClickableStyleFinder clickableStyleFinder)) {
-            return true;
+            return false;
         }
         Font font = minecraft.font;
         ActiveTextCollector.Parameters parameters = clickableStyleFinder.defaultParameters();
@@ -50,6 +52,6 @@ public abstract class ChatComponent$1Mixin {
             minecraft.keyboardHandler.setClipboard(line.parent().content().getString());
             found[0] = true;
         });
-        return !found[0];
+        return found[0];
     }
 }

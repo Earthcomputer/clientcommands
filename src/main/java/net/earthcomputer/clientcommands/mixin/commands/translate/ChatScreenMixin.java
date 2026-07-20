@@ -24,7 +24,7 @@ public abstract class ChatScreenMixin extends Screen implements IChatScreen {
 
     @Inject(method = "onEdited", at = @At("TAIL"))
     private void onEdited(String value, CallbackInfo ci) {
-        this.isTranslating = value.startsWith(Commands.COMMAND_PREFIX + TranslateCommand.LITERAL);
+        this.isTranslating = value.startsWith(Commands.COMMAND_PREFIX + TranslateCommand.COMMAND_NAME);
     }
 
     @Override
