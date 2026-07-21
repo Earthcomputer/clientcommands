@@ -54,6 +54,7 @@ accessible class net/minecraft/client/gui/components/ChatComponent$ClickableText
 accessible field net/minecraft/client/gui/components/ChatComponent$ClickableTextOnlyGraphicsAccess output Lnet/minecraft/client/gui/ActiveTextCollector;
 accessible field net/minecraft/client/gui/ActiveTextCollector$ClickableStyleFinder testX I
 accessible field net/minecraft/client/gui/ActiveTextCollector$ClickableStyleFinder testY I
+accessible field net/minecraft/client/gui/screens/ChatScreen input Lnet/minecraft/client/gui/components/EditBox;
 
 # Game Options
 accessible field net/minecraft/client/OptionInstance value Ljava/lang/Object;

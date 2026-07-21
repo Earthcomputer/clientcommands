@@ -2,7 +2,7 @@ package net.earthcomputer.clientcommands.mixin.commands.translate;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.earthcomputer.clientcommands.interfaces.IChatScreen;
+import net.earthcomputer.clientcommands.command.TranslateCommand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
@@ -11,6 +11,7 @@ import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.renderer.state.gui.GuiTextRenderState;
+import net.minecraft.commands.Commands;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,7 @@ public abstract class ChatComponent_1Mixin {
         if (!(minecraft.gui.screen() instanceof ChatScreen chatScreen)) {
             return false;
         }
-        if (!((IChatScreen) chatScreen).clientcommands_isTranslating()) {
+        if (!isTranslating(chatScreen.input.getValue())) {
             return false;
         }
         if (!(clickableTextOnlyGraphicsAccess.output instanceof ActiveTextCollector.ClickableStyleFinder clickableStyleFinder)) {
@@ -53,5 +54,10 @@ public abstract class ChatComponent_1Mixin {
             found[0] = true;
         });
         return found[0];
+    }
+
+    @Unique
+    private static boolean isTranslating(String value) {
+        return value.startsWith(Commands.COMMAND_PREFIX + TranslateCommand.COMMAND_NAME);
     }
 }
