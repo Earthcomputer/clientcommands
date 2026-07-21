@@ -2,7 +2,6 @@ package net.earthcomputer.clientcommands.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
@@ -33,41 +32,32 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
 
 public class BookCommand {
     private static final SimpleCommandExceptionType NO_BOOK = new SimpleCommandExceptionType(Component.translatable("commands.cbook.commandException"));
-    private static final SimpleCommandExceptionType TITLE_TOO_LONG = new SimpleCommandExceptionType(
-            Component.translatable("commands.cbook.titleTooLong", WrittenBookContent.TITLE_MAX_LENGTH));
+    private static final SimpleCommandExceptionType TITLE_TOO_LONG = new SimpleCommandExceptionType(Component.translatable("commands.cbook.titleTooLong", WrittenBookContent.TITLE_MAX_LENGTH));
 
     private static final int DEFAULT_LIMIT = 50;
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        LiteralArgumentBuilder<FabricClientCommandSource> cbook = literal("cbook")
-                .then(literal("sign")
-                        .executes(ctx -> signBook(ctx.getSource(), ""))
-                        .then(argument("title", greedyString())
-                                .executes(ctx -> signBook(ctx.getSource(), getString(ctx, "title")))))
-                .then(literal("fill")
-                        .requires(source -> MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_15)
-                        .then(literal("static")
-                                .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
-                                .then(argument("limit", integer(0, getMaxLimit()))
-                                        .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
-                        .then(literal("random")
-                                .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
-                                .then(argument("limit", integer(0, getMaxLimit()))
-                                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
-                                        .then(argument("seed", longArg())
-                                                .executes(ctx -> fillBook(ctx.getSource(),
-                                                        random(new Random(getLong(ctx, "seed"))),
-                                                        getInteger(ctx, "limit"))))))
-                        .then(literal("ascii")
-                                .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
-                                .then(argument("limit", integer(0, getMaxLimit()))
-                                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
-                                        .then(argument("seed", longArg())
-                                                .executes(ctx -> fillBook(ctx.getSource(),
-                                                        ascii(new Random(getLong(ctx, "seed"))),
-                                                        getInteger(ctx, "limit")))))));
-
-        dispatcher.register(cbook);
+        dispatcher.register(literal("cbook")
+            .then(literal("sign")
+                .executes(ctx -> signBook(ctx.getSource(), ""))
+                .then(argument("title", greedyString())
+                    .executes(ctx -> signBook(ctx.getSource(), getString(ctx, "title")))))
+            .then(literal("fill")
+                .executes(ctx -> fillBook(ctx.getSource(), fill(), DEFAULT_LIMIT))
+                .then(argument("limit", integer(0, getMaxLimit()))
+                    .executes(ctx -> fillBook(ctx.getSource(), fill(), getInteger(ctx, "limit")))))
+            .then(literal("random")
+                .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), DEFAULT_LIMIT))
+                .then(argument("limit", integer(0, getMaxLimit()))
+                    .executes(ctx -> fillBook(ctx.getSource(), random(new Random()), getInteger(ctx, "limit")))
+                    .then(argument("seed", longArg())
+                        .executes(ctx -> fillBook(ctx.getSource(), random(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit"))))))
+            .then(literal("ascii")
+                .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), DEFAULT_LIMIT))
+                .then(argument("limit", integer(0, getMaxLimit()))
+                    .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random()), getInteger(ctx, "limit")))
+                    .then(argument("seed", longArg())
+                        .executes(ctx -> fillBook(ctx.getSource(), ascii(new Random(getLong(ctx, "seed"))), getInteger(ctx, "limit")))))));
     }
 
     private static IntStream fill() {
@@ -88,8 +78,8 @@ public class BookCommand {
         HeldBook book = getHeldWritableBook(player);
 
         String joinedPages = characterGenerator.limit((long) getMaxLimit() * 210)
-                .mapToObj(i -> String.valueOf((char) i))
-                .collect(Collectors.joining());
+            .mapToObj(i -> String.valueOf((char) i))
+            .collect(Collectors.joining());
 
         List<String> pages = new ArrayList<>(limit);
         List<Filterable<String>> filterablePages = new ArrayList<>();
