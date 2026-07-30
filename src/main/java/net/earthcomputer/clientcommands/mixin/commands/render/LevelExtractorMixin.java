@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LevelExtractor.class)
 public class LevelExtractorMixin {
     @Inject(method = "isEntityVisible", at = @At("RETURN"), cancellable = true)
-    private void hasIndirectPassengersAndClientCommandsShouldRender(CallbackInfoReturnable<Boolean> cir, @Local(name = "entity", argsOnly = true, print = true) Entity entity) {
+    private void hasIndirectPassengersAndClientCommandsShouldRender(CallbackInfoReturnable<Boolean> cir, @Local(name = "entity", argsOnly = true) Entity entity) {
         if (cir.getReturnValueZ() && !RenderSettings.shouldRenderEntity(entity)) {
             cir.setReturnValue(false);
         }
