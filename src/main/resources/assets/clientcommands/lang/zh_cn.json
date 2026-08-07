@@ -13,6 +13,31 @@
   "c2cpacket.startTwoPlayerGameC2CPacket.incoming.accepted": "%s已经接受了你的邀请%s",
   "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.accept": "接受邀请，你的对手将先走",
   "c2cpacket.startTwoPlayerGameC2CPacket.outgoing.invited": "你邀请%s参加%s的游戏",
+  "c2cpacket.stopTwoPlayerGameC2CPacket.incoming": "%s has stopped the game of %s with you",
+
+  "chessGame.acceptDraw": "Accept draw",
+  "chessGame.checkmate.lost": "Checkmate! You lost",
+  "chessGame.checkmate.won": "Checkmate! You win!",
+  "chessGame.copyFen": "Copy FEN",
+  "chessGame.copyFen.success": "Copied FEN: %s",
+  "chessGame.copyPgn": "Copy PGN",
+  "chessGame.copyPgn.success": "Copied PGN: %s",
+  "chessGame.draw.agreement": "The game ended in a draw by agreement",
+  "chessGame.draw.fiftyMoves": "The game ended in a draw by the fifty move rule",
+  "chessGame.draw.insufficientMaterial": "The game ended in a draw by insufficient material",
+  "chessGame.draw.repetition": "The game ended in a draw by repetition",
+  "chessGame.draw.stalemate": "Stalemate! The game ended in a draw",
+  "chessGame.drawOfferAccepted": "%s accepted your draw offer",
+  "chessGame.drawOffered": "%s offered a draw",
+  "chessGame.drawOfferRetracted": "%s retracted their draw offer",
+  "chessGame.offerDraw": "Offer draw",
+  "chessGame.opponentMoved": "%s has played %s. %s",
+  "chessGame.opponentResigned": "%s resigned, you win!",
+  "chessGame.resign": "Resign",
+  "chessGame.retractDrawOffer": "Retract draw offer",
+  "chessGame.title": "Chess against %s",
+  "chessGame.youMoved": "You played %s",
+  "chessGame.youResigned": "You resigned",
 
   "chorusManip.goalTooFar": "目标过远！",
   "chorusManip.landing.failed": "降落操作不可用",
@@ -39,6 +64,7 @@
 
   "commands.cbook.commandException": "你没有手握书本",
   "commands.cbook.success": "成功编辑书本",
+  "commands.cbook.titleTooLong": "Book title cannot be longer than %s characters",
 
   "commands.cbuildinfo.success": "运行clientcommands在%s版本上(%s@{%s})",
 
@@ -63,6 +89,8 @@
   "commands.ccalcstack.success.exact": "%s个%s是正好%s组",
 
   "commands.ccallback.failed": "未知或过期的回调",
+
+  "commands.cchess.name": "Chess",
 
   "commands.cconnectfour.name": "四子棋",
 
@@ -138,6 +166,7 @@
   "commands.cfps.setMaxFps.unlimited": "设置最大FPS为无限",
 
   "commands.cfunction.limitReached": "已达到命令限制（%s）",
+  "commands.cfunction.noActiveDispatcher": "No active command dispatcher",
   "commands.cfunction.success": "从函数%s中运行%s个命令",
 
   "commands.cgamemode.listWithGameMode": "以下玩家处于%s游戏模式：",
@@ -180,12 +209,15 @@
   "commands.client.componentTooDeeplyNested": "聊天组件嵌套过深",
   "commands.client.crack": "破解",
   "commands.client.enable": "启用",
+  "commands.client.excluding": "Invalid argument; excluded",
   "commands.client.expectedRegex": "无效的正则表达式%s",
   "commands.client.glow": "[发光]",
   "commands.client.invalidArgumentException": "无效参数‘%s’",
   "commands.client.invalidClickAction": "无效的点击事件操作‘%s’",
   "commands.client.invalidHoverAction": "无效的点击事件操作‘%s’",
   "commands.client.invalidHoverEvent": "无效的悬浮事件‘%s’",
+  "commands.client.mustBeInstalledOnServer": "To use this command, clientcommands must be installed on the server, or you must be a server operator. %s",
+  "commands.client.mustBeInstalledOnServer.why": "Find out why",
   "commands.client.notClient": "不是客户端指令",
   "commands.client.regexTooSlow": "正则表达式“%s”太慢而无法匹配",
   "commands.client.requiresRestart": "此更改将在你重新启动客户端后生效",
@@ -244,6 +276,7 @@
   "commands.cpredictbrushables.stewEffect": "%s（%s秒）",
 
   "commands.crelog.failed": "未能重新登录",
+  "commands.crelog.retry": "Retrying in %s seconds...",
 
   "commands.crender.entities.success": "实体渲染规则已更新",
 
@@ -316,6 +349,7 @@
 
   "commands.cwiki.failed": "未能获取维基内容",
   "commands.cwiki.noContent": "那篇文章中没有用于介绍的段落",
+  "commands.cwiki.openArticle": "[Open article]",
 
   "connectFourGame.draw": "绘制！",
   "connectFourGame.lost": "失败！",
@@ -409,11 +443,13 @@
   "ticTacToeGame.playingWith": "你正在与%s玩",
   "ticTacToeGame.title": "井字棋对手：%s",
 
+  "twoPlayerGame.alreadyInGame": "You are already in a game with that player",
   "twoPlayerGame.chat.draw": "您已经采取了行动，并在%s中绘制了%s",
   "twoPlayerGame.chat.lost": "%s已经在%s中做出了一个行动并赢了",
   "twoPlayerGame.chat.won": "你已经在%s中做出了一个行动并击败了%s!",
   "twoPlayerGame.clickToMakeYourMove": "单击此处以行动",
   "twoPlayerGame.incoming": "%s已经在%s中做出了一个行动",
   "twoPlayerGame.noGameWithPlayer": "目前没有和那个玩家一起玩游戏",
-  "twoPlayerGame.playerNotFound": "玩家未找到"
+  "twoPlayerGame.playerNotFound": "玩家未找到",
+  "twoPlayerGame.stopped": "You stopped playing the game of %s with %s"
 }
