@@ -64,7 +64,7 @@
 
   "commands.cbook.commandException": "你没有手握书本",
   "commands.cbook.success": "成功编辑书本",
-  "commands.cbook.titleTooLong": "Book title cannot be longer than %s characters",
+  "commands.cbook.titleTooLong": "书名不能超过%s个字符",
 
   "commands.cbuildinfo.success": "运行clientcommands在%s版本上(%s@{%s})",
 
