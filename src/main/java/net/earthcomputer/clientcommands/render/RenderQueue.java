@@ -55,6 +55,12 @@ public class RenderQueue {
         ClientTickEvents.START_CLIENT_TICK.register(RenderQueue::tick);
 
         LevelExtractionEvents.END_EXTRACTION.register(context -> {
+            // Mods that render a secondary world (e.g. Immersive Portals' portal
+            // destination pass) run extraction with no level render state.
+            if (context.levelState() == null) {
+                return;
+            }
+
             EnumMap<Layer, List<Shape.RenderState>> renderStates = new EnumMap<>(Layer.class);
             queue.forEach((layer, shapes) -> {
                 List<Shape.RenderState> states = new ArrayList<>();
@@ -131,6 +137,10 @@ public class RenderQueue {
     }
 
     private static void render(Layer layer, RenderType renderType, LevelRenderContext context) {
+        if (context.levelState() == null) {
+            return;
+        }
+
         EnumMap<Layer, List<Shape.RenderState>> renderStates = context.levelState().getData(RENDER_STATES_KEY);
         if (renderStates == null) {
             return;
