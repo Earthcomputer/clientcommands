@@ -21,11 +21,11 @@ public class PostEffectCommand {
 
     private static int applyPostEffect(FabricClientCommandSource source, @Nullable Identifier postEffect) {
         if (postEffect == null) {
-            source.getClient().gameRenderer.clearPostEffect();
+            source.getClient().gameRenderer.clearSpectatedEntityPostEffect();
             source.sendFeedback(Component.translatable("commands.cposteffect.reset.success"));
             return Command.SINGLE_SUCCESS;
         }
-        source.getClient().gameRenderer.setPostEffect(postEffect);
+        source.getClient().gameRenderer.setSpectatedEntityPostEffect(postEffect);
         source.sendFeedback(Component.translatable("commands.cposteffect.apply.success", postEffect));
         return Command.SINGLE_SUCCESS;
     }

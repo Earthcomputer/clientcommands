@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -37,7 +38,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -283,7 +283,7 @@ class PreviewScreen extends AbstractContainerScreen<InventoryMenu> {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == GLFW.GLFW_KEY_ESCAPE || this.minecraft.options.keyInventory.matches(event)) {
+        if (event.key() == InputConstants.KEY_ESCAPE || this.minecraft.options.keyInventory.matches(event)) {
             return super.keyPressed(event);
         }
 

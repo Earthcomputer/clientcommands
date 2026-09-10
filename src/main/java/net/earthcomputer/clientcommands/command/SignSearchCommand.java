@@ -14,12 +14,11 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.earthcomputer.clientcommands.command.arguments.RegexArgument.*;
@@ -58,9 +57,11 @@ public class SignSearchCommand {
                 }
 
                 boolean textFilteringEnabled = Minecraft.getInstance().isTextFilteringEnabled();
-                for (SignText text : new SignText[]{sign.getFrontText(), sign.getBackText()}) {
-                    String string = IntStream.range(0, SignText.LINES)
-                        .mapToObj(i -> text.getMessage(i, textFilteringEnabled).getString())
+                for (SignTextSlot textSlot : SignTextSlot.values()) {
+                    String string = sign.getText(textSlot)
+                        .getMessages(textFilteringEnabled)
+                        .stream()
+                        .map(Component::getString)
                         .collect(Collectors.joining("\n"));
                     if (linePredicate.test(string)) {
                         return true;

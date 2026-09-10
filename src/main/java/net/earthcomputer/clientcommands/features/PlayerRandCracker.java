@@ -20,6 +20,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.ContainerInput;
@@ -408,7 +409,7 @@ public class PlayerRandCracker {
             }
 
             ItemStack stackToDrop = new ItemStack(Items.COBBLESTONE);
-            player.drop(stackToDrop, true);
+            player.drop(stackToDrop, true, Prediction.PREDICTED);
             interactionManager.handleCreativeModeItemDrop(stackToDrop);
             return new ThrowItemsResult(ThrowItemsResult.Type.SUCCESS);
         }

@@ -11,12 +11,16 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 import static net.earthcomputer.clientcommands.command.ClientCommandHelper.*;
 import static net.earthcomputer.clientcommands.features.PlayerRandCracker.*;
@@ -162,7 +166,7 @@ public class ChorusManipulation {
      * so the function checks whether a teleport would succeed
      *
      * @return The Position, where the player lands
-     * @see net.minecraft.world.entity.LivingEntity#randomTeleport(double, double, double, boolean)  (Vec3d)
+     * @see net.minecraft.world.entity.LivingEntity#randomTeleport(double, double, double, boolean, Predicate)
      */
     @Nullable
     public static Vec3 canTeleport(AABB goalArea, Vec3 goalVec) {
@@ -175,7 +179,7 @@ public class ChorusManipulation {
             while (!blockBelowIsGround && blockPos.getY() > 0) {
                 BlockPos blockPos2 = blockPos.below();
                 BlockState blockState = level.getBlockState(blockPos2);
-                if (blockState.blocksMotion()) {
+                if (blockState.is(BlockTags.ENTITIES_CAN_TELEPORT_TO) && !blockState.is(BlockTags.CONSUMABLE_DOES_NOT_TELEPORT_TO)) {
                     blockBelowIsGround = true;
                 } else {
                     blockPos = blockPos2;

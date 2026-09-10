@@ -22,7 +22,7 @@ accessible field net/minecraft/world/entity/item/ItemEntity DATA_ITEM Lnet/minec
 accessible method net/minecraft/world/entity/projectile/FishingHook canHitEntity (Lnet/minecraft/world/entity/Entity;)Z
 
 # cfps
-accessible field com/mojang/blaze3d/platform/MonitorManager monitors Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;
+accessible field com/mojang/blaze3d/platform/MonitorManager monitors Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
 accessible field com/mojang/blaze3d/platform/Window monitorManager Lcom/mojang/blaze3d/platform/MonitorManager;
 
 # cgive
@@ -42,9 +42,9 @@ accessible field net/minecraft/network/codec/IdDispatchCodec toId Lit/unimi/dsi/
 accessible method net/minecraft/client/Screenshot getFile (Ljava/io/File;)Ljava/io/File;
 
 # cposteffect
-accessible method net/minecraft/client/renderer/GameRenderer setPostEffect (Lnet/minecraft/resources/Identifier;)V
-accessible field net/minecraft/client/renderer/ShaderManager compilationCache Lnet/minecraft/client/renderer/ShaderManager$CompilationCache;
-accessible field net/minecraft/client/renderer/ShaderManager$CompilationCache configs Lnet/minecraft/client/renderer/ShaderManager$Configs;
+accessible method net/minecraft/client/renderer/GameRenderer setSpectatedEntityPostEffect (Lnet/minecraft/resources/Identifier;)V
+accessible field net/minecraft/client/renderer/ShaderManager postChains Lnet/minecraft/client/renderer/ShaderManager$PostChainCache;
+accessible field net/minecraft/client/renderer/ShaderManager$PostChainCache configs Lnet/minecraft/client/renderer/ShaderManager$Configs;
 
 # crelog
 accessible field net/minecraft/client/gui/screens/DisconnectedScreen parent Lnet/minecraft/client/gui/screens/Screen;

@@ -1,9 +1,10 @@
 package net.earthcomputer.clientcommands.render;
 
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.CompareOp;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents;
@@ -15,7 +16,6 @@ import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.CustomFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.LayeringTransform;
-import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
@@ -40,6 +40,7 @@ public class RenderQueue {
     private static final RenderPipeline LINES_NO_DEPTH_PIPELINE = RenderPipelines.register(
         RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
             .withLocation(Identifier.fromNamespaceAndPath("clientcommands", "pipeline/lines_no_depth"))
+            .withColorTargetState(ColorTargetState.DEFAULT)
             .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true))
             .build()
     );
@@ -47,7 +48,6 @@ public class RenderQueue {
         "clientcommands_no_depth",
         RenderSetup.builder(LINES_NO_DEPTH_PIPELINE)
             .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-            .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
             .createRenderSetup()
     );
 
@@ -64,7 +64,7 @@ public class RenderQueue {
             context.levelState().setData(RENDER_STATES_KEY, renderStates);
         });
 
-        LevelRenderEvents.END_MAIN.register(context -> render(Layer.ON_TOP, LINES_NO_DEPTH_LAYER, context));
+        LevelRenderEvents.COLLECT_SUBMITS.register(context -> render(Layer.ON_TOP, LINES_NO_DEPTH_LAYER, context));
     }
 
     public static void register() {
@@ -153,7 +153,7 @@ public class RenderQueue {
         SubmitNodeCollector.CustomGeometryRenderer renderer
     ) {
         if (renderType == LINES_NO_DEPTH_LAYER && collector.order(0) instanceof SubmitNodeCollection collection) {
-            collection.alwaysOnTop.submit(new CustomFeatureRenderer.Submit(poseStack.last().copy(), renderType, renderer));
+            collection.afterTerrain.submit(new CustomFeatureRenderer.Submit(poseStack.last().copy(), renderType, renderer));
         } else {
             collector.submitCustomGeometry(poseStack, renderType, renderer);
         }

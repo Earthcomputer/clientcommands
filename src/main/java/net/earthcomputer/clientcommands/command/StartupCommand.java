@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,7 +9,6 @@ import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.features.ClientCommandFunctions;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class StartupCommand {
         if (file == null) {
             throw COULD_NOT_CREATE_FILE_EXCEPTION.create();
         }
-        Util.getPlatform().openFile(file.toFile());
+        Blaze3D.openPath(file);
         return Command.SINGLE_SUCCESS;
     }
 

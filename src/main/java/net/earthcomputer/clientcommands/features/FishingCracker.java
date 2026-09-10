@@ -47,6 +47,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -624,8 +625,8 @@ public class FishingCracker {
                                     if (oldStack != successResult.heldItemTransformedTo()) {
                                         player.setItemInHand(InteractionHand.MAIN_HAND, successResult.heldItemTransformedTo());
                                     }
-                                    if (successResult.swingSource() == InteractionResult.SwingSource.CLIENT) {
-                                        player.swing(InteractionHand.MAIN_HAND);
+                                    if (successResult.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                                        player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                                     }
                                 }
                                 //networkHandler.sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND));

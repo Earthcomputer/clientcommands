@@ -1,5 +1,6 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.earthcomputer.clientcommands.interfaces.ISafeZoneScreen;
@@ -16,7 +17,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -100,13 +100,13 @@ class SnakeGameScreen extends Screen implements ISafeZoneScreen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (minecraft.options.keyUp.matches(event) || event.key() == GLFW.GLFW_KEY_UP) {
+        if (minecraft.options.keyUp.matches(event) || event.key() == InputConstants.KEY_UP) {
             return this.setDirection(Direction.NORTH);
-        } else if (minecraft.options.keyLeft.matches(event) || event.key() == GLFW.GLFW_KEY_LEFT) {
+        } else if (minecraft.options.keyLeft.matches(event) || event.key() == InputConstants.KEY_LEFT) {
             return this.setDirection(Direction.WEST);
-        } else if (minecraft.options.keyDown.matches(event) || event.key() == GLFW.GLFW_KEY_DOWN) {
+        } else if (minecraft.options.keyDown.matches(event) || event.key() == InputConstants.KEY_DOWN) {
             return this.setDirection(Direction.SOUTH);
-        } else if (minecraft.options.keyRight.matches(event) || event.key() == GLFW.GLFW_KEY_RIGHT) {
+        } else if (minecraft.options.keyRight.matches(event) || event.key() == InputConstants.KEY_RIGHT) {
             return this.setDirection(Direction.EAST);
         }
         return super.keyPressed(event);

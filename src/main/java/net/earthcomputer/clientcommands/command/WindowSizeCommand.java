@@ -1,11 +1,10 @@
 package net.earthcomputer.clientcommands.command;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLVideo;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.*;
@@ -30,12 +29,12 @@ public class WindowSizeCommand {
         int centerX = oldX + oldWidth / 2;
         int centerY = oldY + oldHeight / 2;
 
-        GLFW.glfwSetWindowSize(handle, width, height);
+        SDLVideo.SDL_SetWindowSize(handle, width, height);
 
         int newX = centerX - width / 2;
         int newY = centerY - height / 2;
 
-        GLFW.glfwSetWindowPos(handle, newX, newY);
+        SDLVideo.SDL_SetWindowPosition(handle, newX, newY);
         return Command.SINGLE_SUCCESS;
     }
 }

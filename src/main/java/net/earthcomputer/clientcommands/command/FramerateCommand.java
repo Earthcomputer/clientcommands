@@ -1,7 +1,9 @@
 package net.earthcomputer.clientcommands.command;
 
+import com.mojang.blaze3d.platform.Monitor;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.earthcomputer.clientcommands.Configs;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
@@ -22,7 +24,7 @@ public class FramerateCommand {
                 .executes(ctx -> maxFps(ctx.getSource(), Integer.MAX_VALUE)))
             .then(argument("maxfps", integer(1))
                 .suggests((context, builder) -> {
-                    int maxFps = getDisplayMaxFramerate();
+                    float maxFps = getDisplayMaxFramerate();
                     for (int refreshRate : COMMON_REFRESH_RATES) {
                         if (refreshRate > maxFps) {
                             break;
@@ -71,9 +73,16 @@ public class FramerateCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int getDisplayMaxFramerate() {
-        return Minecraft.getInstance().getWindow().monitorManager.monitors.values().stream()
-            .mapToInt(monitor -> monitor.currentMode().getRefreshRate())
-            .max().orElseThrow();
+    private static float getDisplayMaxFramerate() {
+        Int2ObjectMap<Monitor> monitors = Minecraft.getInstance().getWindow().monitorManager.monitors;
+        if (monitors.isEmpty()) {
+            throw new IllegalStateException("No monitors found");
+        }
+
+        float maxFps = Float.NEGATIVE_INFINITY;
+        for (Monitor monitor : monitors.values()) {
+            maxFps = Math.max(maxFps, monitor.currentMode().getRefreshRate());
+        }
+        return maxFps;
     }
 }

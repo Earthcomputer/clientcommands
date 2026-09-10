@@ -35,7 +35,7 @@ public final class EntityRandomCallHierarchyTest {
     @Test
     public void testTeleportRandomly() {
         TestUtil.regressionTest("teleportRandomlyHierarchy", out -> {
-            CallHierarchyWalker.fromMethod("net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect", "<init>", "(F)V")
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect", "<init>", "(FZ)V")
                 .recurseThrough("net/minecraft/world/item/consume_effects/TeleportRandomlyConsumeEffect", "<init>", "()V")
                 .walk((reference, callStack) -> printReference(out, reference, callStack));
         });
@@ -60,7 +60,7 @@ public final class EntityRandomCallHierarchyTest {
     @Test
     public void testEnchantmentReplaceBlockEffect() {
         TestUtil.regressionTest("enchantmentReplaceBlockEffectHierarchy", out -> {
-            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/ReplaceBlock", "<init>", "(Lnet/minecraft/core/Vec3i;Ljava/util/Optional;Lnet/minecraft/world/level/levelgen/feature/stateproviders/BlockStateProvider;Ljava/util/Optional;)V")
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/ReplaceBlock", "<init>", "(Lnet/minecraft/core/Vec3i;Ljava/util/Optional;Lnet/minecraft/core/Holder;Ljava/util/Optional;)V")
                 .walk((reference, callStack) -> printReference(out, reference, callStack));
         });
     }
@@ -68,7 +68,7 @@ public final class EntityRandomCallHierarchyTest {
     @Test
     public void testEnchantmentReplaceDiskEffect() {
         TestUtil.regressionTest("enchantmentReplaceDiskEffectHierarchy", out -> {
-            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/ReplaceDisk", "<init>", "(Lnet/minecraft/world/item/enchantment/LevelBasedValue;Lnet/minecraft/world/item/enchantment/LevelBasedValue;Lnet/minecraft/core/Vec3i;Ljava/util/Optional;Lnet/minecraft/world/level/levelgen/feature/stateproviders/BlockStateProvider;Ljava/util/Optional;)V")
+            CallHierarchyWalker.fromMethod("net/minecraft/world/item/enchantment/effects/ReplaceDisk", "<init>", "(Lnet/minecraft/world/item/enchantment/LevelBasedValue;Lnet/minecraft/world/item/enchantment/LevelBasedValue;Lnet/minecraft/core/Vec3i;Ljava/util/Optional;Lnet/minecraft/core/Holder;Ljava/util/Optional;)V")
                 .walk((reference, callStack) -> printReference(out, reference, callStack));
         });
     }

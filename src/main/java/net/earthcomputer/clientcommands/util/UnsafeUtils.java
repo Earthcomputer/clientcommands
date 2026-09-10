@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 /**
  * @author Gaming32
  */
+@SuppressWarnings("removal")
 public final class UnsafeUtils {
 
     private UnsafeUtils() {

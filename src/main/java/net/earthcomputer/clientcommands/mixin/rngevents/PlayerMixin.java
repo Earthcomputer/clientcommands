@@ -78,7 +78,7 @@ public abstract class PlayerMixin extends LivingEntity {
             if (applyItemBlocking(source, amount) >= amount) {
                 canAttack = false;
             }
-            if (living.invulnerableTime >= 10 && amount <= living.lastHurt) {
+            if (living.getInvulnerableTime() >= 10 && amount <= living.lastHurt) {
                 canAttack = false;
             }
         }

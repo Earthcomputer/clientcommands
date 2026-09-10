@@ -59,7 +59,7 @@ public class PostEffectArgument implements ArgumentType<Identifier> {
     }
 
     private Stream<Identifier> getValidPostChains() {
-        return Minecraft.getInstance().getShaderManager().compilationCache.configs.postChains().entrySet().stream()
+        return Minecraft.getInstance().getShaderManager().postChains.configs.postChains().entrySet().stream()
             .filter(entry -> entry.getValue().passes().stream()
                 .flatMap(PostChainConfig.Pass::referencedTargets)
                 .filter(location -> !entry.getValue().internalTargets().containsKey(location))

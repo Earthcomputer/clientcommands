@@ -31,6 +31,11 @@ public class MultiPlayerGameModeMixin {
         }
     }
 
+    @Inject(method = "dropItem", at = @At("HEAD"))
+    private void onDrop(CallbackInfo ci) {
+        PlayerRandCracker.onDropItem();
+    }
+
     @Inject(method = "startPrediction", at = @At("HEAD"))
     private void preStartPrediction(CallbackInfo ci) {
         PlayerRandCracker.isPredictingBlockBreaking = true;
