@@ -4,11 +4,13 @@ import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.event.MoreClientEntityEvents;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
-import net.earthcomputer.clientcommands.features.SuggestionsHook;
+import net.earthcomputer.clientcommands.util.RoundTripFence;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.EntityTypes;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -23,6 +25,7 @@ public abstract class ItemThrowTask extends SimpleTask {
     public static final int FLAG_URGENT = 1;
     public static final int FLAG_WAIT_FOR_ITEMS = 2;
 
+    @Nullable
     private static WeakReference<ItemThrowTask> currentThrowTask = null;
 
     static {
@@ -58,6 +61,11 @@ public abstract class ItemThrowTask extends SimpleTask {
 
     @Override
     protected void onTick() {
+        ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        if (connection == null) {
+            return;
+        }
+
         itemThrowsAllowedThisTick += Configs.itemThrowsPerTick;
 
         while (((flags & FLAG_URGENT) != 0 || itemThrowsAllowedThisTick >= 1) && sentItemThrows < totalItemsToThrow) {
@@ -82,7 +90,7 @@ public abstract class ItemThrowTask extends SimpleTask {
 
         if (!waitingFence && sentItemThrows == totalItemsToThrow && confirmedItemThrows < sentItemThrows) {
             waitingFence = true;
-            SuggestionsHook.fence().thenAccept(v -> {
+            RoundTripFence.getInstance(connection).fence().thenRun(() -> {
                 if (sentItemThrows > confirmedItemThrows) {
                     LOGGER.info("Server rejected {} item throws. Rethrowing them.", sentItemThrows - confirmedItemThrows);
                     while (sentItemThrows > confirmedItemThrows) {

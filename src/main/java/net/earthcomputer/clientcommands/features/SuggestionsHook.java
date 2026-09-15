@@ -4,6 +4,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
+import net.earthcomputer.clientcommands.util.RoundTripFence;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -23,10 +24,6 @@ public final class SuggestionsHook {
     private static int currentSuggestionId = MAGIC_SUGGESTION_ID;
     private static final Int2ObjectMap<CompletableFuture<Suggestions>> pendingSuggestions = new Int2ObjectOpenHashMap<>();
 
-    public static CompletableFuture<Void> fence() {
-        return request("").thenAccept(suggestions -> {});
-    }
-
     public static CompletableFuture<Suggestions> request(String command) {
         ClientPacketListener connection = Minecraft.getInstance().getConnection();
         if (connection == null) {
@@ -36,8 +33,22 @@ public final class SuggestionsHook {
         currentSuggestionId--;
         CompletableFuture<Suggestions> future = new CompletableFuture<>();
         pendingSuggestions.put(currentSuggestionId, future);
-        connection.send(new ServerboundCommandSuggestionPacket(currentSuggestionId, command));
+        doRequest(connection, currentSuggestionId, command);
         return future;
+    }
+
+    private static void doRequest(ClientPacketListener connection, int suggestionId, String command) {
+        if (!connection.isAcceptingMessages()) {
+            return;
+        }
+
+        connection.send(new ServerboundCommandSuggestionPacket(suggestionId, command));
+        // Server isn't guaranteed to respond, keep retrying
+        RoundTripFence.getInstance(connection).fence().thenRun(() -> {
+            if (pendingSuggestions.containsKey(suggestionId)) {
+                doRequest(connection, suggestionId, command);
+            }
+        });
     }
 
     public static boolean onCompletions(ClientboundCommandSuggestionsPacket packet) {

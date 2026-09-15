@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
 import net.earthcomputer.clientcommands.features.PacketDumper;
 import net.earthcomputer.clientcommands.util.ReflectionUtils;
 import net.earthcomputer.clientcommands.util.UnsafeUtils;
@@ -65,6 +66,10 @@ public class ListenCommand {
     private static final Set<Identifier> packets = new HashSet<>();
 
     private static @UnknownNullability PacketCallback callback;
+
+    static {
+        ClientConnectionEvents.SEND_PACKET_NO_UNPACK_BUNDLES.register((_, packet) -> onPacket(packet, PacketFlow.SERVERBOUND));
+    }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("clisten")
