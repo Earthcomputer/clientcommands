@@ -361,6 +361,16 @@
   "connectFourGame.won": "Won!",
   "connectFourGame.yourMove": "It is your move",
 
+  "doubleClickMain.browseUnsupported": "Your system does not support opening links in a browser. You can copy and paste this URL instead: %s",
+  "doubleClickMain.errorOpeningLink": "Error opening link %s: %s",
+  "doubleClickMain.installFabric": "installing Fabric",
+  "doubleClickMain.installFabricUrl": "https://docs.fabricmc.net/players/installing-fabric/",
+  "doubleClickMain.installMods": "installing mods",
+  "doubleClickMain.installModsUrl": "https://docs.fabricmc.net/players/installing-mods",
+  "doubleClickMain.message1": "This is not the correct way to run clientcommands.",
+  "doubleClickMain.message2": "Clientcommands is a Minecraft mod. Follow the Fabric guidance for %s and %s.",
+  "doubleClickMain.unableToOpenLink": "Unable to Open Link",
+
   "enchCrack.addInfo": "Add Info",
   "enchCrack.bookshelfCount": "Bookshelf Count: %s",
   "enchCrack.bookshelfCount.actual": "Actual Bookshelf Count: %s",

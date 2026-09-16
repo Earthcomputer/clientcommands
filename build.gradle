@@ -94,6 +94,8 @@ jar {
 	}
 
 	from("LICENSE")
+
+	manifest.attributes 'Main-Class': 'net.earthcomputer.clientcommands.DoubleClickMain'
 }
 
 tasks.register('generateBuildInfo', GenerateBuildInfoTask) {

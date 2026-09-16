@@ -338,7 +338,7 @@ abstract class CheckLanguageFilesTask : DefaultTask() {
 
     private fun checkNotEndWithPeriod(filename: String, lineNumber: Int, key: String, value: String): Boolean {
         // only check English, it's a mess otherwise with other languages' weird rules
-        if (filename == "en_us.json" && value.endsWith('.') && !value.endsWith("...")) {
+        if (filename == "en_us.json" && !key.startsWith("doubleClickMain.") && value.endsWith('.') && !value.endsWith("...")) {
             logger.error("$filename:$lineNumber: translation '$key' ends with a period")
             return false
         }
