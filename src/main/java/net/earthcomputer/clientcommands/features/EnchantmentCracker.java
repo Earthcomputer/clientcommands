@@ -34,6 +34,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.CommonColors;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -134,7 +135,7 @@ public class EnchantmentCracker {
      * This section is in charge of rendering the overlay on the enchantment GUI
      */
 
-    public static void extractEnchantmentGUIOverlay(GuiGraphicsExtractor graphics) {
+    public static void extractEnchantmentGUIOverlay(GuiGraphicsExtractor graphics, EnchantmentMenu menu) {
         ClientLevel level = Minecraft.getInstance().level;
         assert level != null;
 
@@ -182,7 +183,7 @@ public class EnchantmentCracker {
 
         for (int slot = 0; slot < 3; slot++) {
             lines.add(Component.translatable("enchCrack.slot", slot + 1));
-            List<EnchantmentInstance> enchs = getEnchantmentsInTable(slot);
+            List<EnchantmentInstance> enchs = getEnchantmentsInTable(slot, menu);
             if (enchs != null) {
                 sortIntoTooltipOrder(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), enchs);
                 for (EnchantmentInstance ench : enchs) {
@@ -194,7 +195,7 @@ public class EnchantmentCracker {
         Font font = Minecraft.getInstance().font;
         int y = 0;
         for (Component line : lines) {
-            graphics.text(font, line, 0, y, 0xffffffff, false);
+            graphics.text(font, line, 0, y, CommonColors.WHITE, false);
             y += font.lineHeight;
         }
     }
@@ -215,8 +216,28 @@ public class EnchantmentCracker {
         possibleXPSeeds.clear();
     }
 
+    public static void checkXpSeedState(EnchantmentMenu menu) {
+        if (Configs.enchCrackState == CrackState.UNCRACKED) {
+            return;
+        }
+
+        // The client only gets sent some bits of the seed
+        int mask = getMenuXpSeedMask();
+        int expectedSeedBits = menu.getEnchantmentSeed() & mask;
+
+        if (possibleXPSeeds.stream().noneMatch(xpSeed -> (xpSeed & mask) == expectedSeedBits)) {
+            resetCracker();
+            PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.DESYNC);
+        }
+
+    }
+
+    private static int getMenuXpSeedMask() {
+        return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_14 ? 0xfff0 : 0xffff;
+    }
+
     private static void prepareForNextEnchantmentSeedCrack(int serverReportedXPSeed) {
-        serverReportedXPSeed &= 0x0000fff0;
+        serverReportedXPSeed &= getMenuXpSeedMask();
         for (int highBits = 0; highBits < 65536; highBits++) {
             for (int low4Bits = 0; low4Bits < 16; low4Bits++) {
                 possibleXPSeeds.add((highBits << 16) | serverReportedXPSeed | low4Bits);
@@ -673,36 +694,32 @@ public class EnchantmentCracker {
     // Same as above method, except does not assume the seed has been cracked. If it
     // hasn't returns the clue given by the server
     @Nullable
-    public static List<EnchantmentInstance> getEnchantmentsInTable(int slot) {
+    public static List<EnchantmentInstance> getEnchantmentsInTable(int slot, EnchantmentMenu menu) {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
         Registry<Enchantment> enchantmentRegistry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
         CrackState crackState = Configs.enchCrackState;
 
-        if (!(player.containerMenu instanceof EnchantmentMenu enchMenu)) {
-            return null;
-        }
-
         if (crackState != CrackState.CRACKED) {
-            if (enchMenu.enchantClue[slot] == -1) {
+            if (menu.enchantClue[slot] == -1) {
                 // if we haven't cracked it, and there's no clue, then we can't give any
                 // information about the enchantment
                 return null;
             } else {
                 // return a list containing the clue
-                Holder<Enchantment> enchantment = enchantmentRegistry.asHolderIdMap().byId(enchMenu.enchantClue[slot]);
+                Holder<Enchantment> enchantment = enchantmentRegistry.asHolderIdMap().byId(menu.enchantClue[slot]);
                 if (enchantment == null) {
                     return null;
                 }
-                return new ArrayList<>(Collections.singletonList(new EnchantmentInstance(enchantment, enchMenu.levelClue[slot])));
+                return new ArrayList<>(Collections.singletonList(new EnchantmentInstance(enchantment, menu.levelClue[slot])));
             }
         } else {
             // return the enchantments using our cracked seed
             RandomSource rand = RandomSource.create();
             int xpSeed = possibleXPSeeds.iterator().next();
-            ItemStack enchantingStack = enchMenu.getSlot(0).getItem();
-            int enchantLevels = enchMenu.costs[slot];
+            ItemStack enchantingStack = menu.getSlot(0).getItem();
+            int enchantLevels = menu.costs[slot];
             return getEnchantmentList(enchantmentRegistry, rand, xpSeed, enchantingStack, slot, enchantLevels, MultiVersionCompat.INSTANCE.getProtocolVersion());
         }
     }

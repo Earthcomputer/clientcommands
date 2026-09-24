@@ -605,6 +605,7 @@ public class PlayerRandCracker {
         BANE_OF_ARTHROPODS("baneOfArthropods"),
         CONSUME("consume"),
         CROSSBOW("crossbow"),
+        DESYNC("desync"),
         DRINK("drink"),
         DROP_ITEM("dropItem"),
         ENCHANTING("enchanting"),

@@ -3,6 +3,8 @@
   "package": "net.earthcomputer.clientcommands.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "commands.enchant.AbstractContainerMenuMixin",
+    "commands.enchant.EnchantmentMenuMixin",
     "commands.enchant.EnchantmentScreenMixin",
     "commands.findblock.LevelChunkMixin",
     "commands.fish.EntityMixin",

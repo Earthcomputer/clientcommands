@@ -407,6 +407,7 @@
   "playerManip.reset.baneOfArthropods": "Hit Arthropod with Bane of Arthropods",
   "playerManip.reset.consume": "Consumed",
   "playerManip.reset.crossbow": "Crossbow Used",
+  "playerManip.reset.desync": "Desync Detected",
   "playerManip.reset.drink": "Drunk",
   "playerManip.reset.dropItem": "Dropped Item",
   "playerManip.reset.enchanting": "Enchanted Item",
