@@ -238,8 +238,9 @@ public class EnchantmentCracker {
 
     private static void prepareForNextEnchantmentSeedCrack(int serverReportedXPSeed) {
         serverReportedXPSeed &= getMenuXpSeedMask();
+        int maxLowBits = MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_14 ? 15 : 0;
         for (int highBits = 0; highBits < 65536; highBits++) {
-            for (int low4Bits = 0; low4Bits < 16; low4Bits++) {
+            for (int low4Bits = 0; low4Bits < maxLowBits; low4Bits++) {
                 possibleXPSeeds.add((highBits << 16) | serverReportedXPSeed | low4Bits);
             }
         }
