@@ -237,6 +237,8 @@
   "commands.clisten.sentPacket": "Sent the following packet: %s",
   "commands.clisten.unknownPacket": "Unknown packet %s",
 
+  "commands.clocatorbarcolor.success": "%s has locator bar color %s (internal color %s)",
+
   "commands.cmap.export.success.hand": "Saved held map successfully as %s",
   "commands.cmap.export.success.world": "Saved target map successfully as %s",
   "commands.cmap.failedSave": "Failed to save map to file",
