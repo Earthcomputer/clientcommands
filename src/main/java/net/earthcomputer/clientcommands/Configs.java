@@ -25,6 +25,9 @@ public class Configs {
         CONFIG_REF.get().save();
     }
 
+    @Config(readOnly = true)
+    public static boolean donationMessage = true;
+
     @Config(readOnly = true, temporary = true)
     public static double calcAnswer = 0;
 

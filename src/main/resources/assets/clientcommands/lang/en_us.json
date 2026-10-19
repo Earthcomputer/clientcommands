@@ -208,6 +208,8 @@
   "commands.client.cancel": "Cancel",
   "commands.client.componentTooDeeplyNested": "Chat component too deeply nested",
   "commands.client.crack": "Crack",
+  "commands.client.donate": "Thanks for installing clientcommands! If you appreciate this mod, consider %s!",
+  "commands.client.donate.link": "donating to me on ko-fi",
   "commands.client.enable": "Enable",
   "commands.client.excluding": "Invalid argument; excluded",
   "commands.client.expectedRegex": "Invalid regex %s",

@@ -80,6 +80,7 @@ public class ClientCommands implements ClientModInitializer {
 
         // Events
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
+        Donate.registerEvents();
         EnchantmentCracker.registerEvents();
         FishingCracker.registerEvents();
         PlayerRandCracker.registerEvents();
