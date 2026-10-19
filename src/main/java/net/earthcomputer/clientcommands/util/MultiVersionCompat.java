@@ -185,27 +185,30 @@ public abstract sealed class MultiVersionCompat {
     }
 
     private static final class ViaFabricPlus extends AbstractViaVersion {
-        private final Method viaFabricPlusGetImpl;
+        private final Method viaFabricPlusApi;
         private final Method getTargetVersion;
+        private final Method getLimitations;
         private final Method olderThan;
         private final Method itemExistsInConnection;
         private final Object release1_7_2Version;
 
         private ViaFabricPlus() throws ReflectiveOperationException {
             Class<?> viaFabricPlus = Class.forName("com.viaversion.viafabricplus.ViaFabricPlus");
-            Class<?> viaFabricPlusBase = Class.forName("com.viaversion.viafabricplus.api.ViaFabricPlusBase");
+            Class<?> viaFabricPlusApiClass = Class.forName("com.viaversion.viafabricplus.api.ViaFabricPlusAPI");
+            Class<?> limitations = Class.forName("com.viaversion.viafabricplus.api.protocoltranslator.Limitations");
             Class<?> protocolVersion = Class.forName("com.viaversion.viaversion.api.protocol.version.ProtocolVersion");
-            viaFabricPlusGetImpl = viaFabricPlus.getMethod("getImpl");
-            getTargetVersion = viaFabricPlusBase.getMethod("getTargetVersion");
+            viaFabricPlusApi = viaFabricPlus.getMethod("api");
+            getTargetVersion = viaFabricPlusApiClass.getMethod("targetVersion");
+            getLimitations = viaFabricPlusApiClass.getMethod("limitations");
             olderThan = protocolVersion.getMethod("olderThan", protocolVersion);
-            itemExistsInConnection = viaFabricPlusBase.getMethod("itemExistsInConnection", Item.class);
+            itemExistsInConnection = limitations.getMethod("itemExistsInConnection", Item.class);
             release1_7_2Version = protocolVersion.getField("v1_7_2").get(null);
         }
 
         @Override
         public int getProtocolVersion() {
             try {
-                final boolean isOlderThan1_7_2 = (boolean) olderThan.invoke(getTargetVersion.invoke(getImpl()), release1_7_2Version);
+                final boolean isOlderThan1_7_2 = (boolean) olderThan.invoke(getTargetVersion.invoke(getApi()), release1_7_2Version);
                 if (isOlderThan1_7_2) {
                     return V1_7_2;
                 } else {
@@ -218,21 +221,21 @@ public abstract sealed class MultiVersionCompat {
 
         @Override
         protected Object getCurrentVersion() throws ReflectiveOperationException {
-            return getTargetVersion.invoke(getImpl());
+            return getTargetVersion.invoke(getApi());
         }
 
         @Override
         public boolean doesItemExist(Item item) {
             try {
-                return (Boolean) itemExistsInConnection.invoke(getImpl(), item);
+                return (Boolean) itemExistsInConnection.invoke(getLimitations.invoke(getApi()), item);
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        private Object getImpl() {
+        private Object getApi() {
             try {
-                return viaFabricPlusGetImpl.invoke(null);
+                return viaFabricPlusApi.invoke(null);
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
