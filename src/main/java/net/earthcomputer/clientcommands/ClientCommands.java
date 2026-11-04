@@ -10,6 +10,7 @@ import dev.xpple.betterconfig.api.ModConfigBuilder;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
+import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.CommandExecutionCustomPayload;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.FishingCracker;
@@ -80,6 +81,7 @@ public class ClientCommands implements ClientModInitializer {
 
         // Events
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
+        ChorusManipulation.registerEvents();
         Donate.registerEvents();
         EnchantmentCracker.registerEvents();
         FishingCracker.registerEvents();

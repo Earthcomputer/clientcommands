@@ -15,6 +15,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
@@ -34,6 +35,8 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -152,6 +155,57 @@ final class PlayerRandResetTests {
                 singleplayerContext.getServer().runOnServer(_ -> singleplayerContext.getConnection().getServerPlayer().getFoodData().setFoodLevel(10));
                 give(singleplayerContext, Items.BREAD);
                 expectResetOrMaintained(context, singleplayerContext, RNGCallType.FOOD, maintenance, () -> useUntilConsumed(context, singleplayerContext, Items.BREAD));
+            });
+        }
+    }
+
+    @TestCase
+    private static void testConsumeStatusEffects(ClientGameTestContext context, TestSingleplayerContext singleplayerContext) {
+        // the status effect may or may not be applied, but the random call is made either way
+        for (float probability : new float[] {1, 0.5f}) {
+            for (boolean maintenance : new boolean[] {true, false}) {
+                runTest(context, singleplayerContext, probability + "_" + maintenanceVariant(maintenance), () -> {
+                    singleplayerContext.getServer().runOnServer(_ -> singleplayerContext.getConnection().getServerPlayer().getFoodData().setFoodLevel(10));
+                    give(singleplayerContext, breadWithStatusEffects(probability));
+                    expectResetOrMaintained(context, singleplayerContext, RNGCallType.CONSUME_STATUS_EFFECTS, maintenance, () -> useUntilConsumed(context, singleplayerContext, Items.BREAD));
+                });
+            }
+        }
+        // Between 1.20.5 and 1.21.2, each status effect was rolled separately
+        runTest(context, singleplayerContext, "1.21", () -> {
+            setProtocolVersion(context, MultiVersionCompat.V1_21, "1.21");
+            singleplayerContext.getServer().runOnServer(_ -> singleplayerContext.getConnection().getServerPlayer().getFoodData().setFoodLevel(10));
+            give(singleplayerContext, breadWithStatusEffects(1));
+            expectMaintained(context, singleplayerContext, RNGCallType.CONSUME_STATUS_EFFECTS, () -> useUntilConsumed(context, singleplayerContext, Items.BREAD));
+        });
+        // Food status effects used the level random before 1.20.5
+        runTest(context, singleplayerContext, "1.20", () -> {
+            setProtocolVersion(context, MultiVersionCompat.V1_20, "1.20");
+            singleplayerContext.getServer().runOnServer(_ -> singleplayerContext.getConnection().getServerPlayer().getFoodData().setFoodLevel(10));
+            give(singleplayerContext, breadWithStatusEffects(1));
+            List<RNGCallType> rngCalls = expectMaintained(context, singleplayerContext, RNGCallType.FOOD, () -> useUntilConsumed(context, singleplayerContext, Items.BREAD));
+            assertTrue(!rngCalls.contains(RNGCallType.CONSUME_STATUS_EFFECTS), () -> "Expected no status effect RNG call, got " + rngCalls);
+        });
+    }
+
+    // The status effects have no particles, which would otherwise reset the cracker
+    private static ItemStack breadWithStatusEffects(float probability) {
+        ItemStack bread = new ItemStack(Items.BREAD);
+        bread.set(DataComponents.CONSUMABLE, Consumables.defaultFood()
+            .onConsume(new ApplyStatusEffectsConsumeEffect(List.of(
+                new MobEffectInstance(MobEffects.LUCK, 200, 0, false, false),
+                new MobEffectInstance(MobEffects.HASTE, 200, 0, false, false)
+            ), probability))
+            .build());
+        return bread;
+    }
+
+    @TestCase
+    private static void testTeleport(ClientGameTestContext context, TestSingleplayerContext singleplayerContext) {
+        for (boolean maintenance : new boolean[] {true, false}) {
+            runTest(context, singleplayerContext, maintenanceVariant(maintenance), () -> {
+                give(singleplayerContext, Items.CHORUS_FRUIT);
+                expectResetOrMaintained(context, singleplayerContext, RNGCallType.TELEPORT, maintenance, () -> useUntilConsumed(context, singleplayerContext, Items.CHORUS_FRUIT));
             });
         }
     }
@@ -574,7 +628,7 @@ final class PlayerRandResetTests {
     }
 
     // Expects the action to make the given RNG call, but for the client to correctly predict it
-    private static void expectMaintained(ClientGameTestContext context, TestSingleplayerContext singleplayerContext, RNGCallType type, Runnable action) {
+    private static List<RNGCallType> expectMaintained(ClientGameTestContext context, TestSingleplayerContext singleplayerContext, RNGCallType type, Runnable action) {
         List<RNGCallType> rngCalls = performWithKnownSeed(context, singleplayerContext, action);
         assertTrue(rngCalls.contains(type), () -> "Expected RNG call " + type + ", got " + rngCalls);
         assertPlayerCrackState(context, PlayerRandCracker.CrackState.CRACKED);
@@ -582,6 +636,7 @@ final class PlayerRandResetTests {
         if (!isProtocolVersionOverridden(context)) {
             assertPlayerSeedInSync(context, singleplayerContext);
         }
+        return rngCalls;
     }
 
     // Expects the action not to affect the player RNG

@@ -41,6 +41,16 @@ public class ChorusManipulation {
     public static Vec3 chorusGoalTo;
     private static final Object GOAL_POS_KEY = new Object();
 
+    public static void registerEvents() {
+        RNG_CALLED_EVENT.register(ChorusManipulation::onRNGCallEvent);
+    }
+
+    private static void onRNGCallEvent(RNGCallEvent event) {
+        if (event.getType().isConsumableRelated() && Configs.chorusManipulation) {
+            event.setMaintained();
+        }
+    }
+
     public static void onChorusManipEnabled() {
         TaskManager.addNonConflictingTask("chorusManipRenderer", new SimpleTask() {
             @Override

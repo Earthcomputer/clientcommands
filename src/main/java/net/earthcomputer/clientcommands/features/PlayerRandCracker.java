@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
 import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
@@ -182,19 +183,40 @@ public class PlayerRandCracker {
             for (int i = 0; i < consumeRandomCalls; i++) {
                 nextInt();
             }
-
-            if (particleCount == 16) {
-                for (ConsumeEffect effect : consumable.onConsumeEffects()) {
-                    if (effect instanceof TeleportRandomlyConsumeEffect teleport) {
-                        LegacyRandomSource rand = new LegacyRandomSource(0);
-                        rand.seed.set(seed);
-                        ChorusManipulation.simulateTeleport(rand, pos, teleport.diameter());
-                        seed = rand.seed.get();
-                    }
-                }
-            }
         } else {
             resetCracker(callType, false);
+        }
+
+        if (particleCount == 16) {
+            onConsumeEffects(pos, consumable);
+        }
+    }
+
+    private static void onConsumeEffects(Vec3 pos, Consumable consumable) {
+        int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+
+        for (ConsumeEffect effect : consumable.onConsumeEffects()) {
+            if (effect instanceof ApplyStatusEffectsConsumeEffect applyEffects && protocolVersion >= MultiVersionCompat.V1_20_5) {
+                // Before 1.21.2, each status effect of a food had its own probability, so was rolled separately.
+                // Before 1.20.5, the level random was used instead.
+                int randomCalls = protocolVersion >= MultiVersionCompat.V1_21_2 ? 1 : applyEffects.effects().size();
+                if (canMaintainPlayerRNG(RNGCallType.CONSUME_STATUS_EFFECTS)) {
+                    for (int i = 0; i < randomCalls; i++) {
+                        nextFloat();
+                    }
+                } else {
+                    resetCracker(RNGCallType.CONSUME_STATUS_EFFECTS, false);
+                }
+            } else if (effect instanceof TeleportRandomlyConsumeEffect teleport) {
+                if (canMaintainPlayerRNG(RNGCallType.TELEPORT)) {
+                    LegacyRandomSource rand = new LegacyRandomSource(0);
+                    rand.seed.set(seed);
+                    ChorusManipulation.simulateTeleport(rand, pos, teleport.diameter());
+                    seed = rand.seed.get();
+                } else {
+                    resetCracker(RNGCallType.TELEPORT, false);
+                }
+            }
         }
     }
 
@@ -659,6 +681,7 @@ public class PlayerRandCracker {
         ANVIL("anvil"),
         BANE_OF_ARTHROPODS("baneOfArthropods"),
         CONSUME("consume"),
+        CONSUME_STATUS_EFFECTS("consumeStatusEffects"),
         CROSSBOW("crossbow"),
         DESYNC("desync"),
         DRINK("drink"),
@@ -682,6 +705,7 @@ public class PlayerRandCracker {
         SOUL_SPEED("soulSpeed"),
         SPRINT("sprint"),
         SWIM("swim"),
+        TELEPORT("teleport"),
         UNBREAKING("unbreaking"),
         XP("xp"),
         ;
@@ -693,6 +717,17 @@ public class PlayerRandCracker {
 
         public Component getResetMessage() {
             return resetMessage;
+        }
+
+        public boolean isConsumableRelated() {
+            return switch (this) {
+                case FOOD,
+                    DRINK,
+                    CONSUME,
+                    CONSUME_STATUS_EFFECTS,
+                    TELEPORT -> true;
+                default -> false;
+            };
         }
     }
 
