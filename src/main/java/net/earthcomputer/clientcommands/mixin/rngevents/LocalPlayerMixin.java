@@ -25,5 +25,6 @@ public class LocalPlayerMixin extends AbstractClientPlayer {
                 PlayerRandCracker.resetCracker(PlayerRandCracker.RNGCallType.SHOULDER_PARROT);
             }
         }
+        PlayerRandCracker.onBlockingTick((LocalPlayer) (Object) this);
     }
 }

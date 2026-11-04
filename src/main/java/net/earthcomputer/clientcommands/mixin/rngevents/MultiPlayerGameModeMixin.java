@@ -6,6 +6,7 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,5 +50,13 @@ public class MultiPlayerGameModeMixin {
     @Inject(method = "startPrediction", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/prediction/BlockStatePredictionHandler;close()V"))
     private void startPredictionFinally(CallbackInfo ci) {
         PlayerRandCracker.isPredictingBlockBreaking = false;
+    }
+
+    @Inject(method = "handleInventoryButtonClick", at = @At("HEAD"))
+    private void onInventoryButtonClick(int containerId, int buttonId, CallbackInfo ci) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null && player.containerMenu instanceof EnchantmentMenu menu && menu.containerId == containerId && buttonId >= 0 && buttonId < 3) {
+            PlayerRandCracker.onEnchantedItem();
+        }
     }
 }

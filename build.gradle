@@ -45,6 +45,15 @@ loom {
 	accessWidenerPath = file('src/main/resources/clientcommands.aw')
 }
 
+fabricApi {
+	configureTests {
+		modId = "clientcommands-test"
+		enableGameTests = false
+		enableClientGameTests = true
+		createSourceSet = true
+	}
+}
+
 loom.runs.configureEach {
     jvmArguments.add("-enableassertions")
     systemProperties.put("fabric.loom.suppressNarratorError", "true")

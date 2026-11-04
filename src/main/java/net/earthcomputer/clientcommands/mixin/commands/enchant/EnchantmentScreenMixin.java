@@ -1,7 +1,6 @@
 package net.earthcomputer.clientcommands.mixin.commands.enchant;
 
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
-import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -14,7 +13,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EnchantmentScreen.class)
 public abstract class EnchantmentScreenMixin extends AbstractContainerScreen<EnchantmentMenu> {
@@ -27,11 +25,6 @@ public abstract class EnchantmentScreenMixin extends AbstractContainerScreen<Enc
         if (EnchantmentCracker.isEnchantingPredictionEnabled()) {
             EnchantmentCracker.extractEnchantmentGUIOverlay(graphics, this.menu);
         }
-    }
-
-    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;handleInventoryButtonClick(II)V"))
-    private void onItemEnchanted(CallbackInfoReturnable<Boolean> ci) {
-        PlayerRandCracker.onEnchantedItem();
     }
 
     @Inject(method = "init", at = @At("TAIL"))

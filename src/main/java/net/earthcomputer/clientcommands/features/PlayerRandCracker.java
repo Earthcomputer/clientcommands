@@ -20,6 +20,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Prediction;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
@@ -161,19 +162,30 @@ public class PlayerRandCracker {
         };
 
         if (canMaintainPlayerRNG(callType)) {
-            if (itemUseTimeLeft < 0 && particleCount != 16) {
-                // We have accounted for all eating ticks, that on the server should be calculated
+            if (itemUseTimeLeft <= 0 && particleCount != 16) {
+                // We have accounted for all eating ticks, that on the server should be calculated.
+                // The server finishes using the item with 1 tick left, but the client may tick once more before it finds out.
                 // Sometimes if the connection is laggy we eat more than 24 ticks so just hope for the best
                 return;
             }
 
+            int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+
             // random calls for the consume sounds
-            for (int i = 0; i < 3; i++) {
+            int soundRandomCalls = protocolVersion >= MultiVersionCompat.V1_21_2 ? 4 : 3;
+            for (int i = 0; i < soundRandomCalls; i++) {
                 nextInt();
             }
             if (consumable.hasConsumeParticles()) {
                 // random calls for the particles
-                for (int i = 0; i < particleCount * 3; i++) {
+                int particleRandomCalls = protocolVersion >= MultiVersionCompat.V1_21_11 ? 4 : 3;
+                for (int i = 0; i < particleCount * particleRandomCalls; i++) {
+                    nextInt();
+                }
+            }
+            if (particleCount == 16 && protocolVersion >= MultiVersionCompat.V1_21_2 && stack.has(DataComponents.FOOD)) {
+                // random calls for the eating sound and burp sound once the food has been eaten
+                for (int i = 0; i < 3; i++) {
                     nextInt();
                 }
             }
@@ -211,12 +223,23 @@ public class PlayerRandCracker {
         }
     }
 
-    public static void onCrossbowUse() {
+    public static void onCrossbowUse(int projectileCount) {
         if (canMaintainPlayerRNG(RNGCallType.CROSSBOW)) {
-            if (MultiVersionCompat.INSTANCE.getProtocolVersion() <= MultiVersionCompat.V1_18_2) {
+            int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+            int randomCalls;
+            if (protocolVersion >= MultiVersionCompat.V1_20_5) {
+                // a random sound pitch for each projectile after the first
+                randomCalls = Math.max(0, projectileCount - 1);
+            } else if (protocolVersion >= MultiVersionCompat.V1_17) {
+                // a random boolean and two random sound pitches, regardless of the number of projectiles
+                randomCalls = 3;
+            } else {
+                // a random boolean, the sound pitches used a different random
+                randomCalls = 1;
+            }
+            for (int i = 0; i < randomCalls; i++) {
                 nextInt();
             }
-            nextInt();
         } else {
             resetCracker(RNGCallType.CROSSBOW, false);
         }
@@ -226,6 +249,25 @@ public class PlayerRandCracker {
         if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_17) {
             // TODO: is there a way to be smarter about this?
             resetCracker(RNGCallType.XP);
+        }
+    }
+
+    private static final double SHIELD_DISABLE_RANGE = 8;
+
+    public static void onBlockingTick(LocalPlayer player) {
+        // Before 1.20.5, a player blocking an attack from an axe had a random chance to have their shield disabled.
+        // We can't reliably tell when the server blocks an attack (mobs don't always swing), so be conservative and
+        // assume it could happen whenever the player is blocking with an axe-wielder nearby.
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20_5 || !player.isBlocking()) {
+            return;
+        }
+        boolean axeNearby = !player.level().getEntitiesOfClass(
+            LivingEntity.class,
+            player.getBoundingBox().inflate(SHIELD_DISABLE_RANGE),
+            entity -> entity != player && entity.getMainHandItem().is(ItemTags.AXES)
+        ).isEmpty();
+        if (axeNearby) {
+            resetCracker(RNGCallType.SHIELD);
         }
     }
 
