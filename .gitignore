@@ -24,5 +24,6 @@ bin/
 
 run/
 logs/
+.fabric/
 
 /changelog.txt

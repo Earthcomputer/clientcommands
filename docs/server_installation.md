@@ -12,7 +12,7 @@ These commands are:
 
 Other commands considered but not included in the list requiring the opt-in are:
 - `/cfinditem` only searches containers near the player by clicking on them, unless the player is opped.
-    - In the near future we may implement a more powerful mode if clientcommands is installed on the server.
+    - If clientcommands is installed on the server, `/cfinditem` instead asks the server to search all containers within the player's render distance, or within all loaded chunks with `--all-loaded-chunks`. Server admins can disable this by setting `serverFindItem` to `false` in `config/clientcommands-server/config.json`, or by running `/config clientcommands-server serverFindItem set false`.
 - `/csnap` is a teleport but restricted to a maximum of one block distance, reflecting its intention of being used for precise alignment ("snapping") rather than longer-distance teleportation, speed hacks, or flying. It needs to be used with a script or macro to be at all an effective method to do these things, which is functionality that clientcommands doesn't provide.
 - `/cgetdata block` requires you to already know the coordinates of the block you want to get data from, making it an ineffective method to X-ray.
 

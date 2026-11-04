@@ -17,6 +17,7 @@ import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.features.Relogger;
 import net.earthcomputer.clientcommands.features.ServerBrandManager;
+import net.earthcomputer.clientcommands.features.ServerPermissions;
 import net.earthcomputer.clientcommands.features.Waypoints;
 import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.fabricmc.api.ClientModInitializer;
@@ -83,10 +84,12 @@ public class ClientCommands implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(ClientCommands::registerCommands);
         ChorusManipulation.registerEvents();
         Donate.registerEvents();
+        FindItemCommand.registerEvents();
         EnchantmentCracker.registerEvents();
         FishingCracker.registerEvents();
         PlayerRandCracker.registerEvents();
         ServerBrandManager.registerEvents();
+        ServerPermissions.registerEvents();
     }
 
     private static void setupScrambleWindowTitle() {

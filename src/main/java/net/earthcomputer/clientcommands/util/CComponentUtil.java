@@ -75,7 +75,11 @@ public final class CComponentUtil {
     }
 
     public static Component getGlowButtonTextComponent(Entity entity) {
-        return getCommandTextComponent(Component.translatable("commands.client.glow"), "/cglow entities " + entity.getStringUUID());
+        return getGlowButtonTextComponent(entity.getUUID());
+    }
+
+    public static Component getGlowButtonTextComponent(UUID uuid) {
+        return getCommandTextComponent(Component.translatable("commands.client.glow"), "/cglow entities " + uuid);
     }
 
     public static Component getCommandTextComponent(@Translatable String translationKey, String command) {

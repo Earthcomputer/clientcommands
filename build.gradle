@@ -14,15 +14,6 @@ base {
 	archivesName = project.archives_base_name
 }
 
-sourceSets {
-	codeGen
-}
-
-configurations {
-	includedLibrary
-	implementation.extendsFrom includedLibrary
-}
-
 repositories {
 	maven {
 		url = 'https://maven.seedfinding.com'
@@ -42,7 +33,36 @@ repositories {
 }
 
 loom {
+	splitEnvironmentSourceSets()
 	accessWidenerPath = file('src/main/resources/clientcommands.aw')
+
+	mods {
+		clientcommands {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+// Loom calls the server-side source set "main" and the client-only source set "client". Since we're primarily a
+// client-side mod, the client code lives in src/main and the code that also runs on the server lives in src/common.
+// The client code can access the common code, but not vice versa.
+// TODO: add customization option to loom to rename the source sets instead
+sourceSets {
+	main {
+		java.srcDirs = ['src/common/java']
+		resources.srcDirs = ['src/common/resources']
+	}
+	client {
+		java.srcDirs = ['src/main/java']
+		resources.srcDirs = ['src/main/resources']
+	}
+	codeGen
+}
+
+configurations {
+	includedLibrary
+	clientImplementation.extendsFrom includedLibrary
 }
 
 fabricApi {
@@ -64,9 +84,9 @@ dependencies {
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	include implementation("dev.xpple:clientarguments:${project.clientarguments_version}")
+	include clientImplementation("dev.xpple:clientarguments:${project.clientarguments_version}")
 	include implementation("dev.xpple:betterconfig-fabric:${project.betterconfig_version}")
-	include implementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
+	include clientImplementation("dev.xpple:simplewaypoints:${project.simplewaypoints_version}")
 
 	includedLibrary "com.seedfinding:mc_feature:${project.seedfinding_feature_version}"
 	includedLibrary "com.seedfinding:mc_biome:${project.seedfinding_biome_version}"
@@ -80,11 +100,11 @@ dependencies {
 
 	compileOnly 'com.demonwav.mcdev:annotations:2.0.0'
 
-	runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
+	clientRuntimeOnly("me.djtheredstoner:DevAuth-fabric:${project.devauth_version}") {
 		exclude group: 'net.fabricmc', module: 'fabric-loader'
 	}
 
-	codeGenImplementation sourceSets.main.output
+	codeGenImplementation sourceSets.client.output
 
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
@@ -116,18 +136,18 @@ tasks.register('generateBuildInfo', GenerateBuildInfoTask) {
 	outputFile = new File(temporaryDir, "build_info.json")
 }
 
-processResources {
+processClientResources {
 	inputs.property "version", project.version
 	inputs.property "mcversion", project.minecraft_version_dependency
 
 	duplicatesStrategy DuplicatesStrategy.WARN
 
-	from(sourceSets.main.resources.srcDirs) {
+	from(sourceSets.client.resources.srcDirs) {
 		include "fabric.mod.json"
 		expand "version": project.version, "mcversion": project.minecraft_version_dependency
 	}
 
-	from(sourceSets.main.resources.srcDirs) {
+	from(sourceSets.client.resources.srcDirs) {
 		exclude "fabric.mod.json"
 	}
 

@@ -2,21 +2,27 @@ package net.earthcomputer.clientcommands.gametest;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
+import dev.xpple.betterconfig.api.BetterConfigAPI;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
+import net.earthcomputer.clientcommands.gametest.mixin.ChatComponentAccessor;
+import net.earthcomputer.clientcommands.server.ServerConfigs;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,6 +85,7 @@ public class ClientCommandsClientGameTest implements FabricClientGameTest {
         ChorusManipulationTests.class,
         CrackRngTests.class,
         EnchantmentCrackingTests.class,
+        FindItemTests.class,
         PlayerRandResetTests.class
     );
 
@@ -152,6 +159,7 @@ public class ClientCommandsClientGameTest implements FabricClientGameTest {
             }
         });
         clearInventory(singleplayerContext);
+        setServerFindItem(singleplayerContext, true);
         singleplayerContext.getConnection().waitForClientboundPackets();
         singleplayerContext.getConnection().waitForChunksDownload();
         context.waitTick();
@@ -228,6 +236,68 @@ public class ClientCommandsClientGameTest implements FabricClientGameTest {
 
     static List<PlayerRandCracker.RNGCallType> getRngCalls(ClientGameTestContext context) {
         return context.computeOnClient(_ -> List.copyOf(rngCalls));
+    }
+
+    static void setServerFindItem(TestSingleplayerContext singleplayerContext, boolean serverFindItem) {
+        singleplayerContext.getServer().runOnServer(_ -> {
+            if (ServerConfigs.serverFindItem != serverFindItem) {
+                try {
+                    BetterConfigAPI.getInstance().getModConfig(ServerConfigs.MOD_ID).set("serverFindItem", serverFindItem);
+                } catch (CommandSyntaxException e) {
+                    throw sneakyThrow(e);
+                }
+            }
+        });
+        // the change is applied in a task scheduled on the server, then sent to the client
+        singleplayerContext.getServer().runOnServer(_ -> {});
+        singleplayerContext.getConnection().waitForClientboundPackets();
+    }
+
+    static void clearChat(ClientGameTestContext context) {
+        context.runOnClient(client -> client.gui.hud.getChat().clearMessages(false));
+    }
+
+    private static List<GuiMessage> getChatMessages(ClientGameTestContext context) {
+        return context.computeOnClient(client -> List.copyOf(((ChatComponentAccessor) client.gui.hud.getChat()).getAllMessages()));
+    }
+
+    static boolean chatContains(ClientGameTestContext context, String translationKey) {
+        return getChatMessages(context).stream().anyMatch(message -> findTranslatable(message.content(), translationKey) != null);
+    }
+
+    // Finds the given argument of the most recent chat message with the given translation key
+    static Object findTranslationArg(ClientGameTestContext context, String translationKey, int argIndex) {
+        for (GuiMessage message : getChatMessages(context)) {
+            TranslatableContents translatable = findTranslatable(message.content(), translationKey);
+            if (translatable != null) {
+                Object arg = translatable.getArgs()[argIndex];
+                return arg instanceof Component component ? component.getString() : arg;
+            }
+        }
+        throw new AssertionError("No chat message with translation key " + translationKey);
+    }
+
+    private static @Nullable TranslatableContents findTranslatable(Component component, String translationKey) {
+        if (component.getContents() instanceof TranslatableContents translatable) {
+            if (translatable.getKey().equals(translationKey)) {
+                return translatable;
+            }
+            for (Object arg : translatable.getArgs()) {
+                if (arg instanceof Component argComponent) {
+                    TranslatableContents result = findTranslatable(argComponent, translationKey);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+            }
+        }
+        for (Component sibling : component.getSiblings()) {
+            TranslatableContents result = findTranslatable(sibling, translationKey);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     static void runClientCommand(ClientGameTestContext context, String command) {

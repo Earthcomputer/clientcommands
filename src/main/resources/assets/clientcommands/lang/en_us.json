@@ -131,8 +131,12 @@
   "commands.cfindblock.starting": "Searching for %s",
   "commands.cfindblock.success": "Closest match is at %s, %s blocks away",
 
+  "commands.cfinditem.allLoadedChunks.requiresServer": "Searching all loaded chunks requires clientcommands to be installed on the server and to allow it",
   "commands.cfinditem.match": "%sx %s found at %s",
   "commands.cfinditem.match.entity": "%sx %s found in %s at %s",
+  "commands.cfinditem.server.cancelled": "The server cancelled the search",
+  "commands.cfinditem.server.invalidItem": "The server could not understand the item to search for",
+  "commands.cfinditem.server.noPermission": "The server does not allow you to search for items",
   "commands.cfinditem.starting": "Searching for %s",
   "commands.cfinditem.starting.keepSearching": "Infinitely searching for %s",
   "commands.cfinditem.total": "Found %sx %s total",

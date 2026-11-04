@@ -18,6 +18,9 @@
       "net.earthcomputer.clientcommands.gametest.ClientCommandsClientGameTest"
     ]
   },
+  "mixins": [
+    "mixins.clientcommands-test.json"
+  ],
   "depends": {
     "clientcommands": "*"
   }
