@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
 import net.earthcomputer.clientcommands.Configs;
+import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.task.TaskManager;
@@ -75,6 +76,7 @@ public class ClientCommandsClientGameTest implements FabricClientGameTest {
     private static final List<PlayerRandCracker.RNGCallType> rngCalls = new ArrayList<>();
     private static boolean registeredRngCallListener = false;
     private static final List<Class<?>> TEST_CLASSES = List.of(
+        ChorusManipulationTests.class,
         CrackRngTests.class,
         EnchantmentCrackingTests.class,
         PlayerRandResetTests.class
@@ -157,6 +159,9 @@ public class ClientCommandsClientGameTest implements FabricClientGameTest {
             clearProtocolVersionOverride();
             Configs.playerRNGMaintenance = true;
             Configs.enchantingPrediction = true;
+            Configs.chorusManipulation = false;
+            ChorusManipulation.chorusGoalFrom = null;
+            ChorusManipulation.chorusGoalTo = null;
             Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
             EnchantmentCracker.resetCracker();
             EnchantmentCracker.enchantingTablePos = null;
@@ -234,6 +239,16 @@ public class ClientCommandsClientGameTest implements FabricClientGameTest {
             BlockHitResult hitResult = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
             Objects.requireNonNull(client.gameMode).useItemOn(Objects.requireNonNull(client.player), InteractionHand.MAIN_HAND, hitResult);
         });
+    }
+
+    static void useUntilConsumed(ClientGameTestContext context, TestSingleplayerContext singleplayerContext, Item item) {
+        singleplayerContext.getConnection().waitForClientboundPackets();
+        context.getInput().holdMouse(InputConstants.MOUSE_BUTTON_RIGHT);
+        try {
+            singleplayerContext.getServer().waitFor(_ -> !singleplayerContext.getConnection().getServerPlayer().getInventory().getSelectedItem().is(item), 100);
+        } finally {
+            context.getInput().releaseMouse(InputConstants.MOUSE_BUTTON_RIGHT);
+        }
     }
 
     static void assertTrue(boolean condition, Supplier<String> message) {

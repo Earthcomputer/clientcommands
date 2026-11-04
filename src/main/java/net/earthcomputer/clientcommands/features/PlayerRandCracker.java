@@ -22,6 +22,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Prediction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.ContainerInput;
@@ -31,10 +32,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.consume_effects.ConsumeEffect;
+import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -169,39 +173,47 @@ public class PlayerRandCracker {
                 return;
             }
 
-            int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+            if (particleCount != 16 && Configs.chorusManipulation) {
+                // must be before this tick's random calls, as it may throw items, which the server will see first
+                ChorusManipulation.onEat(pos, itemUseTimeLeft, stack, consumable);
+            }
 
-            // random calls for the consume sounds
-            int soundRandomCalls = protocolVersion >= MultiVersionCompat.V1_21_2 ? 4 : 3;
-            for (int i = 0; i < soundRandomCalls; i++) {
+            int consumeRandomCalls = getConsumeRandomCalls(stack, particleCount, consumable);
+            for (int i = 0; i < consumeRandomCalls; i++) {
                 nextInt();
             }
-            if (consumable.hasConsumeParticles()) {
-                // random calls for the particles
-                int particleRandomCalls = protocolVersion >= MultiVersionCompat.V1_21_11 ? 4 : 3;
-                for (int i = 0; i < particleCount * particleRandomCalls; i++) {
-                    nextInt();
-                }
-            }
-            if (particleCount == 16 && protocolVersion >= MultiVersionCompat.V1_21_2 && stack.has(DataComponents.FOOD)) {
-                // random calls for the eating sound and burp sound once the food has been eaten
-                for (int i = 0; i < 3; i++) {
-                    nextInt();
-                }
-            }
 
-            if (Configs.chorusManipulation && stack.getItem() == Items.CHORUS_FRUIT) {
-                ChorusManipulation.onEat(pos, particleCount, itemUseTimeLeft);
-                if (particleCount == 16) {
-                    //Consumption randoms
-                    for (int i = 0; i < 5; i++) {
-                        nextInt();
+            if (particleCount == 16) {
+                for (ConsumeEffect effect : consumable.onConsumeEffects()) {
+                    if (effect instanceof TeleportRandomlyConsumeEffect teleport) {
+                        LegacyRandomSource rand = new LegacyRandomSource(0);
+                        rand.seed.set(seed);
+                        ChorusManipulation.simulateTeleport(rand, pos, teleport.diameter());
+                        seed = rand.seed.get();
                     }
                 }
             }
         } else {
             resetCracker(callType, false);
         }
+    }
+
+    // The number of random calls made when the consume particles and sounds are emitted
+    public static int getConsumeRandomCalls(ItemStack stack, int particleCount, Consumable consumable) {
+        int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+
+        // random calls for the consume sounds
+        int randomCalls = protocolVersion >= MultiVersionCompat.V1_21_2 ? 4 : 3;
+        if (consumable.hasConsumeParticles()) {
+            // random calls for the particles
+            int particleRandomCalls = protocolVersion >= MultiVersionCompat.V1_21_11 ? 4 : 3;
+            randomCalls += particleCount * particleRandomCalls;
+        }
+        if (particleCount == 16 && protocolVersion >= MultiVersionCompat.V1_21_2 && stack.has(DataComponents.FOOD)) {
+            // random calls for the eating sound and burp sound once the food has been eaten
+            randomCalls += 3;
+        }
+        return randomCalls;
     }
 
     public static void onEquipItem() {
@@ -401,21 +413,22 @@ public class PlayerRandCracker {
         }
     }
 
-    public static ThrowItemsResult throwItemsUntil(Predicate<Random> condition, int max) {
+    public static ThrowItemsResult throwItemsUntil(Predicate<RandomSource> condition, int max) {
         if (!Configs.playerCrackState.knowsSeed()) {
             return new ThrowItemsResult(ThrowItemsResult.Type.UNKNOWN_SEED);
         }
         Configs.playerCrackState = CrackState.CRACKED;
 
         long seed = PlayerRandCracker.seed;
-        Random rand = new Random(seed ^ MULTIPLIER);
+        LegacyRandomSource rand = new LegacyRandomSource(0);
+        rand.seed.set(seed);
 
         int itemsNeeded = 0;
         for (; itemsNeeded <= max && !condition.test(rand); itemsNeeded++) {
             for (int i = 0; i < 4; i++) {
                 seed = (seed * MULTIPLIER + ADDEND) & MASK;
             }
-            rand.setSeed(seed ^ MULTIPLIER);
+            rand.seed.set(seed);
         }
         if (itemsNeeded > max) {
             return new ThrowItemsResult(ThrowItemsResult.Type.NOT_POSSIBLE, itemsNeeded);

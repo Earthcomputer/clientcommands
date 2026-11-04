@@ -44,6 +44,7 @@ public abstract sealed class MultiVersionCompat {
     public static final int V1_21_2 = 768;
     public static final int V1_21_9 = 773;
     public static final int V1_21_11 = 774;
+    public static final int V26_3 = 777;
 
     public abstract int getProtocolVersion();
 

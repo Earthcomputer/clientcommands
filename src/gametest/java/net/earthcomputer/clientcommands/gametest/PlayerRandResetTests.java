@@ -694,16 +694,6 @@ final class PlayerRandResetTests {
         singleplayerContext.getConnection().waitForServerboundPackets();
     }
 
-    private static void useUntilConsumed(ClientGameTestContext context, TestSingleplayerContext singleplayerContext, Item item) {
-        singleplayerContext.getConnection().waitForClientboundPackets();
-        context.getInput().holdMouse(InputConstants.MOUSE_BUTTON_RIGHT);
-        try {
-            singleplayerContext.getServer().waitFor(_ -> !singleplayerContext.getConnection().getServerPlayer().getInventory().getSelectedItem().is(item), 100);
-        } finally {
-            context.getInput().releaseMouse(InputConstants.MOUSE_BUTTON_RIGHT);
-        }
-    }
-
     private static void giveUnbreakingShovel(TestSingleplayerContext singleplayerContext) {
         ItemStack shovel = enchantedItem(singleplayerContext, Items.NETHERITE_SHOVEL, Enchantments.UNBREAKING, 3);
         shovel.enchant(singleplayerContext.getServer().computeOnServer(server -> server.registryAccess().getOrThrow(Enchantments.EFFICIENCY)), 5);

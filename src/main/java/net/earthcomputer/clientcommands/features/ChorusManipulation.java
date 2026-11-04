@@ -5,19 +5,26 @@ import net.earthcomputer.clientcommands.render.RenderQueue;
 import net.earthcomputer.clientcommands.task.SimpleTask;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.earthcomputer.clientcommands.util.CComponentUtil;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.consume_effects.ConsumeEffect;
+import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -95,52 +102,134 @@ public class ChorusManipulation {
         return 0;
     }
 
-    public static boolean onEat(Vec3 pos, int particleCount, int itemUseTimeLeft) {
+    public static void onEat(Vec3 pos, int itemUseTimeLeft, ItemStack stack, Consumable consumable) {
+        TeleportRandomlyConsumeEffect teleport = null;
+        for (ConsumeEffect effect : consumable.onConsumeEffects()) {
+            if (effect instanceof TeleportRandomlyConsumeEffect teleportEffect) {
+                teleport = teleportEffect;
+                break;
+            }
+        }
+        if (teleport == null) {
+            return;
+        }
+        float diameter = teleport.diameter();
+
         AABB area = getTargetArea(pos);
         if (area == null) {
-            return false;
+            return;
         }
 
-        if (!area.inflate(8.0).contains(pos)) {
+        if (!area.inflate(diameter / 2).contains(pos)) {
             sendError(Component.translatable("chorusManip.goalTooFar"));
-            return false;
+            return;
         }
 
-        var throwItemsState =
-                throwItemsUntil(rand -> {
-                    if (particleCount != 16 && itemUseTimeLeft >= 0) {
-                        //159 - (7-(itemUseTimeLeft/4)) * 18 = 33 + 4.5 * itemUseTimeLeft
-                        for (int i = 0; i < 33 + 4.5 * itemUseTimeLeft; i++) {
-                            rand.nextInt();
-                        }
-                    }
+        int randomCallsBeforeTeleport = getRandomCallsBeforeTeleport(itemUseTimeLeft, stack, consumable);
+        @UnknownNullability Vec3[] landingPos = new Vec3[1];
+        var throwItemsState = throwItemsUntil(rand -> {
+            for (int i = 0; i < randomCallsBeforeTeleport; i++) {
+                rand.nextInt();
+            }
+            landingPos[0] = simulateTeleport(rand, pos, diameter);
+            return landingPos[0] != null && area.contains(landingPos[0]);
+        }, Configs.getMaxChorusItemThrows());
 
-                    final double x = (rand.nextDouble() - 0.5D) * 16.0D + pos.x();
-                    ClientLevel level = Minecraft.getInstance().level;
-                    assert level != null;
-                    final double y = Mth.clamp(pos.y() + (double) (rand.nextInt(16) - 8), level.getMinY(), level.getMaxY());
-                    final double z = (rand.nextDouble() - 0.5D) * 16.0D + pos.z();
-                    final Vec3 landingArea = canTeleport(area, new Vec3(x, y, z));
-
-                    if (landingArea != null) {
-                        if (itemUseTimeLeft == 24) { // || itemUseTimeLeft == 0
-                            sendFeedback(Component.translatable("chorusManip.landing.success", Math.round(landingArea.x() * 100) / 100.0,
-                                    Math.round(landingArea.y() * 100) / 100.0,
-                                    Math.round(landingArea.z() * 100) / 100.0));
-                        }
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }, Configs.getMaxChorusItemThrows());
         if (!throwItemsState.isSuccess()) {
             throwItemsState.sendErrorMessage();
             Minecraft.getInstance().gui.hud.setOverlayMessage(
                     Component.translatable("chorusManip.landing.failed").withStyle(ChatFormatting.RED), false);
-            return false;
-        } else {
-            return true;
+        } else if (!consumable.shouldEmitParticlesAndSounds(itemUseTimeLeft + 4)) {
+            // only send the success message on the first eating tick
+            sendFeedback(Component.translatable("chorusManip.landing.success",
+                    Math.round(landingPos[0].x() * 100) / 100.0,
+                    Math.round(landingPos[0].y() * 100) / 100.0,
+                    Math.round(landingPos[0].z() * 100) / 100.0));
         }
+    }
+
+    // The random calls from the remaining eating ticks, including this one, and from finishing eating
+    private static int getRandomCallsBeforeTeleport(int itemUseTimeLeft, ItemStack stack, Consumable consumable) {
+        int randomCalls = PlayerRandCracker.getConsumeRandomCalls(stack, 16, consumable);
+        for (int ticksLeft = itemUseTimeLeft; ticksLeft > 0; ticksLeft--) {
+            if (consumable.shouldEmitParticlesAndSounds(ticksLeft)) {
+                randomCalls += PlayerRandCracker.getConsumeRandomCalls(stack, 5, consumable);
+            }
+        }
+        return randomCalls;
+    }
+
+    /**
+     * Simulates the random calls and teleport attempts of the chorus fruit teleport
+     *
+     * @return The position the player teleports to, or {@code null} if all attempts fail
+     * @see net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect#apply
+     */
+    @Nullable
+    public static Vec3 simulateTeleport(RandomSource rand, Vec3 pos, float diameter) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        ClientLevel level = Minecraft.getInstance().level;
+        if (player == null || level == null) {
+            return null;
+        }
+
+        int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+        int maxY = protocolVersion >= MultiVersionCompat.V1_17 ? level.getMinY() + level.dimensionType().logicalHeight() - 1 : level.getMaxY();
+
+        for (int attempt = 0; attempt < 16; attempt++) {
+            double x = pos.x() + (rand.nextDouble() - 0.5) * diameter;
+            double yOffset = protocolVersion >= MultiVersionCompat.V1_21_2 ? (rand.nextDouble() - 0.5) * diameter : rand.nextInt(16) - 8;
+            double y = Mth.clamp(pos.y() + yOffset, level.getMinY(), maxY);
+            double z = pos.z() + (rand.nextDouble() - 0.5) * diameter;
+            Vec3 landingPos = getTeleportDestination(player, level, x, y, z);
+            if (landingPos != null) {
+                return landingPos;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Simulates the teleportation function from LivingEntity
+     *
+     * @return The position the player teleports to, or {@code null} if the teleport fails
+     * @see net.minecraft.world.entity.LivingEntity#randomTeleport(double, double, double, boolean, Predicate)
+     */
+    @Nullable
+    private static Vec3 getTeleportDestination(LocalPlayer player, Level level, double x, double y, double z) {
+        boolean usesTeleportTags = MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V26_3;
+        if (usesTeleportTags) {
+            Vec3 clamped = level.getWorldBorder().clampVec3ToBound(x, y, z);
+            x = clamped.x();
+            z = clamped.z();
+        }
+
+        BlockPos.MutableBlockPos pos = BlockPos.containing(x, y, z).mutable();
+        if (!level.hasChunkAt(pos)) {
+            return null;
+        }
+
+        while (pos.getY() > level.getMinY()) {
+            pos.move(Direction.DOWN);
+            BlockState state = level.getBlockState(pos);
+            boolean isGround = state.is(usesTeleportTags ? BlockTags.ENTITIES_CAN_TELEPORT_TO : BlockTags.BLOCKS_MOTION);
+            if (isGround) {
+                if (usesTeleportTags && state.is(BlockTags.CONSUMABLE_DOES_NOT_TELEPORT_TO)) {
+                    return null;
+                }
+                AABB boundingBox = player.getDimensions(player.getPose()).makeBoundingBox(x, y, z);
+                if (!level.noCollision(player, boundingBox) || level.containsAnyLiquid(boundingBox)) {
+                    return null;
+                }
+                if (usesTeleportTags && level.findBlocksIn(boundingBox).filterState(blockState -> blockState.is(BlockTags.CONSUMABLE_DOES_NOT_TELEPORT_TO)).anyMatched()) {
+                    return null;
+                }
+                return new Vec3(x, y, z);
+            }
+            y--;
+        }
+
+        return null;
     }
 
     @Nullable
@@ -159,41 +248,5 @@ public class ChorusManipulation {
             to = chorusGoalTo;
         }
         return new AABB(from, to);
-    }
-
-    /**
-     * Simulates the teleportation function from LivingEntity,
-     * so the function checks whether a teleport would succeed
-     *
-     * @return The Position, where the player lands
-     * @see net.minecraft.world.entity.LivingEntity#randomTeleport(double, double, double, boolean, Predicate)
-     */
-    @Nullable
-    public static Vec3 canTeleport(AABB goalArea, Vec3 goalVec) {
-        BlockPos blockPos = BlockPos.containing(goalVec);
-        Level level = Minecraft.getInstance().level;
-
-        if (level != null && level.hasChunkAt(blockPos)) {
-            boolean blockBelowIsGround = false;
-
-            while (!blockBelowIsGround && blockPos.getY() > 0) {
-                BlockPos blockPos2 = blockPos.below();
-                BlockState blockState = level.getBlockState(blockPos2);
-                if (blockState.is(BlockTags.ENTITIES_CAN_TELEPORT_TO) && !blockState.is(BlockTags.CONSUMABLE_DOES_NOT_TELEPORT_TO)) {
-                    blockBelowIsGround = true;
-                } else {
-                    blockPos = blockPos2;
-                }
-            }
-
-            if (blockBelowIsGround) {
-                goalVec = new Vec3(goalVec.x(), blockPos.getY(), goalVec.z());
-                final AABB boundingBox = new AABB(goalVec.x() - 0.3, goalVec.y(), goalVec.z() - 0.3, goalVec.x() + 0.3, goalVec.y() + 1.8, goalVec.z() + 0.3);
-                if (goalArea.contains(goalVec) && level.noCollision(boundingBox) && !level.containsAnyLiquid(boundingBox)) {
-                    return goalVec;
-                }
-            }
-        }
-        return null;
     }
 }
