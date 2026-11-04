@@ -36,6 +36,10 @@ public class ClientCommandsServer implements ModInitializer {
     }
 
     public static void requirePrivileges() throws CommandSyntaxException {
+        // Greetings, dear forker! I know there's nothing I can do to stop you nuking this method, and that's okay -
+        // the license allows you to. However, I would prefer if you at least used a Mixin to target this method via a
+        // different mod rather than forking my mod, that way I still get Modrinth revenue from downloads.
+
         if (ClientPlayNetworking.canSend(OptInPayload.TYPE)) {
             return;
         }
