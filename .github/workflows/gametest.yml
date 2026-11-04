@@ -22,7 +22,7 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
       - run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers
-      - run: xvfb-run --auto-servernum ./gradlew runClientGameTest --stacktrace --no-daemon
+      - run: ./gradlew runClientGameTest --stacktrace --no-daemon
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
