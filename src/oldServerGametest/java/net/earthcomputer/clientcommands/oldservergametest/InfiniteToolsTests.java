@@ -52,7 +52,7 @@ final class InfiniteToolsTests {
                     server.runCommand("setblock " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " minecraft:netherrack");
                     context.waitFor(client -> Objects.requireNonNull(client.level).getBlockState(pos).is(Blocks.NETHERRACK));
                     mineBlock(context, pos);
-                    fence(context);
+                    tickFence(context, server);
 
                     assertPlayerCracked(context, "mining block " + blockNumber);
                     int damage = getPickaxeDamage(context);
@@ -84,7 +84,7 @@ final class InfiniteToolsTests {
                 server.runCommand("setblock " + firstPos.getX() + " " + firstPos.getY() + " " + firstPos.getZ() + " minecraft:netherrack");
                 context.waitFor(client -> Objects.requireNonNull(client.level).getBlockState(firstPos).is(Blocks.NETHERRACK));
                 instamineBlock(context, firstPos);
-                fence(context);
+                tickFence(context, server);
                 int initialDamage = getPickaxeDamage(context);
 
                 // a 5x2 wall of blocks in front of the player
@@ -102,7 +102,7 @@ final class InfiniteToolsTests {
                     instamineBlock(context, pos);
                     context.waitTick();
                 }
-                fence(context);
+                tickFence(context, server);
 
                 // the server would have put back any blocks that it didn't let us break
                 String unbrokenBlocks = context.computeOnClient(client -> positions.stream()

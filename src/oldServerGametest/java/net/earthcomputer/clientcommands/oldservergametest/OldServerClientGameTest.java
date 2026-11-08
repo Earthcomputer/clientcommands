@@ -262,6 +262,15 @@ public class OldServerClientGameTest implements FabricClientGameTest {
         context.waitFor(client -> getChatMessages(client).anyMatch(message -> message.getString().contains(chatMessage)));
     }
 
+    // like fence, but also waits for the changes that the server only sends during its tick, such as inventory changes
+    static void tickFence(ClientGameTestContext context, OldServer server) {
+        fence(context);
+        // the server is at the start of a tick once this returns, so wait for the next one for a whole tick to pass
+        server.debugger().runAtNextTick(() -> {});
+        server.debugger().runAtNextTick(() -> {});
+        fence(context);
+    }
+
     static void runClientCommand(ClientGameTestContext context, String command) {
         context.runOnClient(client -> Objects.requireNonNull(client.player).connection.sendCommand(command));
     }
