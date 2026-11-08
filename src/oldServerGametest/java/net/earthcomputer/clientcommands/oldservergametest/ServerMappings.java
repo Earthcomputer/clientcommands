@@ -91,6 +91,23 @@ final class ServerMappings {
         return mapping.getName(runtimeNamespace);
     }
 
+    /**
+     * Returns the runtime name and descriptor of the given method. The descriptor is null if the server is
+     * unobfuscated, in which case the name is assumed to be unique.
+     */
+    RuntimeMethod mapMethod(MappedMethod method) {
+        String name = method.names().get(version);
+        if (tree == null) {
+            return new RuntimeMethod(name, null);
+        }
+        String ownerName = method.owner().names().get(version);
+        MappingTreeView.MethodMappingView mapping = tree.getMethod(toInternalName(ownerName), name, null, namedNamespace);
+        if (mapping == null) {
+            throw new IllegalArgumentException("No mapping for method " + ownerName + "." + name + " in " + version);
+        }
+        return new RuntimeMethod(mapping.getName(runtimeNamespace), mapping.getDesc(runtimeNamespace));
+    }
+
     private static String toInternalName(String binaryName) {
         return binaryName.replace('.', '/');
     }
@@ -186,5 +203,18 @@ final class ServerMappings {
         MappedField until(ProtocolVersion lastVersion, String olderName) {
             return new MappedField(owner, names.until(lastVersion, olderName));
         }
+    }
+
+    record MappedMethod(MappedClass owner, VersionedName names) {
+        static MappedMethod of(MappedClass owner, String name) {
+            return new MappedMethod(owner, new VersionedName(name));
+        }
+
+        MappedMethod until(ProtocolVersion lastVersion, String olderName) {
+            return new MappedMethod(owner, names.until(lastVersion, olderName));
+        }
+    }
+
+    record RuntimeMethod(String name, @Nullable String descriptor) {
     }
 }

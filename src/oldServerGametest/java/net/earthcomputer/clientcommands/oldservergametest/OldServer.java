@@ -97,6 +97,8 @@ final class OldServer implements AutoCloseable {
                 "server-port=" + port,
                 // superflat, so that the tests don't depend on the terrain
                 "level-type=flat",
+                // no villages, whose villagers throw items that the player picks up, interfering with the tests
+                "generate-structures=false",
                 // the epoll transport in old versions of Netty doesn't work on the modern Java versions we run them on
                 "use-native-transport=false",
                 // sync chunk writes slow world saving down a lot on unix systems
@@ -138,6 +140,9 @@ final class OldServer implements AutoCloseable {
             if (!server.started) {
                 throw new AssertionError("Server " + version + " exited with code " + process.exitValue() + " before it started");
             }
+            // stop mobs (e.g. the slimes that spawn in superflat worlds) from killing the player
+            boolean snakeCaseGameRules = version.protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_21_11);
+            server.runCommand("gamerule " + (snakeCaseGameRules ? "spawn_mobs" : "doMobSpawning") + " false");
             server.debugger = ServerDebugger.attach(debugPort, download.mappings());
             // capture the player when it joins
             server.serverPlayer = server.debugger.captureNextInstance(SERVER_PLAYER);
@@ -186,7 +191,10 @@ final class OldServer implements AutoCloseable {
     ObjectReference serverPlayer() {
         try {
             return Objects.requireNonNull(serverPlayer).get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (TimeoutException e) {
+            debugger().logCaptureDiagnostics(SERVER_PLAYER);
+            throw new AssertionError("Failed to get the server player", e);
+        } catch (InterruptedException | ExecutionException e) {
             throw new AssertionError("Failed to get the server player", e);
         }
     }

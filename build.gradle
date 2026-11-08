@@ -77,6 +77,7 @@ configurations {
 	clientImplementation.extendsFrom includedLibrary
 	oldServerGametestCompileClasspath.extendsFrom clientCompileClasspath
 	oldServerGametestRuntimeClasspath.extendsFrom clientRuntimeClasspath
+	oldServerTestMatrixRuntimeOnly
 }
 
 loom {
@@ -157,6 +158,10 @@ dependencies {
 		transitive = false
 	}
 	oldServerGametestImplementation "net.fabricmc:mapping-io:${project.mapping_io_version}"
+	// ViaVersion is otherwise only available nested inside ViaFabricPlus, which only works when the game is running
+	oldServerTestMatrixRuntimeOnly("com.viaversion:viaversion-api:${project.viaversion_version}") {
+		transitive = false
+	}
 
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
@@ -190,6 +195,16 @@ tasks.register('deleteOldServerGameTestRunDir', Delete) {
 
 tasks.named('runOldServerClientGameTest') {
 	dependsOn deleteOldServerGameTestRunDir
+}
+
+// writes the GitHub Actions matrix that splits the old server gametests between parallel jobs
+tasks.register('writeOldServerTestMatrix', JavaExec) {
+	classpath = sourceSets.oldServerGametest.runtimeClasspath + configurations.oldServerTestMatrixRuntimeOnly
+	mainClass = 'net.earthcomputer.clientcommands.oldservergametest.WriteTestMatrix'
+	args file('build/old_server_test_matrix.json').absolutePath
+	if (project.hasProperty('oldServerVersions')) {
+		systemProperty('clientcommands.oldServerTest.versions', project.property('oldServerVersions').toString())
+	}
 }
 
 tasks.register('generateBuildInfo', GenerateBuildInfoTask) {

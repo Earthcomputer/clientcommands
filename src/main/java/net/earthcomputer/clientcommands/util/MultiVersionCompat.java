@@ -55,7 +55,8 @@ public abstract sealed class MultiVersionCompat {
     }
 
     public static final MultiVersionCompat INSTANCE = Util.make(() -> {
-        if (System.getProperty("fabric.client.gametest") != null) {
+        // the old server gametests connect to old versions through ViaFabricPlus, rather than simulating them
+        if (System.getProperty("fabric.client.gametest") != null && !FabricLoader.getInstance().isModLoaded("viafabricplus")) {
             return new GameTestDebug();
         }
 

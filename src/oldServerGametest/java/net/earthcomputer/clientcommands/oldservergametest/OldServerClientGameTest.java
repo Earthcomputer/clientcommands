@@ -47,7 +47,8 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int CONNECT_TIMEOUT = SharedConstants.TICKS_PER_MINUTE;
     private static final List<Class<?>> TEST_CLASSES = List.of(
-        CrackRngTests.class
+        CrackRngTests.class,
+        EnchantmentCrackingTests.class
     );
 
     private static final MappedClass ENTITY = MappedClass.of("net.minecraft.world.entity.Entity")
@@ -164,6 +165,9 @@ public class OldServerClientGameTest implements FabricClientGameTest {
         });
         clearChat(context);
 
+        // remove items dropped by previous tests (e.g. thrown by ccrackrng), so that the player doesn't pick them up later.
+        boolean oldEntityNames = server.version().protocolVersion().olderThan(ProtocolVersion.v1_11);
+        server.runCommand("kill @e[type=" + (oldEntityNames ? "Item" : "item") + "]");
         // these commands have the same syntax in every version
         server.runCommand("gamemode survival " + server.playerName());
         server.runCommand("clear " + server.playerName());
@@ -217,7 +221,7 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     static long getServerPlayerSeed(OldServer server) {
         ServerDebugger debugger = server.debugger();
         ObjectReference player = server.serverPlayer();
-        return debugger.whileSuspended(() -> {
+        return debugger.computeAtNextTick(() -> {
             ObjectReference random = (ObjectReference) debugger.getField(player, ENTITY_RANDOM);
             ObjectReference seed = random.referenceType().name().equals("java.util.Random")
                 ? (ObjectReference) ServerDebugger.getUnmappedField(random, "seed")

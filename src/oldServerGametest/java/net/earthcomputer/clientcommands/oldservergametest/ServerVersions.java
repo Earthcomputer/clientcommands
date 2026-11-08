@@ -74,6 +74,10 @@ final class ServerVersions {
                 URI.create(version.get("url").getAsString()),
                 version.get("sha1").getAsString()
             ));
+            // older versions aren't tested, and may be unknown to ViaVersion when it's used without ViaFabricPlus
+            if (protocolVersion.equals(OLDEST_VERSION)) {
+                break;
+            }
         }
 
         List<ServerVersion> versions = new ArrayList<>(versionsByProtocol.values());
