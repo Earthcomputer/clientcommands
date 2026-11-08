@@ -30,6 +30,12 @@ repositories {
 	maven {
 		url = "https://maven.parchmentmc.org"
 	}
+	maven {
+		url = 'https://repo.viaversion.com'
+		content {
+			includeGroup 'com.viaversion'
+		}
+	}
 }
 
 loom {
@@ -58,11 +64,27 @@ sourceSets {
 		resources.srcDirs = ['src/main/resources']
 	}
 	codeGen
+	// Client gametests that are run against vanilla servers of older versions. These are separate from the regular
+	// gametests so that ViaFabricPlus is only installed for these tests.
+	oldServerGametest {
+		compileClasspath += main.output + client.output
+		runtimeClasspath += main.output + client.output
+	}
 }
 
 configurations {
 	includedLibrary
 	clientImplementation.extendsFrom includedLibrary
+	oldServerGametestCompileClasspath.extendsFrom clientCompileClasspath
+	oldServerGametestRuntimeClasspath.extendsFrom clientRuntimeClasspath
+}
+
+loom {
+	mods {
+		'clientcommands-old-server-test' {
+			sourceSet sourceSets.oldServerGametest
+		}
+	}
 }
 
 fabricApi {
@@ -71,6 +93,23 @@ fabricApi {
 		enableGameTests = false
 		enableClientGameTests = true
 		createSourceSet = true
+	}
+}
+
+loom.runs {
+	oldServerClientGameTest {
+		inherit clientGameTest
+		sourceSet = sourceSets.oldServerGametest.name
+		runDirectory = file('build/run/oldServerClientGameTest')
+		systemProperties.put('fabric.client.gametest.testModResourcesPath', file('src/oldServerGametest/resources').absolutePath)
+		// downloaded server jars are kept outside the build directory so that they survive a clean
+		systemProperties.put('clientcommands.oldServerTest.cacheDir', new File(gradle.gradleUserHomeDir, 'caches/clientcommands-old-servers').absolutePath)
+		if (project.hasProperty('oldServerVersions')) {
+			// e.g. -PoldServerVersions=1.8.9,1.12.2 to only test against those versions
+			systemProperties.put('clientcommands.oldServerTest.versions', project.property('oldServerVersions').toString())
+		}
+		// the player name needs to be known, and the servers run in offline mode anyway
+		systemProperties.put('devauth.enabled', 'false')
 	}
 }
 
@@ -106,6 +145,19 @@ dependencies {
 
 	codeGenImplementation sourceSets.client.output
 
+	// ViaFabricPlus bundles its dependencies, and its transitive dependencies would otherwise change the versions of
+	// Fabric Loader and Fabric API
+	oldServerGametestRuntimeOnly("com.viaversion:viafabricplus:${project.viafabricplus_version}") {
+		transitive = false
+	}
+	oldServerGametestCompileOnly("com.viaversion:viafabricplus-api:${project.viafabricplus_version}") {
+		transitive = false
+	}
+	oldServerGametestCompileOnly("com.viaversion:viaversion-api:${project.viaversion_version}") {
+		transitive = false
+	}
+	oldServerGametestImplementation "net.fabricmc:mapping-io:${project.mapping_io_version}"
+
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
 	testImplementation "com.code-intelligence:jazzer-junit:${project.jazzer_junit_version}"
@@ -130,6 +182,14 @@ jar {
 	from("LICENSE")
 
 	manifest.attributes 'Main-Class': 'net.earthcomputer.clientcommands.DoubleClickMain'
+}
+
+tasks.register('deleteOldServerGameTestRunDir', Delete) {
+	delete loom.runs.oldServerClientGameTest.runDirectory
+}
+
+tasks.named('runOldServerClientGameTest') {
+	dependsOn deleteOldServerGameTestRunDir
 }
 
 tasks.register('generateBuildInfo', GenerateBuildInfoTask) {

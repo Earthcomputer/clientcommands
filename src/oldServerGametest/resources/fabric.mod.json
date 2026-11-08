@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "clientcommands-old-server-test",
+  "version": "1.0.0",
+
+  "name": "Client Commands Old Server Test",
+  "description": "Tests for Client Commands on old server versions",
+  "authors": [
+    "Earthcomputer"
+  ],
+  "contact": {},
+
+  "license": "LGPL-3.0-or-later",
+
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "net.earthcomputer.clientcommands.oldservergametest.OldServerClientGameTest"
+    ]
+  },
+  "depends": {
+    "clientcommands": "*",
+    "viafabricplus": "*"
+  }
+}
