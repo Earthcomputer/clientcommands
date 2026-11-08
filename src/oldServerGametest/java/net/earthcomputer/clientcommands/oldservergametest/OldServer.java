@@ -140,9 +140,12 @@ final class OldServer implements AutoCloseable {
             if (!server.started) {
                 throw new AssertionError("Server " + version + " exited with code " + process.exitValue() + " before it started");
             }
-            // stop mobs (e.g. the slimes that spawn in superflat worlds) from killing the player
+
             boolean snakeCaseGameRules = version.protocolVersion().newerThanOrEqualTo(ProtocolVersion.v1_21_11);
             server.runCommand("gamerule " + (snakeCaseGameRules ? "spawn_mobs" : "doMobSpawning") + " false");
+            server.runCommand("gamerule " + (snakeCaseGameRules ? "send_command_feedback" : "sendCommandFeedback") + " false");
+            server.runCommand("gamerule " + (snakeCaseGameRules ? "log_admin_commands" : "logAdminCommands") + " false");
+
             server.debugger = ServerDebugger.attach(debugPort, download.mappings());
             // capture the player when it joins
             server.serverPlayer = server.debugger.captureNextInstance(SERVER_PLAYER);

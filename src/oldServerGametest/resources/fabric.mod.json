@@ -18,6 +18,9 @@
       "net.earthcomputer.clientcommands.oldservergametest.OldServerClientGameTest"
     ]
   },
+  "mixins": [
+    "mixins.clientcommands-old-server-test.json"
+  ],
   "depends": {
     "clientcommands": "*",
     "viafabricplus": "*"

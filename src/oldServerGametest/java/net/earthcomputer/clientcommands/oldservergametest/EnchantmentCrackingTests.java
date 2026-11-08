@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.oldservergametest;
 
-import com.mojang.logging.LogUtils;
 import com.sun.jdi.ObjectReference;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.earthcomputer.clientcommands.Configs;
@@ -29,7 +28,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EnchantingTableBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +39,6 @@ import static net.earthcomputer.clientcommands.oldservergametest.OldServerClient
 // The enchanting table is placed 4 blocks south of the player, so that the bookshelves don't intersect the player
 @SuppressWarnings("UnstableApiUsage")
 final class EnchantmentCrackingTests {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     private static final MappedClass PLAYER = MappedClass.of("net.minecraft.world.entity.player.Player")
         .until(ProtocolVersion.v1_14_3, "net.minecraft.entity.player.PlayerEntity")
         .until(ProtocolVersion.v1_13_2, "net.minecraft.entity.player.EntityPlayer");
@@ -89,31 +85,26 @@ final class EnchantmentCrackingTests {
 
     @TestCase
     private static void testEnchantingPredictions(ClientGameTestContext context, OldServer server) {
-        BlockPos tablePos = context.computeOnClient(client -> Objects.requireNonNull(client.player).blockPosition()).south(4);
-        giveLevels(context, server);
-
-        List<String> failures = new ArrayList<>();
         for (SeedConfig config : SEED_CONFIGS) {
-            setUpEnchantingTable(context, server, tablePos, config.bookshelves);
             for (EnchantableItem item : ENCHANTABLE_ITEMS) {
                 if (server.version().protocolVersion().olderThan(item.addedIn)) {
                     continue;
                 }
                 for (int slot = 0; slot < 3; slot++) {
-                    try {
-                        enchantAndCheckPrediction(context, server, tablePos, config.xpSeed, item.item, slot);
-                    } catch (AssertionError e) {
-                        String testCase = BuiltInRegistries.ITEM.getKey(item.item) + "[" + config + ",slot=" + slot + "]";
-                        LOGGER.error("Enchanting prediction test case {} failed", testCase, e);
-                        failures.add(testCase + ": " + e.getMessage());
-                    }
+                    int enchantmentSlot = slot;
+                    String testCase = BuiltInRegistries.ITEM.getKey(item.item) + "[" + config + ",slot=" + enchantmentSlot + "]";
+                    runTest(context, server, testCase, () -> {
+                        BlockPos tablePos = context.computeOnClient(client -> Objects.requireNonNull(client.player).blockPosition()).south(4);
+                        try {
+                            giveLevels(context, server);
+                            setUpEnchantingTable(context, server, tablePos, config.bookshelves);
+                            enchantAndCheckPrediction(context, server, tablePos, config.xpSeed, item.item, enchantmentSlot);
+                        } finally {
+                            closeContainer(context);
+                        }
+                    });
                 }
             }
-        }
-        closeContainer(context);
-
-        if (!failures.isEmpty()) {
-            throw new AssertionError(String.join("\n", failures));
         }
     }
 

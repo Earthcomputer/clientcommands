@@ -13,20 +13,24 @@ import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedClass;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedField;
 import net.earthcomputer.clientcommands.oldservergametest.ServerVersions.ServerVersion;
+import net.earthcomputer.clientcommands.oldservergametest.mixin.ChatComponentAccessor;
 import net.earthcomputer.clientcommands.task.TaskManager;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.GameType;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.lang.annotation.ElementType;
@@ -40,12 +44,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OldServerClientGameTest implements FabricClientGameTest {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int CONNECT_TIMEOUT = SharedConstants.TICKS_PER_MINUTE;
+    private static final List<String> failedTests = new ArrayList<>();
     private static final List<Class<?>> TEST_CLASSES = List.of(
         CrackRngTests.class,
         EnchantmentCrackingTests.class
@@ -67,17 +74,13 @@ public class OldServerClientGameTest implements FabricClientGameTest {
         List<ServerVersion> versions = ServerVersions.getVersionsToTest();
         LOGGER.info("Testing against server versions {}", versions);
 
-        List<String> failedTests = new ArrayList<>();
+        failedTests.clear();
         for (ServerVersion version : versions) {
             try (OldServer server = OldServer.start(context, version)) {
                 connect(context, server);
                 try {
                     for (Method method : testMethods) {
-                        String testName = method.getName() + "[" + version + "]";
-                        if (!runTest(context, server, method)) {
-                            failedTests.add(testName);
-                        }
-                        reportTestResult(context, testName, failedTests.contains(testName));
+                        invokeTestMethod(context, server, method);
                     }
                 } finally {
                     disconnect(context);
@@ -132,20 +135,47 @@ public class OldServerClientGameTest implements FabricClientGameTest {
         return testMethods;
     }
 
-    private static boolean runTest(ClientGameTestContext context, OldServer server, Method method) {
+    private static void invokeTestMethod(ClientGameTestContext context, OldServer server, Method method) {
         try {
-            commonSetup(context, server);
             method.invoke(null, context, server);
-            return true;
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
-            LOGGER.error("Test failed", e.getCause());
-            return false;
-        } catch (Throwable e) {
-            LOGGER.error("Test failed", e);
-            return false;
-        } finally {
-            context.waitTick();
+            throw new RuntimeException(e.getCause());
         }
+    }
+
+    static void runTest(ClientGameTestContext context, OldServer server, Runnable testRunner) {
+        runTest(context, server, null, testRunner);
+    }
+
+    static void runTest(ClientGameTestContext context, OldServer server, @Nullable String variant, Runnable testRunner) {
+        commonSetup(context, server);
+
+        boolean testFailed = false;
+        try {
+            testRunner.run();
+        } catch (Throwable e) {
+            testFailed = true;
+            LOGGER.error("Test failed", e);
+        }
+
+        context.waitTick();
+        String testName = getCallingTest().getName() + "[" + server.version() + "]" + (variant == null ? "" : "(" + variant + ")");
+        reportTestResult(context, testName, testFailed);
+    }
+
+    private static Method getCallingTest() {
+        return StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).walk(frames ->
+            frames.map(frame -> {
+                Class<?> clazz = frame.getDeclaringClass();
+                try {
+                    return clazz.getDeclaredMethod(frame.getMethodName(), frame.getMethodType().parameterArray());
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            }).filter(method -> method.isAnnotationPresent(TestCase.class)).findFirst().orElseThrow()
+        );
     }
 
     private static void commonSetup(ClientGameTestContext context, OldServer server) {
@@ -163,7 +193,11 @@ public class OldServerClientGameTest implements FabricClientGameTest {
             EnchantmentCracker.resetCracker();
             EnchantmentCracker.enchantingTablePos = null;
         });
-        clearChat(context);
+
+        // wait for a client-server-client packet round trip
+        String chatMessage = "fence: " + UUID.randomUUID();
+        context.runOnClient(client -> Objects.requireNonNull(client.player).connection.sendChat(chatMessage));
+        context.waitFor(client -> getChatMessages(client).anyMatch(message -> message.getString().contains(chatMessage)));
 
         // remove items dropped by previous tests (e.g. thrown by ccrackrng), so that the player doesn't pick them up later.
         boolean oldEntityNames = server.version().protocolVersion().olderThan(ProtocolVersion.v1_11);
@@ -187,6 +221,9 @@ public class OldServerClientGameTest implements FabricClientGameTest {
             return client.level != null && client.player != null && !(client.gui.screen() instanceof LevelLoadingScreen);
         }, CONNECT_TIMEOUT);
         context.waitFor(client -> Objects.requireNonNull(client.level).hasChunkAt(Objects.requireNonNull(client.player).blockPosition()));
+
+        // op the player to turn off chat spam protection
+        server.runCommand("op " + server.playerName());
     }
 
     private static void disconnect(ClientGameTestContext context) {
@@ -204,6 +241,7 @@ public class OldServerClientGameTest implements FabricClientGameTest {
 
     private static void reportTestResult(ClientGameTestContext context, String testName, boolean testFailed) {
         if (testFailed) {
+            failedTests.add(testName);
             context.runOnClient(client -> client.gui.hud.getChat().addClientSystemMessage(Component.literal("Test failed: " + testName).withStyle(ChatFormatting.RED)));
         } else {
             context.runOnClient(client -> client.gui.hud.getChat().addClientSystemMessage(Component.literal("Test passed: " + testName).withStyle(ChatFormatting.GREEN)));
@@ -214,8 +252,8 @@ public class OldServerClientGameTest implements FabricClientGameTest {
         context.runOnClient(client -> Objects.requireNonNull(client.player).connection.sendCommand(command));
     }
 
-    static void clearChat(ClientGameTestContext context) {
-        context.runOnClient(client -> client.gui.hud.getChat().clearMessages(false));
+    static Stream<Component> getChatMessages(Minecraft client) {
+        return ((ChatComponentAccessor) client.gui.hud.getChat()).getAllMessages().stream().map(GuiMessage::content);
     }
 
     static long getServerPlayerSeed(OldServer server) {

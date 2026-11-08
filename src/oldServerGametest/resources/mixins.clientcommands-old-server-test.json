@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "net.earthcomputer.clientcommands.oldservergametest.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ChatComponentAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
