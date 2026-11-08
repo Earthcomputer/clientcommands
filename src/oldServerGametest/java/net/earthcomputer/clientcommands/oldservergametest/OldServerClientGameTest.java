@@ -29,6 +29,7 @@ import net.minecraft.client.multiplayer.chat.GuiMessage;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -55,7 +56,8 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     private static final List<String> failedTests = new ArrayList<>();
     private static final List<Class<?>> TEST_CLASSES = List.of(
         CrackRngTests.class,
-        EnchantmentCrackingTests.class
+        EnchantmentCrackingTests.class,
+        InfiniteToolsTests.class
     );
 
     private static final MappedClass ENTITY = MappedClass.of("net.minecraft.world.entity.Entity")
@@ -136,6 +138,13 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     }
 
     private static void invokeTestMethod(ClientGameTestContext context, OldServer server, Method method) {
+        TestCase testCase = method.getAnnotation(TestCase.class);
+        int protocolVersion = server.version().protocolVersion().getVersion();
+        if (protocolVersion < testCase.minVersion() || protocolVersion > testCase.maxVersion()) {
+            LOGGER.info("Skipping test {} on server {}", method.getName(), server.version());
+            return;
+        }
+
         try {
             method.invoke(null, context, server);
         } catch (IllegalAccessException e) {
@@ -187,6 +196,7 @@ public class OldServerClientGameTest implements FabricClientGameTest {
             Configs.playerRNGMaintenance = true;
             Configs.enchantingPrediction = true;
             Configs.chorusManipulation = false;
+            Configs.infiniteTools = false;
             ChorusManipulation.chorusGoalFrom = null;
             ChorusManipulation.chorusGoalTo = null;
             Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
@@ -194,10 +204,7 @@ public class OldServerClientGameTest implements FabricClientGameTest {
             EnchantmentCracker.enchantingTablePos = null;
         });
 
-        // wait for a client-server-client packet round trip
-        String chatMessage = "fence: " + UUID.randomUUID();
-        context.runOnClient(client -> Objects.requireNonNull(client.player).connection.sendChat(chatMessage));
-        context.waitFor(client -> getChatMessages(client).anyMatch(message -> message.getString().contains(chatMessage)));
+        fence(context);
 
         // remove items dropped by previous tests (e.g. thrown by ccrackrng), so that the player doesn't pick them up later.
         boolean oldEntityNames = server.version().protocolVersion().olderThan(ProtocolVersion.v1_11);
@@ -248,6 +255,13 @@ public class OldServerClientGameTest implements FabricClientGameTest {
         }
     }
 
+    // waits for a client-server-client packet round trip, so that the server has processed everything sent before
+    static void fence(ClientGameTestContext context) {
+        String chatMessage = "fence: " + UUID.randomUUID();
+        context.runOnClient(client -> Objects.requireNonNull(client.player).connection.sendChat(chatMessage));
+        context.waitFor(client -> getChatMessages(client).anyMatch(message -> message.getString().contains(chatMessage)));
+    }
+
     static void runClientCommand(ClientGameTestContext context, String command) {
         context.runOnClient(client -> Objects.requireNonNull(client.player).connection.sendCommand(command));
     }
@@ -268,6 +282,23 @@ public class OldServerClientGameTest implements FabricClientGameTest {
         });
     }
 
+    // gives the player items for player RNG manipulation to throw
+    static void giveItemsToThrow(ClientGameTestContext context, OldServer server) {
+        server.runCommand("give " + server.playerName() + " minecraft:cobblestone 64");
+        context.waitFor(client -> Objects.requireNonNull(client.player).getInventory().countItem(Items.COBBLESTONE) == 64);
+    }
+
+    static void assertPlayerCracked(ClientGameTestContext context, String after) {
+        PlayerRandCracker.CrackState crackState = context.computeOnClient(_ -> Configs.playerCrackState);
+        assertTrue(crackState == PlayerRandCracker.CrackState.CRACKED, () -> "Expected player crack state CRACKED after " + after + ", got " + crackState);
+    }
+
+    static void assertPlayerSeedMatchesServer(ClientGameTestContext context, OldServer server) {
+        long serverSeed = getServerPlayerSeed(server);
+        long clientSeed = context.computeOnClient(_ -> PlayerRandCracker.getSeed());
+        assertTrue(serverSeed == clientSeed, () -> "Client player seed doesn't match the server: server=0x" + Long.toHexString(serverSeed) + ", client=0x" + Long.toHexString(clientSeed));
+    }
+
     static void assertTrue(boolean condition, Supplier<String> message) {
         if (!condition) {
             throw new AssertionError(message.get());
@@ -278,5 +309,9 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     @Retention(RetentionPolicy.RUNTIME)
     @interface TestCase {
         boolean onlyMe() default false;
+
+        int minVersion() default Integer.MIN_VALUE;
+
+        int maxVersion() default Integer.MAX_VALUE;
     }
 }
