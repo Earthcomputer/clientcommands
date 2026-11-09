@@ -1,6 +1,7 @@
 package net.earthcomputer.clientcommands.server;
 
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.betterconfig.api.ModConfigSide;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -22,7 +23,7 @@ public class ClientCommandsServer implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        new ModConfigBuilder<>(ServerConfigs.MOD_ID, ServerConfigs.class).build();
+        new ModConfigBuilder<>(ServerConfigs.MOD_ID, ServerConfigs.class).setSide(ModConfigSide.SERVER).build();
 
         PayloadTypeRegistry.serverboundPlay().register(OptInPayload.TYPE, OptInPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(OptInPayload.TYPE, (_, _) -> {});

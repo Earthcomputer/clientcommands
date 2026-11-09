@@ -7,6 +7,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.logging.LogUtils;
 import dev.xpple.betterconfig.api.BetterConfigAPI;
 import dev.xpple.betterconfig.api.ModConfigBuilder;
+import dev.xpple.betterconfig.api.ModConfigSide;
 import dev.xpple.simplewaypoints.api.SimpleWaypointsAPI;
 import net.earthcomputer.clientcommands.command.*;
 import net.earthcomputer.clientcommands.event.ClientConnectionEvents;
@@ -66,7 +67,7 @@ public class ClientCommands implements ClientModInitializer {
             LOGGER.error("Failed to create config dir", e);
         }
 
-        new ModConfigBuilder<>("clientcommands", Configs.class).build();
+        new ModConfigBuilder<>("clientcommands", Configs.class).setSide(ModConfigSide.CLIENT).build();
         ClientConnectionEvents.DISCONNECT.register(() -> {
             if (!Relogger.isRelogging) {
                 BetterConfigAPI.getInstance().getModConfig("clientcommands").resetTemporaryConfigs();
