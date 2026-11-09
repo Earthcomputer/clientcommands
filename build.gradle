@@ -111,6 +111,8 @@ loom.runs {
 		}
 		// the player name needs to be known, and the servers run in offline mode anyway
 		systemProperties.put('devauth.enabled', 'false')
+		// logs what fishing manipulation is doing, to diagnose test failures on CI
+		systemProperties.put('clientcommands.debugFishing', 'true')
 	}
 }
 

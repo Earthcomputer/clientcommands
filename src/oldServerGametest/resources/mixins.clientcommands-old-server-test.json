@@ -3,7 +3,8 @@
   "package": "net.earthcomputer.clientcommands.oldservergametest.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ChatComponentAccessor"
+    "ChatComponentAccessor",
+    "ClientPacketListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

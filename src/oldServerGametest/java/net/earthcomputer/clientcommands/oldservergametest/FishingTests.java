@@ -11,15 +11,19 @@ import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedC
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedField;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedMethod;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biomes;
@@ -28,6 +32,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,7 +43,7 @@ import static net.earthcomputer.clientcommands.oldservergametest.OldServerClient
 
 // The player throws the bobber north into a pool of water, where it ends up under some lily pads
 @SuppressWarnings("UnstableApiUsage")
-final class FishingTests {
+public final class FishingTests {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // Fishing manipulation was patched in 1.20. Before 1.9, the loot was generated using the level's random.
@@ -165,6 +170,8 @@ final class FishingTests {
     private static final List<ItemEntity> caughtItems = new ArrayList<>();
     private static final List<Integer> caughtXp = new ArrayList<>();
     private static boolean registeredEvents = false;
+    // the entity data received by the client is logged during each cast, to diagnose catches that the client didn't see
+    private static volatile boolean loggingEntityData = false;
 
     private static final class TargetTickStats {
         int attempts;
@@ -222,6 +229,9 @@ final class FishingTests {
         registeredEvents = true;
 
         MoreClientEntityEvents.POST_ADD.register(packet -> {
+            if (packet.getType() == EntityTypes.FISHING_BOBBER || packet.getType() == EntityTypes.ITEM || packet.getType() == EntityTypes.EXPERIENCE_ORB) {
+                LOGGER.info("Client added {} id={}, uuid={}, data={}, pos=({}, {}, {})", packet.getType().builtInRegistryHolder().getRegisteredName(), packet.getId(), packet.getUUID(), packet.getData(), packet.getX(), packet.getY(), packet.getZ());
+            }
             // the item stack is set later, so keep the entity
             if (packet.getType() == EntityTypes.ITEM && Objects.requireNonNull(Minecraft.getInstance().level).getEntity(packet.getId()) instanceof ItemEntity item) {
                 caughtItems.add(item);
@@ -232,6 +242,11 @@ final class FishingTests {
             }
         });
         MoreClientEntityEvents.POST_SET_INITIAL_XP_ORB_VALUE.register(orb -> caughtXp.add(orb.getValue()));
+        ClientEntityEvents.ENTITY_UNLOAD.register((entity, _) -> {
+            if (entity instanceof FishingHook || entity instanceof ItemEntity) {
+                LOGGER.info("Client removed {}, reason={}", describeEntity(entity), entity.getRemovalReason());
+            }
+        });
     }
 
     private static BlockPos moveToFishingOrigin(ClientGameTestContext context, OldServer server) {
@@ -368,6 +383,8 @@ final class FishingTests {
         CompletableFuture<ObjectReference> hookFuture = debugger.runAfterFieldAssignedInConstructor(FISHING_HOOK, ENTITY_RANDOM, hook -> setEntityRandomSeed(debugger, hook, scrambleSeed(seed)));
         context.runOnClient(client -> Objects.requireNonNull(client.gameMode).useItem(Objects.requireNonNull(client.player), InteractionHand.MAIN_HAND));
         ObjectReference hook = waitForFuture(context, hookFuture, SharedConstants.TICKS_PER_SECOND, "The bobber wasn't created");
+        LOGGER.info("The server created the bobber with seed {}, expected UUID {}", seed, Mth.createInsecureUUID(RandomSource.create(seed)));
+        loggingEntityData = true;
         try {
             record Retrieval(int tickCount, boolean biting) {
             }
@@ -390,6 +407,7 @@ final class FishingTests {
                 FishingCracker.getTotalTicksToWait(),
                 FishingCracker.getExpectedCatches()
             ));
+            LOGGER.info("Prediction: bobber={}, state={}, targetTick={}, catches={}", prediction.bobberUuid, prediction.state, prediction.targetTick, Arrays.toString(prediction.catches));
             UUID expectedUuid = Mth.createInsecureUUID(RandomSource.create(seed));
             assertTrue(prediction.bobberUuid.equals(expectedUuid), () -> "The bobber's UUID " + prediction.bobberUuid + " doesn't match the seed, expected " + expectedUuid);
             assertTrue(prediction.state == FishingCracker.State.WAITING_FOR_FISH || prediction.state == FishingCracker.State.ASYNC_WAITING_FOR_FISH, () -> "Fishing manipulation didn't find the goal in the first bite, state=" + prediction.state);
@@ -414,7 +432,14 @@ final class FishingTests {
             try {
                 context.waitFor(client -> getCaughtItem(client) != null && !caughtXp.isEmpty());
             } catch (AssertionError e) {
-                String seen = context.computeOnClient(client -> "items=" + caughtItems.stream().map(item -> item.getItem() + "@" + item.position()).toList() + ", xp=" + caughtXp + ", player=" + Objects.requireNonNull(client.player).position());
+                String seen = context.computeOnClient(client -> {
+                    var level = Objects.requireNonNull(client.level);
+                    return "items=" + caughtItems.stream().map(item -> describeEntity(item)
+                        + " removed=" + item.getRemovalReason()
+                        + " inLevel=" + (level.getEntity(item.getId()) == item)
+                        + " entityWithId=" + (level.getEntity(item.getId()) instanceof ItemEntity other ? describeEntity(other) : level.getEntity(item.getId()))
+                    ).toList() + ", xp=" + caughtXp + ", player=" + Objects.requireNonNull(client.player).position();
+                });
                 throw new AssertionError("The catch wasn't seen by the client: " + seen, e);
             }
             FishingCracker.Catch actualCatch = context.computeOnClient(client -> new FishingCracker.Catch(Objects.requireNonNull(getCaughtItem(client)), caughtXp.getFirst()));
@@ -422,14 +447,33 @@ final class FishingTests {
             assertTrue(actualCatch.equals(expectedCatch), () -> "The fish was caught " + tickOffset + " ticks after the target tick, where " + describeCatch(expectedCatch) + " was predicted, but " + describeCatch(actualCatch) + " was caught");
             return true;
         } finally {
+            loggingEntityData = false;
             hook.enableCollection();
         }
+    }
+
+    // called on the client thread before the entity data is applied
+    public static void onSetEntityData(ClientboundSetEntityDataPacket packet) {
+        if (!loggingEntityData) {
+            return;
+        }
+        Entity entity = Objects.requireNonNull(Minecraft.getInstance().level).getEntity(packet.id());
+        // the data of an unknown entity is logged too, since it would be dropped if it arrived before the entity was added
+        if (entity != null && !(entity instanceof ItemEntity) && !(entity instanceof FishingHook)) {
+            return;
+        }
+        LOGGER.info("Client received entity data for {}: {}", entity == null ? "unknown entity id=" + packet.id() : describeEntity(entity), packet.packedItems().stream().map(value -> value.id() + "=" + value.value()).toList());
     }
 
     // the caught item spawns at the bobber, which is away from the player, unlike items the player drops
     private static @Nullable ItemStack getCaughtItem(Minecraft client) {
         var player = Objects.requireNonNull(client.player);
         return caughtItems.stream().filter(item -> !item.getItem().isEmpty() && item.position().distanceTo(player.position()) > 2).map(ItemEntity::getItem).findFirst().orElse(null);
+    }
+
+    private static String describeEntity(Entity entity) {
+        String description = entity.getType().builtInRegistryHolder().getRegisteredName() + " id=" + entity.getId() + " uuid=" + entity.getUUID() + " pos=" + entity.position();
+        return entity instanceof ItemEntity item ? description + " item=" + item.getItem() : description;
     }
 
     private static String describeCatch(FishingCracker.Catch fishingCatch) {
