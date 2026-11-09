@@ -67,6 +67,7 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -87,8 +88,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -522,9 +525,9 @@ public class FishingCracker {
 
         long seed = optionalSeed.getAsLong();
         SimulatedFishingBobber fishingBobber = new SimulatedFishingBobber(seed, tool, pos, throwYRot, throwXRot);
-        debug("Simulating bobber {}, seed={}, pos={}, yRot={}, xRot={}, deltaMovement={}, lure={}, luck={}, goals={}",
+        debug("Simulating bobber {}, seed={}, pos={}, yRot={}, xRot={}, deltaMovement={}, lure={}, luck={}, goals={}, hasLightWork={}",
             fishingBobberUUID, seed, pos, throwYRot, throwXRot, fishingBobber.deltaMovement, fishingBobber.lureLevel, fishingBobber.luckLevel,
-            goals.stream().map(WithStringArgument.Result::string).toList());
+            goals.stream().map(WithStringArgument.Result::string).toList(), level.getLightEngine().hasLightWork());
 
         boolean wasCatchingFish = false;
         int ticksUntilOurItem = -1;
@@ -571,9 +574,9 @@ public class FishingCracker {
         }
 
         if (ticksUntilOurItem == -1) {
-            debug("Goal not found after {} ticks, wasCatchingFish={}, position={}, currentState={}, openWater={}, openWaterViolations={}, catches={}",
+            debug("Goal not found after {} ticks, wasCatchingFish={}, position={}, currentState={}, openWater={}, openWaterViolations={}, catches={}, {}",
                 wasCatchingFish ? bobberNumTicks : "all", wasCatchingFish, fishingBobber.position, fishingBobber.currentState,
-                fishingBobber.openWater, fishingBobber.openWaterViolations, possibleExpectedCatches);
+                fishingBobber.openWater, fishingBobber.openWaterViolations, possibleExpectedCatches, fishingBobber.describeFishingConditions());
             // diagnose issue
             Set<LootCondition> failedConditions = new HashSet<>();
             boolean impossible = true;
@@ -653,8 +656,8 @@ public class FishingCracker {
                     debug("Found the goal, but the state changed to {} during the simulation", state);
                     return;
                 }
-                debug("Found the goal on tick {}, expected {}, bobber lands at {}",
-                    ticksUntilOurItem, possibleExpectedCatches.get(ourExpectedCatchIndex), bobberDestPos);
+                debug("Found the goal on tick {}, expected {}, bobber lands at {}, {}",
+                    ticksUntilOurItem, possibleExpectedCatches.get(ourExpectedCatchIndex), bobberDestPos, fishingBobber.describeFishingConditions());
                 totalTicksToWait = ticksUntilOurItem;
                 Arrays.fill(expectedCatches, null);
                 for (int i = Math.max(0, ourExpectedCatchIndex - expectedCatches.length / 2),
@@ -1127,6 +1130,13 @@ public class FishingCracker {
 
         private float fishAngle;
 
+        // what affected how fast the fish came, for debug logging
+        private int catchingFishTicks;
+        private int outOfWaterTicks;
+        private int rainingTicks;
+        private int cantSeeSkyTicks;
+        private final Map<BlockPos, Integer> skyLightAbove = new LinkedHashMap<>(0);
+
         private final RandomSource random;
         private final int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
         private final ItemStack tool;
@@ -1286,6 +1296,7 @@ public class FishingCracker {
                         this.catchingFish(blockPos);
                     } else {
                         this.outOfWaterTime = Math.min(10, this.outOfWaterTime + 1);
+                        this.outOfWaterTicks++;
                     }
                 }
             }
@@ -1589,7 +1600,27 @@ public class FishingCracker {
             }
         }
 
+        private void recordFishingConditions(BlockPos above) {
+            if (!DEBUG_LOGGING) {
+                return;
+            }
+            catchingFishTicks++;
+            if (this.level.isRainingAt(above)) {
+                rainingTicks++;
+            }
+            if (!this.level.canSeeSky(above)) {
+                cantSeeSkyTicks++;
+            }
+            skyLightAbove.putIfAbsent(above.immutable(), this.level.getBrightness(LightLayer.SKY, above));
+        }
+
+        private String describeFishingConditions() {
+            return "catchingFishTicks=" + catchingFishTicks + ", outOfWaterTicks=" + outOfWaterTicks + ", rainingTicks=" + rainingTicks
+                + ", cantSeeSkyTicks=" + cantSeeSkyTicks + ", skyLightAbove=" + skyLightAbove;
+        }
+
         private void catchingFish(BlockPos blockPos) {
+            recordFishingConditions(blockPos.above());
             assert level != null;
             int fishingSpeed = 1;
             BlockPos above = blockPos.above();
@@ -1776,6 +1807,7 @@ public class FishingCracker {
         }
 
         private void catchingFishLegacy(BlockPos blockPos) {
+            recordFishingConditions(blockPos.above());
             int fishingSpeed = 1;
             BlockPos above = blockPos.above();
             if (this.random.nextFloat() < 0.25F && this.level.isRainingAt(above)) {

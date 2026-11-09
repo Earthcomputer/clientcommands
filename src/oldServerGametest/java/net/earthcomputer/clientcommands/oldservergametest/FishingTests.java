@@ -10,6 +10,7 @@ import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedClass;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedField;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedMethod;
+import net.earthcomputer.clientcommands.oldservergametest.mixin.ClientLevelAccessor;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -26,6 +27,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import org.jspecify.annotations.Nullable;
@@ -61,6 +63,8 @@ public final class FishingTests {
     private static final int MAX_TIMING_CORRECTION = 1000;
     private static final int RETRIEVE_TIMEOUT = 10 * SharedConstants.TICKS_PER_SECOND;
     // the server sends a time update every second, and fishing manipulation uses the last 5
+    // how many ticks the client's light has to stay the same for before the bobber is thrown
+    private static final int LIGHT_STABLE_TICKS = 5;
     private static final int SERVER_TICK_RATE_MEASUREMENT_TIME = 6 * SharedConstants.TICKS_PER_SECOND;
 
     // the pitch the bobber is thrown at, which makes the bobber land just in front of the lily pads, then go under them
@@ -306,12 +310,12 @@ public final class FishingTests {
                 && level.getBlockState(poolFrom).is(Blocks.WATER) && level.getBlockState(poolTo).is(Blocks.WATER)
                 && level.getBlockState(getLilyPadsFrom(server, origin)).is(Blocks.LILY_PAD) && level.getBlockState(getLilyPadsTo(server, origin)).is(Blocks.LILY_PAD)
                 && level.getBiome(bobberPos).is(fishingCase.jungle ? Biomes.JUNGLE : Biomes.PLAINS)
-                && level.canSeeSky(bobberPos.above())
                 // clearing the weather makes the rain fade out gradually
                 && level.getRainLevel(1) == 0
                 // giving the fishing rod creates a fake item entity, which the simulated bobber could collide with
                 && StreamSupport.stream(level.entitiesForRendering().spliterator(), false).noneMatch(entity -> entity instanceof ItemEntity);
         });
+        waitForLightToSettle(context, bobberPos.atY(poolFrom.getY()), bobberPos.above());
 
         context.runOnClient(client -> {
             Objects.requireNonNull(client.player).getInventory().setSelectedSlot(0);
@@ -319,6 +323,30 @@ public final class FishingTests {
         });
         runClientCommand(context, "cfish add-goal " + fishingCase.goal);
         context.waitFor(_ -> FishingCracker.goals.size() == 1);
+    }
+
+    /**
+     * The fish comes slower if the bobber can't see the sky, which depends on the client's sky light in the pool. The
+     * client applies the light from chunk and light packets later, a few at a time, which can overwrite the light it
+     * computed for newer block changes. After teleporting far away, such as in the first case after the previous test,
+     * there is a backlog of light from before the pool was built, so wait for it to be applied.
+     */
+    private static void waitForLightToSettle(ClientGameTestContext context, BlockPos bottom, BlockPos top) {
+        var light = new Object() {
+            int stableTicks;
+            int @Nullable [] skyLight;
+        };
+        int ticksWaited = context.waitFor(client -> {
+            var level = Objects.requireNonNull(client.level);
+            int[] skyLight = BlockPos.betweenClosedStream(bottom, top).mapToInt(pos -> level.getBrightness(LightLayer.SKY, pos)).toArray();
+            boolean settled = ((ClientLevelAccessor) level).getLightUpdateQueue().isEmpty()
+                && !level.getLightEngine().hasLightWork()
+                && Arrays.equals(skyLight, light.skyLight);
+            light.skyLight = skyLight;
+            light.stableTicks = settled ? light.stableTicks + 1 : 0;
+            return light.stableTicks >= LIGHT_STABLE_TICKS;
+        });
+        LOGGER.info("Waited {} ticks for the light to settle, sky light from {} to {}: {}", ticksWaited, bottom, top, Arrays.toString(light.skyLight));
     }
 
     private static void tearDownFishing(OldServer server, BlockPos origin, FishingCase fishingCase) {
