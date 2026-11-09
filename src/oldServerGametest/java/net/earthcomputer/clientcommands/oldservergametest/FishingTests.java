@@ -33,7 +33,9 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -168,10 +170,15 @@ public final class FishingTests {
 
     // the catches seen by the client, which are only accessed on the client thread
     private static final List<ItemEntity> caughtItems = new ArrayList<>();
+    // The item stacks received in entity data packets, by entity id. Before 1.19.4 the server sends the entity data
+    // separately from adding the entity, so the client can tick the item entity in between, which discards it because
+    // its item is empty, and then drops the entity data because the entity is unknown.
+    private static final Map<Integer, ItemStack> receivedItemStacks = new HashMap<>();
     private static final List<Integer> caughtXp = new ArrayList<>();
     private static boolean registeredEvents = false;
-    // the entity data received by the client is logged during each cast, to diagnose catches that the client didn't see
-    private static volatile boolean loggingEntityData = false;
+    // the entity data received by the client is recorded and logged during each cast, to diagnose catches that the
+    // client didn't see
+    private static volatile boolean recordingEntityData = false;
 
     private static final class TargetTickStats {
         int attempts;
@@ -299,6 +306,7 @@ public final class FishingTests {
                 && level.getBlockState(poolFrom).is(Blocks.WATER) && level.getBlockState(poolTo).is(Blocks.WATER)
                 && level.getBlockState(getLilyPadsFrom(server, origin)).is(Blocks.LILY_PAD) && level.getBlockState(getLilyPadsTo(server, origin)).is(Blocks.LILY_PAD)
                 && level.getBiome(bobberPos).is(fishingCase.jungle ? Biomes.JUNGLE : Biomes.PLAINS)
+                && level.canSeeSky(bobberPos.above())
                 // clearing the weather makes the rain fade out gradually
                 && level.getRainLevel(1) == 0
                 // giving the fishing rod creates a fake item entity, which the simulated bobber could collide with
@@ -369,6 +377,7 @@ public final class FishingTests {
         context.waitFor(client -> Objects.requireNonNull(client.player).fishing == null);
         context.runOnClient(_ -> {
             caughtItems.clear();
+            receivedItemStacks.clear();
             caughtXp.clear();
             // a run of bad catches can make the timing correction drift so far that the catches are always outside
             // the predicted ticks, where it can't learn from them
@@ -384,7 +393,7 @@ public final class FishingTests {
         context.runOnClient(client -> Objects.requireNonNull(client.gameMode).useItem(Objects.requireNonNull(client.player), InteractionHand.MAIN_HAND));
         ObjectReference hook = waitForFuture(context, hookFuture, SharedConstants.TICKS_PER_SECOND, "The bobber wasn't created");
         LOGGER.info("The server created the bobber with seed {}, expected UUID {}", seed, Mth.createInsecureUUID(RandomSource.create(seed)));
-        loggingEntityData = true;
+        recordingEntityData = true;
         try {
             record Retrieval(int tickCount, boolean biting) {
             }
@@ -438,7 +447,7 @@ public final class FishingTests {
                         + " removed=" + item.getRemovalReason()
                         + " inLevel=" + (level.getEntity(item.getId()) == item)
                         + " entityWithId=" + (level.getEntity(item.getId()) instanceof ItemEntity other ? describeEntity(other) : level.getEntity(item.getId()))
-                    ).toList() + ", xp=" + caughtXp + ", player=" + Objects.requireNonNull(client.player).position();
+                    ).toList() + ", receivedItemStacks=" + receivedItemStacks + ", xp=" + caughtXp + ", player=" + Objects.requireNonNull(client.player).position();
                 });
                 throw new AssertionError("The catch wasn't seen by the client: " + seen, e);
             }
@@ -447,14 +456,14 @@ public final class FishingTests {
             assertTrue(actualCatch.equals(expectedCatch), () -> "The fish was caught " + tickOffset + " ticks after the target tick, where " + describeCatch(expectedCatch) + " was predicted, but " + describeCatch(actualCatch) + " was caught");
             return true;
         } finally {
-            loggingEntityData = false;
+            recordingEntityData = false;
             hook.enableCollection();
         }
     }
 
     // called on the client thread before the entity data is applied
     public static void onSetEntityData(ClientboundSetEntityDataPacket packet) {
-        if (!loggingEntityData) {
+        if (!recordingEntityData) {
             return;
         }
         Entity entity = Objects.requireNonNull(Minecraft.getInstance().level).getEntity(packet.id());
@@ -463,12 +472,22 @@ public final class FishingTests {
             return;
         }
         LOGGER.info("Client received entity data for {}: {}", entity == null ? "unknown entity id=" + packet.id() : describeEntity(entity), packet.packedItems().stream().map(value -> value.id() + "=" + value.value()).toList());
+        for (var value : packet.packedItems()) {
+            if (value.value() instanceof ItemStack stack) {
+                receivedItemStacks.put(packet.id(), stack);
+            }
+        }
     }
 
     // the caught item spawns at the bobber, which is away from the player, unlike items the player drops
     private static @Nullable ItemStack getCaughtItem(Minecraft client) {
         var player = Objects.requireNonNull(client.player);
-        return caughtItems.stream().filter(item -> !item.getItem().isEmpty() && item.position().distanceTo(player.position()) > 2).map(ItemEntity::getItem).findFirst().orElse(null);
+        return caughtItems.stream()
+            .filter(item -> item.position().distanceTo(player.position()) > 2)
+            .map(item -> item.getItem().isEmpty() ? receivedItemStacks.getOrDefault(item.getId(), ItemStack.EMPTY) : item.getItem())
+            .filter(stack -> !stack.isEmpty())
+            .findFirst()
+            .orElse(null);
     }
 
     private static String describeEntity(Entity entity) {
