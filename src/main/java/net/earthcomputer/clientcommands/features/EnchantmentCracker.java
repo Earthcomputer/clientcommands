@@ -126,6 +126,7 @@ public class EnchantmentCracker {
         ClientLevelEvents.UNLOAD_LEVEL.register(isDisconnect -> {
             if (isDisconnect) {
                 expectedNumBookshelves = -1;
+                resetCracker();
             }
         });
         PlayerRandCracker.RNG_CALLED_EVENT.register(EnchantmentCracker::onRNGCallEvent);
