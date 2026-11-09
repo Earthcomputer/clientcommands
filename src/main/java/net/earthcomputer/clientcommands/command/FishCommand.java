@@ -40,6 +40,9 @@ public class FishCommand {
         if (MultiVersionCompat.INSTANCE.getProtocolVersion() >= MultiVersionCompat.V1_20) {
             return; // fishing manipulation patched in 1.20
         }
+        if (MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_9) {
+            return; // fishing loot used level random in 1.8
+        }
 
         dispatcher.register(literal("cfish")
             .then(literal("list-goals")
