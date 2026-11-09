@@ -121,6 +121,10 @@ public class SeedfindingUtil {
         return null;
     }
 
+    public static String toSeedfindingEnchantment(ResourceKey<Enchantment> enchantment) {
+        return Objects.requireNonNull(SEEDFINDING_ENCHANTMENTS.get(enchantment), () -> "missing seedfinding enchantment " + enchantment);
+    }
+
     public static ItemStack fromSeedfindingItem(com.seedfinding.mcfeature.loot.item.Item item, RegistryAccess registryAccess) {
         return fromSeedfindingItem(new com.seedfinding.mcfeature.loot.item.ItemStack(item), registryAccess);
     }

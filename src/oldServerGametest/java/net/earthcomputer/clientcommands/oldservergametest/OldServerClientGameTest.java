@@ -9,6 +9,7 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.ChorusManipulation;
 import net.earthcomputer.clientcommands.features.EnchantmentCracker;
+import net.earthcomputer.clientcommands.features.FishingCracker;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedClass;
 import net.earthcomputer.clientcommands.oldservergametest.ServerMappings.MappedField;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -57,12 +59,13 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     private static final List<Class<?>> TEST_CLASSES = List.of(
         CrackRngTests.class,
         EnchantmentCrackingTests.class,
-        InfiniteToolsTests.class
+        InfiniteToolsTests.class,
+        FishingTests.class
     );
 
-    private static final MappedClass ENTITY = MappedClass.of("net.minecraft.world.entity.Entity")
+    static final MappedClass ENTITY = MappedClass.of("net.minecraft.world.entity.Entity")
         .until(ProtocolVersion.v1_14_3, "net.minecraft.entity.Entity");
-    private static final MappedField ENTITY_RANDOM = MappedField.of(ENTITY, "random")
+    static final MappedField ENTITY_RANDOM = MappedField.of(ENTITY, "random")
         .until(ProtocolVersion.v1_14_3, "field_70146_Z");
     // the entity random is a LegacyRandomSource in 1.19+, and a java.util.Random before that
     private static final MappedClass LEGACY_RANDOM_SOURCE = MappedClass.of("net.minecraft.world.level.levelgen.LegacyRandomSource");
@@ -197,6 +200,9 @@ public class OldServerClientGameTest implements FabricClientGameTest {
             Configs.enchantingPrediction = true;
             Configs.chorusManipulation = false;
             Configs.infiniteTools = false;
+            Configs.fishingManipulation = Configs.FishingManipulation.OFF;
+            FishingCracker.goals.clear();
+            FishingCracker.reset();
             ChorusManipulation.chorusGoalFrom = null;
             ChorusManipulation.chorusGoalTo = null;
             Configs.playerCrackState = PlayerRandCracker.CrackState.UNCRACKED;
@@ -206,9 +212,11 @@ public class OldServerClientGameTest implements FabricClientGameTest {
 
         fence(context);
 
-        // remove items dropped by previous tests (e.g. thrown by ccrackrng), so that the player doesn't pick them up later.
-        boolean oldEntityNames = server.version().protocolVersion().olderThan(ProtocolVersion.v1_11);
-        server.runCommand("kill @e[type=" + (oldEntityNames ? "Item" : "item") + "]");
+        // remove items and experience dropped by previous tests (e.g. thrown by ccrackrng or caught by fishing), so that
+        // the player doesn't pick them up later.
+        ProtocolVersion version = server.version().protocolVersion();
+        server.runCommand("kill @e[type=" + (version.olderThan(ProtocolVersion.v1_11) ? "Item" : "item") + "]");
+        server.runCommand("kill @e[type=" + (version.olderThan(ProtocolVersion.v1_11) ? "XPOrb" : version.olderThan(ProtocolVersion.v1_13) ? "xp_orb" : "experience_orb") + "]");
         // these commands have the same syntax in every version
         server.runCommand("gamemode survival " + server.playerName());
         server.runCommand("clear " + server.playerName());
@@ -282,19 +290,41 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     static long getServerPlayerSeed(OldServer server) {
         ServerDebugger debugger = server.debugger();
         ObjectReference player = server.serverPlayer();
-        return debugger.computeAtNextTick(() -> {
-            ObjectReference random = (ObjectReference) debugger.getField(player, ENTITY_RANDOM);
-            ObjectReference seed = random.referenceType().name().equals("java.util.Random")
-                ? (ObjectReference) ServerDebugger.getUnmappedField(random, "seed")
-                : (ObjectReference) debugger.getField(random, LEGACY_RANDOM_SOURCE_SEED);
-            return ((LongValue) ServerDebugger.getUnmappedField(seed, "value")).value();
-        });
+        return debugger.computeAtNextTick(() -> ((LongValue) ServerDebugger.getUnmappedField(getEntityRandomSeed(debugger, player), "value")).value());
+    }
+
+    // sets the internal seed of the entity's random, which is scrambled from the seed passed to the Random constructor
+    static void setEntityRandomSeed(ServerDebugger debugger, ObjectReference entity, long seed) {
+        ServerDebugger.setUnmappedField(getEntityRandomSeed(debugger, entity), "value", seed);
+    }
+
+    // returns the AtomicLong containing the seed of the entity's random
+    private static ObjectReference getEntityRandomSeed(ServerDebugger debugger, ObjectReference entity) {
+        ObjectReference random = (ObjectReference) debugger.getField(entity, ENTITY_RANDOM);
+        return random.referenceType().name().equals("java.util.Random")
+            ? (ObjectReference) ServerDebugger.getUnmappedField(random, "seed")
+            : (ObjectReference) debugger.getField(random, LEGACY_RANDOM_SOURCE_SEED);
     }
 
     // gives the player items for player RNG manipulation to throw
     static void giveItemsToThrow(ClientGameTestContext context, OldServer server) {
         server.runCommand("give " + server.playerName() + " minecraft:cobblestone 64");
         context.waitFor(client -> Objects.requireNonNull(client.player).getInventory().countItem(Items.COBBLESTONE) == 64);
+    }
+
+    static void giveEnchantedItem(OldServer server, String item, List<EnchantmentLevel> enchantments) {
+        ProtocolVersion version = server.version().protocolVersion();
+        String player = server.playerName();
+        if (version.olderThanOrEqualTo(ProtocolVersion.v1_12_2)) {
+            String nbt = enchantments.stream().map(ench -> "{id:" + ench.legacyId + "s,lvl:" + ench.level + "s}").collect(Collectors.joining(","));
+            server.runCommand("give " + player + " minecraft:" + item + " 1 0 {ench:[" + nbt + "]}");
+        } else if (version.olderThan(ProtocolVersion.v1_20_5)) {
+            String nbt = enchantments.stream().map(ench -> "{id:\"minecraft:" + ench.id + "\",lvl:" + ench.level + "s}").collect(Collectors.joining(","));
+            server.runCommand("give " + player + " minecraft:" + item + "{Enchantments:[" + nbt + "]}");
+        } else {
+            String levels = enchantments.stream().map(ench -> "\"minecraft:" + ench.id + "\":" + ench.level).collect(Collectors.joining(","));
+            server.runCommand("give " + player + " minecraft:" + item + "[minecraft:enchantments={levels:{" + levels + "}}]");
+        }
     }
 
     static void assertPlayerCracked(ClientGameTestContext context, String after) {
@@ -311,6 +341,24 @@ public class OldServerClientGameTest implements FabricClientGameTest {
     static void assertTrue(boolean condition, Supplier<String> message) {
         if (!condition) {
             throw new AssertionError(message.get());
+        }
+    }
+
+    record EnchantmentLevel(String id, int legacyId, int level) {
+        static EnchantmentLevel unbreaking(int level) {
+            return new EnchantmentLevel("unbreaking", 34, level);
+        }
+
+        static EnchantmentLevel efficiency(int level) {
+            return new EnchantmentLevel("efficiency", 32, level);
+        }
+
+        static EnchantmentLevel luckOfTheSea(int level) {
+            return new EnchantmentLevel("luck_of_the_sea", 61, level);
+        }
+
+        static EnchantmentLevel lure(int level) {
+            return new EnchantmentLevel("lure", 62, level);
         }
     }
 

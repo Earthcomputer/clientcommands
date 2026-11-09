@@ -4,9 +4,11 @@ import com.google.common.base.Throwables;
 import com.mojang.logging.LogUtils;
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.ClassNotLoadedException;
+import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.InvalidTypeException;
+import com.sun.jdi.Location;
 import com.sun.jdi.Method;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
@@ -31,18 +33,33 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.ClassModel;
+import java.lang.classfile.CodeElement;
+import java.lang.classfile.CodeModel;
+import java.lang.classfile.Instruction;
+import java.lang.classfile.MethodModel;
+import java.lang.classfile.Opcode;
+import java.lang.classfile.instruction.FieldInstruction;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 final class ServerDebugger implements AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -54,17 +71,20 @@ final class ServerDebugger implements AutoCloseable {
 
     private final VirtualMachine vm;
     private final ServerMappings mappings;
+    private final Path serverJar;
+    private final Map<String, ClassModel> classModels = new ConcurrentHashMap<>();
 
-    private ServerDebugger(VirtualMachine vm, ServerMappings mappings) {
+    private ServerDebugger(VirtualMachine vm, ServerMappings mappings, Path serverJar) {
         this.vm = vm;
         this.mappings = mappings;
+        this.serverJar = serverJar;
 
         Thread eventThread = new Thread(this::handleEvents, "Server debugger events");
         eventThread.setDaemon(true);
         eventThread.start();
     }
 
-    static ServerDebugger attach(int port, ServerMappings mappings) {
+    static ServerDebugger attach(int port, ServerMappings mappings, Path serverJar) {
         AttachingConnector connector = Bootstrap.virtualMachineManager().attachingConnectors().stream()
             .filter(c -> c.name().equals("com.sun.jdi.SocketAttach"))
             .findFirst()
@@ -73,7 +93,7 @@ final class ServerDebugger implements AutoCloseable {
         args.get("hostname").setValue("127.0.0.1");
         args.get("port").setValue(String.valueOf(port));
         try {
-            return new ServerDebugger(connector.attach(args), mappings);
+            return new ServerDebugger(connector.attach(args), mappings, serverJar);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (IllegalConnectorArgumentsException e) {
@@ -157,6 +177,151 @@ final class ServerDebugger implements AutoCloseable {
         }
         breakpoints.forEach(EventRequest::enable);
         LOGGER.info("[capture {}] Enabled constructor breakpoints at {}", type.name(), breakpoints.stream().map(BreakpointRequest::location).toList());
+    }
+
+    /**
+     * Returns a future that completes with the next instance of the given class to be constructed, once the given
+     * field has been assigned in its constructor. The action is run on the instance while the constructing thread is
+     * suspended, using temporary breakpoints on the instructions straight after the field assignments in the
+     * constructors of the field's owner, which must be the given class or a superclass of it. The breakpoints are
+     * deleted if the future is canceled.
+     */
+    CompletableFuture<ObjectReference> runAfterFieldAssignedInConstructor(ServerMappings.MappedClass clazz, ServerMappings.MappedField field, Consumer<ObjectReference> action) {
+        String className = mappings.mapClass(clazz);
+        Field targetField = findField(field);
+        CompletableFuture<ObjectReference> future = new CompletableFuture<>();
+        EventRequestManager requestManager = vm.eventRequestManager();
+        List<BreakpointRequest> breakpoints = new ArrayList<>();
+        for (Method constructor : targetField.declaringType().methods().stream().filter(Method::isConstructor).toList()) {
+            for (Location location : findLocationsAfterPutField(constructor, targetField)) {
+                BreakpointRequest breakpoint = requestManager.createBreakpointRequest(location);
+                breakpoint.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+                breakpoint.putProperty(HANDLER_PROPERTY, (Consumer<Event>) event -> {
+                    try {
+                        ObjectReference instance = Objects.requireNonNull(((BreakpointEvent) event).thread().frame(0).thisObject(), "got null this object in constructor");
+                        // other classes are constructed here too
+                        if (future.isDone() || !isSubclass(instance.referenceType(), className)) {
+                            return;
+                        }
+                        instance.disableCollection();
+                        action.accept(instance);
+                        future.complete(instance);
+                    } catch (Throwable e) {
+                        future.completeExceptionally(e);
+                    }
+                });
+                breakpoints.add(breakpoint);
+            }
+        }
+        if (breakpoints.isEmpty()) {
+            throw new IllegalStateException("No assignments to " + targetField + " in the constructors of " + targetField.declaringType().name());
+        }
+        // also deletes the breakpoints if the future is canceled
+        future.whenComplete((_, _) -> requestManager.deleteEventRequests(breakpoints));
+        breakpoints.forEach(EventRequest::enable);
+        return future;
+    }
+
+    private static boolean isSubclass(ReferenceType type, String superclassName) {
+        for (ClassType clazz = type instanceof ClassType classType ? classType : null; clazz != null; clazz = clazz.superclass()) {
+            if (clazz.name().equals(superclassName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the locations of the instructions straight after the putfield instructions for the given field in the
+     * given method.
+     */
+    private List<Location> findLocationsAfterPutField(Method method, Field field) {
+        String ownerName = field.declaringType().name().replace('.', '/');
+        CodeModel code = parseMethodCode(method);
+        List<Location> locations = new ArrayList<>();
+        int bci = 0;
+        for (CodeElement element : code) {
+            if (element instanceof Instruction instruction) {
+                bci += instruction.sizeInBytes();
+                if (instruction instanceof FieldInstruction fieldInstruction
+                    && fieldInstruction.opcode() == Opcode.PUTFIELD
+                    && fieldInstruction.owner().asInternalName().equals(ownerName)
+                    && fieldInstruction.name().equalsString(field.name())) {
+                    locations.add(method.locationOfCodeIndex(bci));
+                }
+            }
+        }
+        return locations;
+    }
+
+    private CodeModel parseMethodCode(Method method) {
+        ClassModel classModel = classModels.computeIfAbsent(method.declaringType().name(), className -> ClassFile.of().parse(readClassFile(className)));
+        return classModel.methods().stream()
+            .filter(m -> m.methodName().equalsString(method.name()) && m.methodType().equalsString(method.signature()))
+            .findFirst()
+            .flatMap(MethodModel::code)
+            .orElseThrow(() -> new IllegalStateException("Failed to find the code of " + method + " in the server jar"));
+    }
+
+    private byte[] readClassFile(String className) {
+        String entryName = className.replace('.', '/') + ".class";
+        try (ZipFile serverZip = new ZipFile(serverJar.toFile())) {
+            ZipEntry entry = serverZip.getEntry(entryName);
+            if (entry != null) {
+                try (InputStream in = serverZip.getInputStream(entry)) {
+                    return in.readAllBytes();
+                }
+            }
+
+            // since 1.18, the server jar is a bundler, which contains the real server jar
+            ZipEntry versionsList = serverZip.getEntry("META-INF/versions.list");
+            if (versionsList == null) {
+                throw new IllegalStateException("Class " + className + " not found in " + serverJar);
+            }
+            String versionsListContent;
+            try (InputStream in = serverZip.getInputStream(versionsList)) {
+                versionsListContent = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            }
+            // each line is the hash, the id, and the path of the jar
+            for (String line : versionsListContent.lines().toList()) {
+                String[] parts = line.split("\t");
+                ZipEntry innerJar = serverZip.getEntry("META-INF/versions/" + parts[2]);
+                try (ZipInputStream innerZip = new ZipInputStream(serverZip.getInputStream(innerJar))) {
+                    for (ZipEntry innerEntry; (innerEntry = innerZip.getNextEntry()) != null; ) {
+                        if (innerEntry.getName().equals(entryName)) {
+                            return innerZip.readAllBytes();
+                        }
+                    }
+                }
+            }
+            throw new IllegalStateException("Class " + className + " not found in " + serverJar);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Returns a future that completes with the result of the action, which is run the next time the given method is
+     * called on the given instance, while the calling thread is suspended. This uses a temporary breakpoint at the
+     * start of the method, which is deleted if the future is canceled.
+     */
+    <T> CompletableFuture<T> computeOnMethodEntry(ServerMappings.MappedMethod method, ObjectReference instance, Supplier<T> action) {
+        EventRequestManager requestManager = vm.eventRequestManager();
+        CompletableFuture<T> future = new CompletableFuture<>();
+        BreakpointRequest breakpoint = requestManager.createBreakpointRequest(findMethod(method).location());
+        breakpoint.addInstanceFilter(instance);
+        breakpoint.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+        breakpoint.putProperty(HANDLER_PROPERTY, (Consumer<Event>) _ -> {
+            try {
+                future.complete(action.get());
+            } catch (Throwable e) {
+                future.completeExceptionally(e);
+            }
+        });
+        // also deletes the breakpoint if the future is canceled
+        future.whenComplete((_, _) -> requestManager.deleteEventRequest(breakpoint));
+        breakpoint.enable();
+        return future;
     }
 
     Value getField(ObjectReference object, ServerMappings.MappedField field) {
@@ -260,11 +425,23 @@ final class ServerDebugger implements AutoCloseable {
     }
 
     static Value getUnmappedField(ObjectReference object, String fieldName) {
+        return object.getValue(findUnmappedField(object, fieldName));
+    }
+
+    static void setUnmappedField(ObjectReference object, String fieldName, long value) {
+        try {
+            object.setValue(findUnmappedField(object, fieldName), object.virtualMachine().mirrorOf(value));
+        } catch (InvalidTypeException | ClassNotLoadedException e) {
+            throw new IllegalArgumentException("Can't set " + fieldName + " to " + value, e);
+        }
+    }
+
+    private static Field findUnmappedField(ObjectReference object, String fieldName) {
         Field field = object.referenceType().fieldByName(fieldName);
         if (field == null) {
             throw new IllegalStateException("No field " + fieldName + " in " + object.referenceType().name());
         }
-        return object.getValue(field);
+        return field;
     }
 
     <T> T computeAtNextTick(Supplier<T> action) {

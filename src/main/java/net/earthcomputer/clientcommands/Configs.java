@@ -62,7 +62,7 @@ public class Configs {
         }
     }
 
-    @Config(onChange = "onChangeFishingManipulation", temporary = true, condition = "conditionLessThan1_20")
+    @Config(onChange = "onChangeFishingManipulation", temporary = true, condition = "conditionFishingManipulation")
     public static FishingManipulation fishingManipulation = FishingManipulation.OFF;
     private static void onChangeFishingManipulation(FishingManipulation oldFishingManipulation, FishingManipulation fishingManipulation) {
         if (fishingManipulation.isEnabled()) {
@@ -171,8 +171,10 @@ public class Configs {
     @Config
     public static float itemThrowsPerTick = 1;
 
-    public static boolean conditionLessThan1_20() {
-        return MultiVersionCompat.INSTANCE.getProtocolVersion() < MultiVersionCompat.V1_20;
+    // before 1.9, the fishing loot was generated using the level's random, which can't be manipulated
+    public static boolean conditionFishingManipulation() {
+        int protocolVersion = MultiVersionCompat.INSTANCE.getProtocolVersion();
+        return protocolVersion >= MultiVersionCompat.V1_9 && protocolVersion < MultiVersionCompat.V1_20;
     }
 
     public static boolean conditionLessThan1_21() {

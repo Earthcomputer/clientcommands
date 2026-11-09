@@ -1,6 +1,5 @@
 package net.earthcomputer.clientcommands.oldservergametest;
 
-import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import net.earthcomputer.clientcommands.Configs;
 import net.earthcomputer.clientcommands.features.PlayerRandCracker;
 import net.earthcomputer.clientcommands.util.MultiVersionCompat;
@@ -23,16 +22,6 @@ final class InfiniteToolsTests {
     private static final int MAX_MINING_TICKS = 100;
     // from 1.21, unbreaking uses the level random instead of the player random, so it can't be manipulated
     private static final int INFINITE_TOOLS_MAX_VERSION = MultiVersionCompat.V1_20_6;
-
-    private record EnchantmentLevel(String id, int legacyId, int level) {
-        static EnchantmentLevel unbreaking(int level) {
-            return new EnchantmentLevel("unbreaking", 34, level);
-        }
-
-        static EnchantmentLevel efficiency(int level) {
-            return new EnchantmentLevel("efficiency", 32, level);
-        }
-    }
 
     @TestCase(maxVersion = INFINITE_TOOLS_MAX_VERSION)
     private static void testInfiniteTools(ClientGameTestContext context, OldServer server) {
@@ -120,7 +109,7 @@ final class InfiniteToolsTests {
 
     private static void setUpInfiniteTools(ClientGameTestContext context, OldServer server, List<EnchantmentLevel> enchantments) {
         // the pickaxe goes in the first hotbar slot, so that it's held
-        givePickaxe(server, enchantments);
+        giveEnchantedItem(server, "diamond_pickaxe", enchantments);
         context.waitFor(client -> Objects.requireNonNull(client.player).getInventory().getItem(0).is(Items.DIAMOND_PICKAXE));
         giveItemsToThrow(context, server);
 
@@ -131,21 +120,6 @@ final class InfiniteToolsTests {
             Configs.playerCrackState = PlayerRandCracker.CrackState.CRACKED;
             Configs.infiniteTools = true;
         });
-    }
-
-    private static void givePickaxe(OldServer server, List<EnchantmentLevel> enchantments) {
-        ProtocolVersion version = server.version().protocolVersion();
-        String player = server.playerName();
-        if (version.olderThanOrEqualTo(ProtocolVersion.v1_12_2)) {
-            String nbt = enchantments.stream().map(ench -> "{id:" + ench.legacyId + "s,lvl:" + ench.level + "s}").collect(Collectors.joining(","));
-            server.runCommand("give " + player + " minecraft:diamond_pickaxe 1 0 {ench:[" + nbt + "]}");
-        } else if (version.olderThan(ProtocolVersion.v1_20_5)) {
-            String nbt = enchantments.stream().map(ench -> "{id:\"minecraft:" + ench.id + "\",lvl:" + ench.level + "s}").collect(Collectors.joining(","));
-            server.runCommand("give " + player + " minecraft:diamond_pickaxe{Enchantments:[" + nbt + "]}");
-        } else {
-            String levels = enchantments.stream().map(ench -> "\"minecraft:" + ench.id + "\":" + ench.level).collect(Collectors.joining(","));
-            server.runCommand("give " + player + " minecraft:diamond_pickaxe[minecraft:enchantments={levels:{" + levels + "}}]");
-        }
     }
 
     private static void mineBlock(ClientGameTestContext context, BlockPos pos) {

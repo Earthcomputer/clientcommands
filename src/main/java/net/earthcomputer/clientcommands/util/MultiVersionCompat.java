@@ -29,6 +29,7 @@ public abstract sealed class MultiVersionCompat {
     public static final int V1_13 = 393;
     public static final int V1_13_2 = 404;
     public static final int V1_14 = 477;
+    public static final int V1_14_1 = 480;
     public static final int V1_14_2 = 485;
     public static final int V1_15 = 573;
     public static final int V1_15_2 = 578;
@@ -37,6 +38,9 @@ public abstract sealed class MultiVersionCompat {
     public static final int V1_17_1 = 756;
     public static final int V1_18 = 757;
     public static final int V1_18_2 = 758;
+    public static final int V1_19 = 759;
+    public static final int V1_19_3 = 761;
+    public static final int V1_19_4 = 762;
     public static final int V1_20 = 763;
     public static final int V1_20_5 = 766;
     public static final int V1_20_6 = 766;

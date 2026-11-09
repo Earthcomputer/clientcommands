@@ -146,7 +146,7 @@ final class OldServer implements AutoCloseable {
             server.runCommand("gamerule " + (snakeCaseGameRules ? "send_command_feedback" : "sendCommandFeedback") + " false");
             server.runCommand("gamerule " + (snakeCaseGameRules ? "log_admin_commands" : "logAdminCommands") + " false");
 
-            server.debugger = ServerDebugger.attach(debugPort, download.mappings());
+            server.debugger = ServerDebugger.attach(debugPort, download.mappings(), download.serverJar());
             // capture the player when it joins
             server.serverPlayer = server.debugger.captureNextInstance(SERVER_PLAYER);
         } catch (Throwable e) {

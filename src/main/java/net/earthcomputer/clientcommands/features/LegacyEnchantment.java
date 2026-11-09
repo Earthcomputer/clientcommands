@@ -200,7 +200,8 @@ public enum LegacyEnchantment {
     }
 
     private boolean canEnchant(ItemStack item, boolean treasure, int version) {
-        if (version < introducedVersion || (isTreasure() && !treasure)) {
+        // non-discoverable enchantments are never randomly selected, even as treasure
+        if (version < introducedVersion || (isTreasure() && !treasure) || !isDiscoverable()) {
             return false;
         }
         // books can have all enchantments
