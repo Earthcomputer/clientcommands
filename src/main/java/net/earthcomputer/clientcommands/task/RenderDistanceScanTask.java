@@ -8,11 +8,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -199,7 +201,15 @@ public abstract class RenderDistanceScanTask extends SimpleTask {
         return section.maybeHas(stateTest);
     }
 
-    private void scanChunkSection(Entity cameraEntity, SectionPos sectionPos) throws CommandSyntaxException {
+    protected boolean hasBiome(SectionPos pos, Predicate<Holder<Biome>> biomeTest) {
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
+        LevelChunk chunk = level.getChunk(pos.getX(), pos.getZ());
+        LevelChunkSection section = chunk.getSection(chunk.getSectionIndexFromSectionY(pos.getY()));
+        return section.getBiomes().maybeHas(biomeTest);
+    }
+
+    protected void scanChunkSection(Entity cameraEntity, SectionPos sectionPos) throws CommandSyntaxException {
         ClientLevel level = Minecraft.getInstance().level;
         assert level != null;
         for (BlockPos pos : BlockPos.betweenClosed(sectionPos.minBlockX(), sectionPos.minBlockY(), sectionPos.minBlockZ(), sectionPos.maxBlockX(), sectionPos.maxBlockY(), sectionPos.maxBlockZ())) {

@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import net.earthcomputer.clientcommands.c2c.C2CFriendlyByteBuf;
 import net.earthcomputer.clientcommands.c2c.C2CPacket;
 import net.earthcomputer.clientcommands.c2c.C2CPacketListener;
-import net.earthcomputer.clientcommands.c2c.chess.ChessMove;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;

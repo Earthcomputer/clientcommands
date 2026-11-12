@@ -2,12 +2,12 @@ package net.earthcomputer.clientcommands.features;
 
 import com.demonwav.mcdev.annotations.Translatable;
 import net.earthcomputer.clientcommands.Configs;
-import net.earthcomputer.clientcommands.util.CUtil;
-import net.earthcomputer.clientcommands.util.CComponentUtil;
-import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.earthcomputer.clientcommands.command.ClientCommandHelper;
 import net.earthcomputer.clientcommands.event.ClientLevelEvents;
 import net.earthcomputer.clientcommands.interfaces.ICreativeSlot;
+import net.earthcomputer.clientcommands.util.CComponentUtil;
+import net.earthcomputer.clientcommands.util.CUtil;
+import net.earthcomputer.clientcommands.util.MultiVersionCompat;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.ChatFormatting;
