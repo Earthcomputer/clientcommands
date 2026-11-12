@@ -3,10 +3,6 @@ package net.earthcomputer.clientcommands;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jspecify.annotations.Nullable;
 
-import javax.swing.JEditorPane;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.event.HyperlinkEvent;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.io.IOException;
@@ -18,6 +14,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
 
 // A class for lost users who try to double-click clientcommands to "run" it.
 public class DoubleClickMain {

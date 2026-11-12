@@ -6,6 +6,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public final class ClientLevelEvents {
     public static final Event<LoadLevel> LOAD_LEVEL = EventFactory.createArrayBacked(LoadLevel.class, listeners -> level -> {
