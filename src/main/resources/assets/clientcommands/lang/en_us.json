@@ -127,6 +127,10 @@
   "commands.cfind.noMatch": "No entities matched your query",
   "commands.cfind.success": "%s entities matched your query",
 
+  "commands.cfindbiome.notFound": "No such biome found",
+  "commands.cfindbiome.starting": "Searching for %s",
+  "commands.cfindbiome.success": "Closest match is at %s, %s blocks away",
+
   "commands.cfindblock.notFound": "No such block found",
   "commands.cfindblock.starting": "Searching for %s",
   "commands.cfindblock.success": "Closest match is at %s, %s blocks away",
