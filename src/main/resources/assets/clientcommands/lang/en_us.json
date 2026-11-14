@@ -467,7 +467,7 @@
   "ticTacToeGame.title": "Tic-tac-toe against %s",
 
   "twoPlayerGame.alreadyInGame": "You are already in a game with that player",
-  "twoPlayerGame.chat.draw": "You've made a move and drawn against %s in %s",
+  "twoPlayerGame.chat.draw": "You've made a move in %s and drawn against %s",
   "twoPlayerGame.chat.lost": "%s has made a move in %s and won",
   "twoPlayerGame.chat.won": "You made a move in %s and beat %s!",
   "twoPlayerGame.clickToMakeYourMove": "Click here to make your move",
