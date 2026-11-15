@@ -135,7 +135,6 @@
   "commands.cfindblock.starting": "正在搜索%s",
   "commands.cfindblock.success": "最近的匹配位于%s，距离%s格",
 
-  "commands.cfinditem.allLoadedChunks.fallback": "服务器未安装clientcommands，改为在客户端已加载的区块中搜索",
   "commands.cfinditem.allLoadedChunks.requiresServer": "搜索所有已加载区块需要服务器安装并允许clientcommands",
   "commands.cfinditem.match": "在%3$s找到%1$s个%2$s",
   "commands.cfinditem.match.entity": "在%3$s的%4$s中找到%1$s个%2$s",
