@@ -16,9 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({MushroomCow.class, Sheep.class, SnowGolem.class})
 public class MushroomCowSheepAndSnowGolemMixin {
+    // require = 0 because NeoForge (e.g. via Sinytra Connector) moves Sheep and SnowGolem shearing out of mobInteract
     @Definition(id = "ServerLevel", type = ServerLevel.class)
     @Expression("? instanceof ServerLevel")
-    @Inject(method = "mobInteract", at = @At("MIXINEXTRAS:EXPRESSION"))
+    @Inject(method = "mobInteract", at = @At("MIXINEXTRAS:EXPRESSION"), require = 0)
     public void onInteract(Player player, InteractionHand hand, CallbackInfoReturnable<Boolean> ci) {
         PlayerRandCracker.onItemDamage(1, player, player.getItemInHand(hand));
     }
