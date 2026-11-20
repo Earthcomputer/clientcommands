@@ -56,6 +56,10 @@ accessible field net/minecraft/client/gui/ActiveTextCollector$ClickableStyleFind
 accessible field net/minecraft/client/gui/ActiveTextCollector$ClickableStyleFinder testY I
 accessible field net/minecraft/client/gui/screens/ChatScreen input Lnet/minecraft/client/gui/components/EditBox;
 
+# cserverseed
+accessible field net/minecraft/world/entity/player/Player enchantmentSeed I
+accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
+
 # Game Options
 accessible field net/minecraft/client/OptionInstance value Ljava/lang/Object;
 
