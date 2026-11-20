@@ -467,7 +467,7 @@
   "ticTacToeGame.title": "与%s对弈井字棋",
 
   "twoPlayerGame.alreadyInGame": "你已经在和该玩家进行对局",
-  "twoPlayerGame.chat.draw": "你在%1$s中走了一步，与%2$s弈和",
+  "twoPlayerGame.chat.draw": "你在%2$s中走了一步，与%1$s弈和",
   "twoPlayerGame.chat.lost": "%s在%s中走了一步并获胜",
   "twoPlayerGame.chat.won": "你在%s中走了一步，击败了%s！",
   "twoPlayerGame.clickToMakeYourMove": "点击这里走棋",

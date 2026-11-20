@@ -264,7 +264,7 @@ public class TwoPlayerGame<T, S extends Screen> {
     }
 
     public void onDraw(String sender, UUID senderUUID) {
-        ClientCommandHelper.sendFeedback("twoPlayerGame.chat.draw", translate(), sender);
+        ClientCommandHelper.sendFeedback("twoPlayerGame.chat.draw", sender, translate());
         removeActiveGame(senderUUID);
     }
 

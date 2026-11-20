@@ -15,6 +15,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -40,6 +41,7 @@ import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -323,6 +325,23 @@ final class PlayerRandResetTests {
             giveUnbreakingShovel(singleplayerContext);
             setBlock(singleplayerContext, FRONT_POS, Blocks.DIRT);
             expectUnaffected(context, singleplayerContext, () -> leftClick(context, singleplayerContext));
+        });
+    }
+
+    @TestCase
+    private static void testUnbreakingShears(ClientGameTestContext context, TestSingleplayerContext singleplayerContext) {
+        // Sheep shear unbreaking test, the Mixin has require = 0 for NeoForge compat, so catch regressions another way here.
+        for (boolean maintenance : new boolean[] {true, false}) {
+            runTest(context, singleplayerContext, "1.20.6," + maintenanceVariant(maintenance), () -> {
+                setProtocolVersion(context, MultiVersionCompat.V1_20_6, "1.20.6");
+                Entity sheep = setUpShearSheep(singleplayerContext);
+                expectResetOrMaintained(context, singleplayerContext, RNGCallType.UNBREAKING, maintenance, () -> interact(context, singleplayerContext, sheep));
+            });
+        }
+        runTest(context, singleplayerContext, "current", () -> {
+            disableMaintenance(context);
+            Entity sheep = setUpShearSheep(singleplayerContext);
+            expectUnaffected(context, singleplayerContext, () -> interact(context, singleplayerContext, sheep));
         });
     }
 
@@ -771,6 +790,21 @@ final class PlayerRandResetTests {
         context.runOnClient(client -> {
             Entity clientEntity = Objects.requireNonNull(Objects.requireNonNull(client.level).getEntity(target.getId()));
             Objects.requireNonNull(client.gameMode).attack(Objects.requireNonNull(client.player), clientEntity);
+        });
+        singleplayerContext.getConnection().waitForServerboundPackets();
+    }
+
+    private static Entity setUpShearSheep(TestSingleplayerContext singleplayerContext) {
+        give(singleplayerContext, enchantedItem(singleplayerContext, Items.SHEARS, Enchantments.UNBREAKING, 3));
+        Entity sheep = summon(singleplayerContext, EntityTypes.SHEEP, Vec3.atBottomCenterOf(SPAWN_POS.offset(0, 0, 2)));
+        singleplayerContext.getConnection().waitForClientboundPackets();
+        return sheep;
+    }
+
+    private static void interact(ClientGameTestContext context, TestSingleplayerContext singleplayerContext, Entity target) {
+        context.runOnClient(client -> {
+            Entity clientEntity = Objects.requireNonNull(Objects.requireNonNull(client.level).getEntity(target.getId()));
+            Objects.requireNonNull(client.gameMode).interact(Objects.requireNonNull(client.player), clientEntity, new EntityHitResult(clientEntity), InteractionHand.MAIN_HAND);
         });
         singleplayerContext.getConnection().waitForServerboundPackets();
     }
