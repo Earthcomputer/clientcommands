@@ -12,12 +12,14 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.Permissions;
 
 import java.net.URI;
+import java.util.Objects;
 
 public class ClientCommandHelper {
     private static final URI WHY_URI = URI.create("https://github.com/Earthcomputer/clientcommands/blob/" + BuildInfo.COMMIT_HASH + "/docs/server_installation.md");
@@ -51,11 +53,23 @@ public class ClientCommandHelper {
     }
 
     public static <T> T getFlag(FabricClientCommandSource source, Flag<T> flag) {
-        return ((IClientSuggestionsProvider) source).clientcommands_getFlag(flag);
+        return ((IClientSuggestionsProvider) getSuggestionsProvider(source)).clientcommands_getFlag(flag);
     }
 
     public static <T> FabricClientCommandSource withFlag(FabricClientCommandSource source, Flag<T> flag, T value) {
-        return (FabricClientCommandSource) ((IClientSuggestionsProvider) source).clientcommands_withFlag(flag, value);
+        return (FabricClientCommandSource) ((IClientSuggestionsProvider) getSuggestionsProvider(source)).clientcommands_withFlag(flag, value);
+    }
+
+    /**
+     * Our command source mixins target {@link ClientSuggestionProvider}, which is what Fabric API executes client
+     * commands with. Other implementations of the API (e.g. Forgified Fabric API on NeoForge, via Sinytra Connector)
+     * may execute them with a different source, in which case we fall back to the connection's suggestions provider.
+     */
+    public static ClientSuggestionProvider getSuggestionsProvider(FabricClientCommandSource source) {
+        if (source instanceof ClientSuggestionProvider suggestionsProvider) {
+            return suggestionsProvider;
+        }
+        return Objects.requireNonNull(source.getClient().getConnection()).getSuggestionsProvider();
     }
 
     public static void sendError(Component error) {

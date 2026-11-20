@@ -78,10 +78,11 @@ public class AliasCommand {
             throw NOT_FOUND_EXCEPTION.create(aliasKey);
         }
 
-        if (((IClientSuggestionsProvider_Alias) source).clientcommands_isAliasSeen(aliasKey)) {
+        var aliasSource = (IClientSuggestionsProvider_Alias) ClientCommandHelper.getSuggestionsProvider(source);
+        if (aliasSource.clientcommands_isAliasSeen(aliasKey)) {
             throw RECURSIVE_ALIAS_EXCEPTION.create(aliasKey);
         }
-        ((IClientSuggestionsProvider_Alias) source).clientcommands_addSeenAlias(aliasKey);
+        aliasSource.clientcommands_addSeenAlias(aliasKey);
 
         try {
             int inlineArgumentCount = (int) Pattern.compile("(?<!%)%(?:%%)*(?!%)").matcher(cmd).results().count();
@@ -114,7 +115,7 @@ public class AliasCommand {
             return Command.SINGLE_SUCCESS;
         }
         finally {
-            ((IClientSuggestionsProvider_Alias) source).clientcommands_removeSeenAlias(aliasKey); 
+            aliasSource.clientcommands_removeSeenAlias(aliasKey);
         }
     }
 
