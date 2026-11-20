@@ -7,11 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       versions:
-        description: 'Comma-separated server versions to test (leave empty for all)'
+        description: 'Comma-separated server versions to test (leave empty for a random sample)'
         required: false
         default: ''
 jobs:
-  # splits the server versions between parallel jobs, as testing them all in series takes a long time
+  # splits the server versions into ranges, and tests one random version from each range in parallel jobs, as testing
+  # every version takes a long time. Versions given in the workflow inputs are all tested
   prepare_test_matrix:
     name: Prepare Test Matrix
     runs-on: ubuntu-latest
@@ -38,14 +39,14 @@ jobs:
         run: echo "matrix=$(cat build/old_server_test_matrix.json)" >> "$GITHUB_OUTPUT"
 
   old_server_client_gametest:
-    name: Old Server Client Game Tests (${{ matrix.versions.name }})
+    name: Old Server Client Game Tests (${{ matrix.job.name }})
     needs: prepare_test_matrix
     runs-on: ubuntu-latest
     strategy:
       # test the other versions even if some fail
       fail-fast: false
       matrix:
-        versions: ${{ fromJson(needs.prepare_test_matrix.outputs.matrix) }}
+        job: ${{ fromJson(needs.prepare_test_matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -60,20 +61,20 @@ jobs:
             !~/.gradle/caches/clientcommands-old-servers
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
       # the server jars and mappings are cached separately, as they're large and only change when new versions are added.
-      # Each job only downloads its own versions, so each job has its own cache
+      # Each job only downloads its own version, so each version has its own cache
       - uses: actions/cache@v4
         with:
           path: ~/.gradle/caches/clientcommands-old-servers
-          key: ${{ runner.os }}-old-servers-${{ matrix.versions.name }}-${{ hashFiles('gradle.properties') }}
-          restore-keys: ${{ runner.os }}-old-servers-${{ matrix.versions.name }}-
+          key: ${{ runner.os }}-old-servers-${{ matrix.job.version }}-${{ hashFiles('gradle.properties') }}
+          restore-keys: ${{ runner.os }}-old-servers-${{ matrix.job.version }}-
       - run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers
-      - run: ./gradlew runOldServerClientGameTest -PoldServerVersions="$VERSIONS" --stacktrace --no-daemon
+      - run: ./gradlew runOldServerClientGameTest -PoldServerVersions="$VERSION" --stacktrace --no-daemon
         env:
-          VERSIONS: ${{ matrix.versions.versions }}
+          VERSION: ${{ matrix.job.version }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: old-server-client-gametest-results-${{ matrix.versions.name }}
+          name: old-server-client-gametest-results-${{ matrix.job.version }}
           path: |
             build/run/oldServerClientGameTest/logs/
             build/run/oldServerClientGameTest/screenshots/
