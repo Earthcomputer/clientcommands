@@ -54,7 +54,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
@@ -137,23 +136,16 @@ final class ServerDebugger implements AutoCloseable {
 
         List<ReferenceType> loadedClasses = vm.classesByName(className);
         if (!loadedClasses.isEmpty()) {
-            LOGGER.info("[capture {}] Class is already loaded (prepared={})", className, loadedClasses.getFirst().isPrepared());
             addConstructorBreakpoints(loadedClasses.getFirst(), future);
         } else {
-            LOGGER.info("[capture {}] Class is not loaded yet, waiting for it to be prepared", className);
             ClassPrepareRequest classPrepareRequest = requestManager.createClassPrepareRequest();
             classPrepareRequest.addClassFilter(className);
             classPrepareRequest.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
             classPrepareRequest.putProperty(HANDLER_PROPERTY, (Consumer<Event>) event -> {
-                LOGGER.info("[capture {}] Class prepared on thread {}", className, ((ClassPrepareEvent) event).thread().name());
                 requestManager.deleteEventRequest(classPrepareRequest);
                 addConstructorBreakpoints(((ClassPrepareEvent) event).referenceType(), future);
             });
             classPrepareRequest.enable();
-            // check for the class being prepared between checking whether it was loaded and enabling the request
-            if (!vm.classesByName(className).isEmpty()) {
-                LOGGER.warn("[capture {}] Class was loaded while the class prepare request was being created", className);
-            }
         }
 
         return future;
@@ -167,7 +159,6 @@ final class ServerDebugger implements AutoCloseable {
             BreakpointRequest breakpoint = requestManager.createBreakpointRequest(constructor.location());
             breakpoint.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
             breakpoint.putProperty(HANDLER_PROPERTY, (Consumer<Event>) event -> {
-                LOGGER.info("[capture {}] Constructor breakpoint hit at {} on thread {}", type.name(), ((BreakpointEvent) event).location(), ((BreakpointEvent) event).thread().name());
                 requestManager.deleteEventRequests(breakpoints);
                 // "this" isn't valid until the superclass constructor has been called, so wait for the constructor to
                 // return before getting it
@@ -176,7 +167,6 @@ final class ServerDebugger implements AutoCloseable {
             breakpoints.add(breakpoint);
         }
         breakpoints.forEach(EventRequest::enable);
-        LOGGER.info("[capture {}] Enabled constructor breakpoints at {}", type.name(), breakpoints.stream().map(BreakpointRequest::location).toList());
     }
 
     /**
@@ -375,14 +365,8 @@ final class ServerDebugger implements AutoCloseable {
         methodExit.addThreadFilter(thread);
         methodExit.addClassFilter(type);
         methodExit.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-        AtomicInteger loggedExits = new AtomicInteger();
         methodExit.putProperty(HANDLER_PROPERTY, (Consumer<Event>) event -> {
-            Method method = ((MethodExitEvent) event).method();
-            // don't flood the log if the constructor exit is never seen
-            if (loggedExits.getAndIncrement() < 20) {
-                LOGGER.info("[capture {}] Method exit of {}{}", type.name(), method.name(), method.signature());
-            }
-            if (!method.isConstructor()) {
+            if (!((MethodExitEvent) event).method().isConstructor()) {
                 return;
             }
             requestManager.deleteEventRequest(methodExit);
@@ -390,38 +374,12 @@ final class ServerDebugger implements AutoCloseable {
                 ObjectReference instance = Objects.requireNonNull(thread.frame(0).thisObject(), "got null this object in constructor");
                 // don't let the reference become invalid if the object is garbage collected
                 instance.disableCollection();
-                LOGGER.info("[capture {}] Captured instance {}", type.name(), instance);
                 future.complete(instance);
             } catch (IncompatibleThreadStateException e) {
                 future.completeExceptionally(e);
             }
         });
         methodExit.enable();
-        LOGGER.info("[capture {}] Enabled method exit request on thread {}", type.name(), thread.name());
-    }
-
-    /**
-     * Logs the state of the debugger, to help work out why {@link #captureNextInstance} didn't capture an instance.
-     */
-    void logCaptureDiagnostics(ServerMappings.MappedClass clazz) {
-        String className = mappings.mapClass(clazz);
-        try {
-            EventRequestManager requestManager = vm.eventRequestManager();
-            for (ReferenceType type : vm.classesByName(className)) {
-                Object instances = vm.canGetInstanceInfo() ? type.instances(10) : "(unsupported)";
-                LOGGER.warn("[capture {}] Loaded type {}: prepared={}, instances={}", className, type, type.isPrepared(), instances);
-            }
-            LOGGER.warn("[capture {}] Class prepare requests: {}", className, requestManager.classPrepareRequests().stream().map(r -> "enabled=" + r.isEnabled()).toList());
-            LOGGER.warn("[capture {}] Breakpoint requests: {}", className, requestManager.breakpointRequests().stream().map(r -> r.location() + " enabled=" + r.isEnabled()).toList());
-            LOGGER.warn("[capture {}] Method exit requests: {}", className, requestManager.methodExitRequests().stream().map(r -> "enabled=" + r.isEnabled()).toList());
-            for (ThreadReference thread : vm.allThreads()) {
-                if (thread.name().equals("Server thread")) {
-                    LOGGER.warn("[capture {}] Server thread: status={}, suspended={}, suspendCount={}", className, thread.status(), thread.isSuspended(), thread.suspendCount());
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("[capture {}] Failed to get diagnostics", className, e);
-        }
     }
 
     static Value getUnmappedField(ObjectReference object, String fieldName) {

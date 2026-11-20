@@ -194,10 +194,7 @@ final class OldServer implements AutoCloseable {
     ObjectReference serverPlayer() {
         try {
             return Objects.requireNonNull(serverPlayer).get(10, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            debugger().logCaptureDiagnostics(SERVER_PLAYER);
-            throw new AssertionError("Failed to get the server player", e);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new AssertionError("Failed to get the server player", e);
         }
     }
