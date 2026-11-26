@@ -276,6 +276,7 @@ modrinth {
 	projectId = 'client-commands'
 	uploadFile = jar
 	gameVersions.set(project.minecraft_version_list.split('\\s*,\\s*').toList())
+	environment = 'client_only_server_optional'
 	loaders.set(['fabric', 'quilt'])
 	changelog = changelogText
 	dependencies {
